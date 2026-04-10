@@ -17,6 +17,7 @@ This master changelog provides a high-level overview of major version milestones
 
 ### [1.049.000] - 2026-04-09
 **Verification and organization workflow hardening, earnings parity follow-through, transparency chronology updates, and release hygiene sync**
+- Normalized public README repository identity references to the `PayCal-Technologies/paycal` path and removed legacy owner naming from release-facing README copy.
 - Added publication timestamp metadata across transparency hub/article pages (all maintained locales) plus supporting style updates to improve chronology visibility.
 - Hardened verification resend and email pipeline behavior with explicit stage/transport logging, Redis-timeout failure classification, configured-sender enforcement, and code-only fallback for link-delivery failures.
 - Improved account/shell UX with resend cooldown parity adjustments, busy-state signaling, authenticated-header cleanup, and navigation/language tray refinements.
