@@ -1,2 +1,2 @@
-# paycal-core
-PayCal core infrastructure and utilities
+# paycal
+PayCal public repo
