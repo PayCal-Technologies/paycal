@@ -298,7 +298,7 @@ Static analysis:
 ## Installation
 
 ```bash
-git clone https://github.com/cshaiku/paycal.git
+git clone https://github.com/PayCal-Technologies/paycal.git
 cd paycal/html
 
 composer install --no-dev --optimize-autoloader
