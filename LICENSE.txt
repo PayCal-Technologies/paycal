@@ -1,0 +1,65 @@
+PayCal™ — Proprietary Software License
+Copyright (C) 2026 PayCal Technologies Inc. All rights reserved.
+
+PayCal is a trademark of PayCal Technologies Inc., pending registration with the
+Canadian Intellectual Property Office (CIPO), covering Classes 9 and 42.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TERMS AND CONDITIONS
+
+1. GRANT OF LICENSE
+
+   PayCal Technologies Inc. ("Licensor") grants no rights to use, copy, modify,
+   merge, publish, distribute, sublicense, or sell copies of this software or
+   its source code except as expressly permitted in writing by the Licensor.
+
+2. RESTRICTIONS
+
+   You may not:
+
+   a. Copy, reproduce, or redistribute this software or any portion thereof in
+      any form or by any means without prior written permission from the Licensor.
+
+   b. Modify, adapt, translate, reverse-engineer, decompile, disassemble, or
+      create derivative works based on this software.
+
+   c. Use this software or any part of it for commercial purposes without a
+      valid commercial license agreement with the Licensor.
+
+   d. Remove or alter any proprietary notices, labels, or marks on the software.
+
+   e. Use the PayCal name, logo, or trademarks without written authorization.
+
+3. INTELLECTUAL PROPERTY
+
+   All title, ownership rights, and intellectual property rights in and to the
+   software remain with PayCal Technologies Inc. This software is protected by
+   copyright law and international treaty provisions.
+
+4. NO WARRANTY
+
+   THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL
+   PAYCAL TECHNOLOGIES INC. BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+   LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE
+   USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+5. TERMINATION
+
+   Any breach of these terms automatically terminates any rights granted
+   hereunder. Upon termination, you must destroy all copies of the software in
+   your possession.
+
+6. GOVERNING LAW
+
+   This license is governed by the laws of Canada, without regard to conflict
+   of law principles.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For licensing inquiries: legal@paycal.app
+
+PayCal Technologies Inc.
+https://paycal.app

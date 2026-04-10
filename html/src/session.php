@@ -1,0 +1,145 @@
+<?php declare(strict_types=1);
+
+namespace PayCal\Domain;
+
+use PayCal\Domain\Config\SystemConfig;
+use PayCal\Domain\Enums\AuthLevel;
+use PayCal\Domain\Enums\FormTTL;
+
+/**
+ * session.php
+ *
+ * Purpose: Bootstrap user-scoped runtime constants and presentation defaults for each request.
+ *
+ * PHP version 8.4.16
+ *
+ * LICENSE: Part of PayCal.app, licensed under a proprietary license.
+ * Unauthorized copying, modification, distribution or use is prohibited.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ */
+
+
+
+// Defaults
+$textSizing = SystemConfig::TEXT_BASE;
+$spacing = SystemConfig::SPACING_LESS;
+$lineHeight = SystemConfig::LINEHEIGHT_LESS;
+$audioVisibility = 'hidden';
+
+// Set public as default
+$userUuid = 'PUBLIC';
+$userTheme = SystemConfig::PC_THEME_DEFAULT;
+$userLang = SystemConfig::DEFAULT_LANGUAGE;
+
+$user = User::current();
+$hash = Authentication::getSessionHashFromCookie();
+if ($hash !== null && Authentication::sessionExists($hash)) {
+  $userTheme = $user->theme;
+  $userLang = $user->language;
+
+  $textRaw = strtolower(trim((string) ($user->text ?? UserPreferenceDefaults::DEFAULT_TEXT)));
+  $densityRaw = strtolower(trim((string) ($user->density ?? UserPreferenceDefaults::DEFAULT_DENSITY)));
+
+  $textAdjustment = 0;
+  if ($textRaw === 'small') {
+    $textAdjustment = -2;
+  } elseif ($textRaw === 'large') {
+    $textAdjustment = 2;
+  } elseif ($textRaw === 'x-large') {
+    $textAdjustment = 5;
+  } elseif (preg_match('/^-?\d+$/', $textRaw) === 1) {
+    $textAdjustment = max(-5, min(5, (int) $textRaw));
+  }
+
+  $densityAdjustment = 0;
+  if ($densityRaw === 'tight' || $densityRaw === 'compact') {
+    $densityAdjustment = -5;
+  } elseif ($densityRaw === 'spacious') {
+    $densityAdjustment = 5;
+  } elseif (preg_match('/^-?\d+$/', $densityRaw) === 1) {
+    $densityAdjustment = max(-5, min(5, (int) $densityRaw));
+  }
+
+  $textSizing = ($textAdjustment > 0)
+    ? SystemConfig::TEXT_LARGER
+    : (($textAdjustment < 0) ? SystemConfig::TEXT_SMALLER : SystemConfig::TEXT_BASE);
+
+  switch (true) {
+    case $densityAdjustment > 0:
+      $spacing = SystemConfig::SPACING_MORE;
+      $lineHeight = SystemConfig::LINEHEIGHT_MORE;
+
+      break;
+
+    default:
+      $spacing = SystemConfig::SPACING_LESS;
+      $lineHeight = SystemConfig::LINEHEIGHT_LESS;
+
+      break;
+  }
+
+  $audioVisibility = 'none' !== $user->audio_feedback
+    ? 'visible'
+    : 'hidden';
+}
+
+// Derived Locale
+
+$userLocale = strtolower($userLang).'_'.strtoupper($userLang);
+$userLocaleJs = strtolower($userLang).'-'.strtoupper($userLang);
+
+if (!defined('USER_THEME')) {
+  define('USER_THEME', $userTheme);
+}
+
+if (!defined('USER_LANGUAGE')) {
+  define('USER_LANGUAGE', $userLang);
+}
+
+if (!defined('USER_LOCALE')) {
+  define('USER_LOCALE', $userLocale);
+}
+
+if (!defined('USER_LOCALE_JS')) {
+  define('USER_LOCALE_JS', $userLocaleJs);
+}
+
+if (!defined('USER_TEXT_SIZING')) {
+  define('USER_TEXT_SIZING', $textSizing);
+}
+
+if (!defined('USER_SPACING')) {
+  define('USER_SPACING', $spacing);
+}
+
+if (!defined('USER_LINE_HEIGHT')) {
+  define('USER_LINE_HEIGHT', $lineHeight);
+}
+
+if (!defined('AUDIO_FEEDBACK_VISIBILITY')) {
+  define('AUDIO_FEEDBACK_VISIBILITY', $audioVisibility);
+}
+// Logged-in-only constants
+
+if ($hash !== null && Authentication::sessionExists($hash)) {
+  $authCookieRaw = $_COOKIE['PAYCAL_AUTH'] ?? '';
+  $authCookie = is_scalar($authCookieRaw) ? (string) $authCookieRaw : '';
+  Config::createStringConstants([
+      'USER_COOKIE' => Authentication::getCookie(),
+      'USER_PAY_PERIOD_LENGTH' => (string) $user->pay_period_length,
+      'USER_CALENDAR_AUTOFOCUS' => (string) $user->calendar_autofocus,
+      'USER_CALENDAR_AUDIOLABELS' => (string) $user->calendar_audio_labels,
+      'USER_CALENDAR_DAY_NAME_FORMAT' => (string) $user->calendar_day_name_format,
+      'USER_AUTH_COOKIE' => $authCookie,
+  ]);
+}
+
+// Locale Activation
+
+setlocale(LC_ALL, USER_LOCALE.'.UTF-8');
+$pageLanguage = USER_LANGUAGE;

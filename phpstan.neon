@@ -1,0 +1,17 @@
+parameters:
+  level: 9
+
+  bootstrapFiles:
+    - html/config.php
+
+  paths:
+    - html/src
+
+  excludePaths:
+    analyse:
+      - vendor/*
+      - html/tests/*
+      - html/admin/metrics/*
+      - html/src/Domain/MetricsService.php
+      - html/src/Controllers/HealthController.php
+

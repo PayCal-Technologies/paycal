@@ -1,0 +1,317 @@
+<?php
+header('Content-Type: text/css; charset=utf-8');
+
+// Documentation page styles
+?>
+
+/* Documentation Container - Two-column layout */
+.documentation-container {
+  display: flex;
+  gap: var(--gap-lg);
+  height: 100%;
+  width: 100%;
+}
+
+/* Sidebar Navigation */
+.documentation-sidebar {
+  flex: 0 0 280px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--pad-md);
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  position: sticky;
+  top: 100px;
+}
+
+.documentation-sidebar h2 {
+  margin: 0 0 var(--gap-md) 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: var(--pad-sm);
+}
+
+.documentation-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+
+.documentation-link {
+  display: block;
+  padding: var(--pad-sm) var(--pad-md);
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: calc(var(--border-radius) - 2px);
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.documentation-link:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+  border-left-color: var(--primary-color);
+}
+
+.documentation-link.active {
+  background: var(--primary-color-light);
+  color: var(--primary-color);
+  border-left-color: var(--primary-color);
+  font-weight: 600;
+}
+
+.documentation-footer {
+  margin-top: var(--gap-lg);
+  padding-top: var(--gap-md);
+  border-top: 1px solid var(--border-color);
+}
+
+.btn_full {
+  width: 100% !important;
+}
+
+/* Main Content Area */
+.documentation-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--pad-lg);
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+/* Article Styles */
+.documentation-article {
+  width: 100%;
+}
+
+.documentation-article header {
+  margin-bottom: var(--gap-lg);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: var(--gap-md);
+}
+
+.documentation-article h1 {
+  margin: 0 0 var(--gap-sm) 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.documentation-meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Body Content Styles */
+.documentation-body {
+  line-height: 1.7;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.documentation-body h1,
+.documentation-body h2,
+.documentation-body h3 {
+  margin: var(--gap-lg) 0 var(--gap-md) 0;
+  color: var(--text-primary);
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.documentation-body h1 {
+  font-size: 1.8rem;
+  margin-top: var(--gap-xl);
+}
+
+.documentation-body h2 {
+  font-size: 1.4rem;
+  margin-top: var(--gap-lg);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--pad-sm);
+}
+
+.documentation-body h3 {
+  font-size: 1.2rem;
+}
+
+.documentation-body p {
+  margin: var(--gap-md) 0;
+}
+
+.documentation-body code {
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+}
+
+.documentation-body pre {
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: var(--pad-md);
+  border-radius: var(--border-radius);
+  overflow-x: auto;
+  margin: var(--gap-md) 0;
+  border: 1px solid var(--border-color);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.documentation-body pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+}
+
+.documentation-body strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.documentation-body em {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.documentation-body a {
+  color: var(--link-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom 0.2s ease;
+}
+
+.documentation-body a:hover {
+  border-bottom-color: var(--link-color);
+}
+
+.documentation-body ul {
+  margin: var(--gap-md) 0;
+  padding-left: var(--pad-lg);
+}
+
+.documentation-body li {
+  margin: var(--gap-sm) 0;
+  list-style-type: disc;
+}
+
+.documentation-body hr {
+  border: none;
+  border-top: 2px solid var(--border-color);
+  margin: var(--gap-lg) 0;
+}
+
+.documentation-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--gap-md) 0;
+  border: 1px solid var(--border-color);
+}
+
+.documentation-body table th,
+.documentation-body table td {
+  padding: var(--pad-sm) var(--pad-md);
+  border: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.documentation-body table th {
+  background: var(--header-bg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.documentation-body table tr:nth-child(even) {
+  background: var(--hover-bg);
+}
+
+/* Empty State */
+.documentation-empty {
+  padding: var(--pad-xl);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.documentation-empty p {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .documentation-container {
+    flex-direction: column;
+  }
+
+  .documentation-sidebar {
+    flex: 0 0 auto;
+    position: relative;
+    top: 0;
+    max-height: none;
+    min-height: auto;
+  }
+
+  .documentation-content {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .documentation-container {
+    gap: var(--gap-md);
+  }
+
+  .documentation-sidebar {
+    max-height: 60vh;
+  }
+
+  .documentation-content {
+    max-height: auto;
+  }
+
+  .documentation-article h1 {
+    font-size: 1.5rem;
+  }
+
+  .documentation-body h2 {
+    font-size: 1.2rem;
+  }
+
+  .documentation-body h3 {
+    font-size: 1.1rem;
+  }
+}
+
+/* Token mapping for consistent styles */
+:root {
+  --code-bg: #f5f5f5;
+  --code-text: #d63384;
+  --header-bg: #f9f9f9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --code-bg: #2d2d2d;
+    --code-text: #ff79c6;
+    --header-bg: #3d3d3d;
+  }
+}

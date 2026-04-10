@@ -1,0 +1,28 @@
+# Branch protection status-check manifest.
+# Keep this file aligned with repository rulesets in GitHub settings.
+
+version: 1
+default_branch: main
+require_up_to_date_branches: true
+require_conversation_resolution: true
+require_linear_history: true
+require_signed_commits: true
+
+required_status_checks:
+  - "PHPUnit / fast-gate (8.2)"
+  - "PHPUnit / fast-gate (8.5)"
+  - "PHPUnit / full-validation"
+  - "PHPStan / phpstan (8.2)"
+  - "PHPStan / phpstan (8.5)"
+  - "JavaScript Quality / javascript-quality"
+  - "Security Gates / dependency-review"
+  - "Security Gates / composer-audit"
+  - "Security Gates / codeql (php)"
+  - "Security Gates / codeql (javascript)"
+  - "Security Gates / secret-scan"
+  - "EnforceStrictTypes / strict-types"
+  - "CheckRedisCliUsage / no-redis-cli"
+
+notes:
+  - "If a workflow job is renamed, update this file and GitHub branch protection in the same PR."
+  - "Use CODEOWNERS protections to require review on all policy and workflow changes."

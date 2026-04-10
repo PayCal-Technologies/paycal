@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="html/bootstrap/Classes.php"
+         colors="true"
+         failOnWarning="true"
+         failOnNotice="true"
+         failOnDeprecation="true"
+         failOnPhpunitDeprecation="true">
+    <testsuites>
+        <testsuite name="PayCal Unit">
+            <directory>html/tests/Unit</directory>
+            <exclude>html/tests/Unit/A11y</exclude>
+            <exclude>html/tests/Unit/PayPeriodsTest.php</exclude>
+        </testsuite>
+        <testsuite name="PayCal Integration">
+            <directory>html/tests/Integration</directory>
+        </testsuite>
+        <testsuite name="PayCal Contract">
+            <directory>html/tests/Contract</directory>
+        </testsuite>
+        <testsuite name="PayCal Timezone">
+            <file>html/tests/Unit/PayPeriodsTest.php</file>
+        </testsuite>
+        <testsuite name="PayCal Accessibility">
+            <directory>html/tests/Unit/A11y</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>html/src</directory>
+        </include>
+    </source>
+</phpunit>

@@ -1,0 +1,97 @@
+# -------------------------------------------------------------------
+# OS / Editor Artifacts
+# -------------------------------------------------------------------
+.DS_Store
+._*
+
+# -------------------------------------------------------------------
+# Environment / Secrets
+# -------------------------------------------------------------------
+.env
+
+# -------------------------------------------------------------------
+# Build & Test Artifacts
+# -------------------------------------------------------------------
+/coverage/
+/junit.xml
+html/tests/coverage
+.deploy-state
+
+# -------------------------------------------------------------------
+# Temporary / Cache Files
+# -------------------------------------------------------------------
+.tmp
+.temp
+/tmp/*
+!/tmp/ast/
+/tmp/ast/*
+!/tmp/ast/README.md
+*.bak
+.phpunit.cache/
+.phpunit.result.cache
+.php-cs-fixer.cache
+.php-cs-fixer.dist.php
+vendor/bin/.phpunit.result.cache
+logs/
+keys/
+ssl/
+docker/certs/*.pem
+docker/certs/*-key.pem
+tmp/agent-diagnostics/
+ai-notes/knockknock-reports/
+
+# -------------------------------------------------------------------
+# Dependency / Build Artifacts
+# -------------------------------------------------------------------
+/phpunit
+/phpunit/
+/node_modules/
+html/ws/node_modules/
+
+# -------------------------------------------------------------------
+# VCS / Tooling Metadata
+# -------------------------------------------------------------------
+.git/
+.claude/
+.aider/
+.vscode/
+.agent/
+.ralphy/
+.skills/
+.venv/
+**/.grok/
+.php-cs-fixer.php
+
+# -------------------------------------------------------------------
+# Test Artifacts
+# -------------------------------------------------------------------
+html/tests/coverage/
+html/tests/.last-run.json
+html/tests/.last-run-knockknock.json
+/test-results/
+
+# -------------------------------------------------------------------
+# Scripts
+# -------------------------------------------------------------------
+html/dev/login-bypass/
+scripts/*sudoers*
+*.sh
+*.py
+!scripts/
+!/scripts/**
+scripts/.DS_Store
+
+# Copilot operational scripts (local-only)
+/copilot-scripts/
+
+# -------------------------------------------------------------------
+# Documentation
+# -------------------------------------------------------------------
+!README.md
+!/CONTRIBUTING.md
+!docs/ARCHITECTURE.md
+!docs/CHANGELOG.md
+!docs/THEME_TOKEN_MIGRATION_ACTION_PLAN.md
+!docs/data-shapes/theme-research-brief-template.md
+!docs/data-shapes/theme-token-dictionary-v1.md
+!.github/sync-to-dev/SKILLS.md

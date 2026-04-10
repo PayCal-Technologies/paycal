@@ -1,0 +1,11 @@
+# Repository ownership for operational moat surfaces.
+# Protect CI/CD, security gates, and git hook enforcement from unreviewed changes.
+
+/.github/workflows/ @cshaiku
+/.github/required-checks.yml @cshaiku
+/githooks/ @cshaiku
+/.githooks/ @cshaiku
+/scripts/hooks/ @cshaiku
+/scripts/install-git-hooks.sh @cshaiku
+/scripts/test/check-missing-method-docblocks.php @cshaiku
+/scripts/test/check-duplicate-docblocks.php @cshaiku

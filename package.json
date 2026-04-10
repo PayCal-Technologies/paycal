@@ -1,0 +1,48 @@
+{
+  "name": "paycal-js-quality",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "author": "PayCal Technologies Inc.",
+  "scripts": {
+    "lint:js": "eslint html/js/**/*.js tools/js-security-check.mjs",
+    "test:js": "npm run lint:js && node tools/js-security-check.mjs",
+    "test:smoke:ui": "npx playwright test -c playwright.smoke.config.js",
+    "test:smoke:ui:headed": "npx playwright test -c playwright.smoke.config.js --headed",
+    "test:smoke:ui:install": "npx playwright install chromium",
+    "test:aria:unit": "./vendor/bin/phpunit -c phpunit.xml --testsuite \"PayCal Accessibility\"",
+    "test:aria:smoke": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-dialog-chrome.spec.js tests/smoke-ui/wcag-live-regions.spec.js tests/smoke-ui/wcag-shortcuts.spec.js tests/smoke-ui/wcag-shortcut-map.spec.js",
+    "test:wcag:smoke": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-regression.spec.js tests/smoke-ui/wcag-reflow.spec.js tests/smoke-ui/wcag-heading-structure.spec.js tests/smoke-ui/wcag-complex-descriptions.spec.js tests/smoke-ui/wcag-menu-keyboard.spec.js tests/smoke-ui/wcag-navigation-paths.spec.js",
+    "test:a11y:wcag": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-regression.spec.js",
+    "test:a11y:wcag:strict": "PAYCAL_A11Y_STRICT=1 npm run test:a11y:wcag",
+    "test:a11y:reflow": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-reflow.spec.js",
+    "test:a11y:reflow:strict": "PAYCAL_REFLOW_STRICT=1 npm run test:a11y:reflow",
+    "test:a11y:headings": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-heading-structure.spec.js",
+    "test:a11y:complex-descriptions": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-complex-descriptions.spec.js",
+    "test:a11y:menu-keyboard": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-menu-keyboard.spec.js",
+    "test:a11y:navigation-paths": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-navigation-paths.spec.js",
+    "test:a11y:shortcuts": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-shortcuts.spec.js",
+    "test:a11y:shortcut-map": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-shortcut-map.spec.js",
+    "test:a11y:live-regions": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-live-regions.spec.js",
+    "test:a11y:playwright:suite": "npm run test:a11y:wcag && npm run test:a11y:reflow && npm run test:a11y:headings && npm run test:a11y:complex-descriptions && npm run test:a11y:menu-keyboard && npm run test:a11y:navigation-paths && npm run test:a11y:shortcuts && npm run test:a11y:shortcut-map && npm run test:a11y:live-regions",
+    "test:a11y:phpunit:suite": "./vendor/bin/phpunit -c phpunit.xml --testsuite \"PayCal Accessibility\"",
+    "test:a11y:lightpanda": "bash tools/lightpanda/run-wcag-lightpanda.sh",
+    "test:a11y:browser-matrix": "npm run test:a11y:playwright:suite && npm run test:a11y:lightpanda",
+    "test:a11y:all": "npm run test:a11y:phpunit:suite && npm run test:a11y:playwright:suite && npm run test:a11y:wcag:strict && npm run test:a11y:reflow:strict && npm run test:a11y:contrast && npm run test:a11y:contrast:strict && npm run test:a11y:lightpanda",
+    "test:a11y:contrast": "node scripts/generate-theme-contrast-matrix.js",
+    "test:a11y:contrast:strict": "PAYCAL_CONTRAST_STRICT=1 npm run test:a11y:contrast"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
+    "@playwright/test": "^1.58.2",
+    "eslint": "^10.1.0",
+    "globals": "^17.4.0"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  },
+  "overrides": {
+    "flatted": "^3.4.2",
+    "brace-expansion": "^5.0.5"
+  }
+}

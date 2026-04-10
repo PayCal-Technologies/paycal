@@ -1,0 +1,53 @@
+{
+  "manifest_version":                    3,
+  "version":                             "1.0",
+  "name":                                "PayCal",
+  "short_name":                          "PayCal",
+  "start_url":                           "/",
+  "scope":                               "/",
+  "display":                             "standalone",
+  "orientation":                         "any",
+  "description":                         "A modern approach to submitting and tracking hourly pay.",
+  "theme_color":                         "#e6e6e6",
+  "background_color":                    "#060606",
+  "display-override":                    "fullscreen",
+  "lang":                                "en",
+  "icons": [
+    {
+      "src":                             "/android-chrome-192x192.png",
+      "sizes":                           "192x192",
+      "type":                            "image/png",
+      "purpose":                         "any maskable"
+    },
+    {
+      "src":                             "/android-chrome-512x512.png",
+      "sizes":                           "512x512",
+      "type":                            "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src":                             "/screenshot_540x720.jpg",
+      "type":                            "image/jpeg",
+      "sizes":                           "540x720",
+      "form_factor":                     "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name":                            "Calendar",
+      "short_name":                      "Calendar",
+      "url":                             "/v1/"
+    },
+    {
+      "name":                            "Earnings",
+      "short_name":                      "Earnings",
+      "url":                             "/v1/earnings"
+    },
+    {
+      "name":                            "Account",
+      "short_name":                      "Account",
+      "url":                             "/v1/account"
+    }
+  ]
+}

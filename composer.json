@@ -1,0 +1,68 @@
+{
+    "name": "paycal/app",
+    "description": "PayCal.app - Time tracking and earnings calculator",
+    "type": "project",
+    "license": "proprietary",
+    "authors": [
+      {
+        "name": "PayCal Technologies Inc.",
+        "homepage": "https://paycal.app"
+      }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "vlucas/phpdotenv": "^5.6",
+        "lbuchs/webauthn": "^2.2",
+        "stripe/stripe-php": "^19.4"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^11.0",
+        "friendsofphp/php-cs-fixer": "^3.94",
+        "infection/infection": "^0.32"
+    },
+		"autoload": {
+		  "psr-4": {
+        "PayCal\\Domain\\": "html/src/Domain/",
+      "PayCal\\Controllers\\": "html/src/Controllers/",
+      "PayCal\\Observability\\": "html/src/Observability/"
+      },
+      "files": [
+          "html/bootstrap/class_aliases.php"
+      ],
+      "classmap": [
+          "html/src/i18n.php"
+      ]
+		},
+    "config": {
+        "platform": {
+            "php": "8.2"
+        },
+        "allow-plugins": {
+            "infection/extension-installer": true
+        }
+    },
+    "scripts": {
+      "phpstan": "vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G --no-progress",
+      "phpstan:strict": "vendor/bin/phpstan analyse --configuration=phpstan.neon --level=9 --memory-limit=1G --no-progress",
+      "test": "vendor/bin/phpunit --configuration phpunit.xml --exclude-group skip html/tests/Unit html/tests/Integration html/tests/Contract",
+      "test:all": "vendor/bin/phpunit --configuration phpunit.xml --exclude-group skip html/tests/Unit html/tests/Integration html/tests/Contract",
+      "test:skip": "vendor/bin/phpunit --configuration phpunit.xml --group skip html/tests/Unit html/tests/Integration html/tests/Contract",
+      "test:unit": "vendor/bin/phpunit --configuration phpunit.xml --testsuite \"PayCal Unit\"",
+      "test:integration": "vendor/bin/phpunit --configuration phpunit.xml --testsuite \"PayCal Integration\"",
+      "test:contract": "vendor/bin/phpunit --configuration phpunit.xml --testsuite \"PayCal Contract\"",
+      "test:timezone": "vendor/bin/phpunit --configuration phpunit.xml --testsuite \"PayCal Timezone\" --group timezone",
+      "test:knockknock": "vendor/bin/phpunit --configuration phpunit.xml --group knockknock",
+      "test:quick": "vendor/bin/phpunit --configuration phpunit.xml --group unit --exclude-group slow --exclude-group stress",
+      "test:earnings:deterministic": "ROOT_DIR=$(git rev-parse --show-toplevel) && TZ=UTC LC_ALL=C \"$ROOT_DIR/vendor/bin/phpunit\" --configuration \"$ROOT_DIR/phpunit.xml\" --order-by=default --do-not-cache-result --exclude-group skip \"$ROOT_DIR/html/tests/Unit/EarningsTest.php\" \"$ROOT_DIR/html/tests/Unit/EarningsYtdHookSeamTest.php\" \"$ROOT_DIR/html/tests/Contract/EarningsYtdManifestContractTest.php\" \"$ROOT_DIR/html/tests/Contract/EarningsYtdExtensionModeContractTest.php\"",
+      "test:earnings:deterministic:full": "ROOT_DIR=$(git rev-parse --show-toplevel) && TZ=UTC LC_ALL=C \"$ROOT_DIR/vendor/bin/phpunit\" --configuration \"$ROOT_DIR/phpunit.xml\" --order-by=default --do-not-cache-result --exclude-group skip \"$ROOT_DIR/html/tests/Unit/EarningsTest.php\" \"$ROOT_DIR/html/tests/Unit/EarningsYtdHookSeamTest.php\" \"$ROOT_DIR/html/tests/Contract/EarningsYtdManifestContractTest.php\" \"$ROOT_DIR/html/tests/Contract/EarningsYtdExtensionModeContractTest.php\" \"$ROOT_DIR/html/tests/Integration/EarningsControllerIntegrationTest.php\" \"$ROOT_DIR/html/tests/Integration/EarningsCalendarParityIntegrationTest.php\"",
+      "test:random": "vendor/bin/phpunit --configuration phpunit.xml --order-by=random html/tests/Unit html/tests/Integration html/tests/Contract",
+      "test:coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --configuration phpunit.xml --coverage-html coverage html/tests/Unit html/tests/Integration html/tests/Contract",
+      "test:junit": "vendor/bin/phpunit --configuration phpunit.xml --log-junit junit.xml html/tests/Unit html/tests/Integration html/tests/Contract",
+      "test:mutation": "bash -lc 'if [ -x vendor/bin/infection ]; then php -d error_reporting=24575 vendor/bin/infection --threads=max --configuration=infection.json.dist \"$@\"; else echo \"infection not installed (run: composer require --dev infection/infection)\"; exit 1; fi' --",
+      "test:affected": "php scripts/test/affected-tests.php | xargs -r vendor/bin/phpunit --configuration phpunit.xml",
+      "quality:docblocks:missing-methods": "php scripts/test/check-missing-method-docblocks.php",
+      "quality:docblocks:duplicates": "php scripts/test/check-duplicate-docblocks.php",
+      "quality:docblocks": "@quality:docblocks:missing-methods && @quality:docblocks:duplicates"
+    }
+}

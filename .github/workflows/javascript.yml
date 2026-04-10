@@ -1,0 +1,54 @@
+name: JavaScript Quality
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - "html/js/**"
+      - "tools/js-security-check.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - "eslint.config.js"
+      - ".github/workflows/javascript.yml"
+  push:
+    branches: [ main ]
+    paths:
+      - "html/js/**"
+      - "tools/js-security-check.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - "eslint.config.js"
+      - ".github/workflows/javascript.yml"
+  workflow_dispatch:
+
+jobs:
+  javascript-quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint:js
+
+      - name: Run JavaScript Security Check
+        run: node tools/js-security-check.mjs
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ JavaScript quality checks passed"
+          echo "- ESLint: no errors"
+          echo "- Security: no disallowed HTML sinks found"

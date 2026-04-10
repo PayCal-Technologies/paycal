@@ -1,0 +1,59 @@
+name: PHPStan
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    paths:
+      - "html/**"
+      - "scripts/test/**"
+      - "composer.json"
+      - "composer.lock"
+      - "phpstan.neon"
+      - ".github/workflows/phpstan.yml"
+  pull_request:
+    paths:
+      - "html/**"
+      - "scripts/test/**"
+      - "composer.json"
+      - "composer.lock"
+      - "phpstan.neon"
+
+jobs:
+  phpstan:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ["8.2", "8.5"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run docblock quality gates
+        run: composer run quality:docblocks
+
+      - name: Enforce No Baseline Policy
+        run: |
+          if grep -q "baseline" phpstan.neon; then
+            echo "❌ Baselines are not allowed."
+            exit 1
+          fi
+          if [ -f phpstan-baseline.neon ]; then
+            echo "❌ phpstan-baseline.neon is not allowed."
+            exit 1
+          fi
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --level=9 --no-progress --memory-limit=512M

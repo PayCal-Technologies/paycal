@@ -1,0 +1,105 @@
+name: Accessibility Defect Report
+description: Report an accessibility issue and map it to WCAG criteria.
+title: "a11y: "
+labels:
+  - accessibility
+body:
+  - type: input
+    id: route
+    attributes:
+      label: Affected route/page
+      description: Example `/settings/` or `/organizations/`.
+      placeholder: /settings/
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - P0
+        - P1
+        - P2
+    validations:
+      required: true
+
+  - type: input
+    id: owner
+    attributes:
+      label: Owner
+      description: Named owner responsible for triage and follow-through.
+      placeholder: Frontend Lead
+    validations:
+      required: true
+
+  - type: input
+    id: due_date
+    attributes:
+      label: Due date
+      description: Use the SLA window for the selected severity.
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Mitigation or workaround
+      description: Required for `P0` and `P1` if the fix is not immediate.
+      placeholder: Describe any temporary mitigation, fallback, or user guidance.
+
+  - type: input
+    id: wcag
+    attributes:
+      label: WCAG criterion
+      description: Use explicit mapping like `2.1.1 Keyboard` or `1.4.3 Contrast (Minimum)`.
+      placeholder: 2.1.1 Keyboard
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: Describe what should happen for keyboard and assistive technology users.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: Describe what currently happens.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Include keyboard steps and AT context if relevant.
+      placeholder: |
+        1. Navigate to ...
+        2. Press ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: discovery
+    attributes:
+      label: Discovery source
+      options:
+        - Automated axe scan
+        - Keyboard-only manual test
+        - Screen reader manual test
+        - User report
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Paste violation IDs, screenshots, video links, or console excerpts.
