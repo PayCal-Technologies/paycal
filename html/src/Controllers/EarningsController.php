@@ -98,22 +98,14 @@ class EarningsController
    */
   private static function decryptWorkRowIfNeeded(array $row, string $userUUID): ?array
   {
-    $hasGross = isset($row['gross']) || isset($row['g']);
-    $hasEncryptedBlob = isset($row['encrypted_blob']) && is_string($row['encrypted_blob']) && $row['encrypted_blob'] !== '';
-    $allowSnapshotFallback = $hasGross || self::hasSnapshotFallbackData($row);
-
-    if ($hasGross && !$hasEncryptedBlob) {
-      return self::normalizeSnapshotRow($row);
-    }
-
     $blob = self::scalarString($row['encrypted_blob'] ?? '');
     if ($blob === '') {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
 
     $sessionHash = Authentication::getSessionHashFromCookie();
     if ($sessionHash === null) {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
 
     $sessionKey = Keys::SESSION . ':' . $sessionHash;
@@ -122,22 +114,22 @@ class EarningsController
     $user = User::current();
     $saltB64 = self::scalarString($user->encryption_salt);
     if ($saltB64 === '') {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
 
     $dek = self::resolveDekForEnvelope($blob, $userUUID, $credentialId, $saltB64);
     if ($dek === null) {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
 
     $decryptedJson = self::decryptWorkBlob($blob, $dek);
     if ($decryptedJson === null) {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
 
     $decoded = json_decode($decryptedJson, true);
     if (!is_array($decoded)) {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
     /** @var array<string,mixed> $decoded */
 
@@ -178,19 +170,10 @@ class EarningsController
         $wage = (string) $merged['wage'];
       } elseif (isset($merged['w']) && is_numeric($merged['w'])) {
         $wage = (string) $merged['w'];
-      } else {
-        // Lookup wage from site
-        $siteId = self::scalarString($merged['site_id']);
-        if ($siteId !== '') {
-          $siteWages = iterator_to_array(\PayCal\Domain\Sites::getSiteWages($userUUID));
-          if (isset($siteWages[$siteId])) {
-            $wage = $siteWages[$siteId];
-          }
-        }
       }
 
       $grossCents = Money::dollarsToCents((string) $loa);
-      if ($wage !== null && is_numeric($wage)) {
+      if ($wage !== null) {
         // Backfill effective wage so API consumers can compute travel/regular splits consistently.
         $merged['wage'] = $wage;
         $grossCents += Money::calculateGross($regularHours, $overtimeHours, $wage);
@@ -203,44 +186,6 @@ class EarningsController
       if ($grossCents > 0) {
         $merged['gross'] = Money::centsToDollars($grossCents);
       }
-    }
-
-    return $merged;
-  }
-
-  /**
-   * @param array<string,mixed> $row
-   */
-  private static function hasSnapshotFallbackData(array $row): bool
-  {
-    $hoursPresent = isset($row['hours']) && is_numeric($row['hours']);
-    $splitPresent = isset($row['regular_hours'], $row['overtime_hours'])
-      && is_numeric($row['regular_hours'])
-      && is_numeric($row['overtime_hours']);
-    $wagePresent = isset($row['wage']) && is_numeric($row['wage']);
-
-    return $hoursPresent || $splitPresent || $wagePresent;
-  }
-
-  /**
-   * @param array<string,mixed> $row
-   * @return array<string,mixed>
-   */
-  private static function normalizeSnapshotRow(array $row): array
-  {
-    $normalized = WorkEntry::normalizeWorkEntryPayload($row);
-    $merged = $row;
-    foreach ($normalized as $k => $v) {
-      $merged[(string) $k] = $v;
-    }
-
-    if (
-      (!isset($merged['hours']) || !is_numeric($merged['hours']))
-      && isset($merged['regular_hours'], $merged['overtime_hours'])
-      && is_numeric($merged['regular_hours'])
-      && is_numeric($merged['overtime_hours'])
-    ) {
-      $merged['hours'] = (float) $merged['regular_hours'] + (float) $merged['overtime_hours'];
     }
 
     return $merged;
@@ -295,53 +240,12 @@ class EarningsController
 
     $wrappedPasskeyMapKey = Keys::USER . ':' . $ownerUUID . ':passkey_wrapped_deks';
     $wrappedDekPasskey = '';
-    $credentialSource = 'none';
     if ($credentialId !== '') {
       $wrappedDekPasskey = self::scalarString(Database::hget($wrappedPasskeyMapKey, $credentialId));
-      if ($wrappedDekPasskey !== '') {
-        $credentialSource = 'selected_credential_map';
-      }
-    }
-
-    // Fallback: if session credential wrapper missing, try any known credential.
-    if ($wrappedDekPasskey === '') {
-      $credentialIds = Database::smembers(Keys::webauthnUserCredentials($ownerUUID));
-      foreach ($credentialIds as $candidate) {
-        $candidateId = (string) $candidate;
-        if ($candidateId === '') {
-          continue;
-        }
-        $candidateWrapped = self::scalarString(Database::hget($wrappedPasskeyMapKey, $candidateId));
-        if ($candidateWrapped !== '') {
-          $credentialId = $candidateId;
-          $wrappedDekPasskey = $candidateWrapped;
-          $credentialSource = 'fallback_credential_map';
-          break;
-        }
-      }
-
-      // Parity with account bootstrap: if no credential-scoped wrapper was found,
-      // still select a known credential ID so legacy single-wrapper fallback can unwrap.
-      if ($credentialId === '') {
-        foreach ($credentialIds as $candidate) {
-          $candidateId = (string) $candidate;
-          if ($candidateId !== '') {
-            $credentialId = $candidateId;
-            $credentialSource = 'credential_selected_no_map';
-            break;
-          }
-        }
-      }
     }
 
     if ($credentialId === '') {
       return null;
-    }
-    if ($wrappedDekPasskey === '') {
-      $wrappedDekPasskey = self::scalarString(User::current()->wrapped_dek_passkey);
-      if ($wrappedDekPasskey !== '') {
-        $credentialSource = 'legacy_single_wrapper';
-      }
     }
     if ($wrappedDekPasskey === '') {
       return null;
@@ -350,7 +254,7 @@ class EarningsController
     if (self::debugRequested()) {
       self::debug('resolveDekForEnvelope:source', [
         'mode' => 'personal',
-        'source' => $credentialSource,
+        'source' => 'selected_credential_map',
         'owner_uuid_present' => true,
         'credential_present' => true,
       ]);
@@ -431,16 +335,15 @@ class EarningsController
   /**
    * Handles hkdfPasskeyKek operation.
    */
-  private static function hkdfPasskeyKek(string $credentialId, string $userUUID, string $saltB64, bool $legacyUserBound): ?string
+  private static function hkdfPasskeyKek(string $credentialId, string $saltB64): ?string
   {
     $salt = base64_decode($saltB64, true);
     if ($salt === false) {
       return null;
     }
 
-    $ikm = $legacyUserBound ? ($credentialId . '|' . $userUUID) : $credentialId;
     // Matches client derivePasskeyKEK() info label.
-    return hash_hkdf('sha256', $ikm, 32, 'paycal-passkey-kek', $salt);
+    return hash_hkdf('sha256', $credentialId, 32, 'paycal-passkey-kek', $salt);
   }
 
   /**
@@ -474,18 +377,9 @@ class EarningsController
     $tag = substr($ciphertextWithTag, -16);
 
     // Canonical derivation: credential-only
-    $kekCanonical = self::hkdfPasskeyKek($credentialId, $userUUID, $saltB64, false);
+    $kekCanonical = self::hkdfPasskeyKek($credentialId, $saltB64);
     if (is_string($kekCanonical) && $kekCanonical !== '') {
       $dek = openssl_decrypt($ciphertext, 'aes-256-gcm', $kekCanonical, OPENSSL_RAW_DATA, $nonce, $tag);
-      if (is_string($dek) && $dek !== '') {
-        return $dek;
-      }
-    }
-
-    // Legacy derivation fallback: credential-user
-    $kekLegacy = self::hkdfPasskeyKek($credentialId, $userUUID, $saltB64, true);
-    if (is_string($kekLegacy) && $kekLegacy !== '') {
-      $dek = openssl_decrypt($ciphertext, 'aes-256-gcm', $kekLegacy, OPENSSL_RAW_DATA, $nonce, $tag);
       if (is_string($dek) && $dek !== '') {
         return $dek;
       }

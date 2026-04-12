@@ -192,7 +192,7 @@ final class PasskeyController
 
     try {
       $webauthn = $this->createWebAuthn();
-      $result = $webauthn->processCreate($clientDataJSON, $attestationObject, $challengeBinary, false, true);
+      $result = $webauthn->processCreate($clientDataJSON, $attestationObject, $challengeBinary, true, true);
 
       $credentialId = $this->encodeB64Url($result->credentialId);
       $publicKeyPem = (string) $result->credentialPublicKey;
@@ -390,7 +390,7 @@ final class PasskeyController
 
     try {
       $webauthn = $this->createWebAuthn();
-      $result = $webauthn->processCreate($clientDataJSON, $attestationObject, $challengeBinary, false, true);
+      $result = $webauthn->processCreate($clientDataJSON, $attestationObject, $challengeBinary, true, true);
 
       $credentialId = $this->encodeB64Url($result->credentialId);
       $publicKeyPem = (string) $result->credentialPublicKey;
@@ -610,7 +610,7 @@ final class PasskeyController
         $publicKeyPem,
         $challengeBinary,
         (int) $this->scalarString($credentialData['sign_count'] ?? '0'),
-        false,
+        true,
         true
       );
 
@@ -618,6 +618,17 @@ final class PasskeyController
     } catch (WebAuthnException) {
       Response::error('Authentication failed.', [], HttpStatus::HTTP_UNAUTHORIZED);
       return;
+    }
+
+    $oldSignCount = (int) $this->scalarString($credentialData['sign_count'] ?? '0');
+    $suspectedClone = $newSignCount > 0 && $oldSignCount > 0 && $newSignCount < $oldSignCount;
+    if ($suspectedClone) {
+      SecurityLog::log('passkey_clone_suspected', [
+        'user_uuid' => $expectedUserUUID,
+        'credential_id' => $credentialId,
+        'old_sign_count' => $oldSignCount,
+        'new_sign_count' => $newSignCount,
+      ]);
     }
 
     $sessionHash = bin2hex(random_bytes(self::SECRET_BYTES));
@@ -666,6 +677,7 @@ final class PasskeyController
       'password_only_warning' => false,
       'mutation_allowed' => true,
       'credential_id' => $credentialId,
+      'suspected_clone' => $suspectedClone,
     ]);
   }
 
@@ -709,8 +721,21 @@ final class PasskeyController
       ];
     }
 
+    $staleThreshold = time() - (90 * 86400);
+    $staleCount = 0;
+    foreach ($records as $record) {
+      if ($record['lastUsedAt'] > 0 && $record['lastUsedAt'] < $staleThreshold) {
+        $staleCount++;
+      }
+    }
+
     Response::success('[PASSKEY] Passkey list.', [
       'credentials' => $records,
+      'health' => [
+        'total' => count($records),
+        'staleCount' => $staleCount,
+        'atRisk' => count($records) <= 1 || $staleCount >= count($records) - 1,
+      ],
     ]);
   }
 
@@ -811,6 +836,7 @@ final class PasskeyController
 
     Database::unlink($credentialKey);
     Database::srem($this->userCredentialsKey($userUUID), $credentialId);
+    Database::hdel(Keys::USER . ':' . $userUUID . ':passkey_wrapped_deks', $credentialId);
 
     $remaining = Database::scard($this->userCredentialsKey($userUUID)) ?? 0;
     Database::hset(Keys::USER . ':' . $userUUID, [
@@ -825,6 +851,48 @@ final class PasskeyController
     Response::success('[PASSKEY] Passkey deleted.', [
       'remaining' => $remaining,
     ]);
+  }
+
+  /**
+   * Send a recovery email from the sign-in page when passkey login fails.
+   */
+  #[Route('auth/passkey/send-recovery-email', ['POST'])]
+  public function sendRecoveryEmail(): void
+  {
+    if (!$this->enforceEndpointRateLimit('send-recovery-email')) {
+      return;
+    }
+
+    $body = $this->jsonBody();
+    $email = InputSanitizer::sanitizeEmail($this->scalarString($body['email'] ?? ''));
+
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      Response::success('[PASSKEY] Recovery instructions sent if account exists.');
+      return;
+    }
+
+    $userUUID = UserRepository::getUUIDFromEmail($email);
+    if ($userUUID === '' || !$this->isValidUserUUID($userUUID)) {
+      Response::success('[PASSKEY] Recovery instructions sent if account exists.');
+      return;
+    }
+
+    try {
+      $user = User::getByUUID($userUUID);
+      if ($user !== null && $user->email_verified) {
+        $code = Security::generateVerificationCode(6);
+        // TODO: Integrate with AccountRecoveryTransaction for full recovery flow
+        EmailGarum::sendAccountRecoveryCode($user->email, $user->full_name, $code);
+      }
+    } catch (\Throwable) {
+      // Silently fail to prevent email enumeration
+    }
+
+    SecurityLog::log('passkey_recovery_email_requested', [
+      'email_hash' => hash('sha256', $email),
+    ]);
+
+    Response::success('[PASSKEY] Recovery instructions sent if account exists.');
   }
 
   /**

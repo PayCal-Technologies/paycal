@@ -119,11 +119,6 @@ final class SitesController
    */
   private static function decryptWorkRowIfNeeded(array $row, string $userUUID): ?array
   {
-    $hasGross = isset($row['gross']) || isset($row['g']);
-    if ($hasGross) {
-      return $row;
-    }
-
     $blob = self::scalarString($row['encrypted_blob'] ?? '');
     if ($blob === '') {
       return null;
@@ -189,18 +184,10 @@ final class SitesController
         $wage = (string) $merged['wage'];
       } elseif (isset($merged['w']) && is_numeric($merged['w'])) {
         $wage = (string) $merged['w'];
-      } else {
-        $siteId = self::scalarString($merged['site_id'] ?? '');
-        if ($siteId !== '') {
-          $siteWages = iterator_to_array(Sites::getSiteWages($userUUID));
-          if (isset($siteWages[$siteId])) {
-            $wage = $siteWages[$siteId];
-          }
-        }
       }
 
       $grossCents = Money::dollarsToCents((string) $loa);
-      if ($wage !== null && is_numeric($wage)) {
+      if ($wage !== null) {
         $grossCents += Money::calculateGross($regularHours, $overtimeHours, $wage);
         if ($travelHours > 0) {
           $travelPay = $travelHours * (float) $wage;
@@ -260,27 +247,8 @@ final class SitesController
       $wrappedDekPasskey = self::scalarString(Database::hget($wrappedPasskeyMapKey, $credentialId));
     }
 
-    if ($wrappedDekPasskey === '') {
-      $credentialIds = Database::smembers(Keys::webauthnUserCredentials($ownerUUID));
-      foreach ($credentialIds as $candidate) {
-        $candidateId = (string) $candidate;
-        if ($candidateId === '') {
-          continue;
-        }
-        $candidateWrapped = self::scalarString(Database::hget($wrappedPasskeyMapKey, $candidateId));
-        if ($candidateWrapped !== '') {
-          $credentialId = $candidateId;
-          $wrappedDekPasskey = $candidateWrapped;
-          break;
-        }
-      }
-    }
-
     if ($credentialId === '') {
       return null;
-    }
-    if ($wrappedDekPasskey === '') {
-      $wrappedDekPasskey = self::scalarString(User::current()->wrapped_dek_passkey);
     }
     if ($wrappedDekPasskey === '') {
       return null;
@@ -361,15 +329,14 @@ final class SitesController
   /**
    * Handles hkdfPasskeyKek operation.
    */
-  private static function hkdfPasskeyKek(string $credentialId, string $userUUID, string $saltB64, bool $legacyUserBound): ?string
+  private static function hkdfPasskeyKek(string $credentialId, string $saltB64): ?string
   {
     $salt = base64_decode($saltB64, true);
     if ($salt === false) {
       return null;
     }
 
-    $ikm = $legacyUserBound ? ($credentialId . '|' . $userUUID) : $credentialId;
-    return hash_hkdf('sha256', $ikm, 32, 'paycal-passkey-kek', $salt);
+    return hash_hkdf('sha256', $credentialId, 32, 'paycal-passkey-kek', $salt);
   }
 
   /**
@@ -402,17 +369,9 @@ final class SitesController
     $ciphertext = substr($ciphertextWithTag, 0, -16);
     $tag = substr($ciphertextWithTag, -16);
 
-    $kekCanonical = self::hkdfPasskeyKek($credentialId, $userUUID, $saltB64, false);
+    $kekCanonical = self::hkdfPasskeyKek($credentialId, $saltB64);
     if (is_string($kekCanonical) && $kekCanonical !== '') {
       $dek = openssl_decrypt($ciphertext, 'aes-256-gcm', $kekCanonical, OPENSSL_RAW_DATA, $nonce, $tag);
-      if (is_string($dek) && $dek !== '') {
-        return $dek;
-      }
-    }
-
-    $kekLegacy = self::hkdfPasskeyKek($credentialId, $userUUID, $saltB64, true);
-    if (is_string($kekLegacy) && $kekLegacy !== '') {
-      $dek = openssl_decrypt($ciphertext, 'aes-256-gcm', $kekLegacy, OPENSSL_RAW_DATA, $nonce, $tag);
       if (is_string($dek) && $dek !== '') {
         return $dek;
       }

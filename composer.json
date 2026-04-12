@@ -13,7 +13,9 @@
         "php": ">=8.2",
         "vlucas/phpdotenv": "^5.6",
         "lbuchs/webauthn": "^2.2",
-        "stripe/stripe-php": "^19.4"
+        "stripe/stripe-php": "^19.4",
+        "erusev/parsedown": "^1.8",
+        "yupmin/magoo": "^3.0"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.1",
@@ -36,9 +38,6 @@
     "config": {
         "platform": {
             "php": "8.2"
-        },
-        "allow-plugins": {
-            "infection/extension-installer": true
         }
     },
     "scripts": {

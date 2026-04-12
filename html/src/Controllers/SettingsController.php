@@ -19,6 +19,7 @@ use PayCal\Domain\Enums\PayFrequency;
 use PayCal\Domain\RedisReliabilityService;
 use PayCal\Domain\RequestGuard;
 use PayCal\Domain\Response;
+use PayCal\Domain\SecurityLog;
 use PayCal\Domain\Enums\SessionTimeout;
 use PayCal\Domain\Enums\Timezone;
 use PayCal\Domain\SystemLimits;
@@ -26,6 +27,7 @@ use PayCal\Domain\User;
 use PayCal\Domain\UserPreferenceDefaults;
 use PayCal\Domain\UserRepository;
 use PayCal\Domain\UserSettings;
+use PayCal\Domain\Work;
 use PayCal\Domain\WorkEntryLockService;
 
 /**
@@ -59,6 +61,10 @@ use PayCal\Domain\WorkEntryLockService;
  */
 class SettingsController
 {
+  private const DATA_TRANSFER_SCHEMA_VERSION = 2;
+  private const DATA_IMPORT_TTL_SECONDS = 1800;
+  private const DATA_EXPORT_PLAINTEXT_WARNING = 'Export payload includes plaintext account and work data. Treat the file as sensitive.';
+
   /**
    * GET profile/settings
    *
@@ -207,6 +213,484 @@ class SettingsController
     Database::unlink(Keys::LOCK_BOUNDARY . ':' . $userUUID);
 
     Response::success('All account data deleted.', [], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST account/data/export
+   *
+   * Export the authenticated user's portable account dataset containing
+   * profile-safe user fields, sites, and work entries.
+   */
+  #[Route('account/data/export', ['POST'])]
+  /**
+   * Handles exportAccountData operation.
+   */
+  public function exportAccountData(): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    $userUUID = User::currentUUID();
+    $user = UserRepository::getByUUID($userUUID);
+    if (!$user) {
+      Response::error('[SC] Unknown user.', [], HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+      return;
+    }
+
+    $sites = [];
+    foreach (\PayCal\Domain\Sites::getSites($userUUID, 'all') as $siteId => $siteData) {
+      $sites[] = [
+        'id' => $this->scalarString($siteId),
+        'site_name' => $this->scalarString($siteData['site_name'] ?? ''),
+        'wage' => $this->scalarString($siteData['wage'] ?? ''),
+        'living_out_allowance' => $this->scalarString($siteData['living_out_allowance'] ?? ''),
+        'travel_hours' => $this->scalarString($siteData['travel_hours'] ?? ''),
+        'status' => $this->scalarString($siteData['status'] ?? 'active'),
+        'province' => $this->scalarString($siteData['province'] ?? ''),
+      ];
+    }
+
+    $workEntries = [];
+    $start = new \DateTimeImmutable('1970-01-01');
+    $end = new \DateTimeImmutable('2100-01-01');
+    foreach (Work::getWorkInRange($start, $end, $userUUID) as $key => $workData) {
+      $isArchived = str_starts_with($this->scalarString($key), Keys::WORK . ':archived:');
+      $workEntries[] = [
+        'date' => $this->scalarString($workData['date'] ?? ''),
+        'site_id' => $this->scalarString($workData['site_id'] ?? ''),
+        'site_name' => $this->scalarString($workData['site_name'] ?? ''),
+        'hours' => $this->scalarString($workData['hours'] ?? ''),
+        'regular_hours' => $this->scalarString($workData['regular_hours'] ?? ''),
+        'overtime_hours' => $this->scalarString($workData['overtime_hours'] ?? ''),
+        'living_out_allowance' => $this->scalarString($workData['living_out_allowance'] ?? ''),
+        'travel_hours' => $this->scalarString($workData['travel_hours'] ?? ''),
+        'wage' => $this->scalarString($workData['wage'] ?? ''),
+        'gross' => isset($workData['gross']) ? $this->scalarString($workData['gross']) : '',
+        'tax' => isset($workData['tax']) ? $this->scalarString($workData['tax']) : '',
+        'net' => isset($workData['net']) ? $this->scalarString($workData['net']) : '',
+        'other' => isset($workData['other']) ? $this->scalarString($workData['other']) : '',
+        'encrypted_blob' => $this->scalarString($workData['encrypted_blob'] ?? ''),
+        'archived' => $isArchived,
+      ];
+    }
+
+    $payload = [
+      'schema_version' => self::DATA_TRANSFER_SCHEMA_VERSION,
+      'exported_at' => gmdate('c'),
+      'reference' => $this->generateReferenceCode('EXU'),
+      'security' => [
+        'contains_plaintext' => true,
+        'warning' => self::DATA_EXPORT_PLAINTEXT_WARNING,
+      ],
+      'user' => $this->buildPortableUserData($user),
+      'sites' => $sites,
+      'work_entries' => $workEntries,
+    ];
+
+    $payloadJson = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if (!is_string($payloadJson)) {
+      Response::error('[SC] Unable to encode export payload.', [], HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+      return;
+    }
+
+    SecurityLog::log('account_data_export', [
+      'user_uuid' => $userUUID,
+      'schema_version' => self::DATA_TRANSFER_SCHEMA_VERSION,
+      'contains_plaintext' => true,
+      'site_count' => count($sites),
+      'work_entry_count' => count($workEntries),
+    ]);
+
+    Response::success('[SC] Account data export prepared.', [
+      'schema_version' => self::DATA_TRANSFER_SCHEMA_VERSION,
+      'reference' => $payload['reference'],
+      'contains_plaintext' => true,
+      'warning' => self::DATA_EXPORT_PLAINTEXT_WARNING,
+      'checksum_sha256' => hash('sha256', $payloadJson),
+      'counts' => [
+        'sites' => count($sites),
+        'work_entries' => count($workEntries),
+      ],
+      'payload' => $payload,
+    ], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST account/data/import/prepare
+   *
+   * Validate an uploaded export payload and stage it for commit.
+   */
+  #[Route('account/data/import/prepare', ['POST'])]
+  /**
+   * Handles prepareAccountDataImport operation.
+   */
+  public function prepareAccountDataImport(): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    $allowedStrings = ['payload_json'];
+    $droppedKeys = [];
+    $base64ImageStrings = [];
+    $rawStrings = ['payload_json'];
+    $filtered = RequestGuard::filterPost($allowedStrings, [], $droppedKeys, $base64ImageStrings, $rawStrings);
+    if (false === $filtered) {
+      Response::error('[SC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $payloadRaw = $filtered['payload_json'] ?? '';
+    $payloadJson = is_scalar($payloadRaw) ? trim((string) $payloadRaw) : '';
+    if ($payloadJson === '') {
+      Response::error('[SC] Import payload is required.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    try {
+      $decoded = json_decode($payloadJson, true, 512, JSON_THROW_ON_ERROR);
+    } catch (\JsonException $e) {
+      Response::error('[SC] Invalid import JSON payload.', ['error' => $e->getMessage()], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    if (!is_array($decoded)) {
+      Response::error('[SC] Import payload must be a JSON object.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $schemaVersion = $this->scalarInt($decoded['schema_version'] ?? 0);
+    if ($schemaVersion !== self::DATA_TRANSFER_SCHEMA_VERSION) {
+      Response::error('[SC] Unsupported import schema version.', [
+        'supported_schema_version' => self::DATA_TRANSFER_SCHEMA_VERSION,
+        'received_schema_version' => $schemaVersion,
+      ], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $sites = $decoded['sites'] ?? [];
+    $workEntries = $decoded['work_entries'] ?? [];
+    $userData = $decoded['user'] ?? [];
+    if (!is_array($sites) || !is_array($workEntries) || !is_array($userData)) {
+      Response::error('[SC] Import payload shape is invalid.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $importId = $this->generateReferenceCode('IMP');
+    $importKey = $this->importSessionKey($importId);
+    Database::hset($importKey, [
+      'actor_uuid' => User::currentUUID(),
+      'created_at' => (string) time(),
+      'schema_version' => (string) $schemaVersion,
+      'checksum_sha256' => hash('sha256', $payloadJson),
+      'payload_json' => $payloadJson,
+    ]);
+    Database::expire($importKey, self::DATA_IMPORT_TTL_SECONDS);
+
+    SecurityLog::log('account_data_import_prepared', [
+      'user_uuid' => User::currentUUID(),
+      'import_id' => $importId,
+      'schema_version' => $schemaVersion,
+      'site_count' => count($sites),
+      'work_entry_count' => count($workEntries),
+    ]);
+
+    Response::success('[SC] Account data import prepared.', [
+      'import_id' => $importId,
+      'expires_in_seconds' => self::DATA_IMPORT_TTL_SECONDS,
+      'checksum_sha256' => hash('sha256', $payloadJson),
+      'counts' => [
+        'sites' => count($sites),
+        'work_entries' => count($workEntries),
+      ],
+    ], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST account/data/import/commit
+   *
+   * Commit a previously prepared account data import.
+   */
+  #[Route('account/data/import/commit', ['POST'])]
+  /**
+   * Handles commitAccountDataImport operation.
+   */
+  public function commitAccountDataImport(): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    $mutationGate = RedisReliabilityService::allowMutations();
+    if ($mutationGate['allowed'] !== true) {
+      Response::error(
+        '[Settings] Redis reliability guard blocked mutation.',
+        ['redis_guard' => $mutationGate],
+        HttpStatus::HTTP_SERVICE_UNAVAILABLE
+      );
+      return;
+    }
+
+    $allowedStrings = ['import_id'];
+    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    if (false === $filtered) {
+      Response::error('[SC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $importIdRaw = $filtered['import_id'] ?? '';
+    $importId = is_scalar($importIdRaw) ? trim((string) $importIdRaw) : '';
+    if ($importId === '') {
+      Response::error('[SC] Import id is required.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $importKey = $this->importSessionKey($importId);
+    $session = Database::hgetall($importKey);
+    if (empty($session)) {
+      Response::error('[SC] Import session not found or expired.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $actorUUID = User::currentUUID();
+    if ((string) ($session['actor_uuid'] ?? '') !== $actorUUID) {
+      Response::error('[SC] Import session does not belong to this user.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    $payloadJson = (string) ($session['payload_json'] ?? '');
+    if ($payloadJson === '') {
+      Response::error('[SC] Import payload is missing from the session.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    try {
+      $payload = json_decode($payloadJson, true, 512, JSON_THROW_ON_ERROR);
+    } catch (\JsonException $e) {
+      Response::error('[SC] Import payload decoding failed.', ['error' => $e->getMessage()], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    if (!is_array($payload)) {
+      Response::error('[SC] Import payload is malformed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $importedUsers = 0;
+    $importedSites = 0;
+    $importedWorkEntries = 0;
+
+    $userPayloadRaw = $payload['user'] ?? [];
+    $userPayload = is_array($userPayloadRaw) ? $userPayloadRaw : [];
+    $userWrite = $this->sanitizePortableUserImport($userPayload);
+    if ($userWrite !== []) {
+      Database::hset(Keys::USER . ':' . $actorUUID, $userWrite);
+      $importedUsers = 1;
+    }
+
+    $sitesRaw = $payload['sites'] ?? [];
+    $sites = is_array($sitesRaw) ? $sitesRaw : [];
+    foreach ($sites as $siteRow) {
+      if (!is_array($siteRow)) {
+        continue;
+      }
+      $siteId = trim($this->scalarString($siteRow['id'] ?? ''));
+      if ($siteId === '') {
+        continue;
+      }
+
+      $siteKey = Keys::SITE . ':' . $actorUUID . ':' . $siteId;
+      $write = [
+        'site_name' => trim($this->scalarString($siteRow['site_name'] ?? '')),
+        'wage' => trim($this->scalarString($siteRow['wage'] ?? '')),
+        'living_out_allowance' => trim($this->scalarString($siteRow['living_out_allowance'] ?? '')),
+        'travel_hours' => trim($this->scalarString($siteRow['travel_hours'] ?? '')),
+        'status' => trim($this->scalarString($siteRow['status'] ?? 'active')),
+      ];
+      $province = trim($this->scalarString($siteRow['province'] ?? ''));
+      if ($province !== '') {
+        $write['province'] = $province;
+      }
+
+      Database::hset($siteKey, $write);
+      $importedSites += 1;
+    }
+
+    $workEntriesRaw = $payload['work_entries'] ?? [];
+    $workEntries = is_array($workEntriesRaw) ? $workEntriesRaw : [];
+    foreach ($workEntries as $workRow) {
+      if (!is_array($workRow)) {
+        continue;
+      }
+
+      $date = trim($this->scalarString($workRow['date'] ?? ''));
+      $siteId = trim($this->scalarString($workRow['site_id'] ?? ''));
+      if ($date === '' || $siteId === '') {
+        continue;
+      }
+
+      $isArchived = (bool) ($workRow['archived'] ?? false);
+      $workKeyPrefix = $isArchived
+        ? (Keys::WORK . ':archived:' . $actorUUID)
+        : (Keys::WORK . ':' . $actorUUID);
+      $workKey = $workKeyPrefix . ':' . $date . ':' . $siteId;
+
+      $write = [
+        'date' => $date,
+        'site_id' => $siteId,
+        'site_name' => trim($this->scalarString($workRow['site_name'] ?? '')),
+        'hours' => trim($this->scalarString($workRow['hours'] ?? '')),
+        'regular_hours' => trim($this->scalarString($workRow['regular_hours'] ?? '')),
+        'overtime_hours' => trim($this->scalarString($workRow['overtime_hours'] ?? '')),
+        'living_out_allowance' => trim($this->scalarString($workRow['living_out_allowance'] ?? '')),
+        'travel_hours' => trim($this->scalarString($workRow['travel_hours'] ?? '')),
+        'wage' => trim($this->scalarString($workRow['wage'] ?? '')),
+      ];
+
+      foreach (['gross', 'tax', 'net', 'other', 'encrypted_blob'] as $optionalField) {
+        $value = trim($this->scalarString($workRow[$optionalField] ?? ''));
+        if ($value !== '') {
+          $write[$optionalField] = $value;
+        }
+      }
+
+      Database::hset($workKey, $write);
+      $importedWorkEntries += 1;
+    }
+
+    Database::unlink($importKey);
+
+    SecurityLog::log('account_data_import_committed', [
+      'user_uuid' => $actorUUID,
+      'import_id' => $importId,
+      'imported_user' => $importedUsers,
+      'imported_sites' => $importedSites,
+      'imported_work_entries' => $importedWorkEntries,
+    ]);
+
+    Response::success('[SC] Account data import committed.', [
+      'import_id' => $importId,
+      'counts' => [
+        'user' => $importedUsers,
+        'sites' => $importedSites,
+        'work_entries' => $importedWorkEntries,
+      ],
+    ], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * @return array<string, mixed>
+   */
+  private function buildPortableUserData(User $user): array
+  {
+    return [
+      'full_name' => (string) $user->full_name,
+      'phone' => (string) $user->phone,
+      'province' => (string) $user->province,
+      'timezone' => (string) $user->timezone,
+      'currency' => (string) $user->currency,
+      'language' => (string) $user->language,
+      'pay_frequency' => (string) ($user->pay_frequency ?? ''),
+      'pay_anchor' => (string) ($user->pay_anchor ?? ''),
+      'pay_period_start' => (string) $user->pay_period_start,
+      'pay_period_length' => (string) $user->pay_period_length,
+      'default_site_id' => (string) $user->default_site_id,
+      'default_hours' => (string) $user->default_hours,
+      'default_living_out_allowance' => (string) $user->default_living_out_allowance,
+      'default_travel_hours' => (string) $user->default_travel_hours,
+      'theme' => (string) $user->theme,
+      'variant' => (string) $user->variant,
+      'text' => (string) $user->text,
+      'density' => (string) $user->density,
+      'dyslexia_typography' => (string) $user->dyslexia_typography,
+      'voice' => (string) $user->voice,
+      'audio_feedback' => (string) $user->audio_feedback,
+      'editing_grace_days' => (string) $user->editing_grace_days,
+      'calendar_work_entry_fields_hours' => $user->calendar_work_entry_fields_hours,
+      'calendar_work_entry_fields_overtime' => $user->calendar_work_entry_fields_overtime,
+      'calendar_work_entry_fields_living_out' => $user->calendar_work_entry_fields_living_out,
+      'calendar_work_entry_fields_travel' => $user->calendar_work_entry_fields_travel,
+    ];
+  }
+
+  /**
+   * @param array<string, mixed> $userPayload
+   * @return array<string, string>
+   */
+  private function sanitizePortableUserImport(array $userPayload): array
+  {
+    $allowList = [
+      'full_name',
+      'phone',
+      'province',
+      'timezone',
+      'currency',
+      'language',
+      'pay_frequency',
+      'pay_anchor',
+      'pay_period_start',
+      'pay_period_length',
+      'default_site_id',
+      'default_hours',
+      'default_living_out_allowance',
+      'default_travel_hours',
+      'theme',
+      'variant',
+      'text',
+      'density',
+      'dyslexia_typography',
+      'voice',
+      'audio_feedback',
+      'editing_grace_days',
+      'calendar_work_entry_fields_hours',
+      'calendar_work_entry_fields_overtime',
+      'calendar_work_entry_fields_living_out',
+      'calendar_work_entry_fields_travel',
+    ];
+
+    $write = [];
+    foreach ($allowList as $field) {
+      if (!array_key_exists($field, $userPayload)) {
+        continue;
+      }
+
+      $value = $userPayload[$field];
+      if (in_array($field, [
+        'calendar_work_entry_fields_hours',
+        'calendar_work_entry_fields_overtime',
+        'calendar_work_entry_fields_living_out',
+        'calendar_work_entry_fields_travel',
+      ], true)) {
+        $write[$field] = (bool) $value ? '1' : '0';
+      } else {
+        $write[$field] = trim($this->scalarString($value));
+      }
+    }
+
+    return $write;
+  }
+
+  private function scalarString(mixed $value): string
+  {
+    return is_scalar($value) ? (string) $value : '';
+  }
+
+  private function scalarInt(mixed $value, int $default = 0): int
+  {
+    if (is_int($value)) {
+      return $value;
+    }
+
+    if (is_float($value) || is_string($value)) {
+      return (int) $value;
+    }
+
+    return $default;
+  }
+
+  private function generateReferenceCode(string $prefix): string
+  {
+    return $prefix . substr(hash('sha256', User::currentUUID() . '|' . microtime(true) . '|' . random_int(1000, 9999)), 0, 24);
+  }
+
+  private function importSessionKey(string $importId): string
+  {
+    return 'user:data_import:prepare:' . $importId;
   }
 
   /**

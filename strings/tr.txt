@@ -1,0 +1,1343 @@
+14_DAYS 14 Gün
+1_WEEK 1 Hafta
+2_WEEKS 2 Hafta
+7_DAYS 7 Gün
+WIN95_DARK 95 Koyu
+WIN95_LIGHT 95 Açık
+ABOUT_US Hakkımızda
+ACCOUNT Hesap
+ACCOUNT_ACTIONS Hesap İşlemleri
+ACCOUNT_REGISTRATION Hesap Kaydı
+ACTIONS İşlemler
+ACTIVE Aktif
+ADD_ROW Satır Ekle
+CREATE_SITE Site Oluştur
+EDIT_SITE Site Düzenle
+ADMIN Yönetici
+ALL Tümü
+ALL_TIME Tüm Zamanlar
+ALT_A <kbd>ALT A</kbd>
+ALT_BACKSLASH <kbd>ALT \\</kbd>
+ALT_B <kbd>ALT B</kbd>
+ALT_C <kbd>ALT C</kbd>
+ALT_P <kbd>ALT P</kbd>
+ALT_R <kbd>Alt R</kbd>
+ANALYTICS Analitik
+ARCADE_DARK Koyu Arcade
+ARCADE_LIGHT Açık Arcade
+ARROW_KEYS <kbd>Oklar</kbd>
+AUDIO Ses
+AUDIO_FEEDBACK Ses Geri Bildirimi
+AUDIO_FEEDBACK_USING Ses geri bildirimi kullanılarak
+AUDIO_PREFS Ses Tercihleri
+BASE Taban
+BROWSER Tarayıcı
+CALENDAR_AUDIO_LABELS_ON Ses Etiketleri
+CALENDAR_AUTOFOCUS_ON Otomatik Odak
+CALENDAR Takvim
+CALENDAR_DAYS Günler
+CALENDAR_PREFS_FORM Takvim Tercih Formu
+CANCEL_AND_CLOSE İptal Et & Kapat
+CANCEL İptal
+CAPSLOCK_ACTIVE BÜYÜK HARF KİLİDİ aktif.
+CHANGE_EMAIL E-postayı Değiştir
+CHANGE_PASSWORD Parolayı Değiştir
+CHOOSE_A_LANGUAGE Dil Seçin
+CHOOSE_A_THEME Tema Seçin
+CHOOSE_A_VOICE Ses Seçin
+CLOSED_DIALOG Kapatılan Pencere
+CLOSE_DIALOG Pencereyi Kapat
+CLOSE_DIALOG_WITH ESCAPE ile Pencereyi Kapat
+CONFIRM_NEW_EMAIL Yeni E-postayı Onayla
+CONFIRM_NEW_PASSWORD Yeni Parolayı Onayla
+CONFIRM_NO_TYPOS Yazım Hatası Yok Onayla
+CONFIRM_PASSWORD Parolayı Onayla
+CONSENT_COOKIE_POLICY Çerez politikasını kabul ediyorum.
+CONTACT İletişim
+COPY Kopyala
+COPY_WORK İşi Kopyala
+COPY_WORK_WITH CTRL C ile İşi Kopyala.
+CPP CPP
+CSV CSV
+CTRL_C <kbd>CTRL C</kbd>
+CTRL_V <kbd>CTRL V</kbd>
+CURRENT Mevcut
+CURRENT_EMAIL Mevcut E-posta
+CURRENT_PASSWORD Mevcut Parola
+CURRENT_TIME Mevcut Saat
+DAILY Günlük
+DAILY_DETAILS Günlük Detaylar
+DARK Koyu
+DATE Tarih
+DATE_PICKER Tarih Seçici
+DEDUCTIONS Kesintiler
+DELETE_ACCOUNT Hesabı Sil
+DELETE_ACCOUNT_MESSAGE Gitmeni görmekten gerçekten üzgünüz! Hesabını silmek istediğini onaylamak için lütfen parolanı gir.
+DELETE Sil
+DELETE_KEY <kbd>DELETE</kbd>
+DELETE_SITE Siteyi Sil
+DELETE_WORK İşi Sil
+DELETE_WORK_WITH Delete ile İşi Sil.
+DEVICE Cihaz
+DUTCH Hollandaca
+EARNINGS Kazanç
+EARNINGS_LABEL Kazanç
+EARNINGS_YEAR_SELECTOR Kazanç Yılı Seçici
+EI EI
+EMAIL E-posta
+EMAIL_SUBJECT Subject
+END_KEY <kbd>End</kbd>
+ENGLISH İngilizce
+ENTER_KEY <kbd>ENTER</kbd>
+ENTRY_ROW Giriş Satırı
+ERROR_EMAIL_EMPTY E-posta alanı boştu. Lütfen tekrar deneyin.
+ERROR_EMAIL_MISSING E-posta eksik.
+ERROR_EMAIL_REGISTERED E-posta zaten kayıtlı.
+ERROR_EMAIL_TAKEN Üzgünüz, bu e-posta adresi zaten kayıtlı. Lütfen tekrar deneyin.
+ERROR_PASSWORD_EMPTY Parola alanı boştu. Lütfen tekrar deneyin.
+ERROR_PASSWORD_MISSING Parola eksik.
+ERROR_PASSWORDS_MISMATCHED Parolalar uyuşmuyor. Lütfen tekrar deneyin.
+ERROR_PASSWORDS_NO_MATCH Parolalar eşleşmiyor.
+ERROR_REGISTRATION_ISSUES Kayıt sırasında bazı sorunlar var gibi görünüyor. Lütfen kontrol edin ve tekrar deneyin.
+ERROR_USERNAME_EMPTY Kullanıcı adı alanı boştu. Lütfen tekrar deneyin.
+ERROR_USERNAME_TAKEN Üzgünüz, bu kullanıcı adı alınmış. Lütfen tekrar deneyin.
+ESCAPE_KEY <kbd>ESCAPE</kbd>
+FAQ_A2 Elbette! Saatlik kazançlarını kaydetmek ve takip etmek isteyenler için ek özelliklerle ücretsiz bir katman sunuyoruz. Amacımız herkesin işlerini, kazançlarını yönetmesi ve hayatını kolaylaştırması için mümkün olduğunca çok araç sunmaktır.
+FAQ_A3 İlk milyonumuzu finansları üzerinde daha fazla kontrol isteyen işletmeler ve yöneticiler tarafından ödenen abonelik modeliyle kazanmayı planlıyoruz. Plan basittir. Ücretli katman sabit aylık ücrettir ve detaylar resmi yayınla birlikte duyurulacaktır.
+FAQ_A4 Kesinlikle! Takvim her iş için kaydedilen günlük saatleri gösterir. Gün üzerine tıklayarak çalışma detayları panelini açabilir ve gerektiği gibi ayarlayabilirsiniz. Kontrol paneli yılın ay, ödeme dönemi ve işe göre dağılımını gösterir.
+FAQ_A5 Şu anda hizmetimizi 10 dilde sunuyoruz ancak daha fazla dil üzerinde çalışıyoruz! Sık sık kontrol edin! 2024 sonunda 15 dil daha eklemeyi planlıyoruz ve zamanla daha fazlasını ekleyeceğiz. Öneriniz varsa dinlemeye hazırız! Merci! Salamat Po! Danke! :D
+FAQ_A6 Bu hizmeti nasıl işlettiğimiz konusunda mümkün olduğunca açık ve net olmaya çalışıyoruz. Hizmet şartlarımızı, gizlilik kontrollerimizi ve erişilebilirlik hedeflerimizi içeren politikalar oluşturduk.
+FAQ_A7 Bizimle iletişime geçmek için İletişim sayfamızı kullanın lütfen.
+FAQ_CONTACT_TEXT Kullanım Şartları ve Koşulları ile ilgili başka sorularınız varsa, lütfen çekinmeden bizimle iletişime geçin. Bize ulaşabilirsiniz:
+FAQ_Q1 Bu hizmet gerçek mi?
+FAQ_Q2 Bunu ücretsiz kullanabilir miyim?
+FAQ_Q3 Bu ücretli katman nedir?
+FAQ_Q4 Saatlerimi kolayca takip edebilir miyim?
+FAQ_Q5 PayCal dilimi ne zaman destekleyecek?
+FAQ_Q6 Şeffaflığı nasıl sağlıyoruz?
+FAQ_Q7 Geri bildirim veya öneri nasıl yapabilirim?
+FAQ_TITLE Sıkça Sorulan Sorular
+FEDERAL_TAX Federal Vergi
+FIRST İlk
+FOCUS Focus
+FRENCH Fransızca
+FRI Cuma
+FULLDATE Tam Tarih
+FULL_NAME İsim
+FULL_NAME_PLACEHOLDER Lütfen tam isim.
+FUN Eğlence!
+GERMAN Almanca
+GO_TO Git
+GROSS Brüt
+HINDI Hintçe
+HOME_KEY <kbd>Home</kbd>
+HOURS Saatler
+INACTIVE Pasif
+INCOME_TAX Gelir Vergisi
+INFO Bilgi
+IP_ADDRESS IP Adresi
+ITALIAN İtalyanca
+KEYBOARD Keyboard
+KEYBOARD_SHORTCUTS_GOT_IT Anladım!
+KEYBOARD_SHORTCUTS Klavye Kısayolları
+LANG Lang
+LANGUAGE Dil
+LANGUAGE_PICKER Dil Seçici
+LANGUAGE_PREFERENCES Dil Tercihleri
+LARGER Daha Büyük
+LAST Son
+LAST_UPDATED Son Güncelleme
+LENGTH Uzunluk
+LESS Daha Az
+LIGHT Açık
+LIVING_OUT_ALLOWANCE LOA
+LOA LOA
+LOG_OUT Çıkış Yap
+LOG_OUT_MESSAGE Çıkış yapmak istediğinizden emin misiniz?
+LONGDATE Uzun Tarih
+LONG Uzun
+MACOS Mac OS
+MEMORY_USAGE Bellek Kullanımı
+MESSAGE Mesaj
+META_DESCRIPTION_LONG PayCal ile çalışan maaşlarını devrimleştirin: Şeffaf kazançlar, zahmetsiz takip ve verimli bordro yönetimi. Modern, kolay ve ücretsiz.
+META_DESCRIPTION Çalışma saatlerinizi takip edin ve PayCal ile maaş kazançlarını zahmetsizce hesaplayın. Ücretsiz, kolay kullanımlı ve herkes için erişilebilir.
+META_KEYWORDS bordro takibi, çalışma saatleri yönetimi, kazanç hesaplayıcı, ücretsiz bordro aracı, erişilebilir bordro uygulaması, basit bordro platformu, ekip yönetimi, proje takibi, ödeme dönemi hesaplayıcı, çevrimiçi bordro, zaman takibi, erişilebilir araç, çalışma saatleri izleyici, maaş yönetimi, kazanç yönetimi
+META_TITLE PayCal: Herkes için Basit, Erişilebilir Bordro Takibi
+MODAL_HEADER Modal Header
+MODAL_MESSAGE Modal Message
+MODAL_TITLE Modal Title
+MON Mon
+MONTHLY_DETAILS Monthly Details
+MONTHLY Monthly
+MORE More
+NAME Name
+NAV_BAR Nav Bar
+NAVIGATE Navigate
+NAVIGATE_WITH Navigate with TAB or Arrow Keys
+NEED_TO_ENABLE_JAVASCRIPT You need to enable JavaScript to run this application.
+NET Net
+NEW_EMAIL New Email
+NEW_PASSWORD New Password
+NEXT_PREV_BRACKETS <kbd>ALT [ or ]</kbd>
+NEXT_PREV_CALENDAR_MONTH Next/Previous Month
+NEXT_PREV_CALENDAR_MONTH_WITH Next/Previous Month with ALT [ or ]
+NEXT_PREV_PAGEKEYS <kbd>PGDN or PGUP</kbd>
+NONE None
+NUMBERED <kbd>ALT 1-9</kbd>
+NUMBER Number
+OAS OAS
+OPEN_ABOUT Open About
+OPEN_ABOUT_WITH Open About with ALT B
+OPEN_ACCOUNT Open Account
+OPEN_ACCOUNT_WITH Open Account with ALT A
+OPEN_CALENDAR Open Calendar
+OPEN_CALENDAR_WITH Open Calendar with ALT C
+OPEN_DATE_PICKER Open Date Picker
+OPEN_DATE_PICKER_WITH Open Date Picker with ALT \\</kbd>
+OPEN_DIALOG Open Dialog
+OPEN_DIALOG_WITH Open Dialog With ENTER
+OPEN_EARNINGS Open Earnings
+OPEN_EARNINGS_WITH Open Earnings with ALT R
+OPENED_DIALOG Opened dialog
+OPEN_NUMBERED_TAB Open Numbered Tab
+OPEN_NUMBERED_TAB_WITH Open Numbered Tab with ALT [1-9]
+OPEN Open
+OPEN_POLICIES Open Policies
+OPEN_POLICIES_WITH Open Policies with ALT P
+OPEN_SETTINGS Open Settings
+OPEN_SETTINGS_WITH Open Settings  with ALT A
+OPEN_SHORTCUTS Open Shortcuts
+OPEN_SHORTCUTS_WITH Open Shortcuts with ALT Slash or Question Mark
+OPTIONAL_PHONE Optional phone number
+OS OS
+OVERTIME_HOURS Overtime Hours
+OVERTIME Overtime
+PASSWORD Password
+PASSWORD_REQUIRED Current password required
+PAST_1_YEAR Past 1 Year
+PAST_2_YEARS Past 2 Years
+PAST_3_MONTHS Past 3 Months
+PAST_3_YEARS Past 3 Years
+PAST_4_YEARS Past 4 Years
+PAST_5_YEARS Past 5 Years
+PAST_6_MONTHS Past 6 Months
+PASTE Paste
+PASTE_WORK Paste Work
+PASTE_WORK_WITH Paste Work with CTRL V.
+PAYCAL PayCal
+PAY Pay
+PAY_PERIOD_DETAILS Pay Period Details
+PAY_PERIOD Pay Period
+PAY_PERIODS Pay Periods
+PAY_PERIODS_RANGE Pay Periods Range
+PAY_SETTINGS_FORM Pay Settings Form
+PDF PDF
+PERSONAL_INFO_FORM Personal Information Form
+PERSONAL_INFO Personal Info
+PERSONAL Personal
+PHONE Phone
+PHONE_PLACEHOLDER xxx-xxx-xxxx
+TRANSPARENCY Şeffaflık
+POLICIES Policies
+PORTUGUESE Portuguese
+PREFERENCES Preferences
+PRIMARY Primary
+PROVINCIAL_TAX Provincial Tax
+PROVINCE Province
+QUESTION_MARK_KEY <kbd>?</kbd>
+REFRESH Refresh
+REGISTER_COOKIE_DISCLAIMER If you are not comfortable with cookies, you may not register. Sorry bout that. :(
+REGISTER_COOKIE_HEADSUP Hey, headsup! We use a cookie to store user authentication.
+REGISTER_FEATURE1_TEXT Say goodbye to paycheck mysteries! Visualize your expected earnings each pay period. Plan your finances with confidence.
+REGISTER_FEATURE1_TITLE 💡 Earnings Transparency
+REGISTER_FEATURE2_TEXT No more complicated multi-step data entry!
+REGISTER_FEATURE2_TITLE 📊 Effortless Tracking
+REGISTER_FEATURE3_TEXT For employers, powerful tools to simplify payroll management. Download the data you need. Make payroll a breeze.
+REGISTER_FEATURE3_TITLE 🔥 Empower Personnel
+REGISTER_FEATURE4_TEXT Our platform is user-friendly, mobile-responsive, and packed with the latest technology.
+REGISTER_FEATURE4_TITLE 🌟 Easy to Use
+REGISTER_HEADLINE 🚀 Supercharge Your Payroll Experience!
+REGISTER Register
+REGULAR_HOURS Regular Hours
+REGULAR Regular
+RENDER Render
+SAT Sat
+SAVE_AND_CLOSE Save & Close
+SAVE Save
+SCOPE Scope
+SEND_EMAIL Send Email
+SET_AS_DEFAULT Set as default.
+SETTINGS Settings
+SHORTDATE Short Date
+SHORT Short
+SHOW Show
+SITE_NAME PayCal
+SITES_LIST Sites List
+SITES Sites
+SKIP_PRIMARY_NAVIGATION Skip Primary Navigation
+SKIP_TO_CONTENT Skip to Content
+SKIP_TO_MAIN_CONTENT Skip to main content
+SMALLER Smaller
+DENSITY Density
+SPANISH Spanish
+START Start
+STATIC Static
+STATUS Status
+STICKY Fixed
+STYLE_PREFS Style Preferences
+STYLE Style
+SUN Sun
+TAB_KEY <kbd>TAB</kbd>
+TAGALOG Tagalog
+ORGANIZATION Team
+ORGANIZATIONS Takımlar
+ORGANIZATION_AUTH_LEVEL Authorization Level
+ORGANIZATION_INVITE Invite
+ORGANIZATION_PERMISSIONS Permissions
+ORGANIZATION_PHONE_PLACEHOLDER xxx-xxx-xxxx
+ORGANIZATION_ROLES Roles
+ORGANIZATION_UPDATE_USER Update User
+ORGANIZATION_USER_META_INFO User Meta Info
+ORGANIZATION_USERS Users
+TEXT Text
+THEME_PICKER Theme Picker
+THEME Theme
+THU Thu
+TILDE_KEY <kbd>` tilde</kbd>
+TOGGLE_CALENDAR_SCREENMODE Toggle Calendar Mode
+TOGGLE_CALENDAR_SCREENMODE_WITH Toggle Calendar mode with tilde.
+TOOLTIP_AUDIO Describes navigation or changes.
+TOOLTIP_CALENDAR_AUDIO_LABELS Date label type to announce via text-to-speech.
+TOOLTIP_CALENDAR_AUTOFOCUS Day to automatically select in Calendar view.
+TOOLTIP_CONFIRM_EMAIL Confirm your new email address.
+TOOLTIP_CONFIRM_PASSWORD Confirm your new password.
+TOOLTIP_CURRENT_EMAIL Current email address.
+TOOLTIP_CURRENT_PASSWORD Current password.
+TOOLTIP_LANGUAGE Preferred language.
+TOOLTIP_NAV_BAR Preferred scroll behaviour of navigation bar.
+TOOLTIP_NEW_EMAIL Provide the new email address you want to use.
+TOOLTIP_NEW_PASSWORD Provide the new password you want to use.
+TOOLTIP_PASSWORD_REQUIRED Your password is required to proceed.
+TOOLTIP_DENSITY Preferred spacing of the interface.
+TOOLTIP_TEXT Preferred text size of the interface.
+TOOLTIP_THEME Look & feel of the interface.
+TRAVEL_HOURS TRAVEL
+TRAVEL Travel
+TUE Tue
+TURKISH Turkish
+TXT TXT
+UPDATE Update
+UPDATE_USER Update User
+UPDATING_AUDIO_TO Updating audio to
+UPDATING_CALENDAR_AUDIO_LABELS_TO Updating Calendar audio labels to
+UPDATING_CALENDAR_AUTOFOCUS_TO Updating Calendar autofocus to
+INFO_UPDATED Bilgiler güncellendi
+UPDATING_LANGUAGE_TO Updating language to
+UPDATING_NAME Updating Name
+NAME_UPDATED İsim güncellendi
+UPDATING_NAV_BAR_TO Updating Navigation Bar to
+UPDATING_PAY_PERIOD Updating Pay Period
+UPDATING_PHONE Updating Phone
+UPDATING_PROVINCE Updating Province...
+PROVINCE_UPDATED İl güncellendi
+UPDATING_DENSITY_TO Updating density to
+UPDATING_TEXT_TO Updating text to
+UPDATING_THEME_TO Updating theme to
+TIMEZONE_UPDATED Saat dilimi güncellendi
+UPDATING_WORK Updating Work
+USER_AGENT User Agent
+USERS Users
+VOICE_PICKER Voice Picker
+VOICE Voice
+WAGE Wage
+WE_ARE_HIRING We are hiring. Send resumes to resumes@paycal.app
+WED Wed
+WINDOWS Windows
+WORK_DETAILS work
+WORK_FORM Work Form
+WORK_HOURS Work Hours
+WORK Work
+YEAR_SVG_LINE_GRAPH Year SVG Line Graph
+YEAR_TO_DATE_EARNINGS Year To Date Earnings
+YEAR_TO_DATE Year To Date
+YOUR_EMAIL Email
+YOUR_NAME Name
+SECONDARY İkincil
+ADD_NEW_ENTRY Yeni Giriş Ekle
+CALENDAR_HELP_LINK Takvim Yardımı
+EARNINGS_HELP_LINK Kazanç Yardımı
+MY_ORGANIZATIONS Takımlarım
+MEMBER_OF Üyesi
+NO_ORGANIZATIONS_MANAGED Henüz herhangi bir takımı yönetmiyorsunuz
+NO_MEMBER_ORGANIZATIONS Henüz herhangi bir takımın üyesi değilsiniz
+ORGANIZATION_NAME Takım Adı
+ORGANIZATION_INFO Takım Bilgileri
+ORGANIZATION_MEMBERS Takım Üyeleri
+ORGANIZATION_DETAILS_DESC Takım ayrıntılarını görüntüleyin ve yönetin
+CREATED Oluşturuldu
+ENTER_ORGANIZATION_NAME Takım adını girin
+SEARCH_USER Eklemek için kullanıcı arayın
+NO_MEMBERS Bu takımda üye yok
+ADD_MEMBER Üye Ekle
+CONFIRM_DELETE_ORGANIZATION Silmeyi Onayla
+YES_DELETE Evet, Sil
+PROMOTE Terfi Et
+DEMOTE Demir Yap
+REMOVE_MEMBER Üye Kaldır
+REMOVE Kaldır
+VIEW Görüntüle
+MANAGERS Yöneticiler
+MEMBERS Üyeler
+CLOSE Kapat
+COLLAPSE_SIDEBAR Kenar cubugunu daralt
+EXPAND_SIDEBAR Kenar cubugunu genislet
+SIDEBAR_COLLAPSED Kenar cubugu daraltildi
+SIDEBAR_EXPANDED Kenar cubugu genisletildi
+SIGN_OUT_CONFIRMATION_AND_CONTROLS Oturumu kapatma onayi ve denetimleri
+SIGN_OUT_DIALOG_DESCRIPTION Bu iletisim kutusu, hesabinızdan cikis yapmanizi onaylamanizi saglar. Oturumunuzu kapatabilir veya giris yapmis kalmak icin iptal edebilirsiniz.
+ORGANIZATION_HTML <em>T</em>eam
+ORGANIZATIONS_HTML <em>O</em>rganizations
+ORGANIZATION_SVG <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="8" cy="8" r="3.5"/><path d="M 8 14 c -2.33 0 -7 1.17 -7 3.5 V 22 h 14 v -4.5 c 0 -2.33 -4.67 -3.5 -7 -3.5 Z"/><circle cx="16" cy="7.5" r="3"/><path d="M 16 13.5 c -1.67 0 -5 0.83 -5 2.5 v 3.5 h 10 v -3.5 c 0 -1.67 -3.33 -2.5 -5 -2.5 Z" opacity="0.9"/></g></svg>
+CONTACT_REASON Topic
+CONTACT_REASON_GENERAL Genel soru
+CONTACT_REASON_BUG Hata raporu
+CONTACT_REASON_FEATURE Özellik isteği
+CONTACT_REASON_OTHER Diğer
+CONTACT_REASON_SELECT Lütfen seçin
+CONTACT_MESSAGE_LABEL İleti
+CONTACT_MESSAGE_PLACEHOLDER İletinizi buraya yazın...
+CONTACT_CHAR_COUNT {count}/6000
+CONTACT_CHAR_WARNING İleti sınırına yaklaşıyorsunuz
+CONTACT_CONTEXT_LABEL İsteğe bağlı teknik bağlam
+CONTACT_CONTEXT_BROWSER Tarayıcı ayrıntılarını dahil et
+CONTACT_CONTEXT_PAGE Sayfa bilgilerini dahil et
+CONTACT_CONTEXT_LANGUAGE Dili dahil et
+CONTACT_HELP_TITLE Write a useful message
+CONTACT_HELP_TIP_1 Özel olun: Tam olarak ne yapmaya çalıştığınızı ve neyin olduğunu açıklayın.
+CONTACT_HELP_TIP_2 Detayları ekleyin: Teknik bilgi paylaşmak için aşağıdaki opsiyonel bağlam seçeneklerimizi kontrol edin.
+CONTACT_HELP_TIP_3 İleti başına bir sorun: Birden fazla endişeniz varsa, ayrı iletiler gönderin.
+CONTACT_SLA_LABEL Response time
+CONTACT_SLA_TEXT Typically 24–48 hours
+CONTACT_SUCCESS_TITLE Message sent
+CONTACT_SUCCESS_NOTE Mesajınızı aldık ve kısa süre içinde sizinle iletişime geçeceğiz.
+CONTACT_SUCCESS_SENT_AT Gönderme zamanı
+CONTACT_REASON_ACCOUNT Hesap Sorunu
+CONTACT_REASON_BILLING Faturalama Sorusu
+CONTACT_SEND_ANOTHER Send another
+PLEASE_SELECT placeholder
+CONTACT_HELP_INTRO Help us resolve this faster.
+CONTACT_HELP_CONTEXT placeholder
+
+ORGANIZATIONS Organizations
+ORGANIZATIONS_HTML <em>O</em>rganizations
+ORGANIZATIONS_INTRO Organizations connect sites and member access while keeping work entries user-owned.
+ORGANIZATIONS_OPEN_FULL Open Full Org Controls
+ORGANIZATIONS_CREATE_ORG Create Organization
+ORGANIZATIONS_NAME Organization Name
+ORGANIZATIONS_CREATE_HELP After creating, manage invites, scopes, defaults, and ownership from Settings.
+ORGANIZATIONS_YOUR_ORGANIZATIONS Your Organizations
+ORGANIZATIONS_SELECT_PLACEHOLDER Select organization...
+ORGANIZATIONS_INVITE_DELEGATES Invite Members
+ORGANIZATIONS_INVITE_PLACEHOLDER member@example.com
+ORGANIZATIONS_SEND_INVITE Send Invite
+ORGANIZATIONS_SCOPE_WORK_READ Work Read
+ORGANIZATIONS_SCOPE_SITES_READ Sites Read
+ORGANIZATIONS_SCOPE_SITES_WRITE Sites Write
+ORGANIZATIONS_SCOPE_ORG_READ Org Read
+ORGANIZATIONS_SCOPE_ORG_WRITE Org Write
+ORGANIZATIONS_SCOPE_ACCESS_MANAGE Access Manage
+ORGANIZATIONS_PENDING_INVITES Pending Invites
+ORGANIZATIONS_DISCOVERY Discovery
+ORGANIZATIONS_RUN_DISCOVERY Run Discovery
+ORGANIZATIONS_DISCOVERY_HELP Find sites that can be linked to the selected organization.
+ORGANIZATIONS_LEAVE_SELECTED Leave Selected Organization
+ORGANIZATIONS_DEFAULTS Organization Defaults
+ORGANIZATIONS_SAVE_DEFAULTS Save Defaults
+ORGANIZATIONS_PAY_PERIOD_LENGTH Pay Period Length
+ORGANIZATIONS_DEFAULT_WAGE Default Wage
+ORGANIZATIONS_TIMEZONE Timezone
+ORGANIZATIONS_CURRENCY Currency
+ORGANIZATIONS_OWNERSHIP_TRANSFER Ownership Transfer
+ORGANIZATIONS_RELOAD_MEMBERS Reload Members
+ORGANIZATIONS_TRANSFER_TARGET_PLACEHOLDER Select member UUID...
+ORGANIZATIONS_TRANSFER_OWNERSHIP Transfer Ownership
+ORGANIZATIONS_AUDIT_TIMELINE Audit Timeline
+ORGANIZATIONS_RELOAD_TIMELINE Reload Timeline
+ORGANIZATIONS_LOADING Loading organizations...
+ORGANIZATIONS_NONE No organizations yet. Create your first organization to get started.
+ORGANIZATIONS_ROLE Role
+ORGANIZATIONS_SCOPES Scopes
+ORGANIZATIONS_MANAGE_IN_SETTINGS Manage in Settings
+ORGANIZATIONS_UNKNOWN Unknown
+ORGANIZATIONS_PENDING pending
+ORGANIZATIONS_REVOKE Revoke
+ORGANIZATIONS_NO_INVITES No invites for this organization.
+ORGANIZATIONS_SELECT_FIRST Select an organization first.
+ORGANIZATIONS_INVITE_REVOKED Invite revoked.
+ORGANIZATIONS_INVITE_REVOKE_FAILED Unable to revoke invite.
+ORGANIZATIONS_LINK_SITE Link Site
+ORGANIZATIONS_SITE_WITHOUT_ORG Site without org
+ORGANIZATIONS_SITE_LINKED Site linked to organization.
+ORGANIZATIONS_SITE_LINK_FAILED Unable to link site.
+ORGANIZATIONS_NO_DISCOVERY No discovery candidates found.
+ORGANIZATIONS_DISCOVERY_RUNNING Running discovery...
+ORGANIZATIONS_DISCOVERY_COMPLETE Organization discovery completed.
+ORGANIZATIONS_DISCOVERY_FAILED Unable to run organization discovery.
+ORGANIZATIONS_LOAD_INVITES_FAILED Unable to load invites.
+ORGANIZATIONS_LOAD_DEFAULTS_FAILED Unable to load organization defaults.
+ORGANIZATIONS_DEFAULTS_SAVED Organization defaults saved.
+ORGANIZATIONS_DEFAULTS_SAVE_FAILED Unable to save organization defaults.
+ORGANIZATIONS_LOAD_ORGS_FAILED Unable to load organizations right now.
+ORGANIZATIONS_LOAD_AUDIT_FAILED Unable to load audit timeline.
+ORGANIZATIONS_NO_AUDIT No audit events yet.
+ORGANIZATIONS_NAME_MIN Organization name must be at least 2 characters.
+ORGANIZATIONS_CREATED Organization created.
+ORGANIZATIONS_CREATE_FAILED Failed to create organization.
+ORGANIZATIONS_ENTER_INVITE_EMAIL Enter an invite email.
+ORGANIZATIONS_SELECT_SCOPE Select at least one scope.
+ORGANIZATIONS_INVITE_SENT Organization invite sent.
+ORGANIZATIONS_INVITE_SEND_FAILED Unable to send organization invite.
+ORGANIZATIONS_SELECT_TRANSFER_TARGET Select a transfer target first.
+ORGANIZATIONS_OWNERSHIP_TRANSFERRED Ownership transferred.
+ORGANIZATIONS_OWNERSHIP_TRANSFER_FAILED Unable to transfer ownership.
+ORGANIZATIONS_WITHDRAWN Organization relationship withdrawn.
+ORGANIZATIONS_WITHDRAW_FAILED Unable to leave organization.
+ORGANIZATIONS_AUDIT_EVENT event
+ORGANIZATIONS_AUDIT_ACTOR actor
+
+ORGANIZATIONS_REMOVE_CONFIRM_PREFIX Remove organization
+ORGANIZATIONS_REMOVE_CONFIRM_SUFFIX from your organizations list?
+ORGANIZATIONS_REMOVE_FAILED Unable to remove organization right now.
+ADMIN_DASHBOARD_PLATFORM_METRICS_TITLE Platform Metrikleri
+BREADCRUMB Ekmek kırıntısı
+BREADCRUMB Ekmek kırıntısı
+HELP_TOC_HOME Ana sayfa
+HELP_TOC_TRANSPARENCY_HUB Şeffaflık Merkezi
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_1 Rota düzeyinde WCAG taramaları, ihlaller için sıkı rota taramaları ve daha sıkı kontrast kontrolleri dahil olmak üzere ana sayfalarda gerçekleştirilir.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_2 Önemli nokta yapısının, etiketlerin ve kurtarma mesajlarının sessizce kaymaması için başlık ve form regresyonları kontrol edilir.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_3 Yeniden akış ve metin aralığı kapsamı, yatay taşmayı ve aralık hatalarını yakalamak için kompakt görüntü alanı genişliklerindeki çekirdek rotaları kontrol eder.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_4 Gezinme yolu ve kısayol regresyon testleri, içerik kırıntılarını, alternatif yolları, geri bildirim aktarımını, kısayol güvenliği davranışını ve klavye kısayolu politikası kapsamını doğrular.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_5 Paket düzeyindeki kontroller Oyun Yazarı, PHPUnit ve tarayıcı matrisi kapsamını birleştirerek erişilebilirlik iddialarının test destekli kalmasını sağlar.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_TEXT_1 Bu, kamuya açık erişilebilirlik bildirimlerimizin yalnızca niyetle değil, gerçek regresyon kapsamıyla da bağlantılı olduğu anlamına gelir.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_TITLE Neleri Aktif Olarak Doğruluyoruz
+TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TEXT_1 Erişilebilirlik denetimleri üç ayda bir gerçekleştirilir. Her denetim penceresi, sıkı otomatik rota kontrollerini, manuel klavye kontrollerini ve temel rotalarda manuel VoiceOver doğrulamasını içerir.
+TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TEXT_2 Her döngü, izlenen kusurlarla (bulunduğunda), önem derecesiyle ilgili etiketlerle, sahiplerle ve kalan risklerin kısa bir özetiyle sonuçlanır.
+TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TITLE Denetim Temposu
+TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TEXT_1 Erişilebilirlik tek seferlik bir temizleme değildir. Doğruluk, güvenlik ve güvenilirliğe nasıl önem veriyorsak, bunu da normal ürün kalitesinin bir parçası olarak ele alıyoruz.
+TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TEXT_2 Daha fazla rota denetlenip kapsandıkça, bu sayfayı gönderilen değişiklikler, açık çalışma ve doğrulama yaklaşımıyla güncellemeye devam ediyoruz, böylece genel olmaktan ziyade faydalı olmaya devam ediyor.
+TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TITLE Sürekli Uygulama
+TRANSPARENCY_ACCESSIBILITY_DECK Erişilebilirlik, PayCal'ı geliştirme şeklimizin bir parçasıdır. Bu sayfada standardımız, nelerin gönderildiği, nelerin hala açık olduğu ve engellerin nasıl bildirileceği açıklanmaktadır.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_ACKNOWLEDGE Aynı iş günü
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_DEFINITION Klavye veya ekran okuyucu kullanımında engelleyiciyi serbest bırakma veya temel görev hatası.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_ESCALATION 24 saat içinde çözümlenmezse Mühendislik Liderine iletin.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_FIX_TARGET 48 saat
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_OWNER Ön Uç Lideri
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_ACKNOWLEDGE 1 iş günü
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_DEFINITION Önemli akışlarda büyük kullanılabilirlik anlaşmazlıkları veya önemli ARIA sözleşmesi başarısızlığı.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_ESCALATION 7 iş günü sonunda çözümlenmezse Ön Uç Liderine iletin.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_FIX_TARGET 10 iş günü
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_OWNER Erişilebilirlik Sahibi
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_SEVERITY P1
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_ACKNOWLEDGE 3 iş günü
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_DEFINITION Yerelleştirilmiş sorun, çalışmaların sıkılaştırılması veya yönetişimin iyileştirilmesi.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_ESCALATION İki döngüden sonra ertelenmesi durumunda üç aylık denetimin kapatılması için işaret koyun.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_FIX_TARGET Sonraki planlı döngü
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_OWNER Triyajda atanan
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_SEVERITY P2
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_ACKNOWLEDGE onayla
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_CAPTION Erişilebilirlik kusuru SLA modeli: önem derecesi, onay penceresi, düzeltme hedefi, sahip ve yükseltme yolu
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_DEFINITION Tanım
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_ESCALATION_PATH İlerletme yolu
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_FIX_TARGET Düzeltme veya azaltma hedefi
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_OWNER Sahip
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_SEVERITY Şiddet
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TEXT_1 Doğrulanan her erişilebilirlik hatası, bir önem derecesi, sahip, WCAG kriteri ve oluşturma sırasındaki son tarih ile birlikte dosyalanır, böylece çalışma gayri resmi olmak yerine çalışır durumda kalır.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TITLE Erişilebilirlik Kusur Yanıtı Pencereleri
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_FACT_1 Değişikliği ilk önce bu sayfada yayınlamadan, doğrulanmış bir tarayıcı ve yardımcı teknoloji kombinasyonuna yönelik desteği kasıtlı olarak bırakmıyoruz.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_FACT_2 Satıcı, platform veya güvenlik kısıtlamaları nedeniyle doğrulanmış bir kombinasyonun desteklenmesi pratik olmazsa, en iyi çaba durumuna geçmeden önce en az üç aylık bir bildirimi hedefliyoruz.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_FACT_3 Herhangi bir kullanımdan kaldırma bildirimi, etkilenen kombinasyonu, neden değiştiğini, geçerlilik tarihini ve desteklenen en yakın alternatifi içermelidir.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_TEXT_1 Bildirilen bir engel, şu anda doğrudan doğruladığımız bir kombinasyonu etkiliyorsa sorun, bu destek beklentisine göre önceliklendirilir ve isteğe bağlı olarak ele alınmaz.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_TITLE Kullanımdan Kaldırma ve Değişiklik Politikası
+TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TEXT_1 Odaklanma güvenliği kuralları, kısayol işleyicilerinin ve komut dosyası içeren kullanıcı arayüzünün, birisi bir kipte yazarken veya çalışırken odağı çalmasını önler. Kısayollar, düzenlenebilir kontrollerin içinde etkinleşmez ve iletişim kutusu etkileşimleri, iletişim kutusu kapanana kadar odağın kapsamını korur.
+TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TEXT_2 Bu politika yanlışlıkla gezinmeyi azaltır, form girişini korur ve klavye davranışını Playwright ve Lightpanda'da çalıştırdığımız rota düzeyinde regresyon kapsamıyla tutarlı tutar.
+TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TITLE Odak Güvenliği
+TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TEXT_1 ARIA'yı anlamsal HTML'nin yerine geçecek bir araç olarak görmüyoruz. Yerel HTML'nin tek başına yeterli olmadığı durumlarda kontrol adlarını, ilişkileri, açıklamaları ve durum değişikliklerini netleştirmek için ARIA'yı kullanırız.
+TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TEXT_2 Bu, erişilebilirlik çalışmalarımızın yalnızca ARIA kullanımından daha kapsamlı olduğu anlamına gelir. Klavye davranışı, başlıklar, odak yönetimi, kontrast, yeniden akış ve hata düzeltme de aynı derecede önemlidir.
+TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TITLE ARIA'yı Nasıl Kullanıyoruz?
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_1 Çekirdek navigasyon, klavye kullanımını, bağlantıları atlamayı ve ana hedefler için belgelenmiş tek tuşlu kısayolları destekler.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_2 Ana uygulama yolları için tek tuşlu kısayollar (C, R, S, E, A, H, N, P, ?) belgelenmiştir.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_3 Kısayollar, giriş yazarken veya iletişim kutuları açıkken etkinleşmez.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_4 Yardım ve şeffaflık yolları, yararlı bağlam ekleyen içerik kırıntıları da dahil olmak üzere birden fazla gezinme yöntemi sağlar.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_5 Denetlenen rotalar, etkileşimin geri bildirime ihtiyaç duyduğu durumlarda anlamsal yer işaretleri, net başlıklar, doğrudan etiketler ve durum mesajları kullanır.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_6 Kontrast ve odak belirteci kontrolleri mevcut tema kataloğunda otomatikleştirilir ve yayınlanan matris, erişilebilirlik biriktirme iş akışımızda izlenir.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_7 Ayarlar, erişilebilir aralık ve yedek yığın desteğiyle disleksi dostu tipografi tercihini içerir.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_8 Erişilebilirlik raporları artık bu sayfadan başlayabilir ve temel ayrıntıların önceden doldurulmasıyla güvenli iletişim akışına devam edebilir.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_TEXT_1 Önce anlamsal HTML'yi tercih ediyoruz ve adların, ilişkilerin veya canlı durum değişikliklerinin daha net bir şekilde ortaya çıkmasına yardımcı olduğu ARIA'yı kullanıyoruz.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_TITLE Şimdi Ne Var
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_CLEAR_STRUCTURE_LABEL Net yapı
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_CLEAR_STRUCTURE_TEXT Başlıklar, yer işaretleri, etiketler ve durum mesajları sayfa davranışını anlaşılır hale getirmelidir.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_DIRECT_FEEDBACK_LABEL Doğrudan geri bildirim yolu
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_DIRECT_FEEDBACK_TEXT Kullanıcılar doğru kanalı aramadan engelleri bildirebilmelidir.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_KEYBOARD_LABEL Klavye işlemi
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_KEYBOARD_TEXT Temel görevlere fare gerektirmeden ulaşılabilir olmalıdır.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_READABLE_PRESENTATION_LABEL Okunabilir sunum
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_READABLE_PRESENTATION_TEXT Temel olarak denetlenen rotalar, daha büyük metin boyutları ve daha dar görüntü alanı genişlikleri altında bir arada tutulmalıdır.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_SAFE_NAVIGATION_LABEL Güvenli gezinme davranışı
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_SAFE_NAVIGATION_TEXT Verimlilik kısayolları hiçbir zaman aktif metin girişini veya açık diyalogları kesintiye uğratmamalıdır.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_TITLE Temel Erişilebilirlik Beklentileri
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_1 Temel rotalar arasında manuel ekran okuyucu geçişi henüz rota bazında VoiceOver notları ve kusur başına izleme oluşturmadı (WCAG-015, devam ediyor).
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_2 Yüksek geri bildirim akışlarındaki duyuru ifadeleri (açıklık ve özlülük), canlı bölge yapısı ayrımı tamamlandıktan sonra kalan odak noktasıdır.
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_3 Üçüncü taraf bağımlılığı incelemesi, harici kitaplıklar büyük güncellemeleri alırken bileşene özgü kısıtlamaları veya yükseltme kısıtlamalarını tanımlayabilir.
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_TITLE Bilinen Sınırlamalar
+TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_TEXT_1 Bu, WCAG yürütme birikimimizdeki aktif öğedir. Tasarım belirteçleri, şeffaflık meta verileri, canlı bölge sözleşmeleri, halkla ilişkiler yönetimi ve sade dilli kopyalama çalışmaları tamamlandı ve geriye kayma riskini azaltmak için regresyon paketlerinin kapsamına alındı.
+TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_TITLE Mevcut Açık Çalışma
+TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_WCAG026_TEXT Dış denetim hazırlık paketi — bir denetim kanıt paketinin bir iş günü içinde oluşturulabilmesi için ön paketleme sorun geçmişi, iyileştirme günlükleri, kanıt verileri ve politika belgeleri.
+TRANSPARENCY_ACCESSIBILITY_PAGE_TITLE Erişilebilirlik Şeffaflığı
+TRANSPARENCY_ACCESSIBILITY_QUICK_KEYS_TEXT_1 PayCal, ana varış noktaları için tek tuşlu kısayollar yayınlayarak, sık kullanılan rotaların tekrarlayan işaretçi hareketleri olmadan ulaşılabilir kalmasını sağlar. Geçerli belgelenen set; takvimi, organizasyonları, ayarları, kazançları, yöneticiyi, yardımı, notları, ödeme dönemlerini ve klavye kısayolu yardımını kapsar.
+TRANSPARENCY_ACCESSIBILITY_QUICK_KEYS_TEXT_2 Bu kısayollar yalnızca öngörülebilir, belgelenmiş ve göz ardı edilmesi güvenli olduklarında erişilebilirlik sözleşmesinin bir parçasıdır. Kullanıcılar, kısayol ezberlemeye ihtiyaç duymadan standart bağlantılar, düğmeler, atlama bağlantıları ve yer işaretleriyle gezinmeye devam edebilir.
+TRANSPARENCY_ACCESSIBILITY_QUICK_KEYS_TITLE Hızlı erişim tuşları
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_1 <strong>2026-03-23:</strong> Durum çubukları, doğrulama banner'ları, geri sayım zamanlayıcıları ve form/diyalog aralığı bileşenleri için 30'dan fazla tasarım jetonu uygulandı, paylaşılan stillerden tüm doğrudan renk bağlantısı kaldırıldı ve kontrast matrisi yeni jeton çiftlerini kapsayacak şekilde genişletildi (WCAG-020).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_10 <strong>2026-03-23:</strong> Temel genel rotalardaki katı kontrast engelleyiciler çözüldü ve bu kontroller WCAG rota paketinde tutuldu.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_11 <strong>2026-03-23:</strong> Erişilebilir yazı tipi yığını ve aralık davranışıyla ayarlara disleksi dostu tipografi tercihi kapsamı eklendi.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_12 <strong>2026-03-22:</strong> Kompakt görünüm genişliklerindeki ana sayfalar için rota düzeyinde yeniden akış ve metin aralığı kapsamı eklendi.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_13 <strong>2026-03-20:</strong> Korumalı, belgelenmiş uygulama tarzı kısayollar eklendi, böylece yazarken veya iletişim kutuları açıkken etkinleşmezler.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_2 <strong>2026-03-23:</strong> Erişilebilirlik, ölçümler, vergiler ve doğrulama yönetimi (WCAG-021) olmak üzere dört aktif şeffaflık alt sayfasının tümüne doğrulama meta verileri (son doğrulama tarihi, sonraki inceleme tarihi, kapsam ve bilinen sınırlamalar) eklendi.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_3 <strong>2026-03-23:</strong> Kimlik doğrulama, takvim ve kuruluş akışlarında 31 hata ve durum dizesi basitleştirildi: teknik jargon kaldırıldı (tek seferlik referanslar), boş alan mesajları işlem yapılabilir hale getirildi ve kuruluş hata mesajları tutarlı bir "X Yapılmadı. Lütfen tekrar deneyin." şeklinde standartlaştırıldı. desen (WCAG-024).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_4 <strong>2026-03-23:</strong> Klavye/ARIA sözleşmeleri ve yap/yapma örneklerini içeren diyalogları, sekmeleri, veri kılavuzlarını ve formları kapsayan bileşen düzeyinde erişilebilirlik standartları yayınlandı; PR şablonundan ve regresyon iş akışından (WCAG-025) çapraz bağlantılı.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_5 <strong>2026-03-23:</strong> Yinelenen canlı bölge çıktısını kaldırmak için iddialı hata duyuruları /auth/ ve /settings/ üzerindeki kibar ilerleme duyurularından ayrıldı (WCAG-017).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_6 <strong>2026-03-23:</strong> Onay pencereleri, düzeltme hedefleri, sahipler ve yükseltme yollarını içeren erişilebilirlik kusuru SLA tablosu yayınlandı (WCAG-019).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_7 <strong>2026-03-23:</strong> Resmi bir kalan çalışma kontrol listesi ve sahipleri, rota kapsamını ve kanıt gerekliliklerini içeren üç aylık bir erişilebilirlik denetim başucu kitabı yayınladı.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_8 <strong>2026-03-23:</strong> Bu sayfadan güvenli iletişim formuna erişilebilirlik geri bildirimi alma yolu eklendi.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_9 <strong>2026-03-23:</strong> Önemli genel rotalardaki birden fazla navigasyon yolu için içerik kırıntıları ve regresyon kapsamı eklendi.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_TITLE Son İyileştirmeler
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_BUTTON_LABEL Erişilebilirlik Geri Bildirim Formunu Aç
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_1 Hangi sayfayı veya özelliği kullanıyordunuz
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_2 Hangi cihazı, tarayıcıyı veya ekran okuyucuyu kullanıyordunuz
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_3 Hangi engelle karşılaştınız ve bu durum görevinizi tamamlamanıza nasıl engel oldu?
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_4 PayCal'ı kullanmanıza nasıl yardımcı olabiliriz?
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_FORM_HELP Gönder seçildiğinde, bu ayrıntıların önceden doldurulmuş olduğu güvenli iletişim formu açılır, böylece güvenli bir şekilde inceleyebilir ve gönderebilirsiniz.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_HELPFUL_DETAILS_LABEL Yararlı ayrıntılar şunları içerir:
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_LABEL_DETAILS Sorun ayrıntıları
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_LABEL_SUMMARY Sorun özeti
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_PLACEHOLDER_DETAILS Ne oldu, hangi yardımcı teknolojiyi kullandınız ve nasıl bir sonuç bekliyordunuz?
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_PLACEHOLDER_SUMMARY Örnek: Takvimde gezinme ekran okuyucu tarafından atlanıyor
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TEXT_1 Kullanımı zor veya erişilemez bir şey varsa aşağıdaki formu kullanın veya doğrudan iletişim sayfasına gidin. Form, özetinizin ve ayrıntılarınızın taşındığı güvenli iletişim akışını açar.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TEXT_2 Bu formdan başlamamayı tercih ederseniz <a href="/contact/">genel iletişim sayfasını</a> da kullanabilirsiniz.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TITLE Erişilebilirlik Sorunlarını Bildirin
+TRANSPARENCY_ACCESSIBILITY_ROUTE_METADATA_TITLE Rota Meta Verileri
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_1 <strong>WCAG 2.1</strong> (W3C Web İçeriği Erişilebilirlik Yönergeleri) — Web erişilebilirliğine yönelik uluslararası standart
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_2 <strong>Bölüm 508</strong> (ABD Federal yasası) — WCAG 2.0 Düzey AA ile uyumludur
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_3 <strong>EN 301 549</strong> (Avrupa standardı) — WCAG 2.1 Düzey AA ile uyumludur
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_4 <strong>AODA</strong> (Engelli Ontaryalılar için Erişilebilirlik Yasası) — Kanada'da WCAG uyumlu erişilebilirlik beklentilerine gönderme yapar
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_TEXT_1 Erişilebilirlik çalışmalarımız öncelikle WCAG 2.1 ve Düzey AA beklentilerini referans alan ilgili yasal standartlar tarafından yönlendirilmektedir.
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_TITLE Standartlar ve Yönergeler
+TRANSPARENCY_ACCESSIBILITY_STILL_IMPROVING_FACT_1 Dış denetim hazırlık paketi: bir iş günü içinde eksiksiz bir denetim paketinin oluşturulabilmesi için ön paketleme sorun geçmişi, iyileştirme günlükleri ve politika kanıtları (WCAG-026).
+TRANSPARENCY_ACCESSIBILITY_STILL_IMPROVING_TITLE Hala Geliştirdiğimiz Şeyler
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TEXT_1 Doğrudan doğruladığımız kombinasyonlara ve planlı denetimler sırasında incelediğimiz kombinasyonlara dayanarak destek beklentilerini yayınlıyoruz. Bu bir destek matrisidir; her tarayıcı ve yardımcı teknoloji eşleşmesinin aynı şekilde davrandığı iddiası değildir.
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TEXT_2 Kullanıcılar en iyi çaba kombinasyonuna ilişkin bir engel bildirdiğinde, bunu yine de araştırırız. Sorun temel anlambilimi, klavye davranışını veya paylaşılan bileşenleri etkiliyorsa, tam eşleştirme doğrulanan birincil kümede olmasa bile bunu bir ürün hatası olarak ele alırız.
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TITLE Yardımcı Teknoloji Desteği Politikası
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_AT Seslendirme
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_BROWSER Safari
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_EXPECTATION Birincil doğrulanmış kombinasyon
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_PLATFORM macOS
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_VERIFICATION Düzenli WCAG kontrollerinde ve üç aylık denetimlerde manuel rota incelemesi
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_AT Diğer AT veya sesli kontrol araçları
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_BROWSER Mevcut büyük tarayıcılar
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_EXPECTATION En iyi çabayı gösteren destek
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_PLATFORM Diğer kombinasyonlar
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_VERIFICATION Erişilebilirlik kusuru süreci aracılığıyla tetiklenen sorunlar
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_AT ÇENELER
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_BROWSER krom
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_EXPECTATION Desteklenen denetim kombinasyonu
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_PLATFORM Windows
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_VERIFICATION Üç aylık denetimler sırasında planlanmış manuel doğrulama
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_AT NVDA
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_BROWSER Firefox
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_EXPECTATION Desteklenen denetim kombinasyonu
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_PLATFORM Windows
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_VERIFICATION Üç aylık denetimler sırasında planlanmış manuel doğrulama
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_ASSISTIVE_TECH Yardımcı teknoloji
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_BROWSER Tarayıcı
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_PLATFORM platformu
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_SUPPORT_EXPECTATION Destek beklentisi
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_VERIFICATION_MODEL Doğrulama modeli
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_REVIEW_TEXT_1 Denetlenen PayCal etkileşimlerinin çoğu, birinci taraf kullanıcı arayüzü kodunu kullanır. Üçüncü taraf tarayıcı tarafı kodunun mevcut olduğu durumlarda, yükseltmelerin klavye, anlambilim veya CSP beklentilerini atlamaması için erişilebilirlik etkisini ayrı olarak izleriz.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_REVIEW_TEXT_2 Kullanıcı arayüzü, odak yönetimi, diyalog davranışı, yerleşik medya veya özel widget'lar ekleyen her türlü yeni tarayıcı tarafı bağımlılığı, benimsenmeden önce gözden geçirilmeli ve ana sürüm yükseltmelerinden önce yeniden incelenmelidir.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_REVIEW_TITLE Üçüncü Taraf Bağımlılığı Erişilebilirlik İncelemesi
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_PDFLIB_NOTES Widget olmayan dışa aktarma kitaplığı. Klavye kullanıcı arayüzü eklemez ancak oluşturulan çıktı yine de birinci taraf etiketlemeye ve içerik kalitesine bağlıdır.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_PDFLIB_STATUS Onaylandı
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_PDFLIB_USAGE İstemci tarafı kazançları PDF'ye dışa aktarma
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_TWEETNACL_NOTES Görsel olmayan yardımcı program kitaplığı. Erişilebilirlik etkisi dolaylıdır ve birinci taraf akışlarının duyarlı ve istikrarlı tutulmasıyla sınırlıdır.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_TWEETNACL_STATUS Onaylı
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_TWEETNACL_USAGE İstemci tarafı şifreleme yardımcıları
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_APPROVED Onaylandı
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_APPROVED_DESC Erişilebilirlik etkisi anlaşılıp belgelenerek mevcut kullanıma izin verilmiştir.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_BLOCKED Engellendi
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_BLOCKED_DESC erişilebilirlik gereksinimleri karşılanana kadar yeni kullanıcı arayüzü kullanımına izin verilmez.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_CONDITIONAL Koşullu
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_CONDITIONAL_DESC İnceleme, değiştirme veya sınırlama çalışmaları açık kaldığı sürece yalnızca sınırlı kapsamda izin verilir.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_DEPENDENCY Bağımlılık
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_NOTES Notlar
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_STATUS Erişilebilirlik durumu
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_USAGE Kullanım
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_LAST_VERIFIED_LABEL Son doğrulandı
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_NEXT_REVIEW_LABEL Sonraki inceleme zamanı gelecek
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_ROUTE_LABEL Rota
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_SCOPE_LABEL Doğrulama kapsamı
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_SCOPE_VALUE sıkı WCAG rota taramaları, yeniden akış/metin aralığı kontrolleri, klavye duman kontrolleri ve manuel VoiceOver rota incelemesi.
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_TEXT_1 Bu meta veriler, üç aylık denetim kapanışının bir parçası olarak güncellenir; böylece kullanıcılar nelerin doğrulandığını, nelerin hala sınırları olduğunu ve bir sonraki resmi incelemenin ne zaman yapılacağını görebilir.
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
+TRANSPARENCY_ACCESSIBILITY_WHY_PAGE_EXISTS_TEXT_1 PayCal, insanların sıklıkla tekrarladığı zaman, ödeme ve hesap görevleri için kullanılır. Bir sayfanın okunması zor olduğunda, gezinmesi zor olduğunda veya fare olmadan çalıştırılması zor olduğunda, gerçek çalışma yavaşlar.
+TRANSPARENCY_ACCESSIBILITY_WHY_PAGE_EXISTS_TEXT_2 Kullanıcıların kullandığımız standardı, halihazırda sunduğumuz erişilebilirlik değişikliklerini ve halen geliştirmekte olduğumuz alanları görebilmesi için bu sayfayı yayınlıyoruz.
+TRANSPARENCY_ACCESSIBILITY_WHY_PAGE_EXISTS_TITLE Bu Sayfa Neden Var?
+TRANSPARENCY_ACCESSIBILITY_WORKING_STANDARD_TEXT_1 Ürün erişilebilirliği için çalışma standardımız olarak WCAG 2.1 Düzey AA'yı kullanıyoruz. Kullanılabilirliği açıkça iyileştirdikleri takdirde seçilen AAA fikirlerini de benimseriz, ancak AAA uyumluluğunu iddia etmeyiz.
+TRANSPARENCY_ACCESSIBILITY_WORKING_STANDARD_TEXT_2 Her rotanın her zaman mükemmel olduğunu iddia etmiyoruz. Doğrulanmış engelleri düzeltmeyi, değişiklikleri belgelemeyi ve erişilebilirlik çalışmalarını normal mühendislik iş akışında sürdürmeyi taahhüt ediyoruz.
+TRANSPARENCY_ACCESSIBILITY_WORKING_STANDARD_TITLE Çalışma Standardımız
+TRANSPARENCY_DEPENDENCY_CI_CICD_GATE_TEXT_1 PayCal, kalite kontrollerini iş akışlarına ayırır, böylece arızalar açık ve izlenebilir olur:
+TRANSPARENCY_DEPENDENCY_CI_CICD_GATE_TEXT_2 Hijyen iş akışlarını serbest bırakma, başarısız kapıları engelleyici olarak ele alır ve düzeltmelerden sonra yeniden çalıştırılmasını gerektirir.
+TRANSPARENCY_DEPENDENCY_CI_CICD_GATE_TITLE CI/CD Geçidi Modeli
+TRANSPARENCY_DEPENDENCY_CI_DECK Bu sayfada PayCal'ın JavaScript bağımlılıklarını nasıl belirleyici tuttuğu ve CI geçitlerinin yayınlanmadan önce nasıl uygulandığı açıklanmaktadır.
+TRANSPARENCY_DEPENDENCY_CI_HOW_TO_VERIFY_TITLE Nasıl Doğrulanır?
+TRANSPARENCY_DEPENDENCY_CI_KNOWN_LIMITATIONS_ITEM_1 Genel şeffaflık sayfaları, yayın döngülerindeki iş akışı ve paket değişiklikleriyle manuel olarak senkronize edilir.
+TRANSPARENCY_DEPENDENCY_CI_KNOWN_LIMITATIONS_ITEM_2 CI işlem hattı davranışı birden fazla sayfada belgelenmiştir ve güncellemeler tutarlı bir şekilde uygulanmazsa sürüklenebilir.
+TRANSPARENCY_DEPENDENCY_CI_KNOWN_LIMITATIONS_TITLE Bilinen Sınırlamalar
+TRANSPARENCY_DEPENDENCY_CI_LAST_VERIFIED_LABEL Son doğrulanma tarihi:
+TRANSPARENCY_DEPENDENCY_CI_NEXT_REVIEW_LABEL Bir sonraki incelemenin zamanı:
+TRANSPARENCY_DEPENDENCY_CI_NPM_POLICY_TEXT_1 PayCal, JavaScript araçları ve tarayıcı otomasyon kontrolleri için dosya öncelikli bağımlılık politikasını kullanır.
+TRANSPARENCY_DEPENDENCY_CI_NPM_POLICY_TITLE npm Bağımlılık Politikası
+TRANSPARENCY_DEPENDENCY_CI_PAGE_TITLE Bağımlılık ve CI/CD Yönetişimi
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_ITEM_1 Her CI işini sahip, tetikleyici, komut ve engelleme durumuna eşleyen bir kanonik geçit matrisi yayınlayın.
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_ITEM_2 Doğrudan npm paketleri, gerekçe ve güncelleme temposunu içeren üç aylık bir bağımlılık yönetimi anlık görüntüsü ekleyin.
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_ITEM_3 NPM yönetişim belgelerinin iş akışı ve kilit dosyası politikasıyla uyumlu kaldığını doğrulamak için bir sürüm kontrol listesi öğesi ekleyin.
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_TITLE Planlanan Dokümantasyon İyileştirmeleri
+TRANSPARENCY_DEPENDENCY_CI_ROUTE_LABEL Rota:
+TRANSPARENCY_DEPENDENCY_CI_SCOPE_LABEL Doğrulama kapsamı:
+TRANSPARENCY_DEPENDENCY_CI_SCOPE_VALUE npm paket politikası, kilit dosyası davranışı, GitHub Eylemleri iş akışları ve sürüm kapısı belgeleri.
+TRANSPARENCY_DEPENDENCY_CI_TABLE_ARIA npm yönetişim komut haritası
+TRANSPARENCY_DEPENDENCY_CI_TABLE_COMMAND Komut
+TRANSPARENCY_DEPENDENCY_CI_TABLE_CONTROL Birincil Kontrol
+TRANSPARENCY_DEPENDENCY_CI_TABLE_PURPOSE Amaç
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW1_CONTROL ESLint kuralları + JS havuz politikası kontrolleri
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW1_PURPOSE JavaScript tüysüzlüğü ve havuz kontrolleri
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW2_CONTROL Tarayıcı düzeyinde rota davranışı ve regresyon doğrulaması
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW2_PURPOSE Oyun yazarı duman kontrolleri
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW3_CONTROL WCAG, yeniden akış, kontrast ve ARIA test paketleri
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW3_PURPOSE Erişilebilirlik rotası ve politika kontrolleri
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW4_CONTROL Tema düzeyinde kontrast uygunluğu doğrulaması
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW4_PURPOSE Kontrast matrisi üretimi
+TRANSPARENCY_DEPENDENCY_CI_USAGE_TITLE Npm Ne İçin Kullanılır?
+TRANSPARENCY_DEPENDENCY_CI_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
+TRANSPARENCY_EMAIL_DECK Bu sayfada PayCal'ın hangi e-postaları gönderdiği, her mesajın nasıl bir araya getirilip iletildiği ve güvenilirliği nasıl doğruladığımız açıklanmaktadır.
+TRANSPARENCY_EMAIL_DELIVERY_PIPELINE_TITLE Teslimat Boru Hattı
+TRANSPARENCY_EMAIL_DELIVERY_TEXT_1 PayCal iki katmanlı bir e-posta yığını kullanır:
+TRANSPARENCY_EMAIL_DELIVERY_TEXT_3 Doğrulama bağlantıları, istek ana bilgisayar çözünürlüğü kullanılarak ortamda yerelleştirilir, böylece bağlantılar geçerli dağıtım bağlamıyla aynı hizada kalır.
+TRANSPARENCY_EMAIL_FLOW_ACCOUNT_RECOVERY Hesap kurtarma işlemi
+TRANSPARENCY_EMAIL_FLOW_ACCOUNT_RECOVERY_PURPOSE Hesap kurtarma doğrulama kodunu verin
+TRANSPARENCY_EMAIL_FLOW_CONTACT_RELAY Destek rölesiyle iletişime geçin
+TRANSPARENCY_EMAIL_FLOW_CONTACT_RELAY_PURPOSE Destek isteklerini normalleştirilmiş içeriğe sahip destek gelen kutusuna iletin
+TRANSPARENCY_EMAIL_FLOW_EMAIL_CHANGE E-posta değişikliği (eski/yeni gelen kutusu)
+TRANSPARENCY_EMAIL_FLOW_EMAIL_CHANGE_PURPOSE Hesap e-postasının değiştirilmesi için ikili gelen kutusu onayı
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_EMAIL_PURPOSE Hassas kurtarma eylemlerinden önce hedefin sahipliğini kanıtlayın
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_EMAIL_VERIFICATION Kurtarma e-postası doğrulaması
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_KEY_DELIVERY Kurtarma Anahtarı Teslimatı
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_KEY_PURPOSE Hesap kurtarma materyali sağlayın
+TRANSPARENCY_EMAIL_FLOW_VERIFICATION E-posta doğrulaması
+TRANSPARENCY_EMAIL_FLOW_VERIFICATION_PURPOSE Hesabın yaşam döngüsü etkinlikleri sırasında sahipliği doğrulayın
+TRANSPARENCY_EMAIL_LAST_UPDATED_LABEL Son güncelleme:
+TRANSPARENCY_EMAIL_PAGE_TITLE E-posta Şeffaflığı
+TRANSPARENCY_EMAIL_PRINCIPLES_FACT_TEMPLATE_PATHS Akışa özel şablonlar doğrulama, kurtarma, hesap değiştirme ve destek ekibine başvurma yolları için kullanılır.
+TRANSPARENCY_EMAIL_PRINCIPLES_ITEM_2 Denetleyiciler arasında farklı mesaj mantıklarını önlemek için e-posta kompozisyonu merkezileştirilmiştir.
+TRANSPARENCY_EMAIL_PRINCIPLES_ITEM_3 Teslimat başarısızlıkları açık sonuçlar döndürür, böylece çağrı akışları güvenli bir şekilde başarısız olabilir ve kullanıcıları net bir şekilde bilgilendirebilir.
+TRANSPARENCY_EMAIL_PRINCIPLES_TEXT_1 PayCal, işlemsel e-postayı pazarlama altyapısı olarak değil, hesap güvenliği ve hesap sürekliliğinin bir parçası olarak ele alır.
+TRANSPARENCY_EMAIL_PRINCIPLES_TITLE E-posta İlkeleri
+TRANSPARENCY_EMAIL_RELIABILITY_CHECKS_TITLE Doğrulama ve Güvenilirlik Kontrolleri
+TRANSPARENCY_EMAIL_SCOPE_BOUNDARY_TITLE Kapsam Sınırı
+TRANSPARENCY_EMAIL_SCOPE_TEXT_1 Bu sayfa, PayCal ürün işlemlerine ilişkin işlem ve destek e-posta davranışını belgelemektedir. PayCal bu kod tabanında bir pazarlama e-postası hunisi kullanmadığı için pazarlama otomasyonunu belgelemez.
+TRANSPARENCY_EMAIL_SUPPORT_TELEMETRY_TITLE E-posta Telemetrisini ve Denetlenebilirliği Destekleyin
+TRANSPARENCY_EMAIL_TABLE_ARIA İşlemsel e-posta kataloğu
+TRANSPARENCY_EMAIL_TABLE_FLOW Akış
+TRANSPARENCY_EMAIL_TABLE_PURPOSE Amaç
+TRANSPARENCY_EMAIL_TABLE_TEMPLATE_FAMILY Şablon Ailesi
+TRANSPARENCY_EMAIL_TELEMETRY_ITEM_3 Telemetri depolaması bozulursa destek formu UX'ini korumak için günlük yazma işlemi engellemez.
+TRANSPARENCY_EMAIL_TELEMETRY_TEXT_1 İletişim desteği gönderimleri, en iyi çaba telemetrisini içerir, böylece teslimat durumu, kullanıcı gönderimlerini engellemeden izlenebilmektedir.
+TRANSPARENCY_EMAIL_WHAT_WE_SEND_TITLE Ne Gönderiyoruz
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_CONTROL_CLOSURE Denetim kontrolünün kapatılması
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_OBSERVABILITY Gözlemlenebilirlik ve düzen
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_PRODUCT_MODEL Ürün modeli ve kullanıcı arayüzü çerçevesi
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_SECURITY_CONTROLS Güvenlik kontrolleri
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_SECURITY_GOVERNANCE Güvenlik denetimi yönetimi
+TRANSPARENCY_FRAMEWORK_BACKEND_DECK Bu defter, kullanıcıların teknik kontrollerin zaman içinde nasıl geliştiğini izleyebilmeleri için önemli arka uç ve çerçeve düzeyindeki değişiklikleri özetler.
+TRANSPARENCY_FRAMEWORK_BACKEND_EVIDENCE_TITLE Uygulama Kanıtları Nerede İncelenmeli?
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_1 Önce sınırlar yazılır: PHPStan Düzey 9'daki statik analiz, yerel ve sürüm iş akışlarında uygulanır.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_2 Hassas mutasyonlar açık kontroller gerektirir: yetenek belirteçleri, rol kontrolleri ve sınırlı hız sınırı pencereleri.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_3 Güvenlik değişiklikleri, aynı yayın döngüsünde testler ve şeffaflık güncellemeleriyle birlikte gönderilmelidir.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_4 Operasyonel sınırlar ve telemetri sınırları, tavsiye niteliğindeki belgeler olarak değil, uygulanabilir politika olarak ele alınır.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_TITLE Arka Uç Yönetişim İlkeleri
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1032_WHAT_CHANGED Platform ölçüm altyapısı, genel ölçüm şeffaflık yolu ve yeniden kullanılabilir, kimliği doğrulanmış/genel düzen sistemi eklendi.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1037_WHAT_CHANGED Ekipler Kuruluşlara taşındı, diyalog altyapısı normalleştirildi ve rol tabanlı tasarım belirteci mimarisi tanıtıldı.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1041_WHAT_CHANGED Tamamlanan korelasyon yönetimi, telemetri birleştirme kontrolleri, ayrıcalıklı rol mutasyonunu güçlendirme ve yaşam döngüsü sıfırlama kapatma.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1042_WHAT_CHANGED CSP'nin tek seferlik/katı dinamik uygulaması, yetenek belirteçleri, çalışma zamanı bütünlüğü izleme, kimlik bilgisi köprüsünün kaldırılması ve Guardian güçlendirmesi tanıtıldı.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1043_WHAT_CHANGED Genişletilmiş güvenlik testi külliyatı, nihai denetim kontrol anlatımları ve senkronize yayın/şeffaflık meta verileri.
+TRANSPARENCY_FRAMEWORK_BACKEND_PAGE_TITLE Çerçeve ve Arka Uç Değişiklik Defteri
+TRANSPARENCY_FRAMEWORK_BACKEND_RECENT_MILESTONES_TITLE Son Arka Uç ve Çerçeve Kilometre Taşları
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_AREA Alan
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_ARIA Çerçeve ve arka uç kilometre taşları
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_RELEASE Sürüm
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_WHAT_CHANGED Ne değişti
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_LAST_VERIFIED_LABEL Son doğrulanma tarihi:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_NEXT_REVIEW_LABEL Bir sonraki incelemenin zamanı:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_PRIMARY_REFS_LABEL Birincil referanslar:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_ROUTE_LABEL Rota:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
+TRANSPARENCY_HUB_ACCESSIBILITY_READ_MORE Erişilebilirlik standardımızı, son çalışmalarımızı ve geri bildirim yolumuzu okuyun
+TRANSPARENCY_HUB_ACCESSIBILITY_WCAG_TITLE Erişilebilirlik ve WCAG Uyumluluğu
+TRANSPARENCY_HUB_DECK Kullanıcıların yalnızca güven beyanlarını değil, kararları da doğrulayabilmeleri için PayCal'ın nasıl çalıştığını yayınlıyoruz.
+TRANSPARENCY_HUB_DEPENDENCY_CI_READ_MORE Bağımlılık ve CI/CD yönetişim politikasını okuyun
+TRANSPARENCY_HUB_DEPENDENCY_CI_TITLE Bağımlılık ve CI/CD Yönetişimi
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_TITLE Kazanç Yükü Testi
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_READ_MORE Devamını oku
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_TITLE E-posta Mimarisi
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_READ_MORE Çerçeve ve arka uç değişiklik geçmişini okuyun
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TITLE Çerçeve ve Arka Uç Değişiklik Defteri
+TRANSPARENCY_HUB_METRICS_FACT_COLLECTION_SCOPE Koleksiyon kapsamı yalnızca topludur ve kesin sınırlarladır ve anahtarlarda kişisel tanımlayıcılar yoktur.
+TRANSPARENCY_HUB_METRICS_FACT_RETENTION Saklama, tanımlanmış bir yaşam döngüsünü takip eder: ham veriler, toplamalar ve otomatik temizleme.
+TRANSPARENCY_HUB_METRICS_FACT_TELEMETRY_KEYS İddiaların doğrulanabilmesi için telemetri anahtarları ve örnekleri yayınlanmaktadır.
+TRANSPARENCY_HUB_METRICS_PRIVACY_TITLE Platform Metrikleri ve Gizlilik
+TRANSPARENCY_HUB_METRICS_READ_MORE Devamını oku
+TRANSPARENCY_HUB_METRICS_TEXT_1 Ölçümler sayfası, güvenilirlik ve kapasite planlaması için toplanan operasyonel telemetriyi açıklar.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_READ_MORE Ağ özelliklerini ve güvenlik başlığı politikasını okuyun
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_TEXT_1 Bu makalede, tarayıcı ve ağ davranışını güvence altına almak için kullanılan aktarım protokolleri ve yanıt başlığı denetimleri yayınlanmaktadır.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_TITLE Ağ Yetenekleri
+TRANSPARENCY_HUB_PAGE_TITLE Şeffaflık Merkezi
+TRANSPARENCY_HUB_PANELS_ARIA Şeffaflık detay panelleri
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_STRIPE_SUPPORT_TEXT Abonelik faturalandırması Stripe tarafından işlenir. Stripe desteği support.stripe.com adresinde mevcuttur.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_1 PayCal denetlenebilir işlemler üzerine kurulmuştur: formüller belgelenmiştir, telemetri sınırları açıktır ve saklama varsayılan olarak sınırlıdır.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_2 İlkemiz basittir: Bir sistem maaş bordrosunu veya mahremiyeti etkiliyorsa, kullanıcılar bu sistemin nasıl çalıştığını ve nasıl yönetildiğini anlayabilmelidir.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_3 Faturalandırma ve profil yönetimi akışları da dahil olmak üzere en son ürün şekillendirme güncellemeleri, çerçeve/arka uç defterimizde ve test yönetimi sayfalarımızda takip edilir.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TITLE Platform Felsefesine Genel Bakış
+TRANSPARENCY_HUB_PRODUCT_BILLING_READ_MORE Ürüne yönelik platform değişikliklerini inceleyin
+TRANSPARENCY_HUB_PRODUCT_BILLING_TITLE Ürün Deneyimi ve Faturalandırma Değişiklikleri
+TRANSPARENCY_HUB_SECURITY_AUDIT_FACT_COVERAGE İş akışı kapsamı, çalışma zamanı yaşam döngüsü kontrollerini, telemetri yalıtımını, korelasyon yönetimini ve ayrıcalıklı rol sağlamlaştırmayı içerir.
+TRANSPARENCY_HUB_SECURITY_AUDIT_FACT_STATUS Mevcut döngü durumu, doğrulama tarihi ve inceleme temposu ile birlikte yayınlanır.
+TRANSPARENCY_HUB_SECURITY_AUDIT_READ_MORE Güvenlik denetimi durumumuzu ve kanıt özetimizi okuyun
+TRANSPARENCY_HUB_SECURITY_AUDIT_TEXT_1 Bu sayfada mevcut denetim durumu, kapalı kapsam, kanıt referansları ve güvenlik duruşunu koruyan sürüm engelleyici taahhütleri yayınlanır.
+TRANSPARENCY_HUB_SECURITY_AUDIT_TITLE Güvenlik Denetim Durumu
+TRANSPARENCY_HUB_SECURITY_AUDIT_VALIDATION_SNAPSHOT_FACT Doğrulama anlık görüntüsü Playwright, JS, PHPStan Seviye 9 ve arka uç test sonuçlarını içerir.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_READ_MORE Devamını oku
+TRANSPARENCY_HUB_SUPERHEROES_MAP_TITLE Süper Kahramanlar Sistem Haritası
+TRANSPARENCY_HUB_TAX_METHODOLOGY_READ_MORE Devamını oku
+TRANSPARENCY_HUB_TAX_METHODOLOGY_TITLE Vergi Metodolojisi
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_READ_MORE Test yönetimi ve sürüm doğrulama politikamızı okuyun
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_TITLE Test ve Doğrulama Yönetişimi
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_READ_MORE Devamını oku
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_TITLE Doğrulama ve Yönetişim
+TRANSPARENCY_LOAD_TESTING_BENCHMARK_METHOD_TITLE Karşılaştırma Yöntemi
+TRANSPARENCY_LOAD_TESTING_DECK /kazanç/ için istekli görüntü oluşturma ile yavaş bölüm yüklemeyi karşılaştıran 10 çalıştırmalı A/B karşılaştırması.
+TRANSPARENCY_LOAD_TESTING_EXECUTIVE_SUMMARY_TITLE Yönetici Özeti
+TRANSPARENCY_LOAD_TESTING_INTERPRETATION_TITLE Yorumlama
+TRANSPARENCY_LOAD_TESTING_PAGE_TITLE Kazanç Yükü Testi
+TRANSPARENCY_LOAD_TESTING_RESULTS_REAL_TITLE Sonuçlar: Gerçek Kullanıcı Veri Kümesi (10 Çalıştırma)
+TRANSPARENCY_LOAD_TESTING_RESULTS_SYNTHETIC_TITLE Sonuçlar: Sentetik 2025/2026 Veri Seti (10 Çalıştırma)
+TRANSPARENCY_LOAD_TESTING_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
+TRANSPARENCY_METRICS_COMMITMENT_TEXT_1 Kullanıcılar bir hizmetin tam olarak hangi telemetriyi topladığını görebilmelidir. Bu sayfada platform sağlığını izlemek için kullanılan her bir ölçüm belgelenmektedir.
+TRANSPARENCY_METRICS_COMMITMENT_TEXT_2 Bu sayfadaki tüm telemetri yalnızca topludur. Kişisel tanımlayıcıları telemetri anahtarlarında saklamayız.
+TRANSPARENCY_METRICS_COMMITMENT_TITLE Taahhüdümüz
+TRANSPARENCY_METRICS_DECK Bu sayfada PayCal'ın hangi telemetri topladığını, neden topladığını ve ne zaman silindiğini gösterir.
+TRANSPARENCY_METRICS_KNOWN_LIMITATIONS_TITLE Bilinen sınırlamalar
+TRANSPARENCY_METRICS_METADATA_UPDATED_NOTE Bu meta veriler, üç aylık denetim kapanışının bir parçası olarak güncellenir.
+TRANSPARENCY_METRICS_NO Hayır
+TRANSPARENCY_METRICS_PAGE_TITLE Platform Metrikleri Şeffaflığı
+TRANSPARENCY_METRICS_ROUTE_METADATA_TITLE Meta verileri yönlendir
+TRANSPARENCY_METRICS_TABLE_CATEGORY Metrik Kategorisi
+TRANSPARENCY_METRICS_TABLE_PERSONAL_DATA Kişisel Veriler?
+TRANSPARENCY_METRICS_TABLE_PURPOSE Amaç
+TRANSPARENCY_METRICS_TABLE_RETENTION Saklama
+TRANSPARENCY_METRICS_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
+TRANSPARENCY_METRICS_YES Evet
+TRANSPARENCY_NETWORK_BROWSER_HEADERS_TITLE Tarayıcı Güvenlik Başlığı Taban Çizgisi
+TRANSPARENCY_NETWORK_CAPABILITIES_DECK PayCal, kullanıcıların ağ ve tarayıcı güvenlik durumunu doğrudan doğrulayabilmeleri için protokol davranışını ve yanıt başlığı kontrollerini yayınlar.
+TRANSPARENCY_NETWORK_CAPABILITIES_PAGE_TITLE Ağ Yetenekleri
+TRANSPARENCY_NETWORK_EXECUTIVE_SUMMARY_TITLE Yönetici Özeti
+TRANSPARENCY_NETWORK_HEADERS_TABLE_ARIA Güvenlik Başlıkları Tablosu
+TRANSPARENCY_NETWORK_HEADERS_TABLE_HEADER Başlık
+TRANSPARENCY_NETWORK_HEADERS_TABLE_SECURITY_EFFECT Güvenlik Etkisi
+TRANSPARENCY_NETWORK_PROTOCOL_ROUTING_TITLE Protokol ve Yönlendirme Davranışı
+TRANSPARENCY_NETWORK_QUIC_WORKLOADS_TITLE QUIC ve Çoklu İstek İş Yükleri
+TRANSPARENCY_NETWORK_SCOPE_NOTES_TITLE Kapsam ve Yorum Notları
+TRANSPARENCY_NETWORK_TABLE_CONTROL Kontrol
+TRANSPARENCY_NETWORK_TABLE_OBSERVED_VALUE Gözlemlenen Değer
+TRANSPARENCY_NETWORK_TABLE_PURPOSE Amaç
+TRANSPARENCY_NETWORK_TRANSPORT_CONTROLS_TITLE Taşıma Güvenliği Kontrolleri
+TRANSPARENCY_NETWORK_TRANSPORT_TABLE_ARIA Aktarım Protokolü Tablosu
+TRANSPARENCY_NETWORK_USE_CASE_ARIA Ağ Operasyonları Kullanım Örneği
+TRANSPARENCY_NETWORK_USE_CASE_TITLE Kullanım Örneği: Aktarım ve Başlık Regresyonlarını Tanılama
+TRANSPARENCY_NETWORK_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
+TRANSPARENCY_SECURITY_AUDIT_DECK PayCal, kod, testler ve sürüm yönetiminde uygulanan mimariye göre kontrol önlemleriyle 2026-03-24 itibarıyla PASS statüsünde kalıyor.
+TRANSPARENCY_SECURITY_AUDIT_EVIDENCE_SOURCES_TITLE Kanıt kaynakları
+TRANSPARENCY_SECURITY_AUDIT_LAST_VERIFIED_LABEL Son doğrulanma tarihi:
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_COMMITMENTS_TITLE Bakım Taahhütleri
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_ITEM_3 Sürüm adayları üzerinde tam arka uç test paketi ve JS güvenlik kontrolleri.
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_TEXT_1 PASS durumunu korumak için aşağıdaki serbest bırakma engelleyicileri kalır:
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_TEXT_2 Herhangi bir takvim yaşam döngüsü, kripto durumu veya DOM oluşturma değişikliği, yayınlanmadan önce ilgili regresyon güncellemelerini içermelidir.
+TRANSPARENCY_SECURITY_AUDIT_NEXT_REVIEW_LABEL Bir sonraki incelemenin zamanı:
+TRANSPARENCY_SECURITY_AUDIT_PAGE_TITLE Güvenlik Denetim Durumu
+TRANSPARENCY_SECURITY_AUDIT_ROUTE_LABEL Rota:
+TRANSPARENCY_SECURITY_AUDIT_ROUTE_METADATA_TITLE Meta verileri yönlendir
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_1 Bellek içi kripto durumu, gezinme ve yaşam döngüsü sınırlarında sıfırlanır.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_2 Gizli sekmenin gecikmeli sona ermesi artık kilitsiz durum sıfırlama kanıtını içeriyor.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_3 DOM duyarlılığı temizleme, durum sıfırlamadan önce çalışma zamanı veri yükü izlerini temizler.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_4 Deterministik yeniden kilit açma ve kurtarma davranışı regresyon testine tabi tutulur.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_SUMMARY_TITLE Çalışma Zamanı Yaşam Döngüsü Kapanış Özeti
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_CLOSED_TITLE PASS Döngülerinde Kapanan Kapsam 1.042-1.043
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_A İş Akışı A: Aracı tarafından değerlendirilen, reddedilmeye karşı korumalı zarflar aracılığıyla merkezileştirilmiş korelasyon yönetimi.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_B İş Akışı B: Akış kapsamlı belirteçler ve akışlar arası birleştirme reddiyle uygulanan telemetri sorgu yönetimi.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_C İş Akışı C: Tekil süper yönetici ve mutasyon koruması uygulamasıyla güçlendirilmiş ayrıcalıklı rol kontrolleri.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_D İş Akışı D: Yaşam döngüsünün sıfırlanması ve DOM duyarlılığı temizleme davranışı da dahil olmak üzere çalışma zamanında şifresi çözülmüş veri yaşam döngüsü kontrolleri tamamlandı.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_E İş Akışı E: CSP tek seferlik + katı dinamik politika ve üretim rotalarında ihlal alımının uygulanması.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_F Workstream F: Reddetme regresyon kapsamına sahip yüksek riskli yönetici mutasyonları için tek seferlik özellikli jeton kapıları.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_G İş Akışı G: Geçiş anahtarı akışları ve deterministik kimlik bilgisinden türetilen KEK yönetimi için tarayıcı kimlik bilgisi köprüsünün kaldırılması.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_H Workstream H: Telemetri kancalarına sahip çalışma zamanı bütünlüğü izleme durumu makinesi (GÜVENLİ/BOZULMUŞ/KİLİTLİ/SONLANDIRILMIŞ).
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_I İş Akışı I: Güncellenmiş kapsama bağlantılarıyla Guardian temizleyici seçici/stil sertleştirme.
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_EVIDENCE_PHPUNIT 1.212 listelenmiş test (geçen sürüm doğrulamaları)
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_EVIDENCE_PLAYWRIGHT 8 geçti
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_JSLINT JS tüy ve lavabo kontrolleri
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_PHPSTAN PHPStan katı (Seviye 9)
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_PHPUNIT Arka uç PHPUnit paketi
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_PLAYWRIGHT Oyun yazarı yaşam döngüsü dumanı
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_RESULT_PASS GEÇ
+TRANSPARENCY_SECURITY_AUDIT_STATUS_LABEL Mevcut durum:
+TRANSPARENCY_SECURITY_AUDIT_STATUS_VALUE GEÇ
+TRANSPARENCY_SECURITY_AUDIT_SUMMARY_TEXT_1 Bu sayfada halka açık durum özetlenmektedir; bağlantılı arşiv eserlerinde ayrıntılı teknik kanıtlar kalır.
+TRANSPARENCY_SECURITY_AUDIT_TABLE_EVIDENCE Kanıt
+TRANSPARENCY_SECURITY_AUDIT_TABLE_GATE Kapı
+TRANSPARENCY_SECURITY_AUDIT_TABLE_RESULT Sonuç
+TRANSPARENCY_SECURITY_AUDIT_USE_CASE_ARIA Kullanım örneği: Güvenli olmayan bir sürümün engellenmesi
+TRANSPARENCY_SECURITY_AUDIT_USE_CASE_TEXT_1 Bir sürüm adayı, yaşam döngüsünün sıfırlanması veya CSP uygulamasında bir gerileme başlatırsa, bu engelleyici kapılar, kontroller ve testler yeniden sağlanana kadar yükseltmeyi durdurarak zayıflamış duruşun üretime ulaşmasını engeller.
+TRANSPARENCY_SECURITY_AUDIT_USE_CASE_TITLE Kullanım Örneği: Güvenli Olmayan Bir Sürümün Engellenmesi
+TRANSPARENCY_SECURITY_AUDIT_VALIDATION_SNAPSHOT_ARIA Güvenlik denetimi doğrulama anlık görüntüsü
+TRANSPARENCY_SECURITY_AUDIT_VALIDATION_SNAPSHOT_TITLE Doğrulama Anlık Görüntüsü (2026-03-24)
+TRANSPARENCY_SECURITY_AUDIT_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
+TRANSPARENCY_SUPERHEROES_DECK PayCal, birbiriyle kesişen çeşitli çalışma zamanı sistemleri için temalı "Süper Kahramanlar" adlarını kullanır. Bu sayfada bunların amacı, sınırları ve kullanım durumları açıklanmaktadır.
+TRANSPARENCY_SUPERHEROES_ECHO_ROLE ARIA tempo biçimlendirici
+TRANSPARENCY_SUPERHEROES_ECHO_USE_CASE Echo, yardımcı yollar için içeriği yansıtır ve Cadence gücü, stratejik duraklamalar ve ritim ekleyerek anlatımın ekran okuyuculara, konuşma sentezine, braille ekranlara ve insan dinleyicilere net bir şekilde ulaşmasını sağlar.
+TRANSPARENCY_SUPERHEROES_EMAILGARUM_ROLE İşlemsel posta orkestratörü
+TRANSPARENCY_SUPERHEROES_EMAILGARUM_USE_CASE Doğrulama, kurtarma ve hesap değişikliği iş akışları için akışa özel e-posta şablonlarını ve teslim davranışını koordine eder.
+TRANSPARENCY_SUPERHEROES_GUARDIAN_ROLE GüvenilirHTML DOM yazma koruması
+TRANSPARENCY_SUPERHEROES_GUARDIAN_USE_CASE XSS riskini azaltmak ve CSP uyumluluğunu korumak için ön uç modüllerine dinamik işaretlemeyi temizler ve güvenli bir şekilde ekler.
+TRANSPARENCY_SUPERHEROES_LAST_UPDATED_LABEL Son güncelleme:
+TRANSPARENCY_SUPERHEROES_LENS_ROLE İstek kapsamlı tanılama arabelleği
+TRANSPARENCY_SUPERHEROES_MOTTO Mükemmel yansıma. Mükemmel ritim. Geride ses kalmadı.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_ITEM_1 Yeni katkıda bulunanlar, platform temellerini sayfa düzeyindeki kodlara göre hızlı bir şekilde tanımlayabilir.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_ITEM_2 Operasyonel olaylar, bileşen alanına (hatalar, istemci telemetrisi, DOM güvenliği, e-posta teslimi) göre tetiklenebilir.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_ITEM_3 Dokümantasyon, uygulama ayrıntılarını değiştirmek yerine kararlı sistem adlarına referans verebilir.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_TEXT_1 Temalı adlar, yerel özellik mantığı yerine "kesişen sistem bileşenlerini" belirtmek için kullanılır.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_TITLE Bu Adlandırma Modeli Neden Var?
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_ITEM_1 Bu bileşenler, birden fazla sayfa ve API tarafından kullanılan korkuluklar, teşhisler veya teslimat garantileri sağlar.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_ITEM_2 Riskli veya yüksek öneme sahip davranışları merkezileştirerek tekrarlanan mantığı azaltırlar.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_ITEM_3 Kullanıcıların ve geliştiricilerin özellik davranışını somut uygulama noktalarıyla eşleştirebilmesi için bunlar kasıtlı olarak belgelenmiştir.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_TEXT_1 Süper Kahramanlar adlandırma modeli, birçok özellikte çalışan platform düzeyinde güvenlik, gözlemlenebilirlik ve iletişim katmanları için kullanılır.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_TITLE Genel Amaç
+TRANSPARENCY_SUPERHEROES_PAGE_TITLE Süper Kahramanlar Şeffaflığı
+TRANSPARENCY_SUPERHEROES_PHANTOMWING_ROLE İstemci hatası harmanlama arka plan programı
+TRANSPARENCY_SUPERHEROES_PHANTOMWING_USE_CASE Konsol hatalarını/uyarılarını ve işlenmeyen arızaları yakalar, ardından operatör hata ayıklaması için tanılamayı gruplandırır ve kullanıma sunar.
+TRANSPARENCY_SUPERHEROES_SHADOWTALON_ROLE Genel PHP hata koruyucusu
+TRANSPARENCY_SUPERHEROES_SHADOWTALON_USE_CASE Yakalanmayan çalışma zamanı hatalarını güvenli JSON/HTML yanıtlarına dönüştürür ve korelasyon kimlikleriyle özel dönen hata günlükleri yazar.
+TRANSPARENCY_SUPERHEROES_SYSTEM_BREAKDOWN_TITLE Sistem Dağılımı
+TRANSPARENCY_SUPERHEROES_TABLE_ARIA Süper kahramanlar bileşen dökümü
+TRANSPARENCY_SUPERHEROES_TABLE_IMPLEMENTATION Birincil Uygulama
+TRANSPARENCY_SUPERHEROES_TABLE_PRIMARY_ROLE Birincil Rol
+TRANSPARENCY_SUPERHEROES_TABLE_SUPERHERO Süper kahraman
+TRANSPARENCY_SUPERHEROES_TABLE_USE_CASE Özel Kullanım Durumu
+TRANSPARENCY_SUPERHEROES_VERIFICATION_ANCHORS_TITLE Doğrulama Bağlantıları
+TRANSPARENCY_SUPERHEROES_VERIFICATION_ITEM_3 Phantom Wing ve Lens davranışı DEV'de kontrol paneli tanılamaları ve istek hata ayıklama çıktısı aracılığıyla gözlemlenebilir.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_1_TEXT ShadowTalon, operatör teşhislerini özel günlüklerde korurken, işlenmeyen arızaları yakalar ve güvenli yanıtlar verir.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_2_TEXT Guardian, DOM yazmalarını korur; Phantom Wing, ön uç hatalarını toplar; Lens, geliştirme yüzeylerinde istek düzeyinde tanılama sağlar.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_3_TEXT EmailGarum, işlemsel posta kompozisyonunu standartlaştırır ve protokol dağıtımını EmailTransport'a devreder.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_4_TEXT Echo, semantiği sadık bir şekilde tekrarlarken Cadence, duraklamalar ve zamanlamayla ilerleme hızını geri kazandırır, böylece erişilebilirlik çıktısı aceleye getirilmek yerine anlaşılır hale gelir.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_TITLE Birlikte Nasıl Çalışırlar?
+TRANSPARENCY_TAX_ACCURACY_VALIDATION_TITLE Doğruluk ve Doğrulama
+TRANSPARENCY_TAX_EMPLOYMENT_INSURANCE_TITLE İstihdam Sigortası (EI)
+TRANSPARENCY_TAX_FEDERAL_BRACKETS_ARIA 2025 federal vergi dilimleri
+TRANSPARENCY_TAX_FEDERAL_PROVINCIAL_TITLE Federal ve Eyalet Gelir Vergisi
+TRANSPARENCY_TAX_IMPORTANT_NOTES_TITLE Önemli Notlar
+TRANSPARENCY_TAX_KNOWN_LIMITATIONS_TITLE Bilinen sınırlamalar
+TRANSPARENCY_TAX_METHODOLOGY_DECK Bordro vergilerini ve kesintilerini tahmin etmek için kullanılan formüllerin, parametrelerin ve örneklerin ayrıntılı belgelenmesi.
+TRANSPARENCY_TAX_METHODOLOGY_PAGE_TITLE Vergi Metodolojisi Şeffaflığı
+TRANSPARENCY_TAX_NET_PAY_TITLE Net Ücret Hesaplaması
+TRANSPARENCY_TAX_OAS_CLAWBACK_TITLE Yaşlılık Güvenliği (OAS) Pençe Gerilemesi
+TRANSPARENCY_TAX_ROUTE_METADATA_TITLE Meta verileri yönlendir
+TRANSPARENCY_TAX_SCOPE_COMMITMENT_TITLE Kapsam ve Taahhüt
+TRANSPARENCY_TAX_TABLE_INCOME_RANGE Gelir Aralığı
+TRANSPARENCY_TAX_TABLE_RATE Oran
+TRANSPARENCY_TAX_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
+TRANSPARENCY_TESTING_CURRENT_SUITE_INVENTORY_VALUE 118 dosyada 1.212 listelenmiş test.
+TRANSPARENCY_TESTING_CURRENT_TEST_TOPOLOGY_TITLE Güncel Test Topolojisi
+TRANSPARENCY_TESTING_GOVERNANCE_DECK PayCal, otomatik doğrulamayı isteğe bağlı bir kalite kontrolü olarak değil, bir yayın sözleşmesi olarak ele alır.
+TRANSPARENCY_TESTING_GOVERNANCE_PAGE_TITLE Test ve Doğrulama Yönetişimi
+TRANSPARENCY_TESTING_PUBLIC_TRACEABILITY_TEXT_1 Yayınlanan içerik davranışı değiştirdiğinde güncellemeleri her ikisinde de yayınlarız:
+TRANSPARENCY_TESTING_PUBLIC_TRACEABILITY_TEXT_2 Bu, uygulama kanıtlarını ve kamu taahhütlerini senkronize halde tutar.
+TRANSPARENCY_TESTING_PUBLIC_TRACEABILITY_TITLE Kamu İzlenebilirlik Politikası
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_1 Yetenek belirteci yaşam döngüsü ve uyumsuzluk reddi kapsamı.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_2 Düz ve iç içe yük çeşitleri için CSP raporu alımı uç noktası kapsamı.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_3 Guardian temizleme kapsamı, çalışma zamanı yapılandırmasına ve engellenen seçici kontrollerine sabitlenmiştir.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_4 Eksik/geçersiz tek seferlik yetenek belirteçleri için yönetici mutasyon reddi regresyonları.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_TITLE Son Güvenlik Testi Genişletmesi
+TRANSPARENCY_TESTING_RELEASE_BLOCKING_STACK_TEXT_1 Bir kapı arızalandığında, arıza giderilene ve etkilenen kapı yeniden çalıştırılıncaya kadar serbest bırakma çalışması duraklatılır.
+TRANSPARENCY_TESTING_RELEASE_BLOCKING_STACK_TITLE Yayın Engelleme Doğrulama Yığını
+TRANSPARENCY_TESTING_SUITE_CONTRACT Sözleşme
+TRANSPARENCY_TESTING_SUITE_CONTRACT_COVERAGE Kritik bileşenler arasında sınır ve uyumluluk sözleşmeleri
+TRANSPARENCY_TESTING_SUITE_INTEGRATION Entegrasyon
+TRANSPARENCY_TESTING_SUITE_INTEGRATION_COVERAGE Denetleyici/API akışları, kimlik doğrulama yolları, şifrelenmiş yaşam döngüsü, çalışma zamanı korumaları
+TRANSPARENCY_TESTING_SUITE_MANUAL Manuel
+TRANSPARENCY_TESTING_SUITE_MANUAL_COVERAGE Operatör odaklı tatbikatlar ve hedeflenen ortam doğrulaması
+TRANSPARENCY_TESTING_SUITE_UNIT Birim
+TRANSPARENCY_TESTING_SUITE_UNIT_COVERAGE Etki alanı ve hizmet davranışı, güvenlik değişmezleri, yardımcı mantık
+TRANSPARENCY_TESTING_TABLE_ARIA Güncel test topolojisi
+TRANSPARENCY_TESTING_TABLE_COVERAGE_FOCUS Kapsama Odağı
+TRANSPARENCY_TESTING_TABLE_FILES Dosyalar
+TRANSPARENCY_TESTING_TABLE_SUITE_CATEGORY Süit Kategorisi
+TRANSPARENCY_TESTING_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CI_PIPELINE_TEXT_1 CI iş akışı, hızlı doğrulamadan stres tarzı doğrulamaya kadar giderek daha derin test katmanları çalıştırır.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CI_PIPELINE_TITLE 2) CI Doğrulama İşlem Hattı
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CSP_ASSETS_TEXT_1 Herkese açık sayfalar, açık İçerik Güvenliği Politikasına ve önceden farkında olunmayan komut dosyası/stil oluşturmaya tabidir.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CSP_ASSETS_TEXT_2 Bu kontroller yürütülebilir yüzeyleri kısıtlar ve temel yönetişim modelimizin bir parçasıdır.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CSP_ASSETS_TITLE 5) CSP ve Varlık Teslim Kontrolleri
+TRANSPARENCY_VERIFICATION_GOVERNANCE_DECK Bu sayfada PayCal'ın davranışı doğrulamak ve üretimde operasyonel korumaları uygulamak için kullandığı kontroller açıklanmaktadır.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_KNOWN_LIMITATIONS_FACT_1 Kapı açıklamaları manuel olarak korunur; bu sayfa ile kanca/boru hattı yapılandırması arasında otomatik çapraz referansın üç ayda bir kapatılması planlanmaktadır.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_KNOWN_LIMITATIONS_FACT_2 Çalışma zamanı sınır değerleri varsayılanları yansıtır; Ortama özgü geçersiz kılmalar, geliştirme dışı örneklerde farklılık gösterebilir.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_KNOWN_LIMITATIONS_TITLE Bilinen sınırlamalar
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LAST_UPDATED_LABEL Son güncelleme:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LAST_VERIFIED_LABEL Son doğrulanma tarihi:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LOCAL_GATES_TEXT_1 Yerel kancalar, kod paylaşılan dallara ulaşmadan önce güvenli olmayan birleştirmeleri engeller.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LOCAL_GATES_TEXT_2 Bu kapılar politika sapması ve sessiz kalite gerilemesi olasılığını azaltır.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LOCAL_GATES_TITLE 1) Yerel Politika Kapıları (Git Hooks)
+TRANSPARENCY_VERIFICATION_GOVERNANCE_MEANING_TEXT_1 Bizim için yönetişim, kod yollarına, sınırlara, testlere ve dağıtım kontrollerine kodlanmış politika anlamına gelir. Bu yalnızca belgeye dayalı bir vaat değildir.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_MEANING_TEXT_2 Aşağıdaki referanslar, iddiaların bağımsız olarak doğrulanabilmesi için bu veri havuzundaki uygulama noktalarına eşlenmektedir.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_MEANING_TITLE Yönetişimden Ne Kast Ediyoruz?
+TRANSPARENCY_VERIFICATION_GOVERNANCE_METADATA_TEXT_1 Bu meta veriler, yönetim denetimi kapanışının bir parçası olarak üç ayda bir güncellenir.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_METADATA_TITLE Doğrulama Meta Verileri
+TRANSPARENCY_VERIFICATION_GOVERNANCE_NEXT_REVIEW_LABEL Bir sonraki incelemenin zamanı:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_PAGE_TITLE Doğrulama ve Yönetim Şeffaflığı
+TRANSPARENCY_VERIFICATION_GOVERNANCE_ROUTE_LABEL Rota:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_ROUTE_METADATA_TITLE Meta verileri yönlendir
+TRANSPARENCY_VERIFICATION_GOVERNANCE_RUNTIME_LIMITS_TEXT_1 Operasyonel uç noktalar, açık istek pencereleri ve yük doğrulama kurallarıyla sınırlanır.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_RUNTIME_LIMITS_TEXT_2 Bu kontrollerin amacı, hem normal hem de kötü amaçlı trafik düzenleri altında davranışı öngörülebilir tutmaktır.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_RUNTIME_LIMITS_TITLE 3) Çalışma Zamanı Hız Limitleri ve Giriş Yönetişimi
+TRANSPARENCY_VERIFICATION_GOVERNANCE_SECURITY_STATUS_TEXT_1 2026-03-24 itibarıyla PayCal, BRS-01'den BRS-05'e kadar genişletme ve takip sürümü hijyen senkronizasyonundan sonra PASS durumunda kalmaya devam ediyor.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_SECURITY_STATUS_TEXT_2 Kamu durumu ayrıntıları ve kanıt referansları şu adreste yayınlanmaktadır:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_SECURITY_STATUS_TITLE Mevcut Güvenlik Denetim Durumu
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_ACCOUNT_RECOVERY_ITEM Hesap kurtarma sınırları arasında kod TTL'si, yeniden gönderme bekleme süreleri, maksimum doğrulama denemeleri, yeniden oynatma pencereleri ve karma IP engelleme TTL'leri bulunur.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_TEXT_1 Güvenliğe duyarlı akış sınırları merkezi olarak tanımlanır ve min/maks kısıtlamalarla sınırlandırılır.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_TEXT_2 Bu yapı, yazılan sınırları atlamadan kontrollü politika güncellemelerine olanak tanır.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_TITLE 4) TTL ve Güvenlik Limiti Yönetişimi
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFICATION_SCOPE_LABEL Doğrulama kapsamı:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFICATION_SCOPE_VALUE açıklanan geçit uygulamalarının mevcut kancalara, CI boru hattı kontrollerine ve çalışma zamanı kontrol yollarına göre manuel olarak incelenmesi.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFY_CLAIMS_TEXT_1 Geliştiriciler doğrulama sinyallerini doğrudan bu depoda yeniden oluşturabilirler:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFY_CLAIMS_TITLE Bu İddialar Nasıl Doğrulanır?
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_1 Core navigation supports keyboard use, skip links, and documented single-key shortcuts for primary destinations.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_2 Shortcut handling is safety-guarded and does not fire while typing in editable fields or when dialogs are open.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_3 Recent regression coverage checks headings, reflow/text spacing, navigation paths, and the accessibility feedback handoff.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_4 Strict route-level contrast blockers on core public pages have been remediated, while broader theme-wide contrast work continues.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_5 Users can start an accessibility report from the accessibility page and continue it through the secure contact flow.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_6 The accessibility transparency page now publishes last-verified date, verification scope, known limitations, and next review due date.
+TRANSPARENCY_HUB_ACCESSIBILITY_TEXT_1 We use WCAG 2.1 Level AA as our working accessibility standard and publish recent accessibility work in plain language.
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_1 Documents lockfile-first npm policy and
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_2 Maps JavaScript quality gates and backend pipeline stages to workflow controls.
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_3 Lists known documentation limitations and planned governance improvements.
+TRANSPARENCY_HUB_DEPENDENCY_CI_TEXT_1 This article publishes how npm dependencies are controlled and how CI gates are enforced before release.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_1 Includes a 10-run matrix for real and synthetic 2025/2026 datasets.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_2 Reports DOMContentLoaded, section-ready timing, and API-call trade-offs.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_3 Documents test method and interpretation for public review.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_READ_MORE Read earnings load-testing results
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_TEXT_1 This article publishes reproducible A/B benchmark results for eager rendering versus lazy section loading on
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_1 Flow-specific template families are documented across verification, recovery, change-email, and contact support paths.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_2 Delivery responsibilities are separated between EmailGarum orchestration and EmailTransport SMTP protocol handling.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_3 Opt-in live tests for template sweeps and DKIM/DMARC health verification are documented.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_TEXT_1 The email page explains which transactional emails PayCal sends, how templates are rendered, and how delivery reliability is verified.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_1 Summarizes service/controller changes that materially affect behavior.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_2 Maps release changes to security and governance controls.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_3 Includes references to detailed changelog and audit artifacts.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TEXT_1 This page tracks backend architecture and framework-level changes with public explanations of what changed and why.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_1 Documents HTTPS enforcement, HSTS preload, and HTTP/3 (QUIC) advertisement.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_2 Lists the current security header baseline including CSP, COOP, COEP, CORP, and browser hardening headers.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_3 Explains protocol negotiation and fallback behavior across modern clients.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_1 Tracks billing-state handling and subscription status contract changes.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_2 Captures destructive-action safeguards such as explicit account deletion confirmation phrases.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_3 Links product-facing updates to verification and release governance evidence.
+TRANSPARENCY_HUB_PRODUCT_BILLING_TEXT_1 Major account, billing, and profile-flow updates are explained alongside backend and testing governance so users can audit both UX and behavior changes.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_1 Includes ShadowTalon, Guardian, Phantom Wing, Lens, and EmailGarum.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_2 Explains where each component is used and what risk boundary it protects.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_3 Provides verification anchors so implementation claims can be inspected directly in code and tests.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_TEXT_1 The Superheroes page documents PayCal's themed cross-cutting components and the specific operational problem each one solves.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_1 CPP, OAS, EI, federal/provincial tax, and net-pay formulas are documented with worked examples.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_2 Current tax-year thresholds and rates are published and tied to CRA references.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_3 Calculation quality is validated with an automated test suite and annual rate updates.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_TEXT_1 The tax page documents our CRA-aligned formulas, thresholds, and examples used for estimates.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_1 Shows the active PHPUnit suite inventory and category split.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_2 Documents release-blocking validation commands used in
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_3 Explains how test evidence is synchronized into changelogs and source-of-truth notes.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_TEXT_1 This article documents how we run backend, frontend, and accessibility validation and which gates are treated as release blockers.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_1 Pre-commit and pre-push hooks enforce PHPStan Level 9 and reject baseline bypasses.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_2 CI runs staged validation across unit, integration, contract, random-order, and coverage jobs.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_3 Runtime controls apply rate limits, TTL windows, and abuse-response blocks for sensitive flows.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_TEXT_1 This page documents how PayCal enforces policy through tests, hooks, runtime limits, and security controls.
+AUTH_BETA_NOTICE PayCal zel beta srmndedir.
+AUTH_DIVIDER_OR veya
+AUTH_PAGE_HEADING Kimlik dorulama
+AUTH_PRIVACY_LINK Gizlilik Politikas
+AUTH_RECOVER_ACCOUNT Hesab kurtar
+AUTH_RECOVER_ACCOUNT_EMAIL Hesap e-postas
+AUTH_REGISTER_CREATE_BUTTON Hesap olutur
+AUTH_REGISTER_DEVICE_LABEL Passkey cihaz ad
+AUTH_REGISTER_DEVICE_PLACEHOLDER ad-YYYYAAGG
+AUTH_REGISTER_EMAIL_LABEL E-posta (zorunlu)
+AUTH_REGISTER_FULL_NAME_LABEL Tam ad (zorunlu)
+AUTH_REGISTER_INVITE_LABEL Davet kodu
+AUTH_REGISTER_PANEL_ARIA Hesap oluturma paneli
+AUTH_REGISTER_PASSKEY_STATUS Hesabnz korumak iin bir passkey oluturacaksnz.
+AUTH_SIGNIN_EMAIL_ARIA E-posta zorunlu
+AUTH_SIGNIN_EMAIL_LABEL E-posta (zorunlu)
+AUTH_SIGNIN_OTHER_DEVICE Baka bir cihaz kullan
+AUTH_SIGNIN_PANEL_ARIA Giri paneli
+AUTH_SIGNIN_PASSKEY_BUTTON Passkey ile devam et
+AUTH_SIGNIN_PASSKEY_STATUS Bu cihazda bir passkey kullann veya baka bir cihazdan giri yapn.
+AUTH_TABS_ARIA Kimlik dorulama seenekleri
+AUTH_TAB_REGISTER Hesap Olutur
+AUTH_TAB_SIGNIN Giri Yap
+AUTH_TERMS_ACK_AND ve
+AUTH_TERMS_ACK_PREFIX Giri yaparak
+AUTH_TERMS_LINK Koullar kabul etmi olursunuz
+AUTH_VERIFICATION_MESSAGE Kurtarma anahtarnz size e-posta ile gnderildi. Devam etmeden nce bunu gvenli bir yerde saklayn.
+AUTH_VERIFICATION_STEP_1 Kurtarma anahtar e-postas iin gelen kutunuzu kontrol edin.
+AUTH_VERIFICATION_STEP_2 Kurtarma anahtarnz gvenli bir yerde saklayn.
+AUTH_VERIFICATION_STEP_3 Passkey'inizle giri yaparak devam edin.
+AUTH_VERIFICATION_TITLE E-posta doruland
+BLOG_ARTICLE_BODY_ARIA Makale gövdesi
+BLOG_ARTICLE_FOUND_PLURAL makale bulundu
+BLOG_ARTICLE_FOUND_SINGULAR makale bulundu
+BLOG_ARTICLE_NAV_ARIA Makale navigasyonu
+BLOG_CLEAR Temizle
+BLOG_DEFAULT_AUTHOR PayCal Editöryal
+BLOG_EMPTY_RESULTS Mevcut arama ve etiket filtrelerine uyan gönderi yok.
+BLOG_FILTER_TAG_ARIA Etikete göre filtrele
+BLOG_LIST Liste
+BLOG_NEXT Sonraki
+BLOG_NEXT_ARROW_LABEL Sonraki ->
+BLOG_NEXT_ARTICLE_ARIA Sonraki makale
+BLOG_NEXT_PAGE Sonraki Sayfa
+BLOG_OF_LABEL /
+BLOG_OVERVIEW_ARIA Blog genel bakış
+BLOG_PAGE_DECK PayCal organizasyonundan sürüm notları, bordro operasyon rehberi ve mühendislik güncellemeleri.
+BLOG_PAGE_LABEL Sayfa
+BLOG_PAGE_NAV_ARIA Blog sayfa navigasyonu
+BLOG_PAGE_TITLE PayCal Blog
+BLOG_POST_NOT_FOUND_ARIA Blog gönderisi bulunamadı
+BLOG_POST_NOT_FOUND_DECK İstenen makale bulunamadı.
+BLOG_POST_NOT_FOUND_TITLE Gönderi Bulunamadı
+BLOG_POST_TAGS_ARIA Gönderi etiketleri
+BLOG_PREVIOUS Önceki
+BLOG_PREVIOUS_ARROW_LABEL <- Önceki
+BLOG_PREVIOUS_ARTICLE_ARIA Önceki makale
+BLOG_PREVIOUS_PAGE Önceki Sayfa
+BLOG_RETURN_TO_LIST Blog listesine dön
+BLOG_SEARCH_ARIA Blog gönderilerini ara
+BLOG_SEARCH_PLACEHOLDER Başlık, yazar, alıntı veya etiketlere göre ara
+BLOG_UNTITLED Başlıksız
+ADMIN_LIMITS_RESET_ERROR Limit sıfırlanırken hata oluştu
+ADMIN_LIMITS_RESET_CATEGORY_ERROR Kategori limitleri sıfırlanırken hata oluştu
+
+WEEKDAY_MONDAY Pazartesi
+WEEKDAY_TUESDAY Salı
+WEEKDAY_WEDNESDAY Çarşamba
+WEEKDAY_THURSDAY Perşembe
+WEEKDAY_FRIDAY Cuma
+WEEKDAY_SATURDAY Cumartesi
+WEEKDAY_SUNDAY Pazar
+
+SETTINGS_CALENDAR_LABEL_TODAY Today
+SETTINGS_CALENDAR_LABEL_DATE Date
+SETTINGS_CALENDAR_LABEL_LABEL Label
+SETTINGS_CALENDAR_LABEL_AUDIO Audio
+SETTINGS_CALENDAR_LABEL_ENTRIES Entries
+SETTINGS_CALENDAR_LABEL_FIELDS Fields
+SETTINGS_POSITION_LEFT Left
+SETTINGS_POSITION_MIDDLE Middle
+SETTINGS_POSITION_RIGHT Right
+SETTINGS_STYLE_LABEL_SIDEBAR Sidebar
+SETTINGS_SECURITY_TABLE_ACTION Action
+SETTINGS_SECURITY_TABLE_TTL TTL
+SETTINGS_SECURITY_TABLE_LEFT Left
+
+CHANGE_EMAIL_STATUS_ENTER_BOTH_EMAILS Enter both email addresses.
+CHANGE_EMAIL_ERROR_ENTER_NEW_EMAIL Enter a new email address.
+CHANGE_EMAIL_ERROR_CONFIRM_NEW_EMAIL Confirm your new email address.
+CHANGE_EMAIL_STATUS_EMAILS_NO_MATCH Emails do not match.
+CHANGE_EMAIL_ERROR_EMAILS_MUST_MATCH Email addresses must match.
+CHANGE_EMAIL_STATUS_WORKING Working...
+CHANGE_EMAIL_STATUS_CODES_SENT Codes sent.
+CHANGE_EMAIL_STATUS_REQUEST_FAILED_PREFIX Request failed:
+CHANGE_EMAIL_STATUS_ENTER_BOTH_CODES Enter both verification codes.
+CHANGE_EMAIL_ERROR_ENTER_VALID_6_CHAR_CODE Enter a valid 6-character code.
+CHANGE_EMAIL_STATUS_EMAIL_UPDATED Email updated.
+CHANGE_EMAIL_STATUS_SESSION_EXPIRED Your session expired. Start again.
+RECOVERY_EMAIL_ERROR_ENTER_VALID_EMAIL Please enter a valid email address.
+RECOVERY_EMAIL_STATUS_SECURITY_TOKEN_MISSING Security token missing. Reload and try again.
+RECOVERY_EMAIL_STATUS_SENDING_CODE Sending code...
+RECOVERY_EMAIL_STATUS_CODE_SENT_CHECK_EMAIL Code sent! Check your email.
+RECOVERY_EMAIL_STATUS_NETWORK_ERROR Network error. Please try again.
+RECOVERY_EMAIL_ERROR_ENTER_6_DIGIT_CODE Please enter a 6-digit code.
+RECOVERY_EMAIL_STATUS_VERIFYING Verifying...
+RECOVERY_EMAIL_STATUS_VERIFIED Recovery email verified! ✓
+RECOVERY_EMAIL_STATUS_RESENDING_CODE Resending code...
+RECOVERY_EMAIL_STATUS_NEW_CODE_SENT New code sent!
+
+ORGANIZATIONS_MEMBERSHIP_CONSENT_TITLE Membership Consent
+ORGANIZATIONS_MEMBERSHIP_CONSENT_DESC Review and confirm before activating organization membership access.
+ORGANIZATIONS_MEMBERSHIP_CONSENT_DISCLAIMER_LABEL Reason / Disclaimer (optional)
+ORGANIZATIONS_MEMBERSHIP_CONSENT_DISCLAIMER_PLACEHOLDER Optional note for consent record
+ORGANIZATIONS_MEMBERSHIP_CONSENT_ACK_TEXT I acknowledge and consent to organization membership activation.
+ORGANIZATIONS_CURRENT_OWNER_TITLE Current Owner
+ORGANIZATIONS_PREMIUM_LOCKED Premium locked
+ORGANIZATIONS_NO_ACTIVE_SESSIONS No active sessions found.
+ORGANIZATIONS_LOADING_ACCOUNT_ACTIVITY Loading account activity...
+ORGANIZATIONS_CREATE_NAME_REQUIRED Enter an organization name.
+ORGANIZATIONS_FAILED_LOAD_MEMBERS_GRID Failed to load members grid.
+ORGANIZATIONS_FAILED_LOAD_ACCESS_REQUESTS Failed to load access requests.
+
+SETTINGS_STYLE_LABEL_TYPOGRAPHY Typography
+SETTINGS_TYPOGRAPHY_STANDARD Standard
+SETTINGS_TYPOGRAPHY_DYSLEXIA_FRIENDLY Dyslexia-friendly
+SETTINGS_AUDIO_FEEDBACK_MODE_ARIA Audio feedback mode
+SETTINGS_SECTION_PASSKEYS Passkeys
+SETTINGS_SECTION_SECURITY Security
+SETTINGS_SECTION_DEBUGGING_OPTIONAL Debugging (Optional)
+
+SETTINGS_VOICE_PICKER_ENABLE_CUES Enable Cues to choose a voice.
+SETTINGS_PASSKEYS_SECURITY_NOTE Add more passkeys to improve account security.
+SETTINGS_PASSKEYS_SR_INSTRUCTIONS Passkeys list. Edit a passkey name inline and press Enter to save. Use Remove to delete a passkey when multiple devices are registered.
+SETTINGS_ADD_DEVICE Add Device
+SETTINGS_TIMEOUT_FORM_ARIA Timeout Settings Form
+SETTINGS_SECURITY_SESSION_TIMING_HELP Session + sensitive action timing.
+SETTINGS_DEBUGGING_FORM_ARIA Debugging Preferences Form
+SETTINGS_DEBUG_OPTION_OFF_DEFAULT Off (Default)
+SETTINGS_DEBUG_OPTION_ON_MORE_DETAILS On (More details)
+
+SETTINGS_SECURITY_LEVEL Level
+SETTINGS_SECURITY_LOW Low
+SETTINGS_SECURITY_HIGH High
+SETTINGS_SECURITY_BALANCED Balanced
+SETTINGS_SECURITY_LEVEL_HINT Shorter sessions are safer on shared devices.
+SETTINGS_SECURITY_ROW_AUTO_SIGNOUT Auto Signout
+SETTINGS_SECURITY_ROW_ACCOUNT_EDIT Account Edit
+SETTINGS_SECURITY_ROW_CALENDAR_EDIT Calendar Edit
+SETTINGS_SECURITY_EMERGENCY_SIGNOUT Emergency Signout
+
+SETTINGS_DEBUG_PANEL_HOVER_HELP Debugging adds extra information to help identify issues. You can safely leave this off unless you're troubleshooting.
+SETTINGS_DEBUG_INTRO Turn on extra diagnostics to help troubleshoot issues. Safe to leave off.
+SETTINGS_DEBUG_PERF_NOTE For troubleshooting only. Enabling extra diagnostics may impact performance.
+SETTINGS_DEBUG_CONSOLE_HELP Show helpful messages in your browser console.
+SETTINGS_DEBUG_CONSOLE_HOVER Off shows only critical errors. On includes warnings and helpful logs.
+SETTINGS_DEBUG_FINE_GRAINED_HELP Capture deeper system-level debugging information.
+SETTINGS_DEBUG_FINE_GRAINED_HOVER Off keeps output minimal. On includes step-by-step internal logs.
+SETTINGS_DEBUG_NETWORK_HELP Track API requests and performance details while troubleshooting.
+SETTINGS_DEBUG_NETWORK_HOVER Off keeps network debug tracking disabled. On logs request timing details for diagnostics.
+
+SETTINGS_SECURITY_LEVEL_SLIDER_ARIA Security level slider
+SETTINGS_SECURITY_DERIVED_TIMEOUTS_ARIA Derived timeout values
+SETTINGS_SECURITY_EMERGENCY_WINDOW_ARIA Emergency signout window in milliseconds
+
+SETTINGS_SECURITY_LEVEL_HOVER_HELP Higher level shortens timeouts for stronger protection on shared devices.
+SETTINGS_SECURITY_ROW_AUTO_SIGNOUT_HOVER Auto signout ends inactive sessions to reduce unauthorized access risk.
+SETTINGS_SECURITY_ROW_ACCOUNT_EDIT_HOVER Account edit timeout limits how long profile changes stay unlocked.
+SETTINGS_SECURITY_ROW_CALENDAR_EDIT_HOVER Calendar edit timeout reduces chance of unwanted timesheet changes.
+SETTINGS_SECURITY_EMERGENCY_WINDOW_HOVER Press ESC three times within this window for immediate safety signout.
+
+SETTINGS_ARIA_EDIT_ACCOUNT_DETAILS Edit Account Details
+SETTINGS_ARIA_RECOVERY_ACCOUNT_DELETION_ACTIONS Recovery and account deletion actions
+SETTINGS_ARIA_DELETE_SITE_ROW Delete site row
+SETTINGS_ARIA_CALENDAR_PREFERENCES_FORM Calendar Preferences Form
+
+SETTINGS_CHANGE_EMAIL_SEND_CODES Send Verification Codes
+SETTINGS_CHANGE_EMAIL_COMPLETE Complete Email Change
+SETTINGS_CHANGE_EMAIL_RESEND_CODES Resend Codes
+SETTINGS_CHANGE_EMAIL_LINK_TITLE Change email address
+SETTINGS_CHANGE_EMAIL_LINK_HOVER Start secure email change with verification codes.
+SETTINGS_CHANGE_EMAIL_LINK_TEXT Change
+SETTINGS_CHANGE_EMAIL_LINK_DISABLED_TITLE Verify recovery email first
+SETTINGS_CHANGE_EMAIL_LINK_DISABLED_TEXT Change (verify recovery email first)
+SETTINGS_RECOVERY_KEY_TITLE Recovery Key
+SETTINGS_RECOVERY_KEY_HELP_TEXT Create a Recovery Key to regain access if you lose your passkeys. Creating a new key disables the old one.
+SETTINGS_RECOVERY_KEY_BUTTON_HOVER Recovery Key is offline backup access. New keys invalidate older keys.
+SETTINGS_RECOVERY_KEY_CREATE_BUTTON Create Recovery Key
+
+SETTINGS_RECOVERY_LABEL Recovery
+SETTINGS_RECOVERY_PENDING_VERIFICATION Pending verification
+SETTINGS_RECOVERY_NOT_VERIFIED Not verified
+
+SETTINGS_RECOVERY_EMAIL_PLACEHOLDER Enter recovery email address
+SETTINGS_RECOVERY_EMAIL_ARIA_LABEL Recovery email address
+SETTINGS_RECOVERY_EMAIL_INPUT_HOVER Backup email for account recovery and verification.
+SETTINGS_RECOVERY_SEND_VERIFICATION_CODE_ARIA Send Verification Code
+SETTINGS_RECOVERY_SEND_CODE_HOVER Send a one-time code to verify this recovery email.
+SETTINGS_RECOVERY_SEND_BUTTON Send
+SETTINGS_RECOVERY_VERIFICATION_CODE_PLACEHOLDER verification code
+SETTINGS_RECOVERY_VERIFICATION_CODE_ARIA Recovery email verification code
+SETTINGS_RECOVERY_VERIFICATION_CODE_HOVER Enter the 6-digit code from your recovery email.
+SETTINGS_RECOVERY_VERIFY_BUTTON_HOVER Confirm this recovery email with the entered code.
+SETTINGS_RECOVERY_VERIFY_BUTTON Verify
+SETTINGS_DELETE_ACCOUNT_WARNING_TEXT Deleting your account permanently removes profile data, calendar records, organizations, sites, and recovery methods. This action cannot be undone.
+SETTINGS_DELETE_ACCOUNT_DESC Delete your account permanently. Type the confirmation phrase exactly, then select Delete Account to continue.
+SETTINGS_DELETE_ACCOUNT_CONFIRM_LABEL Type %s to confirm
+SETTINGS_DELETE_ACCOUNT_CONFIRM_PHRASE PLEASE DELETE
+SETTINGS_EDIT_DETAILS_SUBMIT_HOVER Save all Account Details changes.
+SETTINGS_EDIT_DETAILS_CANCEL_HOVER Close this dialog without saving new changes.
+SETTINGS_DELETE_ACCOUNT_BUTTON_HOVER Open irreversible account deletion flow. This cannot be undone.
+SETTINGS_EDIT_DETAILS_EMAIL_HOVER Primary account email. Change requires verified recovery access.
+SETTINGS_EDIT_DETAILS_FULL_NAME_HOVER Your legal full name used in account records.
+SETTINGS_EDIT_DETAILS_PHONE_HOVER Phone number for account contact and notifications.
+SETTINGS_EDIT_DETAILS_PROVINCE_HOVER Select your province for payroll and tax defaults.
+SETTINGS_EDIT_DETAILS_TIMEZONE_HOVER Pick your local timezone for calendar and pay periods.
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_LABEL Employment
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_HOVER Set your employment category for profile context.
+SETTINGS_EDIT_DETAILS_JOB_TITLE_LABEL Job Title
+SETTINGS_EDIT_DETAILS_JOB_TITLE_HOVER Your current role or position title.
+SETTINGS_EDIT_DETAILS_DEPARTMENT_LABEL Department
+SETTINGS_EDIT_DETAILS_DEPARTMENT_HOVER Department or organization where you primarily work.
+SETTINGS_EDIT_DETAILS_HIRE_DATE_LABEL Hire Date
+SETTINGS_EDIT_DETAILS_HIRE_DATE_HOVER Employment start date for recordkeeping.
+SETTINGS_EDIT_DETAILS_PAY_RATE_LABEL Pay Rate
+SETTINGS_EDIT_DETAILS_PAY_RATE_HOVER Base pay amount before overtime or premiums.
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_LABEL Pay Rate Type
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_HOVER Choose whether pay rate is hourly, salary, or day rate.
+SETTINGS_EDIT_DETAILS_ADDRESS_HOVER Street and unit address for your profile.
+SETTINGS_EDIT_DETAILS_CITY_LABEL City
+SETTINGS_EDIT_DETAILS_CITY_HOVER City associated with your mailing address.
+SETTINGS_EDIT_DETAILS_POSTAL_CODE_LABEL Postal Code
+SETTINGS_EDIT_DETAILS_POSTAL_CODE_HOVER Postal code used for tax and address validation.
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_FULL_TIME Full-time
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_PART_TIME Part-time
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_CONTRACTOR Contractor
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_CASUAL Casual
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_OPTION_HOURLY Hourly
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_OPTION_SALARY Salary
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_OPTION_DAY_RATE Day rate
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_ALBERTA Alberta
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_BRITISH_COLUMBIA British Columbia
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_MANITOBA Manitoba
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NEW_BRUNSWICK New Brunswick
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NEWFOUNDLAND_AND_LABRADOR Newfoundland and Labrador
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NOVA_SCOTIA Nova Scotia
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_ONTARIO Ontario
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_PRINCE_EDWARD_ISLAND Prince Edward Island
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_QUEBEC Quebec
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_SASKATCHEWAN Saskatchewan
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NORTHWEST_TERRITORIES Northwest Territories
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NUNAVUT Nunavut
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_YUKON Yukon
+SETTINGS_CHANGE_EMAIL_DESC Change your account email in two steps: request verification codes, then enter both codes to confirm the update.
+SETTINGS_CHANGE_EMAIL_NEW_EMAIL_LABEL New Email Address
+SETTINGS_CHANGE_EMAIL_NEW_EMAIL_PLACEHOLDER Enter new email address
+SETTINGS_CHANGE_EMAIL_CONFIRM_EMAIL_LABEL Confirm Email Address
+SETTINGS_CHANGE_EMAIL_OLD_CODE_LABEL Old Email Code
+SETTINGS_CHANGE_EMAIL_NEW_CODE_LABEL New Email Code
+SETTINGS_CHANGE_EMAIL_CODE_PLACEHOLDER Enter 6-digit code

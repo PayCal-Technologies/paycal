@@ -110,6 +110,24 @@ final class SettingsControllerIntegrationTest extends TestCase
     Database::unlink(Keys::EMAIL . ':' . $context['email']);
     Database::unlink(Keys::EMAIL . $context['email']);
 
+    foreach (Database::scanKeys(Keys::SITE . ':' . $context['userUUID'] . ':*') as $key) {
+      Database::unlink($key);
+    }
+
+    foreach (Database::scanKeys(Keys::WORK . ':' . $context['userUUID'] . ':*') as $key) {
+      Database::unlink($key);
+    }
+
+    foreach (Database::scanKeys(Keys::WORK . ':archived:' . $context['userUUID'] . ':*') as $key) {
+      Database::unlink($key);
+    }
+
+    foreach (Database::scanKeys('user:data_import:prepare:*') as $key) {
+      if ((string) Database::hget($key, 'actor_uuid') === $context['userUUID']) {
+        Database::unlink($key);
+      }
+    }
+
     unset($_COOKIE['PAYCAL_AUTH']);
     unset($_SERVER['REQUEST_METHOD']);
     unset($_POST);
@@ -136,6 +154,25 @@ final class SettingsControllerIntegrationTest extends TestCase
     } finally {
       $this->cleanupAuthenticatedContext($context);
     }
+  }
+
+  /**
+   * @param array{userUUID: string, sessionHash: string, email: string, csrfToken: string} $context
+   * @param array<string, mixed> $post
+   * @return array<string, mixed>
+   */
+  private function runAuthenticatedSettingsMethodCall(array $context, string $method, array $post = []): array
+  {
+    $_SERVER['REQUEST_METHOD'] = 'POST';
+    $_POST = $post;
+    $_POST['csrf_token'] = $context['csrfToken'];
+
+    ob_start();
+    (new SettingsController())->{$method}();
+    $output = ob_get_clean();
+    $this->assertNotFalse($output);
+
+    return $this->decodeJsonPayload((string) $output);
   }
 
   public function testUpdateSettingsRejectsUnauthenticatedRequest(): void
@@ -192,5 +229,168 @@ final class SettingsControllerIntegrationTest extends TestCase
 
     $this->assertSame('left', $saved['nav_position_primary'] ?? null);
     $this->assertSame('left', $canonical['nav_position_primary'] ?? null);
+  }
+
+  public function testExportAccountDataIncludesPortablePayloadAndWarning(): void
+  {
+    $context = $this->createAuthenticatedContext();
+
+    try {
+      Database::hset(Keys::SITE . ':' . $context['userUUID'] . ':SITEA', [
+        'site_name' => 'Export Site',
+        'wage' => '52.10',
+        'living_out_allowance' => '20.00',
+        'travel_hours' => '1.50',
+        'status' => 'active',
+        'province' => 'BC',
+      ]);
+
+      Database::hset(Keys::WORK . ':' . $context['userUUID'] . ':2026-04-10:SITEA', [
+        'date' => '2026-04-10',
+        'site_id' => 'SITEA',
+        'site_name' => 'Export Site',
+        'hours' => '8.00',
+        'regular_hours' => '8.00',
+        'overtime_hours' => '0.00',
+        'wage' => '52.10',
+      ]);
+
+      $decoded = $this->runAuthenticatedSettingsMethodCall($context, 'exportAccountData');
+
+      $this->assertSame('success', $decoded['status'] ?? null);
+      $data = $decoded['data'] ?? [];
+      $this->assertSame(2, $data['schema_version'] ?? null);
+      $this->assertSame(true, $data['contains_plaintext'] ?? null);
+      $this->assertNotSame('', trim((string) ($data['warning'] ?? '')));
+      $this->assertNotSame('', trim((string) ($data['checksum_sha256'] ?? '')));
+
+      $payload = $data['payload'] ?? [];
+      $this->assertIsArray($payload);
+      $this->assertSame(2, $payload['schema_version'] ?? null);
+      $this->assertSame(true, $payload['security']['contains_plaintext'] ?? null);
+      $this->assertIsArray($payload['sites'] ?? null);
+      $this->assertIsArray($payload['work_entries'] ?? null);
+      $this->assertGreaterThanOrEqual(1, count($payload['sites'] ?? []));
+      $this->assertGreaterThanOrEqual(1, count($payload['work_entries'] ?? []));
+    } finally {
+      $this->cleanupAuthenticatedContext($context);
+    }
+  }
+
+  public function testPrepareAndCommitAccountDataImportPersistsPortableRecords(): void
+  {
+    $context = $this->createAuthenticatedContext();
+
+    try {
+      $payload = [
+        'schema_version' => 2,
+        'exported_at' => '2026-04-11T00:00:00Z',
+        'reference' => 'EXU-test',
+        'security' => [
+          'contains_plaintext' => true,
+          'warning' => 'test warning',
+        ],
+        'user' => [
+          'full_name' => 'Imported User Name',
+          'phone' => '555-1234',
+          'theme' => 'paycal_blue',
+        ],
+        'sites' => [
+          [
+            'id' => 'SITEI',
+            'site_name' => 'Imported Site',
+            'wage' => '61.25',
+            'living_out_allowance' => '15.00',
+            'travel_hours' => '2.00',
+            'status' => 'active',
+            'province' => 'AB',
+          ],
+        ],
+        'work_entries' => [
+          [
+            'date' => '2026-04-09',
+            'site_id' => 'SITEI',
+            'site_name' => 'Imported Site',
+            'hours' => '10.00',
+            'regular_hours' => '8.00',
+            'overtime_hours' => '2.00',
+            'living_out_allowance' => '15.00',
+            'travel_hours' => '2.00',
+            'wage' => '61.25',
+            'gross' => '700.00',
+          ],
+        ],
+      ];
+
+      $prepare = $this->runAuthenticatedSettingsMethodCall($context, 'prepareAccountDataImport', [
+        'payload_json' => json_encode($payload, JSON_UNESCAPED_SLASHES),
+      ]);
+
+      $this->assertSame('success', $prepare['status'] ?? null);
+      $prepareData = $prepare['data'] ?? [];
+      $importId = (string) ($prepareData['import_id'] ?? '');
+      $this->assertNotSame('', $importId);
+      $this->assertSame(1, $prepareData['counts']['sites'] ?? null);
+      $this->assertSame(1, $prepareData['counts']['work_entries'] ?? null);
+
+      $commit = $this->runAuthenticatedSettingsMethodCall($context, 'commitAccountDataImport', [
+        'import_id' => $importId,
+      ]);
+
+      if (($commit['status'] ?? null) === 'error') {
+        $message = strtolower((string) ($commit['message'] ?? ''));
+        if (str_contains($message, 'redis reliability guard blocked mutation')) {
+          $this->markTestSkipped('Redis reliability mutation guard blocked integration commit path.');
+        }
+      }
+
+      $this->assertSame('success', $commit['status'] ?? null);
+      $this->assertSame($importId, (string) ($commit['data']['import_id'] ?? ''));
+      $this->assertSame(1, $commit['data']['counts']['user'] ?? null);
+      $this->assertSame(1, $commit['data']['counts']['sites'] ?? null);
+      $this->assertSame(1, $commit['data']['counts']['work_entries'] ?? null);
+
+      $savedUser = Database::hgetall(Keys::USER . ':' . $context['userUUID']);
+      $this->assertSame('Imported User Name', (string) ($savedUser['full_name'] ?? ''));
+
+      $savedSite = Database::hgetall(Keys::SITE . ':' . $context['userUUID'] . ':SITEI');
+      $this->assertSame('Imported Site', (string) ($savedSite['site_name'] ?? ''));
+      $this->assertSame('61.25', (string) ($savedSite['wage'] ?? ''));
+
+      $savedWork = Database::hgetall(Keys::WORK . ':' . $context['userUUID'] . ':2026-04-09:SITEI');
+      $this->assertSame('2026-04-09', (string) ($savedWork['date'] ?? ''));
+      $this->assertSame('SITEI', (string) ($savedWork['site_id'] ?? ''));
+      $this->assertSame('700.00', (string) ($savedWork['gross'] ?? ''));
+
+      $staged = Database::hgetall('user:data_import:prepare:' . $importId);
+      $this->assertSame([], $staged);
+    } finally {
+      $this->cleanupAuthenticatedContext($context);
+    }
+  }
+
+  public function testPrepareAccountDataImportRejectsUnsupportedSchemaVersion(): void
+  {
+    $context = $this->createAuthenticatedContext();
+
+    try {
+      $payload = [
+        'schema_version' => 1,
+        'user' => [],
+        'sites' => [],
+        'work_entries' => [],
+      ];
+
+      $decoded = $this->runAuthenticatedSettingsMethodCall($context, 'prepareAccountDataImport', [
+        'payload_json' => json_encode($payload, JSON_UNESCAPED_SLASHES),
+      ]);
+
+      $this->assertSame('error', $decoded['status'] ?? null);
+      $this->assertStringContainsString('Unsupported import schema version', (string) ($decoded['message'] ?? ''));
+      $this->assertSame(2, $decoded['data']['supported_schema_version'] ?? null);
+      $this->assertSame(1, $decoded['data']['received_schema_version'] ?? null);
+    } finally {
+      $this->cleanupAuthenticatedContext($context);
+    }
   }
 }

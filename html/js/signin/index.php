@@ -403,6 +403,15 @@ const requestRecoveryEmail = async (email) => {
   }
 };
 
+// Conditional UI: attempt discoverable passkey autofill if supported
+if (window.PublicKeyCredential && typeof PublicKeyCredential.isConditionalMediationAvailable === 'function') {
+  PublicKeyCredential.isConditionalMediationAvailable().then((available) => {
+    if (available) {
+      runPasskeySignin(true);
+    }
+  }).catch(() => {});
+}
+
 const passkeyButton = document.getElementById('signin-passkey');
 if (passkeyButton) {
   passkeyButton.addEventListener('click', async () => {

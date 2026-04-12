@@ -3919,30 +3919,6 @@ final class OrganizationDiscoveryService
       }
     }
 
-    $user = UserRepository::getByUUID($userUUID);
-    if (null === $user) {
-      return $this->fail('Cannot resolve passkey wrapper: member account not found.');
-    }
-
-    $legacyWrapped = self::scalarString($user->wrapped_dek_passkey ?? '');
-    if ($legacyWrapped !== '') {
-      $credentialIds = Database::smembers(Keys::webauthnUserCredentials($userUUID));
-      $fallbackCredentialId = '';
-      foreach ($credentialIds as $credentialId) {
-        $fallbackCredentialId = trim((string) $credentialId);
-        if ($fallbackCredentialId !== '') {
-          break;
-        }
-      }
-
-      if ($fallbackCredentialId !== '') {
-        return $this->ok('Resolved passkey wrapper from legacy user field.', [
-          'credential_id' => $fallbackCredentialId,
-          'wrapped_dek' => $legacyWrapped,
-        ]);
-      }
-    }
-
     return $this->fail('No passkey-wrapped DEK is available for this member.');
   }
 

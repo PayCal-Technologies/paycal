@@ -106,7 +106,6 @@ class AccountController
 
         // Fetch wrapped DEK and version if present
         $wrappedDek = $user->wrapped_dek;
-        $wrappedDekPasskeyLegacy = $user->wrapped_dek_passkey;
         $wrappedDekPasskey = '';
         $dekVersion = $user->dek_version;
         $cryptoVersion = $user->crypto_version > 0 ? $user->crypto_version : 1;
@@ -122,7 +121,6 @@ class AccountController
             $sessionCredentialId = (string) \PayCal\Domain\Database::hget($sessionKey, 'credential_id');
         }
         
-        // Fetch first available credential_id for passkey-based DEK unwrap
         $credentialId = '';
         $credentialSource = 'none';
         $credentialSetKey = Keys::webauthnUserCredentials($user->user_uuid);
@@ -131,13 +129,6 @@ class AccountController
             static fn ($value): string => (string) $value,
             $credentialIds
         ), static fn (string $value): bool => $value !== ''));
-        if (count($credentialIds) > 0) {
-            $credentialId = (string) reset($credentialIds);
-            $credentialSource = 'credential_set_first';
-        }
-
-        // Prefer the credential used by the active session to keep DEK unwrap deterministic
-        // for users with multiple passkeys.
         if ($sessionCredentialId !== '') {
             $credentialId = $sessionCredentialId;
             $credentialSource = 'session_credential';
@@ -155,32 +146,6 @@ class AccountController
 
         if ($credentialId !== '') {
             $wrappedDekPasskey = (string) Database::hget($passkeyWrappedDekKey, $credentialId);
-        }
-
-        // If selected credential has no wrapper, pick any credential that does have one.
-        if ($wrappedDekPasskey === '' && count($credentialIds) > 0) {
-            foreach ($credentialIds as $candidateCredentialId) {
-                $candidate = (string) Database::hget($passkeyWrappedDekKey, (string) $candidateCredentialId);
-                if ($candidate !== '') {
-                    $credentialId = (string) $candidateCredentialId;
-                    $wrappedDekPasskey = $candidate;
-                    $credentialSource = 'wrapper_available_fallback';
-                    break;
-                }
-            }
-        }
-
-        // One-time migration path for legacy single-wrapper storage.
-        if ($wrappedDekPasskey === '' && is_string($wrappedDekPasskeyLegacy) && $wrappedDekPasskeyLegacy !== '' && $credentialId !== '') {
-            Database::hset($passkeyWrappedDekKey, [$credentialId => $wrappedDekPasskeyLegacy]);
-            $wrappedDekPasskey = $wrappedDekPasskeyLegacy;
-            $user->updateSettings([
-                UserFields::WRAPPED_DEK_PASSKEY->value => '',
-            ]);
-            \PayCal\Observability\Lens::add('[Bootstrap] Migrated legacy passkey wrapper to credential map', [
-                'user_uuid' => $user->user_uuid,
-                'credentialIdFp' => $this->credentialFingerprint($credentialId),
-            ]);
         }
 
         $wrappedDekPasskeyMeta = [
@@ -205,7 +170,6 @@ class AccountController
             'user_uuid' => $user->user_uuid,
             'hasWrappedDek' => !empty($wrappedDek),
             'hasWrappedDekPasskey' => !empty($wrappedDekPasskey),
-            'hasLegacyWrappedDekPasskey' => !empty($wrappedDekPasskeyLegacy),
             'dekVersion' => $dekVersion,
             'cryptoVersion' => $cryptoVersion,
             'passwordOnlyWarning' => $passwordOnlyWarning,

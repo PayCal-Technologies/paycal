@@ -1,0 +1,566 @@
+14_DAYS 14 Days
+1_WEEK 1 Week
+2_WEEKS 2 Weeks
+7_DAYS 7 Days
+WIN95_DARK Windows 95 Dark
+WIN95_LIGHT Windows 95 Light
+ABOUT_US About us
+ACCOUNT Account
+ACCOUNT_ACTIONS Account Actions
+ACCOUNT_REGISTRATION Account Registration
+ACTIONS Actions
+ACTIVE Active
+ADD_ROW Add Row
+CREATE Create
+CREATE_SITE Create Site
+SITES_CREATE Create
+EDIT_SITE Edit Site
+ADMIN Admin
+ALL All
+ALL_TIME All Time
+ALT_A <kbd>ALT A</kbd>
+ALT_BACKSLASH <kbd>\</kbd>
+ALT_B <kbd>ALT B</kbd>
+ALT_C <kbd>ALT C</kbd>
+ALT_P <kbd>ALT P</kbd>
+ALT_R <kbd>Alt R</kbd>
+ANALYTICS Analytics
+ARCADE_DARK Arcade Dark
+ARCADE_LIGHT Arcade Light
+ARROW_KEYS <kbd>Arrows</kbd>
+AUDIO Audio
+AUDIO_FEEDBACK Audio Feedback
+AUDIO_FEEDBACK_USING Audio feedback using
+AUDIO_PREFS Audio Preferences
+BASE Base
+BROWSER Browser
+CALENDAR_AUDIO_LABELS_ON Audio Labels
+CALENDAR_AUTOFOCUS_ON Autofocus
+CALENDAR Calendar
+CALENDAR_DAYS Days
+CALENDAR_DAY_NAME_FORMAT_ON Day Name Format
+CALENDAR_PREFS_FORM Calendar Preferences Form
+CANCEL_AND_CLOSE Cancel & Close
+CANCEL Cancel
+CAPSLOCK_ACTIVE CAPS Lock key active.
+CHANGE_EMAIL Change Email
+CHANGE_PASSWORD Change Password
+CHOOSE_A_LANGUAGE Choose a language
+CHOOSE_A_THEME Choose a theme
+CHOOSE_A_VOICE Choose a voice
+CLOSED_DIALOG Closed dialog
+CLOSE_DIALOG Close Dialog
+CLOSE_DIALOG_WITH Close Dialog with ESCAPE
+CONFIRM_NEW_EMAIL Confirm New Email
+CONFIRM_NEW_PASSWORD Confirm New Password
+CONFIRM_NO_TYPOS Confirm no typos
+CONFIRM_PASSWORD Confirm Password
+CONSENT_COOKIE_POLICY I consent to the cookie policy.
+CONTACT Contact
+CONTACT_US Contact Us
+COPY Copy
+COPY_WORK Copy Work
+COPY_WORK_WITH Copy Work with CTRL C.
+CPP CPP
+CSV CSV
+CTRL_C <kbd>CTRL C</kbd>
+CTRL_V <kbd>CTRL V</kbd>
+CURRENT Current
+CURRENT_EMAIL Current Email
+CURRENT_PASSWORD Current Password
+CURRENT_TIME Current Time
+DAILY Daily
+DAILY_DETAILS Daily Details
+DARK Dark
+DATE Date
+DATE_PICKER Date Picker
+DEDUCTIONS Deductions
+DELETE_ACCOUNT Delete Account
+DELETE_ACCOUNT_MESSAGE Warning: deleting your account is permanent and cannot be undone. Type PLEASE DELETE to confirm this irreversible action.
+DELETE Delete
+DELETE_KEY <kbd>DELETE</kbd>
+DELETE_SITE Delete Site
+DELETE_WORK Delete Work
+DELETE_WORK_WITH Delete Work with Delete.
+DEVICE Device
+DUTCH Dutch
+EARNINGS Earnings
+EARNINGS_LABEL Earnings
+EARNINGS_YEAR_SELECTOR Earnings Year Selector
+EI EI
+EMAIL Email
+EMAIL_SUBJECT Email Subject
+END_KEY <kbd>End</kbd>
+ENGLISH English
+ENTER_KEY <kbd>ENTER</kbd>
+ENTRY_ROW Entry Row
+ERROR_EMAIL_EMPTY The email field was empty. Please try again.
+ERROR_EMAIL_MISSING The email is missing.
+ERROR_EMAIL_REGISTERED The email is already registered.
+ERROR_EMAIL_TAKEN Sorry, that email address is already registered. Please try again.
+ERROR_PASSWORD_EMPTY The password field was empty. Please try again.
+ERROR_PASSWORD_MISSING The password is missing.
+ERROR_PASSWORDS_MISMATCHED The passwords are mismatched. Please try again.
+ERROR_PASSWORDS_NO_MATCH The passwords do not match.
+ERROR_REGISTRATION_ISSUES It appears there are some issues with your registration. Please double check and try again.
+ERROR_SIGNIN_INVALID The email or password you entered doesn't match our records. Double-check and try again, or reset your password if needed.
+ERROR_SIGNIN_MISSING_FIELDS Please enter both your email and password to sign in.
+ERROR_USERNAME_EMPTY The username field was empty. Please try again.
+ERROR_USERNAME_TAKEN Sorry, that username has been taken. Please try again.
+ERROR_CAL_INVALID_HOURS Invalid hours value.
+ERROR_CAL_NONCE_FETCH Error fetching nonce.
+ERROR_CAL_NONCE_PASTE Failed to get nonce for paste.
+ERROR_CAL_NONCE_SAVE Failed to get nonce for save.
+ERROR_CAL_PASTE_FAILED Failed to update paste on server.
+ERROR_CAL_TOTAL_HOURS_EXCEED Total hours exceed 24.
+ERR_ENTRY_LOCKED_DATE Work entry date is locked for editing
+ENTRY_LOCKED This pay period is locked and cannot be edited
+ENTRY_LOCKED_GRACE_REMAINING You have {days} day(s) left to edit this period
+ENTRY_LOCKED_APPROACHING This pay period will lock soon
+EDITING_GRACE_DAYS Editing Grace Period
+EDITING_GRACE_DAYS_HELP Prevents editing work entries after the grace period expires
+EDITING_GRACE_DAYS_LOCK_IMMEDIATELY Lock immediately after period ends
+EDITING_GRACE_DAYS_1_DAY 1 day grace period
+EDITING_GRACE_DAYS_2_DAYS 2 days grace period
+EDITING_GRACE_DAYS_3_DAYS 3 days grace period
+EDITING_GRACE_DAYS_MAX_INFO Current maximum: {max} days
+ESCAPE_KEY <kbd>ESCAPE</kbd>
+FAQ_A1 Yes. We are currently in the private beta testing phase with a public beta to be launched in 2024. Our goals are grounded in keeping things simple, offering value and above all a solid committment to keeping your privacy and personal information safe and sound. We follow best practices to the best of our ability, such as responsive design, full accessibility, multi-language and theme support, fast and secure server management and much more.
+FAQ_A2 You bet! We offer a free tier for anyone needing to record and track their hourly earnings with additional related features that make it easy to gain further insights. We want to offer this level of service for free because it is important that everyone has as many tools as possible to help manage their work, their earnings and make their lives easier.
+FAQ_A3 We plan to make our first million from a subscription model paid by businesses and managers desiring even more control over their finances. The plan is simple. The paid tier is a flat-rate monthly fee with details to be announced once we officially release to the public.
+FAQ_A4 Absolutely! The Calendar displays each day's worth of recorded hours per job. Click on a day to bring up the Work Details panel to adjust as required. The Dashboard shows a breakdown of the year by month, pay period and job.
+FAQ_A5 Even though we presently provide our services in 10 languages, we are working on more! Check back often! We aim to provide an additional 15 more by the end of 2024, with plans to add more as time goes on. If you have a suggestion, we're all ears! Merci! Salamat Po! Danke! D
+FAQ_A6 We strive to be as open and clear as possible about how we operate this service. We have created policies outlining our terms of service, privacy controls, and accessibility goals.
+FAQ_A7 Please use our Contact page to get in touch with us.
+FAQ_CONTACT_TEXT If you have any further questions or concerns regarding our Terms and Conditions of Use, please do not hesitate to reach out. You can contact us at
+FAQ_Q1 Is this service real
+FAQ_Q2 Can I use this for free
+FAQ_Q3 What is this paid tier all about
+FAQ_Q4 Can I easily track my hours
+FAQ_Q5 When will PayCal support my language
+FAQ_Q6 How do we ensure transparency
+FAQ_Q7 How can I provide feedback or suggest improvements
+FAQ_TITLE Frequently Asked Questions
+FEDERAL_TAX Federal Tax
+FIRST First
+FRENCH French
+FRI Fri
+FULLDATE Full Date
+FULL_NAME Name
+FULL_NAME_PLACEHOLDER Full name please.
+FUN Fun!
+GERMAN German
+GO Go
+GO_TO Go to
+GROSS Gross
+HELP Help
+HELP_PAGE_TEASER Check out our <a href/__v20251116__/help/ accesskey'h'><em>H</em>elp Page</a> for videos and more!
+HINDI Hindi
+HOME_KEY <kbd>Home</kbd>
+HOURS Hours
+INACTIVE Inactive
+INCOME_TAX Income Tax
+INFO Info
+IP_ADDRESS IP Address
+ITALIAN Italian
+KEYBOARD Keyboard
+KEYBOARD_SHORTCUTS_GOT_IT Got it!
+KEYBOARD_SHORTCUTS Keyboard Shortcuts
+LANGUAGE Language
+LANGUAGE_PICKER Language Picker
+LANGUAGE_PREFERENCES Language Preferences
+TIMEZONE Timezone
+TIMEZONE_PICKER Timezone Picker
+CHOOSE_A_TIMEZONE Choose a timezone
+LARGER Larger
+LAST Last
+LAST_UPDATED Last updated
+LENGTH Length
+LESS Less
+LIGHT Light
+LIVING_OUT_ALLOWANCE Living Out Allowance
+LOA LOA
+SIGN_OUT Sign Out
+SIGN_OUT_MESSAGE Are you sure you want to Sign Out
+LONGDATE Long Date
+LONG Long
+MACOS Mac OS
+MAKE_ACTIVE Make Active
+MAKE_INACTIVE Make Inactive
+MEMORY_USAGE Memory Usage
+MESSAGE Message
+META_DESCRIPTION_LONG PayCal is the source of truth for pay periods, turning worked hours into payroll-ready, dispute-proof records. Modern, easy, and free to use.
+META_DESCRIPTION PayCal turns worked hours into dispute-proof payroll records.
+META_KEYWORDS payroll tracking, work hours management, earnings calculator, free payroll tool, accessible payroll app, simple payroll platform, team management, project tracking, pay period calculator, online payroll, time tracking, accessible tool, work hours tracker, pay management, earnings management
+META_TITLE PayCal Simple, Accessible Payroll Tracking for Everyone
+MODAL_HEADER Modal Header
+MODAL_MESSAGE Modal Message
+MODAL_TITLE Modal Title
+MON Mon
+MONTHLY_DETAILS Monthly Details
+MONTHLY Monthly
+MORE More
+NAME Name
+NARROW Narrow
+NAV_BAR Nav Bar
+NAVIGATE Navigate
+NAVIGATE_WITH Navigate with TAB or Arrow Keys
+NEED_TO_ENABLE_JAVASCRIPT You need to enable JavaScript to run this application.
+NET Net
+NEW_EMAIL New Email
+NEW_PASSWORD New Password
+NEXT_PREV_BRACKETS <kbd>[ or ]</kbd>
+NEXT_PREV_CALENDAR_MONTH Next/Previous Month
+NEXT_PREV_CALENDAR_MONTH_WITH Next/Previous Month with [ or ] or PGDN or PGUP
+NEXT_PREV_PAGEKEYS <kbd>PGDN or PGUP</kbd>
+NONE None
+NUMBERED <kbd>ALT 1-9</kbd>
+NUMBER Number
+OAS OAS
+OPEN_ABOUT Open About
+OPEN_ABOUT_WITH Open About with ALT B
+OPEN_ACCOUNT Open Profile
+OPEN_ACCOUNT_WITH Open Profile with ALT O
+OPEN_CALENDAR Open Calendar
+OPEN_CALENDAR_WITH Open Calendar with ALT C
+OPEN_DATE_PICKER Open Date Picker
+OPEN_DATE_PICKER_WITH Open Date Picker with backslash.
+OPEN_DIALOG Open Dialog
+OPEN_DIALOG_WITH Open Dialog With ENTER
+OPEN_EARNINGS Open Earnings
+OPEN_EARNINGS_WITH Open Earnings with ALT R
+OPENED_DIALOG Opened dialog
+OPEN_NUMBERED_TAB Open Numbered Tab
+OPEN_NUMBERED_TAB_WITH Open Numbered Tab with ALT 1-9
+OPEN Open
+OPEN_POLICIES Open Policies
+OPEN_POLICIES_WITH Open Policies with ALT P
+OPEN_SETTINGS Open Settings
+OPEN_SETTINGS_WITH Open Settings  with ALT A
+OPEN_SHORTCUTS Open Shortcuts
+OPEN_SHORTCUTS_WITH Open Shortcuts with Question Mark
+OPTIONAL_PHONE Optional phone number
+OS OS
+OVERTIME_HOURS Overtime Hours
+OVERTIME Overtime
+PASSWORD Password
+PASSWORD_REQUIRED Current password required
+PAST_1_YEAR Past 1 Year
+PAST_2_YEARS Past 2 Years
+PAST_3_MONTHS Past 3 Months
+PAST_3_YEARS Past 3 Years
+PAST_4_YEARS Past 4 Years
+PAST_5_YEARS Past 5 Years
+PAST_6_MONTHS Past 6 Months
+PASTE Paste
+PASTE_WORK Paste Work
+PASTE_WORK_WITH Paste Work with CTRL V.
+PAYCAL PayCal
+PAY Pay
+PAY_PERIOD_DETAILS Pay Period Details
+PAY_PERIOD Pay Period
+PAY_PERIODS Pay Periods
+PAY_PERIOD_PROGRESS Pay Period Progress
+PAY_PERIODS_RANGE Pay Periods Range
+PAY_SETTINGS_FORM Pay Settings Form
+PDF PDF
+PERSONAL_INFO_FORM Personal Information Form
+PERSONAL_INFO Personal Info
+PERSONAL Personal
+PHONE Phone
+PHONE_PLACEHOLDER xxx-xxx-xxxx
+TRANSPARENCY Transparency
+POLICIES Policies
+PORTUGUESE Portuguese
+PREFERENCES Preferences
+PRIMARY Primary
+PROVINCE Province
+PROVINCIAL_TAX Provincial Tax
+QUESTION_MARK_KEY <kbd>?</kbd>
+REFRESH Refresh
+REGISTER_COOKIE_DISCLAIMER If you are not comfortable with cookies, you may not register. Sorry bout that. (
+REGISTER_COOKIE_HEADSUP Hey, headsup! We use a cookie to store user authentication.
+REGISTER_FEATURE1_TEXT Say goodbye to paycheck mysteries! Visualize your expected earnings each pay period. Plan your finances with confidence.
+REGISTER_FEATURE1_TITLE �&nbspEarnings Transparency
+REGISTER_FEATURE2_TEXT No more complicated multi-step data entry!
+REGISTER_FEATURE2_TITLE �&nbspEffortless Tracking
+REGISTER_FEATURE3_TEXT For employers, powerful tools to simplify payroll management. Download the data you need. Make payroll a breeze.
+REGISTER_FEATURE3_TITLE %&nbspEmpower Personnel
+REGISTER_FEATURE4_TEXT Our platform is user-friendly, mobile-responsive, and packed with the latest technology.
+REGISTER_FEATURE4_TITLE &nbspEasy to Use
+REGISTER_HEADLINE � Supercharge Your Payroll Experience!
+REGISTER Register
+REGULAR_HOURS Regular Hours
+REGULAR Regular
+RENDER Render
+SAT Sat
+SAVE_AND_CLOSE Save & Close
+SAVE Save
+SCOPE Scope
+SELECT_AUTHENTICATION_LEVEL Select authentication level
+SEND_EMAIL Send Email
+SET_AS_DEFAULT Set&nbspas&nbspdefault.
+SETTINGS Settings
+SHORTDATE Short Date
+SHORT Short
+SHOW Show
+SITE_NAME PayCal
+SITES_LIST Sites List
+SITES Sites
+SKIP_PRIMARY_NAVIGATION Skip Primary Navigation
+SKIP_TO_CONTENT Skip to Content
+SKIP_TO_MAIN_CONTENT Skip to main content
+SMALLER Smaller
+DENSITY Density
+SPANISH Spanish
+START Start
+STATIC Static
+STATUS Status
+STICKY Fixed
+STYLE_PREFS Style Preferences
+STYLE Style
+SUN Sun
+TAB_KEY <kbd>TAB</kbd>
+TAGALOG Tagalog
+ORGANIZATION_AUTH_LEVEL Authorization Level
+ORGANIZATION_INVITE Invite
+ORGANIZATION_PERMISSIONS Permissions
+ORGANIZATION_PHONE_PLACEHOLDER xxx-xxx-xxxx
+ORGANIZATION_ROLES Roles
+ORGANIZATIONS Teams
+ORGANIZATION Team
+ORGANIZATION_UPDATE_USER Update User
+ORGANIZATION_USER_META_INFO User Meta Info
+ORGANIZATION_USERS Users
+TEXT Text
+THEME_PICKER Theme Picker
+THEME Theme
+THU Thu
+TILDE_KEY <kbd>/</kbd>
+TO to
+TOGGLE_CALENDAR_SCREENMODE Calendar Mode
+TOGGLE_CALENDAR_SCREENMODE_WITH Toggle Calendar mode with forward slash.
+TOOLTIP_AUDIO Describes navigation or changes.
+TOOLTIP_CALENDAR_AUDIO_LABELS Date label type to announce via text-to-speech.
+TOOLTIP_CALENDAR_AUTOFOCUS Day to automatically select in Calendar view.
+TOOLTIP_CONFIRM_EMAIL Confirm your new email address.
+TOOLTIP_CONFIRM_PASSWORD Confirm your new password.
+TOOLTIP_CURRENT_EMAIL Current email address.
+TOOLTIP_CURRENT_PASSWORD Current password.
+TOOLTIP_LANGUAGE Preferred language.
+TOOLTIP_NAV_BAR Preferred scroll behaviour of navigation bar.
+TOOLTIP_NEW_EMAIL Provide the new email address you want to use.
+TOOLTIP_NEW_PASSWORD Provide the new password you want to use.
+TOOLTIP_PASSWORD_REQUIRED Your password is required to proceed.
+TOOLTIP_DENSITY Preferred spacing of the interface.
+TOOLTIP_TEXT Preferred text size of the interface.
+TOOLTIP_THEME Look & feel of the interface.
+TRAVEL_HOURLY_RATE Travel Hourly Rate
+TRAVEL_HOURS Travel Hours
+TRAVEL Travel
+TUE Tue
+TURKISH Turkish
+TXT TXT
+UPDATE Update
+UPDATE_USER Update User
+UPDATING_AUDIO_TO Updating audio to
+UPDATING_CALENDAR_AUDIO_LABELS_TO Updating Calendar audio labels to
+UPDATING_CALENDAR_AUTOFOCUS_TO Updating Calendar autofocus to
+UPDATING_CALENDAR_DAY_NAME_FORMAT_TO Updating Calendar Day Name Format to
+UPDATING_INFO Updating Info...
+INFO_UPDATED Info updated
+UPDATING_LANGUAGE_TO Updating language to
+UPDATING_NAME Updating Name
+NAME_UPDATED Name updated
+UPDATING_NAV_BAR_TO Updating Navigation Bar to
+UPDATING_PAY_PERIOD Updating Pay Period
+UPDATING_PHONE Updating Phone
+UPDATING_PROVINCE Updating Province...
+PROVINCE_UPDATED Province updated
+UPDATING_DENSITY_TO Updating density to
+UPDATING_TEXT_TO Updating text to
+UPDATING_THEME_TO Updating theme to
+UPDATING_TIMEZONE Updating Timezone...
+TIMEZONE_UPDATED Timezone updated
+UPDATING_WORK Updating Work
+USER_AGENT User Agent
+USERS Users
+VOICE_PICKER Voice Picker
+VOICE Voice
+WAGE Wage
+WE_ARE_HIRING We are hiring. Send resumes to resumes@paycal.app
+WED Wed
+WINDOWS Windows
+WITH_SELECTED Select...
+WORK_DETAILS work
+WORK_FORM Work Form
+WORK_HOURS Work Hours
+WORK Work
+YEAR_SVG_LINE_GRAPH Year SVG Line Graph
+YEAR_TO_DATE_EARNINGS Year To Date Earnings
+YEAR_TO_DATE Year To Date
+YOUR_EMAIL Your Email
+YOUR_NAME Your Name
+SECONDARY Secondary
+ORGANIZATION_CREATE_ORGANIZATION Create Team
+ORGANIZATION_CREATE_DESC Create a new team
+ORGANIZATION_TITLE Title
+ORGANIZATION_TITLE_PLACEHOLDER Enter a title
+ORGANIZATION_LOCATION Location
+ORGANIZATION_LOCATION_PLACEHOLDER Enter a location
+ORGANIZATION_MANAGER Manager
+ORGANIZATION_CREATE Create
+ADD_NEW_ENTRY Add New Entry
+CALENDAR_HELP_LINK Calendar Help
+EARNINGS_HELP_LINK Earnings Help
+MY_ORGANIZATIONS My Teams
+MEMBER_OF Member Of
+NO_ORGANIZATIONS_MANAGED You don't manage any teams yet
+NO_MEMBER_ORGANIZATIONS You aren't a member of any teams yet
+ORGANIZATION_NAME Team Name
+ORGANIZATION_INFO Team Information
+ORGANIZATION_MEMBERS Team Members
+ORGANIZATION_DETAILS_DESC View and manage team details
+CREATED Created
+ENTER_ORGANIZATION_NAME Enter team name
+SEARCH_USER Search for user to add
+NO_MEMBERS No members in this team
+ADD_MEMBER Add Member
+CONFIRM_DELETE_ORGANIZATION Confirm Delete Team
+YES_DELETE Yes, Delete Team
+PROMOTE Promote
+DEMOTE Demote
+REMOVE_MEMBER Remove Member
+REMOVE Remove
+VIEW View
+MANAGERS Managers
+MEMBERS Members
+ACTIONS Actions
+CLOSE Close
+ABOUT_US_HTML <em>A</em>bout Us
+ACCOUNT_HTML <em>A</em>ccount
+ADMIN_HTML Ad<em>m</em>in
+CALENDAR_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960"><path d="M 200 -80 q -33 0 -56.5 -23.5 T 120 -160 v -560 q 0 -33 23.5 -56.5 T 200 -800 h 40 v -40 q 0 -17 11.5 -28.5 T 280 -880 q 17 0 28.5 11.5 T 320 -840 v 40 h 320 v -40 q 0 -17 11.5 -28.5 T 680 -880 q 17 0 28.5 11.5 T 720 -840 v 40 h 40 q 33 0 56.5 23.5 T 840 -720 v 560 q 0 33 -23.5 56.5 T 760 -80 H 200 Z m 0 -80 h 560 v -400 H 200 v 400 Z m 0 -480 h 560 v -80 H 200 v 80 Z m 0 0 v -80 80 Z m 280 240 q -17 0 -28.5 -11.5 T 440 -440 q 0 -17 11.5 -28.5 T 480 -480 q 17 0 28.5 11.5 T 520 -440 q 0 17 -11.5 28.5 T 480 -400 Z m -160 0 q -17 0 -28.5 -11.5 T 280 -440 q 0 -17 11.5 -28.5 T 320 -480 q 17 0 28.5 11.5 T 360 -440 q 0 17 -11.5 28.5 T 320 -400 Z m 320 0 q -17 0 -28.5 -11.5 T 600 -440 q 0 -17 11.5 -28.5 T 640 -480 q 17 0 28.5 11.5 T 680 -440 q 0 17 -11.5 28.5 T 640 -400 Z M 480 -240 q -17 0 -28.5 -11.5 T 440 -280 q 0 -17 11.5 -28.5 T 480 -320 q 17 0 28.5 11.5 T 520 -280 q 0 17 -11.5 28.5 T 480 -240 Z m -160 0 q -17 0 -28.5 -11.5 T 280 -280 q 0 -17 11.5 -28.5 T 320 -320 q 17 0 28.5 11.5 T 360 -280 q 0 17 -11.5 28.5 T 320 -240 Z m 320 0 q -17 0 -28.5 -11.5 T 600 -280 q 0 -17 11.5 -28.5 T 640 -320 q 17 0 28.5 11.5 T 680 -280 q 0 17 -11.5 28.5 T 640 -240 Z"/></svg>
+EARNINGS_HTML Ea<em>r</em>nings
+HELP_HTML <em>H</em>elp
+HELP_PAGE_TEASER_HTML Check out our <a href="/__v20251116__/help/" accesskey="h"><em>H</em>elp  Page</a> for videos and more!
+MONEY_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 860 860"><path d="M 481 -120 q -17 0 -28.5 -11.5 T 441 -160 v -46 q -45 -10 -79 -35 t -55 -70 q -7 -14 -0.5 -29.5 T 330 -363 q 14 -6 29 0.5 t 23 21.5 q 17 30 43 45.5 t 64 15.5 q 41 0 69.5 -18.5 T 587 -356 q 0 -35 -22 -55.5 T 463 -458 q -86 -27 -118 -64.5 T 313 -614 q 0 -65 42 -101 t 86 -41 v -44 q 0 -17 11.5 -28.5 T 481 -840 q 17 0 28.5 11.5 T 521 -800 v 44 q 38 6 66 24.5 t 46 45.5 q 9 13 3.5 29 T 614 -634 q -14 6 -29 0.5 T 557 -653 q -13 -14 -30.5 -21.5 T 483 -682 q -44 0 -67 19.5 T 393 -614 q 0 33 30 52 t 104 40 q 69 20 104.5 63.5 T 667 -358 q 0 71 -42 108 t -104 46 v 44 q 0 17 -11.5 28.5 T 481 -120 Z"/></svg>
+NEXT_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -900 600 600"><path d="M 504 -480 L 348 -636 q -11 -11 -11 -28 t 11 -28 q 11 -11 28 -11 t 28 11 l 184 184 q 6 6 8.5 13 t 2.5 15 q 0 8 -2.5 15 t -8.5 13 L 404 -268 q -11 11 -28 11 t -28 -11 q -11 -11 -11 -28 t 11 -28 l 156 -156 Z"/></svg>
+PAYCAL_HTML Pay<em>C</em>al
+PAYCAL_HTML_PUBLIC PayCal
+POLICIES_HTML <em>P</em>olicies
+PREVIOUS_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -900 600 600" width="24"><path d="m 432 -480 l 156 156 q 11 11 11 28 t -11 28 q -11 11 -28 11 t -28 -11 L 348 -452 q -6 -6 -8.5 -13 t -2.5 -15 q 0 -8 2.5 -15 t 8.5 -13 l 184 -184 q 11 -11 28 -11 t 28 11 q 11 11 11 28 t -11 28 L 432 -480 Z"/></svg>
+COLLAPSE_SIDEBAR Collapse Sidebar
+EXPAND_SIDEBAR Expand Sidebar
+SIDEBAR_COLLAPSED Sidebar Collapsed
+SIDEBAR_EXPANDED Sidebar Expanded
+SIGN_OUT_CONFIRMATION_AND_CONTROLS Sign out confirmation and controls
+SIGN_OUT_DIALOG_DESCRIPTION This dialog allows you to confirm signing out of your account. You can choose to sign out or cancel to remain logged in.
+TRANSPARENCY_HTML Tra<em>n</em>sparency
+SETTINGS_HTML S<em>e</em>ttings
+SETTINGS_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -1100 960 960" width="24"><path d="M 433 -80 q -27 0 -46.5 -18 T 363 -142 l -9 -66 q -13 -5 -24.5 -12 T 307 -235 l -62 26 q -25 11 -50 2 t -39 -32 l -47 -82 q -14 -23 -8 -49 t 27 -43 l 53 -40 q -1 -7 -1 -13.5 v -27 q 0 -6.5 1 -13.5 l -53 -40 q -21 -17 -27 -43 t 8 -49 l 47 -82 q 14 -23 39 -32 t 50 2 l 62 26 q 11 -8 23 -15 t 24 -12 l 9 -66 q 4 -26 23.5 -44 t 46.5 -18 h 94 q 27 0 46.5 18 t 23.5 44 l 9 66 q 13 5 24.5 12 t 22.5 15 l 62 -26 q 25 -11 50 -2 t 39 32 l 47 82 q 14 23 8 49 t -27 43 l -53 40 q 1 7 1 13.5 v 27 q 0 6.5 -2 13.5 l 53 40 q 21 17 27 43 t -8 49 l -48 82 q -14 23 -39 32 t -50 -2 l -60 -26 q -11 8 -23 15 t -24 12 l -9 66 q -4 26 -23.5 44 T 527 -80 h -94 Z m 7 -80 h 79 l 14 -106 q 31 -8 57.5 -23.5 T 639 -327 l 99 41 39 -68 l -86 -65 q 5 -14 7 -29.5 t 2 -31.5 q 0 -16 -2 -31.5 t -7 -29.5 l 86 -65 l -39 -68 l -99 42 q -22 -23 -48.5 -38.5 T 533 -694 l -13 -106 h -79 l -14 106 q -31 8 -57.5 -23.5 T 321 -633 l -99 -41 l -39 68 l 86 64 q -5 15 -7 30 t -2 32 q 0 16 2 31 t 7 30 l -86 65 l 39 68 l 99 -42 q 22 23 48.5 38.5 T 427 -266 l 13 106 Z m 42 -180 q 58 0 99 -41 t 41 -99 q 0 -58 -41 -99 t -99 -41 q -59 0 -99.5 41 T 342 -480 q 0 58 40.5 99 t 99.5 41 Z m -2 -140 Z"/></svg>
+SITE_NAME_HTML Pay<em>C</em>al
+SITES_HTML <em>S</em>ites
+SITES_SVG <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M 4 2.5 a 0.5 0.5 0 0 1 0.5 -0.5 h 1 a 0.5 0.5 0 0 1 0.5 0.5 v 1 a 0.5 0.5 0 0 1 -0.5 0.5 h -1 a 0.5 0.5 0 0 1 -0.5 -0.5 z m 3 0 a 0.5 0.5 0 0 1 0.5 -0.5 h 1 a 0.5 0.5 0 0 1 0.5 0.5 v 1 a 0.5 0.5 0 0 1 -0.5 0.5 h -1 a 0.5 0.5 0 0 1 -0.5 -0.5 z m 3.5 -0.5 a 0.5 0.5 0 0 0 -0.5 0.5 v 1 a 0.5 0.5 0 0 0 0.5 0.5 h 1 a 0.5 0.5 0 0 0 0.5 -0.5 v -1 a 0.5 0.5 0 0 0 -0.5 -0.5 z M 4 5.5 a 0.5 0.5 0 0 1 0.5 -0.5 h 1 a 0.5 0.5 0 0 1 0.5 0.5 v 1 a 0.5 0.5 0 0 1 -0.5 0.5 h -1 a 0.5 0.5 0 0 1 -0.5 -0.5 z M 7.5 5 a 0.5 0.5 0 0 0 -0.5 0.5 v 1 a 0.5 0.5 0 0 0 0.5 0.5 h 1 a 0.5 0.5 0 0 0 0.5 -0.5 v -1 a 0.5 0.5 0 0 0 -0.5 -0.5 z m 2.5 0.5 a 0.5 0.5 0 0 1 0.5 -0.5 h 1 a 0.5 0.5 0 0 1 0.5 0.5 v 1 a 0.5 0.5 0 0 1 -0.5 0.5 h -1 a 0.5 0.5 0 0 1 -0.5 -0.5 z M 4.5 8 a 0.5 0.5 0 0 0 -0.5 0.5 v 1 a 0.5 0.5 0 0 0 0.5 0.5 h 1 a 0.5 0.5 0 0 0 0.5 -0.5 v -1 a 0.5 0.5 0 0 0 -0.5 -0.5 z m 2.5 0.5 a 0.5 0.5 0 0 1 0.5 -0.5 h 1 a 0.5 0.5 0 0 1 0.5 0.5 v 1 a 0.5 0.5 0 0 1 -0.5 0.5 h -1 a 0.5 0.5 0 0 1 -0.5 -0.5 z m 3.5 -0.5 a 0.5 0.5 0 0 0 -0.5 0.5 v 1 a 0.5 0.5 0 0 0 0.5 0.5 h 1 a 0.5 0.5 0 0 0 0.5 -0.5 v -1 a 0.5 0.5 0 0 0 -0.5 -0.5 z M 2 1 a 1 1 0 0 1 1 -1 h 10 a 1 1 0 0 1 1 1 v 14 a 1 1 0 0 1 -1 1 H 3 a 1 1 0 0 1 -1 -1 z m 11 0 H 3 v 14 h 3 v -2.5 a 0.5 0.5 0 0 1 0.5 -0.5 h 3 a 0.5 0.5 0 0 1 0.5 0.5 V 15 h 3 z "/></svg>
+ORGANIZATION_HTML <em>T</em>eam
+ORGANIZATIONS_HTML <em>O</em>rganizations
+ORGANIZATION_SVG <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="8" cy="8" r="3.5"/><path d="M 8 14 c -2.33 0 -7 1.17 -7 3.5 V 22 h 14 v -4.5 c 0 -2.33 -4.67 -3.5 -7 -3.5 Z"/><circle cx="16" cy="7.5" r="3"/><path d="M 16 13.5 c -1.67 0 -5 0.83 -5 2.5 v 3.5 h 10 v -3.5 c 0 -1.67 -3.33 -2.5 -5 -2.5 Z" opacity="0.9"/></g></svg>
+CONTACT_REASON Reason for contacting
+CONTACT_REASON_GENERAL General inquiry
+CONTACT_REASON_ACCOUNT Account or login issue
+CONTACT_REASON_BUG Report a bug
+CONTACT_REASON_BILLING Billing question
+CONTACT_REASON_FEATURE Request a feature
+CONTACT_HELP_TITLE Help us help you better
+CONTACT_HELP_INTRO Making your message clear helps us respond faster:
+CONTACT_HELP_TIP_1 Be specific: Describe exactly what you're trying to do and what happens instead.
+CONTACT_HELP_TIP_2 Include details: Check our optional context options below to share technical info.
+CONTACT_HELP_TIP_3 One issue per message: If you have multiple concerns, send separate messages.
+CONTACT_HELP_CONTEXT Optional — Help us understand your context:
+CONTACT_CONTEXT_BROWSER Include my browser info
+CONTACT_CONTEXT_PAGE Include current page URL
+CONTACT_CONTEXT_LANGUAGE Include my language setting
+CONTACT_SLA_LABEL Response time:
+
+ORGANIZATIONS Profile
+ORGANIZATIONS_HTML Pr<em>o</em>file
+PROFILE Profile
+PROFILE_HTML Pr<em>o</em>file
+ORGANIZATIONS_INTRO Organizations connect sites and member access while keeping work entries user-owned.
+ORGANIZATIONS_OPEN_FULL Open Full Org Controls
+ORGANIZATIONS_CREATE_ORG Create Organization
+ORGANIZATIONS_NAME Organization Name
+ORGANIZATIONS_CREATE_HELP After creating, manage invites, scopes, defaults, and ownership from Settings.
+ORGANIZATIONS_YOUR_ORGANIZATIONS Your Organizations
+ORGANIZATIONS_SELECT_PLACEHOLDER Select organization...
+ORGANIZATIONS_INVITE_DELEGATES Invite Members
+ORGANIZATIONS_INVITE_PLACEHOLDER member@example.com
+ORGANIZATIONS_SEND_INVITE Send Invite
+ORGANIZATIONS_SCOPE_WORK_READ Work Read
+ORGANIZATIONS_SCOPE_SITES_READ Sites Read
+ORGANIZATIONS_SCOPE_SITES_WRITE Sites Write
+ORGANIZATIONS_SCOPE_ORG_READ Org Read
+ORGANIZATIONS_SCOPE_ORG_WRITE Org Write
+ORGANIZATIONS_SCOPE_ACCESS_MANAGE Access Manage
+ORGANIZATIONS_PENDING_INVITES Pending Invites
+ORGANIZATIONS_DISCOVERY Discovery
+ORGANIZATIONS_RUN_DISCOVERY Run Discovery
+ORGANIZATIONS_DISCOVERY_HELP Find sites that can be linked to the selected organization.
+ORGANIZATIONS_LEAVE_SELECTED Leave Selected Organization
+ORGANIZATIONS_DEFAULTS Organization Defaults
+ORGANIZATIONS_SAVE_DEFAULTS Save Defaults
+ORGANIZATIONS_PAY_PERIOD_LENGTH Pay Period Length
+ORGANIZATIONS_DEFAULT_WAGE Default Wage
+ORGANIZATIONS_TIMEZONE Timezone
+ORGANIZATIONS_CURRENCY Currency
+ORGANIZATIONS_OWNERSHIP_TRANSFER Ownership Transfer
+ORGANIZATIONS_RELOAD_MEMBERS Reload Members
+ORGANIZATIONS_TRANSFER_TARGET_PLACEHOLDER Select member UUID...
+ORGANIZATIONS_TRANSFER_OWNERSHIP Transfer Ownership
+ORGANIZATIONS_AUDIT_TIMELINE Audit Timeline
+ORGANIZATIONS_RELOAD_TIMELINE Reload Timeline
+ORGANIZATIONS_LOADING Loading organizations...
+ORGANIZATIONS_NONE No organizations yet. Create your first organization to get started.
+ORGANIZATIONS_ROLE Role
+ORGANIZATIONS_SCOPES Scopes
+ORGANIZATIONS_MANAGE_IN_SETTINGS Manage in Settings
+ORGANIZATIONS_UNKNOWN Unknown
+ORGANIZATIONS_PENDING pending
+ORGANIZATIONS_REVOKE Revoke
+ORGANIZATIONS_NO_INVITES No invites for this organization.
+ORGANIZATIONS_SELECT_FIRST Select an organization first.
+ORGANIZATIONS_INVITE_REVOKED Invite revoked.
+ORGANIZATIONS_INVITE_REVOKE_FAILED Unable to revoke invite.
+ORGANIZATIONS_LINK_SITE Link Site
+ORGANIZATIONS_SITE_WITHOUT_ORG Site without org
+ORGANIZATIONS_SITE_LINKED Site linked to organization.
+ORGANIZATIONS_SITE_LINK_FAILED Unable to link site.
+ORGANIZATIONS_NO_DISCOVERY No discovery candidates found.
+ORGANIZATIONS_DISCOVERY_RUNNING Running discovery...
+ORGANIZATIONS_DISCOVERY_COMPLETE Organization discovery completed.
+ORGANIZATIONS_DISCOVERY_FAILED Unable to run organization discovery.
+ORGANIZATIONS_LOAD_INVITES_FAILED Unable to load invites.
+ORGANIZATIONS_LOAD_DEFAULTS_FAILED Unable to load organization defaults.
+ORGANIZATIONS_DEFAULTS_SAVED Organization defaults saved.
+ORGANIZATIONS_DEFAULTS_SAVE_FAILED Unable to save organization defaults.
+ORGANIZATIONS_LOAD_ORGS_FAILED Unable to load organizations right now.
+ORGANIZATIONS_LOAD_AUDIT_FAILED Unable to load audit timeline.
+ORGANIZATIONS_NO_AUDIT No audit events yet.
+ORGANIZATIONS_NAME_MIN Organization name must be at least 2 characters.
+ORGANIZATIONS_CREATED Organization created.
+ORGANIZATIONS_CREATE_FAILED Failed to create organization.
+ORGANIZATIONS_ENTER_INVITE_EMAIL Enter an invite email.
+ORGANIZATIONS_SELECT_SCOPE Select at least one scope.
+ORGANIZATIONS_INVITE_SENT Organization invite sent.
+ORGANIZATIONS_INVITE_SEND_FAILED Unable to send organization invite.
+ORGANIZATIONS_SELECT_TRANSFER_TARGET Select a transfer target first.
+ORGANIZATIONS_OWNERSHIP_TRANSFERRED Ownership transferred.
+ORGANIZATIONS_OWNERSHIP_TRANSFER_FAILED Unable to transfer ownership.
+ORGANIZATIONS_WITHDRAWN Organization relationship withdrawn.
+ORGANIZATIONS_WITHDRAW_FAILED Unable to leave organization.
+ORGANIZATIONS_AUDIT_EVENT event
+ORGANIZATIONS_AUDIT_ACTOR actor
+
+ORGANIZATIONS_REMOVE_CONFIRM_PREFIX Remove organization
+ORGANIZATIONS_REMOVE_CONFIRM_SUFFIX from your organizations list?
+ORGANIZATIONS_REMOVE_FAILED Unable to remove organization right now.

@@ -1,0 +1,495 @@
+14_DAYS 14 jours
+1_WEEK 1 semaine
+2_WEEKS 2 semaines
+7_DAYS 7 jours
+WIN95_DARK 95 Sombre
+WIN95_LIGHT 95 Clair
+ABOUT_US À propos de nous
+ACCOUNT Compte
+ACCOUNT_ACTIONS Actions du compte
+ACCOUNT_REGISTRATION Inscription au compte
+ACTIONS Actions
+ACTIVE Actif
+ADD_ROW Ajouter une ligne
+CREATE_SITE Créer un Site
+EDIT_SITE Modifier le Site
+ADMIN Admin
+ALL Tout
+ALL_TIME Tout le temps
+ALT_A <kbd>ALT A</kbd>
+ALT_BACKSLASH <kbd>ALT \\</kbd>
+ALT_B <kbd>ALT B</kbd>
+ALT_C <kbd>ALT C</kbd>
+ALT_P <kbd>ALT P</kbd>
+ALT_R <kbd>Alt R</kbd>
+ANALYTICS Analytique
+ARCADE_DARK Arcade Sombre
+ARCADE_LIGHT Arcade Clair
+ARROW_KEYS <kbd>Flèches</kbd>
+AUDIO Audio
+AUDIO_FEEDBACK Retour audio
+AUDIO_FEEDBACK_USING Retour audio utilisant
+AUDIO_PREFS Préférences audio
+BASE Base
+BROWSER Navigateur
+CALENDAR_AUDIO_LABELS_ON Étiquettes audio
+CALENDAR_AUTOFOCUS_ON Focus automatique
+CALENDAR Calendrier
+CALENDAR_DAYS Jours
+CALENDAR_PREFS_FORM Formulaire de préférences du calendrier
+CANCEL_AND_CLOSE Annuler et fermer
+CANCEL Annuler
+CAPSLOCK_ACTIVE Touche Verr. Maj. active.
+CHANGE_EMAIL Changer l\'e-mail
+CHANGE_PASSWORD Changer le mot de passe
+CHOOSE_A_LANGUAGE Choisir une langue
+CHOOSE_A_THEME Choisir un thème
+CHOOSE_A_VOICE Choisir une voix
+CLOSED_DIALOG Boîte de dialogue fermée
+CLOSE_DIALOG Fermer la boîte de dialogue
+CLOSE_DIALOG_WITH Fermer la boîte de dialogue avec ÉCHAP
+CONFIRM_NEW_EMAIL Confirmer le nouvel e-mail
+CONFIRM_NEW_PASSWORD Confirmer le nouveau mot de passe
+CONFIRM_NO_TYPOS Confirmer l\'absence de fautes de frappe
+CONFIRM_PASSWORD Confirmer le mot de passe
+CONSENT_COOKIE_POLICY J\'accepte la politique de cookies.
+CONTACT Contact
+CONTACT_US Nous contacter
+COPY Copier
+COPY_WORK Copier le travail
+COPY_WORK_WITH Copier le travail avec CTRL C.
+CPP RPC
+CSV CSV
+CTRL_C <kbd>CTRL C</kbd>
+CTRL_V <kbd>CTRL V</kbd>
+CURRENT Actuel
+CURRENT_EMAIL E-mail actuel
+CURRENT_PASSWORD Mot de passe actuel
+CURRENT_TIME Heure actuelle
+DAILY Quotidien
+DAILY_DETAILS Détails quotidiens
+DARK Sombre
+DATE Date
+DATE_PICKER Sélecteur de date
+DEDUCTIONS Déductions
+DELETE_ACCOUNT Supprimer le compte
+DELETE_ACCOUNT_MESSAGE Nous sommes vraiment tristes de vous voir partir ! Veuillez entrer votre mot de passe pour confirmer que vous voulez vraiment supprimer votre compte.
+DELETE Supprimer
+DELETE_KEY <kbd>SUPPR</kbd>
+DELETE_SITE Supprimer le site
+DELETE_WORK Supprimer le travail
+DELETE_WORK_WITH Supprimer le travail avec Suppr.
+DEVICE Appareil
+DUTCH Néerlandais
+EARNINGS Gains
+EARNINGS_LABEL Gains
+EARNINGS_YEAR_SELECTOR Sélecteur d\'année des gains
+EI AE
+EMAIL E-mail
+EMAIL_SUBJECT Sujet de l\'e-mail
+END_KEY <kbd>Fin</kbd>
+ENGLISH Anglais
+ENTER_KEY <kbd>ENTRÉE</kbd>
+ENTRY_ROW Ligne d\'entrée
+ERROR_EMAIL_EMPTY Le champ e-mail était vide. Veuillez réessayer.
+ERROR_EMAIL_MISSING L\'e-mail manque.
+ERROR_EMAIL_REGISTERED L\'e-mail est déjà enregistré.
+ERROR_EMAIL_TAKEN Désolé, cette adresse e-mail est déjà enregistrée. Veuillez réessayer.
+ERROR_PASSWORD_EMPTY Le champ mot de passe était vide. Veuillez réessayer.
+ERROR_PASSWORD_MISSING Le mot de passe manque.
+ERROR_PASSWORDS_MISMATCHED Les mots de passe ne correspondent pas. Veuillez réessayer.
+ERROR_PASSWORDS_NO_MATCH Les mots de passe ne correspondent pas.
+ERROR_REGISTRATION_ISSUES Il semble y avoir des problèmes avec votre inscription. Veuillez vérifier et réessayer.
+ERROR_USERNAME_EMPTY Le champ nom d\'utilisateur était vide. Veuillez réessayer.
+ERROR_USERNAME_TAKEN Désolé, ce nom d\'utilisateur est déjà pris. Veuillez réessayer.
+ESCAPE_KEY <kbd>ÉCHAP</kbd>
+FAQ_A1 Oui. Nous sommes actuellement en phase de tests bêta privés avec une bêta publique prévue pour 2024. Nos objectifs sont ancrés dans la simplicité, l\'offre de valeur et avant tout un engagement solide à garder votre vie privée et vos informations personnelles en sécurité. Nous suivons les meilleures pratiques au mieux de nos capacités, comme la conception responsive, l\'accessibilité complète, le support multilingue et de thèmes, la gestion de serveur rapide et sécurisée et bien plus encore.
+FAQ_A2 Bien sûr ! Nous offrons un niveau gratuit pour quiconque ayant besoin d\'enregistrer et de suivre ses gains horaires avec des fonctionnalités supplémentaires qui facilitent l\'obtention d\'insights supplémentaires. Nous voulons offrir ce niveau de service gratuitement car il est important que tout le monde ait autant d\'outils que possible pour aider à gérer son travail, ses gains et rendre sa vie plus facile.
+FAQ_A3 Nous prévoyons de faire notre premier million grâce à un modèle d\'abonnement payé par les entreprises et les managers désirant encore plus de contrôle sur leurs finances. Le plan est simple. Le niveau payant est un tarif mensuel fixe avec des détails à annoncer une fois que nous sortirons officiellement au public.
+FAQ_A4 Absolument ! Le calendrier affiche chaque jour les heures enregistrées par emploi. Cliquez sur un jour pour faire apparaître le panneau Détails du travail à ajuster selon les besoins. Le tableau de bord montre une ventilation de l\'année par mois, période de paie et emploi.
+FAQ_A5 Même si nous fournissons actuellement nos services en 10 langues, nous en développons plus ! Revenez souvent ! Nous visons à fournir 15 langues supplémentaires d\'ici la fin de 2024, avec des plans pour en ajouter plus au fil du temps. Si vous avez une suggestion, nous sommes tout ouïe ! Merci ! Salamat Po ! Danke ! :D
+FAQ_A6 Nous nous efforçons d\'être aussi ouverts et clairs que possible sur la façon dont nous exploitons ce service. Nous avons créé des politiques décrivant nos conditions d\'utilisation, contrôles de confidentialité et objectifs d\'accessibilité.
+FAQ_A7 Veuillez utiliser notre page Contact pour nous contacter.
+FAQ_CONTACT_TEXT Si vous avez d\'autres questions ou préoccupations concernant nos Conditions d\'utilisation, n\'hésitez pas à nous contacter. Vous pouvez nous contacter à
+FAQ_Q1 Ce service est-il réel ?
+FAQ_Q2 Puis-je l\'utiliser gratuitement ?
+FAQ_Q3 Qu\'est-ce que ce niveau payant ?
+FAQ_Q4 Puis-je facilement suivre mes heures ?
+FAQ_Q5 Quand PayCal prendra-t-il en charge ma langue ?
+FAQ_Q6 Comment assurons-nous la transparence ?
+FAQ_Q7 Comment puis-je fournir des commentaires ou suggérer des améliorations ?
+FAQ_TITLE Foire aux questions
+FEDERAL_TAX Impôt fédéral
+FIRST Premier
+FRENCH Français
+FRI Ven
+FULLDATE Date complète
+FULL_NAME Nom
+FULL_NAME_PLACEHOLDER Nom complet s\'il vous plaît.
+FUN Amusant !
+GERMAN Allemand
+GO_TO Aller à
+GROSS Brut
+HINDI Hindi
+HOME_KEY <kbd>Début</kbd>
+HOURS Heures
+INACTIVE Inactif
+INCOME_TAX Impôt sur le revenu
+INFO Info
+IP_ADDRESS Adresse IP
+ITALIAN Italien
+KEYBOARD Keyboard
+KEYBOARD_SHORTCUTS_GOT_IT Compris !
+KEYBOARD_SHORTCUTS Raccourcis clavier
+LANGUAGE Langue
+LANGUAGE_PICKER Sélecteur de langue
+LANGUAGE_PREFERENCES Préférences de langue
+LARGER Plus grand
+LAST Dernier
+LAST_UPDATED Dernière mise à jour
+LENGTH Longueur
+LESS Moins
+LIGHT Clair
+LIVING_OUT_ALLOWANCE IVE
+LOA IVE
+LOG_OUT Se déconnecter
+LOG_OUT_MESSAGE Êtes-vous sûr de vouloir vous déconnecter ?
+LONGDATE Date longue
+LONG Long
+MACOS Mac OS
+MEMORY_USAGE Utilisation mémoire
+MESSAGE Message
+META_DESCRIPTION_LONG Révolutionnez la paie des travailleurs avec PayCal : gains transparents, suivi sans effort et gestion de paie efficace. Moderne, facile et gratuit à utiliser.
+META_DESCRIPTION Suivez vos heures de travail et calculez les gains de paie sans effort avec PayCal. Gratuit, facile à utiliser et accessible à tous. Gérez vos données avec rapidité et simplicité, et explorez les fonctionnalités avancées pour la gestion d\'équipe.
+META_KEYWORDS suivi de paie, gestion heures travail, calculateur gains, outil paie gratuit, app paie accessible, plateforme paie simple, gestion équipe, suivi projet, calculateur période paie, paie en ligne, suivi temps, outil accessible, suiveur heures travail, gestion paie, gestion gains
+META_TITLE PayCal : Suivi de paie simple et accessible pour tous
+MODAL_HEADER En-tête de modal
+MODAL_MESSAGE Message de modal
+MODAL_TITLE Titre de modal
+MON Lun
+MONTHLY_DETAILS Détails mensuels
+MONTHLY Mensuel
+MORE Plus
+NAME Nom
+NAV_BAR Barre de navigation
+NAVIGATE Naviguer
+NAVIGATE_WITH Naviguer avec TAB ou flèches
+NEED_TO_ENABLE_JAVASCRIPT Vous devez activer JavaScript pour exécuter cette application.
+NET Net
+NEW_EMAIL Nouvel e-mail
+NEW_PASSWORD Nouveau mot de passe
+NEXT_PREV_BRACKETS <kbd>ALT [ ou ]</kbd>
+NEXT_PREV_CALENDAR_MONTH Mois suivant/précédent
+NEXT_PREV_CALENDAR_MONTH_WITH Mois suivant/précédent avec ALT [ ou ]
+NEXT_PREV_PAGEKEYS <kbd>PAGE SUIv ou PAGE PRÉC</kbd>
+NONE Aucun
+NUMBERED <kbd>ALT 1-9</kbd>
+NUMBER Numéro
+OAS SV
+OPEN_ABOUT Ouvrir À propos
+OPEN_ABOUT_WITH Ouvrir À propos avec ALT B
+OPEN_ACCOUNT Ouvrir le compte
+OPEN_ACCOUNT_WITH Ouvrir un compte avec ALT A
+OPEN_CALENDAR Ouvrir le calendrier
+OPEN_CALENDAR_WITH Ouvrir le calendrier avec ALT C
+OPEN_DATE_PICKER Ouvrir le sélecteur de date
+OPEN_DATE_PICKER_WITH Ouvrir le sélecteur de date avec ALT \\</kbd>
+OPEN_DIALOG Ouvrir la boîte de dialogue
+OPEN_DIALOG_WITH Ouvrir la boîte de dialogue avec ENTRÉE
+OPEN_EARNINGS Ouvrir les revenus
+OPEN_EARNINGS_WITH Ouvrir les revenus avec ALT R
+OPENED_DIALOG Boîte de dialogue ouverte
+OPEN_NUMBERED_TAB Ouvrir l\'onglet numéroté
+OPEN_NUMBERED_TAB_WITH Ouvrir l\'onglet numéroté avec ALT [1-9]
+OPEN Ouvrir
+OPEN_POLICIES Ouvrir les politiques
+OPEN_POLICIES_WITH Ouvrir les politiques avec ALT P
+OPEN_SETTINGS Ouvrir les paramètres
+OPEN_SETTINGS_WITH Ouvrir les paramètres avec ALT A
+OPEN_SHORTCUTS Ouvrir les raccourcis
+OPEN_SHORTCUTS_WITH Ouvrir les raccourcis avec ALT Barre oblique ou Point d\'interrogation
+OPTIONAL_PHONE Numéro de téléphone optionnel
+OS Système d\'exploitation
+OVERTIME_HOURS Heures supplémentaires
+OVERTIME Heures supplémentaires
+PASSWORD Mot de passe
+PASSWORD_REQUIRED Mot de passe actuel requis
+PAST_1_YEAR Dernière année
+PAST_2_YEARS 2 dernières années
+PAST_3_MONTHS 3 derniers mois
+PAST_3_YEARS 3 dernières années
+PAST_4_YEARS 4 dernières années
+PAST_5_YEARS 5 dernières années
+PAST_6_MONTHS 6 derniers mois
+PASTE Coller
+PASTE_WORK Coller le travail
+PASTE_WORK_WITH Coller le travail avec CTRL V.
+PAYCAL PayCal
+PAY Payer
+PAY_PERIOD_DETAILS Détails de la période de paie
+PAY_PERIOD Période de paie
+PAY_PERIODS Périodes de paie
+PAY_PERIODS_RANGE Plage des périodes de paie
+PAY_SETTINGS_FORM Formulaire des paramètres de paie
+PDF PDF
+PERSONAL_INFO_FORM Formulaire d\'informations personnelles
+PERSONAL_INFO Informations personnelles
+PERSONAL Personnel
+PHONE Téléphone
+PHONE_PLACEHOLDER xxx-xxx-xxxx
+TRANSPARENCY Transparence
+POLICIES Politiques
+PORTUGUESE Portugais
+PREFERENCES Préférences
+PRIMARY Principal
+PROVINCIAL_TAX Taxe provinciale
+PROVINCE Province
+QUESTION_MARK_KEY <kbd>?</kbd>
+REFRESH Actualiser
+REGISTER_COOKIE_DISCLAIMER Si vous n\'êtes pas à l\'aise avec les cookies, vous ne pouvez pas vous inscrire. Désolé pour cela. :(
+REGISTER_COOKIE_HEADSUP Hey, attention ! Nous utilisons un cookie pour stocker l\'authentification de l\'utilisateur.
+REGISTER_FEATURE1_TEXT Dites adieu aux mystères de la paie ! Visualisez vos revenus attendus pour chaque période de paie. Planifiez vos finances en toute confiance.
+REGISTER_FEATURE1_TITLE 💡 Transparence des revenus
+REGISTER_FEATURE2_TEXT Fini la saisie de données compliquée en plusieurs étapes !
+REGISTER_FEATURE2_TITLE 📊 Suivi sans effort
+REGISTER_FEATURE3_TEXT Pour les employeurs, des outils puissants pour simplifier la gestion de la paie. Téléchargez les données dont vous avez besoin. Facilitez la paie.
+REGISTER_FEATURE3_TITLE 🔥 Autonomiser le personnel
+REGISTER_FEATURE4_TEXT Notre plateforme est conviviale, adaptée aux mobiles et dotée des dernières technologies.
+REGISTER_FEATURE4_TITLE 🌟 Facile à utiliser
+REGISTER_HEADLINE 🚀 Boostez votre expérience de paie !
+REGISTER S\'inscrire
+REGULAR_HOURS Heures régulières
+REGULAR Régulier
+RENDER Rendu
+SAT Sam
+SAVE_AND_CLOSE Enregistrer et fermer
+SAVE Enregistrer
+SCOPE Portée
+SEND_EMAIL Envoyer un e-mail
+SET_AS_DEFAULT Définir par défaut.
+SETTINGS Paramètres
+SHORTDATE Date courte
+SHORT Court
+SHOW Afficher
+SITE_NAME PayCal
+SITES_LIST Liste des sites
+SITES Sites
+SKIP_PRIMARY_NAVIGATION Ignorer la navigation principale
+SKIP_TO_CONTENT Aller au contenu
+SKIP_TO_MAIN_CONTENT Aller au contenu principal
+SMALLER Plus petit
+DENSITY Densité
+SPANISH Espagnol
+START Commencer
+STATIC Statique
+STATUS Statut
+STICKY Fixe
+STYLE_PREFS Préférences de style
+STYLE Style
+SUN Dim
+TAB_KEY <kbd>TAB</kbd>
+TAGALOG Tagalog
+ORGANIZATION Équipe
+ORGANIZATIONS Équipes
+ORGANIZATION_AUTH_LEVEL Niveau d\'autorisation
+ORGANIZATION_INVITE Inviter
+ORGANIZATION_PERMISSIONS Permissions
+ORGANIZATION_PHONE_PLACEHOLDER xxx-xxx-xxxx
+ORGANIZATION_ROLES Rôles
+ORGANIZATION_UPDATE_USER Mettre à jour l\'utilisateur
+ORGANIZATION_USER_META_INFO Informations méta de l\'utilisateur
+ORGANIZATION_USERS Utilisateurs
+TEXT Texte
+THEME_PICKER Sélecteur de thème
+THEME Thème
+THU Jeu
+TILDE_KEY <kbd>` tilde</kbd>
+TOGGLE_CALENDAR_SCREENMODE Basculer le mode calendrier
+TOGGLE_CALENDAR_SCREENMODE_WITH Basculer le mode calendrier avec tilde.
+TOOLTIP_AUDIO Décrit la navigation ou les changements.
+TOOLTIP_CALENDAR_AUDIO_LABELS Type d\'étiquette de date à annoncer via la synthèse vocale.
+TOOLTIP_CALENDAR_AUTOFOCUS Jour à sélectionner automatiquement dans la vue Calendrier.
+TOOLTIP_CONFIRM_EMAIL Confirmez votre nouvelle adresse e-mail.
+TOOLTIP_CONFIRM_PASSWORD Confirmez votre nouveau mot de passe.
+TOOLTIP_CURRENT_EMAIL Adresse e-mail actuelle.
+TOOLTIP_CURRENT_PASSWORD Mot de passe actuel.
+TOOLTIP_LANGUAGE Langue préférée.
+TOOLTIP_NAV_BAR Comportement de défilement préféré de la barre de navigation.
+TOOLTIP_NEW_EMAIL Fournissez la nouvelle adresse e-mail que vous souhaitez utiliser.
+TOOLTIP_NEW_PASSWORD Fournissez le nouveau mot de passe que vous souhaitez utiliser.
+TOOLTIP_PASSWORD_REQUIRED Votre mot de passe est requis pour continuer.
+TOOLTIP_DENSITY Espacement préféré de l\'interface.
+TOOLTIP_TEXT Taille de texte préférée de l\'interface.
+TOOLTIP_THEME Apparence et convivialité de l\'interface.
+TRAVEL_HOURS DÉPLACEMENT
+TRAVEL Déplacement
+TUE Mar
+TURKISH Turc
+TXT TXT
+UPDATE Mettre à jour
+UPDATE_USER Mettre à jour l\'utilisateur
+UPDATING_AUDIO_TO Mise à jour de l\'audio vers
+UPDATING_CALENDAR_AUDIO_LABELS_TO Mise à jour des étiquettes audio du calendrier vers
+UPDATING_CALENDAR_AUTOFOCUS_TO Mise à jour de la mise au point automatique du calendrier vers
+INFO_UPDATED Informations mises à jour
+UPDATING_LANGUAGE_TO Mise à jour de la langue vers
+UPDATING_NAME Mise à jour du nom
+NAME_UPDATED Nom mis à jour
+UPDATING_NAV_BAR_TO Mise à jour de la barre de navigation vers
+UPDATING_PAY_PERIOD Mise à jour de la période de paie
+UPDATING_PHONE Mise à jour du téléphone
+UPDATING_PROVINCE Mise à jour de la province...
+PROVINCE_UPDATED Province mise à jour
+UPDATING_DENSITY_TO Mise à jour de la densité vers
+UPDATING_TEXT_TO Mise à jour du texte vers
+UPDATING_THEME_TO Mise à jour du thème vers
+TIMEZONE_UPDATED Fuseau horaire mis à jour
+UPDATING_WORK Mise à jour du travail
+USER_AGENT Agent utilisateur
+USERS Utilisateurs
+VOICE_PICKER Sélecteur de voix
+VOICE Voix
+WAGE Salaire
+WE_ARE_HIRING Nous recrutons. Envoyez vos CV à resumes@paycal.app
+WED Mer
+WINDOWS Windows
+WORK_DETAILS travail
+WORK_FORM Formulaire de travail
+WORK_HOURS Heures de travail
+WORK Travail
+YEAR_SVG_LINE_GRAPH Graphique linéaire SVG de l\'année
+YEAR_TO_DATE_EARNINGS Revenus depuis le début de l\'année
+YEAR_TO_DATE Depuis le début de l\'année
+YOUR_EMAIL Votre e-mail
+YOUR_NAME Votre nom
+SECONDARY Secondaire
+ADD_NEW_ENTRY Ajouter une nouvelle entrée
+CALENDAR_HELP_LINK Aide Calendrier
+EARNINGS_HELP_LINK Aide Revenus
+MY_ORGANIZATIONS Mes Équipes
+MEMBER_OF Membre de
+NO_ORGANIZATIONS_MANAGED Vous ne gérez pas encore d'équipes
+NO_MEMBER_ORGANIZATIONS Vous n'êtes pas encore membre d'équipes
+ORGANIZATION_NAME Nom de l'Équipe
+ORGANIZATION_INFO Informations de l'Équipe
+ORGANIZATION_MEMBERS Membres de l'Équipe
+ORGANIZATION_DETAILS_DESC Afficher et gérer les détails de l'équipe
+CREATED Créé
+ENTER_ORGANIZATION_NAME Entrez le nom de l'équipe
+SEARCH_USER Recherchez un utilisateur à ajouter
+NO_MEMBERS Aucun membre dans cette équipe
+ADD_MEMBER Ajouter un Membre
+CONFIRM_DELETE_ORGANIZATION Confirmer la Suppression
+YES_DELETE Oui, Supprimer
+PROMOTE Promouvoir
+DEMOTE Rétrograder
+REMOVE_MEMBER Supprimer Membre
+REMOVE Supprimer
+VIEW Afficher
+MANAGERS Gestionnaires
+MEMBERS Membres
+CLOSE Fermer
+COLLAPSE_SIDEBAR Reduire la barre laterale
+EXPAND_SIDEBAR Developper la barre laterale
+SIDEBAR_COLLAPSED Barre laterale reduite
+SIDEBAR_EXPANDED Barre laterale developpee
+SIGN_OUT_CONFIRMATION_AND_CONTROLS Confirmation et commandes de deconnexion
+SIGN_OUT_DIALOG_DESCRIPTION Ce dialogue vous permet de confirmer la deconnexion de votre compte. Vous pouvez vous deconnecter ou annuler pour rester connecte.
+
+CONTACT_REASON Reason for contacting
+CONTACT_REASON_GENERAL General inquiry
+CONTACT_REASON_ACCOUNT Account or login issue
+CONTACT_REASON_BUG Report a bug
+CONTACT_REASON_BILLING Billing question
+CONTACT_REASON_FEATURE Request a feature
+CONTACT_HELP_TITLE Help us help you better
+CONTACT_HELP_INTRO Making your message clear helps us respond faster:
+CONTACT_HELP_TIP_1 Be specific: Describe exactly what you're trying to do and what happens instead.
+CONTACT_HELP_TIP_2 Include details: Check our optional context options below to share technical info.
+CONTACT_HELP_TIP_3 One issue per message: If you have multiple concerns, send separate messages.
+CONTACT_HELP_CONTEXT Optional — Help us understand your context:
+CONTACT_CONTEXT_BROWSER Include my browser info
+CONTACT_CONTEXT_PAGE Include current page URL
+CONTACT_CONTEXT_LANGUAGE Include my language setting
+CONTACT_SLA_LABEL Response time:
+
+ORGANIZATIONS Organizations
+ORGANIZATIONS_HTML <em>O</em>rganizations
+ORGANIZATIONS_INTRO Organizations connect sites and member access while keeping work entries user-owned.
+ORGANIZATIONS_OPEN_FULL Open Full Org Controls
+ORGANIZATIONS_CREATE_ORG Create Organization
+ORGANIZATIONS_NAME Organization Name
+ORGANIZATIONS_CREATE_HELP After creating, manage invites, scopes, defaults, and ownership from Settings.
+ORGANIZATIONS_YOUR_ORGANIZATIONS Your Organizations
+ORGANIZATIONS_SELECT_PLACEHOLDER Select organization...
+ORGANIZATIONS_INVITE_DELEGATES Invite Members
+ORGANIZATIONS_INVITE_PLACEHOLDER member@example.com
+ORGANIZATIONS_SEND_INVITE Send Invite
+ORGANIZATIONS_SCOPE_WORK_READ Work Read
+ORGANIZATIONS_SCOPE_SITES_READ Sites Read
+ORGANIZATIONS_SCOPE_SITES_WRITE Sites Write
+ORGANIZATIONS_SCOPE_ORG_READ Org Read
+ORGANIZATIONS_SCOPE_ORG_WRITE Org Write
+ORGANIZATIONS_SCOPE_ACCESS_MANAGE Access Manage
+ORGANIZATIONS_PENDING_INVITES Pending Invites
+ORGANIZATIONS_DISCOVERY Discovery
+ORGANIZATIONS_RUN_DISCOVERY Run Discovery
+ORGANIZATIONS_DISCOVERY_HELP Find sites that can be linked to the selected organization.
+ORGANIZATIONS_LEAVE_SELECTED Leave Selected Organization
+ORGANIZATIONS_DEFAULTS Organization Defaults
+ORGANIZATIONS_SAVE_DEFAULTS Save Defaults
+ORGANIZATIONS_PAY_PERIOD_LENGTH Pay Period Length
+ORGANIZATIONS_DEFAULT_WAGE Default Wage
+ORGANIZATIONS_TIMEZONE Timezone
+ORGANIZATIONS_CURRENCY Currency
+ORGANIZATIONS_OWNERSHIP_TRANSFER Ownership Transfer
+ORGANIZATIONS_RELOAD_MEMBERS Reload Members
+ORGANIZATIONS_TRANSFER_TARGET_PLACEHOLDER Select member UUID...
+ORGANIZATIONS_TRANSFER_OWNERSHIP Transfer Ownership
+ORGANIZATIONS_AUDIT_TIMELINE Audit Timeline
+ORGANIZATIONS_RELOAD_TIMELINE Reload Timeline
+ORGANIZATIONS_LOADING Loading organizations...
+ORGANIZATIONS_NONE No organizations yet. Create your first organization to get started.
+ORGANIZATIONS_ROLE Role
+ORGANIZATIONS_SCOPES Scopes
+ORGANIZATIONS_MANAGE_IN_SETTINGS Manage in Settings
+ORGANIZATIONS_UNKNOWN Unknown
+ORGANIZATIONS_PENDING pending
+ORGANIZATIONS_REVOKE Revoke
+ORGANIZATIONS_NO_INVITES No invites for this organization.
+ORGANIZATIONS_SELECT_FIRST Select an organization first.
+ORGANIZATIONS_INVITE_REVOKED Invite revoked.
+ORGANIZATIONS_INVITE_REVOKE_FAILED Unable to revoke invite.
+ORGANIZATIONS_LINK_SITE Link Site
+ORGANIZATIONS_SITE_WITHOUT_ORG Site without org
+ORGANIZATIONS_SITE_LINKED Site linked to organization.
+ORGANIZATIONS_SITE_LINK_FAILED Unable to link site.
+ORGANIZATIONS_NO_DISCOVERY No discovery candidates found.
+ORGANIZATIONS_DISCOVERY_RUNNING Running discovery...
+ORGANIZATIONS_DISCOVERY_COMPLETE Organization discovery completed.
+ORGANIZATIONS_DISCOVERY_FAILED Unable to run organization discovery.
+ORGANIZATIONS_LOAD_INVITES_FAILED Unable to load invites.
+ORGANIZATIONS_LOAD_DEFAULTS_FAILED Unable to load organization defaults.
+ORGANIZATIONS_DEFAULTS_SAVED Organization defaults saved.
+ORGANIZATIONS_DEFAULTS_SAVE_FAILED Unable to save organization defaults.
+ORGANIZATIONS_LOAD_ORGS_FAILED Unable to load organizations right now.
+ORGANIZATIONS_LOAD_AUDIT_FAILED Unable to load audit timeline.
+ORGANIZATIONS_NO_AUDIT No audit events yet.
+ORGANIZATIONS_NAME_MIN Organization name must be at least 2 characters.
+ORGANIZATIONS_CREATED Organization created.
+ORGANIZATIONS_CREATE_FAILED Failed to create organization.
+ORGANIZATIONS_ENTER_INVITE_EMAIL Enter an invite email.
+ORGANIZATIONS_SELECT_SCOPE Select at least one scope.
+ORGANIZATIONS_INVITE_SENT Organization invite sent.
+ORGANIZATIONS_INVITE_SEND_FAILED Unable to send organization invite.
+ORGANIZATIONS_SELECT_TRANSFER_TARGET Select a transfer target first.
+ORGANIZATIONS_OWNERSHIP_TRANSFERRED Ownership transferred.
+ORGANIZATIONS_OWNERSHIP_TRANSFER_FAILED Unable to transfer ownership.
+ORGANIZATIONS_WITHDRAWN Organization relationship withdrawn.
+ORGANIZATIONS_WITHDRAW_FAILED Unable to leave organization.
+ORGANIZATIONS_AUDIT_EVENT event
+ORGANIZATIONS_AUDIT_ACTOR actor
+
+ORGANIZATIONS_REMOVE_CONFIRM_PREFIX Remove organization
+ORGANIZATIONS_REMOVE_CONFIRM_SUFFIX from your organizations list?
+ORGANIZATIONS_REMOVE_FAILED Unable to remove organization right now.
