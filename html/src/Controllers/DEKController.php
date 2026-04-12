@@ -66,22 +66,30 @@ class DEKController
      */
     private function resolveCredentialIdForUser(string $userUUID, array $body): string
     {
-        $bodyCredentialId = $body['credentialId'] ?? '';
-        if (is_string($bodyCredentialId) && $bodyCredentialId !== '') {
-            return $bodyCredentialId;
-        }
+        $credentialSetKey = Keys::webauthnUserCredentials($userUUID);
 
+        $sessionCredentialId = '';
         $sessionHash = Authentication::getSessionHashFromCookie();
         if ($sessionHash) {
             $sessionCredentialId = (string) Database::hget(Keys::SESSION . ':' . $sessionHash, 'credential_id');
-            if ($sessionCredentialId !== '') {
-                return $sessionCredentialId;
-            }
         }
 
-        $credentialIds = Database::smembers(Keys::webauthnUserCredentials($userUUID));
-        if (count($credentialIds) > 0) {
-            return (string) reset($credentialIds);
+        $bodyCredentialId = $body['credentialId'] ?? '';
+        if (is_string($bodyCredentialId) && $bodyCredentialId !== '') {
+            // If session carries a credential, caller must bind wrapper to that same credential.
+            if ($sessionCredentialId !== '' && !hash_equals($sessionCredentialId, $bodyCredentialId)) {
+                return '';
+            }
+
+            return Database::sismember($credentialSetKey, $bodyCredentialId) === 1
+                ? $bodyCredentialId
+                : '';
+        }
+
+        if ($sessionCredentialId !== '') {
+            return Database::sismember($credentialSetKey, $sessionCredentialId) === 1
+                ? $sessionCredentialId
+                : '';
         }
 
         return '';
@@ -122,9 +130,6 @@ class DEKController
         $wrappedDekPasskey = '';
         if ($sessionCredentialId !== '') {
             $wrappedDekPasskey = (string) Database::hget($this->passkeyWrappedDekKey($user->user_uuid), $sessionCredentialId);
-        }
-        if ($wrappedDekPasskey === '') {
-            $wrappedDekPasskey = $user->wrapped_dek_passkey ?? '';
         }
 
         Response::success('[DEK] Wrapped DEK.', [

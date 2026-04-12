@@ -1,0 +1,1507 @@
+14_DAYS 14 Dagen
+1_WEEK 1 Week
+2_WEEKS 2 Weken
+7_DAYS 7 Dagen
+WIN95_DARK 95 Donker
+WIN95_LIGHT 95 Licht
+ABOUT_US Over ons
+ACCOUNT Account
+ACCOUNT_ACTIONS Account Acties
+ACCOUNT_REGISTRATION Account Registratie
+ACTIONS Acties
+ACTIVE Actief
+ADD_ROW Rij Toevoegen
+CREATE_SITE Site Aanmaken
+EDIT_SITE Site Bewerken
+ADMIN Beheer
+ALL Alle
+ALL_TIME Alle Tijd
+ALT_A <kbd>ALT A</kbd>
+ALT_BACKSLASH <kbd>ALT \\</kbd>
+ALT_B <kbd>ALT B</kbd>
+ALT_C <kbd>ALT C</kbd>
+ALT_P <kbd>ALT P</kbd>
+ALT_R <kbd>Alt R</kbd>
+ANALYTICS Analyses
+ARCADE_DARK Arcade Donker
+ARCADE_LIGHT Arcade Licht
+ARROW_KEYS <kbd>Pijltjes</kbd>
+AUDIO Audio
+AUDIO_FEEDBACK Audio Terugkoppeling
+AUDIO_FEEDBACK_USING Audio terugkoppeling via
+AUDIO_PREFS Audio Voorkeuren
+BASE Basis
+BROWSER Browser
+CALENDAR_AUDIO_LABELS_ON Audio Labels
+CALENDAR_AUTOFOCUS_ON Autofocus
+CALENDAR Kalender
+CALENDAR_DAYS Dagen
+CALENDAR_PREFS_FORM Kalender Voorkeuren Formulier
+CANCEL_AND_CLOSE Annuleren & Sluiten
+CANCEL Annuleren
+CAPSLOCK_ACTIVE CAPS Lock toets actief.
+CHANGE_EMAIL E-mail Wijzigen
+CHANGE_PASSWORD Wachtwoord Wijzigen
+CHOOSE_A_LANGUAGE Kies een taal
+CHOOSE_A_THEME Kies een thema
+CHOOSE_A_VOICE Kies een stem
+CLOSED_DIALOG Dialoog gesloten
+CLOSE_DIALOG Dialoog Sluiten
+CLOSE_DIALOG_WITH Dialoog sluiten met ESCAPE
+CONFIRM_NEW_EMAIL Nieuw E-mail Bevestigen
+CONFIRM_NEW_PASSWORD Nieuw Wachtwoord Bevestigen
+CONFIRM_NO_TYPOS Bevestig geen typefouten
+CONFIRM_PASSWORD Wachtwoord Bevestigen
+CONSENT_COOKIE_POLICY Ik ga akkoord met het cookiebeleid.
+CONTACT Contact
+COPY Kopiëren
+COPY_WORK Werk Kopiëren
+COPY_WORK_WITH Werk kopiëren met CTRL C.
+CPP CPP
+CSV CSV
+CTRL_C <kbd>CTRL C</kbd>
+CTRL_V <kbd>CTRL V</kbd>
+CURRENT Huidige
+CURRENT_EMAIL Huidige E-mail
+CURRENT_PASSWORD Huidig Wachtwoord
+CURRENT_TIME Huidige Tijd
+DAILY Dagelijks
+DAILY_DETAILS Dagelijkse Details
+DARK Donker
+DATE Datum
+DATE_PICKER Datumkiezer
+DEDUCTIONS Aftrekposten
+DELETE_ACCOUNT Account Verwijderen
+DELETE_ACCOUNT_MESSAGE We zijn echt verdrietig om je te zien gaan! Voer je wachtwoord in om te bevestigen dat je echt je account wilt verwijderen.
+DELETE Verwijderen
+DELETE_KEY <kbd>DELETE</kbd>
+DELETE_SITE Site Verwijderen
+DELETE_WORK Werk Verwijderen
+DELETE_WORK_WITH Werk verwijderen met Delete.
+DEVICE Apparaat
+DUTCH Nederlands
+EARNINGS Inkomsten
+EARNINGS_LABEL Inkomsten
+EARNINGS_YEAR_SELECTOR Inkomsten Jaar Selector
+EI WW
+EMAIL E-mail
+EMAIL_SUBJECT Subject
+END_KEY <kbd>End</kbd>
+ENGLISH Engels
+ENTER_KEY <kbd>ENTER</kbd>
+ENTRY_ROW Invoer Rij
+ERROR_EMAIL_EMPTY Het e-mailveld was leeg. Probeer opnieuw.
+ERROR_EMAIL_MISSING Het e-mailadres ontbreekt.
+ERROR_EMAIL_REGISTERED Het e-mailadres is al geregistreerd.
+ERROR_EMAIL_TAKEN Sorry, dat e-mailadres is al geregistreerd. Probeer opnieuw.
+ERROR_PASSWORD_EMPTY Het wachtwoordveld was leeg. Probeer opnieuw.
+ERROR_PASSWORD_MISSING Het wachtwoord ontbreekt.
+ERROR_PASSWORDS_MISMATCHED De wachtwoorden komen niet overeen. Probeer opnieuw.
+ERROR_PASSWORDS_NO_MATCH De wachtwoorden komen niet overeen.
+ERROR_REGISTRATION_ISSUES Het lijkt erop dat er enkele problemen zijn met je registratie. Controleer alles en probeer opnieuw.
+ERROR_USERNAME_EMPTY Het gebruikersnaamveld was leeg. Probeer opnieuw.
+ERROR_USERNAME_TAKEN Sorry, die gebruikersnaam is al bezet. Probeer opnieuw.
+ESCAPE_KEY <kbd>ESCAPE</kbd>
+FAQ_A1 Ja. We zijn momenteel in de privé bètafase met een openbare bèta die in 2024 gelanceerd zal worden. Onze doelen zijn gebaseerd op het eenvoudig houden van dingen, waarde bieden en bovenal een sterke toewijding aan het veilig houden van je privacy en persoonlijke informatie. We volgen beste praktijken naar ons beste vermogen, zoals responsief ontwerp, volledige toegankelijkheid, meertalige en thema-ondersteuning, snelle en veilige serverbeheer en nog veel meer.
+FAQ_A2 Jazeker! We bieden een gratis laag voor iedereen die hun uurloon moet registreren en bijhouden met aanvullende gerelateerde functies die het gemakkelijk maken om verdere inzichten te verkrijgen. We willen dit serviceniveau gratis aanbieden omdat het belangrijk is dat iedereen zoveel mogelijk tools heeft om hun werk, hun inkomsten te beheren en hun leven gemakkelijker te maken.
+FAQ_A3 We zijn van plan onze eerste miljoen te verdienen met een abonnementsmodel betaald door bedrijven en managers die nog meer controle over hun financiën willen. Het plan is eenvoudig. De betaalde laag is een vast maandelijks tarief met details die aangekondigd worden zodra we officieel aan het publiek vrijgeven.
+FAQ_A4 Absoluut! De Kalender toont de geregistreerde uren per baan voor elke dag. Klik op een dag om het Werk Details paneel te openen om naar wens aan te passen. Het Dashboard toont een overzicht van het jaar per maand, loonperiode en baan.
+FAQ_A5 Ook al bieden we momenteel onze diensten in 10 talen aan, we werken aan meer! Kom vaak terug kijken! We streven ernaar om tegen eind 2024 nog 15 talen toe te voegen, met plannen om er meer toe te voegen naarmate de tijd vordert. Als je een suggestie hebt, luisteren we graag! Merci! Salamat Po! Danke! :D
+FAQ_A6 We streven ernaar om zo open en duidelijk mogelijk te zijn over hoe we deze service beheren. We hebben beleid gecreëerd dat onze servicevoorwaarden, privacycontroles en toegankelijkheidsdoelstellingen schetst.
+FAQ_A7 Gebruik onze Contactpagina om contact met ons op te nemen.
+FAQ_CONTACT_TEXT Als je verdere vragen of zorgen hebt betreffende onze Algemene Voorwaarden, aarzel dan niet om contact op te nemen. Je kunt ons contacteren op
+FAQ_Q1 Is deze service echt?
+FAQ_Q2 Kan ik dit gratis gebruiken?
+FAQ_Q3 Waar gaat deze betaalde laag over?
+FAQ_Q4 Kan ik mijn uren gemakkelijk bijhouden?
+FAQ_Q5 Wanneer zal PayCal mijn taal ondersteunen?
+FAQ_Q6 Hoe zorgen we voor transparantie?
+FAQ_Q7 Hoe kan ik feedback geven of verbeteringen voorstellen?
+FAQ_TITLE Veelgestelde Vragen
+FEDERAL_TAX Federale Belasting
+FIRST Eerste
+FOCUS Focus
+FRENCH Frans
+FRI Vri
+FULLDATE Volledige Datum
+FULL_NAME Naam
+FULL_NAME_PLACEHOLDER Volledige naam alstublieft.
+FUN Leuk!
+GERMAN Duits
+GO_TO Ga naar
+GROSS Bruto
+HINDI Hindi
+HOME_KEY <kbd>Home</kbd>
+HOURS Uren
+INACTIVE Inactief
+INCOME_TAX Inkomstenbelasting
+INFO Info
+IP_ADDRESS IP-adres
+ITALIAN Italiaans
+KEYBOARD Keyboard
+KEYBOARD_SHORTCUTS_GOT_IT Begrepen!
+KEYBOARD_SHORTCUTS Toetsenbord Snelkoppelingen
+LANG Lang
+LANGUAGE Taal
+LANGUAGE_PICKER Taalkiezer
+LANGUAGE_PREFERENCES Taal Voorkeuren
+LARGER Groter
+LAST Laatste
+LAST_UPDATED Laatst bijgewerkt
+LENGTH Lengte
+LESS Minder
+LIGHT Licht
+LIVING_OUT_ALLOWANCE LOA
+LOA LOA
+LOG_OUT Uitloggen
+LOG_OUT_MESSAGE Weet je zeker dat je wilt uitloggen?
+LONGDATE Lange Datum
+LONG Lang
+MACOS Mac OS
+MEMORY_USAGE Geheugengebruik
+MESSAGE Bericht
+META_DESCRIPTION_LONG Revolutioneer werknemersloon met PayCal: Transparante inkomsten, moeiteloos bijhouden en efficiënt loonbeheer. Modern, gemakkelijk en gratis te gebruiken.
+META_DESCRIPTION Houd je werkuren bij en bereken loonstrookgegevens moeiteloos met PayCal. Gratis, gebruiksvriendelijk en toegankelijk voor iedereen. Beheer je gegevens met snelheid en eenvoud, en ontdek geavanceerde functies voor teambeheer.
+META_KEYWORDS loonstrook bijhouden, werkuren beheer, inkomsten calculator, gratis loonstrook tool, toegankelijke loonstrook app, eenvoudig loonstrook platform, teambeheer, project tracking, loonperiode calculator, online loonstrook, tijd bijhouden, toegankelijke tool, werkuren tracker, loonbeheer, inkomsten beheer
+META_TITLE PayCal: Eenvoudig, Toegankelijk Loonstrook Bijhouden voor Iedereen
+14_DAYS 14 Dagen
+1_WEEK 1 Week
+2_WEEKS 2 Weken
+7_DAYS 7 Dagen
+WIN95_DARK 95 Donker
+WIN95_LIGHT 95 Licht
+ABOUT_US Over ons
+ACCOUNT Account
+ACCOUNT_ACTIONS Account Acties
+ACCOUNT_REGISTRATION Account Registratie
+ACTIONS Acties
+ACTIVE Actief
+ADD_ROW Rij Toevoegen
+CREATE_SITE Site Aanmaken
+ADMIN Beheer
+ALL Alle
+ALL_TIME Alle Tijd
+ALT_A <kbd>ALT A</kbd>
+ALT_BACKSLASH <kbd>ALT \\</kbd>
+ALT_B <kbd>ALT B</kbd>
+ALT_C <kbd>ALT C</kbd>
+ALT_P <kbd>ALT P</kbd>
+ALT_R <kbd>Alt R</kbd>
+ANALYTICS Analyses
+ARCADE_DARK Arcade Donker
+ARCADE_LIGHT Arcade Licht
+ARROW_KEYS <kbd>Pijltjes</kbd>
+AUDIO Audio
+AUDIO_FEEDBACK Audio Terugkoppeling
+AUDIO_FEEDBACK_USING Audio terugkoppeling via
+AUDIO_PREFS Audio Voorkeuren
+BASE Basis
+BROWSER Browser
+CALENDAR_AUDIO_LABELS_ON Audio Labels
+CALENDAR_AUTOFOCUS_ON Autofocus
+CALENDAR Kalender
+CALENDAR_DAYS Dagen
+CALENDAR_PREFS_FORM Kalender Voorkeuren Formulier
+CANCEL_AND_CLOSE Annuleren & Sluiten
+CANCEL Annuleren
+CAPSLOCK_ACTIVE CAPS Lock toets actief.
+CHANGE_EMAIL E-mail Wijzigen
+CHANGE_PASSWORD Wachtwoord Wijzigen
+CHOOSE_A_LANGUAGE Kies een taal
+CHOOSE_A_THEME Kies een thema
+CHOOSE_A_VOICE Kies een stem
+CLOSED_DIALOG Dialoog gesloten
+CLOSE_DIALOG Dialoog Sluiten
+CLOSE_DIALOG_WITH Dialoog sluiten met ESCAPE
+CONFIRM_NEW_EMAIL Nieuw E-mail Bevestigen
+CONFIRM_NEW_PASSWORD Nieuw Wachtwoord Bevestigen
+CONFIRM_NO_TYPOS Bevestig geen typefouten
+CONFIRM_PASSWORD Wachtwoord Bevestigen
+CONSENT_COOKIE_POLICY Ik ga akkoord met het cookiebeleid.
+CONTACT Contact
+COPY Kopiëren
+COPY_WORK Werk Kopiëren
+COPY_WORK_WITH Werk kopiëren met CTRL C.
+CPP CPP
+CSV CSV
+CTRL_C <kbd>CTRL C</kbd>
+CTRL_V <kbd>CTRL V</kbd>
+CURRENT Huidige
+CURRENT_EMAIL Huidige E-mail
+CURRENT_PASSWORD Huidig Wachtwoord
+CURRENT_TIME Huidige Tijd
+DAILY Dagelijks
+DAILY_DETAILS Dagelijkse Details
+DARK Donker
+DATE Datum
+DATE_PICKER Datumkiezer
+DEDUCTIONS Aftrekposten
+DELETE_ACCOUNT Account Verwijderen
+DELETE_ACCOUNT_MESSAGE We zijn echt verdrietig om je te zien gaan! Voer je wachtwoord in om te bevestigen dat je echt je account wilt verwijderen.
+DELETE Verwijderen
+DELETE_KEY <kbd>DELETE</kbd>
+DELETE_SITE Site Verwijderen
+DELETE_WORK Werk Verwijderen
+DELETE_WORK_WITH Werk verwijderen met Delete.
+DEVICE Apparaat
+DUTCH Nederlands
+EARNINGS Inkomsten
+EARNINGS_LABEL Inkomsten
+EARNINGS_YEAR_SELECTOR Inkomsten Jaar Selector
+EI WW
+EMAIL E-mail
+EMAIL_SUBJECT Subject
+END_KEY <kbd>End</kbd>
+ENGLISH Engels
+ENTER_KEY <kbd>ENTER</kbd>
+ENTRY_ROW Invoer Rij
+ERROR_EMAIL_EMPTY Het e-mailveld was leeg. Probeer opnieuw.
+ERROR_EMAIL_MISSING Het e-mailadres ontbreekt.
+ERROR_EMAIL_REGISTERED Het e-mailadres is al geregistreerd.
+ERROR_EMAIL_TAKEN Sorry, dat e-mailadres is al geregistreerd. Probeer opnieuw.
+ERROR_PASSWORD_EMPTY Het wachtwoordveld was leeg. Probeer opnieuw.
+ERROR_PASSWORD_MISSING Het wachtwoord ontbreekt.
+ERROR_PASSWORDS_MISMATCHED De wachtwoorden komen niet overeen. Probeer opnieuw.
+ERROR_PASSWORDS_NO_MATCH De wachtwoorden komen niet overeen.
+ERROR_REGISTRATION_ISSUES Het lijkt erop dat er enkele problemen zijn met je registratie. Controleer alles en probeer opnieuw.
+ERROR_USERNAME_EMPTY Het gebruikersnaamveld was leeg. Probeer opnieuw.
+ERROR_USERNAME_TAKEN Sorry, die gebruikersnaam is al bezet. Probeer opnieuw.
+ESCAPE_KEY <kbd>ESCAPE</kbd>
+FAQ_A1 Ja. We zijn momenteel in de privé bètafase met een openbare bèta die in 2024 gelanceerd zal worden. Onze doelen zijn gebaseerd op het eenvoudig houden van dingen, waarde bieden en bovenal een sterke toewijding aan het veilig houden van je privacy en persoonlijke informatie. We volgen beste praktijken naar ons beste vermogen, zoals responsief ontwerp, volledige toegankelijkheid, meertalige en thema-ondersteuning, snelle en veilige serverbeheer en nog veel meer.
+FAQ_A2 Jazeker! We bieden een gratis laag voor iedereen die hun uurloon moet registreren en bijhouden met aanvullende gerelateerde functies die het gemakkelijk maken om verdere inzichten te verkrijgen. We willen dit serviceniveau gratis aanbieden omdat het belangrijk is dat iedereen zoveel mogelijk tools heeft om hun werk, hun inkomsten te beheren en hun leven gemakkelijker te maken.
+FAQ_A3 We zijn van plan onze eerste miljoen te verdienen met een abonnementsmodel betaald door bedrijven en managers die nog meer controle over hun financiën willen. Het plan is eenvoudig. De betaalde laag is een vast maandelijks tarief met details die aangekondigd worden zodra we officieel aan het publiek vrijgeven.
+FAQ_A4 Absoluut! De Kalender toont de geregistreerde uren per baan voor elke dag. Klik op een dag om het Werk Details paneel te openen om naar wens aan te passen. Het Dashboard toont een overzicht van het jaar per maand, loonperiode en baan.
+FAQ_A5 Ook al bieden we momenteel onze diensten in 10 talen aan, we werken aan meer! Kom vaak terug kijken! We streven ernaar om tegen eind 2024 nog 15 talen toe te voegen, met plannen om er meer toe te voegen naarmate de tijd vordert. Als je een suggestie hebt, luisteren we graag! Merci! Salamat Po! Danke! :D
+FAQ_A6 We streven ernaar om zo open en duidelijk mogelijk te zijn over hoe we deze service beheren. We hebben beleid gecreëerd dat onze servicevoorwaarden, privacycontroles en toegankelijkheidsdoelstellingen schetst.
+FAQ_A7 Gebruik onze Contactpagina om contact met ons op te nemen.
+FAQ_CONTACT_TEXT Als je verdere vragen of zorgen hebt betreffende onze Algemene Voorwaarden, aarzel dan niet om contact op te nemen. Je kunt ons contacteren op
+FAQ_Q1 Is deze service echt?
+FAQ_Q2 Kan ik dit gratis gebruiken?
+FAQ_Q3 Waar gaat deze betaalde laag over?
+FAQ_Q4 Kan ik mijn uren gemakkelijk bijhouden?
+FAQ_Q5 Wanneer zal PayCal mijn taal ondersteunen?
+FAQ_Q6 Hoe zorgen we voor transparantie?
+FAQ_Q7 Hoe kan ik feedback geven of verbeteringen voorstellen?
+FAQ_TITLE Veelgestelde Vragen
+FEDERAL_TAX Federale Belasting
+FIRST Eerste
+FRENCH Frans
+FRI Vri
+FULLDATE Volledige Datum
+FULL_NAME Naam
+FULL_NAME_PLACEHOLDER Volledige naam alstublieft.
+FUN Leuk!
+GERMAN Duits
+GO_TO Ga naar
+GROSS Bruto
+HINDI Hindi
+HOME_KEY <kbd>Home</kbd>
+HOURS Uren
+INACTIVE Inactief
+INCOME_TAX Inkomstenbelasting
+INFO Info
+IP_ADDRESS IP-adres
+ITALIAN Italiaans
+KEYBOARD_SHORTCUTS_GOT_IT Begrepen!
+KEYBOARD_SHORTCUTS Toetsenbord Snelkoppelingen
+LANGUAGE Taal
+LANGUAGE_PICKER Taalkiezer
+LANGUAGE_PREFERENCES Taal Voorkeuren
+LARGER Groter
+LAST Laatste
+LAST_UPDATED Laatst bijgewerkt
+LENGTH Lengte
+LESS Minder
+LIGHT Licht
+LIVING_OUT_ALLOWANCE LOA
+LOA LOA
+LOG_OUT Uitloggen
+LOG_OUT_MESSAGE Weet je zeker dat je wilt uitloggen?
+LONGDATE Lange Datum
+LONG Lang
+MACOS Mac OS
+MEMORY_USAGE Geheugengebruik
+MESSAGE Bericht
+META_DESCRIPTION_LONG Revolutioneer werknemersloon met PayCal: Transparante inkomsten, moeiteloos bijhouden en efficiënt loonbeheer. Modern, gemakkelijk en gratis te gebruiken.
+META_DESCRIPTION Houd je werkuren bij en bereken loonstrookgegevens moeiteloos met PayCal. Gratis, gebruiksvriendelijk en toegankelijk voor iedereen. Beheer je gegevens met snelheid en eenvoud, en ontdek geavanceerde functies voor teambeheer.
+META_KEYWORDS loonstrook bijhouden, werkuren beheer, inkomsten calculator, gratis loonstrook tool, toegankelijke loonstrook app, eenvoudig loonstrook platform, teambeheer, project tracking, loonperiode calculator, online loonstrook, tijd bijhouden, toegankelijke tool, werkuren tracker, loonbeheer, inkomsten beheer
+META_TITLE PayCal: Eenvoudig, Toegankelijk Loonstrook Bijhouden voor Iedereen
+MODAL_HEADER Modal Header
+MODAL_MESSAGE Modal Bericht
+MODAL_TITLE Modal Titel
+MON Maa
+MONTHLY_DETAILS Maandelijkse Details
+MONTHLY Maandelijks
+MORE Meer
+NAME Naam
+NAV_BAR Navigatie Balk
+NAVIGATE Navigeren
+NAVIGATE_WITH Navigeren met TAB of Pijltoetsen
+NEED_TO_ENABLE_JAVASCRIPT Je moet JavaScript inschakelen om deze applicatie te draaien.
+NET Netto
+NEW_EMAIL Nieuwe E-mail
+NEW_PASSWORD Nieuw Wachtwoord
+NEXT_PREV_BRACKETS <kbd>ALT [ of ]</kbd>
+NEXT_PREV_CALENDAR_MONTH Volgende/Vorige Maand
+NEXT_PREV_CALENDAR_MONTH_WITH Volgende/Vorige Maand met ALT [ of ]
+NEXT_PREV_PAGEKEYS <kbd>PGDN of PGUP</kbd>
+NONE Geen
+NUMBERED <kbd>ALT 1-9</kbd>
+NUMBER Nummer
+OAS OAS
+OPEN_ABOUT Over Openen
+OPEN_ABOUT_WITH Over openen met ALT B
+OPEN_ACCOUNT Account Openen
+OPEN_ACCOUNT_WITH Account openen met ALT A
+OPEN_CALENDAR Kalender Openen
+OPEN_CALENDAR_WITH Kalender openen met ALT C
+OPEN_DATE_PICKER Datumkiezer Openen
+OPEN_DATE_PICKER_WITH Datumkiezer openen met ALT \\</kbd>
+OPEN_DIALOG Dialoog Openen
+OPEN_DIALOG_WITH Dialoog openen met ENTER
+OPEN_EARNINGS Inkomsten Openen
+OPEN_EARNINGS_WITH Inkomsten openen met ALT R
+OPENED_DIALOG Dialoog geopend
+OPEN_NUMBERED_TAB Genummerd Tabblad Openen
+OPEN_NUMBERED_TAB_WITH Genummerd tabblad openen met ALT [1-9]
+OPEN Openen
+OPEN_POLICIES Beleid Openen
+OPEN_POLICIES_WITH Beleid openen met ALT P
+OPEN_SETTINGS Instellingen Openen
+OPEN_SETTINGS_WITH Instellingen openen met ALT A
+OPEN_SHORTCUTS Snelkoppelingen Openen
+OPEN_SHORTCUTS_WITH Snelkoppelingen openen met ALT Slash of Vraagteken
+OPTIONAL_PHONE Optioneel telefoonnummer
+OS OS
+OVERTIME_HOURS Overuren
+OVERTIME Overuren
+PASSWORD Wachtwoord
+PASSWORD_REQUIRED Huidig wachtwoord vereist
+PAST_1_YEAR Afgelopen 1 Jaar
+PAST_2_YEARS Afgelopen 2 Jaar
+PAST_3_MONTHS Afgelopen 3 Maanden
+PAST_3_YEARS Afgelopen 3 Jaar
+PAST_4_YEARS Afgelopen 4 Jaar
+PAST_5_YEARS Afgelopen 5 Jaar
+PAST_6_MONTHS Afgelopen 6 Maanden
+PASTE Plakken
+PASTE_WORK Werk Plakken
+PASTE_WORK_WITH Werk plakken met CTRL V.
+PAYCAL PayCal
+PAY Loon
+PAY_PERIOD_DETAILS Loonperiode Details
+PAY_PERIOD Loonperiode
+PAY_PERIODS Loonperioden
+PAY_PERIOD_PROGRESS Loonperiode Voortgang
+PAY_PERIODS_RANGE Loonperiodes Bereik
+PAY_SETTINGS_FORM Loon Instellingen Formulier
+PDF PDF
+PERSONAL_INFO_FORM Persoonlijke Informatie Formulier
+PERSONAL_INFO Persoonlijke Info
+PERSONAL Persoonlijk
+PHONE Telefoon
+PHONE_PLACEHOLDER xxx-xxx-xxxx
+TRANSPARENCY Transparantie
+POLICIES Beleid
+PORTUGUESE Portugees
+PREFERENCES Voorkeuren
+PRIMARY Primair
+PROVINCIAL_TAX Provinciale Belasting
+PROVINCE Provincie
+QUESTION_MARK_KEY <kbd>?</kbd>
+REFRESH Vernieuwen
+REGISTER_COOKIE_DISCLAIMER Als je niet comfortabel bent met cookies, mag je je niet registreren. Sorry daarvoor. :(
+REGISTER_COOKIE_HEADSUP Hé, let op! We gebruiken een cookie om gebruikersauthenticatie op te slaan.
+REGISTER_FEATURE1_TEXT Zeg vaarwel tegen loonstrook mysterie! Visualiseer je verwachte inkomsten elke loonperiode. Plan je financiën met vertrouwen.
+REGISTER_FEATURE1_TITLE 💡 Inkomsten Transparantie
+REGISTER_FEATURE2_TEXT Geen ingewikkelde meerstaps data-invoer meer!
+REGISTER_FEATURE2_TITLE 📊 Moeiteloos Bijhouden
+REGISTER_FEATURE3_TEXT Voor werkgevers, krachtige tools om loonbeheer te vereenvoudigen. Download de data die je nodig hebt. Maak loonstrook een makkie.
+REGISTER_FEATURE3_TITLE 🔥 Personeel Versterken
+REGISTER_FEATURE4_TEXT Ons platform is gebruiksvriendelijk, mobiel-responsief en vol met de nieuwste technologie.
+REGISTER_FEATURE4_TITLE 🌟 Gemakkelijk te Gebruiken
+REGISTER_HEADLINE 🚀 Geef je Loonstrook Ervaring Een Boost!
+REGISTER Registreren
+REGULAR_HOURS Reguliere Uren
+REGULAR Regulier
+RENDER Weergeven
+SAT Zat
+SAVE_AND_CLOSE Opslaan & Sluiten
+SAVE Opslaan
+SCOPE Bereik
+SEND_EMAIL Send Email
+SET_AS_DEFAULT Als standaard instellen.
+SETTINGS Instellingen
+SHORTDATE Korte Datum
+SHORT Kort
+SHOW Tonen
+SITE_NAME PayCal
+SITES_LIST Sites Lijst
+SITES Sites
+SKIP_PRIMARY_NAVIGATION Primaire Navigatie Overslaan
+SKIP_TO_CONTENT Naar Inhoud Gaan
+SKIP_TO_MAIN_CONTENT Naar hoofdinhoud gaan
+SMALLER Kleiner
+DENSITY Dichtheid
+SPANISH Spaans
+START Start
+STATIC Statisch
+STATUS Status
+STICKY Vast
+STYLE_PREFS Stijl Voorkeuren
+STYLE Stijl
+SUN Zon
+TAB_KEY <kbd>TAB</kbd>
+TAGALOG Tagalog
+ORGANIZATION Team
+ORGANIZATIONS Teams
+ORGANIZATION_AUTH_LEVEL Autorisatieniveau
+ORGANIZATION_INVITE Uitnodigen
+ORGANIZATION_PERMISSIONS Machtigingen
+ORGANIZATION_PHONE_PLACEHOLDER xxx-xxx-xxxx
+ORGANIZATION_ROLES Rollen
+ORGANIZATION_UPDATE_USER Gebruiker Bijwerken
+ORGANIZATION_USER_META_INFO Gebruiker Meta Info
+ORGANIZATION_USERS Gebruikers
+TEXT Tekst
+THEME_PICKER Themakiezer
+THEME Thema
+THU Don
+TILDE_KEY <kbd>` tilde</kbd>
+TOGGLE_CALENDAR_SCREENMODE Kalender Modus Schakelen
+TOGGLE_CALENDAR_SCREENMODE_WITH Kalender modus schakelen met tilde.
+TOOLTIP_AUDIO Beschrijft navigatie of wijzigingen.
+TOOLTIP_CALENDAR_AUDIO_LABELS Datum label type om aan te kondigen via tekst-naar-spraak.
+TOOLTIP_CALENDAR_AUTOFOCUS Dag om automatisch te selecteren in Kalender weergave.
+TOOLTIP_CONFIRM_EMAIL Bevestig je nieuwe e-mailadres.
+TOOLTIP_CONFIRM_PASSWORD Bevestig je nieuwe wachtwoord.
+TOOLTIP_CURRENT_EMAIL Huidig e-mailadres.
+TOOLTIP_CURRENT_PASSWORD Huidig wachtwoord.
+TOOLTIP_LANGUAGE Voorkeurstaal.
+TOOLTIP_NAV_BAR Voorkeur scrollgedrag van navigatiebalk.
+TOOLTIP_NEW_EMAIL Geef het nieuwe e-mailadres op dat je wilt gebruiken.
+TOOLTIP_NEW_PASSWORD Geef het nieuwe wachtwoord op dat je wilt gebruiken.
+TOOLTIP_PASSWORD_REQUIRED Je wachtwoord is vereist om door te gaan.
+TOOLTIP_DENSITY Voorkeur ruimte van de interface.
+TOOLTIP_TEXT Voorkeur tekstgrootte van de interface.
+TOOLTIP_THEME Uiterlijk & gevoel van de interface.
+TRAVEL_HOURS REIS
+TRAVEL Reis
+TUE Din
+TURKISH Turks
+TXT TXT
+UPDATE Bijwerken
+UPDATE_USER Gebruiker Bijwerken
+UPDATING_AUDIO_TO Audio bijwerken naar
+UPDATING_CALENDAR_AUDIO_LABELS_TO Kalender audio labels bijwerken naar
+UPDATING_CALENDAR_AUTOFOCUS_TO Kalender autofocus bijwerken naar
+INFO_UPDATED Info bijgewerkt
+UPDATING_LANGUAGE_TO Taal bijwerken naar
+UPDATING_NAME Naam Bijwerken
+NAME_UPDATED Naam bijgewerkt
+UPDATING_NAV_BAR_TO Navigatiebalk bijwerken naar
+UPDATING_PAY_PERIOD Loonperiode Bijwerken
+UPDATING_PHONE Telefoon Bijwerken
+UPDATING_PROVINCE Provincie bijwerken...
+PROVINCE_UPDATED Provincie bijgewerkt
+UPDATING_DENSITY_TO Dichtheid bijwerken naar
+UPDATING_TEXT_TO Tekst bijwerken naar
+UPDATING_THEME_TO Thema bijwerken naar
+TIMEZONE_UPDATED Tijdzone bijgewerkt
+UPDATING_WORK Werk Bijwerken
+USER_AGENT User Agent
+USERS Gebruikers
+VOICE_PICKER Stemkiezer
+VOICE Stem
+WAGE Loon
+WE_ARE_HIRING We zoeken mensen. Stuur cv\'s naar resumes@paycal.app
+WED Woe
+WINDOWS Windows
+WORK_DETAILS werk
+WORK_FORM Werk Formulier
+WORK_HOURS Werkuren
+WORK Werk
+YEAR_SVG_LINE_GRAPH Jaar SVG Lijn Grafiek
+YEAR_TO_DATE_EARNINGS Jaar Tot Datum Inkomsten
+YEAR_TO_DATE Jaar Tot Datum
+YOUR_EMAIL Email
+YOUR_NAME Name
+SECONDARY Secundair
+ADD_NEW_ENTRY Nieuwe invoer toevoegen
+CALENDAR_HELP_LINK Hulp Kalender
+EARNINGS_HELP_LINK Hulp Inkomsten
+MY_ORGANIZATIONS Mijn Teams
+MEMBER_OF Lid van
+NO_ORGANIZATIONS_MANAGED Je beheert nog geen teams
+NO_MEMBER_ORGANIZATIONS Je bent nog lid van geen teams
+ORGANIZATION_NAME Teamnaam
+ORGANIZATION_INFO Teamgegevens
+ORGANIZATION_MEMBERS Teamleden
+ORGANIZATION_DETAILS_DESC Teamgegevens bekijken en beheren
+CREATED Gemaakt
+ENTER_ORGANIZATION_NAME Voer teamnaam in
+SEARCH_USER Zoek gebruiker om toe te voegen
+NO_MEMBERS Geen leden in dit team
+ADD_MEMBER Lid toevoegen
+CONFIRM_DELETE_ORGANIZATION Verwijdering bevestigen
+YES_DELETE Ja, Verwijderen
+PROMOTE Promoveren
+DEMOTE Degraderen
+REMOVE_MEMBER Lid Verwijderen
+REMOVE Verwijderen
+VIEW Weergeven
+MANAGERS Managers
+MEMBERS Leden
+CLOSE Sluiten
+COLLAPSE_SIDEBAR Zijbalk samenvouwen
+EXPAND_SIDEBAR Zijbalk uitvouwen
+SIDEBAR_COLLAPSED Zijbalk samengevouwen
+SIDEBAR_EXPANDED Zijbalk uitgeklapt
+SIGN_OUT_CONFIRMATION_AND_CONTROLS Afmeldbevestiging en bedieningselementen
+SIGN_OUT_DIALOG_DESCRIPTION Met dit dialoogvenster kunt u bevestigen dat u zich wilt afmelden bij uw account. U kunt zich afmelden of annuleren om ingelogd te blijven.
+ORGANIZATION_HTML <em>T</em>eam
+ORGANIZATIONS_HTML <em>O</em>rganizations
+ORGANIZATION_SVG <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="8" cy="8" r="3.5"/><path d="M 8 14 c -2.33 0 -7 1.17 -7 3.5 V 22 h 14 v -4.5 c 0 -2.33 -4.67 -3.5 -7 -3.5 Z"/><circle cx="16" cy="7.5" r="3"/><path d="M 16 13.5 c -1.67 0 -5 0.83 -5 2.5 v 3.5 h 10 v -3.5 c 0 -1.67 -3.33 -2.5 -5 -2.5 Z" opacity="0.9"/></g></svg>
+CONTACT_REASON Topic
+CONTACT_REASON_GENERAL Algemene vraag
+CONTACT_REASON_BUG Bugrapport
+CONTACT_REASON_FEATURE Verzoek voor functie
+CONTACT_REASON_OTHER Ander
+CONTACT_REASON_SELECT Selecteer alstublieft
+CONTACT_MESSAGE_LABEL Bericht
+CONTACT_MESSAGE_PLACEHOLDER Typ je bericht hier...
+CONTACT_CHAR_COUNT {count}/6000
+CONTACT_CHAR_WARNING Je nadert de berichtenlimiet
+CONTACT_CONTEXT_LABEL Optionele technische context
+CONTACT_CONTEXT_BROWSER Browsergegevens opnemen
+CONTACT_CONTEXT_PAGE Paginagegevens opnemen
+CONTACT_CONTEXT_LANGUAGE Taal opnemen
+CONTACT_HELP_TITLE Write a useful message
+CONTACT_HELP_TIP_1 Wees specifiek: Beschrijf exact wat je probeert te doen en wat er in plaats daarvan gebeurt.
+CONTACT_HELP_TIP_2 Details opnemen: Controleer onze optionele contextopties hieronder om technische informatie te delen.
+CONTACT_HELP_TIP_3 Eén probleem per bericht: Als je meerdere vragen hebt, stuur dan afzonderlijke berichten.
+CONTACT_SLA_LABEL Response time
+CONTACT_SLA_TEXT Typically 24–48 hours
+CONTACT_SUCCESS_TITLE Message sent
+CONTACT_SUCCESS_NOTE We hebben je bericht ontvangen en nemen binnenkort contact met je op.
+CONTACT_SUCCESS_SENT_AT Verzonden op
+CONTACT_REASON_ACCOUNT Accountprobleem
+CONTACT_REASON_BILLING Factureringsvraag
+CONTACT_SEND_ANOTHER Send another
+PLEASE_SELECT placeholder
+CONTACT_HELP_INTRO Help us resolve this faster.
+CONTACT_HELP_CONTEXT placeholder
+
+ORGANIZATIONS Organizations
+ORGANIZATIONS_HTML <em>O</em>rganizations
+ORGANIZATIONS_INTRO Organizations connect sites and member access while keeping work entries user-owned.
+ORGANIZATIONS_OPEN_FULL Open Full Org Controls
+ORGANIZATIONS_CREATE_ORG Create Organization
+ORGANIZATIONS_NAME Organization Name
+ORGANIZATIONS_CREATE_HELP After creating, manage invites, scopes, defaults, and ownership from Settings.
+ORGANIZATIONS_YOUR_ORGANIZATIONS Your Organizations
+ORGANIZATIONS_SELECT_PLACEHOLDER Select organization...
+ORGANIZATIONS_INVITE_DELEGATES Invite Members
+ORGANIZATIONS_INVITE_PLACEHOLDER member@example.com
+ORGANIZATIONS_SEND_INVITE Send Invite
+ORGANIZATIONS_SCOPE_WORK_READ Work Read
+ORGANIZATIONS_SCOPE_SITES_READ Sites Read
+ORGANIZATIONS_SCOPE_SITES_WRITE Sites Write
+ORGANIZATIONS_SCOPE_ORG_READ Org Read
+ORGANIZATIONS_SCOPE_ORG_WRITE Org Write
+ORGANIZATIONS_SCOPE_ACCESS_MANAGE Access Manage
+ORGANIZATIONS_PENDING_INVITES Pending Invites
+ORGANIZATIONS_DISCOVERY Discovery
+ORGANIZATIONS_RUN_DISCOVERY Run Discovery
+ORGANIZATIONS_DISCOVERY_HELP Find sites that can be linked to the selected organization.
+ORGANIZATIONS_LEAVE_SELECTED Leave Selected Organization
+ORGANIZATIONS_DEFAULTS Organization Defaults
+ORGANIZATIONS_SAVE_DEFAULTS Save Defaults
+ORGANIZATIONS_PAY_PERIOD_LENGTH Pay Period Length
+ORGANIZATIONS_DEFAULT_WAGE Default Wage
+ORGANIZATIONS_TIMEZONE Timezone
+ORGANIZATIONS_CURRENCY Currency
+ORGANIZATIONS_OWNERSHIP_TRANSFER Ownership Transfer
+ORGANIZATIONS_RELOAD_MEMBERS Reload Members
+ORGANIZATIONS_TRANSFER_TARGET_PLACEHOLDER Select member UUID...
+ORGANIZATIONS_TRANSFER_OWNERSHIP Transfer Ownership
+ORGANIZATIONS_AUDIT_TIMELINE Audit Timeline
+ORGANIZATIONS_RELOAD_TIMELINE Reload Timeline
+ORGANIZATIONS_LOADING Loading organizations...
+ORGANIZATIONS_NONE No organizations yet. Create your first organization to get started.
+ORGANIZATIONS_ROLE Role
+ORGANIZATIONS_SCOPES Scopes
+ORGANIZATIONS_MANAGE_IN_SETTINGS Manage in Settings
+ORGANIZATIONS_UNKNOWN Unknown
+ORGANIZATIONS_PENDING pending
+ORGANIZATIONS_REVOKE Revoke
+ORGANIZATIONS_NO_INVITES No invites for this organization.
+ORGANIZATIONS_SELECT_FIRST Select an organization first.
+ORGANIZATIONS_INVITE_REVOKED Invite revoked.
+ORGANIZATIONS_INVITE_REVOKE_FAILED Unable to revoke invite.
+ORGANIZATIONS_LINK_SITE Link Site
+ORGANIZATIONS_SITE_WITHOUT_ORG Site without org
+ORGANIZATIONS_SITE_LINKED Site linked to organization.
+ORGANIZATIONS_SITE_LINK_FAILED Unable to link site.
+ORGANIZATIONS_NO_DISCOVERY No discovery candidates found.
+ORGANIZATIONS_DISCOVERY_RUNNING Running discovery...
+ORGANIZATIONS_DISCOVERY_COMPLETE Organization discovery completed.
+ORGANIZATIONS_DISCOVERY_FAILED Unable to run organization discovery.
+ORGANIZATIONS_LOAD_INVITES_FAILED Unable to load invites.
+ORGANIZATIONS_LOAD_DEFAULTS_FAILED Unable to load organization defaults.
+ORGANIZATIONS_DEFAULTS_SAVED Organization defaults saved.
+ORGANIZATIONS_DEFAULTS_SAVE_FAILED Unable to save organization defaults.
+ORGANIZATIONS_LOAD_ORGS_FAILED Unable to load organizations right now.
+ORGANIZATIONS_LOAD_AUDIT_FAILED Unable to load audit timeline.
+ORGANIZATIONS_NO_AUDIT No audit events yet.
+ORGANIZATIONS_NAME_MIN Organization name must be at least 2 characters.
+ORGANIZATIONS_CREATED Organization created.
+ORGANIZATIONS_CREATE_FAILED Failed to create organization.
+ORGANIZATIONS_ENTER_INVITE_EMAIL Enter an invite email.
+ORGANIZATIONS_SELECT_SCOPE Select at least one scope.
+ORGANIZATIONS_INVITE_SENT Organization invite sent.
+ORGANIZATIONS_INVITE_SEND_FAILED Unable to send organization invite.
+ORGANIZATIONS_SELECT_TRANSFER_TARGET Select a transfer target first.
+ORGANIZATIONS_OWNERSHIP_TRANSFERRED Ownership transferred.
+ORGANIZATIONS_OWNERSHIP_TRANSFER_FAILED Unable to transfer ownership.
+ORGANIZATIONS_WITHDRAWN Organization relationship withdrawn.
+ORGANIZATIONS_WITHDRAW_FAILED Unable to leave organization.
+ORGANIZATIONS_AUDIT_EVENT event
+ORGANIZATIONS_AUDIT_ACTOR actor
+
+ORGANIZATIONS_REMOVE_CONFIRM_PREFIX Remove organization
+ORGANIZATIONS_REMOVE_CONFIRM_SUFFIX from your organizations list?
+ORGANIZATIONS_REMOVE_FAILED Unable to remove organization right now.
+ADMIN_DASHBOARD_PLATFORM_METRICS_TITLE Platformstatistieken
+BREADCRUMB Broodkruimel
+BREADCRUMB Broodkruimel
+HELP_TOC_HOME Thuis
+HELP_TOC_TRANSPARENCY_HUB Transparantiehub
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_1 WCAG-scans op routeniveau worden uitgevoerd op kernpagina's, inclusief strikte routecontroles op overtredingen en strengere contrastcontroles.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_2 Kop- en formulierregressies worden gecontroleerd, zodat de oriëntatiepuntstructuur, labels en herstelberichten niet stilletjes verdwijnen.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_3 De reflow- en tekstafstanddekking controleert kernroutes bij compacte viewportbreedtes om problemen met horizontale overloop en spatiëring op te vangen.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_4 Navigatiepad- en snelkoppelingsregressietests verifiëren broodkruimels, alternatieve paden, overdracht van feedback, veiligheidsgedrag van snelkoppelingen en de dekking van het beleid voor sneltoetsen.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_5 Controles op suiteniveau combineren de dekking van Playwright, PHPUnit en browsermatrix, zodat claims op het gebied van toegankelijkheid getest blijven.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_TEXT_1 Dit betekent dat onze verklaringen over openbare toegankelijkheid verband houden met de daadwerkelijke regressiedekking, en niet alleen met de bedoeling.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_TITLE Wat we actief verifiëren
+TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TEXT_1 Toegankelijkheidsaudits worden elk kwartaal uitgevoerd. Elk auditvenster omvat strikte geautomatiseerde routecontroles, handmatige toetsenbordcontroles en handmatige VoiceOver-verificatie op kernroutes.
+TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TEXT_2 Elke cyclus resulteert in getraceerde defecten (indien gevonden), ernstlabels, eigenaren en een korte samenvatting van de resterende risico's.
+TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TITLE Auditcadans
+TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TEXT_1 Toegankelijkheid is geen eenmalige opruiming. We behandelen het als onderdeel van de normale productkwaliteit, op dezelfde manier waarop we correctheid, veiligheid en betrouwbaarheid behandelen.
+TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TEXT_2 Naarmate meer routes worden gecontroleerd en bestreken, blijven we deze pagina bijwerken met verzonden wijzigingen, open werk en verificatieaanpak, zodat deze nuttig blijft in plaats van algemeen.
+TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TITLE Continue oefening
+TRANSPARENCY_ACCESSIBILITY_DECK Toegankelijkheid maakt deel uit van de manier waarop we PayCal bouwen. Op deze pagina wordt uitgelegd wat onze standaard is, wat er wordt verzonden, wat er nog openstaat en hoe u belemmeringen kunt melden.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_ACKNOWLEDGE Dezelfde werkdag
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_DEFINITION Release blocker of kerntaakfout voor toetsenbord- of schermlezergebruik.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_ESCALATION Escaleer naar de Engineering Lead als het probleem na 24 uur nog niet is opgelost.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_FIX_TARGET 48 uur
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_OWNER Frontend-leider
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_ACKNOWLEDGE 1 werkdag
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_DEFINITION Grote bruikbaarheidsproblemen bij belangrijke stromen of belangrijke mislukkingen van ARIA-contracten.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_ESCALATION Escaleer naar de frontend-lead als het probleem na zeven werkdagen nog niet is opgelost.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_FIX_TARGET 10 werkdagen
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_OWNER Toegankelijkheid Eigenaar
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_SEVERITY P1
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_ACKNOWLEDGE 3 werkdagen
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_DEFINITION Lokaal probleem, verhardingswerk of verbetering van het bestuur.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_ESCALATION Markering voor driemaandelijkse afsluiting van de audit indien deze na twee cycli wordt uitgesteld.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_FIX_TARGET Volgende geplande cyclus
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_OWNER Toegewezen bij triage
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_SEVERITY P2
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_ACKNOWLEDGE Erken
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_CAPTION SLA-model voor toegankelijkheidsdefecten: ernst, bevestigingsvenster, fixdoel, eigenaar en escalatiepad
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_DEFINITION Definitie
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_ESCALATION_PATH Escalatie pad
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_FIX_TARGET Doelstelling voor oplossing of beperking
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_OWNER Eigenaar
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_SEVERITY Ernst
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TEXT_1 Elk geverifieerd toegankelijkheidsdefect wordt bij de creatie geregistreerd met een ernst, eigenaar, WCAG-criterium en vervaldatum, zodat het werk operationeel blijft in plaats van informeel.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TITLE Toegankelijkheid Foutreactie Windows
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_FACT_1 We stoppen niet opzettelijk de ondersteuning voor een geverifieerde combinatie van browser en ondersteunende technologie zonder de wijziging eerst op deze pagina te publiceren.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_FACT_2 Wanneer een geverifieerde combinatie onpraktisch wordt om te ondersteunen vanwege leveranciers-, platform- of beveiligingsbeperkingen, streven we ernaar ten minste één kwartaalaankondiging te doen voordat deze de status van beste inspanning krijgt.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_FACT_3 Elke beëindigingskennisgeving moet de betrokken combinatie vermelden, waarom deze is gewijzigd, de ingangsdatum en het dichtstbijzijnde ondersteunde alternatief.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_TEXT_1 Als een gerapporteerde barrière een combinatie beïnvloedt die we momenteel rechtstreeks verifiëren, wordt het probleem beoordeeld op basis van die ondersteuningsverwachting en niet als optioneel behandeld.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_TITLE Beëindigings- en wijzigingsbeleid
+TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TEXT_1 Focusveiligheidsregels voorkomen dat snelkoppelingshandlers en gescripte gebruikersinterface de focus stelen terwijl iemand in een modal typt of werkt. Snelkoppelingen worden niet geactiveerd binnen bewerkbare besturingselementen, en dialooginteracties houden de focus behouden totdat het dialoogvenster wordt gesloten.
+TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TEXT_2 Dit beleid vermindert onbedoelde navigatie, beschermt formulierinvoer en zorgt ervoor dat het toetsenbordgedrag consistent blijft met de regressiedekking op routeniveau die we uitvoeren in Playwright en Lightpanda.
+TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TITLE Focus op veiligheid
+TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TEXT_1 We beschouwen ARIA niet als vervanging voor semantische HTML. We gebruiken ARIA om besturingsnamen, relaties, beschrijvingen en statuswijzigingen te verduidelijken wanneer native HTML alleen niet voldoende is.
+TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TEXT_2 Dat betekent dat ons toegankelijkheidswerk breder is dan alleen het gebruik van ARIA. Toetsenbordgedrag, koppen, focusbehandeling, contrast, reflow en foutherstel zijn net zo belangrijk.
+TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TITLE Hoe wij ARIA gebruiken
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_1 Kernnavigatie ondersteunt toetsenbordgebruik, links overslaan en gedocumenteerde sneltoetsen met één toets voor belangrijke bestemmingen.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_2 Sneltoetsen met één toets (C, R, S, E, A, H, N, P, ?) zijn gedocumenteerd voor de belangrijkste toepassingsroutes.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_3 Snelkoppelingen worden niet geactiveerd tijdens het typen van invoer of wanneer dialoogvensters geopend zijn.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_4 Hulp- en transparantieroutes bieden meer dan één manier om te navigeren, inclusief broodkruimels waar dat nuttige context toevoegt.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_5 Gecontroleerde routes maken gebruik van semantische oriëntatiepunten, duidelijke koppen, directe labels en statusberichten waarbij de interactie feedback nodig heeft.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_6 Contrast- en focustokencontroles zijn geautomatiseerd in de huidige themacatalogus, en de gepubliceerde matrix wordt bijgehouden in onze toegankelijkheidsachterstandworkflow.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_7 Instellingen omvatten een dyslexievriendelijke typografievoorkeur met toegankelijke spatiëring en ondersteuning voor fallback-stack.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_8 Toegankelijkheidsrapporten kunnen nu vanaf deze pagina beginnen en doorgaan naar de beveiligde contactstroom, waarbij de belangrijkste details vooraf zijn ingevuld.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_TEXT_1 Wij geven de voorkeur aan semantische HTML en gebruiken ARIA waar het helpt namen, relaties of live statusveranderingen duidelijker bloot te leggen.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_TITLE Wat is er nu aanwezig
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_CLEAR_STRUCTURE_LABEL Duidelijke structuur
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_CLEAR_STRUCTURE_TEXT Koppen, oriëntatiepunten, labels en statusberichten moeten het paginagedrag begrijpelijk maken.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_DIRECT_FEEDBACK_LABEL Direct feedbackpad
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_DIRECT_FEEDBACK_TEXT Gebruikers moeten barrières kunnen melden zonder op zoek te gaan naar het juiste kanaal.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_KEYBOARD_LABEL Toetsenbordbediening
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_KEYBOARD_TEXT Kerntaken moeten bereikbaar zijn zonder dat er een muis nodig is.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_READABLE_PRESENTATION_LABEL Leesbare presentatie
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_READABLE_PRESENTATION_TEXT Kerngeauditeerde routes moeten bij elkaar blijven onder grotere tekstformaten en strakkere viewportbreedtes.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_SAFE_NAVIGATION_LABEL Veilig navigatiegedrag
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_SAFE_NAVIGATION_TEXT Productiviteitssnelkoppelingen mogen actieve tekstinvoer of geopende dialoogvensters nooit onderbreken.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_TITLE Belangrijkste toegankelijkheidsverwachtingen
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_1 Handmatige schermlezerpassage over kernroutes heeft nog geen VoiceOver-aantekeningen per route en tracking per defect opgeleverd (WCAG-015, in uitvoering).
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_2 De formulering van aankondigingen (duidelijkheid en beknoptheid) in stromen met hoge feedback is de resterende focus nadat de scheiding van de live-regiostructuur is voltooid.
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_3 Afhankelijkheidsbeoordeling door derden kan componentspecifieke beperkingen of upgradebeperkingen aan het licht brengen wanneer externe bibliotheken belangrijke updates ontvangen.
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_TITLE Bekende beperkingen
+TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_TEXT_1 Dit is het actieve item in onze WCAG-uitvoeringsachterstand. Ontwerptokens, metadata voor transparantie, live-regiocontracten, PR-beheer en kopieerwerk in gewone taal zijn voltooid en worden gedekt door regressiesuites om het risico op terugval te verminderen.
+TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_TITLE Huidig open werk
+TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_WCAG026_TEXT Pakket voor externe auditgereedheid: probleemgeschiedenis, herstellogboeken, bewijsartefacten en beleidsdocumenten vooraf inpakken, zodat binnen één werkdag een pakket met auditbewijsmateriaal kan worden geproduceerd.
+TRANSPARENCY_ACCESSIBILITY_PAGE_TITLE Toegankelijkheid Transparantie
+TRANSPARENCY_ACCESSIBILITY_QUICK_KEYS_TEXT_1 PayCal publiceert snelkoppelingen met één toets voor belangrijke bestemmingen, zodat frequente routes bereikbaar blijven zonder herhaaldelijke aanwijzerreizen. De huidige gedocumenteerde set omvat agenda, organisaties, instellingen, inkomsten, administratie, hulp, notities, betaalperioden en hulp bij sneltoetsen.
+TRANSPARENCY_ACCESSIBILITY_QUICK_KEYS_TEXT_2 Deze snelkoppelingen maken alleen deel uit van het toegankelijkheidscontract als ze voorspelbaar, gedocumenteerd en veilig zijn om te negeren. Gebruikers kunnen blijven navigeren met standaardlinks, knoppen, links overslaan en oriëntatiepunten zonder afhankelijk te zijn van het onthouden van snelkoppelingen.
+TRANSPARENCY_ACCESSIBILITY_QUICK_KEYS_TITLE Sneltoegangstoetsen
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_1 <strong>23-03-2026:</strong> 30+ ontwerptokens toegepast voor statusbalken, verificatiebanners, afteltimers en componenten voor de afstand tussen formulieren en dialoogvensters, waarbij alle directe kleurkoppelingen uit gedeelde stijlen zijn verwijderd en de contrastmatrix is uitgebreid om de nieuwe tokenparen te dekken (WCAG-020).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_10 <strong>23-03-2026:</strong> Strenge contrastblokkers op belangrijke openbare routes opgelost en deze controles in de WCAG-routesuite gehandhaafd.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_11 <strong>23-03-2026:</strong> Dyslexievriendelijke typografievoorkeursdekking toegevoegd in de instellingen, met toegankelijk lettertypestapel- en spatiëringsgedrag.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_12 <strong>22-03-2026:</strong> Vernieuwing op routeniveau en tekstafstanddekking toegevoegd voor kernpagina's met compacte viewportbreedtes.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_13 <strong>20-03-2026:</strong> Gedocumenteerde snelkoppelingen in applicatiestijl toegevoegd met beveiliging, zodat ze niet worden geactiveerd tijdens het typen of terwijl dialoogvensters geopend zijn.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_2 <strong>23-03-2026:</strong> Metagegevens voor verificatie toegevoegd (datum laatst geverifieerd, datum volgende beoordeling, bereik en bekende beperkingen) aan alle vier actieve subpagina's voor transparantie: toegankelijkheid, statistieken, belastingen en verificatiebeheer (WCAG-021).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_3 <strong>23-03-2026:</strong> 31 fout- en statusreeksen vereenvoudigd voor authenticatie-, agenda- en organisatiestromen: technisch jargon (nonce-referenties) verwijderd, veldlege berichten actiegericht gemaakt en organisatiefoutmeldingen gestandaardiseerd naar een consistente 'Kan niet X. Probeer het opnieuw.' patroon (WCAG-024).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_4 <strong>23-03-2026:</strong> Gepubliceerde toegankelijkheidsstandaarden op componentniveau met betrekking tot dialoogvensters, tabbladen, datagrids en formulieren met toetsenbord/ARIA-contracten en voorbeelden van wel/niet doen; gecrosslinkt vanuit PR-sjabloon en regressieworkflow (WCAG-025).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_5 <strong>23-03-2026:</strong> Asserieve foutaankondigingen gescheiden van beleefde voortgangsaankondigingen op /auth/ en /settings/ om dubbele live-regio-uitvoer te verwijderen (WCAG-017).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_6 <strong>23-03-2026:</strong> Gepubliceerde SLA-tabel met toegankelijkheidsdefecten met bevestigingsvensters, fixdoelen, eigenaren en escalatiepaden (WCAG-019).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_7 <strong>23-03-2026:</strong> Publiceerde een formele checklist voor het resterende werk en een driemaandelijks controleboekje voor de toegankelijkheid met eigenaren, routedekking en bewijsvereisten.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_8 <strong>23-03-2026:</strong> Een feedbackpad voor toegankelijkheid vanaf deze pagina toegevoegd aan het beveiligde contactformulier.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_9 <strong>23-03-2026:</strong> Broodkruimels en regressiedekking toegevoegd voor meerdere navigatiepaden op belangrijke openbare routes.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_TITLE Recente verbeteringen
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_BUTTON_LABEL Open het feedbackformulier voor toegankelijkheid
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_1 Welke pagina of functie u gebruikte
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_2 Welk apparaat, browser of schermlezer u gebruikte
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_3 Welke barrière u tegenkwam en hoe deze u ervan weerhield uw taak te voltooien
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_4 Hoe wij u kunnen helpen bij het gebruik van PayCal
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_FORM_HELP Als u Verzenden selecteert, wordt het beveiligde contactformulier geopend waarin deze gegevens vooraf zijn ingevuld, zodat u deze veilig kunt bekijken en verzenden.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_HELPFUL_DETAILS_LABEL Nuttige details zijn onder meer
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_LABEL_DETAILS Details van het probleem
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_LABEL_SUMMARY Samenvatting van het probleem
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_PLACEHOLDER_DETAILS Wat er is gebeurd, welke ondersteunende technologie u heeft gebruikt en welk resultaat u had verwacht.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_PLACEHOLDER_SUMMARY Voorbeeld: Agendanavigatie wordt overgeslagen door de schermlezer
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TEXT_1 Als iets moeilijk te gebruiken of niet toegankelijk is, gebruik dan het onderstaande formulier of ga direct naar de contactpagina. Het formulier opent de beveiligde contactstroom waarbij uw samenvatting en details worden overgedragen.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TEXT_2 U kunt ook <a href="/contact/">de algemene contactpagina</a> gebruiken als u liever niet vanuit dit formulier start.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TITLE Rapporteer toegankelijkheidsproblemen
+TRANSPARENCY_ACCESSIBILITY_ROUTE_METADATA_TITLE Metagegevens van routes
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_1 <strong>WCAG 2.1</strong> (W3C Web Content Accessibility Guidelines) — Internationale standaard voor webtoegankelijkheid
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_2 <strong>Sectie 508</strong> (Amerikaanse federale wet) — Komt overeen met WCAG 2.0 niveau AA
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_3 <strong>EN 301 549</strong> (Europese norm) — Komt overeen met WCAG 2.1 niveau AA
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_4 <strong>AODA</strong> (Accessibility for Ontarios with Disabilities Act) — Verwijzingen naar WCAG-gerichte toegankelijkheidsverwachtingen in Canada
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_TEXT_1 Ons toegankelijkheidswerk wordt voornamelijk geleid door WCAG 2.1 en gerelateerde wettelijke normen die verwijzen naar de verwachtingen van niveau AA.
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_TITLE Normen en richtlijnen
+TRANSPARENCY_ACCESSIBILITY_STILL_IMPROVING_FACT_1 Pakket voor externe auditgereedheid: probleemgeschiedenis, herstellogboeken en beleidsbewijs vooraf inpakken, zodat binnen één werkdag een compleet auditpakket kan worden geproduceerd (WCAG-026).
+TRANSPARENCY_ACCESSIBILITY_STILL_IMPROVING_TITLE Wat we nog steeds verbeteren
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TEXT_1 We publiceren ondersteuningsverwachtingen op basis van de combinaties die we rechtstreeks verifiëren en de combinaties die we beoordelen tijdens geplande audits. Dit is een ondersteuningsmatrix, en niet een bewering dat elke combinatie van browser en ondersteunende technologie zich identiek gedraagt.
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TEXT_2 Wanneer gebruikers een barrière melden bij een best-effort-combinatie, onderzoeken we dit nog steeds. Als het probleem van invloed is op de kernsemantiek, het toetsenbordgedrag of gedeelde componenten, beschouwen we dit als een productdefect, zelfs als de exacte koppeling niet in de primaire geverifieerde set voorkomt.
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TITLE Beleid voor ondersteunende technologie
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_AT VoiceOver
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_BROWSER Safari
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_EXPECTATION Primaire geverifieerde combinatie
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_PLATFORM macOS
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_VERIFICATION Handmatige routebeoordeling bij regelmatige WCAG-controles en driemaandelijkse audits
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_AT Andere AT- of stembesturingstools
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_BROWSER Huidige grote browsers
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_EXPECTATION Ondersteuning met de beste inspanningen
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_PLATFORM Andere combinaties
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_VERIFICATION Problemen worden beoordeeld via het proces voor toegankelijkheidsdefecten
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_AT JAWS
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_BROWSER Chroom
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_EXPECTATION Ondersteunde auditcombinatie
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_PLATFORM Ramen
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_VERIFICATION Geplande handmatige validatie tijdens driemaandelijkse audits
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_AT NVDA
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_BROWSER Firefox
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_EXPECTATION Ondersteunde auditcombinatie
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_PLATFORM Ramen
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_VERIFICATION Geplande handmatige validatie tijdens driemaandelijkse audits
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_ASSISTIVE_TECH Assisterende technologie
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_BROWSER Browser
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_PLATFORM Platform
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_SUPPORT_EXPECTATION Ondersteun de verwachting
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_VERIFICATION_MODEL Verificatiemodel
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_REVIEW_TEXT_1 De meeste gecontroleerde PayCal-interacties maken gebruik van eigen UI-code. Als er browsercode van derden bestaat, houden we de impact ervan op de toegankelijkheid afzonderlijk bij, zodat upgrades de verwachtingen op het gebied van toetsenbord, semantiek of CSP niet omzeilen.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_REVIEW_TEXT_2 Elke nieuwe afhankelijkheid aan de browserzijde die een gebruikersinterface, focusafhandeling, dialooggedrag, ingebedde media of aangepaste widgets toevoegt, moet vóór adoptie worden beoordeeld en opnieuw worden beoordeeld vóór grote versie-upgrades.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_REVIEW_TITLE Toegankelijkheidsbeoordeling van afhankelijkheid van derden
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_PDFLIB_NOTES Niet-widget-exportbibliotheek. Voegt geen toetsenbordgebruikersinterface toe, maar de gegenereerde uitvoer is nog steeds afhankelijk van de labels van de eerste partij en de kwaliteit van de inhoud.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_PDFLIB_STATUS Goedgekeurd
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_PDFLIB_USAGE PDF-export van inkomsten aan de klantzijde
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_TWEETNACL_NOTES Niet-visuele nutsbibliotheek. De impact op de toegankelijkheid is indirect en beperkt tot het responsief en stabiel houden van de stromen van de eerste partij.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_TWEETNACL_STATUS Goedgekeurd
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_TWEETNACL_USAGE Cryptografiehelpers aan de clientzijde
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_APPROVED Goedgekeurd
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_APPROVED_DESC toegestaan voor huidig gebruik, waarbij de impact op de toegankelijkheid wordt begrepen en gedocumenteerd.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_BLOCKED Geblokkeerd
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_BLOCKED_DESC niet toegestaan voor nieuw gebruik van de gebruikersinterface totdat aan de toegankelijkheidsvereisten is voldaan.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_CONDITIONAL Voorwaardelijk
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_CONDITIONAL_DESC alleen toegestaan in een beperkte reikwijdte terwijl de evaluatie-, vervangings- of inperkingswerkzaamheden open blijven.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_DEPENDENCY Afhankelijkheid
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_NOTES Opmerkingen
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_STATUS Toegankelijkheidsstatus
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_USAGE Gebruik
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_LAST_VERIFIED_LABEL Laatst geverifieerd
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_NEXT_REVIEW_LABEL Volgende beoordeling gepland
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_ROUTE_LABEL Route
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_SCOPE_LABEL Verificatiebereik
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_SCOPE_VALUE strikte WCAG-routescans, controles op de tekstverloop/tekstafstand, toetsenbord-rookcontroles en handmatige VoiceOver-routebeoordeling.
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_TEXT_1 Deze metagegevens worden bijgewerkt als onderdeel van de driemaandelijkse afsluiting van de audit, zodat gebruikers kunnen zien wat er is geverifieerd, wat nog steeds beperkingen heeft en wanneer de volgende formele beoordeling moet plaatsvinden.
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_TITLE Verificatie-metagegevens
+TRANSPARENCY_ACCESSIBILITY_WHY_PAGE_EXISTS_TEXT_1 PayCal wordt gebruikt voor tijd-, betalings- en accounttaken die mensen vaak herhalen. Wanneer een pagina moeilijk te lezen, moeilijk te navigeren of moeilijk te bedienen is zonder muis, vertraagt ​​dit het echte werk.
+TRANSPARENCY_ACCESSIBILITY_WHY_PAGE_EXISTS_TEXT_2 We publiceren deze pagina zodat gebruikers kunnen zien welke standaard we gebruiken, welke toegankelijkheidswijzigingen we al hebben doorgevoerd en welke gebieden we nog steeds verbeteren.
+TRANSPARENCY_ACCESSIBILITY_WHY_PAGE_EXISTS_TITLE Waarom deze pagina bestaat
+TRANSPARENCY_ACCESSIBILITY_WORKING_STANDARD_TEXT_1 We gebruiken WCAG 2.1 Niveau AA als onze werkstandaard voor producttoegankelijkheid. We nemen ook geselecteerde AAA-ideeën over als deze de bruikbaarheid duidelijk verbeteren, maar we claimen geen AAA-conformiteit.
+TRANSPARENCY_ACCESSIBILITY_WORKING_STANDARD_TEXT_2 Wij beweren niet dat iedere route altijd perfect is. We verbinden ons ertoe geverifieerde barrières op te lossen, wijzigingen te documenteren en toegankelijkheid binnen de normale engineeringworkflow te houden.
+TRANSPARENCY_ACCESSIBILITY_WORKING_STANDARD_TITLE Onze werkstandaard
+TRANSPARENCY_DEPENDENCY_CI_CICD_GATE_TEXT_1 PayCal scheidt de kwaliteitscontroles van alle workflows, zodat fouten expliciet en traceerbaar zijn:
+TRANSPARENCY_DEPENDENCY_CI_CICD_GATE_TEXT_2 Release-hygiëneworkflows behandelen mislukte poorten als blokkers en moeten na reparaties opnieuw worden uitgevoerd.
+TRANSPARENCY_DEPENDENCY_CI_CICD_GATE_TITLE CI/CD Gate-model
+TRANSPARENCY_DEPENDENCY_CI_DECK Op deze pagina wordt uitgelegd hoe PayCal JavaScript-afhankelijkheden deterministisch houdt en hoe CI-poorten worden afgedwongen vóór de release.
+TRANSPARENCY_DEPENDENCY_CI_HOW_TO_VERIFY_TITLE Hoe te verifiëren
+TRANSPARENCY_DEPENDENCY_CI_KNOWN_LIMITATIONS_ITEM_1 Openbare transparantiepagina's worden handmatig gesynchroniseerd met workflow- en pakketwijzigingen tijdens releasecycli.
+TRANSPARENCY_DEPENDENCY_CI_KNOWN_LIMITATIONS_ITEM_2 Het gedrag van de CI-pijplijn wordt op meerdere pagina's gedocumenteerd en kan afwijken als updates niet consequent worden toegepast.
+TRANSPARENCY_DEPENDENCY_CI_KNOWN_LIMITATIONS_TITLE Bekende beperkingen
+TRANSPARENCY_DEPENDENCY_CI_LAST_VERIFIED_LABEL Laatst geverifieerd:
+TRANSPARENCY_DEPENDENCY_CI_NEXT_REVIEW_LABEL Volgende beoordeling gepland:
+TRANSPARENCY_DEPENDENCY_CI_NPM_POLICY_TEXT_1 PayCal gebruikt een lockfile-first-afhankelijkheidsbeleid voor JavaScript-tooling en browserautomatiseringscontroles.
+TRANSPARENCY_DEPENDENCY_CI_NPM_POLICY_TITLE npm Afhankelijkheidsbeleid
+TRANSPARENCY_DEPENDENCY_CI_PAGE_TITLE Afhankelijkheid en CI/CD-governance
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_ITEM_1 Publiceer één canonieke poortmatrix waarin elke CI-taak wordt toegewezen aan de status van eigenaar, trigger, opdracht en blokkering.
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_ITEM_2 Voeg een driemaandelijkse momentopname van het afhankelijkheidsbeheer toe, inclusief directe NPM-pakketten, grondgedachte en updatecadans.
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_ITEM_3 Voeg een releasechecklist-item toe om te bevestigen dat de NPM-beheerdocumenten in lijn blijven met het workflow- en lockfile-beleid.
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_TITLE Geplande documentatieverbeteringen
+TRANSPARENCY_DEPENDENCY_CI_ROUTE_LABEL Routebeschrijving:
+TRANSPARENCY_DEPENDENCY_CI_SCOPE_LABEL Verificatiebereik:
+TRANSPARENCY_DEPENDENCY_CI_SCOPE_VALUE npm-pakketbeleid, lockfile-gedrag, GitHub Actions-workflows en release-gate-documentatie.
+TRANSPARENCY_DEPENDENCY_CI_TABLE_ARIA npm governance-opdrachtkaart
+TRANSPARENCY_DEPENDENCY_CI_TABLE_COMMAND Commando
+TRANSPARENCY_DEPENDENCY_CI_TABLE_CONTROL Primaire controle
+TRANSPARENCY_DEPENDENCY_CI_TABLE_PURPOSE Doel
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW1_CONTROL ESLint-regels + JS-sink-beleidscontroles
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW1_PURPOSE JavaScript-lint- en sink-controles
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW2_CONTROL Routegedrag en regressievalidatie op browserniveau
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW2_PURPOSE Toneelschrijver rookcontroles
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW3_CONTROL WCAG-, reflow-, contrast- en ARIA-testsuites
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW3_PURPOSE Bereikbaarheidsroute en beleidscontroles
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW4_CONTROL Conformiteitsverificatie op themaniveau
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW4_PURPOSE Contrastmatrix genereren
+TRANSPARENCY_DEPENDENCY_CI_USAGE_TITLE Waar wordt npm voor gebruikt
+TRANSPARENCY_DEPENDENCY_CI_VERIFICATION_METADATA_TITLE Verificatie-metagegevens
+TRANSPARENCY_EMAIL_DECK Op deze pagina wordt uitgelegd welke e-mails PayCal verzendt, hoe elk bericht wordt samengesteld en afgeleverd en hoe we de betrouwbaarheid verifiëren.
+TRANSPARENCY_EMAIL_DELIVERY_PIPELINE_TITLE Leveringspijplijn
+TRANSPARENCY_EMAIL_DELIVERY_TEXT_1 PayCal gebruikt een e-mailstack met twee lagen:
+TRANSPARENCY_EMAIL_DELIVERY_TEXT_3 Verificatiekoppelingen worden in de omgeving gelokaliseerd met behulp van verzoekhostresolutie, zodat koppelingen afgestemd blijven op de huidige implementatiecontext.
+TRANSPARENCY_EMAIL_FLOW_ACCOUNT_RECOVERY Transactie voor accountherstel
+TRANSPARENCY_EMAIL_FLOW_ACCOUNT_RECOVERY_PURPOSE Verificatiecode voor accountherstel uitgeven
+TRANSPARENCY_EMAIL_FLOW_CONTACT_RELAY Neem contact op met het ondersteuningsrelais
+TRANSPARENCY_EMAIL_FLOW_CONTACT_RELAY_PURPOSE Stuur ondersteuningsverzoeken door om de inbox met genormaliseerde inhoud te ondersteunen
+TRANSPARENCY_EMAIL_FLOW_EMAIL_CHANGE E-mailwijziging (oude/nieuwe inbox)
+TRANSPARENCY_EMAIL_FLOW_EMAIL_CHANGE_PURPOSE Dubbele inboxbevestiging voor account-e-mailmutatie
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_EMAIL_PURPOSE Bewijs het eigendom van de bestemming vóór gevoelige herstelacties
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_EMAIL_VERIFICATION Herstel-e-mailverificatie
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_KEY_DELIVERY Levering van herstelsleutel
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_KEY_PURPOSE Zorg voor materiaal voor accountherstel
+TRANSPARENCY_EMAIL_FLOW_VERIFICATION E-mailverificatie
+TRANSPARENCY_EMAIL_FLOW_VERIFICATION_PURPOSE Bevestig het eigendom tijdens gebeurtenissen in de accountlevenscyclus
+TRANSPARENCY_EMAIL_LAST_UPDATED_LABEL Laatst bijgewerkt:
+TRANSPARENCY_EMAIL_PAGE_TITLE E-mailtransparantie
+TRANSPARENCY_EMAIL_PRINCIPLES_FACT_TEMPLATE_PATHS Stroomspecifieke sjablonen worden gebruikt voor verificatie, herstel, accountwijziging en contactondersteuning.
+TRANSPARENCY_EMAIL_PRINCIPLES_ITEM_2 De samenstelling van e-mails is gecentraliseerd om uiteenlopende berichtlogica tussen controllers te voorkomen.
+TRANSPARENCY_EMAIL_PRINCIPLES_ITEM_3 Leveringsfouten leveren expliciete resultaten op, zodat belstromen veilig kunnen mislukken en gebruikers duidelijk kunnen worden geïnformeerd.
+TRANSPARENCY_EMAIL_PRINCIPLES_TEXT_1 PayCal behandelt transactionele e-mail als onderdeel van accountveiligheid en accountcontinuïteit, niet als marketinginfrastructuur.
+TRANSPARENCY_EMAIL_PRINCIPLES_TITLE E-mailprincipes
+TRANSPARENCY_EMAIL_RELIABILITY_CHECKS_TITLE Verificatie- en betrouwbaarheidscontroles
+TRANSPARENCY_EMAIL_SCOPE_BOUNDARY_TITLE Bereikgrens
+TRANSPARENCY_EMAIL_SCOPE_TEXT_1 Deze pagina documenteert transactioneel en ondersteunend e-mailgedrag voor PayCal-productbewerkingen. Het documenteert geen marketingautomatisering omdat PayCal in deze codebase geen marketing-e-mailtrechter gebruikt.
+TRANSPARENCY_EMAIL_SUPPORT_TELEMETRY_TITLE Ondersteuning van e-mailtelemetrie en controleerbaarheid
+TRANSPARENCY_EMAIL_TABLE_ARIA Transactionele e-mailcatalogus
+TRANSPARENCY_EMAIL_TABLE_FLOW Stroom
+TRANSPARENCY_EMAIL_TABLE_PURPOSE Doel
+TRANSPARENCY_EMAIL_TABLE_TEMPLATE_FAMILY Sjabloonfamilie
+TRANSPARENCY_EMAIL_TELEMETRY_ITEM_3 Het schrijven van logboeken is niet-blokkerend om de UX van ondersteuningsvorm te behouden als de telemetrie-opslag verslechtert.
+TRANSPARENCY_EMAIL_TELEMETRY_TEXT_1 Contactondersteuningsinzendingen omvatten best-effort-telemetrie, zodat de status van de levering kan worden gecontroleerd zonder inzendingen van gebruikers te blokkeren.
+TRANSPARENCY_EMAIL_WHAT_WE_SEND_TITLE Wat we verzenden
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_CONTROL_CLOSURE Afsluiting auditcontrole
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_OBSERVABILITY Waarneembaarheid en lay-out
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_PRODUCT_MODEL Productmodel en UI-framework
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_SECURITY_CONTROLS Beveiligingscontroles
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_SECURITY_GOVERNANCE Beheer van beveiligingsaudits
+TRANSPARENCY_FRAMEWORK_BACKEND_DECK Dit grootboek vat de belangrijkste wijzigingen op backend- en framework-niveau samen, zodat gebruikers kunnen volgen hoe technische controles in de loop van de tijd evolueren.
+TRANSPARENCY_FRAMEWORK_BACKEND_EVIDENCE_TITLE Waar kunt u het implementatiebewijs inspecteren
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_1 Eerst de grenzen getypt: statische analyse op PHPStan Level 9 wordt afgedwongen in lokale en release-workflows.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_2 Gevoelige mutaties vereisen expliciete controles: capaciteitstokens, rolcontroles en begrensde snelheidslimietvensters.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_3 Beveiligingswijzigingen moeten samen met tests en transparantie-updates in dezelfde releasecyclus worden verzonden.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_4 Operationele limieten en telemetriegrenzen worden behandeld als afdwingbaar beleid en niet als adviesdocumentatie.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_TITLE Backend-governanceprincipes
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1032_WHAT_CHANGED Infrastructuur voor platformstatistieken, transparantieroute voor openbare statistieken en herbruikbaar geauthenticeerd/openbaar lay-outsysteem toegevoegd.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1037_WHAT_CHANGED Migreerde teams naar organisaties, normaliseerde de dialooginfrastructuur en introduceerde op rollen gebaseerde ontwerptokenarchitectuur.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1041_WHAT_CHANGED Voltooide correlatiebeheer, controles op het gebied van telemetrie-joining, versterking van geprivilegieerde rolmutaties en afsluiting van de nulstelling van de levenscyclus.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1042_WHAT_CHANGED Introductie van CSP nonce/strikt-dynamische handhaving, capaciteitstokens, runtime-integriteitsmonitor, verwijdering van credential-bridge en Guardian-verharding.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1043_WHAT_CHANGED Uitgebreid beveiligingstestcorpus, definitieve auditcontroleverhalen en gesynchroniseerde release-/transparantie-metagegevens.
+TRANSPARENCY_FRAMEWORK_BACKEND_PAGE_TITLE Framework en backend-wijzigingsgrootboek
+TRANSPARENCY_FRAMEWORK_BACKEND_RECENT_MILESTONES_TITLE Recente backend- en framework-mijlpalen
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_AREA Gebied
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_ARIA Framework- en backend-mijlpalen
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_RELEASE Laat los
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_WHAT_CHANGED Wat is er veranderd
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_LAST_VERIFIED_LABEL Laatst geverifieerd:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_NEXT_REVIEW_LABEL Volgende beoordeling gepland:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_PRIMARY_REFS_LABEL Primaire referenties:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_ROUTE_LABEL Routebeschrijving:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_TITLE Verificatie-metagegevens
+TRANSPARENCY_HUB_ACCESSIBILITY_READ_MORE Lees onze toegankelijkheidsstandaard, recent werk en feedbackpad
+TRANSPARENCY_HUB_ACCESSIBILITY_WCAG_TITLE Toegankelijkheid en WCAG-naleving
+TRANSPARENCY_HUB_DECK We publiceren hoe PayCal werkt, zodat gebruikers beslissingen kunnen verifiëren, en niet alleen vertrouwensverklaringen.
+TRANSPARENCY_HUB_DEPENDENCY_CI_READ_MORE Lees het afhankelijkheids- en CI/CD-governancebeleid
+TRANSPARENCY_HUB_DEPENDENCY_CI_TITLE Afhankelijkheid en CI/CD-governance
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_TITLE Inkomstenbelasting testen
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_READ_MORE Lees verder
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_TITLE E-mailarchitectuur
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_READ_MORE Lees de wijzigingsgeschiedenis van het raamwerk en de backend
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TITLE Framework en backend-wijzigingsgrootboek
+TRANSPARENCY_HUB_METRICS_FACT_COLLECTION_SCOPE Het bereik van de verzameling is uitsluitend aggregeerbaar, met harde limieten en zonder persoonlijke identificatiegegevens in sleutels.
+TRANSPARENCY_HUB_METRICS_FACT_RETENTION Retentie volgt een gedefinieerde levenscyclus: onbewerkte gegevens, rollups en automatisch opschonen.
+TRANSPARENCY_HUB_METRICS_FACT_TELEMETRY_KEYS Telemetriesleutels en voorbeelden worden gepubliceerd, zodat claims verifieerbaar zijn.
+TRANSPARENCY_HUB_METRICS_PRIVACY_TITLE Platformstatistieken en privacy
+TRANSPARENCY_HUB_METRICS_READ_MORE Lees verder
+TRANSPARENCY_HUB_METRICS_TEXT_1 Op de pagina met metrische gegevens wordt operationele telemetrie uitgelegd die is verzameld voor betrouwbaarheid en capaciteitsplanning.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_READ_MORE Lees netwerkmogelijkheden en beveiligingsheaderbeleid
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_TEXT_1 In dit artikel worden transportprotocollen en respons-header-besturingselementen gepubliceerd die worden gebruikt om browser- en netwerkgedrag te beveiligen.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_TITLE Netwerkmogelijkheden
+TRANSPARENCY_HUB_PAGE_TITLE Transparantiehub
+TRANSPARENCY_HUB_PANELS_ARIA Transparante detailpanelen
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_STRIPE_SUPPORT_TEXT De facturering van abonnementen wordt verwerkt door Stripe. Stripe-ondersteuning is beschikbaar op support.stripe.com.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_1 PayCal is gebouwd rond inspecteerbare bewerkingen: formules zijn gedocumenteerd, telemetriegrenzen zijn expliciet en retentie is standaard eindig.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_2 Ons principe is eenvoudig: als een systeem invloed heeft op de salarisadministratie of de privacy, moeten gebruikers kunnen begrijpen hoe het werkt en hoe het wordt beheerd.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_3 Recente updates voor productvorming, waaronder facturering en profielbeheerstromen, worden bijgehouden op onze framework-/backend-grootboek- en testbeheerpagina's.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TITLE Overzicht platformfilosofie
+TRANSPARENCY_HUB_PRODUCT_BILLING_READ_MORE Bekijk productgerichte platformwijzigingen
+TRANSPARENCY_HUB_PRODUCT_BILLING_TITLE Productervaring en factureringswijzigingen
+TRANSPARENCY_HUB_SECURITY_AUDIT_FACT_COVERAGE De dekking van de werkstroom omvat controles over de runtime-levenscyclus, telemetrie-isolatie, correlatiebeheer en versterking van geprivilegieerde rollen.
+TRANSPARENCY_HUB_SECURITY_AUDIT_FACT_STATUS De huidige cyclusstatus wordt gepubliceerd met verificatiedatum en beoordelingscadans.
+TRANSPARENCY_HUB_SECURITY_AUDIT_READ_MORE Lees onze beveiligingsauditstatus en bewijsoverzicht
+TRANSPARENCY_HUB_SECURITY_AUDIT_TEXT_1 Deze pagina publiceert de huidige auditstatus, de gesloten reikwijdte, bewijsreferenties en release-blocker-verplichtingen die de beveiligingsstatus behouden.
+TRANSPARENCY_HUB_SECURITY_AUDIT_TITLE Status van beveiligingsaudit
+TRANSPARENCY_HUB_SECURITY_AUDIT_VALIDATION_SNAPSHOT_FACT Validatiemomentopname omvat Playwright, JS, PHPStan Level 9 en backend-testresultaten.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_READ_MORE Lees verder
+TRANSPARENCY_HUB_SUPERHEROES_MAP_TITLE Superhelden systeemkaart
+TRANSPARENCY_HUB_TAX_METHODOLOGY_READ_MORE Lees verder
+TRANSPARENCY_HUB_TAX_METHODOLOGY_TITLE Belastingmethodologie
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_READ_MORE Lees ons beleid voor testbeheer en releasevalidatie
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_TITLE Test- en validatiebeheer
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_READ_MORE Lees verder
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_TITLE Verificatie en bestuur
+TRANSPARENCY_LOAD_TESTING_BENCHMARK_METHOD_TITLE Benchmark-methode
+TRANSPARENCY_LOAD_TESTING_DECK Een 10-run A/B-benchmark van enthousiaste weergave versus lui laden van secties voor /earnings/.
+TRANSPARENCY_LOAD_TESTING_EXECUTIVE_SUMMARY_TITLE Samenvatting
+TRANSPARENCY_LOAD_TESTING_INTERPRETATION_TITLE Interpretatie
+TRANSPARENCY_LOAD_TESTING_PAGE_TITLE Inkomstenbelasting testen
+TRANSPARENCY_LOAD_TESTING_RESULTS_REAL_TITLE Resultaten: Real User Dataset (10 runs)
+TRANSPARENCY_LOAD_TESTING_RESULTS_SYNTHETIC_TITLE Resultaten: Synthetische dataset 2025/2026 (10 runs)
+TRANSPARENCY_LOAD_TESTING_VERIFICATION_METADATA_TITLE Verificatie-metagegevens
+TRANSPARENCY_METRICS_COMMITMENT_TEXT_1 Gebruikers moeten precies kunnen zien welke telemetrie een dienst verzamelt. Op deze pagina wordt elke statistiek gedocumenteerd die wordt gebruikt om de platformstatus te monitoren.
+TRANSPARENCY_METRICS_COMMITMENT_TEXT_2 Alle telemetrie op deze pagina is uitsluitend bedoeld voor aggregatie. We slaan geen persoonlijke identificatiegegevens op in telemetriesleutels.
+TRANSPARENCY_METRICS_COMMITMENT_TITLE Onze inzet
+TRANSPARENCY_METRICS_DECK Deze pagina laat zien welke telemetrie PayCal verzamelt, waarom we deze verzamelen en wanneer deze wordt verwijderd.
+TRANSPARENCY_METRICS_KNOWN_LIMITATIONS_TITLE Bekende beperkingen
+TRANSPARENCY_METRICS_METADATA_UPDATED_NOTE Deze metagegevens worden bijgewerkt als onderdeel van de kwartaalafsluiting van de audit.
+TRANSPARENCY_METRICS_NO Nee
+TRANSPARENCY_METRICS_PAGE_TITLE Transparantie van platformstatistieken
+TRANSPARENCY_METRICS_ROUTE_METADATA_TITLE Metagegevens routeren
+TRANSPARENCY_METRICS_TABLE_CATEGORY Metrische categorie
+TRANSPARENCY_METRICS_TABLE_PERSONAL_DATA Persoonlijke gegevens?
+TRANSPARENCY_METRICS_TABLE_PURPOSE Doel
+TRANSPARENCY_METRICS_TABLE_RETENTION Retentie
+TRANSPARENCY_METRICS_VERIFICATION_METADATA_TITLE Verificatie-metagegevens
+TRANSPARENCY_METRICS_YES Ja
+TRANSPARENCY_NETWORK_BROWSER_HEADERS_TITLE Basislijn browserbeveiligingsheader
+TRANSPARENCY_NETWORK_CAPABILITIES_DECK PayCal publiceert protocolgedrag en respons-header-controles, zodat gebruikers de beveiligingsstatus van het netwerk en de browser rechtstreeks kunnen verifiëren.
+TRANSPARENCY_NETWORK_CAPABILITIES_PAGE_TITLE Netwerkmogelijkheden
+TRANSPARENCY_NETWORK_EXECUTIVE_SUMMARY_TITLE Samenvatting
+TRANSPARENCY_NETWORK_HEADERS_TABLE_ARIA Tabel met beveiligingskoppen
+TRANSPARENCY_NETWORK_HEADERS_TABLE_HEADER Koptekst
+TRANSPARENCY_NETWORK_HEADERS_TABLE_SECURITY_EFFECT Beveiligingseffect
+TRANSPARENCY_NETWORK_PROTOCOL_ROUTING_TITLE Protocol- en routeringsgedrag
+TRANSPARENCY_NETWORK_QUIC_WORKLOADS_TITLE QUIC- en multi-request-workloads
+TRANSPARENCY_NETWORK_SCOPE_NOTES_TITLE Reikwijdte en interpretatienotities
+TRANSPARENCY_NETWORK_TABLE_CONTROL Controle
+TRANSPARENCY_NETWORK_TABLE_OBSERVED_VALUE Waargenomen waarde
+TRANSPARENCY_NETWORK_TABLE_PURPOSE Doel
+TRANSPARENCY_NETWORK_TRANSPORT_CONTROLS_TITLE Transportbeveiligingscontroles
+TRANSPARENCY_NETWORK_TRANSPORT_TABLE_ARIA Transportprotocoltabel
+TRANSPARENCY_NETWORK_USE_CASE_ARIA Gebruiksscenario voor netwerkoperaties
+TRANSPARENCY_NETWORK_USE_CASE_TITLE Gebruiksvoorbeeld: diagnose van transport- en kopregressies
+TRANSPARENCY_NETWORK_VERIFICATION_METADATA_TITLE Verificatie-metagegevens
+TRANSPARENCY_SECURITY_AUDIT_DECK PayCal behoudt de PASS-status vanaf 24-03-2026, waarbij controle-door-architectuur-waarborgen worden afgedwongen in code, tests en release-beheer.
+TRANSPARENCY_SECURITY_AUDIT_EVIDENCE_SOURCES_TITLE Bewijsbronnen
+TRANSPARENCY_SECURITY_AUDIT_LAST_VERIFIED_LABEL Laatst geverifieerd:
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_COMMITMENTS_TITLE Onderhoudsverplichtingen
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_ITEM_3 Volledige backend-testsuite en JS-beveiligingscontroles op releasekandidaten.
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_TEXT_1 Om de PASS-status te behouden, blijven de volgende releaseblokkers:
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_TEXT_2 Elke wijziging in de kalenderlevenscyclus, cryptostatus of DOM-weergave moet vóór de release overeenkomstige regressie-updates bevatten.
+TRANSPARENCY_SECURITY_AUDIT_NEXT_REVIEW_LABEL Volgende beoordeling gepland:
+TRANSPARENCY_SECURITY_AUDIT_PAGE_TITLE Status van beveiligingsaudit
+TRANSPARENCY_SECURITY_AUDIT_ROUTE_LABEL Routebeschrijving:
+TRANSPARENCY_SECURITY_AUDIT_ROUTE_METADATA_TITLE Metagegevens routeren
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_1 De cryptostatus in het geheugen wordt op nul gezet op basis van navigatie- en levenscyclusgrenzen.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_2 Vertraagde vervaldatum op verborgen tabblad bevat nu zeroisatiebewijs in ontgrendelde staat.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_3 DOM-gevoeligheidsscrub wist de sporen van de runtime-payload voordat de status wordt gereset.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_4 Deterministisch herontgrendelings- en herstelgedrag wordt aan regressietests onderworpen.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_SUMMARY_TITLE Samenvatting van de afsluiting van de runtimelevenscyclus
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_CLOSED_TITLE Scope gesloten in PASS-cycli 1.042-1.043
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_A Werkstroom A: Correlatiebeheer gecentraliseerd via door makelaars geëvalueerde, deny-safe-enveloppen.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_B Werkstroom B: beheer van telemetriequery's wordt afgedwongen met op streams gerichte tokens en weigering van deelname aan meerdere streams.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_C Workstream C: Controles op geprivilegieerde rollen zijn versterkt met singleton-superadmin en mutatiebewaking.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_D Werkstroom D: Runtime gedecodeerde levenscycluscontroles van gegevens voltooid, inclusief nulstelling van de levenscyclus en scrubgedrag van DOM-gevoeligheid.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_E Werkstroom E: CSP nonce + strikt dynamisch beleid en handhaving van overtredingsopname in productieroutes.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_F Werkstroom F: eenmalige tokenpoorten voor risicovolle beheerdersmutaties met dekking voor denial-regressie.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_G Workstream G: Verwijdering van browserreferenties voor wachtwoordstromen en deterministische, van credentialen afgeleide KEK-governance.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_H Werkstroom H: Runtime-integriteitsmonitorstatusmachine (SAFE/DEGRADED/LOCKED/TERMINATED) met telemetriehaken.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_I Werkstroom I: Guardian-selector voor ontsmettingsmiddel/stijlverharding met bijgewerkte dekkingsankers.
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_EVIDENCE_PHPUNIT 1.212 vermelde tests (vrijgavevalidaties geslaagd)
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_EVIDENCE_PLAYWRIGHT 8 geslaagd
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_JSLINT JS-pluis- en zinkcontroles
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_PHPSTAN PHPStan strikt (niveau 9)
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_PHPUNIT Backend PHPUnit-suite
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_PLAYWRIGHT Levenscyclusrook van toneelschrijvers
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_RESULT_PASS PAS
+TRANSPARENCY_SECURITY_AUDIT_STATUS_LABEL Huidige status:
+TRANSPARENCY_SECURITY_AUDIT_STATUS_VALUE PAS
+TRANSPARENCY_SECURITY_AUDIT_SUMMARY_TEXT_1 Deze pagina vat de status van het publiek samen; gedetailleerd technisch bewijsmateriaal blijft aanwezig in de gekoppelde repository-artefacten.
+TRANSPARENCY_SECURITY_AUDIT_TABLE_EVIDENCE Bewijs
+TRANSPARENCY_SECURITY_AUDIT_TABLE_GATE Poort
+TRANSPARENCY_SECURITY_AUDIT_TABLE_RESULT Resultaat
+TRANSPARENCY_SECURITY_AUDIT_USE_CASE_ARIA Gebruiksscenario: een onveilige release blokkeren
+TRANSPARENCY_SECURITY_AUDIT_USE_CASE_TEXT_1 Als een release candidate een regressie introduceert in de nulstelling van de levenscyclus of het afdwingen van CSP's, stoppen deze blocker-poorten de promotie totdat de controles en tests zijn hersteld, waardoor wordt voorkomen dat een verzwakte houding de productie bereikt.
+TRANSPARENCY_SECURITY_AUDIT_USE_CASE_TITLE Gebruiksvoorbeeld: een onveilige release blokkeren
+TRANSPARENCY_SECURITY_AUDIT_VALIDATION_SNAPSHOT_ARIA Momentopname van de validatie van de beveiligingsaudit
+TRANSPARENCY_SECURITY_AUDIT_VALIDATION_SNAPSHOT_TITLE Validatiemomentopname (24-03-2026)
+TRANSPARENCY_SECURITY_AUDIT_VERIFICATION_METADATA_TITLE Verificatie-metagegevens
+TRANSPARENCY_SUPERHEROES_DECK PayCal gebruikt thema-"Superhelden"-namen voor verschillende transversale runtime-systemen. Op deze pagina worden hun doel, grenzen en gebruiksscenario's uitgelegd.
+TRANSPARENCY_SUPERHEROES_ECHO_ROLE ARIA-cadansformatter
+TRANSPARENCY_SUPERHEROES_ECHO_USE_CASE Echo weerspiegelt inhoud voor ondersteunende trajecten, en haar cadanskracht voegt strategische pauzes en ritme toe, zodat de vertelling duidelijk terechtkomt voor schermlezers, spraaksynthese, brailleleesregels en menselijke luisteraars.
+TRANSPARENCY_SUPERHEROES_EMAILGARUM_ROLE Transactionele mailorkestrator
+TRANSPARENCY_SUPERHEROES_EMAILGARUM_USE_CASE Coördineert stroomspecifieke e-mailsjablonen en bezorggedrag voor workflows voor verificatie, herstel en accountwijzigingen.
+TRANSPARENCY_SUPERHEROES_GUARDIAN_ROLE TrustedHTML DOM-schrijfbeveiliging
+TRANSPARENCY_SUPERHEROES_GUARDIAN_USE_CASE Reinigt en voegt op veilige wijze dynamische markup in frontend-modules in om het XSS-risico te verminderen en de CSP-compatibiliteit te behouden.
+TRANSPARENCY_SUPERHEROES_LAST_UPDATED_LABEL Laatst bijgewerkt:
+TRANSPARENCY_SUPERHEROES_LENS_ROLE Op aanvragen gerichte diagnostische buffer
+TRANSPARENCY_SUPERHEROES_MOTTO Perfecte reflectie. Perfect ritme. Geen stem achtergelaten.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_ITEM_1 Nieuwe bijdragers kunnen platformprimitieven snel identificeren versus code op paginaniveau.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_ITEM_2 Operationele incidenten kunnen worden beoordeeld per componentgebied (fouten, clienttelemetrie, DOM-veiligheid, e-mailbezorging).
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_ITEM_3 Documentatie kan verwijzen naar stabiele systeemnamen in plaats van naar veranderende implementatiedetails.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_TEXT_1 Thematische namen worden gebruikt om "transversale systeemcomponenten" aan te duiden in plaats van functie-lokale logica.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_TITLE Waarom dit naamgevingspatroon bestaat
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_ITEM_1 Deze componenten bieden vangrails, diagnostiek of leveringsgaranties die door meerdere pagina's en API's worden gebruikt.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_ITEM_2 Ze verminderen herhaalde logica door risicovol of belangrijk gedrag te centraliseren.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_ITEM_3 Ze zijn opzettelijk gedocumenteerd, zodat gebruikers en ontwikkelaars het gedrag van functies kunnen toewijzen aan concrete implementatiepunten.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_TEXT_1 Het Superheroes-naamgevingspatroon wordt gebruikt voor veiligheid, zichtbaarheid en communicatie op platformniveau die voor veel functies gelden.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_TITLE Algemeen doel
+TRANSPARENCY_SUPERHEROES_PAGE_TITLE Transparantie van superhelden
+TRANSPARENCY_SUPERHEROES_PHANTOMWING_ROLE Verzameldaemon voor clientfout
+TRANSPARENCY_SUPERHEROES_PHANTOMWING_USE_CASE Registreert consolefouten/waarschuwingen en onverwerkte fouten, groepeert en stelt vervolgens diagnostische gegevens beschikbaar voor foutopsporing door de operator.
+TRANSPARENCY_SUPERHEROES_SHADOWTALON_ROLE Globale PHP-foutbewaker
+TRANSPARENCY_SUPERHEROES_SHADOWTALON_USE_CASE Converteert niet-opgevangen runtimefouten naar veilige JSON/HTML-reacties en schrijft speciale roterende foutlogboeken met correlatie-ID's.
+TRANSPARENCY_SUPERHEROES_SYSTEM_BREAKDOWN_TITLE Systeemstoring
+TRANSPARENCY_SUPERHEROES_TABLE_ARIA Uitsplitsing van superheldencomponenten
+TRANSPARENCY_SUPERHEROES_TABLE_IMPLEMENTATION Primaire implementatie
+TRANSPARENCY_SUPERHEROES_TABLE_PRIMARY_ROLE Primaire rol
+TRANSPARENCY_SUPERHEROES_TABLE_SUPERHERO Superheld
+TRANSPARENCY_SUPERHEROES_TABLE_USE_CASE Specifiek gebruiksscenario
+TRANSPARENCY_SUPERHEROES_VERIFICATION_ANCHORS_TITLE Verificatieankers
+TRANSPARENCY_SUPERHEROES_VERIFICATION_ITEM_3 Het gedrag van Phantom Wing en Lens kan in DEV worden waargenomen via dashboarddiagnostiek en foutopsporingsuitvoer.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_1_TEXT ShadowTalon spoort onverwerkte fouten op en retourneert veilige reacties, terwijl de operatordiagnostiek in speciale logboeken wordt bewaard.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_2_TEXT Guardian beschermt DOM-schrijfbewerkingen; Phantom Wing verzamelt frontend-fouten; Lens biedt diagnostiek op verzoekniveau op ontwikkelingsoppervlakken.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_3_TEXT EmailGarum standaardiseert de samenstelling van transactionele post en delegeert de protocollevering aan EmailTransport.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_4_TEXT Echo herhaalt de semantiek getrouw, terwijl Cadence het tempo herstelt met pauzes en timing, zodat de toegankelijkheidsuitvoer begrijpelijk aanvoelt in plaats van gehaast.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_TITLE Hoe ze samenwerken
+TRANSPARENCY_TAX_ACCURACY_VALIDATION_TITLE Nauwkeurigheid en validatie
+TRANSPARENCY_TAX_EMPLOYMENT_INSURANCE_TITLE Arbeidsverzekering (EI)
+TRANSPARENCY_TAX_FEDERAL_BRACKETS_ARIA Federale belastingschijven voor 2025
+TRANSPARENCY_TAX_FEDERAL_PROVINCIAL_TITLE Federale en provinciale inkomstenbelasting
+TRANSPARENCY_TAX_IMPORTANT_NOTES_TITLE Belangrijke opmerkingen
+TRANSPARENCY_TAX_KNOWN_LIMITATIONS_TITLE Bekende beperkingen
+TRANSPARENCY_TAX_METHODOLOGY_DECK Gedetailleerde documentatie van formules, parameters en voorbeelden die worden gebruikt om loonbelastingen en inhoudingen te schatten.
+TRANSPARENCY_TAX_METHODOLOGY_PAGE_TITLE Transparantie van belastingmethodologie
+TRANSPARENCY_TAX_NET_PAY_TITLE Berekening van het nettoloon
+TRANSPARENCY_TAX_OAS_CLAWBACK_TITLE Terugvordering van de ouderdomsbeveiliging (OAS).
+TRANSPARENCY_TAX_ROUTE_METADATA_TITLE Metagegevens routeren
+TRANSPARENCY_TAX_SCOPE_COMMITMENT_TITLE Reikwijdte en betrokkenheid
+TRANSPARENCY_TAX_TABLE_INCOME_RANGE Inkomensbereik
+TRANSPARENCY_TAX_TABLE_RATE Beoordeel
+TRANSPARENCY_TAX_VERIFICATION_METADATA_TITLE Verificatie-metagegevens
+TRANSPARENCY_TESTING_CURRENT_SUITE_INVENTORY_VALUE 1.212 vermelde tests in 118 bestanden.
+TRANSPARENCY_TESTING_CURRENT_TEST_TOPOLOGY_TITLE Huidige testtopologie
+TRANSPARENCY_TESTING_GOVERNANCE_DECK PayCal beschouwt geautomatiseerde validatie als een vrijgavecontract en niet als een optionele kwaliteitscontrole.
+TRANSPARENCY_TESTING_GOVERNANCE_PAGE_TITLE Test- en validatiebeheer
+TRANSPARENCY_TESTING_PUBLIC_TRACEABILITY_TEXT_1 Wanneer release-inhoud het gedrag verandert, publiceren we updates in beide:
+TRANSPARENCY_TESTING_PUBLIC_TRACEABILITY_TEXT_2 Hierdoor blijven implementatiebewijs en publieke toezeggingen gesynchroniseerd.
+TRANSPARENCY_TESTING_PUBLIC_TRACEABILITY_TITLE Openbaar traceerbaarheidsbeleid
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_1 Levenscyclus van capaciteitstokens en dekking van mismatch-denial.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_2 CSP rapporteert opname-eindpuntdekking voor platte en geneste payloadvarianten.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_3 De dekking van Guardian-ontsmettingsmiddel is verankerd in runtimeconfiguratie en besturingselementen voor geblokkeerde selecties.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_4 Regressies voor het weigeren van mutaties door beheerders voor ontbrekende/ongeldige eenmalige capaciteitstokens.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_TITLE Recente uitbreiding van de beveiligingstest
+TRANSPARENCY_TESTING_RELEASE_BLOCKING_STACK_TEXT_1 Wanneer een poort defect raakt, wordt het vrijgavewerk gepauzeerd totdat de storing is verholpen en de betreffende poort opnieuw wordt gestart.
+TRANSPARENCY_TESTING_RELEASE_BLOCKING_STACK_TITLE Release-blokkerende validatiestack
+TRANSPARENCY_TESTING_SUITE_CONTRACT Contract
+TRANSPARENCY_TESTING_SUITE_CONTRACT_COVERAGE Grens- en compatibiliteitscontracten voor kritieke componenten
+TRANSPARENCY_TESTING_SUITE_INTEGRATION Integratie
+TRANSPARENCY_TESTING_SUITE_INTEGRATION_COVERAGE Controller-/API-stromen, authenticatiepaden, gecodeerde levenscyclus, runtime-beveiligingen
+TRANSPARENCY_TESTING_SUITE_MANUAL Handmatig
+TRANSPARENCY_TESTING_SUITE_MANUAL_COVERAGE Door een operator aangestuurde oefeningen en gerichte omgevingsverificatie
+TRANSPARENCY_TESTING_SUITE_UNIT Eenheid
+TRANSPARENCY_TESTING_SUITE_UNIT_COVERAGE Domein- en servicegedrag, beveiligingsinvarianten, helperlogica
+TRANSPARENCY_TESTING_TABLE_ARIA Huidige testtopologie
+TRANSPARENCY_TESTING_TABLE_COVERAGE_FOCUS Dekkingsfocus
+TRANSPARENCY_TESTING_TABLE_FILES Bestanden
+TRANSPARENCY_TESTING_TABLE_SUITE_CATEGORY Suitecategorie
+TRANSPARENCY_TESTING_VERIFICATION_METADATA_TITLE Verificatie-metagegevens
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CI_PIPELINE_TEXT_1 De CI-workflow voert steeds diepere testlagen uit, van snelle validatie tot stress-achtige verificatie.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CI_PIPELINE_TITLE 2) CI-verificatiepijplijn
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CSP_ASSETS_TEXT_1 Voor openbare pagina's geldt een expliciet inhoudsbeveiligingsbeleid en een niet-bewuste weergave van scripts/stijlen.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CSP_ASSETS_TEXT_2 Deze controles beperken uitvoerbare oppervlakken en maken deel uit van ons basisbeheermodel.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CSP_ASSETS_TITLE 5) CSP en controles op de levering van activa
+TRANSPARENCY_VERIFICATION_GOVERNANCE_DECK Op deze pagina worden de controles uitgelegd die PayCal gebruikt om gedrag te verifiëren en operationele vangrails in de productie af te dwingen.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_KNOWN_LIMITATIONS_FACT_1 Poortbeschrijvingen worden handmatig bijgehouden; Er is een automatische kruisverwijzing tussen deze pagina en de hook/pipeline-configuratie gepland voor de kwartaalafsluiting.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_KNOWN_LIMITATIONS_FACT_2 Runtime-limietwaarden weerspiegelen standaardwaarden; omgevingsspecifieke overschrijvingen kunnen verschillen op niet-ontwikkelingsinstanties.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_KNOWN_LIMITATIONS_TITLE Bekende beperkingen
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LAST_UPDATED_LABEL Laatst bijgewerkt:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LAST_VERIFIED_LABEL Laatst geverifieerd:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LOCAL_GATES_TEXT_1 Lokale hooks blokkeren onveilige samenvoegingen voordat de code gedeelde vertakkingen bereikt.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LOCAL_GATES_TEXT_2 Deze poorten verkleinen de kans op beleidsafwijkingen en stille kwaliteitsregressies.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LOCAL_GATES_TITLE 1) Lokale beleidspoorten (Git Hooks)
+TRANSPARENCY_VERIFICATION_GOVERNANCE_MEANING_TEXT_1 Voor ons betekent governance beleid dat is gecodeerd in codepaden, limieten, tests en implementatiecontroles. Het is geen belofte die alleen uit documenten bestaat.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_MEANING_TEXT_2 De onderstaande verwijzingen verwijzen naar implementatiepunten in deze repository, zodat claims onafhankelijk kunnen worden geverifieerd.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_MEANING_TITLE Wat we bedoelen met bestuur
+TRANSPARENCY_VERIFICATION_GOVERNANCE_METADATA_TEXT_1 Deze metagegevens worden elk kwartaal bijgewerkt als onderdeel van de afsluiting van de governance-audit.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_METADATA_TITLE Verificatie-metagegevens
+TRANSPARENCY_VERIFICATION_GOVERNANCE_NEXT_REVIEW_LABEL Volgende beoordeling gepland:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_PAGE_TITLE Verificatie en transparantie van bestuur
+TRANSPARENCY_VERIFICATION_GOVERNANCE_ROUTE_LABEL Routebeschrijving:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_ROUTE_METADATA_TITLE Metagegevens routeren
+TRANSPARENCY_VERIFICATION_GOVERNANCE_RUNTIME_LIMITS_TEXT_1 Operationele eindpunten worden begrensd door expliciete aanvraagvensters en payload-validatieregels.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_RUNTIME_LIMITS_TEXT_2 Deze controles zijn bedoeld om het gedrag voorspelbaar te houden onder zowel normale als onrechtmatige verkeerspatronen.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_RUNTIME_LIMITS_TITLE 3) Runtimelimieten en inputbeheer
+TRANSPARENCY_VERIFICATION_GOVERNANCE_SECURITY_STATUS_TEXT_1 Vanaf 24-03-2026 blijft PayCal in PASS-status na de BRS-01 tot en met BRS-05-uitbreiding en daaropvolgende release-hygiënesynchronisatie.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_SECURITY_STATUS_TEXT_2 Details over de openbare status en bewijsreferenties worden gepubliceerd op
+TRANSPARENCY_VERIFICATION_GOVERNANCE_SECURITY_STATUS_TITLE Huidige beveiligingsauditstatus
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_ACCOUNT_RECOVERY_ITEM Limieten voor accountherstel omvatten code-TTL, cooldowns voor opnieuw verzenden, maximale verificatiepogingen, herhalingsvensters en gehashte IP-blok-TTL's.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_TEXT_1 Beveiligingsgevoelige stroomlimieten worden centraal gedefinieerd en begrensd door min/max-beperkingen.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_TEXT_2 Deze structuur maakt gecontroleerde beleidsupdates mogelijk zonder getypte grenzen te omzeilen.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_TITLE 4) TTL en beveiligingslimietbeheer
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFICATION_SCOPE_LABEL Verificatiebereik:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFICATION_SCOPE_VALUE handmatige beoordeling van beschreven poortimplementaties aan de hand van huidige hooks, CI-pijplijncontroles en runtime-controlepaden.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFY_CLAIMS_TEXT_1 Ontwikkelaars kunnen verificatiesignalen rechtstreeks in deze repository reproduceren:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFY_CLAIMS_TITLE Hoe u deze claims kunt verifiëren
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_1 Core navigation supports keyboard use, skip links, and documented single-key shortcuts for primary destinations.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_2 Shortcut handling is safety-guarded and does not fire while typing in editable fields or when dialogs are open.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_3 Recent regression coverage checks headings, reflow/text spacing, navigation paths, and the accessibility feedback handoff.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_4 Strict route-level contrast blockers on core public pages have been remediated, while broader theme-wide contrast work continues.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_5 Users can start an accessibility report from the accessibility page and continue it through the secure contact flow.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_6 The accessibility transparency page now publishes last-verified date, verification scope, known limitations, and next review due date.
+TRANSPARENCY_HUB_ACCESSIBILITY_TEXT_1 We use WCAG 2.1 Level AA as our working accessibility standard and publish recent accessibility work in plain language.
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_1 Documents lockfile-first npm policy and
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_2 Maps JavaScript quality gates and backend pipeline stages to workflow controls.
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_3 Lists known documentation limitations and planned governance improvements.
+TRANSPARENCY_HUB_DEPENDENCY_CI_TEXT_1 This article publishes how npm dependencies are controlled and how CI gates are enforced before release.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_1 Includes a 10-run matrix for real and synthetic 2025/2026 datasets.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_2 Reports DOMContentLoaded, section-ready timing, and API-call trade-offs.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_3 Documents test method and interpretation for public review.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_READ_MORE Read earnings load-testing results
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_TEXT_1 This article publishes reproducible A/B benchmark results for eager rendering versus lazy section loading on
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_1 Flow-specific template families are documented across verification, recovery, change-email, and contact support paths.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_2 Delivery responsibilities are separated between EmailGarum orchestration and EmailTransport SMTP protocol handling.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_3 Opt-in live tests for template sweeps and DKIM/DMARC health verification are documented.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_TEXT_1 The email page explains which transactional emails PayCal sends, how templates are rendered, and how delivery reliability is verified.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_1 Summarizes service/controller changes that materially affect behavior.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_2 Maps release changes to security and governance controls.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_3 Includes references to detailed changelog and audit artifacts.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TEXT_1 This page tracks backend architecture and framework-level changes with public explanations of what changed and why.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_1 Documents HTTPS enforcement, HSTS preload, and HTTP/3 (QUIC) advertisement.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_2 Lists the current security header baseline including CSP, COOP, COEP, CORP, and browser hardening headers.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_3 Explains protocol negotiation and fallback behavior across modern clients.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_1 Tracks billing-state handling and subscription status contract changes.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_2 Captures destructive-action safeguards such as explicit account deletion confirmation phrases.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_3 Links product-facing updates to verification and release governance evidence.
+TRANSPARENCY_HUB_PRODUCT_BILLING_TEXT_1 Major account, billing, and profile-flow updates are explained alongside backend and testing governance so users can audit both UX and behavior changes.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_1 Includes ShadowTalon, Guardian, Phantom Wing, Lens, and EmailGarum.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_2 Explains where each component is used and what risk boundary it protects.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_3 Provides verification anchors so implementation claims can be inspected directly in code and tests.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_TEXT_1 The Superheroes page documents PayCal's themed cross-cutting components and the specific operational problem each one solves.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_1 CPP, OAS, EI, federal/provincial tax, and net-pay formulas are documented with worked examples.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_2 Current tax-year thresholds and rates are published and tied to CRA references.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_3 Calculation quality is validated with an automated test suite and annual rate updates.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_TEXT_1 The tax page documents our CRA-aligned formulas, thresholds, and examples used for estimates.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_1 Shows the active PHPUnit suite inventory and category split.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_2 Documents release-blocking validation commands used in
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_3 Explains how test evidence is synchronized into changelogs and source-of-truth notes.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_TEXT_1 This article documents how we run backend, frontend, and accessibility validation and which gates are treated as release blockers.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_1 Pre-commit and pre-push hooks enforce PHPStan Level 9 and reject baseline bypasses.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_2 CI runs staged validation across unit, integration, contract, random-order, and coverage jobs.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_3 Runtime controls apply rate limits, TTL windows, and abuse-response blocks for sensitive flows.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_TEXT_1 This page documents how PayCal enforces policy through tests, hooks, runtime limits, and security controls.
+AUTH_BETA_NOTICE PayCal bevindt zich in privbeta.
+AUTH_DIVIDER_OR of
+AUTH_PAGE_HEADING Authenticatie
+AUTH_PRIVACY_LINK Privacybeleid
+AUTH_RECOVER_ACCOUNT Account herstellen
+AUTH_RECOVER_ACCOUNT_EMAIL E-mail van account
+AUTH_REGISTER_CREATE_BUTTON Account aanmaken
+AUTH_REGISTER_DEVICE_LABEL Naam van het passkey-apparaat
+AUTH_REGISTER_DEVICE_PLACEHOLDER naam-JJJJMMDD
+AUTH_REGISTER_EMAIL_LABEL E-mail (verplicht)
+AUTH_REGISTER_FULL_NAME_LABEL Volledige naam (verplicht)
+AUTH_REGISTER_INVITE_LABEL Uitnodigingscode
+AUTH_REGISTER_PANEL_ARIA Paneel voor accountaanmaak
+AUTH_REGISTER_PASSKEY_STATUS Je maakt een passkey aan om je account te beveiligen.
+AUTH_SIGNIN_EMAIL_ARIA E-mail verplicht
+AUTH_SIGNIN_EMAIL_LABEL E-mail (verplicht)
+AUTH_SIGNIN_OTHER_DEVICE Ander apparaat gebruiken
+AUTH_SIGNIN_PANEL_ARIA Inlogpaneel
+AUTH_SIGNIN_PASSKEY_BUTTON Doorgaan met passkey
+AUTH_SIGNIN_PASSKEY_STATUS Gebruik een passkey op dit apparaat of meld je aan vanaf een ander apparaat.
+AUTH_TABS_ARIA Authenticatieopties
+AUTH_TAB_REGISTER Account aanmaken
+AUTH_TAB_SIGNIN Inloggen
+AUTH_TERMS_ACK_AND en
+AUTH_TERMS_ACK_PREFIX Door in te loggen ga je akkoord met de
+AUTH_TERMS_LINK Voorwaarden
+AUTH_VERIFICATION_MESSAGE Je herstelsleutel is naar je gemaild. Bewaar deze op een veilige plaats voordat je doorgaat.
+AUTH_VERIFICATION_STEP_1 Controleer je inbox op de e-mail met de herstelsleutel.
+AUTH_VERIFICATION_STEP_2 Bewaar je herstelsleutel op een veilige plaats.
+AUTH_VERIFICATION_STEP_3 Ga verder door in te loggen met je passkey.
+AUTH_VERIFICATION_TITLE E-mail geverifieerd
+BLOG_ARTICLE_BODY_ARIA Artikeltekst
+BLOG_ARTICLE_FOUND_PLURAL artikelen gevonden
+BLOG_ARTICLE_FOUND_SINGULAR artikel gevonden
+BLOG_ARTICLE_NAV_ARIA Artikelnavigatie
+BLOG_CLEAR Wissen
+BLOG_DEFAULT_AUTHOR PayCal Redactie
+BLOG_EMPTY_RESULTS Geen berichten komen overeen met de huidige zoek- en tagfilters.
+BLOG_FILTER_TAG_ARIA Filteren op tag
+BLOG_LIST Lijst
+BLOG_NEXT Volgende
+BLOG_NEXT_ARROW_LABEL Volgende ->
+BLOG_NEXT_ARTICLE_ARIA Volgend artikel
+BLOG_NEXT_PAGE Volgende pagina
+BLOG_OF_LABEL van
+BLOG_OVERVIEW_ARIA Blogoverzicht
+BLOG_PAGE_DECK Release-notities, salarisverwerking begeleiding en technische updates van de PayCal-organisatie.
+BLOG_PAGE_LABEL Pagina
+BLOG_PAGE_NAV_ARIA Blogpaginanavigatie
+BLOG_PAGE_TITLE PayCal Blog
+BLOG_POST_NOT_FOUND_ARIA Blogbericht niet gevonden
+BLOG_POST_NOT_FOUND_DECK Het gevraagde artikel kon niet worden gevonden.
+BLOG_POST_NOT_FOUND_TITLE Bericht niet gevonden
+BLOG_POST_TAGS_ARIA Berichttags
+BLOG_PREVIOUS Vorige
+BLOG_PREVIOUS_ARROW_LABEL <- Vorige
+BLOG_PREVIOUS_ARTICLE_ARIA Vorig artikel
+BLOG_PREVIOUS_PAGE Vorige pagina
+BLOG_RETURN_TO_LIST Terug naar de bloglijst
+BLOG_SEARCH_ARIA Blogberichten zoeken
+BLOG_SEARCH_PLACEHOLDER Zoeken op titel, auteur, fragment of tags
+BLOG_UNTITLED Zonder titel
+ADMIN_LIMITS_RESET_ERROR Fout bij het resetten van de limiet
+ADMIN_LIMITS_RESET_CATEGORY_ERROR Fout bij het resetten van categorielimieten
+
+WEEKDAY_MONDAY Maandag
+WEEKDAY_TUESDAY Dinsdag
+WEEKDAY_WEDNESDAY Woensdag
+WEEKDAY_THURSDAY Donderdag
+WEEKDAY_FRIDAY Vrijdag
+WEEKDAY_SATURDAY Zaterdag
+WEEKDAY_SUNDAY Zondag
+
+SETTINGS_CALENDAR_LABEL_TODAY Today
+SETTINGS_CALENDAR_LABEL_DATE Date
+SETTINGS_CALENDAR_LABEL_LABEL Label
+SETTINGS_CALENDAR_LABEL_AUDIO Audio
+SETTINGS_CALENDAR_LABEL_ENTRIES Entries
+SETTINGS_CALENDAR_LABEL_FIELDS Fields
+SETTINGS_POSITION_LEFT Left
+SETTINGS_POSITION_MIDDLE Middle
+SETTINGS_POSITION_RIGHT Right
+SETTINGS_STYLE_LABEL_SIDEBAR Sidebar
+SETTINGS_SECURITY_TABLE_ACTION Action
+SETTINGS_SECURITY_TABLE_TTL TTL
+SETTINGS_SECURITY_TABLE_LEFT Left
+
+CHANGE_EMAIL_STATUS_ENTER_BOTH_EMAILS Enter both email addresses.
+CHANGE_EMAIL_ERROR_ENTER_NEW_EMAIL Enter a new email address.
+CHANGE_EMAIL_ERROR_CONFIRM_NEW_EMAIL Confirm your new email address.
+CHANGE_EMAIL_STATUS_EMAILS_NO_MATCH Emails do not match.
+CHANGE_EMAIL_ERROR_EMAILS_MUST_MATCH Email addresses must match.
+CHANGE_EMAIL_STATUS_WORKING Working...
+CHANGE_EMAIL_STATUS_CODES_SENT Codes sent.
+CHANGE_EMAIL_STATUS_REQUEST_FAILED_PREFIX Request failed:
+CHANGE_EMAIL_STATUS_ENTER_BOTH_CODES Enter both verification codes.
+CHANGE_EMAIL_ERROR_ENTER_VALID_6_CHAR_CODE Enter a valid 6-character code.
+CHANGE_EMAIL_STATUS_EMAIL_UPDATED Email updated.
+CHANGE_EMAIL_STATUS_SESSION_EXPIRED Your session expired. Start again.
+RECOVERY_EMAIL_ERROR_ENTER_VALID_EMAIL Please enter a valid email address.
+RECOVERY_EMAIL_STATUS_SECURITY_TOKEN_MISSING Security token missing. Reload and try again.
+RECOVERY_EMAIL_STATUS_SENDING_CODE Sending code...
+RECOVERY_EMAIL_STATUS_CODE_SENT_CHECK_EMAIL Code sent! Check your email.
+RECOVERY_EMAIL_STATUS_NETWORK_ERROR Network error. Please try again.
+RECOVERY_EMAIL_ERROR_ENTER_6_DIGIT_CODE Please enter a 6-digit code.
+RECOVERY_EMAIL_STATUS_VERIFYING Verifying...
+RECOVERY_EMAIL_STATUS_VERIFIED Recovery email verified! ✓
+RECOVERY_EMAIL_STATUS_RESENDING_CODE Resending code...
+RECOVERY_EMAIL_STATUS_NEW_CODE_SENT New code sent!
+
+ORGANIZATIONS_MEMBERSHIP_CONSENT_TITLE Membership Consent
+ORGANIZATIONS_MEMBERSHIP_CONSENT_DESC Review and confirm before activating organization membership access.
+ORGANIZATIONS_MEMBERSHIP_CONSENT_DISCLAIMER_LABEL Reason / Disclaimer (optional)
+ORGANIZATIONS_MEMBERSHIP_CONSENT_DISCLAIMER_PLACEHOLDER Optional note for consent record
+ORGANIZATIONS_MEMBERSHIP_CONSENT_ACK_TEXT I acknowledge and consent to organization membership activation.
+ORGANIZATIONS_CURRENT_OWNER_TITLE Current Owner
+ORGANIZATIONS_PREMIUM_LOCKED Premium locked
+ORGANIZATIONS_NO_ACTIVE_SESSIONS No active sessions found.
+ORGANIZATIONS_LOADING_ACCOUNT_ACTIVITY Loading account activity...
+ORGANIZATIONS_CREATE_NAME_REQUIRED Enter an organization name.
+ORGANIZATIONS_FAILED_LOAD_MEMBERS_GRID Failed to load members grid.
+ORGANIZATIONS_FAILED_LOAD_ACCESS_REQUESTS Failed to load access requests.
+
+SETTINGS_STYLE_LABEL_TYPOGRAPHY Typography
+SETTINGS_TYPOGRAPHY_STANDARD Standard
+SETTINGS_TYPOGRAPHY_DYSLEXIA_FRIENDLY Dyslexia-friendly
+SETTINGS_AUDIO_FEEDBACK_MODE_ARIA Audio feedback mode
+SETTINGS_SECTION_PASSKEYS Passkeys
+SETTINGS_SECTION_SECURITY Security
+SETTINGS_SECTION_DEBUGGING_OPTIONAL Debugging (Optional)
+
+SETTINGS_VOICE_PICKER_ENABLE_CUES Enable Cues to choose a voice.
+SETTINGS_PASSKEYS_SECURITY_NOTE Add more passkeys to improve account security.
+SETTINGS_PASSKEYS_SR_INSTRUCTIONS Passkeys list. Edit a passkey name inline and press Enter to save. Use Remove to delete a passkey when multiple devices are registered.
+SETTINGS_ADD_DEVICE Add Device
+SETTINGS_TIMEOUT_FORM_ARIA Timeout Settings Form
+SETTINGS_SECURITY_SESSION_TIMING_HELP Session + sensitive action timing.
+SETTINGS_DEBUGGING_FORM_ARIA Debugging Preferences Form
+SETTINGS_DEBUG_OPTION_OFF_DEFAULT Off (Default)
+SETTINGS_DEBUG_OPTION_ON_MORE_DETAILS On (More details)
+
+SETTINGS_SECURITY_LEVEL Level
+SETTINGS_SECURITY_LOW Low
+SETTINGS_SECURITY_HIGH High
+SETTINGS_SECURITY_BALANCED Balanced
+SETTINGS_SECURITY_LEVEL_HINT Shorter sessions are safer on shared devices.
+SETTINGS_SECURITY_ROW_AUTO_SIGNOUT Auto Signout
+SETTINGS_SECURITY_ROW_ACCOUNT_EDIT Account Edit
+SETTINGS_SECURITY_ROW_CALENDAR_EDIT Calendar Edit
+SETTINGS_SECURITY_EMERGENCY_SIGNOUT Emergency Signout
+
+SETTINGS_DEBUG_PANEL_HOVER_HELP Debugging adds extra information to help identify issues. You can safely leave this off unless you're troubleshooting.
+SETTINGS_DEBUG_INTRO Turn on extra diagnostics to help troubleshoot issues. Safe to leave off.
+SETTINGS_DEBUG_PERF_NOTE For troubleshooting only. Enabling extra diagnostics may impact performance.
+SETTINGS_DEBUG_CONSOLE_HELP Show helpful messages in your browser console.
+SETTINGS_DEBUG_CONSOLE_HOVER Off shows only critical errors. On includes warnings and helpful logs.
+SETTINGS_DEBUG_FINE_GRAINED_HELP Capture deeper system-level debugging information.
+SETTINGS_DEBUG_FINE_GRAINED_HOVER Off keeps output minimal. On includes step-by-step internal logs.
+SETTINGS_DEBUG_NETWORK_HELP Track API requests and performance details while troubleshooting.
+SETTINGS_DEBUG_NETWORK_HOVER Off keeps network debug tracking disabled. On logs request timing details for diagnostics.
+
+SETTINGS_SECURITY_LEVEL_SLIDER_ARIA Security level slider
+SETTINGS_SECURITY_DERIVED_TIMEOUTS_ARIA Derived timeout values
+SETTINGS_SECURITY_EMERGENCY_WINDOW_ARIA Emergency signout window in milliseconds
+
+SETTINGS_SECURITY_LEVEL_HOVER_HELP Higher level shortens timeouts for stronger protection on shared devices.
+SETTINGS_SECURITY_ROW_AUTO_SIGNOUT_HOVER Auto signout ends inactive sessions to reduce unauthorized access risk.
+SETTINGS_SECURITY_ROW_ACCOUNT_EDIT_HOVER Account edit timeout limits how long profile changes stay unlocked.
+SETTINGS_SECURITY_ROW_CALENDAR_EDIT_HOVER Calendar edit timeout reduces chance of unwanted timesheet changes.
+SETTINGS_SECURITY_EMERGENCY_WINDOW_HOVER Press ESC three times within this window for immediate safety signout.
+
+SETTINGS_ARIA_EDIT_ACCOUNT_DETAILS Edit Account Details
+SETTINGS_ARIA_RECOVERY_ACCOUNT_DELETION_ACTIONS Recovery and account deletion actions
+SETTINGS_ARIA_DELETE_SITE_ROW Delete site row
+SETTINGS_ARIA_CALENDAR_PREFERENCES_FORM Calendar Preferences Form
+
+SETTINGS_CHANGE_EMAIL_SEND_CODES Send Verification Codes
+SETTINGS_CHANGE_EMAIL_COMPLETE Complete Email Change
+SETTINGS_CHANGE_EMAIL_RESEND_CODES Resend Codes
+SETTINGS_CHANGE_EMAIL_LINK_TITLE Change email address
+SETTINGS_CHANGE_EMAIL_LINK_HOVER Start secure email change with verification codes.
+SETTINGS_CHANGE_EMAIL_LINK_TEXT Change
+SETTINGS_CHANGE_EMAIL_LINK_DISABLED_TITLE Verify recovery email first
+SETTINGS_CHANGE_EMAIL_LINK_DISABLED_TEXT Change (verify recovery email first)
+SETTINGS_RECOVERY_KEY_TITLE Recovery Key
+SETTINGS_RECOVERY_KEY_HELP_TEXT Create a Recovery Key to regain access if you lose your passkeys. Creating a new key disables the old one.
+SETTINGS_RECOVERY_KEY_BUTTON_HOVER Recovery Key is offline backup access. New keys invalidate older keys.
+SETTINGS_RECOVERY_KEY_CREATE_BUTTON Create Recovery Key
+
+SETTINGS_RECOVERY_LABEL Recovery
+SETTINGS_RECOVERY_PENDING_VERIFICATION Pending verification
+SETTINGS_RECOVERY_NOT_VERIFIED Not verified
+
+SETTINGS_RECOVERY_EMAIL_PLACEHOLDER Enter recovery email address
+SETTINGS_RECOVERY_EMAIL_ARIA_LABEL Recovery email address
+SETTINGS_RECOVERY_EMAIL_INPUT_HOVER Backup email for account recovery and verification.
+SETTINGS_RECOVERY_SEND_VERIFICATION_CODE_ARIA Send Verification Code
+SETTINGS_RECOVERY_SEND_CODE_HOVER Send a one-time code to verify this recovery email.
+SETTINGS_RECOVERY_SEND_BUTTON Send
+SETTINGS_RECOVERY_VERIFICATION_CODE_PLACEHOLDER verification code
+SETTINGS_RECOVERY_VERIFICATION_CODE_ARIA Recovery email verification code
+SETTINGS_RECOVERY_VERIFICATION_CODE_HOVER Enter the 6-digit code from your recovery email.
+SETTINGS_RECOVERY_VERIFY_BUTTON_HOVER Confirm this recovery email with the entered code.
+SETTINGS_RECOVERY_VERIFY_BUTTON Verify
+SETTINGS_DELETE_ACCOUNT_WARNING_TEXT Deleting your account permanently removes profile data, calendar records, organizations, sites, and recovery methods. This action cannot be undone.
+SETTINGS_DELETE_ACCOUNT_DESC Delete your account permanently. Type the confirmation phrase exactly, then select Delete Account to continue.
+SETTINGS_DELETE_ACCOUNT_CONFIRM_LABEL Type %s to confirm
+SETTINGS_DELETE_ACCOUNT_CONFIRM_PHRASE PLEASE DELETE
+SETTINGS_EDIT_DETAILS_SUBMIT_HOVER Save all Account Details changes.
+SETTINGS_EDIT_DETAILS_CANCEL_HOVER Close this dialog without saving new changes.
+SETTINGS_DELETE_ACCOUNT_BUTTON_HOVER Open irreversible account deletion flow. This cannot be undone.
+SETTINGS_EDIT_DETAILS_EMAIL_HOVER Primary account email. Change requires verified recovery access.
+SETTINGS_EDIT_DETAILS_FULL_NAME_HOVER Your legal full name used in account records.
+SETTINGS_EDIT_DETAILS_PHONE_HOVER Phone number for account contact and notifications.
+SETTINGS_EDIT_DETAILS_PROVINCE_HOVER Select your province for payroll and tax defaults.
+SETTINGS_EDIT_DETAILS_TIMEZONE_HOVER Pick your local timezone for calendar and pay periods.
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_LABEL Employment
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_HOVER Set your employment category for profile context.
+SETTINGS_EDIT_DETAILS_JOB_TITLE_LABEL Job Title
+SETTINGS_EDIT_DETAILS_JOB_TITLE_HOVER Your current role or position title.
+SETTINGS_EDIT_DETAILS_DEPARTMENT_LABEL Department
+SETTINGS_EDIT_DETAILS_DEPARTMENT_HOVER Department or organization where you primarily work.
+SETTINGS_EDIT_DETAILS_HIRE_DATE_LABEL Hire Date
+SETTINGS_EDIT_DETAILS_HIRE_DATE_HOVER Employment start date for recordkeeping.
+SETTINGS_EDIT_DETAILS_PAY_RATE_LABEL Pay Rate
+SETTINGS_EDIT_DETAILS_PAY_RATE_HOVER Base pay amount before overtime or premiums.
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_LABEL Pay Rate Type
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_HOVER Choose whether pay rate is hourly, salary, or day rate.
+SETTINGS_EDIT_DETAILS_ADDRESS_HOVER Street and unit address for your profile.
+SETTINGS_EDIT_DETAILS_CITY_LABEL City
+SETTINGS_EDIT_DETAILS_CITY_HOVER City associated with your mailing address.
+SETTINGS_EDIT_DETAILS_POSTAL_CODE_LABEL Postal Code
+SETTINGS_EDIT_DETAILS_POSTAL_CODE_HOVER Postal code used for tax and address validation.
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_FULL_TIME Full-time
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_PART_TIME Part-time
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_CONTRACTOR Contractor
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_CASUAL Casual
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_OPTION_HOURLY Hourly
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_OPTION_SALARY Salary
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_OPTION_DAY_RATE Day rate
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_ALBERTA Alberta
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_BRITISH_COLUMBIA British Columbia
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_MANITOBA Manitoba
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NEW_BRUNSWICK New Brunswick
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NEWFOUNDLAND_AND_LABRADOR Newfoundland and Labrador
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NOVA_SCOTIA Nova Scotia
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_ONTARIO Ontario
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_PRINCE_EDWARD_ISLAND Prince Edward Island
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_QUEBEC Quebec
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_SASKATCHEWAN Saskatchewan
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NORTHWEST_TERRITORIES Northwest Territories
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NUNAVUT Nunavut
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_YUKON Yukon
+SETTINGS_CHANGE_EMAIL_DESC Change your account email in two steps: request verification codes, then enter both codes to confirm the update.
+SETTINGS_CHANGE_EMAIL_NEW_EMAIL_LABEL New Email Address
+SETTINGS_CHANGE_EMAIL_NEW_EMAIL_PLACEHOLDER Enter new email address
+SETTINGS_CHANGE_EMAIL_CONFIRM_EMAIL_LABEL Confirm Email Address
+SETTINGS_CHANGE_EMAIL_OLD_CODE_LABEL Old Email Code
+SETTINGS_CHANGE_EMAIL_NEW_CODE_LABEL New Email Code
+SETTINGS_CHANGE_EMAIL_CODE_PLACEHOLDER Enter 6-digit code

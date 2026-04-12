@@ -275,17 +275,11 @@ async function generateRecoveryMaterial(payload) {
 }
 
 async function deriveRecoveryProof(payload) {
-  const { recoveryKey, accountRecoverySalt, proofNonce, txnId } = payload;
+  const { recoveryKey, accountRecoverySalt, proofNonce, txnId, clientFingerprintHash } = payload;
 
-  if (!recoveryKey || !accountRecoverySalt || !proofNonce || !txnId) {
+  if (!recoveryKey || !accountRecoverySalt || !proofNonce || !txnId || !clientFingerprintHash) {
     throw new Error('Missing recovery proof inputs');
   }
-
-  // Generate or retrieve session diagnostic token (not persistent fingerprint)
-  if (!self.cryptoState.sessionDiagnosticToken) {
-    self.cryptoState.sessionDiagnosticToken = generateSessionDiagnosticToken();
-  }
-  const sessionToken = self.cryptoState.sessionDiagnosticToken;
 
   const recoveryKeyBytes = decodeCrockfordBase32(recoveryKey);
   const saltBytes = b64ToBytes(accountRecoverySalt);
@@ -297,7 +291,7 @@ async function deriveRecoveryProof(payload) {
     hash: 'SHA-256',
   }, ikm, 256);
   const hmacKey = await crypto.subtle.importKey('raw', new Uint8Array(proofKeyBits), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const proof = await crypto.subtle.sign('HMAC', hmacKey, encoder.encode(`paycal-recovery-proof-v1|${txnId}|${proofNonce}|${sessionToken}`));
+  const proof = await crypto.subtle.sign('HMAC', hmacKey, encoder.encode(`paycal-recovery-proof-v1|${txnId}|${proofNonce}|${clientFingerprintHash}`));
 
   return { proof: bytesToB64(new Uint8Array(proof)) };
 }

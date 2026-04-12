@@ -112,6 +112,16 @@ require_once Environment::appHome().'html/header.php';
 
   <h1 class="visually_hidden"><?php echo settings_index_i18n('SETTINGS'); ?></h1>
 
+  <!-- SETTINGS JUMP NAV -->
+  <nav class="settings_jump_nav" aria-label="<?php echo settings_index_i18n('SETTINGS'); ?> sections">
+    <a href="#panel-calendar" class="settings_jump_link"><?php echo settings_index_i18n('CALENDAR'); ?></a>
+    <a href="#panel-style" class="settings_jump_link"><?php echo settings_index_i18n('STYLE'); ?></a>
+    <a href="#panel-audio" class="settings_jump_link"><?php echo settings_index_i18n('AUDIO'); ?></a>
+    <a href="#panel-passkeys" class="settings_jump_link"><?php echo settings_index_i18n('SETTINGS_SECTION_PASSKEYS'); ?></a>
+    <a href="#panel-security" class="settings_jump_link"><?php echo settings_index_i18n('SETTINGS_SECTION_SECURITY'); ?></a>
+    <a href="#panel-data-portability" class="settings_jump_link">Data Portability</a>
+  </nav>
+
   <!-- MODAL CHANGE EMAIL -->
   <dialog id="modal_change_email" aria-labelledby="modal_change_email_title" aria-describedby="modal_change_email_desc change_email_status">
   <form id="change_email_form" name="change_email_form" aria-label="<?php echo settings_index_i18n('CHANGE_EMAIL'); ?>">
@@ -996,6 +1006,79 @@ echo Render::dialog([
     <input type="hidden" id="form_ttl_settings" name="form_ttl_settings" value="<?php echo htmlspecialchars((string) ($user->form_ttl_settings ?? '3600'), ENT_QUOTES, 'UTF-8'); ?>">
     <input type="hidden" id="form_ttl_calendar" name="form_ttl_calendar" value="<?php echo htmlspecialchars((string) ($user->form_ttl_calendar ?? '3600'), ENT_QUOTES, 'UTF-8'); ?>">
     <input type="hidden" id="form_ttl_general" name="form_ttl_general" value="<?php echo htmlspecialchars((string) ($user->form_ttl_general ?? '3600'), ENT_QUOTES, 'UTF-8'); ?>">
+  </form>
+</section>
+
+<!-- IMPORT CONFIRM DIALOG -->
+<dialog id="modal_import_confirm" aria-labelledby="modal_import_confirm_title" aria-describedby="modal_import_confirm_desc">
+  <section class="modal_header">
+    <button type="button" class="btn btn_close" data-dialog-close="modal_import_confirm" aria-label="<?php echo settings_index_i18n('CLOSE'); ?>">&times;</button>
+    <h2 id="modal_import_confirm_title" class="modal_title centered">Confirm Import</h2>
+  </section>
+  <section class="modal_content f_column">
+    <p id="modal_import_confirm_desc">This will overwrite your existing sites and work entries with the staged import data. This action cannot be undone.</p>
+    <p id="modal_import_confirm_summary" class="centered muted"></p>
+  </section>
+  <section class="modal_footer">
+    <div class="modal_controls flex centered">
+      <button id="import_confirm_proceed_btn" type="button" class="btn btn_primary f_just_center mar_md">Commit Import</button>
+      <button id="import_confirm_cancel_btn" type="button" class="btn btn_cancel f_just_center mar_md"><?php echo settings_index_i18n('CANCEL'); ?></button>
+    </div>
+  </section>
+</dialog>
+
+<!-- DATA PORTABILITY SECTION -->
+<section class="panel" id="panel-data-portability">
+  <form id="account_data_portability_form" method="POST" action="<?php echo Environment::appURL('api/v1/account/data/export/'); ?>" aria-label="Account data export and import">
+    <input class="visually_hidden" type="text" name="username" value="NOTUSED" autocomplete="username" hidden tabindex="-1" aria-hidden="true">
+    <input type="hidden" name="csrf_token" value="<?php echo $csrfNonce; ?>">
+    <h2 class="heading-accent">Data Portability</h2>
+    <p class="help_text">Export creates a portable account package (user profile settings, sites, and work entries). Import runs in two stages: prepare validates and stages data, commit applies changes.</p>
+    <p class="data_portability_warning" role="note"><strong>Warning:</strong> Export generates plaintext JSON data, including work details. Treat export files as sensitive and store or transfer securely.</p>
+
+    <div id="data_portability_status" class="status_message" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="data_portability_grid">
+      <section class="data_portability_column" aria-labelledby="data_export_title">
+        <h3 id="data_export_title">Stage A: Export</h3>
+        <p class="help_text">1) Click Export. 2) Review counts/checksum. 3) Copy or download the payload.</p>
+        <div class="data_portability_actions_row">
+          <button id="data_export_run_btn" type="button" class="btn btn_primary">Export Account Data</button>
+          <button id="data_export_copy_btn" type="button" class="btn btn_secondary" disabled aria-disabled="true">Copy Payload</button>
+          <button id="data_export_download_btn" type="button" class="btn btn_secondary" disabled aria-disabled="true">Download JSON</button>
+        </div>
+        <div class="data_portability_meta">
+          <div><strong>Reference:</strong> <span id="data_export_reference">-</span></div>
+          <div><strong>Checksum (SHA-256):</strong> <span id="data_export_checksum">-</span></div>
+          <div><strong>Counts:</strong> <span id="data_export_counts">-</span></div>
+        </div>
+        <label for="data_export_payload" class="item_label">Export Payload JSON</label>
+        <textarea id="data_export_payload" class="data_portability_textarea" rows="12" readonly aria-describedby="data_portability_status" placeholder="Export payload will appear here after running export."></textarea>
+      </section>
+
+      <section class="data_portability_column" aria-labelledby="data_import_title">
+        <h3 id="data_import_title">Stage B: Import</h3>
+        <p class="help_text">1) Paste payload. 2) Prepare Import validates and stages. 3) Commit Import applies data to your account.</p>
+        <label for="data_import_payload_json" class="item_label">Import Payload JSON</label>
+        <textarea id="data_import_payload_json" class="data_portability_textarea" rows="12" aria-describedby="data_portability_status" placeholder="Paste exported payload JSON here."></textarea>
+        <div class="data_portability_actions_row">
+          <button id="data_import_prepare_btn" type="button" class="btn btn_secondary">Prepare Import</button>
+          <button id="data_import_commit_btn" type="button" class="btn btn_primary" disabled aria-disabled="true">Commit Import</button>
+        </div>
+        <div class="data_portability_meta">
+          <div><strong>Import ID:</strong> <span id="data_import_id">-</span></div>
+          <div><strong>Prepared Checksum:</strong> <span id="data_import_checksum">-</span></div>
+          <div><strong>Prepared Counts:</strong> <span id="data_import_counts">-</span></div>
+          <div><strong>Session TTL:</strong> <span id="data_import_expires">-</span></div>
+          <div><strong>Commit Result:</strong> <span id="data_import_result_counts">-</span></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="data_portability_log_section" aria-labelledby="data_portability_log_title">
+      <h3 id="data_portability_log_title">Action Log</h3>
+      <ol id="data_portability_action_log" class="data_portability_action_log" aria-live="polite" aria-atomic="false"></ol>
+    </section>
   </form>
 </section>
 

@@ -1,0 +1,1345 @@
+14_DAYS 14 Araw
+1_WEEK 1 Linggo
+2_WEEKS 2 Linggo
+7_DAYS 7 Araw
+WIN95_DARK 95 Madilim
+WIN95_LIGHT 95 Maliwanag
+ABOUT_US Tungkol sa Amin
+ACCOUNT Account
+ACCOUNT_ACTIONS Mga Gawain sa Account
+ACCOUNT_REGISTRATION Pagrehistro ng Account
+ACTIONS Mga Gawain
+ACTIVE Aktibo
+ADD_ROW Magdagdag ng Hilera
+CREATE_SITE Lumikha ng Site
+EDIT_SITE I-edit ang Site
+ADMIN Admin
+ALL Lahat
+ALL_TIME Lahat ng Oras
+ALT_A <kbd>ALT A</kbd>
+ALT_BACKSLASH <kbd>ALT \\</kbd>
+ALT_B <kbd>ALT B</kbd>
+ALT_C <kbd>ALT C</kbd>
+ALT_P <kbd>ALT P</kbd>
+ALT_R <kbd>Alt R</kbd>
+ANALYTICS Analitika
+ARCADE_DARK Arcade Madilim
+ARCADE_LIGHT Arcade Maliwanag
+ARROW_KEYS <kbd>Mga Pindutan ng Pabalis</kbd>
+AUDIO Audio
+AUDIO_FEEDBACK Puna ng Audio
+AUDIO_FEEDBACK_USING Puna ng audio gamit ang
+AUDIO_PREFS Mga Kagustuhan sa Audio
+BASE Base
+BROWSER Browser
+CALENDAR_AUDIO_LABELS_ON Mga Label ng Audio
+CALENDAR_AUTOFOCUS_ON Autofocus
+CUES Cues
+CALENDAR Kalendaryo
+CALENDAR_DAYS Mga Araw
+CALENDAR_PREFS_FORM Form ng Mga Kagustuhan sa Kalendaryo
+CANCEL_AND_CLOSE Kanselahin & Isara
+CANCEL Kanselahin
+CAPSLOCK_ACTIVE Aktibo ang CAPS Lock key.
+CHANGE_EMAIL Palitan ang Email
+CHANGE_PASSWORD Palitan ang Password
+CHOOSE_A_LANGUAGE Pumili ng wika
+CHOOSE_A_THEME Pumili ng tema
+CHOOSE_A_VOICE Pumili ng boses
+CLOSED_DIALOG Nakasara ang dialog
+CLOSE_DIALOG Isara ang Dialog
+CLOSE_DIALOG_WITH Isara ang Dialog gamit ang ESCAPE
+CONFIRM_NEW_EMAIL Kumpirmahin ang Bagong Email
+CONFIRM_NEW_PASSWORD Kumpirmahin ang Bagong Password
+CONFIRM_NO_TYPOS Kumpirmahin na walang typo
+CONFIRM_PASSWORD Kumpirmahin ang Password
+CONSENT_COOKIE_POLICY Sumasang-ayon ako sa patakaran sa cookies.
+CONTACT Makipag-ugnayan
+COPY Kopyahin
+COPY_WORK Kopyahin ang Trabaho
+COPY_WORK_WITH Kopyahin ang Trabaho gamit ang CTRL C.
+CPP CPP
+CSV CSV
+CTRL_C <kbd>CTRL C</kbd>
+CTRL_V <kbd>CTRL V</kbd>
+CURRENT Kasalukuyan
+CURRENT_EMAIL Kasalukuyang Email
+CURRENT_PASSWORD Kasalukuyang Password
+CURRENT_TIME Kasalukuyang Oras
+DAILY Araw-araw
+DAILY_DETAILS Detalye ng Araw-araw
+DARK Madilim
+DATE Petsa
+DATE_PICKER Tagapili ng Petsa
+DEDUCTIONS Mga Bawas
+DELETE_ACCOUNT Tanggalin ang Account
+DELETE_ACCOUNT_MESSAGE Nalulungkot kami na aalis ka! Mangyaring ilagay ang iyong password upang kumpirmahin na gusto mo talagang tanggalin ang iyong account.
+DELETE Tanggalin
+DELETE_KEY <kbd>DELETE</kbd>
+DELETE_SITE Tanggalin ang Site
+DELETE_WORK Tanggalin ang Trabaho
+DELETE_WORK_WITH Tanggalin ang Trabaho gamit ang Delete.
+DEVICE Device
+DUTCH Olandes
+EARNINGS Kita
+EARNINGS_LABEL Kita
+EARNINGS_YEAR_SELECTOR Tagapili ng Taon ng Kita
+EI EI
+EMAIL Email
+EMAIL_SUBJECT Subject
+END_KEY <kbd>End</kbd>
+ENGLISH Ingles
+ENTER_KEY <kbd>ENTER</kbd>
+ENTRY_ROW Hilera ng Entry
+ERROR_EMAIL_EMPTY Ang field ng email ay walang laman. Pakiulit.
+ERROR_EMAIL_MISSING Nawawala ang email.
+ERROR_EMAIL_REGISTERED Ang email ay nakarehistro na.
+ERROR_EMAIL_TAKEN Paumanhin, ang email address na iyon ay nakarehistro na. Pakiulit.
+ERROR_PASSWORD_EMPTY Ang field ng password ay walang laman. Pakiulit.
+ERROR_PASSWORD_MISSING Nawawala ang password.
+ERROR_PASSWORDS_MISMATCHED Hindi magkatugma ang mga password. Pakiulit.
+ERROR_PASSWORDS_NO_MATCH Hindi magkatugma ang mga password.
+ERROR_REGISTRATION_ISSUES Mukhang may problema sa iyong pagrehistro. Paki-double check at subukan muli.
+ERROR_USERNAME_EMPTY Ang field ng username ay walang laman. Pakiulit.
+ERROR_USERNAME_TAKEN Paumanhin, ang username ay ginagamit na. Pakiulit.
+ESCAPE_KEY <kbd>ESCAPE</kbd>
+FAQ_A1 Oo. Kasalukuyan kaming nasa pribadong beta testing phase na may pampublikong beta na ilalabas sa 2024. Ang aming mga layunin ay panatilihing simple, magbigay ng halaga, at higit sa lahat, protektahan ang iyong privacy at personal na impormasyon. Sinusunod namin ang pinakamahusay na mga kasanayan tulad ng responsive design, full accessibility, suporta sa maraming wika at tema, mabilis at secure na server management, at marami pa.
+FAQ_A2 Oo! Nag-aalok kami ng libreng tier para sa sinumang nangangailangan mag-record at mag-track ng kanilang oras-oras na kita, kasama ang karagdagang mga tampok para sa mas malalim na pagsusuri. Nais naming gawing libre ito upang lahat ay magkaroon ng mga tool upang mas mapadali ang kanilang trabaho at kita.
+FAQ_A3 Plano naming kumita mula sa subscription model na babayaran ng mga negosyo at managers na nais ng mas mataas na kontrol sa kanilang pananalapi. Ang plano ay simple: flat-rate monthly fee na ipapahayag kapag inilunsad na namin ito.
+FAQ_A4 Oo naman! Ipinapakita ng Kalendaryo ang mga oras bawat araw para sa bawat trabaho. I-click ang isang araw upang buksan ang Work Details panel para i-adjust kung kinakailangan. Ang Dashboard ay nagpapakita ng breakdown ng taon ayon sa buwan, pay period, at trabaho.
+FAQ_A5 Bagamat nag-aalok kami ng serbisyo sa 10 wika, patuloy kaming nagdaragdag ng iba pa! Balik-balikan para sa updates! Plano naming magdagdag ng 15 pang wika sa katapusan ng 2024, at marami pang susunod. Kung may suggestion ka, handa kaming makinig! Merci! Salamat Po! Danke! \:D
+FAQ_A6 Nagsusumikap kaming maging bukas at malinaw sa pagpapatakbo ng serbisyong ito. Gumawa kami ng mga patakaran tungkol sa terms of service, privacy controls, at accessibility goals.
+FAQ_A7 Pakiusap gamitin ang aming Contact page para makipag-ugnayan sa amin.
+FAQ_CONTACT_TEXT Kung mayroon kang mga karagdagang tanong o alalahanin tungkol sa aming Terms and Conditions of Use, huwag mag-atubiling makipag-ugnayan. Maaari mo kaming kontakin sa
+FAQ_Q1 Totoo ba ang serbisyong ito?
+FAQ_Q2 Libre ba itong gamitin?
+FAQ_Q3 Ano ang tungkol sa paid tier?
+FAQ_Q4 Madali bang i-track ang aking mga oras?
+FAQ_Q5 Kailan susuportahan ng PayCal ang aking wika?
+FAQ_Q6 Paano namin sinisiguro ang transparency?
+FAQ_Q7 Paano ako makapagbibigay ng feedback o mag-suggest ng improvements?
+FAQ_TITLE Mga Madalas na Itanong
+FEDERAL_TAX Pederal na Buwis
+FIRST Una
+FOCUS Focus
+FRENCH Pranses
+FRI Biy
+FULLDATE Buong Petsa
+FULL_NAME Buong Pangalan
+FULL_NAME_PLACEHOLDER Buong pangalan, pakiusap.
+FUN Saya!
+GERMAN Aleman
+GO_TO Pumunta sa
+GROSS Kabuuan
+HINDI Hindi
+HOME_KEY <kbd>Home</kbd>
+HOURS Oras
+INACTIVE Hindi Aktibo
+INCOME_TAX Buwis sa Kita
+INFO Impormasyon
+IP_ADDRESS IP Address
+ITALIAN Italyano
+KEYBOARD Keyboard
+KEYBOARD_SHORTCUTS_GOT_IT Naiintindihan!
+KEYBOARD_SHORTCUTS Mga Shortcut sa Keyboard
+LANG Lang
+LANGUAGE Wika
+LANGUAGE_PICKER Tagapili ng Wika
+LANGUAGE_PREFERENCES Mga Kagustuhan sa Wika
+LARGER Mas Malaki
+LAST Huli
+LAST_UPDATED Huling Na-update
+LENGTH Haba
+LESS Mas Kaunti
+LIGHT Maliwanag
+LIVING_OUT_ALLOWANCE LOA
+LOA LOA
+LOG_OUT Mag-Log Out
+LOG_OUT_MESSAGE Sigurado ka bang gusto mong mag-Log Out?
+LONGDATE Mahabang Petsa
+LONG Mahaba
+MACOS Mac OS
+MEMORY_USAGE Paggamit ng Memorya
+MESSAGE Mensahe
+META_DESCRIPTION_LONG Baguhin ang pagbayad ng manggagawa gamit ang PayCal: Transparent na kita, madaling pagsubaybay, at epektibong pamamahala ng payroll. Moderno, madali, at libre gamitin.
+META_DESCRIPTION Subaybayan ang iyong oras ng trabaho at kalkulahin ang kita sa payroll nang madali gamit ang PayCal. Libre, madaling gamitin, at naa-access para sa lahat. Pamahalaan ang iyong data nang mabilis at simple, at tuklasin ang mga advanced na tampok para sa pamamahala ng koponan.
+META_KEYWORDS pagsubaybay ng payroll, pamamahala ng oras ng trabaho, kalkulador ng kita, libreng payroll tool, naa-access na payroll app, simpleng payroll platform, pamamahala ng koponan, pagsubaybay ng proyekto, kalkulador ng pay period, online payroll, pagsubaybay ng oras, naa-access na tool, tracker ng oras ng trabaho, pamamahala ng bayad, pamamahala ng kita
+META_TITLE PayCal: Simpleng, Naa-access na Pagsubaybay ng Payroll para sa Lahat
+MODAL_HEADER Ulo ng Modal
+MODAL_MESSAGE Mensahe ng Modal
+MODAL_TITLE Pamagat ng Modal
+MON Lun
+MONTHLY_DETAILS Detalye ng Buwan
+MONTHLY Buwanang
+MORE Higit Pa
+NAME Pangalan
+NAV_BAR Nav Bar
+NAVIGATE Mag-navigate
+NAVIGATE_WITH Mag-navigate gamit ang TAB o Mga Pindutan ng Pabalis
+NEED_TO_ENABLE_JAVASCRIPT Kailangan mong paganahin ang JavaScript upang patakbuhin ang application na ito.
+NET Net
+NEW_EMAIL Bagong Email
+NEW_PASSWORD Bagong Password
+NEXT_PREV_BRACKETS <kbd>ALT \[ o ]</kbd>
+NEXT_PREV_CALENDAR_MONTH Susunod/Naunang Buwan
+NEXT_PREV_CALENDAR_MONTH_WITH Susunod/Naunang Buwan gamit ang ALT \[ o ]
+NEXT_PREV_PAGEKEYS <kbd>PGDN o PGUP</kbd>
+NONE Wala
+NUMBERED <kbd>ALT 1-9</kbd>
+NUMBER Numero
+OAS OAS
+OPEN_ABOUT Buksan ang Tungkol
+OPEN_ABOUT_WITH Buksan ang Tungkol gamit ang ALT B
+OPEN_ACCOUNT Buksan ang Account
+OPEN_ACCOUNT_WITH Buksan ang Account gamit ang ALT A
+OPEN_CALENDAR Buksan ang Kalendaryo
+OPEN_CALENDAR_WITH Buksan ang Kalendaryo gamit ang ALT C
+OPEN_DATE_PICKER Buksan ang Tagapili ng Petsa
+OPEN_DATE_PICKER_WITH Buksan ang Tagapili ng Petsa gamit ang ALT \\</kbd>
+OPEN_DIALOG Buksan ang Dialog
+OPEN_DIALOG_WITH Buksan ang Dialog gamit ang ENTER
+OPEN_EARNINGS Buksan ang Kita
+OPEN_EARNINGS_WITH Buksan ang Kita gamit ang ALT R
+OPENED_DIALOG Binuksang dialog
+OPEN_NUMBERED_TAB Buksan ang Numero ng Tab
+OPEN_NUMBERED_TAB_WITH Buksan ang Numero ng Tab gamit ang ALT \[1-9]
+OPEN Buksan
+OPEN_POLICIES Buksan ang Mga Patakaran
+OPEN_POLICIES_WITH Buksan ang Mga Patakaran gamit ang ALT P
+OPEN_SETTINGS Buksan ang Mga Setting
+OPEN_SETTINGS_WITH Buksan ang Mga Setting gamit ang ALT A
+OPEN_SHORTCUTS Buksan ang Mga Shortcut
+OPEN_SHORTCUTS_WITH Buksan ang Mga Shortcut gamit ang ALT Slash o Tanda ng Tanong
+OPTIONAL_PHONE Opsyonal na numero ng telepono
+OS OS
+OVERTIME_HOURS Mga Oras ng Overtime
+OVERTIME Overtime
+PASSWORD Password
+PASSWORD_REQUIRED Kasalukuyang password ay kinakailangan
+PAST_1_YEAR Nakaraang 1 Taon
+PAST_2_YEARS Nakaraang 2 Taon
+PAST_3_MONTHS Nakaraang 3 Buwan
+PAST_3_YEARS Nakaraang 3 Taon
+PAST_4_YEARS Nakaraang 4 Taon
+PAST_5_YEARS Nakaraang 5 Taon
+PAST_6_MONTHS Nakaraang 6 Buwan
+PASTE Idikit
+PASTE_WORK Idikit ang Trabaho
+PASTE_WORK_WITH Idikit ang Trabaho gamit ang CTRL V.
+PAYCAL PayCal
+PAY Bayad
+PAY_PERIOD_DETAILS Detalye ng Panahon ng Bayad
+PAY_PERIOD Panahon ng Bayad
+PAY_PERIODS Mga Panahon ng Bayad
+PAY_PERIODS_RANGE Saklaw ng Panahon ng Bayad
+PAY_SETTINGS_FORM Form ng Mga Setting sa Bayad
+PDF PDF
+PERSONAL_INFO_FORM Form ng Personal na Impormasyon
+PERSONAL_INFO Personal na Impormasyon
+PERSONAL Personal
+PHONE Telepono
+PHONE_PLACEHOLDER xxx-xxx-xxxx
+TRANSPARENCY Transparency
+POLICIES Mga Patakaran
+PORTUGUESE Portuges
+PREFERENCES Mga Kagustuhan
+PRIMARY Pangunahing
+PROVINCIAL_TAX Buwis Panlalawigan
+PROVINCE Probinsya
+QUESTION_MARK_KEY <kbd>?</kbd>
+REFRESH I-refresh
+REGISTER_COOKIE_DISCLAIMER Kung hindi ka komportable sa cookies, maaaring hindi ka makapagrehistro. Paumanhin.
+REGISTER_COOKIE_HEADSUP Paunawa! Gumagamit kami ng cookie para sa user authentication.
+REGISTER_FEATURE1_TEXT Paalam sa mga misteryo ng paycheck! Ipakita ang iyong inaasahang kita bawat panahon ng bayad. Planuhin ang iyong pananalapi nang may kumpiyansa.
+REGISTER_FEATURE1_TITLE 💡 Transparency ng Kita
+REGISTER_FEATURE2_TEXT Walang komplikadong multi-step data entry!
+REGISTER_FEATURE2_TITLE 📊 Madaling Pagsubaybay
+REGISTER_FEATURE3_TEXT Para sa mga employer, makapangyarihang mga tool para gawing simple ang pamamahala ng payroll. I-download ang kinakailangang data. Gawing madali ang payroll.
+REGISTER_FEATURE3_TITLE 🔥 Bigyang Kapangyarihan ang Tauhan
+REGISTER_FEATURE4_TEXT Ang aming platform ay madaling gamitin, mobile-responsive, at puno ng pinakabagong teknolohiya.
+REGISTER_FEATURE4_TITLE 🌟 Madaling Gamitin
+REGISTER_HEADLINE 🚀 Pasiglahin ang Iyong Karanasan sa Payroll!
+REGISTER Magrehistro
+REGULAR_HOURS Regular na Oras
+REGULAR Regular
+RENDER I-render
+SAT Sab
+SAVE_AND_CLOSE I-save & Isara
+SAVE I-save
+SCOPE Saklaw
+SEND_EMAIL Send Email
+SET_AS_DEFAULT Itakda bilang default.
+SETTINGS Mga Setting
+SHORTDATE Maikling Petsa
+SHORT Maikli
+SHOW Ipakita
+SITE_NAME PayCal
+SITES_LIST Listahan ng Mga Site
+SITES Mga Site
+SKIP_PRIMARY_NAVIGATION Laktawan ang Pangunahing Navigasyon
+SKIP_TO_CONTENT Laktawan sa Nilalaman
+SKIP_TO_MAIN_CONTENT Laktawan sa pangunahing nilalaman
+SMALLER Mas Maliit
+DENSITY Densidad
+SPANISH Espanyol
+START Simulan
+STATIC Static
+STATUS Katayuan
+STICKY Nakabitin
+STYLE_PREFS Mga Kagustuhan sa Estilo
+STYLE Estilo
+SUN Ado
+TAB_KEY <kbd>TAB</kbd>
+TAGALOG Tagalog
+ORGANIZATION Koponan
+ORGANIZATIONS Mga Koponan
+ORGANIZATION_AUTH_LEVEL Antas ng Awtorisasyon
+ORGANIZATION_INVITE Imbitahan
+ORGANIZATION_PERMISSIONS Mga Pahintulot
+ORGANIZATION_PHONE_PLACEHOLDER xxx-xxx-xxxx
+ORGANIZATION_ROLES Mga Papel
+ORGANIZATION_UPDATE_USER I-update ang User
+ORGANIZATION_USER_META_INFO Meta Impormasyon ng User
+ORGANIZATION_USERS Mga User
+TEXT Teksto
+THEME_PICKER Tagapili ng Tema
+THEME Tema
+THU Huw
+TILDE_KEY <kbd>\` tilde</kbd>
+TOGGLE_CALENDAR_SCREENMODE I-toggle ang Mode ng Kalendaryo
+TOGGLE_CALENDAR_SCREENMODE_WITH I-toggle ang mode ng Kalendaryo gamit ang tilde.
+TOOLTIP_AUDIO Naglalarawan ng navigasyon o mga pagbabago.
+TOOLTIP_CALENDAR_AUDIO_LABELS Uri ng label ng petsa na ipapahayag gamit ang text-to-speech.
+TOOLTIP_CALENDAR_AUTOFOCUS Araw na awtomatikong pipiliin sa view ng Kalendaryo.
+TOOLTIP_CONFIRM_EMAIL Kumpirmahin ang iyong bagong email address.
+TOOLTIP_CONFIRM_PASSWORD Kumpirmahin ang iyong bagong password.
+TOOLTIP_CURRENT_EMAIL Kasalukuyang email address.
+TOOLTIP_CURRENT_PASSWORD Kasalukuyang password.
+TOOLTIP_LANGUAGE Nais na wika.
+TOOLTIP_NAV_BAR Nais na pag-scroll ng navigation bar.
+TOOLTIP_NEW_EMAIL Ibigay ang bagong email address na nais mong gamitin.
+TOOLTIP_NEW_PASSWORD Ibigay ang bagong password na nais mong gamitin.
+TOOLTIP_PASSWORD_REQUIRED Kinakailangan ang iyong password upang magpatuloy.
+TOOLTIP_DENSITY Nais na pagkakalagay ng interface.
+TOOLTIP_TEXT Nais na laki ng teksto ng interface.
+TOOLTIP_THEME Hitsura at pakiramdam ng interface.
+TRAVEL_HOURS ORAS NG PAGBIAHAY
+TRAVEL Pagbiyahe
+TUE Mar
+TURKISH Turko
+TXT TXT
+UPDATE I-update
+UPDATE_USER I-update ang User
+UPDATING_AUDIO_TO Ina-update ang audio sa
+UPDATING_CALENDAR_AUDIO_LABELS_TO Ina-update ang mga label ng audio ng Kalendaryo sa
+UPDATING_CALENDAR_AUTOFOCUS_TO Ina-update ang autofocus ng Kalendaryo sa
+INFO_UPDATED Na-update ang impormasyon
+UPDATING_LANGUAGE_TO Ina-update ang wika sa
+UPDATING_NAME Ina-update ang Pangalan
+NAME_UPDATED Na-update ang pangalan
+UPDATING_NAV_BAR_TO Ina-update ang Navigation Bar sa
+UPDATING_PAY_PERIOD Ina-update ang Panahon ng Bayad
+UPDATING_PHONE Ina-update ang Telepono
+UPDATING_PROVINCE Ina-update ang Lalawigan...
+PROVINCE_UPDATED Na-update ang lalawigan
+UPDATING_DENSITY_TO Ina-update ang densidad sa
+UPDATING_TEXT_TO Ina-update ang teksto sa
+UPDATING_THEME_TO Ina-update ang tema sa
+TIMEZONE_UPDATED Na-update ang time zone
+UPDATING_WORK Ina-update ang Trabaho
+USER_AGENT User Agent
+USERS Mga User
+VOICE_PICKER Tagapili ng Boses
+VOICE Boses
+WAGE Sahod
+WE_ARE_HIRING Naghahanap kami ng mga empleyado. Magpadala ng resume sa [resumes@paycal.app](mailto:resumes@paycal.app)
+WED Miy
+WINDOWS Windows
+WORK_DETAILS trabaho
+WORK_FORM Form ng Trabaho
+WORK_HOURS Oras ng Trabaho
+WORK Trabaho
+YEAR_SVG_LINE_GRAPH Taon SVG Line Graph
+YEAR_TO_DATE_EARNINGS Kita mula sa Simula ng Taon
+YEAR_TO_DATE Mula sa Simula ng Taon
+YOUR_EMAIL Email
+YOUR_NAME Name
+SECONDARY Pangalawa
+ADD_NEW_ENTRY Magdagdag ng Bagong Entry
+CALENDAR_HELP_LINK Tulong sa Kalendaryo
+EARNINGS_HELP_LINK Tulong sa Kita
+MY_ORGANIZATIONS Ang Aking Mga Koponan
+MEMBER_OF Miyembro ng
+NO_ORGANIZATIONS_MANAGED Wala pa kayong pinamamahalaan na koponan
+NO_MEMBER_ORGANIZATIONS Hindi ka pa miyembro ng anumang koponan
+ORGANIZATION_NAME Pangalan ng Koponan
+ORGANIZATION_INFO Impormasyon ng Koponan
+ORGANIZATION_MEMBERS Mga Miyembro ng Koponan
+ORGANIZATION_DETAILS_DESC Tingnan at pamahalaan ang mga detalye ng koponan
+CREATED Ginawa
+ENTER_ORGANIZATION_NAME Ipasok ang pangalan ng koponan
+SEARCH_USER Maghanap ng user upang idagdag
+NO_MEMBERS Walang miyembro sa koponanang ito
+ADD_MEMBER Magdagdag ng Miyembro
+CONFIRM_DELETE_ORGANIZATION Kumpirmahin ang Pagbura
+YES_DELETE Oo, Burahin
+PROMOTE I-promote
+DEMOTE I-demote
+REMOVE_MEMBER Alisin ang Miyembro
+REMOVE Alisin
+VIEW Tingnan
+MANAGERS Mga Tagapamhalala
+MEMBERS Mga Miyembro
+CLOSE Isara
+COLLAPSE_SIDEBAR I-collapse ang sidebar
+EXPAND_SIDEBAR I-expand ang sidebar
+SIDEBAR_COLLAPSED Naka-collapse ang sidebar
+SIDEBAR_EXPANDED Naka-expand ang sidebar
+SIGN_OUT_CONFIRMATION_AND_CONTROLS Pagkumpirma at mga kontrol sa pag-sign out
+SIGN_OUT_DIALOG_DESCRIPTION Pinapayagan ka ng dialog na ito na kumpirmahin ang pag-sign out sa iyong account. Maaari kang mag-sign out o magkansela upang manatiling naka-log in.
+ORGANIZATION_HTML <em>T</em>eam
+ORGANIZATIONS_HTML <em>O</em>rganizations
+ORGANIZATION_SVG <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="8" cy="8" r="3.5"/><path d="M 8 14 c -2.33 0 -7 1.17 -7 3.5 V 22 h 14 v -4.5 c 0 -2.33 -4.67 -3.5 -7 -3.5 Z"/><circle cx="16" cy="7.5" r="3"/><path d="M 16 13.5 c -1.67 0 -5 0.83 -5 2.5 v 3.5 h 10 v -3.5 c 0 -1.67 -3.33 -2.5 -5 -2.5 Z" opacity="0.9"/></g></svg>
+CONTACT_REASON Topic
+CONTACT_REASON_GENERAL Pangkalahatang katanungan
+CONTACT_REASON_BUG Ulat ng bug
+CONTACT_REASON_FEATURE Kahilingan sa feature
+CONTACT_REASON_OTHER Iba
+CONTACT_REASON_SELECT Mangyaring pumili
+CONTACT_MESSAGE_LABEL Mensahe
+CONTACT_MESSAGE_PLACEHOLDER I-type ang iyong mensahe dito...
+CONTACT_CHAR_COUNT {count}/6000
+CONTACT_CHAR_WARNING Lumalapit ka na sa limitasyon ng mensahe
+CONTACT_CONTEXT_LABEL Opsyonal na teknikal na konteksto
+CONTACT_CONTEXT_BROWSER Isama ang mga detalye ng browser
+CONTACT_CONTEXT_PAGE Isama ang impormasyon ng pahina
+CONTACT_CONTEXT_LANGUAGE Isama ang wika
+CONTACT_HELP_TITLE Write a useful message
+CONTACT_HELP_TIP_1 Maging tukoy: Ilarawan nang eksakto kung ano ang sinusubukan mong gawin at ano ang nangyayari sa halip.
+CONTACT_HELP_TIP_2 Isama ang mga detalye: Suriin ang aming mga opsyonal na konteksto sa ibaba upang magbahagi ng teknikal na impormasyon.
+CONTACT_HELP_TIP_3 Isang isyu bawat mensahe: Kung mayroon kang maraming alalahanin, magpadala ng mga hiwalay na mensahe.
+CONTACT_SLA_LABEL Response time
+CONTACT_SLA_TEXT Typically 24–48 hours
+CONTACT_SUCCESS_TITLE Message sent
+CONTACT_SUCCESS_NOTE Natanggap namin ang iyong mensahe at makikipag-ugnayan kami sa iyo sa lalong madaling panahon.
+CONTACT_SUCCESS_SENT_AT Ipinadala sa
+CONTACT_REASON_ACCOUNT Problema sa Account
+CONTACT_REASON_BILLING Tanong sa Pagbabayad
+CONTACT_SEND_ANOTHER Send another
+PLEASE_SELECT placeholder
+CONTACT_HELP_INTRO Help us resolve this faster.
+CONTACT_HELP_CONTEXT placeholder
+
+ORGANIZATIONS Organizations
+ORGANIZATIONS_HTML <em>O</em>rganizations
+ORGANIZATIONS_INTRO Organizations connect sites and member access while keeping work entries user-owned.
+ORGANIZATIONS_OPEN_FULL Open Full Org Controls
+ORGANIZATIONS_CREATE_ORG Create Organization
+ORGANIZATIONS_NAME Organization Name
+ORGANIZATIONS_CREATE_HELP After creating, manage invites, scopes, defaults, and ownership from Settings.
+ORGANIZATIONS_YOUR_ORGANIZATIONS Your Organizations
+ORGANIZATIONS_SELECT_PLACEHOLDER Select organization...
+ORGANIZATIONS_INVITE_DELEGATES Invite Members
+ORGANIZATIONS_INVITE_PLACEHOLDER member@example.com
+ORGANIZATIONS_SEND_INVITE Send Invite
+ORGANIZATIONS_SCOPE_WORK_READ Work Read
+ORGANIZATIONS_SCOPE_SITES_READ Sites Read
+ORGANIZATIONS_SCOPE_SITES_WRITE Sites Write
+ORGANIZATIONS_SCOPE_ORG_READ Org Read
+ORGANIZATIONS_SCOPE_ORG_WRITE Org Write
+ORGANIZATIONS_SCOPE_ACCESS_MANAGE Access Manage
+ORGANIZATIONS_PENDING_INVITES Pending Invites
+ORGANIZATIONS_DISCOVERY Discovery
+ORGANIZATIONS_RUN_DISCOVERY Run Discovery
+ORGANIZATIONS_DISCOVERY_HELP Find sites that can be linked to the selected organization.
+ORGANIZATIONS_LEAVE_SELECTED Leave Selected Organization
+ORGANIZATIONS_DEFAULTS Organization Defaults
+ORGANIZATIONS_SAVE_DEFAULTS Save Defaults
+ORGANIZATIONS_PAY_PERIOD_LENGTH Pay Period Length
+ORGANIZATIONS_DEFAULT_WAGE Default Wage
+ORGANIZATIONS_TIMEZONE Timezone
+ORGANIZATIONS_CURRENCY Currency
+ORGANIZATIONS_OWNERSHIP_TRANSFER Ownership Transfer
+ORGANIZATIONS_RELOAD_MEMBERS Reload Members
+ORGANIZATIONS_TRANSFER_TARGET_PLACEHOLDER Select member UUID...
+ORGANIZATIONS_TRANSFER_OWNERSHIP Transfer Ownership
+ORGANIZATIONS_AUDIT_TIMELINE Audit Timeline
+ORGANIZATIONS_RELOAD_TIMELINE Reload Timeline
+ORGANIZATIONS_LOADING Loading organizations...
+ORGANIZATIONS_NONE No organizations yet. Create your first organization to get started.
+ORGANIZATIONS_ROLE Role
+ORGANIZATIONS_SCOPES Scopes
+ORGANIZATIONS_MANAGE_IN_SETTINGS Manage in Settings
+ORGANIZATIONS_UNKNOWN Unknown
+ORGANIZATIONS_PENDING pending
+ORGANIZATIONS_REVOKE Revoke
+ORGANIZATIONS_NO_INVITES No invites for this organization.
+ORGANIZATIONS_SELECT_FIRST Select an organization first.
+ORGANIZATIONS_INVITE_REVOKED Invite revoked.
+ORGANIZATIONS_INVITE_REVOKE_FAILED Unable to revoke invite.
+ORGANIZATIONS_LINK_SITE Link Site
+ORGANIZATIONS_SITE_WITHOUT_ORG Site without org
+ORGANIZATIONS_SITE_LINKED Site linked to organization.
+ORGANIZATIONS_SITE_LINK_FAILED Unable to link site.
+ORGANIZATIONS_NO_DISCOVERY No discovery candidates found.
+ORGANIZATIONS_DISCOVERY_RUNNING Running discovery...
+ORGANIZATIONS_DISCOVERY_COMPLETE Organization discovery completed.
+ORGANIZATIONS_DISCOVERY_FAILED Unable to run organization discovery.
+ORGANIZATIONS_LOAD_INVITES_FAILED Unable to load invites.
+ORGANIZATIONS_LOAD_DEFAULTS_FAILED Unable to load organization defaults.
+ORGANIZATIONS_DEFAULTS_SAVED Organization defaults saved.
+ORGANIZATIONS_DEFAULTS_SAVE_FAILED Unable to save organization defaults.
+ORGANIZATIONS_LOAD_ORGS_FAILED Unable to load organizations right now.
+ORGANIZATIONS_LOAD_AUDIT_FAILED Unable to load audit timeline.
+ORGANIZATIONS_NO_AUDIT No audit events yet.
+ORGANIZATIONS_NAME_MIN Organization name must be at least 2 characters.
+ORGANIZATIONS_CREATED Organization created.
+ORGANIZATIONS_CREATE_FAILED Failed to create organization.
+ORGANIZATIONS_ENTER_INVITE_EMAIL Enter an invite email.
+ORGANIZATIONS_SELECT_SCOPE Select at least one scope.
+ORGANIZATIONS_INVITE_SENT Organization invite sent.
+ORGANIZATIONS_INVITE_SEND_FAILED Unable to send organization invite.
+ORGANIZATIONS_SELECT_TRANSFER_TARGET Select a transfer target first.
+ORGANIZATIONS_OWNERSHIP_TRANSFERRED Ownership transferred.
+ORGANIZATIONS_OWNERSHIP_TRANSFER_FAILED Unable to transfer ownership.
+ORGANIZATIONS_WITHDRAWN Organization relationship withdrawn.
+ORGANIZATIONS_WITHDRAW_FAILED Unable to leave organization.
+ORGANIZATIONS_AUDIT_EVENT event
+ORGANIZATIONS_AUDIT_ACTOR actor
+
+ORGANIZATIONS_REMOVE_CONFIRM_PREFIX Remove organization
+ORGANIZATIONS_REMOVE_CONFIRM_SUFFIX from your organizations list?
+ORGANIZATIONS_REMOVE_FAILED Unable to remove organization right now.
+ADMIN_DASHBOARD_PLATFORM_METRICS_TITLE Mga Sukatan ng Platform
+BREADCRUMB Breadcrumb
+BREADCRUMB Breadcrumb
+HELP_TOC_HOME Bahay
+HELP_TOC_TRANSPARENCY_HUB Transparency Hub
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_1 Ang mga pag-scan ng WCAG sa antas ng ruta ay tumatakbo laban sa mga pangunahing pahina, kabilang ang mga mahigpit na pag-sweep ng ruta para sa mga paglabag at mas mahigpit na pagsusuri sa kaibahan.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_2 Ang mga heading at form regression ay sinusuri upang ang landmark na istraktura, mga label, at pagmemensahe sa pagbawi ay hindi tahimik na naaanod.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_3 Sinusuri ng reflow at saklaw ng text-spacing ang mga pangunahing ruta sa mga compact na lapad ng viewport upang mahuli ang mga pagkabigo ng pahalang na overflow at spacing.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_4 Bine-verify ng mga pagsubok sa navigation-path at shortcut regression ang mga breadcrumb, mga alternatibong path, handoff ng feedback, pag-uugali sa kaligtasan ng shortcut, at saklaw ng patakaran ng keyboard shortcut.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_5 Pinagsasama ng mga pagsusuri sa antas ng suite ang Playwright, PHPUnit, at saklaw ng browser-matrix upang manatiling sinubok ang mga claim sa accessibility.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_TEXT_1 Nangangahulugan ito na ang aming mga pampublikong pahayag sa pagiging naa-access ay nauugnay sa aktwal na saklaw ng regression, hindi lamang sa layunin.
+TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_TITLE Ano ang Aktibong Bine-verify Namin
+TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TEXT_1 Ang mga pag-audit sa accessibility ay tumatakbo sa isang quarterly cadence. Kasama sa bawat window ng pag-audit ang mahigpit na mga automated na pagsusuri sa ruta, manu-manong pagsusuri sa keyboard, at manu-manong pag-verify ng VoiceOver sa mga pangunahing ruta.
+TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TEXT_2 Ang bawat cycle ay nagreresulta sa mga sinusubaybayang depekto (kapag natagpuan), mga label ng kalubhaan, mga may-ari, at isang maikling buod ng mga natitirang panganib.
+TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TITLE Indayog ng Audit
+TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TEXT_1 Ang pagiging naa-access ay hindi isang beses na paglilinis. Itinuring namin ito bilang bahagi ng normal na kalidad ng produkto, sa parehong paraan na tinatrato namin ang kawastuhan, seguridad, at pagiging maaasahan.
+TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TEXT_2 Habang mas maraming ruta ang ina-audit at sinasaklaw, patuloy naming ina-update ang page na ito na may mga naipadalang pagbabago, bukas na trabaho, at paraan ng pag-verify upang manatiling kapaki-pakinabang sa halip na generic.
+TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TITLE Patuloy na Pagsasanay
+TRANSPARENCY_ACCESSIBILITY_DECK Ang pagiging naa-access ay bahagi ng kung paano namin binuo ang PayCal. Ipinapaliwanag ng page na ito ang aming pamantayan, kung ano ang ipinadala, kung ano ang bukas pa, at kung paano mag-ulat ng mga hadlang.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_ACKNOWLEDGE Parehong araw ng negosyo
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_DEFINITION Release blocker o core task failure para sa paggamit ng keyboard o screen-reader.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_ESCALATION I-escalate sa Engineering Lead kung hindi nalutas pagkatapos ng 24 na oras.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_FIX_TARGET 48 oras
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_OWNER Pangunahing Pangunahin
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_ACKNOWLEDGE 1 araw ng negosyo
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_DEFINITION Malaking usability friction sa mahahalagang daloy o mahalagang pagkabigo sa kontrata ng ARIA.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_ESCALATION I-escalate sa Frontend Lead kung hindi nalutas pagkatapos ng 7 araw ng negosyo.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_FIX_TARGET 10 araw ng negosyo
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_OWNER May-ari ng Accessibility
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_SEVERITY P1
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_ACKNOWLEDGE 3 araw ng negosyo
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_DEFINITION Naka-localize na isyu, hardening work, o pagpapabuti ng pamamahala.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_ESCALATION I-flag para sa quarterly audit close-out kung ipinagpaliban ang nakalipas na dalawang cycle.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_FIX_TARGET Susunod na nakaplanong ikot
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_OWNER Itinalaga sa triage
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_SEVERITY P2
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_ACKNOWLEDGE Kilalanin
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_CAPTION Modelo ng SLA na depekto sa pagiging naa-access: kalubhaan, window ng pagkilala, pag-aayos ng target, may-ari, at landas ng pagdami
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_DEFINITION Kahulugan
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_ESCALATION_PATH Daan ng escalation
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_FIX_TARGET Ayusin o mitigation target
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_OWNER May-ari
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_SEVERITY Kalubhaan
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TEXT_1 Ang bawat na-verify na depekto sa accessibility ay isinampa nang may kalubhaan, may-ari, pamantayan ng WCAG, at takdang petsa sa paggawa upang manatiling gumagana ang trabaho sa halip na impormal.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TITLE Accessibility Defect Response Windows
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_FACT_1 Hindi namin sinasadyang ihinto ang suporta para sa isang na-verify na browser at kumbinasyon ng teknolohiyang pantulong nang hindi na-publish muna ang pagbabago sa page na ito.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_FACT_2 Kapag naging hindi praktikal na suportahan ang isang na-verify na kumbinasyon dahil sa mga hadlang sa vendor, platform, o seguridad, nagta-target kami ng kahit isang quarterly-cycle na notice bago ito lumipat sa best-effort status.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_FACT_3 Ang anumang abiso sa paghinto sa paggamit ay dapat isama ang apektadong kumbinasyon, kung bakit ito nagbago, ang petsa ng bisa, at ang pinakamalapit na sinusuportahang alternatibo.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_TEXT_1 Kung ang isang iniulat na hadlang ay nakakaapekto sa isang kumbinasyon na kasalukuyan naming bine-verify nang direkta, ang isyu ay susuriin laban sa inaasahan ng suporta na iyon at hindi itinuturing bilang opsyonal.
+TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_TITLE Patakaran sa Paghinto at Pagbabago
+TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TEXT_1 Pinipigilan ng mga panuntunan sa kaligtasan ng focus ang mga humahawak ng shortcut at naka-script na UI na magnakaw ng focus habang may nagta-type o nagtatrabaho sa loob ng isang modal. Ang mga shortcut ay hindi gumagana sa loob ng mga nae-edit na kontrol, at ang mga pakikipag-ugnayan sa dialog ay patuloy na nasasaklaw ng focus hanggang sa magsara ang dialog.
+TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TEXT_2 Binabawasan ng patakarang ito ang hindi sinasadyang pag-navigate, pinoprotektahan ang pagpasok ng form, at pinapanatili ang gawi ng keyboard na pare-pareho sa saklaw ng regression sa antas ng ruta na pinapatakbo namin sa Playwright at Lightpanda.
+TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TITLE Kaligtasan ng Pokus
+TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TEXT_1 Hindi namin itinuturing ang ARIA bilang kapalit ng semantic HTML. Gumagamit kami ng ARIA upang linawin ang mga pangalan ng kontrol, relasyon, paglalarawan, at pagbabago sa status kapag hindi sapat ang katutubong HTML lamang.
+TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TEXT_2 Nangangahulugan iyon na ang aming gawain sa pagiging naa-access ay mas malawak kaysa sa paggamit ng ARIA lamang. Ang gawi ng keyboard, mga heading, paghawak ng focus, contrast, reflow, at pagbawi ng error ay mahalaga din.
+TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TITLE Paano Namin Ginagamit ang ARIA
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_1 Sinusuportahan ng core navigation ang paggamit ng keyboard, laktawan ang mga link, at mga nakadokumentong single-key na shortcut para sa mga pangunahing destinasyon.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_2 Ang mga single-key na shortcut (C, R, S, E, A, H, N, P, ?) ay dokumentado para sa mga pangunahing ruta ng aplikasyon.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_3 Hindi gumagana ang mga shortcut habang nagta-type ng mga input o kapag bukas ang mga dialog.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_4 Ang mga ruta ng tulong at transparency ay nagbibigay ng higit sa isang paraan upang mag-navigate, kabilang ang mga breadcrumb kung saan nagdaragdag iyon ng kapaki-pakinabang na konteksto.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_5 Gumagamit ang mga na-audit na ruta ng mga semantic landmark, malinaw na heading, direktang label, at status messaging kung saan nangangailangan ng feedback ang pakikipag-ugnayan.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_6 Ang mga pagsusuri sa contrast at focus token ay awtomatiko sa kasalukuyang catalog ng tema, at ang na-publish na matrix ay sinusubaybayan sa aming backlog workflow ng accessibility.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_7 Kasama sa mga setting ang isang dyslexia-friendly na typography preference na may accessible na spacing at fallback stack support.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_8 Ang mga ulat sa pagiging naa-access ay maaari na ngayong magsimula sa pahinang ito at magpatuloy sa secure na daloy ng pakikipag-ugnayan na may paunang napunan ang mga pangunahing detalye.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_TEXT_1 Mas gusto muna namin ang semantic na HTML at ginagamit ang ARIA kung saan nakakatulong itong ilantad ang mga pangalan, relasyon, o live na pagbabago sa status nang mas malinaw.
+TRANSPARENCY_ACCESSIBILITY_IN_PLACE_TITLE Ano ang Nasa Lugar Ngayon
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_CLEAR_STRUCTURE_LABEL Malinaw na istraktura
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_CLEAR_STRUCTURE_TEXT Ang mga heading, landmark, label, at status message ay dapat gawing nauunawaan ang gawi ng page.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_DIRECT_FEEDBACK_LABEL Direktang landas ng feedback
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_DIRECT_FEEDBACK_TEXT Ang mga user ay dapat na makapag-ulat ng mga hadlang nang hindi naghahanap ng tamang channel.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_KEYBOARD_LABEL Pagpapatakbo ng keyboard
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_KEYBOARD_TEXT Ang mga pangunahing gawain ay dapat maabot nang hindi nangangailangan ng mouse.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_READABLE_PRESENTATION_LABEL Nababasang presentasyon
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_READABLE_PRESENTATION_TEXT Ang mga pangunahing na-audit na ruta ay dapat magkasama sa ilalim ng mas malalaking sukat ng teksto at mas mahigpit na lapad ng viewport.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_SAFE_NAVIGATION_LABEL Ligtas na pag-uugali sa pag-navigate
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_SAFE_NAVIGATION_TEXT Ang mga shortcut sa pagiging produktibo ay hindi dapat makagambala sa aktibong pagpasok ng teksto o mga bukas na dialog.
+TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_TITLE Mga Pangunahing Inaasahan sa Accessibility
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_1 Ang manu-manong screen-reader pass sa mga pangunahing ruta ay hindi pa gumagawa ng ruta-by-ruta na mga tala ng VoiceOver at per-defect na pagsubaybay (WCAG-015, kasalukuyang isinasagawa).
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_2 Ang mga salita ng anunsyo (linaw at maikli) sa mga daloy ng mataas na feedback ay ang natitirang pagtuon pagkatapos makumpleto ang paghihiwalay ng istraktura ng live-rehiyon.
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_3 Maaaring matukoy ng pagsusuri sa dependency ng third-party ang mga hadlang na partikular sa bahagi o mga paghihigpit sa pag-upgrade habang ang mga panlabas na aklatan ay tumatanggap ng mga pangunahing update.
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_TITLE Mga Kilalang Limitasyon
+TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_TEXT_1 Ito ang aktibong item sa aming WCAG execution backlog. Nakumpleto na ang mga design token, transparency metadata, live-region contract, PR governance, at plain-language copy work at sakop ng mga regression suite upang mabawasan ang panganib sa backslide.
+TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_TITLE Kasalukuyang Bukas na Trabaho
+TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_WCAG026_TEXT External audit readiness package — pre-packaging issue history, remediation logs, evidence artifacts, at policy docs para makagawa ng audit evidence package sa loob ng isang araw ng negosyo.
+TRANSPARENCY_ACCESSIBILITY_PAGE_TITLE Transparency ng Accessibility
+TRANSPARENCY_ACCESSIBILITY_QUICK_KEYS_TEXT_1 Nag-publish ang PayCal ng mga single-key na shortcut para sa mga pangunahing destinasyon kaya nananatiling mapupuntahan ang mga madalas na ruta nang walang paulit-ulit na paglalakbay sa pointer. Ang kasalukuyang nakadokumentong hanay ay sumasaklaw sa kalendaryo, mga organisasyon, mga setting, mga kita, admin, tulong, mga tala, mga panahon ng pagbabayad, at tulong sa keyboard shortcut.
+TRANSPARENCY_ACCESSIBILITY_QUICK_KEYS_TEXT_2 Ang mga shortcut na ito ay bahagi lamang ng kontrata sa pagiging naa-access kapag ang mga ito ay nahuhulaan, nakadokumento, at ligtas na balewalain. Maaaring patuloy na mag-navigate ang mga user gamit ang mga karaniwang link, button, laktawan ang mga link, at landmark nang hindi umaasa sa shortcut memorization.
+TRANSPARENCY_ACCESSIBILITY_QUICK_KEYS_TITLE Mabilis na access key
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_1 <strong>03-2026
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_10 <strong>2026-03-23:</strong> Niresolba ang mga mahigpit na contrast blocker sa mga pangunahing pampublikong ruta at pinananatili ang mga pagsusuring iyon sa suite ng ruta ng WCAG.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_11 <strong>2026-03-23:</strong> Nagdagdag ng dyslexia-friendly na typography preference coverage sa mga setting, na may accessible na font stack at spacing na gawi.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_12 <strong>2026-03-22:</strong> Nagdagdag ng reflow sa antas ng ruta at saklaw ng text-spacing para sa mga pangunahing pahina sa mga compact na lapad ng viewport.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_13 <strong>2026-03-20:</strong> Nagdagdag ng mga nakadokumentong shortcut sa istilo ng application na may mga proteksyon upang hindi gumana ang mga ito habang nagta-type o habang bukas ang mga dialog.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_2 <strong>2026-03-23:</strong> Nagdagdag ng metadata ng pag-verify (petsa ng huling na-verify, petsa ng susunod na pagsusuri, saklaw, at kilalang limitasyon) sa lahat ng apat na aktibong sub-page ng transparency: pagiging naa-access, mga sukatan, buwis, at pamamahala sa pag-verify (WCAG-021).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_3 <strong>2026-03-23:</strong> Pinasimpleng 31 na error at mga string ng status sa auth, kalendaryo, at mga daloy ng organisasyon: inalis ang teknikal na jargon (nonce references), ginawang aksyonan ang mga field-empty message, at standardized na mga mensahe ng error sa organisasyon sa isang pare-parehong "Hindi ma-X. Pakisubukang muli." pattern (WCAG-024).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_4 <strong>2026-03-23:</strong> Nai-publish ang mga pamantayan sa pagiging naa-access sa antas ng bahagi na sumasaklaw sa mga dialog, tab, datagrid, at form na may mga kontrata sa keyboard/ARIA at mga halimbawang gawin/huwag; cross-linked mula sa PR template at regression workflow (WCAG-025).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_5 <strong>2026-03-23:</strong> Pinaghiwalay ang mga assertive na anunsyo ng error mula sa mga magalang na anunsyo sa pag-unlad sa /auth/ at /settings/ para alisin ang duplicate na live-region na output (WCAG-017).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_6 <strong>2026-03-23:</strong> Na-publish na talahanayan ng SLA na depekto sa accessibility na may mga window ng pagkilala, pag-aayos ng mga target, may-ari, at mga landas ng pagdami (WCAG-019).
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_7 <strong>2026-03-23:</strong> Nag-publish ng isang pormal na checklist na natitira sa trabaho at isang quarterly accessibility audit playbook na may mga may-ari, saklaw ng ruta, at mga kinakailangan sa ebidensya.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_8 <strong>2026-03-23:</strong> Nagdagdag ng path ng pagkuha ng feedback sa pagiging naa-access mula sa page na ito papunta sa secure na form sa pakikipag-ugnayan.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_9 <strong>2026-03-23:</strong> Nagdagdag ng mga breadcrumb at saklaw ng regression para sa maramihang navigation path sa mga pangunahing pampublikong ruta.
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_TITLE Mga Kamakailang Pagpapabuti
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_BUTTON_LABEL Buksan ang Accessibility Feedback Form
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_1 Anong page o feature ang iyong ginagamit
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_2 Anong device, browser, o screen reader ang ginagamit mo
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_3 Anong hadlang ang iyong naranasan at kung paano ito humadlang sa iyong pagkumpleto ng iyong gawain
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_DETAIL_ITEM_4 Paano ka namin matutulungan na gamitin ang PayCal
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_FORM_HELP Ang pagpili sa isumite ay magbubukas sa secure na form sa pakikipag-ugnayan na may mga detalyeng ito na paunang napunan upang maaari mong suriin at maipadala nang ligtas.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_HELPFUL_DETAILS_LABEL Kasama sa mga kapaki-pakinabang na detalye
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_LABEL_DETAILS Mga detalye ng isyu
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_LABEL_SUMMARY Buod ng isyu
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_PLACEHOLDER_DETAILS Ano ang nangyari, anong pantulong na teknolohiya ang ginamit mo, at anong resulta ang iyong inaasahan.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_PLACEHOLDER_SUMMARY Halimbawa: Ang nabigasyon sa kalendaryo ay nilaktawan ng screen reader
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TEXT_1 Kung may mahirap gamitin o hindi naa-access, gamitin ang form sa ibaba o direktang pumunta sa pahina ng contact. Binubuksan ng form ang secure na daloy ng contact kasama ang iyong buod at mga detalye na dinadala.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TEXT_2 Maaari mo ring gamitin ang <a href="/contact/">ang pangkalahatang pahina ng contact</a> kung mas gusto mong hindi magsimula sa form na ito.
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TITLE Mag-ulat ng Mga Isyu sa Accessibility
+TRANSPARENCY_ACCESSIBILITY_ROUTE_METADATA_TITLE Metadata ng Ruta
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_1 <strong>WCAG 2.1</strong> (W3C Web Content Accessibility Guidelines) — International standard para sa web accessibility
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_2 <strong>Seksyon 508</strong> (Pederal na batas ng US) — Nakahanay sa WCAG 2.0 Level AA
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_3 <strong>EN 301 549</strong> (European standard) — Nakahanay sa WCAG 2.1 Level AA
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_4 <strong>AODA</strong> (Accessibility for Ontarians with Disabilities Act) — Mga sanggunian WCAG-aligned accessibility expectations sa Canada
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_TEXT_1 Ang aming gawain sa pagiging naa-access ay pangunahing ginagabayan ng WCAG 2.1 at mga kaugnay na legal na pamantayan na tumutukoy sa mga inaasahan sa Level AA.
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_TITLE Mga Pamantayan at Alituntunin
+TRANSPARENCY_ACCESSIBILITY_STILL_IMPROVING_FACT_1 External audit readiness package: pre-packaging issue history, remediation logs, at policy evidence para makagawa ng kumpletong audit package sa loob ng isang araw ng negosyo (WCAG-026).
+TRANSPARENCY_ACCESSIBILITY_STILL_IMPROVING_TITLE Ang Pinagbubuti Pa Namin
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TEXT_1 Nag-publish kami ng mga inaasahan sa suporta batay sa mga kumbinasyong direktang bini-verify namin at sa mga kumbinasyong sinusuri namin sa mga naka-iskedyul na pag-audit. Ito ay isang support matrix, hindi isang pag-aangkin na ang bawat browser at pantulong na pagpapares ng teknolohiya ay magkaparehong kumikilos.
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TEXT_2 Kapag nag-ulat ang mga user ng hadlang sa kumbinasyon ng pinakamahusay na pagsisikap, sinisiyasat pa rin namin ito. Kung ang isyu ay nakakaapekto sa mga pangunahing semantika, pag-uugali ng keyboard, o mga nakabahaging bahagi, itinuturing namin ito bilang isang depekto ng produkto kahit na ang eksaktong pagpapares ay wala sa pangunahing na-verify na hanay.
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TITLE Patakaran sa Suporta sa Pantulong na Teknolohiya
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_AT VoiceOver
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_BROWSER Safari
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_EXPECTATION Pangunahing na-verify na kumbinasyon
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_PLATFORM macOS
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_VERIFICATION Manu-manong pagsusuri ng ruta sa mga regular na pagsusuri sa WCAG at quarterly audit
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_AT Iba pang AT o voice control tool
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_BROWSER Mga kasalukuyang pangunahing browser
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_EXPECTATION Suporta sa pinakamahusay na pagsisikap
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_PLATFORM Iba pang mga kumbinasyon
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_VERIFICATION Mga isyung nasuri sa pamamagitan ng proseso ng depekto sa accessibility
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_AT JAWS
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_BROWSER Chrome
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_EXPECTATION Sinusuportahang kumbinasyon ng audit
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_PLATFORM Windows
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_VERIFICATION Naka-iskedyul na manual validation sa panahon ng quarterly audit
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_AT NVDA
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_BROWSER Firefox
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_EXPECTATION Sinusuportahang kumbinasyon ng audit
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_PLATFORM Windows
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_VERIFICATION Naka-iskedyul na manual validation sa panahon ng quarterly audit
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_ASSISTIVE_TECH Pantulong na teknolohiya
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_BROWSER Browser
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_PLATFORM Plataporma
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_SUPPORT_EXPECTATION Suportahan ang inaasahan
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_VERIFICATION_MODEL Modelo ng pag-verify
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_REVIEW_TEXT_1 Karamihan sa mga na-audit na pakikipag-ugnayan sa PayCal ay gumagamit ng first-party na UI code. Kung saan umiiral ang third-party na browser-side code, hiwalay naming sinusubaybayan ang epekto nito sa pagiging naa-access upang hindi ma-bypass ng mga upgrade ang mga inaasahan sa keyboard, semantics, o CSP.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_REVIEW_TEXT_2 Anumang bagong dependency sa gilid ng browser na nagdaragdag ng UI, paghawak ng focus, pag-uugali ng dialog, naka-embed na media, o mga custom na widget ay dapat suriin bago gamitin at muling suriin bago mag-upgrade ng mga pangunahing bersyon.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_REVIEW_TITLE Pagsusuri sa Accessibility ng Dependency ng Third-Party
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_PDFLIB_NOTES Non-widget export library. Hindi nagdaragdag ng keyboard UI, ngunit nakadepende pa rin ang nabuong output sa first-party na label at kalidad ng content.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_PDFLIB_STATUS Naaprubahan
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_PDFLIB_USAGE Pag-export ng PDF na kita sa panig ng kliyente
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_TWEETNACL_NOTES Non-visual utility library. Ang epekto sa pagiging naa-access ay hindi direkta at limitado sa pagpapanatiling tumutugon at matatag ang mga daloy ng first-party.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_TWEETNACL_STATUS Naaprubahan
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_ROW_TWEETNACL_USAGE Mga katulong sa kriptograpiya sa panig ng kliyente
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_APPROVED Naaprubahan
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_APPROVED_DESC pinapayagan para sa kasalukuyang paggamit, na may epekto sa pagiging naa-access na naiintindihan at naidokumento.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_BLOCKED Na-block
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_BLOCKED_DESC hindi pinapayagan para sa bagong paggamit ng UI hanggang sa matugunan ang mga kinakailangan sa pagiging naa-access.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_CONDITIONAL May kundisyon
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_STATUS_CONDITIONAL_DESC pinapayagan lang sa limitadong saklaw habang nananatiling bukas ang pagsusuri, pagpapalit, o pagpigil.
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_DEPENDENCY Dependency
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_NOTES Mga Tala
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_STATUS Katayuan ng pagiging naa-access
+TRANSPARENCY_ACCESSIBILITY_THIRD_PARTY_TABLE_USAGE Paggamit
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_LAST_VERIFIED_LABEL Huling na-verify
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_NEXT_REVIEW_LABEL Ang susunod na pagsusuri ay dapat bayaran
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_ROUTE_LABEL Ruta
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_SCOPE_LABEL Saklaw ng pag-verify
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_SCOPE_VALUE mahigpit na pag-scan ng ruta ng WCAG, mga pagsusuri sa reflow/text-spacing, mga pagsusuri sa usok ng keyboard, at manu-manong pagsusuri sa ruta ng VoiceOver.
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_TEXT_1 Ang metadata na ito ay ina-update bilang bahagi ng quarterly audit close-out upang makita ng mga user kung ano ang na-verify, kung ano ang mayroon pa ring mga limitasyon, at kung kailan dapat ang susunod na pormal na pagsusuri.
+TRANSPARENCY_ACCESSIBILITY_VERIFICATION_METADATA_TITLE Metadata ng Pag-verify
+TRANSPARENCY_ACCESSIBILITY_WHY_PAGE_EXISTS_TEXT_1 Ginagamit ang PayCal para sa oras, pagbabayad, at mga gawain sa account na madalas na inuulit ng mga tao. Kapag ang isang pahina ay mahirap basahin, mahirap i-navigate, o mahirap patakbuhin nang walang mouse, pinapabagal nito ang totoong trabaho.
+TRANSPARENCY_ACCESSIBILITY_WHY_PAGE_EXISTS_TEXT_2 Ini-publish namin ang page na ito para makita ng mga user ang standard na ginagamit namin, ang mga pagbabago sa accessibility na naipadala na namin, at ang mga lugar na pinagbubuti pa namin.
+TRANSPARENCY_ACCESSIBILITY_WHY_PAGE_EXISTS_TITLE Bakit Umiiral ang Pahinang Ito
+TRANSPARENCY_ACCESSIBILITY_WORKING_STANDARD_TEXT_1 Ginagamit namin ang WCAG 2.1 Level AA bilang aming working standard para sa accessibility ng produkto. Gumagamit din kami ng mga piling ideya ng AAA kapag malinaw na pinapahusay ng mga ito ang kakayahang magamit, ngunit hindi namin inaangkin ang pagsunod sa AAA.
+TRANSPARENCY_ACCESSIBILITY_WORKING_STANDARD_TEXT_2 Hindi namin inaangkin na ang bawat ruta ay perpekto sa lahat ng oras. Nangangako kami sa pag-aayos ng mga na-verify na hadlang, pagdodokumento ng mga pagbabago, at pagpapanatiling gumagana ang pagiging naa-access sa normal na daloy ng trabaho sa engineering.
+TRANSPARENCY_ACCESSIBILITY_WORKING_STANDARD_TITLE Ang aming Pamantayan sa Paggawa
+TRANSPARENCY_DEPENDENCY_CI_CICD_GATE_TEXT_1 Pinaghihiwalay ng PayCal ang mga kontrol sa kalidad sa mga daloy ng trabaho upang tahasan at masusubaybayan ang mga pagkabigo:
+TRANSPARENCY_DEPENDENCY_CI_CICD_GATE_TEXT_2 Tinatrato ng mga release hygiene workflow ang mga nabigong gate bilang mga blocker at nangangailangan ng muling pagpapatakbo pagkatapos ng mga pag-aayos.
+TRANSPARENCY_DEPENDENCY_CI_CICD_GATE_TITLE Modelo ng CI/CD Gate
+TRANSPARENCY_DEPENDENCY_CI_DECK Ipinapaliwanag ng page na ito kung paano pinapanatili ng PayCal na deterministiko ang mga dependency ng JavaScript at kung paano ipinapatupad ang mga CI gate bago ilabas.
+TRANSPARENCY_DEPENDENCY_CI_HOW_TO_VERIFY_TITLE Paano I-verify
+TRANSPARENCY_DEPENDENCY_CI_KNOWN_LIMITATIONS_ITEM_1 Ang mga pampublikong transparency na pahina ay manu-manong naka-synchronize sa daloy ng trabaho at mga pagbabago sa package sa mga ikot ng paglabas.
+TRANSPARENCY_DEPENDENCY_CI_KNOWN_LIMITATIONS_ITEM_2 Ang pag-uugali ng pipeline ng CI ay nakadokumento sa maraming page at maaaring mag-drift kung ang mga update ay hindi nailalapat nang tuluy-tuloy.
+TRANSPARENCY_DEPENDENCY_CI_KNOWN_LIMITATIONS_TITLE Mga Kilalang Limitasyon
+TRANSPARENCY_DEPENDENCY_CI_LAST_VERIFIED_LABEL Huling na-verify:
+TRANSPARENCY_DEPENDENCY_CI_NEXT_REVIEW_LABEL Nakatakdang susunod na pagsusuri:
+TRANSPARENCY_DEPENDENCY_CI_NPM_POLICY_TEXT_1 Gumagamit ang PayCal ng lockfile-first dependency policy para sa JavaScript tooling at mga pagsusuri sa automation ng browser.
+TRANSPARENCY_DEPENDENCY_CI_NPM_POLICY_TITLE Patakaran sa Dependency ng npm
+TRANSPARENCY_DEPENDENCY_CI_PAGE_TITLE Dependency at CI/CD Governance
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_ITEM_1 Mag-publish ng isang canonical gate matrix na nagmamapa sa bawat CI job sa may-ari, trigger, command, at status ng pagharang.
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_ITEM_2 Magdagdag ng isang quarterly dependency governance snapshot kasama ang mga direktang npm packages, katwiran, at update cadence.
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_ITEM_3 Magdagdag ng item ng checklist ng release para kumpirmahin na mananatiling nakahanay ang mga dokumento ng pamamahala ng npm sa daloy ng trabaho at patakaran sa lockfile.
+TRANSPARENCY_DEPENDENCY_CI_PLANNED_IMPROVEMENTS_TITLE Nakaplanong Pagpapahusay sa Dokumentasyon
+TRANSPARENCY_DEPENDENCY_CI_ROUTE_LABEL Ruta:
+TRANSPARENCY_DEPENDENCY_CI_SCOPE_LABEL Saklaw ng pag-verify:
+TRANSPARENCY_DEPENDENCY_CI_SCOPE_VALUE patakaran sa package ng npm, pag-uugali ng lockfile, mga daloy ng trabaho sa GitHub Actions, at dokumentasyon ng release-gate.
+TRANSPARENCY_DEPENDENCY_CI_TABLE_ARIA npm governance command map
+TRANSPARENCY_DEPENDENCY_CI_TABLE_COMMAND Utos
+TRANSPARENCY_DEPENDENCY_CI_TABLE_CONTROL Pangunahing Kontrol
+TRANSPARENCY_DEPENDENCY_CI_TABLE_PURPOSE Layunin
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW1_CONTROL ESLint rules + JS sink policy checks
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW1_PURPOSE JavaScript lint at sink checks
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW2_CONTROL Pag-uugali ng ruta sa antas ng browser at pagpapatunay ng regression
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW2_PURPOSE Nagsusuri ng usok ng manunulat ng dula
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW3_CONTROL WCAG, reflow, contrast, at ARIA test suite
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW3_PURPOSE Pagsusuri sa ruta ng accessibility at patakaran
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW4_CONTROL Pag-verify ng contrast conformance sa antas ng tema
+TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW4_PURPOSE Contrast matrix generation
+TRANSPARENCY_DEPENDENCY_CI_USAGE_TITLE Para Saan Ginagamit ang npm
+TRANSPARENCY_DEPENDENCY_CI_VERIFICATION_METADATA_TITLE Metadata ng Pag-verify
+TRANSPARENCY_EMAIL_DECK Ipinapaliwanag ng page na ito kung aling mga email ang ipinapadala ng PayCal, kung paano binuo at inihahatid ang bawat mensahe, at kung paano namin ibe-verify ang pagiging maaasahan.
+TRANSPARENCY_EMAIL_DELIVERY_PIPELINE_TITLE Pipeline ng Paghahatid
+TRANSPARENCY_EMAIL_DELIVERY_TEXT_1 Gumagamit ang PayCal ng dalawang-layer na email stack:
+TRANSPARENCY_EMAIL_DELIVERY_TEXT_3 Ang mga link sa pag-verify ay naka-localize sa kapaligiran gamit ang pagresolba ng host ng kahilingan upang manatiling nakahanay ang mga link sa kasalukuyang konteksto ng deployment.
+TRANSPARENCY_EMAIL_FLOW_ACCOUNT_RECOVERY Transaksyon sa pagbawi ng account
+TRANSPARENCY_EMAIL_FLOW_ACCOUNT_RECOVERY_PURPOSE Mag-isyu ng verification code sa pagbawi ng account
+TRANSPARENCY_EMAIL_FLOW_CONTACT_RELAY Makipag-ugnayan sa relay ng suporta
+TRANSPARENCY_EMAIL_FLOW_CONTACT_RELAY_PURPOSE Ipasa ang mga kahilingan sa suporta upang suportahan ang inbox na may normalized na nilalaman
+TRANSPARENCY_EMAIL_FLOW_EMAIL_CHANGE Pagbabago ng email (luma/bagong inbox)
+TRANSPARENCY_EMAIL_FLOW_EMAIL_CHANGE_PURPOSE Dual inbox confirmation para sa account email mutation
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_EMAIL_PURPOSE Patunayan ang pagmamay-ari ng destinasyon bago ang mga sensitibong pagkilos sa pagbawi
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_EMAIL_VERIFICATION Pag-verify ng email sa pagbawi
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_KEY_DELIVERY Paghahatid ng Susi sa Pagbawi
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_KEY_PURPOSE Magbigay ng materyal sa pagbawi ng account
+TRANSPARENCY_EMAIL_FLOW_VERIFICATION Email verification
+TRANSPARENCY_EMAIL_FLOW_VERIFICATION_PURPOSE Kumpirmahin ang pagmamay-ari sa panahon ng mga kaganapan sa lifecycle ng account
+TRANSPARENCY_EMAIL_LAST_UPDATED_LABEL Huling na-update:
+TRANSPARENCY_EMAIL_PAGE_TITLE Transparency ng Email
+TRANSPARENCY_EMAIL_PRINCIPLES_FACT_TEMPLATE_PATHS Ang mga template na partikular sa daloy ay ginagamit para sa pag-verify, pagbawi, pagbabago ng account, at mga path ng suporta sa pakikipag-ugnayan.
+TRANSPARENCY_EMAIL_PRINCIPLES_ITEM_2 Ang komposisyon ng email ay sentralisado upang maiwasan ang magkakaibang lohika ng mensahe sa mga controller.
+TRANSPARENCY_EMAIL_PRINCIPLES_ITEM_3 Ang mga pagkabigo sa paghahatid ay nagbabalik ng mga tahasang kinalabasan upang ang mga daloy ng pagtawag ay maaaring mabigo nang ligtas at malinaw na ipaalam sa mga user.
+TRANSPARENCY_EMAIL_PRINCIPLES_TEXT_1 Itinuturing ng PayCal ang transaksyonal na email bilang bahagi ng kaligtasan ng account at pagpapatuloy ng account, hindi bilang imprastraktura sa marketing.
+TRANSPARENCY_EMAIL_PRINCIPLES_TITLE Mga Prinsipyo sa Email
+TRANSPARENCY_EMAIL_RELIABILITY_CHECKS_TITLE Pagpapatunay at Pagiging Maaasahan
+TRANSPARENCY_EMAIL_SCOPE_BOUNDARY_TITLE Hangganan ng Saklaw
+TRANSPARENCY_EMAIL_SCOPE_TEXT_1 Ang page na ito ay nagdodokumento ng transactional at suporta sa pag-uugali ng email para sa mga pagpapatakbo ng produkto ng PayCal. Hindi ito nagdodokumento ng marketing automation dahil ang PayCal ay hindi gumagamit ng marketing email funnel sa codebase na ito.
+TRANSPARENCY_EMAIL_SUPPORT_TELEMETRY_TITLE Suportahan ang Telemetry at Auditability ng Email
+TRANSPARENCY_EMAIL_TABLE_ARIA Catalog ng email sa transaksyon
+TRANSPARENCY_EMAIL_TABLE_FLOW Daloy
+TRANSPARENCY_EMAIL_TABLE_PURPOSE Layunin
+TRANSPARENCY_EMAIL_TABLE_TEMPLATE_FAMILY Pamilya ng Template
+TRANSPARENCY_EMAIL_TELEMETRY_ITEM_3 Ang pagsusulat ng log ay hindi naka-block upang mapanatili ang support-form na UX kung ang telemetry storage ay nasira.
+TRANSPARENCY_EMAIL_TELEMETRY_TEXT_1 Kasama sa mga pagsusumite ng contact-support ang pinakamahusay na pagsisikap na telemetry upang masubaybayan ang kalusugan ng paghahatid nang hindi hinaharangan ang mga pagsusumite ng user.
+TRANSPARENCY_EMAIL_WHAT_WE_SEND_TITLE Ang Ipapadala Namin
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_CONTROL_CLOSURE Pagsara ng kontrol sa pag-audit
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_OBSERVABILITY Pagmamasid at layout
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_PRODUCT_MODEL Modelo ng produkto at balangkas ng UI
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_SECURITY_CONTROLS Mga kontrol sa seguridad
+TRANSPARENCY_FRAMEWORK_BACKEND_AREA_SECURITY_GOVERNANCE Pamamahala sa pag-audit sa seguridad
+TRANSPARENCY_FRAMEWORK_BACKEND_DECK Binubuod ng ledger na ito ang mga pangunahing pagbabago sa antas ng backend at framework para masubaybayan ng mga user kung paano umuusbong ang mga teknikal na kontrol sa paglipas ng panahon.
+TRANSPARENCY_FRAMEWORK_BACKEND_EVIDENCE_TITLE Saan Mag-inspeksyon ng Katibayan ng Pagpapatupad
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_1 Nag-type muna ng mga hangganan: ang static na pagsusuri sa PHPStan Level 9 ay ipinapatupad sa mga lokal at release na daloy ng trabaho.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_2 Ang mga sensitibong mutasyon ay nangangailangan ng mga tahasang kontrol: mga token ng kakayahan, mga pagsusuri sa tungkulin, at mga bounded rate-limit window.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_3 Ang mga pagbabago sa seguridad ay dapat ipadala kasama ng mga pagsubok at mga update sa transparency sa parehong ikot ng paglabas.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_FACT_4 Ang mga limitasyon sa pagpapatakbo at mga hangganan ng telemetry ay itinuturing bilang patakarang maipapatupad, hindi dokumentasyon ng pagpapayo.
+TRANSPARENCY_FRAMEWORK_BACKEND_GOVERNANCE_PRINCIPLES_TITLE Mga Prinsipyo ng Pamamahala sa Backend
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1032_WHAT_CHANGED Idinagdag ang imprastraktura ng mga sukatan ng platform, ruta ng transparency ng pampublikong sukatan, at muling naa-authenticate/pampublikong layout system.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1037_WHAT_CHANGED Nag-migrate ng Mga Koponan sa Mga Organisasyon, na-normalize ang imprastraktura ng dialog, at ipinakilala ang arkitektura ng token ng disenyo na nakabatay sa papel.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1041_WHAT_CHANGED Nakumpleto ang pamamahala ng ugnayan, mga kontrol sa pagsali sa telemetry, pagpapatigas ng mutation sa privileged-role, at pagsasara ng zeroization ng lifecycle.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1042_WHAT_CHANGED Ipinakilala ang CSP nonce/strict-dynamic na pagpapatupad, mga capability token, runtime integrity monitor, credential-bridge removal, at Guardian hardening.
+TRANSPARENCY_FRAMEWORK_BACKEND_MILESTONE_1043_WHAT_CHANGED Pinalawak na security test corpus, na-finalize na audit control narrative, at naka-synchronize na release/transparency metadata.
+TRANSPARENCY_FRAMEWORK_BACKEND_PAGE_TITLE Framework at Backend Change Ledger
+TRANSPARENCY_FRAMEWORK_BACKEND_RECENT_MILESTONES_TITLE Kamakailang Backend at Framework Milestones
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_AREA Lugar
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_ARIA Framework at backend milestone
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_RELEASE Palayain
+TRANSPARENCY_FRAMEWORK_BACKEND_TABLE_WHAT_CHANGED Ano ang nagbago
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_LAST_VERIFIED_LABEL Huling na-verify:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_NEXT_REVIEW_LABEL Nakatakdang susunod na pagsusuri:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_PRIMARY_REFS_LABEL Pangunahing mga sanggunian:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_ROUTE_LABEL Ruta:
+TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_TITLE Metadata ng Pag-verify
+TRANSPARENCY_HUB_ACCESSIBILITY_READ_MORE Basahin ang aming pamantayan sa pagiging naa-access, kamakailang trabaho, at path ng feedback
+TRANSPARENCY_HUB_ACCESSIBILITY_WCAG_TITLE Accessibility at Pagsunod sa WCAG
+TRANSPARENCY_HUB_DECK Ini-publish namin kung paano gumagana ang PayCal para ma-verify ng mga user ang mga desisyon, hindi lang ang mga trust statement.
+TRANSPARENCY_HUB_DEPENDENCY_CI_READ_MORE Basahin ang dependency at patakaran sa pamamahala ng CI/CD
+TRANSPARENCY_HUB_DEPENDENCY_CI_TITLE Dependency at CI/CD Governance
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_TITLE Pagsubok sa Pag-load ng Mga Kita
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_READ_MORE Magbasa pa
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_TITLE Arkitektura ng Email
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_READ_MORE Basahin ang kasaysayan ng pagbabago ng framework at backend
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TITLE Framework at Backend Change Ledger
+TRANSPARENCY_HUB_METRICS_FACT_COLLECTION_SCOPE Ang saklaw ng koleksyon ay pinagsama-sama-lamang na may matitigas na limitasyon at walang mga personal na pagkakakilanlan sa mga susi.
+TRANSPARENCY_HUB_METRICS_FACT_RETENTION Ang pagpapanatili ay sumusunod sa isang tinukoy na lifecycle: raw data, rollups, at awtomatikong pag-purge.
+TRANSPARENCY_HUB_METRICS_FACT_TELEMETRY_KEYS Ang mga telemetry key at mga halimbawa ay na-publish upang ang mga claim ay mabe-verify.
+TRANSPARENCY_HUB_METRICS_PRIVACY_TITLE Mga Sukatan at Privacy ng Platform
+TRANSPARENCY_HUB_METRICS_READ_MORE Magbasa pa
+TRANSPARENCY_HUB_METRICS_TEXT_1 Ipinapaliwanag ng page ng sukatan ang operational telemetry na nakolekta para sa pagiging maaasahan at pagpaplano ng kapasidad.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_READ_MORE Basahin ang mga kakayahan ng network at patakaran sa header ng seguridad
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_TEXT_1 Ang artikulong ito ay nagpa-publish ng mga transport protocol at response-header na kontrol na ginagamit upang ma-secure ang pag-uugali ng browser at network.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_TITLE Mga Kakayahang Network
+TRANSPARENCY_HUB_PAGE_TITLE Transparency Hub
+TRANSPARENCY_HUB_PANELS_ARIA Mga panel ng detalye ng transparency
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_STRIPE_SUPPORT_TEXT Ang pagsingil sa subscription ay pinoproseso ng Stripe. Available ang suporta sa stripe sa support.stripe.com.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_1 Ang PayCal ay binuo sa paligid ng mga nasusuri na operasyon: ang mga formula ay dokumentado, ang mga hangganan ng telemetry ay tahasan, at ang pagpapanatili ay may hangganan bilang default.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_2 Ang aming prinsipyo ay diretso: kung ang isang system ay nakakaapekto sa payroll o privacy, dapat na maunawaan ng mga user kung paano ito gumagana at kung paano ito pinamamahalaan.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_3 Ang mga kamakailang update sa paghubog ng produkto, kabilang ang mga daloy ng pamamahala sa pagsingil at profile, ay sinusubaybayan sa aming framework/backend ledger at mga pahina ng pagsubok sa pamamahala.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TITLE Pangkalahatang-ideya ng Pilosopiya ng Platform
+TRANSPARENCY_HUB_PRODUCT_BILLING_READ_MORE Suriin ang mga pagbabago sa platform na nakaharap sa produkto
+TRANSPARENCY_HUB_PRODUCT_BILLING_TITLE Mga Pagbabago sa Karanasan sa Produkto at Pagsingil
+TRANSPARENCY_HUB_SECURITY_AUDIT_FACT_COVERAGE Kasama sa saklaw ng workstream ang mga kontrol sa runtime lifecycle, telemetry isolation, correlation governance, at privileged-role hardening.
+TRANSPARENCY_HUB_SECURITY_AUDIT_FACT_STATUS Na-publish ang kasalukuyang cycle status na may petsa ng pag-verify at ritmo ng pagsusuri.
+TRANSPARENCY_HUB_SECURITY_AUDIT_READ_MORE Basahin ang aming katayuan sa pag-audit sa seguridad at buod ng ebidensya
+TRANSPARENCY_HUB_SECURITY_AUDIT_TEXT_1 Ang page na ito ay nagpa-publish ng kasalukuyang katayuan sa pag-audit, saklaw na sarado, mga sanggunian sa ebidensya, at mga pangako sa release-blocker na nagpapanatili ng postura ng seguridad.
+TRANSPARENCY_HUB_SECURITY_AUDIT_TITLE Katayuan ng Pag-audit ng Seguridad
+TRANSPARENCY_HUB_SECURITY_AUDIT_VALIDATION_SNAPSHOT_FACT Kasama sa snapshot ng pagpapatunay ang Playwright, JS, PHPStan Level 9, at mga resulta ng pagsubok sa backend.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_READ_MORE Magbasa pa
+TRANSPARENCY_HUB_SUPERHEROES_MAP_TITLE Mapa ng Sistema ng Superheroes
+TRANSPARENCY_HUB_TAX_METHODOLOGY_READ_MORE Magbasa pa
+TRANSPARENCY_HUB_TAX_METHODOLOGY_TITLE Pamamaraan ng Buwis
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_READ_MORE Basahin ang aming pagsusuri sa pamamahala at patakaran sa pagpapatunay ng release
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_TITLE Pamamahala sa Pagsubok at Pagpapatunay
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_READ_MORE Magbasa pa
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_TITLE Pagpapatunay at Pamamahala
+TRANSPARENCY_LOAD_TESTING_BENCHMARK_METHOD_TITLE Pamamaraan ng Benchmark
+TRANSPARENCY_LOAD_TESTING_DECK Isang 10-run A/B benchmark ng sabik na pag-render kumpara sa tamad na pag-load ng seksyon para sa /earnings/.
+TRANSPARENCY_LOAD_TESTING_EXECUTIVE_SUMMARY_TITLE Executive Summary
+TRANSPARENCY_LOAD_TESTING_INTERPRETATION_TITLE Interpretasyon
+TRANSPARENCY_LOAD_TESTING_PAGE_TITLE Pagsubok sa Pag-load ng Mga Kita
+TRANSPARENCY_LOAD_TESTING_RESULTS_REAL_TITLE Mga Resulta: Real User Dataset (10 Run)
+TRANSPARENCY_LOAD_TESTING_RESULTS_SYNTHETIC_TITLE Mga Resulta: Synthetic 2025/2026 Dataset (10 Run)
+TRANSPARENCY_LOAD_TESTING_VERIFICATION_METADATA_TITLE Metadata ng Pag-verify
+TRANSPARENCY_METRICS_COMMITMENT_TEXT_1 Dapat na makita ng mga user kung ano mismo ang telemetry na kinokolekta ng isang serbisyo. Ang pahinang ito ay nagdodokumento ng bawat sukatan na ginagamit upang subaybayan ang kalusugan ng platform.
+TRANSPARENCY_METRICS_COMMITMENT_TEXT_2 Ang lahat ng telemetry sa pahinang ito ay pinagsama-sama lamang. Hindi kami nag-iimbak ng mga personal na pagkakakilanlan sa mga telemetry key.
+TRANSPARENCY_METRICS_COMMITMENT_TITLE Ang Aming Pangako
+TRANSPARENCY_METRICS_DECK Ipinapakita ng page na ito kung ano ang kinokolekta ng telemetry ng PayCal, kung bakit namin ito kinokolekta, at kung kailan ito tinanggal.
+TRANSPARENCY_METRICS_KNOWN_LIMITATIONS_TITLE Mga kilalang limitasyon
+TRANSPARENCY_METRICS_METADATA_UPDATED_NOTE Ina-update ang metadata na ito bilang bahagi ng quarterly audit close-out.
+TRANSPARENCY_METRICS_NO Hindi
+TRANSPARENCY_METRICS_PAGE_TITLE Transparency ng Mga Sukatan ng Platform
+TRANSPARENCY_METRICS_ROUTE_METADATA_TITLE Metadata ng ruta
+TRANSPARENCY_METRICS_TABLE_CATEGORY Kategorya ng Sukatan
+TRANSPARENCY_METRICS_TABLE_PERSONAL_DATA Personal na Data?
+TRANSPARENCY_METRICS_TABLE_PURPOSE Layunin
+TRANSPARENCY_METRICS_TABLE_RETENTION Pagpapanatili
+TRANSPARENCY_METRICS_VERIFICATION_METADATA_TITLE Metadata ng Pag-verify
+TRANSPARENCY_METRICS_YES Oo
+TRANSPARENCY_NETWORK_BROWSER_HEADERS_TITLE Baseline ng Header ng Seguridad ng Browser
+TRANSPARENCY_NETWORK_CAPABILITIES_DECK Ini-publish ng PayCal ang pag-uugali ng protocol at mga kontrol sa response-header upang direktang ma-verify ng mga user ang postura ng seguridad ng network at browser.
+TRANSPARENCY_NETWORK_CAPABILITIES_PAGE_TITLE Mga Kakayahang Network
+TRANSPARENCY_NETWORK_EXECUTIVE_SUMMARY_TITLE Executive Summary
+TRANSPARENCY_NETWORK_HEADERS_TABLE_ARIA Talahanayan ng Mga Header ng Seguridad
+TRANSPARENCY_NETWORK_HEADERS_TABLE_HEADER Header
+TRANSPARENCY_NETWORK_HEADERS_TABLE_SECURITY_EFFECT Epekto ng Seguridad
+TRANSPARENCY_NETWORK_PROTOCOL_ROUTING_TITLE Protocol at Pag-uugali sa Pagruruta
+TRANSPARENCY_NETWORK_QUIC_WORKLOADS_TITLE QUIC at Multi-Request na Workloads
+TRANSPARENCY_NETWORK_SCOPE_NOTES_TITLE Saklaw at Mga Tala ng Interpretasyon
+TRANSPARENCY_NETWORK_TABLE_CONTROL Kontrolin
+TRANSPARENCY_NETWORK_TABLE_OBSERVED_VALUE Naobserbahang Halaga
+TRANSPARENCY_NETWORK_TABLE_PURPOSE Layunin
+TRANSPARENCY_NETWORK_TRANSPORT_CONTROLS_TITLE Mga Kontrol sa Seguridad sa Transportasyon
+TRANSPARENCY_NETWORK_TRANSPORT_TABLE_ARIA Talahanayan ng Transport Protocol
+TRANSPARENCY_NETWORK_USE_CASE_ARIA Kaso ng Paggamit ng Network Operations
+TRANSPARENCY_NETWORK_USE_CASE_TITLE Use Case: Pag-diagnose ng Transport at Header Regressions
+TRANSPARENCY_NETWORK_VERIFICATION_METADATA_TITLE Metadata ng Pag-verify
+TRANSPARENCY_SECURITY_AUDIT_DECK Ang PayCal ay nananatili sa katayuang PASS noong 2026-03-24 na may mga control-by-architecture safeguards na ipinapatupad sa code, mga pagsubok, at pamamahala ng release.
+TRANSPARENCY_SECURITY_AUDIT_EVIDENCE_SOURCES_TITLE Mga mapagkukunan ng ebidensya
+TRANSPARENCY_SECURITY_AUDIT_LAST_VERIFIED_LABEL Huling na-verify:
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_COMMITMENTS_TITLE Mga Pangako sa Pagpapanatili
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_ITEM_3 Buong backend test suite at JS security checks sa mga release candidate.
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_TEXT_1 Upang mapanatili ang katayuan ng PASS, ang mga sumusunod ay nananatiling mga blocker ng release:
+TRANSPARENCY_SECURITY_AUDIT_MAINTENANCE_TEXT_2 Anumang pagbabago sa lifecycle ng kalendaryo, crypto-state, o DOM sa pag-render ay dapat may kasamang kaukulang mga update sa regression bago i-release.
+TRANSPARENCY_SECURITY_AUDIT_NEXT_REVIEW_LABEL Nakatakdang susunod na pagsusuri:
+TRANSPARENCY_SECURITY_AUDIT_PAGE_TITLE Katayuan ng Pag-audit ng Seguridad
+TRANSPARENCY_SECURITY_AUDIT_ROUTE_LABEL Ruta:
+TRANSPARENCY_SECURITY_AUDIT_ROUTE_METADATA_TITLE Metadata ng ruta
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_1 Ang in-memory na crypto state ay naka-zero sa nabigasyon at mga hangganan ng lifecycle.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_2 Kasama na ngayon ang naka-unlock na estado ng zeroization na patunay ng naantala na pag-expire ng nakatagong tab.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_3 Ang DOM sensitivity scrub ay nag-clear ng runtime payload traces bago ang state reset.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_ITEM_4 Ang deterministikong muling pag-unlock at pag-uugali sa pagbawi ay sinubok ng regression.
+TRANSPARENCY_SECURITY_AUDIT_RUNTIME_SUMMARY_TITLE Buod ng Pagsara ng Runtime Lifecycle
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_CLOSED_TITLE Isinara ang Saklaw sa Mga Ikot ng PASS 1.042-1.043
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_A Workstream A: Ang pamamahala ng ugnayan ay nakasentro sa pamamagitan ng mga sobre na nasuri ng broker, deny-safe.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_B Workstream B: Telemetry query governance na ipinapatupad gamit ang stream-scoped token at cross-stream join denial.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_C Workstream C: Ang mga kontrol na may pribilehiyong tungkulin ay pinatigas gamit ang singleton superadmin at pagpapatupad ng mutation guard.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_D Workstream D: Nakumpleto ang runtime decrypted-data na mga kontrol sa lifecycle, kabilang ang lifecycle zeroization at DOM sensitivity scrub na gawi.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_E Workstream E: CSP nonce + mahigpit na dynamic na patakaran at paglabag sa pagpapatupad ng ingestion sa mga ruta ng produksyon.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_F Workstream F: One-shot capability token gate para sa high-risk admin mutations na may denial regression coverage.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_G Workstream G: Pag-aalis ng kredensyal-tulay ng browser para sa mga daloy ng passkey at pamamahala ng KEK na nagmula sa kredensyal na deterministiko.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_H Workstream H: Runtime integrity monitor state machine (SAFE/DEGRADED/LOCKED/TERMINATED) na may mga telemetry hook.
+TRANSPARENCY_SECURITY_AUDIT_SCOPE_ITEM_I Workstream I: Tagapili ng sanitizer ng tagapag-alaga/pagpapatigas ng istilo na may mga na-update na coverage anchor.
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_EVIDENCE_PHPUNIT 1,212 na nakalistang pagsubok (pagpasa ng mga pagpapatunay ng release)
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_EVIDENCE_PLAYWRIGHT 8 ang pumasa
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_JSLINT JS lint at sink checks
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_PHPSTAN Mahigpit ang PHPStan (Level 9)
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_PHPUNIT Backend PHPUnit suite
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_GATE_PLAYWRIGHT Usok sa lifecycle ng playwright
+TRANSPARENCY_SECURITY_AUDIT_SNAPSHOT_RESULT_PASS PASS
+TRANSPARENCY_SECURITY_AUDIT_STATUS_LABEL Kasalukuyang katayuan:
+TRANSPARENCY_SECURITY_AUDIT_STATUS_VALUE PASS
+TRANSPARENCY_SECURITY_AUDIT_SUMMARY_TEXT_1 Ang pahinang ito ay nagbubuod ng katayuan na nakaharap sa publiko; ang detalyadong teknikal na ebidensya ay nananatili sa mga naka-link na artifact ng repositoryo.
+TRANSPARENCY_SECURITY_AUDIT_TABLE_EVIDENCE Ebidensya
+TRANSPARENCY_SECURITY_AUDIT_TABLE_GATE Gate
+TRANSPARENCY_SECURITY_AUDIT_TABLE_RESULT Resulta
+TRANSPARENCY_SECURITY_AUDIT_USE_CASE_ARIA Kaso ng paggamit: Pag-block ng hindi ligtas na paglabas
+TRANSPARENCY_SECURITY_AUDIT_USE_CASE_TEXT_1 Kung ang isang kandidato sa pagpapalaya ay nagpasimula ng regression sa lifecycle zeroization o pagpapatupad ng CSP, ang mga blocker gate na ito ay hihinto sa pag-promote hanggang sa maibalik ang mga kontrol at pagsubok, na pumipigil sa mahinang postura sa pag-abot sa produksyon.
+TRANSPARENCY_SECURITY_AUDIT_USE_CASE_TITLE Use Case: Pag-block ng Hindi Ligtas na Paglabas
+TRANSPARENCY_SECURITY_AUDIT_VALIDATION_SNAPSHOT_ARIA Snapshot ng pagpapatunay ng pag-audit ng seguridad
+TRANSPARENCY_SECURITY_AUDIT_VALIDATION_SNAPSHOT_TITLE Snapshot ng Pagpapatunay (2026-03-24)
+TRANSPARENCY_SECURITY_AUDIT_VERIFICATION_METADATA_TITLE Metadata ng Pag-verify
+TRANSPARENCY_SUPERHEROES_DECK Gumagamit ang PayCal ng mga may temang "Superheroes" na pangalan para sa ilang cross-cutting runtime system. Ipinapaliwanag ng page na ito ang kanilang layunin, mga hangganan, at mga kaso ng paggamit.
+TRANSPARENCY_SUPERHEROES_ECHO_ROLE ARIA cadence formatter
+TRANSPARENCY_SUPERHEROES_ECHO_USE_CASE Sinasalamin ng Echo ang content para sa mga assistive pathway, at ang kanyang Cadence power ay nagdaragdag ng mga strategic na pag-pause at ritmo upang malinaw na makarating ang pagsasalaysay para sa mga screen reader, speech synthesis, braille display, at human listener.
+TRANSPARENCY_SUPERHEROES_EMAILGARUM_ROLE Transaksyonal na mail orkestra
+TRANSPARENCY_SUPERHEROES_EMAILGARUM_USE_CASE Nag-coordinate ng mga template ng email na tukoy sa daloy at gawi sa paghahatid para sa mga daloy ng trabaho sa pag-verify, pagbawi, at pagbabago ng account.
+TRANSPARENCY_SUPERHEROES_GUARDIAN_ROLE TrustedHTML DOM write guard
+TRANSPARENCY_SUPERHEROES_GUARDIAN_USE_CASE Nagsalinis at ligtas na naglalagay ng dynamic na markup sa mga frontend module upang mabawasan ang panganib ng XSS at mapanatili ang pagiging tugma ng CSP.
+TRANSPARENCY_SUPERHEROES_LAST_UPDATED_LABEL Huling na-update:
+TRANSPARENCY_SUPERHEROES_LENS_ROLE Buffer ng diagnostic na saklaw ng kahilingan
+TRANSPARENCY_SUPERHEROES_MOTTO Perpektong pagmuni-muni. Perpektong ritmo. Walang tinig na naiwan.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_ITEM_1 Mabilis na matutukoy ng mga bagong kontribyutor ang mga primitive ng platform kumpara sa page-level na code.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_ITEM_2 Maaaring masuri ang mga insidente sa pagpapatakbo sa pamamagitan ng bahagi ng bahagi (mga pagkakamali, telemetry ng kliyente, kaligtasan ng DOM, paghahatid ng email).
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_ITEM_3 Ang dokumentasyon ay maaaring sumangguni sa mga stable na pangalan ng system kaysa sa paglilipat ng mga detalye ng pagpapatupad.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_TEXT_1 Ang mga may temang pangalan ay ginagamit upang magsenyas ng "cross-cutting system component" sa halip na tampok-lokal na lohika.
+TRANSPARENCY_SUPERHEROES_NAMING_PATTERN_TITLE Bakit Umiiral ang Pattern ng Pangalan na Ito
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_ITEM_1 Nagbibigay ang mga bahaging ito ng mga guardrail, diagnostic, o garantiya sa paghahatid na ginagamit ng maraming page at API.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_ITEM_2 Binabawasan nila ang paulit-ulit na lohika sa pamamagitan ng pagsentralisa sa peligroso o mataas na kahalagahan ng pag-uugali.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_ITEM_3 Sinadyang idokumento ang mga ito para maimapa ng mga user at developer ang feature na gawi sa mga konkretong punto ng pagpapatupad.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_TEXT_1 Ang pattern ng pagbibigay ng pangalan ng Superheroes ay ginagamit para sa kaligtasan sa antas ng platform, observability, at mga layer ng komunikasyon na gumagana sa maraming feature.
+TRANSPARENCY_SUPERHEROES_OVERALL_PURPOSE_TITLE Pangkalahatang Layunin
+TRANSPARENCY_SUPERHEROES_PAGE_TITLE Transparency ng mga Superheroes
+TRANSPARENCY_SUPERHEROES_PHANTOMWING_ROLE Client error collation daemon
+TRANSPARENCY_SUPERHEROES_PHANTOMWING_USE_CASE Kinukuha ang mga error/babala sa console at mga hindi nahawakang kabiguan, pagkatapos ay pinapangkat at inilalantad ang mga diagnostic para sa pag-debug ng operator.
+TRANSPARENCY_SUPERHEROES_SHADOWTALON_ROLE Global PHP fault guardian
+TRANSPARENCY_SUPERHEROES_SHADOWTALON_USE_CASE Kino-convert ang mga hindi nahuli na runtime fault sa mga ligtas na JSON/HTML na tugon at nagsusulat ng nakalaang rotating fault log na may mga correlation ID.
+TRANSPARENCY_SUPERHEROES_SYSTEM_BREAKDOWN_TITLE Pagkasira ng System
+TRANSPARENCY_SUPERHEROES_TABLE_ARIA Pagkasira ng bahagi ng mga superhero
+TRANSPARENCY_SUPERHEROES_TABLE_IMPLEMENTATION Pangunahing Pagpapatupad
+TRANSPARENCY_SUPERHEROES_TABLE_PRIMARY_ROLE Pangunahing Tungkulin
+TRANSPARENCY_SUPERHEROES_TABLE_SUPERHERO Superhero
+TRANSPARENCY_SUPERHEROES_TABLE_USE_CASE Partikular na Kaso ng Paggamit
+TRANSPARENCY_SUPERHEROES_VERIFICATION_ANCHORS_TITLE Mga Anchor sa Pagpapatunay
+TRANSPARENCY_SUPERHEROES_VERIFICATION_ITEM_3 Ang pag-uugali ng Phantom Wing at Lens ay maaaring maobserbahan sa DEV sa pamamagitan ng mga diagnostic ng dashboard at humiling ng output ng pag-debug.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_1_TEXT Nahuhuli ng ShadowTalon ang mga hindi nahawakang kabiguan at nagbabalik ng mga ligtas na tugon habang pinapanatili ang mga diagnostic ng operator sa mga nakalaang log.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_2_TEXT Pinoprotektahan ng Tagapangalaga ang mga pagsusulat ng DOM; Pinagsasama ng Phantom Wing ang mga pagkabigo sa frontend; Nagbibigay ang Lens ng mga diagnostic sa antas ng kahilingan sa mga development surface.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_3_TEXT Ang EmailGarum ay nag-standardize ng transactional mail composition at nagde-delegate ng protocol delivery sa EmailTransport.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_4_TEXT Tapat na inuulit ng Echo ang mga semantika, habang ibinabalik ni Cadence ang pacing na may mga pag-pause at timing upang ang output ng pagiging naa-access ay parang naiintindihan sa halip na minamadali.
+TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_TITLE Paano Sila Nagtutulungan
+TRANSPARENCY_TAX_ACCURACY_VALIDATION_TITLE Katumpakan at Pagpapatunay
+TRANSPARENCY_TAX_EMPLOYMENT_INSURANCE_TITLE Employment Insurance (EI)
+TRANSPARENCY_TAX_FEDERAL_BRACKETS_ARIA 2025 federal tax bracket
+TRANSPARENCY_TAX_FEDERAL_PROVINCIAL_TITLE Federal at Provincial Income Tax
+TRANSPARENCY_TAX_IMPORTANT_NOTES_TITLE Mahalagang Tala
+TRANSPARENCY_TAX_KNOWN_LIMITATIONS_TITLE Mga kilalang limitasyon
+TRANSPARENCY_TAX_METHODOLOGY_DECK Detalyadong dokumentasyon ng mga formula, parameter, at mga halimbawang ginamit upang tantyahin ang mga buwis at pagbabawas sa payroll.
+TRANSPARENCY_TAX_METHODOLOGY_PAGE_TITLE Transparency ng Pamamaraan ng Buwis
+TRANSPARENCY_TAX_NET_PAY_TITLE Pagkalkula ng Net Pay
+TRANSPARENCY_TAX_OAS_CLAWBACK_TITLE Old Age Security (OAS) Clawback
+TRANSPARENCY_TAX_ROUTE_METADATA_TITLE Metadata ng ruta
+TRANSPARENCY_TAX_SCOPE_COMMITMENT_TITLE Saklaw at Pangako
+TRANSPARENCY_TAX_TABLE_INCOME_RANGE Saklaw ng Kita
+TRANSPARENCY_TAX_TABLE_RATE Rate
+TRANSPARENCY_TAX_VERIFICATION_METADATA_TITLE Metadata ng Pag-verify
+TRANSPARENCY_TESTING_CURRENT_SUITE_INVENTORY_VALUE 1,212 nakalistang mga pagsubok sa 118 mga file.
+TRANSPARENCY_TESTING_CURRENT_TEST_TOPOLOGY_TITLE Kasalukuyang Test Topology
+TRANSPARENCY_TESTING_GOVERNANCE_DECK Itinuturing ng PayCal ang awtomatikong pagpapatunay bilang isang kontrata sa pagpapalabas, hindi isang opsyonal na pagsusuri sa kalidad.
+TRANSPARENCY_TESTING_GOVERNANCE_PAGE_TITLE Pamamahala sa Pagsubok at Pagpapatunay
+TRANSPARENCY_TESTING_PUBLIC_TRACEABILITY_TEXT_1 Kapag nagbabago ang pag-uugali ng content ng release, nag-publish kami ng mga update sa pareho:
+TRANSPARENCY_TESTING_PUBLIC_TRACEABILITY_TEXT_2 Pinapanatili nitong naka-synchronize ang ebidensya ng pagpapatupad at mga pampublikong pangako.
+TRANSPARENCY_TESTING_PUBLIC_TRACEABILITY_TITLE Public Traceability Policy
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_1 Lifecycle ng capability token at mismatch-denial coverage.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_2 Ang saklaw ng endpoint ng pag-ingest ng CSP para sa mga flat at nested na variant ng payload.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_3 Ang saklaw ng sanitizer ng tagapag-alaga ay naka-angkla sa configuration ng runtime at mga kontrol sa naka-block na selector.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_ITEM_4 Admin mutation denial regressions para sa nawawala/invalid na one-shot capability token.
+TRANSPARENCY_TESTING_RECENT_EXPANSION_TITLE Kamakailang Security-Test Expansion
+TRANSPARENCY_TESTING_RELEASE_BLOCKING_STACK_TEXT_1 Kapag nabigo ang isang gate, ipo-pause ang pagpapalabas hanggang sa maayos ang pagkabigo at muling patakbuhin ang apektadong gate.
+TRANSPARENCY_TESTING_RELEASE_BLOCKING_STACK_TITLE Pagpapalabas-Blocking Validation Stack
+TRANSPARENCY_TESTING_SUITE_CONTRACT Kontrata
+TRANSPARENCY_TESTING_SUITE_CONTRACT_COVERAGE Mga kontrata sa hangganan at pagiging tugma sa mga kritikal na bahagi
+TRANSPARENCY_TESTING_SUITE_INTEGRATION Pagsasama
+TRANSPARENCY_TESTING_SUITE_INTEGRATION_COVERAGE Mga daloy ng Controller/API, mga landas ng auth, naka-encrypt na lifecycle, mga proteksyon sa runtime
+TRANSPARENCY_TESTING_SUITE_MANUAL Manwal
+TRANSPARENCY_TESTING_SUITE_MANUAL_COVERAGE Mga drill na hinimok ng operator at naka-target na pag-verify sa kapaligiran
+TRANSPARENCY_TESTING_SUITE_UNIT Yunit
+TRANSPARENCY_TESTING_SUITE_UNIT_COVERAGE Pag-uugali ng domain at serbisyo, mga invariant sa seguridad, lohika ng katulong
+TRANSPARENCY_TESTING_TABLE_ARIA Kasalukuyang pagsubok topology
+TRANSPARENCY_TESTING_TABLE_COVERAGE_FOCUS Pokus sa Saklaw
+TRANSPARENCY_TESTING_TABLE_FILES Mga file
+TRANSPARENCY_TESTING_TABLE_SUITE_CATEGORY Kategorya ng Suite
+TRANSPARENCY_TESTING_VERIFICATION_METADATA_TITLE Metadata ng Pag-verify
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CI_PIPELINE_TEXT_1 Ang daloy ng trabaho ng CI ay nagpapatakbo ng mas malalim na mga layer ng pagsubok mula sa mabilis na pagpapatunay hanggang sa pag-verify ng istilo ng stress.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CI_PIPELINE_TITLE 2) CI Verification Pipeline
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CSP_ASSETS_TEXT_1 Ang mga page na nakaharap sa publiko ay pinamamahalaan ng tahasang Patakaran sa Seguridad ng Nilalaman at pag-render ng script/style na walang kaalam-alam.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CSP_ASSETS_TEXT_2 Pinipigilan ng mga kontrol na ito ang mga executable surface at bahagi ito ng aming baseline na modelo ng pamamahala.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_CSP_ASSETS_TITLE 5) Mga Kontrol sa Paghahatid ng CSP at Asset
+TRANSPARENCY_VERIFICATION_GOVERNANCE_DECK Ipinapaliwanag ng page na ito ang mga kontrol na ginagamit ng PayCal upang i-verify ang gawi at ipatupad ang mga operational guardrail sa produksyon.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_KNOWN_LIMITATIONS_FACT_1 Ang mga paglalarawan ng gate ay pinananatili nang manu-mano; ang automated na cross-reference sa pagitan ng page na ito at hook/pipeline config ay binalak para sa quarterly close-out.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_KNOWN_LIMITATIONS_FACT_2 Ang mga halaga ng limitasyon sa runtime ay nagpapakita ng mga default; maaaring mag-iba ang mga override na partikular sa kapaligiran sa mga hindi pag-unlad na pagkakataon.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_KNOWN_LIMITATIONS_TITLE Mga kilalang limitasyon
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LAST_UPDATED_LABEL Huling na-update:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LAST_VERIFIED_LABEL Huling na-verify:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LOCAL_GATES_TEXT_1 Hinaharangan ng mga lokal na kawit ang mga hindi ligtas na pagsasama bago makarating ang code sa mga nakabahaging sangay.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LOCAL_GATES_TEXT_2 Binabawasan ng mga gate na ito ang pagkakataon ng pag-anod ng patakaran at tahimik na kalidad ng mga regression.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_LOCAL_GATES_TITLE 1) Mga Local Policy Gate (Git Hooks)
+TRANSPARENCY_VERIFICATION_GOVERNANCE_MEANING_TEXT_1 Para sa amin, ang pamamahala ay nangangahulugan ng patakarang naka-encode sa mga path ng code, limitasyon, pagsubok, at pagsusuri sa deployment. Ito ay hindi isang dokumento lamang na pangako.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_MEANING_TEXT_2 Ang mga sanggunian sa ibaba ay nagmamapa sa mga punto ng pagpapatupad sa repositoryong ito upang ang mga claim ay maaaring independiyenteng ma-verify.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_MEANING_TITLE Ang Ibig Sabihin Natin sa Pamamahala
+TRANSPARENCY_VERIFICATION_GOVERNANCE_METADATA_TEXT_1 Ang metadata na ito ay ina-update kada quarter bilang bahagi ng pagsasara ng audit ng pamamahala.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_METADATA_TITLE Metadata ng Pag-verify
+TRANSPARENCY_VERIFICATION_GOVERNANCE_NEXT_REVIEW_LABEL Nakatakdang susunod na pagsusuri:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_PAGE_TITLE Pagpapatunay at Transparency ng Pamamahala
+TRANSPARENCY_VERIFICATION_GOVERNANCE_ROUTE_LABEL Ruta:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_ROUTE_METADATA_TITLE Metadata ng ruta
+TRANSPARENCY_VERIFICATION_GOVERNANCE_RUNTIME_LIMITS_TEXT_1 Ang mga endpoint ng pagpapatakbo ay nililimitahan ng tahasang mga window ng kahilingan at mga panuntunan sa pagpapatunay ng payload.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_RUNTIME_LIMITS_TEXT_2 Nilalayon ng mga kontrol na ito na panatilihing mahuhulaan ang pag-uugali sa ilalim ng parehong normal at mapang-abusong mga pattern ng trapiko.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_RUNTIME_LIMITS_TITLE 3) Mga Limitasyon sa Rate ng Runtime at Pamamahala sa Input
+TRANSPARENCY_VERIFICATION_GOVERNANCE_SECURITY_STATUS_TEXT_1 Simula noong 2026-03-24, nananatili ang PayCal sa katayuang PASS pagkatapos ng pagpapalawak ng BRS-01 hanggang BRS-05 at pag-synchronize ng kalinisan ng follow-up na release.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_SECURITY_STATUS_TEXT_2 Ang mga detalye ng pampublikong katayuan at mga sanggunian ng ebidensya ay nai-publish sa
+TRANSPARENCY_VERIFICATION_GOVERNANCE_SECURITY_STATUS_TITLE Kasalukuyang Katayuan ng Pag-audit ng Seguridad
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_ACCOUNT_RECOVERY_ITEM Kasama sa mga limitasyon sa pag-recover ng account ang code TTL, muling ipadala ang mga cooldown, max na pagsubok sa pag-verify, replay window, at hashed-IP block na mga TTL.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_TEXT_1 Ang mga limitasyon sa daloy na sensitibo sa seguridad ay nasa gitnang tinukoy at nililimitahan ng min/max na mga hadlang.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_TEXT_2 Nagbibigay-daan ang istrukturang ito sa mga kontroladong pag-update ng patakaran nang hindi nilalagpasan ang mga na-type na hangganan.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_TTL_LIMITS_TITLE 4) TTL at Security Limit Governance
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFICATION_SCOPE_LABEL Saklaw ng pag-verify:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFICATION_SCOPE_VALUE manu-manong pagsusuri ng inilarawang mga pagpapatupad ng gate laban sa mga kasalukuyang hook, CI pipeline check, at runtime control path.
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFY_CLAIMS_TEXT_1 Ang mga developer ay maaaring direktang gumawa ng mga signal ng pag-verify sa repositoryong ito:
+TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFY_CLAIMS_TITLE Paano I-verify ang Mga Claim na Ito
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_1 Core navigation supports keyboard use, skip links, and documented single-key shortcuts for primary destinations.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_2 Shortcut handling is safety-guarded and does not fire while typing in editable fields or when dialogs are open.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_3 Recent regression coverage checks headings, reflow/text spacing, navigation paths, and the accessibility feedback handoff.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_4 Strict route-level contrast blockers on core public pages have been remediated, while broader theme-wide contrast work continues.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_5 Users can start an accessibility report from the accessibility page and continue it through the secure contact flow.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_6 The accessibility transparency page now publishes last-verified date, verification scope, known limitations, and next review due date.
+TRANSPARENCY_HUB_ACCESSIBILITY_TEXT_1 We use WCAG 2.1 Level AA as our working accessibility standard and publish recent accessibility work in plain language.
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_1 Documents lockfile-first npm policy and
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_2 Maps JavaScript quality gates and backend pipeline stages to workflow controls.
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_3 Lists known documentation limitations and planned governance improvements.
+TRANSPARENCY_HUB_DEPENDENCY_CI_TEXT_1 This article publishes how npm dependencies are controlled and how CI gates are enforced before release.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_1 Includes a 10-run matrix for real and synthetic 2025/2026 datasets.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_2 Reports DOMContentLoaded, section-ready timing, and API-call trade-offs.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_3 Documents test method and interpretation for public review.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_READ_MORE Read earnings load-testing results
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_TEXT_1 This article publishes reproducible A/B benchmark results for eager rendering versus lazy section loading on
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_1 Flow-specific template families are documented across verification, recovery, change-email, and contact support paths.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_2 Delivery responsibilities are separated between EmailGarum orchestration and EmailTransport SMTP protocol handling.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_3 Opt-in live tests for template sweeps and DKIM/DMARC health verification are documented.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_TEXT_1 The email page explains which transactional emails PayCal sends, how templates are rendered, and how delivery reliability is verified.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_1 Summarizes service/controller changes that materially affect behavior.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_2 Maps release changes to security and governance controls.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_3 Includes references to detailed changelog and audit artifacts.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TEXT_1 This page tracks backend architecture and framework-level changes with public explanations of what changed and why.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_1 Documents HTTPS enforcement, HSTS preload, and HTTP/3 (QUIC) advertisement.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_2 Lists the current security header baseline including CSP, COOP, COEP, CORP, and browser hardening headers.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_3 Explains protocol negotiation and fallback behavior across modern clients.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_1 Tracks billing-state handling and subscription status contract changes.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_2 Captures destructive-action safeguards such as explicit account deletion confirmation phrases.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_3 Links product-facing updates to verification and release governance evidence.
+TRANSPARENCY_HUB_PRODUCT_BILLING_TEXT_1 Major account, billing, and profile-flow updates are explained alongside backend and testing governance so users can audit both UX and behavior changes.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_1 Includes ShadowTalon, Guardian, Phantom Wing, Lens, and EmailGarum.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_2 Explains where each component is used and what risk boundary it protects.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_3 Provides verification anchors so implementation claims can be inspected directly in code and tests.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_TEXT_1 The Superheroes page documents PayCal's themed cross-cutting components and the specific operational problem each one solves.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_1 CPP, OAS, EI, federal/provincial tax, and net-pay formulas are documented with worked examples.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_2 Current tax-year thresholds and rates are published and tied to CRA references.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_3 Calculation quality is validated with an automated test suite and annual rate updates.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_TEXT_1 The tax page documents our CRA-aligned formulas, thresholds, and examples used for estimates.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_1 Shows the active PHPUnit suite inventory and category split.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_2 Documents release-blocking validation commands used in
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_3 Explains how test evidence is synchronized into changelogs and source-of-truth notes.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_TEXT_1 This article documents how we run backend, frontend, and accessibility validation and which gates are treated as release blockers.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_1 Pre-commit and pre-push hooks enforce PHPStan Level 9 and reject baseline bypasses.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_2 CI runs staged validation across unit, integration, contract, random-order, and coverage jobs.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_3 Runtime controls apply rate limits, TTL windows, and abuse-response blocks for sensitive flows.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_TEXT_1 This page documents how PayCal enforces policy through tests, hooks, runtime limits, and security controls.
+AUTH_BETA_NOTICE Nasa pribadong beta ang PayCal.
+AUTH_DIVIDER_OR o
+AUTH_PAGE_HEADING Pagpapatunay
+AUTH_PRIVACY_LINK Patakaran sa Privacy
+AUTH_RECOVER_ACCOUNT Ibalik ang account
+AUTH_RECOVER_ACCOUNT_EMAIL Email ng account
+AUTH_REGISTER_CREATE_BUTTON Gumawa ng account
+AUTH_REGISTER_DEVICE_LABEL Pangalan ng passkey device
+AUTH_REGISTER_DEVICE_PLACEHOLDER pangalan-AAAAMMDD
+AUTH_REGISTER_EMAIL_LABEL Email (kinakailangan)
+AUTH_REGISTER_FULL_NAME_LABEL Buong pangalan (kinakailangan)
+AUTH_REGISTER_INVITE_LABEL Code ng imbitasyon
+AUTH_REGISTER_PANEL_ARIA Panel para gumawa ng account
+AUTH_REGISTER_PASSKEY_STATUS Gagawa ka ng passkey para maprotektahan ang iyong account.
+AUTH_SIGNIN_EMAIL_ARIA Kinakailangan ang email
+AUTH_SIGNIN_EMAIL_LABEL Email (kinakailangan)
+AUTH_SIGNIN_OTHER_DEVICE Gumamit ng ibang device
+AUTH_SIGNIN_PANEL_ARIA Panel sa pag-sign in
+AUTH_SIGNIN_PASSKEY_BUTTON Magpatuloy gamit ang passkey
+AUTH_SIGNIN_PASSKEY_STATUS Gumamit ng passkey sa device na ito, o mag-sign in mula sa ibang device.
+AUTH_TABS_ARIA Mga opsyon sa pagpapatunay
+AUTH_TAB_REGISTER Gumawa ng Account
+AUTH_TAB_SIGNIN Mag-sign In
+AUTH_TERMS_ACK_AND at
+AUTH_TERMS_ACK_PREFIX Sa pag-sign in, sumasang-ayon ka sa
+AUTH_TERMS_LINK Mga Tuntunin
+AUTH_VERIFICATION_MESSAGE Na-email na sa iyo ang iyong recovery key. Itago ito sa ligtas na lugar bago magpatuloy.
+AUTH_VERIFICATION_STEP_1 Tingnan ang iyong inbox para sa email ng recovery key.
+AUTH_VERIFICATION_STEP_2 Itago ang iyong recovery key sa ligtas na lugar.
+AUTH_VERIFICATION_STEP_3 Magpatuloy sa pag-sign in gamit ang iyong passkey.
+AUTH_VERIFICATION_TITLE Na-verify ang Email
+BLOG_ARTICLE_BODY_ARIA Nilalaman ng artikulo
+BLOG_ARTICLE_FOUND_PLURAL mga artikulo ang nahanap
+BLOG_ARTICLE_FOUND_SINGULAR artikulo ang nahanap
+BLOG_ARTICLE_NAV_ARIA Nabigasyon ng artikulo
+BLOG_CLEAR I-clear
+BLOG_DEFAULT_AUTHOR PayCal Editorial
+BLOG_EMPTY_RESULTS Walang mga post na tumutugma sa kasalukuyang mga filter ng paghahanap at tag.
+BLOG_FILTER_TAG_ARIA I-filter ayon sa tag
+BLOG_LIST Listahan
+BLOG_NEXT Susunod
+BLOG_NEXT_ARROW_LABEL Susunod ->
+BLOG_NEXT_ARTICLE_ARIA Susunod na artikulo
+BLOG_NEXT_PAGE Susunod na pahina
+BLOG_OF_LABEL ng
+BLOG_OVERVIEW_ARIA Pangkalahatang-ideya ng blog
+BLOG_PAGE_DECK Mga tala ng release, gabay sa payroll, at mga update sa engineering mula sa organisasyon ng PayCal.
+BLOG_PAGE_LABEL Pahina
+BLOG_PAGE_NAV_ARIA Nabigasyon ng pahina ng blog
+BLOG_PAGE_TITLE PayCal Blog
+BLOG_POST_NOT_FOUND_ARIA Hindi nahanap ang post sa blog
+BLOG_POST_NOT_FOUND_DECK Hindi mahanap ang hiniling na artikulo.
+BLOG_POST_NOT_FOUND_TITLE Hindi Nahanap ang Post
+BLOG_POST_TAGS_ARIA Mga tag ng post
+BLOG_PREVIOUS Nakaraan
+BLOG_PREVIOUS_ARROW_LABEL <- Nakaraan
+BLOG_PREVIOUS_ARTICLE_ARIA Nakaraang artikulo
+BLOG_PREVIOUS_PAGE Nakaraang pahina
+BLOG_RETURN_TO_LIST Bumalik sa listahan ng blog
+BLOG_SEARCH_ARIA Maghanap ng mga post sa blog
+BLOG_SEARCH_PLACEHOLDER Maghanap sa pamamagitan ng pamagat, may-akda, sipi, o mga tag
+BLOG_UNTITLED Walang pamagat
+ADMIN_LIMITS_RESET_ERROR Error sa pag-reset ng limit
+ADMIN_LIMITS_RESET_CATEGORY_ERROR Error sa pag-reset ng mga limitasyon ng kategorya
+
+WEEKDAY_MONDAY Lunes
+WEEKDAY_TUESDAY Martes
+WEEKDAY_WEDNESDAY Miyerkules
+WEEKDAY_THURSDAY Huwebes
+WEEKDAY_FRIDAY Biyernes
+WEEKDAY_SATURDAY Sabado
+WEEKDAY_SUNDAY Linggo
+
+SETTINGS_CALENDAR_LABEL_TODAY Today
+SETTINGS_CALENDAR_LABEL_DATE Date
+SETTINGS_CALENDAR_LABEL_LABEL Label
+SETTINGS_CALENDAR_LABEL_AUDIO Audio
+SETTINGS_CALENDAR_LABEL_ENTRIES Entries
+SETTINGS_CALENDAR_LABEL_FIELDS Fields
+SETTINGS_POSITION_LEFT Left
+SETTINGS_POSITION_MIDDLE Middle
+SETTINGS_POSITION_RIGHT Right
+SETTINGS_STYLE_LABEL_SIDEBAR Sidebar
+SETTINGS_SECURITY_TABLE_ACTION Action
+SETTINGS_SECURITY_TABLE_TTL TTL
+SETTINGS_SECURITY_TABLE_LEFT Left
+
+CHANGE_EMAIL_STATUS_ENTER_BOTH_EMAILS Enter both email addresses.
+CHANGE_EMAIL_ERROR_ENTER_NEW_EMAIL Enter a new email address.
+CHANGE_EMAIL_ERROR_CONFIRM_NEW_EMAIL Confirm your new email address.
+CHANGE_EMAIL_STATUS_EMAILS_NO_MATCH Emails do not match.
+CHANGE_EMAIL_ERROR_EMAILS_MUST_MATCH Email addresses must match.
+CHANGE_EMAIL_STATUS_WORKING Working...
+CHANGE_EMAIL_STATUS_CODES_SENT Codes sent.
+CHANGE_EMAIL_STATUS_REQUEST_FAILED_PREFIX Request failed:
+CHANGE_EMAIL_STATUS_ENTER_BOTH_CODES Enter both verification codes.
+CHANGE_EMAIL_ERROR_ENTER_VALID_6_CHAR_CODE Enter a valid 6-character code.
+CHANGE_EMAIL_STATUS_EMAIL_UPDATED Email updated.
+CHANGE_EMAIL_STATUS_SESSION_EXPIRED Your session expired. Start again.
+RECOVERY_EMAIL_ERROR_ENTER_VALID_EMAIL Please enter a valid email address.
+RECOVERY_EMAIL_STATUS_SECURITY_TOKEN_MISSING Security token missing. Reload and try again.
+RECOVERY_EMAIL_STATUS_SENDING_CODE Sending code...
+RECOVERY_EMAIL_STATUS_CODE_SENT_CHECK_EMAIL Code sent! Check your email.
+RECOVERY_EMAIL_STATUS_NETWORK_ERROR Network error. Please try again.
+RECOVERY_EMAIL_ERROR_ENTER_6_DIGIT_CODE Please enter a 6-digit code.
+RECOVERY_EMAIL_STATUS_VERIFYING Verifying...
+RECOVERY_EMAIL_STATUS_VERIFIED Recovery email verified! ✓
+RECOVERY_EMAIL_STATUS_RESENDING_CODE Resending code...
+RECOVERY_EMAIL_STATUS_NEW_CODE_SENT New code sent!
+
+ORGANIZATIONS_MEMBERSHIP_CONSENT_TITLE Membership Consent
+ORGANIZATIONS_MEMBERSHIP_CONSENT_DESC Review and confirm before activating organization membership access.
+ORGANIZATIONS_MEMBERSHIP_CONSENT_DISCLAIMER_LABEL Reason / Disclaimer (optional)
+ORGANIZATIONS_MEMBERSHIP_CONSENT_DISCLAIMER_PLACEHOLDER Optional note for consent record
+ORGANIZATIONS_MEMBERSHIP_CONSENT_ACK_TEXT I acknowledge and consent to organization membership activation.
+ORGANIZATIONS_CURRENT_OWNER_TITLE Current Owner
+ORGANIZATIONS_PREMIUM_LOCKED Premium locked
+ORGANIZATIONS_NO_ACTIVE_SESSIONS No active sessions found.
+ORGANIZATIONS_LOADING_ACCOUNT_ACTIVITY Loading account activity...
+ORGANIZATIONS_CREATE_NAME_REQUIRED Enter an organization name.
+ORGANIZATIONS_FAILED_LOAD_MEMBERS_GRID Failed to load members grid.
+ORGANIZATIONS_FAILED_LOAD_ACCESS_REQUESTS Failed to load access requests.
+
+SETTINGS_STYLE_LABEL_TYPOGRAPHY Typography
+SETTINGS_TYPOGRAPHY_STANDARD Standard
+SETTINGS_TYPOGRAPHY_DYSLEXIA_FRIENDLY Dyslexia-friendly
+SETTINGS_AUDIO_FEEDBACK_MODE_ARIA Audio feedback mode
+SETTINGS_SECTION_PASSKEYS Passkeys
+SETTINGS_SECTION_SECURITY Security
+SETTINGS_SECTION_DEBUGGING_OPTIONAL Debugging (Optional)
+
+SETTINGS_VOICE_PICKER_ENABLE_CUES Enable Cues to choose a voice.
+SETTINGS_PASSKEYS_SECURITY_NOTE Add more passkeys to improve account security.
+SETTINGS_PASSKEYS_SR_INSTRUCTIONS Passkeys list. Edit a passkey name inline and press Enter to save. Use Remove to delete a passkey when multiple devices are registered.
+SETTINGS_ADD_DEVICE Add Device
+SETTINGS_TIMEOUT_FORM_ARIA Timeout Settings Form
+SETTINGS_SECURITY_SESSION_TIMING_HELP Session + sensitive action timing.
+SETTINGS_DEBUGGING_FORM_ARIA Debugging Preferences Form
+SETTINGS_DEBUG_OPTION_OFF_DEFAULT Off (Default)
+SETTINGS_DEBUG_OPTION_ON_MORE_DETAILS On (More details)
+
+SETTINGS_SECURITY_LEVEL Level
+SETTINGS_SECURITY_LOW Low
+SETTINGS_SECURITY_HIGH High
+SETTINGS_SECURITY_BALANCED Balanced
+SETTINGS_SECURITY_LEVEL_HINT Shorter sessions are safer on shared devices.
+SETTINGS_SECURITY_ROW_AUTO_SIGNOUT Auto Signout
+SETTINGS_SECURITY_ROW_ACCOUNT_EDIT Account Edit
+SETTINGS_SECURITY_ROW_CALENDAR_EDIT Calendar Edit
+SETTINGS_SECURITY_EMERGENCY_SIGNOUT Emergency Signout
+
+SETTINGS_DEBUG_PANEL_HOVER_HELP Debugging adds extra information to help identify issues. You can safely leave this off unless you're troubleshooting.
+SETTINGS_DEBUG_INTRO Turn on extra diagnostics to help troubleshoot issues. Safe to leave off.
+SETTINGS_DEBUG_PERF_NOTE For troubleshooting only. Enabling extra diagnostics may impact performance.
+SETTINGS_DEBUG_CONSOLE_HELP Show helpful messages in your browser console.
+SETTINGS_DEBUG_CONSOLE_HOVER Off shows only critical errors. On includes warnings and helpful logs.
+SETTINGS_DEBUG_FINE_GRAINED_HELP Capture deeper system-level debugging information.
+SETTINGS_DEBUG_FINE_GRAINED_HOVER Off keeps output minimal. On includes step-by-step internal logs.
+SETTINGS_DEBUG_NETWORK_HELP Track API requests and performance details while troubleshooting.
+SETTINGS_DEBUG_NETWORK_HOVER Off keeps network debug tracking disabled. On logs request timing details for diagnostics.
+
+SETTINGS_SECURITY_LEVEL_SLIDER_ARIA Security level slider
+SETTINGS_SECURITY_DERIVED_TIMEOUTS_ARIA Derived timeout values
+SETTINGS_SECURITY_EMERGENCY_WINDOW_ARIA Emergency signout window in milliseconds
+
+SETTINGS_SECURITY_LEVEL_HOVER_HELP Higher level shortens timeouts for stronger protection on shared devices.
+SETTINGS_SECURITY_ROW_AUTO_SIGNOUT_HOVER Auto signout ends inactive sessions to reduce unauthorized access risk.
+SETTINGS_SECURITY_ROW_ACCOUNT_EDIT_HOVER Account edit timeout limits how long profile changes stay unlocked.
+SETTINGS_SECURITY_ROW_CALENDAR_EDIT_HOVER Calendar edit timeout reduces chance of unwanted timesheet changes.
+SETTINGS_SECURITY_EMERGENCY_WINDOW_HOVER Press ESC three times within this window for immediate safety signout.
+
+SETTINGS_ARIA_EDIT_ACCOUNT_DETAILS Edit Account Details
+SETTINGS_ARIA_RECOVERY_ACCOUNT_DELETION_ACTIONS Recovery and account deletion actions
+SETTINGS_ARIA_DELETE_SITE_ROW Delete site row
+SETTINGS_ARIA_CALENDAR_PREFERENCES_FORM Calendar Preferences Form
+
+SETTINGS_CHANGE_EMAIL_SEND_CODES Send Verification Codes
+SETTINGS_CHANGE_EMAIL_COMPLETE Complete Email Change
+SETTINGS_CHANGE_EMAIL_RESEND_CODES Resend Codes
+SETTINGS_CHANGE_EMAIL_LINK_TITLE Change email address
+SETTINGS_CHANGE_EMAIL_LINK_HOVER Start secure email change with verification codes.
+SETTINGS_CHANGE_EMAIL_LINK_TEXT Change
+SETTINGS_CHANGE_EMAIL_LINK_DISABLED_TITLE Verify recovery email first
+SETTINGS_CHANGE_EMAIL_LINK_DISABLED_TEXT Change (verify recovery email first)
+SETTINGS_RECOVERY_KEY_TITLE Recovery Key
+SETTINGS_RECOVERY_KEY_HELP_TEXT Create a Recovery Key to regain access if you lose your passkeys. Creating a new key disables the old one.
+SETTINGS_RECOVERY_KEY_BUTTON_HOVER Recovery Key is offline backup access. New keys invalidate older keys.
+SETTINGS_RECOVERY_KEY_CREATE_BUTTON Create Recovery Key
+
+SETTINGS_RECOVERY_LABEL Recovery
+SETTINGS_RECOVERY_PENDING_VERIFICATION Pending verification
+SETTINGS_RECOVERY_NOT_VERIFIED Not verified
+
+SETTINGS_RECOVERY_EMAIL_PLACEHOLDER Enter recovery email address
+SETTINGS_RECOVERY_EMAIL_ARIA_LABEL Recovery email address
+SETTINGS_RECOVERY_EMAIL_INPUT_HOVER Backup email for account recovery and verification.
+SETTINGS_RECOVERY_SEND_VERIFICATION_CODE_ARIA Send Verification Code
+SETTINGS_RECOVERY_SEND_CODE_HOVER Send a one-time code to verify this recovery email.
+SETTINGS_RECOVERY_SEND_BUTTON Send
+SETTINGS_RECOVERY_VERIFICATION_CODE_PLACEHOLDER verification code
+SETTINGS_RECOVERY_VERIFICATION_CODE_ARIA Recovery email verification code
+SETTINGS_RECOVERY_VERIFICATION_CODE_HOVER Enter the 6-digit code from your recovery email.
+SETTINGS_RECOVERY_VERIFY_BUTTON_HOVER Confirm this recovery email with the entered code.
+SETTINGS_RECOVERY_VERIFY_BUTTON Verify
+SETTINGS_DELETE_ACCOUNT_WARNING_TEXT Deleting your account permanently removes profile data, calendar records, organizations, sites, and recovery methods. This action cannot be undone.
+SETTINGS_DELETE_ACCOUNT_DESC Delete your account permanently. Type the confirmation phrase exactly, then select Delete Account to continue.
+SETTINGS_DELETE_ACCOUNT_CONFIRM_LABEL Type %s to confirm
+SETTINGS_DELETE_ACCOUNT_CONFIRM_PHRASE PLEASE DELETE
+SETTINGS_EDIT_DETAILS_SUBMIT_HOVER Save all Account Details changes.
+SETTINGS_EDIT_DETAILS_CANCEL_HOVER Close this dialog without saving new changes.
+SETTINGS_DELETE_ACCOUNT_BUTTON_HOVER Open irreversible account deletion flow. This cannot be undone.
+SETTINGS_EDIT_DETAILS_EMAIL_HOVER Primary account email. Change requires verified recovery access.
+SETTINGS_EDIT_DETAILS_FULL_NAME_HOVER Your legal full name used in account records.
+SETTINGS_EDIT_DETAILS_PHONE_HOVER Phone number for account contact and notifications.
+SETTINGS_EDIT_DETAILS_PROVINCE_HOVER Select your province for payroll and tax defaults.
+SETTINGS_EDIT_DETAILS_TIMEZONE_HOVER Pick your local timezone for calendar and pay periods.
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_LABEL Employment
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_HOVER Set your employment category for profile context.
+SETTINGS_EDIT_DETAILS_JOB_TITLE_LABEL Job Title
+SETTINGS_EDIT_DETAILS_JOB_TITLE_HOVER Your current role or position title.
+SETTINGS_EDIT_DETAILS_DEPARTMENT_LABEL Department
+SETTINGS_EDIT_DETAILS_DEPARTMENT_HOVER Department or organization where you primarily work.
+SETTINGS_EDIT_DETAILS_HIRE_DATE_LABEL Hire Date
+SETTINGS_EDIT_DETAILS_HIRE_DATE_HOVER Employment start date for recordkeeping.
+SETTINGS_EDIT_DETAILS_PAY_RATE_LABEL Pay Rate
+SETTINGS_EDIT_DETAILS_PAY_RATE_HOVER Base pay amount before overtime or premiums.
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_LABEL Pay Rate Type
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_HOVER Choose whether pay rate is hourly, salary, or day rate.
+SETTINGS_EDIT_DETAILS_ADDRESS_HOVER Street and unit address for your profile.
+SETTINGS_EDIT_DETAILS_CITY_LABEL City
+SETTINGS_EDIT_DETAILS_CITY_HOVER City associated with your mailing address.
+SETTINGS_EDIT_DETAILS_POSTAL_CODE_LABEL Postal Code
+SETTINGS_EDIT_DETAILS_POSTAL_CODE_HOVER Postal code used for tax and address validation.
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_FULL_TIME Full-time
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_PART_TIME Part-time
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_CONTRACTOR Contractor
+SETTINGS_EDIT_DETAILS_EMPLOYMENT_OPTION_CASUAL Casual
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_OPTION_HOURLY Hourly
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_OPTION_SALARY Salary
+SETTINGS_EDIT_DETAILS_PAY_RATE_TYPE_OPTION_DAY_RATE Day rate
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_ALBERTA Alberta
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_BRITISH_COLUMBIA British Columbia
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_MANITOBA Manitoba
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NEW_BRUNSWICK New Brunswick
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NEWFOUNDLAND_AND_LABRADOR Newfoundland and Labrador
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NOVA_SCOTIA Nova Scotia
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_ONTARIO Ontario
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_PRINCE_EDWARD_ISLAND Prince Edward Island
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_QUEBEC Quebec
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_SASKATCHEWAN Saskatchewan
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NORTHWEST_TERRITORIES Northwest Territories
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_NUNAVUT Nunavut
+SETTINGS_EDIT_DETAILS_PROVINCE_OPTION_YUKON Yukon
+SETTINGS_CHANGE_EMAIL_DESC Change your account email in two steps: request verification codes, then enter both codes to confirm the update.
+SETTINGS_CHANGE_EMAIL_NEW_EMAIL_LABEL New Email Address
+SETTINGS_CHANGE_EMAIL_NEW_EMAIL_PLACEHOLDER Enter new email address
+SETTINGS_CHANGE_EMAIL_CONFIRM_EMAIL_LABEL Confirm Email Address
+SETTINGS_CHANGE_EMAIL_OLD_CODE_LABEL Old Email Code
+SETTINGS_CHANGE_EMAIL_NEW_CODE_LABEL New Email Code
+SETTINGS_CHANGE_EMAIL_CODE_PLACEHOLDER Enter 6-digit code

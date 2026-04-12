@@ -330,8 +330,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const bootstrap = await fetchBootstrap();
-      const wrappedDekPasskey = bootstrap.wrappedDekPasskeyForCredential || bootstrap.wrappedDekPasskey || '';
-      const credentialId = bootstrap.credentialId || bootstrap.sessionCredentialId || '';
+      const wrappedDekPasskey = bootstrap.wrappedDekPasskeyForCredential || '';
+      const credentialId = bootstrap.credentialId || '';
       const encryptionSalt = bootstrap.encryptionSalt || '';
 
       if (!wrappedDekPasskey || !credentialId || !encryptionSalt) {
@@ -2982,6 +2982,424 @@ document.addEventListener("DOMContentLoaded", async () => {
       deleteAccountConfirmInput.value = deleteAccountConfirmInput.value.toUpperCase();
     });
   }
+
+  /* DATA PORTABILITY: EXPORT + STAGED IMPORT */
+  const dataPortabilityEls = {
+    status: PC.getElement('data_portability_status'),
+    actionLog: PC.getElement('data_portability_action_log'),
+    exportRunBtn: PC.getElement('data_export_run_btn'),
+    exportCopyBtn: PC.getElement('data_export_copy_btn'),
+    exportDownloadBtn: PC.getElement('data_export_download_btn'),
+    exportPayload: PC.getElement('data_export_payload'),
+    exportReference: PC.getElement('data_export_reference'),
+    exportChecksum: PC.getElement('data_export_checksum'),
+    exportCounts: PC.getElement('data_export_counts'),
+    importPayload: PC.getElement('data_import_payload_json'),
+    importPrepareBtn: PC.getElement('data_import_prepare_btn'),
+    importCommitBtn: PC.getElement('data_import_commit_btn'),
+    importId: PC.getElement('data_import_id'),
+    importChecksum: PC.getElement('data_import_checksum'),
+    importCounts: PC.getElement('data_import_counts'),
+    importExpires: PC.getElement('data_import_expires'),
+    importResultCounts: PC.getElement('data_import_result_counts'),
+  };
+
+  const dataPortabilityState = {
+    preparedImportId: '',
+    exporting: false,
+    preparing: false,
+    committing: false,
+  };
+
+  const setDataPortabilityStatus = (message, tone = 'muted') => {
+    if (!dataPortabilityEls.status) {
+      return;
+    }
+
+    dataPortabilityEls.status.classList.remove(
+      'status_message_error',
+      'status_message_muted',
+      'status_message_info',
+      'status_message_success'
+    );
+    dataPortabilityEls.status.classList.add(`status_message_${tone}`);
+    dataPortabilityEls.status.textContent = message;
+  };
+
+  const appendDataPortabilityLog = (title, detail = '') => {
+    if (!dataPortabilityEls.actionLog) {
+      return;
+    }
+
+    const ts = new Date().toLocaleTimeString();
+    const item = document.createElement('li');
+    item.textContent = detail
+      ? `[${ts}] ${title} - ${detail}`
+      : `[${ts}] ${title}`;
+    dataPortabilityEls.actionLog.prepend(item);
+
+    const maxItems = 30;
+    while (dataPortabilityEls.actionLog.children.length > maxItems) {
+      dataPortabilityEls.actionLog.removeChild(dataPortabilityEls.actionLog.lastChild);
+    }
+  };
+
+  const summarizeCounts = (counts) => {
+    const sites = Number(counts?.sites || 0);
+    const workEntries = Number(counts?.work_entries || 0);
+    return `${sites} sites, ${workEntries} work entries`;
+  };
+
+  const updateDataPortabilityButtons = () => {
+    const hasExportPayload = Boolean(String(dataPortabilityEls.exportPayload?.value || '').trim());
+    const hasPreparedImport = Boolean(dataPortabilityState.preparedImportId);
+    const busy = dataPortabilityState.exporting || dataPortabilityState.preparing || dataPortabilityState.committing;
+
+    if (dataPortabilityEls.exportRunBtn) {
+      dataPortabilityEls.exportRunBtn.disabled = busy;
+      dataPortabilityEls.exportRunBtn.setAttribute('aria-disabled', dataPortabilityEls.exportRunBtn.disabled ? 'true' : 'false');
+    }
+    if (dataPortabilityEls.exportCopyBtn) {
+      dataPortabilityEls.exportCopyBtn.disabled = busy || !hasExportPayload;
+      dataPortabilityEls.exportCopyBtn.setAttribute('aria-disabled', dataPortabilityEls.exportCopyBtn.disabled ? 'true' : 'false');
+    }
+    if (dataPortabilityEls.exportDownloadBtn) {
+      dataPortabilityEls.exportDownloadBtn.disabled = busy || !hasExportPayload;
+      dataPortabilityEls.exportDownloadBtn.setAttribute('aria-disabled', dataPortabilityEls.exportDownloadBtn.disabled ? 'true' : 'false');
+    }
+    if (dataPortabilityEls.importPrepareBtn) {
+      dataPortabilityEls.importPrepareBtn.disabled = busy;
+      dataPortabilityEls.importPrepareBtn.setAttribute('aria-disabled', dataPortabilityEls.importPrepareBtn.disabled ? 'true' : 'false');
+    }
+    if (dataPortabilityEls.importCommitBtn) {
+      dataPortabilityEls.importCommitBtn.disabled = busy || !hasPreparedImport;
+      dataPortabilityEls.importCommitBtn.setAttribute('aria-disabled', dataPortabilityEls.importCommitBtn.disabled ? 'true' : 'false');
+    }
+  };
+
+  const normalizeApiData = (payload) => {
+    if (!payload || typeof payload !== 'object') {
+      return {};
+    }
+    if (payload.data && typeof payload.data === 'object') {
+      return payload.data;
+    }
+    return payload;
+  };
+
+  const postDataPortabilityForm = async (url, formPairs = []) => {
+    const csrfToken = getSettingsCsrfToken();
+    const body = new URLSearchParams();
+    if (csrfToken) {
+      body.set('csrf_token', csrfToken);
+    }
+    formPairs.forEach(([key, value]) => body.set(key, String(value ?? '')));
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      body: body.toString(),
+    });
+
+    const { data, raw } = await parseApiResponse(response);
+    return { response, data, raw };
+  };
+
+  const runAccountDataExport = async () => {
+    dataPortabilityState.exporting = true;
+    updateDataPortabilityButtons();
+    setDataPortabilityStatus('Export started. Requesting account dataset from server.', 'muted');
+    appendDataPortabilityLog('Export started', 'POST /api/v1/account/data/export');
+
+    try {
+      const { response, data, raw } = await postDataPortabilityForm('/api/v1/account/data/export');
+      if (!response.ok || !data || data.status !== 'success') {
+        const message = data?.message || raw || `Export request failed with HTTP ${response.status}.`;
+        setDataPortabilityStatus(message, 'error');
+        appendDataPortabilityLog('Export failed', message);
+        return;
+      }
+
+      const normalized = normalizeApiData(data);
+      const payload = normalized.payload;
+      if (!payload || typeof payload !== 'object') {
+        const message = 'Export response did not include payload data.';
+        setDataPortabilityStatus(message, 'error');
+        appendDataPortabilityLog('Export failed', message);
+        return;
+      }
+
+      const payloadJson = JSON.stringify(payload, null, 2);
+      if (dataPortabilityEls.exportPayload) {
+        dataPortabilityEls.exportPayload.value = payloadJson;
+      }
+      if (dataPortabilityEls.importPayload) {
+        dataPortabilityEls.importPayload.value = payloadJson;
+      }
+      if (dataPortabilityEls.exportReference) {
+        dataPortabilityEls.exportReference.textContent = String(normalized.reference || '-');
+      }
+      if (dataPortabilityEls.exportChecksum) {
+        dataPortabilityEls.exportChecksum.textContent = String(normalized.checksum_sha256 || '-');
+      }
+      if (dataPortabilityEls.exportCounts) {
+        dataPortabilityEls.exportCounts.textContent = summarizeCounts(normalized.counts);
+      }
+
+      const exportWarning = String(normalized.warning || '').trim();
+      if (exportWarning) {
+        setDataPortabilityStatus(`Export completed. ${exportWarning}`, 'info');
+        appendDataPortabilityLog('Export warning', exportWarning);
+      } else {
+        setDataPortabilityStatus('Export completed. Payload is ready to copy, download, or import.', 'success');
+      }
+      appendDataPortabilityLog('Export completed', `Reference ${String(normalized.reference || '-')}; ${summarizeCounts(normalized.counts)}`);
+    } catch (error) {
+      const message = `Export request failed: ${String(error?.message || 'unknown error')}`;
+      setDataPortabilityStatus(message, 'error');
+      appendDataPortabilityLog('Export failed', message);
+      PW.error(error);
+    } finally {
+      dataPortabilityState.exporting = false;
+      updateDataPortabilityButtons();
+    }
+  };
+
+  const prepareAccountDataImport = async () => {
+    const payloadJson = String(dataPortabilityEls.importPayload?.value || '').trim();
+    if (!payloadJson) {
+      setDataPortabilityStatus('Paste export payload JSON before preparing import.', 'error');
+      appendDataPortabilityLog('Prepare blocked', 'Import payload is empty.');
+      return;
+    }
+
+    try {
+      JSON.parse(payloadJson);
+      appendDataPortabilityLog('Prepare precheck passed', 'Client-side JSON parse succeeded.');
+    } catch (error) {
+      const message = `Payload is not valid JSON: ${String(error?.message || 'parse error')}`;
+      setDataPortabilityStatus(message, 'error');
+      appendDataPortabilityLog('Prepare blocked', message);
+      return;
+    }
+
+    dataPortabilityState.preparing = true;
+    dataPortabilityState.preparedImportId = '';
+    updateDataPortabilityButtons();
+    setDataPortabilityStatus('Prepare started. Validating payload and staging import session.', 'muted');
+    appendDataPortabilityLog('Prepare started', 'POST /api/v1/account/data/import/prepare');
+
+    try {
+      const { response, data, raw } = await postDataPortabilityForm('/api/v1/account/data/import/prepare', [['payload_json', payloadJson]]);
+      if (!response.ok || !data || data.status !== 'success') {
+        const message = data?.message || raw || `Prepare request failed with HTTP ${response.status}.`;
+        setDataPortabilityStatus(message, 'error');
+        appendDataPortabilityLog('Prepare failed', message);
+        return;
+      }
+
+      const normalized = normalizeApiData(data);
+      const importId = String(normalized.import_id || '').trim();
+      if (importId === '') {
+        const message = 'Prepare response missing import session id.';
+        setDataPortabilityStatus(message, 'error');
+        appendDataPortabilityLog('Prepare failed', message);
+        return;
+      }
+
+      dataPortabilityState.preparedImportId = importId;
+      if (dataPortabilityEls.importId) {
+        dataPortabilityEls.importId.textContent = importId;
+      }
+      if (dataPortabilityEls.importChecksum) {
+        dataPortabilityEls.importChecksum.textContent = String(normalized.checksum_sha256 || '-');
+      }
+      if (dataPortabilityEls.importCounts) {
+        dataPortabilityEls.importCounts.textContent = summarizeCounts(normalized.counts);
+      }
+      if (dataPortabilityEls.importExpires) {
+        dataPortabilityEls.importExpires.textContent = `${String(normalized.expires_in_seconds || '-') } seconds`;
+      }
+      if (dataPortabilityEls.importResultCounts) {
+        dataPortabilityEls.importResultCounts.textContent = '-';
+      }
+
+      setDataPortabilityStatus('Prepare completed. Review details, then commit import when ready.', 'info');
+      appendDataPortabilityLog('Prepare completed', `Import ID ${importId}; ${summarizeCounts(normalized.counts)}`);
+    } catch (error) {
+      const message = `Prepare request failed: ${String(error?.message || 'unknown error')}`;
+      setDataPortabilityStatus(message, 'error');
+      appendDataPortabilityLog('Prepare failed', message);
+      PW.error(error);
+    } finally {
+      dataPortabilityState.preparing = false;
+      updateDataPortabilityButtons();
+    }
+  };
+
+  const commitAccountDataImport = async () => {
+    const importId = String(dataPortabilityState.preparedImportId || '').trim();
+    if (!importId) {
+      setDataPortabilityStatus('Run Prepare Import first to create a valid import session.', 'error');
+      appendDataPortabilityLog('Commit blocked', 'No prepared import session found.');
+      return;
+    }
+
+    dataPortabilityState.committing = true;
+    updateDataPortabilityButtons();
+    setDataPortabilityStatus('Commit started. Applying staged import to account records.', 'muted');
+    appendDataPortabilityLog('Commit started', `POST /api/v1/account/data/import/commit (import_id=${importId})`);
+
+    try {
+      const { response, data, raw } = await postDataPortabilityForm('/api/v1/account/data/import/commit', [['import_id', importId]]);
+      if (!response.ok || !data || data.status !== 'success') {
+        const message = data?.message || raw || `Commit request failed with HTTP ${response.status}.`;
+        setDataPortabilityStatus(message, 'error');
+        appendDataPortabilityLog('Commit failed', message);
+        return;
+      }
+
+      const normalized = normalizeApiData(data);
+      const counts = normalized.counts || {};
+      const userCount = Number(counts.user || 0);
+      const siteCount = Number(counts.sites || 0);
+      const workCount = Number(counts.work_entries || 0);
+      const summary = `${userCount} user profile, ${siteCount} sites, ${workCount} work entries`;
+
+      if (dataPortabilityEls.importResultCounts) {
+        dataPortabilityEls.importResultCounts.textContent = summary;
+      }
+
+      setDataPortabilityStatus('Commit completed. Imported records are now active on this account.', 'success');
+      appendDataPortabilityLog('Commit completed', summary);
+      dataPortabilityState.preparedImportId = '';
+      if (dataPortabilityEls.importExpires) {
+        dataPortabilityEls.importExpires.textContent = 'Consumed';
+      }
+    } catch (error) {
+      const message = `Commit request failed: ${String(error?.message || 'unknown error')}`;
+      setDataPortabilityStatus(message, 'error');
+      appendDataPortabilityLog('Commit failed', message);
+      PW.error(error);
+    } finally {
+      dataPortabilityState.committing = false;
+      updateDataPortabilityButtons();
+    }
+  };
+
+  if (dataPortabilityEls.exportRunBtn) {
+    dataPortabilityEls.exportRunBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      runAccountDataExport();
+    });
+  }
+
+  if (dataPortabilityEls.exportCopyBtn) {
+    dataPortabilityEls.exportCopyBtn.addEventListener('click', async (event) => {
+      event.preventDefault();
+      const payload = String(dataPortabilityEls.exportPayload?.value || '').trim();
+      if (!payload) {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(payload);
+        appendDataPortabilityLog('Payload copied', 'Export payload copied to clipboard.');
+        setDataPortabilityStatus('Payload copied to clipboard.', 'info');
+      } catch (error) {
+        appendDataPortabilityLog('Copy failed', 'Clipboard access was denied.');
+        setDataPortabilityStatus('Unable to copy payload automatically. Copy manually from the text area.', 'error');
+        PW.error(error);
+      }
+    });
+  }
+
+  if (dataPortabilityEls.exportDownloadBtn) {
+    dataPortabilityEls.exportDownloadBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      const payload = String(dataPortabilityEls.exportPayload?.value || '').trim();
+      if (!payload) {
+        return;
+      }
+
+      const blob = new Blob([payload], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `paycal-account-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+
+      appendDataPortabilityLog('Payload downloaded', 'Export JSON file downloaded locally.');
+      setDataPortabilityStatus('Export JSON downloaded.', 'info');
+    });
+  }
+
+  if (dataPortabilityEls.importPrepareBtn) {
+    dataPortabilityEls.importPrepareBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      prepareAccountDataImport();
+    });
+  }
+
+  if (dataPortabilityEls.importCommitBtn) {
+    dataPortabilityEls.importCommitBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      const confirmDialog = /** @type {HTMLDialogElement|null} */ (PC.getElement('modal_import_confirm'));
+      const summaryEl = PC.getElement('modal_import_confirm_summary');
+      if (summaryEl) {
+        const counts = dataPortabilityEls.importCounts?.textContent || '';
+        summaryEl.textContent = counts ? `Staged: ${counts}` : '';
+      }
+      if (confirmDialog) {
+        PC.openModal('modal_import_confirm', 'Confirm Import');
+      } else {
+        commitAccountDataImport();
+      }
+    });
+  }
+
+  const importConfirmProceedBtn = PC.getElement('import_confirm_proceed_btn');
+  if (importConfirmProceedBtn) {
+    importConfirmProceedBtn.addEventListener('click', () => {
+      PC.closeModal('modal_import_confirm', 'Confirm Import');
+      commitAccountDataImport();
+    });
+  }
+
+  const importConfirmCancelBtn = PC.getElement('import_confirm_cancel_btn');
+  if (importConfirmCancelBtn) {
+    importConfirmCancelBtn.addEventListener('click', () => {
+      PC.closeModal('modal_import_confirm', 'Confirm Import');
+      appendDataPortabilityLog('Commit cancelled', 'Import was not applied.');
+    });
+  }
+
+  if (dataPortabilityEls.importPayload) {
+    dataPortabilityEls.importPayload.addEventListener('input', () => {
+      if (dataPortabilityState.preparedImportId !== '') {
+        dataPortabilityState.preparedImportId = '';
+        if (dataPortabilityEls.importId) {
+          dataPortabilityEls.importId.textContent = '-';
+        }
+        if (dataPortabilityEls.importExpires) {
+          dataPortabilityEls.importExpires.textContent = '-';
+        }
+        appendDataPortabilityLog('Prepared session cleared', 'Import payload changed; run Prepare Import again.');
+      }
+      updateDataPortabilityButtons();
+    });
+  }
+
+  if (dataPortabilityEls.actionLog) {
+    appendDataPortabilityLog('Data portability ready', 'Use Export, then Prepare Import, then Commit Import.');
+  }
+  updateDataPortabilityButtons();
 
   await initializeBillingSection({
     successUrl: '/api/v1/billing/checkout-return',

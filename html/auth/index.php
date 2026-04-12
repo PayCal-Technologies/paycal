@@ -153,7 +153,7 @@ require_once __DIR__ . '/../header.php';
           <form id="signin-form" method="POST" action="/auth/<?php echo $authLanguageQuery; ?>">
             <section>
               <label for="email"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-              <input type="email" id="email" name="email" value="<?php echo $emailValue; ?>" autocomplete="email" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" required>
+              <input type="email" id="email" name="email" value="<?php echo $emailValue; ?>" autocomplete="username webauthn" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" required>
             </section>
 
             <section>

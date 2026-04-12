@@ -203,23 +203,15 @@ class Earnings
    */
   private static function resolveWorkRow(array $row, ?string $userUUID = null): ?array
   {
-    $hasGross = isset($row['gross']) || isset($row['g']);
-    $hasEncryptedBlob = isset($row['encrypted_blob']) && is_string($row['encrypted_blob']) && $row['encrypted_blob'] !== '';
-    $allowSnapshotFallback = $hasGross;
-
-    if ($hasGross && !$hasEncryptedBlob) {
-      return self::normalizeSnapshotRow($row);
-    }
-
     $userUUID ??= User::currentUUID();
     $blob = self::scalarString($row['encrypted_blob'] ?? '');
     if ($blob === '') {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
 
     $sessionHash = Authentication::getSessionHashFromCookie();
     if ($sessionHash === null) {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
 
     $sessionKey = Keys::SESSION . ':' . $sessionHash;
@@ -227,22 +219,22 @@ class Earnings
     $user = User::current();
     $saltB64 = self::scalarString($user->encryption_salt);
     if ($saltB64 === '') {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
 
     $dek = self::resolveDekForEnvelope($blob, $userUUID, $credentialId, $saltB64);
     if ($dek === null) {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
 
     $decryptedJson = self::decryptWorkBlob($blob, $dek);
     if ($decryptedJson === null) {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
 
     $decoded = json_decode($decryptedJson, true);
     if (!is_array($decoded)) {
-      return $allowSnapshotFallback ? self::normalizeSnapshotRow($row) : null;
+      return null;
     }
     /** @var array<string,mixed> $decoded */
 
@@ -271,18 +263,10 @@ class Earnings
         $wage = (string) $merged['wage'];
       } elseif (isset($merged['w']) && is_numeric($merged['w'])) {
         $wage = (string) $merged['w'];
-      } else {
-        $siteId = self::scalarString($merged['site_id'] ?? '');
-        if ($siteId !== '') {
-          $siteWages = self::getSiteWages($userUUID);
-          if (isset($siteWages[$siteId])) {
-            $wage = $siteWages[$siteId];
-          }
-        }
       }
 
       $grossCents = Money::dollarsToCents((string) $loa);
-      if ($wage !== null && is_numeric($wage)) {
+      if ($wage !== null) {
         $grossCents += Money::calculateGross($regularHours, $overtimeHours, $wage);
         if ($travelHours > 0) {
           $travelPay = $travelHours * (float) $wage;
@@ -292,37 +276,6 @@ class Earnings
 
       if ($grossCents > 0) {
         $merged['gross'] = Money::centsToDollars($grossCents);
-      }
-    }
-
-    return $merged;
-  }
-
-  /**
-   * @param array<string, mixed> $row
-   * @return array<string, mixed>
-   */
-  private static function normalizeSnapshotRow(array $row): array
-  {
-    $normalized = WorkEntry::normalizeWorkEntryPayload($row);
-    $merged = $row;
-    foreach ($normalized as $k => $v) {
-      $merged[(string) $k] = $v;
-    }
-
-    if (
-      (!isset($merged['hours']) || !is_numeric($merged['hours']))
-      && isset($merged['regular_hours'], $merged['overtime_hours'])
-    ) {
-      $regularRaw = $merged['regular_hours'];
-      $overtimeRaw = $merged['overtime_hours'];
-      if (
-        is_scalar($regularRaw)
-        && is_scalar($overtimeRaw)
-        && is_numeric((string) $regularRaw)
-        && is_numeric((string) $overtimeRaw)
-      ) {
-        $merged['hours'] = (float) $regularRaw + (float) $overtimeRaw;
       }
     }
 
@@ -368,38 +321,8 @@ class Earnings
       $wrappedDekPasskey = self::scalarString(Database::hget($wrappedPasskeyMapKey, $credentialId));
     }
 
-    if ($wrappedDekPasskey === '') {
-      $credentialIds = Database::smembers(Keys::webauthnUserCredentials($ownerUUID));
-      foreach ($credentialIds as $candidate) {
-        $candidateId = (string) $candidate;
-        if ($candidateId === '') {
-          continue;
-        }
-        $candidateWrapped = self::scalarString(Database::hget($wrappedPasskeyMapKey, $candidateId));
-        if ($candidateWrapped !== '') {
-          $credentialId = $candidateId;
-          $wrappedDekPasskey = $candidateWrapped;
-          break;
-        }
-      }
-
-      // Keep behavior aligned with account bootstrap for legacy wrapper compatibility.
-      if ($credentialId === '') {
-        foreach ($credentialIds as $candidate) {
-          $candidateId = (string) $candidate;
-          if ($candidateId !== '') {
-            $credentialId = $candidateId;
-            break;
-          }
-        }
-      }
-    }
-
     if ($credentialId === '') {
       return null;
-    }
-    if ($wrappedDekPasskey === '') {
-      $wrappedDekPasskey = self::scalarString(User::current()->wrapped_dek_passkey);
     }
     if ($wrappedDekPasskey === '') {
       return null;
@@ -454,15 +377,14 @@ class Earnings
   /**
    * Handles hkdfPasskeyKek operation.
    */
-  private static function hkdfPasskeyKek(string $credentialId, string $userUUID, string $saltB64, bool $legacyUserBound): ?string
+  private static function hkdfPasskeyKek(string $credentialId, string $saltB64): ?string
   {
     $salt = base64_decode($saltB64, true);
     if ($salt === false) {
       return null;
     }
 
-    $ikm = $legacyUserBound ? ($credentialId . '|' . $userUUID) : $credentialId;
-    return hash_hkdf('sha256', $ikm, 32, 'paycal-passkey-kek', $salt);
+    return hash_hkdf('sha256', $credentialId, 32, 'paycal-passkey-kek', $salt);
   }
 
   /**
@@ -495,17 +417,9 @@ class Earnings
     $ciphertext = substr($ciphertextWithTag, 0, -16);
     $tag = substr($ciphertextWithTag, -16);
 
-    $kekCanonical = self::hkdfPasskeyKek($credentialId, $userUUID, $saltB64, false);
+    $kekCanonical = self::hkdfPasskeyKek($credentialId, $saltB64);
     if (is_string($kekCanonical) && $kekCanonical !== '') {
       $dek = openssl_decrypt($ciphertext, 'aes-256-gcm', $kekCanonical, OPENSSL_RAW_DATA, $nonce, $tag);
-      if (is_string($dek) && $dek !== '') {
-        return $dek;
-      }
-    }
-
-    $kekLegacy = self::hkdfPasskeyKek($credentialId, $userUUID, $saltB64, true);
-    if (is_string($kekLegacy) && $kekLegacy !== '') {
-      $dek = openssl_decrypt($ciphertext, 'aes-256-gcm', $kekLegacy, OPENSSL_RAW_DATA, $nonce, $tag);
       if (is_string($dek) && $dek !== '') {
         return $dek;
       }

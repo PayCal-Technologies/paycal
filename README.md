@@ -6,10 +6,6 @@ PayCal™ is a payroll tracking platform focused on transparency, accessibility,
 
 The goal is simple: make pay easier to understand while keeping personal financial data private.
 
-> Historical note: this public repository initial commit (including this README replacement) is derived from approximately three years of prior development in a private PayCal codebase.
-
-Public repository: https://github.com/PayCal-Technologies/paycal
-
 Latest documented release: **v1.049.000**
 
 [![Test
