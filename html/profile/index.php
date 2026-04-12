@@ -65,7 +65,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
       <div id="change_email_step1_section">
         <div class="item_pair">
           <div class="item_label" data-tooltip="<?php echo profile_index_i18n('TOOLTIP_CURRENT_EMAIL'); ?>"><?php echo profile_index_i18n('CURRENT_EMAIL'); ?></div>
-          <div class="item_value"><input type="email" name="current_email" value="<?php echo $user->email; ?>" readonly autocomplete="email" aria-readonly="true" disabled></div>
+          <div class="item_value"><input type="email" name="current_email" value="<?php echo $user->email; ?>" readonly autocomplete="email" aria-readonly="true" aria-label="<?php echo profile_index_i18n('CURRENT_EMAIL'); ?>" disabled></div>
         </div>
 
         <div class="item_pair">

@@ -119,7 +119,7 @@ require_once Environment::appHome().'html/header.php';
     <a href="#panel-audio" class="settings_jump_link"><?php echo settings_index_i18n('AUDIO'); ?></a>
     <a href="#panel-passkeys" class="settings_jump_link"><?php echo settings_index_i18n('SETTINGS_SECTION_PASSKEYS'); ?></a>
     <a href="#panel-security" class="settings_jump_link"><?php echo settings_index_i18n('SETTINGS_SECTION_SECURITY'); ?></a>
-    <a href="#panel-data-portability" class="settings_jump_link">Data Portability</a>
+    <a href="#panel-data-portability" class="settings_jump_link"><?php echo settings_index_i18n('SETTINGS_SECTION_DATA_PORTABILITY'); ?></a>
   </nav>
 
   <!-- MODAL CHANGE EMAIL -->
@@ -140,7 +140,7 @@ require_once Environment::appHome().'html/header.php';
       <div id="change_email_step1_section">
         <div class="item_pair">
           <div class="item_label" data-tooltip="<?php echo settings_index_i18n('TOOLTIP_CURRENT_EMAIL'); ?>"><?php echo settings_index_i18n('CURRENT_EMAIL'); ?></div>
-          <div class="item_value"><input type="email" name="current_email" value="<?php echo $user->email; ?>" readonly autocomplete="email" aria-readonly="true" disabled></div>
+          <div class="item_value"><input type="email" name="current_email" value="<?php echo $user->email; ?>" readonly autocomplete="email" aria-readonly="true" aria-label="<?php echo settings_index_i18n('CURRENT_EMAIL'); ?>" disabled></div>
         </div><!-- item_pair -->
 
         <div class="item_pair">
@@ -1029,10 +1029,10 @@ echo Render::dialog([
 
 <!-- DATA PORTABILITY SECTION -->
 <section class="panel" id="panel-data-portability">
-  <form id="account_data_portability_form" method="POST" action="<?php echo Environment::appURL('api/v1/account/data/export/'); ?>" aria-label="Account data export and import">
+  <form id="account_data_portability_form" method="POST" action="<?php echo Environment::appURL('api/v1/account/data/export/'); ?>" aria-label="<?php echo settings_index_i18n('SETTINGS_SECTION_DATA_PORTABILITY_EXPORT_IMPORT'); ?>">
     <input class="visually_hidden" type="text" name="username" value="NOTUSED" autocomplete="username" hidden tabindex="-1" aria-hidden="true">
     <input type="hidden" name="csrf_token" value="<?php echo $csrfNonce; ?>">
-    <h2 class="heading-accent">Data Portability</h2>
+    <h2 class="heading-accent"><?php echo settings_index_i18n('SETTINGS_SECTION_DATA_PORTABILITY'); ?></h2>
     <p class="help_text">Export creates a portable account package (user profile settings, sites, and work entries). Import runs in two stages: prepare validates and stages data, commit applies changes.</p>
     <p class="data_portability_warning" role="note"><strong>Warning:</strong> Export generates plaintext JSON data, including work details. Treat export files as sensitive and store or transfer securely.</p>
 
@@ -1076,7 +1076,7 @@ echo Render::dialog([
     </div>
 
     <section class="data_portability_log_section" aria-labelledby="data_portability_log_title">
-      <h3 id="data_portability_log_title">Action Log</h3>
+      <h3 id="data_portability_log_title"><?php echo settings_index_i18n('SETTINGS_SECTION_DATA_PORTABILITY_ACTION_LOG'); ?></h3>
       <ol id="data_portability_action_log" class="data_portability_action_log" aria-live="polite" aria-atomic="false"></ol>
     </section>
   </form>
