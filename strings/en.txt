@@ -830,6 +830,7 @@ HELP_PAY_PERIODS_THUMB_ALT Pay Period editor set to biweekly frequency with Mond
 HELP_PAY_PERIODS_TITLE Setting up Your Pay Periods
 HELP_PAY_PERIODS_UNSURE_DATE_TEXT Use the first day of the most recent completed pay period you can verify. Avoid using payday itself unless payday is also the first day of the work period, because many employers pay after the period has already ended.
 HELP_PAY_PERIODS_UNSURE_DATE_TITLE If you are not sure which date to use
+HELP_POLICIES_LEGAL_DECK Review the terms of service, privacy policy, and legal notices that govern your use of PayCal.
 HELP_SITES_MANAGEMENT_LINK Sites Management Help
 HELP_TAX_BRACKETS_DECK Federal and provincial bracket references used for payroll estimates.
 HELP_TAX_BRACKETS_DISCLAIMERS_TITLE Disclaimers
