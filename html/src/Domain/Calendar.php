@@ -161,7 +161,7 @@ class Calendar
   public static function getCurrentPayPeriods(?User $user = null): PayPeriods
   {
     $user = $user ?? User::current();
-    $tz = $user->timezone ?? 'America/Edmonton';
+    $tz = $user->timezone;
     $zone = new \DateTimeZone($tz);
     $now = new \DateTimeImmutable('now', $zone);
     $scheduled = PayPeriodGenerator::resolveForDate($user, $now);

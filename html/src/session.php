@@ -42,8 +42,8 @@ if ($hash !== null && Authentication::sessionExists($hash)) {
   $userTheme = $user->theme;
   $userLang = $user->language;
 
-  $textRaw = strtolower(trim((string) ($user->text ?? UserPreferenceDefaults::DEFAULT_TEXT)));
-  $densityRaw = strtolower(trim((string) ($user->density ?? UserPreferenceDefaults::DEFAULT_DENSITY)));
+  $textRaw = strtolower(trim($user->text));
+  $densityRaw = strtolower(trim($user->density));
 
   $textAdjustment = 0;
   if ($textRaw === 'small') {

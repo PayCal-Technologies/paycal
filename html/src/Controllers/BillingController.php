@@ -47,7 +47,7 @@ final class BillingController
 
     $user = User::current();
     $userUUID = User::currentUUID();
-    $email = trim((string) ($user->email ?? ''));
+    $email = trim($user->email);
 
     if ($userUUID === '' || $email === '') {
       Response::error('[Billing] Missing authenticated user context.', [], HttpStatus::HTTP_UNAUTHORIZED);

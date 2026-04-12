@@ -304,8 +304,8 @@ final class OrganizationDiscoveryService
         'organization_id' => $orgId,
         'name' => (string) ($org['name'] ?? ''),
         'owner_uuid' => (string) ($org['owner_uuid'] ?? ''),
-        'owner_name' => $owner instanceof User ? (string) ($owner->full_name ?? '') : '',
-        'owner_email' => $owner instanceof User ? (string) ($owner->email ?? '') : '',
+        'owner_name' => $owner instanceof User ? $owner->full_name : '',
+        'owner_email' => $owner instanceof User ? $owner->email : '',
         'organization_type' => $organizationType,
         'status' => (string) ($org['status'] ?? 'active'),
         'role' => (string) ($relationship['role'] ?? ''),
@@ -2023,9 +2023,9 @@ final class OrganizationDiscoveryService
       'organization' => [
         'name' => (string) ($organization['name'] ?? ''),
         'owner_uuid' => (string) ($organization['owner_uuid'] ?? ''),
-        'owner_name' => $owner instanceof User ? (string) ($owner->full_name ?? '') : '',
-        'owner_email' => $owner instanceof User ? (string) ($owner->email ?? '') : '',
-        'owner_phone' => $owner instanceof User ? (string) ($owner->phone ?? '') : '',
+        'owner_name' => $owner instanceof User ? $owner->full_name : '',
+        'owner_email' => $owner instanceof User ? $owner->email : '',
+        'owner_phone' => $owner instanceof User ? $owner->phone : '',
         'owner_since' => $ownerSince,
         'organization_type' => (string) ($organization['organization_type'] ?? 'shared'),
         'status' => (string) ($organization['status'] ?? 'active'),
@@ -2395,7 +2395,7 @@ final class OrganizationDiscoveryService
       return $this->fail('Target user not found.');
     }
 
-    $targetEmail = InputSanitizer::sanitizeEmail((string) ($targetUser->email ?? ''));
+    $targetEmail = InputSanitizer::sanitizeEmail($targetUser->email);
     $domainGate = $this->ensureContactDomainPolicyAllowsEmail($orgId, $targetEmail, 'ownership transfer target email');
     if (!$domainGate['success']) {
       return $domainGate;
@@ -2495,8 +2495,8 @@ final class OrganizationDiscoveryService
         $members[] = [
           'uuid' => $memberUUID,
           'user_uuid' => $memberUUID,
-          'full_name' => (string) ($member->full_name ?? ''),
-          'email' => (string) ($member->email ?? ''),
+          'full_name' => $member->full_name,
+          'email' => $member->email,
           'role' => $role,
           'status' => (string) ($relationship['status'] ?? ''),
           'scopes' => $this->scopeList((string) ($relationship['scopes'] ?? '')),
@@ -2596,7 +2596,7 @@ final class OrganizationDiscoveryService
     }
 
     $actor = UserRepository::getByUUID($actorUUID);
-    $actorEmail = $actor instanceof User ? strtolower(trim((string) ($actor->email ?? ''))) : '';
+    $actorEmail = $actor instanceof User ? strtolower(trim($actor->email)) : '';
 
     $eventIds = Database::smembers(Keys::ORGANIZATION_AUDIT . ':' . $orgId);
     $events = [];
@@ -2801,7 +2801,7 @@ final class OrganizationDiscoveryService
       return $this->fail('Only organization owners/admins can perform bulk imports.');
     }
 
-    $authorityEmail = InputSanitizer::sanitizeEmail((string) ($actor->email ?? ''));
+    $authorityEmail = InputSanitizer::sanitizeEmail($actor->email);
     if ($authorityEmail === '' || !filter_var($authorityEmail, FILTER_VALIDATE_EMAIL)) {
       return $this->fail('A verified authority email is required for bulk import verification.');
     }
@@ -4203,7 +4203,7 @@ final class OrganizationDiscoveryService
    */
   private function defaultPersonalOrganizationName(User $owner, string $fallback = 'Personal Organization'): string
   {
-    $fullName = trim((string) ($owner->full_name ?? ''));
+    $fullName = trim($owner->full_name);
     if ($fullName !== '') {
       return $fullName;
     }
@@ -4223,7 +4223,7 @@ final class OrganizationDiscoveryService
       'pay_period_length' => $owner->pay_period_length ?: '14',
       'pay_period_start' => $payPeriodStart,
       'pay_epoch' => $owner->pay_epoch ?: $payPeriodStart,
-      'editing_grace_days' => (string) ($owner->editing_grace_days ?? UserPreferenceDefaults::DEFAULT_EDITING_GRACE_DAYS),
+      'editing_grace_days' => (string) $owner->editing_grace_days,
       'default_wage' => (string) ($owner->pay_rate ?? ''),
       'timezone' => $owner->timezone ?: self::DEFAULT_TIMEZONE,
       'currency' => self::DEFAULT_CURRENCY,

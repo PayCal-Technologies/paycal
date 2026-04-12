@@ -71,9 +71,10 @@ $registerFullNameValue = htmlspecialchars($registerFullNameInput, ENT_QUOTES, 'U
 $registerEmailValue = htmlspecialchars(InputSanitizer::sanitizeEmail($registerEmailInput), ENT_QUOTES, 'UTF-8');
 $registerInviteValue = htmlspecialchars($registerInviteInput, ENT_QUOTES, 'UTF-8');
 
-$cssVersion = Environment::appVersion();
+$cssVersion = (string) time();
 $isRegisterTab = $authTab === 'register';
 $accountRecoveryEnabled = filter_var(\PayCal\Domain\Config\SystemConfig::get('account_recovery_enabled'), FILTER_VALIDATE_BOOLEAN);
+$siteName = Strings::headerI18n('SITE_NAME');
 
 $i18nKeys = [
   'AUTH_BETA_NOTICE',
@@ -118,7 +119,6 @@ require_once __DIR__ . '/../header.php';
 
   <div class="auth-container">
   <div class="auth-shell<?php echo $isRegisterTab ? ' is-register' : ''; ?>" id="auth-shell">
-    <h1 class="visually_hidden"><?php echo htmlspecialchars($i18n['AUTH_PAGE_HEADING'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <?php if ($errorMessage !== '') { ?>
       <p class="auth-message error" role="alert"><?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?></p>
     <?php } ?>
@@ -126,81 +126,91 @@ require_once __DIR__ . '/../header.php';
       <p class="auth-message success" role="status"><?php echo htmlspecialchars($successMessage, ENT_QUOTES, 'UTF-8'); ?></p>
     <?php } ?>
 
-    <div class="auth-card">
-      <div class="auth-tabs-wrapper">
-        <div class="auth-tabs" role="tablist" aria-label="<?php echo htmlspecialchars($i18n['AUTH_TABS_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
-          <button type="button" id="tab-signin" class="auth-tab<?php echo $isRegisterTab ? '' : ' active'; ?>" data-tab="signin" role="tab" aria-controls="panel-signin" aria-selected="<?php echo $isRegisterTab ? 'false' : 'true'; ?>"><?php echo htmlspecialchars($i18n['AUTH_TAB_SIGNIN'], ENT_QUOTES, 'UTF-8'); ?></button>
-          <button type="button" id="tab-register" class="auth-tab<?php echo $isRegisterTab ? ' active' : ''; ?>" data-tab="register" role="tab" aria-controls="panel-register" aria-selected="<?php echo $isRegisterTab ? 'true' : 'false'; ?>"><?php echo htmlspecialchars($i18n['AUTH_TAB_REGISTER'], ENT_QUOTES, 'UTF-8'); ?></button>
+    <div class="auth-layout">
+      <section class="auth-hero" role="img" aria-roledescription="hero image" aria-label="<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?> — <?php echo htmlspecialchars($i18n['AUTH_PAGE_HEADING'], ENT_QUOTES, 'UTF-8'); ?>">
+        <img class="auth-hero-image" src="/images/paycal-auth-hero-win10.png" alt="" loading="eager" decoding="async" aria-hidden="true">
+        <div class="auth-hero-overlay" aria-hidden="true"></div>
+        <div class="auth-hero-content">
+          <h1 class="visually_hidden"><?php echo htmlspecialchars($i18n['AUTH_PAGE_HEADING'], ENT_QUOTES, 'UTF-8'); ?></h1>
+          <p class="auth-hero-note"><?php echo htmlspecialchars($i18n['AUTH_BETA_NOTICE'], ENT_QUOTES, 'UTF-8'); ?></p>
         </div>
-        <p class="auth-beta-notice pad_md"><?php echo htmlspecialchars($i18n['AUTH_BETA_NOTICE'], ENT_QUOTES, 'UTF-8'); ?></p>
+      </section>
+
+      <div class="auth-card">
+        <div class="auth-tabs-wrapper">
+          <div class="auth-tabs" role="tablist" aria-label="<?php echo htmlspecialchars($i18n['AUTH_TABS_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
+            <button type="button" id="tab-signin" class="auth-tab<?php echo $isRegisterTab ? '' : ' active'; ?>" data-tab="signin" role="tab" aria-controls="panel-signin" aria-selected="<?php echo $isRegisterTab ? 'false' : 'true'; ?>"><?php echo htmlspecialchars($i18n['AUTH_TAB_SIGNIN'], ENT_QUOTES, 'UTF-8'); ?></button>
+            <button type="button" id="tab-register" class="auth-tab<?php echo $isRegisterTab ? ' active' : ''; ?>" data-tab="register" role="tab" aria-controls="panel-register" aria-selected="<?php echo $isRegisterTab ? 'true' : 'false'; ?>"><?php echo htmlspecialchars($i18n['AUTH_TAB_REGISTER'], ENT_QUOTES, 'UTF-8'); ?></button>
+          </div>
+        </div>
+
+        <div class="auth-viewport">
+        <div class="auth-track">
+          <section class="auth-panel" id="panel-signin" role="tabpanel" aria-labelledby="tab-signin" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PANEL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="<?php echo $isRegisterTab ? 'true' : 'false'; ?>"<?php echo $isRegisterTab ? ' inert' : ''; ?>>
+            <?php if ($verificationSuccess): ?>
+              <section class="auth-verification-panel" aria-labelledby="auth_verification_panel_title">
+                <h2 id="auth_verification_panel_title" class="auth-verification-title"><?php echo htmlspecialchars($i18n['AUTH_VERIFICATION_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h2>
+                <p class="auth-verification-message"><?php echo htmlspecialchars($i18n['AUTH_VERIFICATION_MESSAGE'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <ul class="auth-verification-list">
+                  <li><?php echo htmlspecialchars($i18n['AUTH_VERIFICATION_STEP_1'], ENT_QUOTES, 'UTF-8'); ?></li>
+                  <li><?php echo htmlspecialchars($i18n['AUTH_VERIFICATION_STEP_2'], ENT_QUOTES, 'UTF-8'); ?></li>
+                  <li><?php echo htmlspecialchars($i18n['AUTH_VERIFICATION_STEP_3'], ENT_QUOTES, 'UTF-8'); ?></li>
+                </ul>
+              </section>
+            <?php endif; ?>
+
+            <form id="signin-form" method="POST" action="/auth/<?php echo $authLanguageQuery; ?>">
+              <section>
+                <label for="email"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
+                <input type="email" id="email" name="email" value="<?php echo $emailValue; ?>" autocomplete="username webauthn" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" required>
+              </section>
+
+              <section>
+                <button id="signin-passkey" type="button" class="btn btn_primary" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_BUTTON'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_BUTTON'], ENT_QUOTES, 'UTF-8'); ?></button>
+                <p class="divider-or"><?php echo htmlspecialchars($i18n['AUTH_DIVIDER_OR'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <p class="centered">
+                  <button id="signin-passkey-phone" type="button" class="btn-link" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_DEVICE'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_DEVICE'], ENT_QUOTES, 'UTF-8'); ?></button>
+                </p>
+                <p class="status" id="signin-passkey-status" role="status" aria-live="polite" aria-atomic="true"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_STATUS'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php if ($accountRecoveryEnabled) { ?>
+                  <p><a href="/auth/recover/<?php echo $authLanguageQuery; ?>"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_ACCOUNT'], ENT_QUOTES, 'UTF-8'); ?></a></p>
+                <?php } ?>
+              </section>
+
+              <p><?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_PREFIX'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#terms"><?php echo htmlspecialchars($i18n['AUTH_TERMS_LINK'], ENT_QUOTES, 'UTF-8'); ?></a> <?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_AND'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#privacy"><?php echo htmlspecialchars($i18n['AUTH_PRIVACY_LINK'], ENT_QUOTES, 'UTF-8'); ?></a>.</p>
+            </form>
+          </section>
+
+          <section class="auth-panel" id="panel-register" role="tabpanel" aria-labelledby="tab-register" aria-label="<?php echo htmlspecialchars($i18n['AUTH_REGISTER_PANEL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="<?php echo $isRegisterTab ? 'false' : 'true'; ?>"<?php echo $isRegisterTab ? '' : ' inert'; ?>>
+            <form id="register-form" method="POST" action="/auth/<?php echo $authLanguageQuery; ?>">
+
+              <section>
+                <label for="register-full-name"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_FULL_NAME_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
+                <input type="text" id="register-full-name" name="full_name" value="<?php echo $registerFullNameValue; ?>" autocomplete="name" required>
+              </section>
+
+              <section>
+                <label for="register-email"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_EMAIL_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
+                <input type="email" id="register-email" name="register_email" value="<?php echo $registerEmailValue; ?>" autocomplete="email" required>
+              </section>
+
+              <section>
+                <label for="invite_code"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_INVITE_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
+                <input type="text" id="invite_code" name="invite_code" value="<?php echo $registerInviteValue; ?>" autocomplete="off">
+              </section>
+
+              <section>
+                <label for="register-device-name"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_DEVICE_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
+                <input type="text" id="register-device-name" name="device_name" value="" placeholder="<?php echo htmlspecialchars($i18n['AUTH_REGISTER_DEVICE_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>" autocomplete="off" required>
+              </section>
+
+              <button id="register-passkey" type="button" class="btn btn_primary" aria-label="<?php echo htmlspecialchars($i18n['AUTH_REGISTER_CREATE_BUTTON'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_CREATE_BUTTON'], ENT_QUOTES, 'UTF-8'); ?></button>
+              <p class="status" id="register-passkey-status" role="status" aria-live="polite" aria-atomic="true"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_PASSKEY_STATUS'], ENT_QUOTES, 'UTF-8'); ?></p>
+            </form>
+          </section>
+        </div>
       </div>
-
-      <div class="auth-viewport">
-      <div class="auth-track">
-        <section class="auth-panel" id="panel-signin" role="tabpanel" aria-labelledby="tab-signin" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PANEL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="<?php echo $isRegisterTab ? 'true' : 'false'; ?>"<?php echo $isRegisterTab ? ' inert' : ''; ?>>
-          <?php if ($verificationSuccess): ?>
-            <section class="auth-verification-panel" aria-labelledby="auth_verification_panel_title">
-              <h2 id="auth_verification_panel_title" class="auth-verification-title"><?php echo htmlspecialchars($i18n['AUTH_VERIFICATION_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h2>
-              <p class="auth-verification-message"><?php echo htmlspecialchars($i18n['AUTH_VERIFICATION_MESSAGE'], ENT_QUOTES, 'UTF-8'); ?></p>
-              <ul class="auth-verification-list">
-                <li><?php echo htmlspecialchars($i18n['AUTH_VERIFICATION_STEP_1'], ENT_QUOTES, 'UTF-8'); ?></li>
-                <li><?php echo htmlspecialchars($i18n['AUTH_VERIFICATION_STEP_2'], ENT_QUOTES, 'UTF-8'); ?></li>
-                <li><?php echo htmlspecialchars($i18n['AUTH_VERIFICATION_STEP_3'], ENT_QUOTES, 'UTF-8'); ?></li>
-              </ul>
-            </section>
-          <?php endif; ?>
-
-          <form id="signin-form" method="POST" action="/auth/<?php echo $authLanguageQuery; ?>">
-            <section>
-              <label for="email"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-              <input type="email" id="email" name="email" value="<?php echo $emailValue; ?>" autocomplete="username webauthn" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" required>
-            </section>
-
-            <section>
-              <button id="signin-passkey" type="button" class="btn btn_primary" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_BUTTON'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_BUTTON'], ENT_QUOTES, 'UTF-8'); ?></button>
-              <p class="divider-or"><?php echo htmlspecialchars($i18n['AUTH_DIVIDER_OR'], ENT_QUOTES, 'UTF-8'); ?></p>
-              <p class="centered">
-                <button id="signin-passkey-phone" type="button" class="btn-link" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_DEVICE'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_DEVICE'], ENT_QUOTES, 'UTF-8'); ?></button>
-              </p>
-              <p class="status" id="signin-passkey-status" role="status" aria-live="polite" aria-atomic="true"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_STATUS'], ENT_QUOTES, 'UTF-8'); ?></p>
-              <?php if ($accountRecoveryEnabled) { ?>
-                <p><a href="/auth/recover/<?php echo $authLanguageQuery; ?>"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_ACCOUNT'], ENT_QUOTES, 'UTF-8'); ?></a></p>
-              <?php } ?>
-            </section>
-
-            <p><?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_PREFIX'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#terms"><?php echo htmlspecialchars($i18n['AUTH_TERMS_LINK'], ENT_QUOTES, 'UTF-8'); ?></a> <?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_AND'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#privacy"><?php echo htmlspecialchars($i18n['AUTH_PRIVACY_LINK'], ENT_QUOTES, 'UTF-8'); ?></a>.</p>
-          </form>
-        </section>
-
-        <section class="auth-panel" id="panel-register" role="tabpanel" aria-labelledby="tab-register" aria-label="<?php echo htmlspecialchars($i18n['AUTH_REGISTER_PANEL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="<?php echo $isRegisterTab ? 'false' : 'true'; ?>"<?php echo $isRegisterTab ? '' : ' inert'; ?>>
-          <form id="register-form" method="POST" action="/auth/<?php echo $authLanguageQuery; ?>">
-
-            <section>
-              <label for="register-full-name"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_FULL_NAME_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-              <input type="text" id="register-full-name" name="full_name" value="<?php echo $registerFullNameValue; ?>" autocomplete="name" required>
-            </section>
-
-            <section>
-              <label for="register-email"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_EMAIL_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-              <input type="email" id="register-email" name="register_email" value="<?php echo $registerEmailValue; ?>" autocomplete="email" required>
-            </section>
-
-            <section>
-              <label for="invite_code"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_INVITE_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-              <input type="text" id="invite_code" name="invite_code" value="<?php echo $registerInviteValue; ?>" autocomplete="off">
-            </section>
-
-            <section>
-              <label for="register-device-name"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_DEVICE_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-              <input type="text" id="register-device-name" name="device_name" value="" placeholder="<?php echo htmlspecialchars($i18n['AUTH_REGISTER_DEVICE_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>" autocomplete="off" required>
-            </section>
-
-            <button id="register-passkey" type="button" class="btn btn_primary" aria-label="<?php echo htmlspecialchars($i18n['AUTH_REGISTER_CREATE_BUTTON'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_CREATE_BUTTON'], ENT_QUOTES, 'UTF-8'); ?></button>
-            <p class="status" id="register-passkey-status" role="status" aria-live="polite" aria-atomic="true"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_PASSKEY_STATUS'], ENT_QUOTES, 'UTF-8'); ?></p>
-          </form>
-        </section>
       </div>
-    </div>
     </div>
   </div>
   </div>

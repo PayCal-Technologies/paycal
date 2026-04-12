@@ -1921,7 +1921,7 @@ HTML;
     }
 
     // Calculate expected hours per day based on actual logged work
-    $expectedHoursPerDay = $daysWorked > 0 ? ($hoursLogged / $daysWorked) : (float) ($user->default_hours ?? 10.0);
+    $expectedHoursPerDay = $daysWorked > 0 ? ($hoursLogged / $daysWorked) : (float) $user->default_hours;
 
     // Days remaining (calendar days)
     $daysRemaining = max(0, ($endTs - $nowTs) / 86400);

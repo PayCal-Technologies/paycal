@@ -94,7 +94,7 @@ class CalendarController
    */
   private function resolveCalendarSubjectUser(User $actor): ?User
   {
-    $actorUUID = self::scalarString($actor->user_uuid ?? User::currentUUID());
+    $actorUUID = self::scalarString($actor->user_uuid);
     if ($actorUUID === '') {
       return $actor;
     }
@@ -551,7 +551,7 @@ class CalendarController
       ], 'recalc');
 
       // Refresh CSRF token TTL after successful update
-      $sessionTimeout = (int) ($user->session_timeout ?? SessionTimeout::ONE_HOUR->value);
+      $sessionTimeout = (int) ($user->session_timeout);
       $ttl = max((int) SessionTimeout::ONE_MIN->value, min($sessionTimeout, (int) SessionTimeout::TWO_HOURS->value));
       Database::expire(Keys::USER . ":" . $user->user_uuid . ":csrf:calendar:{$csrfToken}", $ttl);
 
@@ -891,7 +891,7 @@ class CalendarController
     // Get week day headers
     $weekHeaders = [];
     foreach ($calendar->generateWeekDayLabels() as $day) {
-      $dayNameFormat = $user->calendar_day_name_format ?? 'short';
+      $dayNameFormat = $user->calendar_day_name_format;
       $weekHeaders[] = [
           'abbr' => $day[$dayNameFormat],
           'full' => $day['long'],
@@ -934,8 +934,8 @@ class CalendarController
       }
 
       // Add position classes based on user settings
-      $dateLabelPosition = $user->calendar_date_label_position ?? 'middle';
-      $workEntryPosition = $user->calendar_work_entry_position ?? 'left';
+      $dateLabelPosition = $user->calendar_date_label_position;
+      $workEntryPosition = $user->calendar_work_entry_position;
       $dayClasses[] = 'date-label-'.$dateLabelPosition;
       $dayClasses[] = 'work-entry-'.$workEntryPosition;
 
@@ -948,7 +948,7 @@ class CalendarController
 
       // Generate formatted date label and aria label
       $dateLabel = Strings::formatFulldateWithOrdinal($ymd);
-      $audioLabelType = self::scalarString($user->calendar_audio_labels ?? 'number');
+      $audioLabelType = self::scalarString($user->calendar_audio_labels);
       if (!in_array($audioLabelType, ['number', 'short', 'long'], true)) {
         $audioLabelType = 'number';
       }

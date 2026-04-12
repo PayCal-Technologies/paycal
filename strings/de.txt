@@ -129,6 +129,8 @@ FULL_NAME Name
 FULL_NAME_PLACEHOLDER Vollständiger Name bitte.
 FUN Spaß!
 GERMAN Deutsch
+GITHUB GitHub
+GITHUB_HTML <em>G</em>itHub
 GO_TO Gehen zu
 GROSS Brutto
 HINDI Hindi

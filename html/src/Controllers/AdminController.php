@@ -136,9 +136,9 @@ class AdminController
     $fullName = InputSanitizer::sanitizeString((string) ($filteredArray['full_name'] ?? $user->full_name));
     $email = InputSanitizer::sanitizeString((string) ($filteredArray['email'] ?? $user->email));
     $authLevelStr = (string) ($filteredArray['auth_level'] ?? $user->auth_level->value);
-    $phone = InputSanitizer::sanitizeString($filteredArray['phone'] ?? $user->phone ?? '');
+    $phone = InputSanitizer::sanitizeString($filteredArray['phone'] ?? $user->phone);
 
-    $lastSessionHash = $user->last_session_hash ?? '';
+    $lastSessionHash = $user->last_session_hash;
 
     // Validate and convert auth_level
     try {

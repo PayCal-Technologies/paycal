@@ -208,8 +208,8 @@ class Layout
 
     if ($isAuthenticated) {
       $currentUser = User::current();
-      $primary = strtolower((string) ($currentUser->nav_position_primary ?? UserPreferenceDefaults::DEFAULT_NAV_POSITION_PRIMARY));
-      $dyslexiaTypographyRaw = strtolower((string) ($currentUser->dyslexia_typography ?? UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY));
+      $primary = strtolower($currentUser->nav_position_primary);
+      $dyslexiaTypographyRaw = strtolower($currentUser->dyslexia_typography);
 
       if (in_array($primary, $allowedNavPositions, true)) {
         $navPrimaryPosition = $primary;

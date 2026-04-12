@@ -669,6 +669,8 @@ FULL_NAME Name
 FULL_NAME_PLACEHOLDER Full name please.
 FUN Fun!
 GERMAN German
+GITHUB GitHub
+GITHUB_HTML <em>G</em>itHub
 GO Go
 GO_TO Go to
 GROSS Gross

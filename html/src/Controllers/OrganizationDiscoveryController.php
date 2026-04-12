@@ -1406,7 +1406,7 @@ final class OrganizationDiscoveryController
           continue;
         }
 
-        $ownerEmail = InputSanitizer::sanitizeEmail((string) ($owner->email ?? ''));
+        $ownerEmail = InputSanitizer::sanitizeEmail($owner->email);
         if ($ownerEmail === '') {
           continue;
         }
@@ -1421,7 +1421,7 @@ final class OrganizationDiscoveryController
           'created_at' => $createdAt,
           'source' => 'organization',
           'email' => $ownerEmail,
-          'name' => trim((string) ($owner->full_name ?? '')),
+          'name' => trim($owner->full_name),
           'organization_name' => $organizationName,
           'public_profile' => $this->buildPublicOrganizationProfile($settings),
         ];
@@ -1529,7 +1529,7 @@ final class OrganizationDiscoveryController
         continue;
       }
 
-      $ownerEmail = InputSanitizer::sanitizeEmail((string) ($owner->email ?? ''));
+      $ownerEmail = InputSanitizer::sanitizeEmail($owner->email);
       if ($ownerEmail === '' || isset($seenEmails[$ownerEmail])) {
         continue;
       }
@@ -1543,7 +1543,7 @@ final class OrganizationDiscoveryController
       $suggestions[] = [
         'source' => 'organization',
         'email' => $ownerEmail,
-        'name' => trim((string) ($owner->full_name ?? '')),
+        'name' => trim($owner->full_name),
         'organization_name' => $organizationName,
         'public_profile' => $publicProfile,
       ];
@@ -1810,7 +1810,7 @@ final class OrganizationDiscoveryController
       if ($ownerUUID !== '') {
         $ownerUser = UserRepository::getByUUID($ownerUUID);
         if ($ownerUser !== null) {
-          $orgOwnerEmail = trim((string) ($ownerUser->email ?? ''));
+          $orgOwnerEmail = trim($ownerUser->email);
         }
       }
     }
@@ -1835,8 +1835,8 @@ final class OrganizationDiscoveryController
       $label = $actorUUID;
       $actor = UserRepository::getByUUID($actorUUID);
       if ($actor !== null) {
-        $fullName = trim((string) ($actor->full_name ?? ''));
-        $email = trim((string) ($actor->email ?? ''));
+        $fullName = trim($actor->full_name);
+        $email = trim($actor->email);
         if ($fullName !== '') {
           $label = $fullName;
         } elseif ($email !== '') {

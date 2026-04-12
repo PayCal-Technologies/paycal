@@ -127,6 +127,8 @@ FULL_NAME İsim
 FULL_NAME_PLACEHOLDER Lütfen tam isim.
 FUN Eğlence!
 GERMAN Almanca
+GITHUB GitHub
+GITHUB_HTML <em>G</em>itHub
 GO_TO Git
 GROSS Brüt
 HINDI Hintçe

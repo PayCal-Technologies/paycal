@@ -365,7 +365,7 @@ class Authentication
   {
     if (self::validateAndTouchSession()) {
       $currentUser = User::current();
-      if (!($currentUser->email_verified ?? false)) {
+      if (!$currentUser->email_verified) {
         self::sendRedirectSecurityHeaders();
         header('Location: ' . Environment::appURL('/unverified/'));
         exit;
@@ -396,7 +396,7 @@ class Authentication
   private static function shouldRedirectUnverifiedUser(?string $requestUri = null): bool
   {
     $currentUser = User::current();
-    if ($currentUser->email_verified ?? false) {
+    if ($currentUser->email_verified) {
       return false;
     }
 
@@ -435,7 +435,7 @@ class Authentication
     }
 
     $currentUser = User::current();
-    if (!($currentUser->email_verified ?? false)) {
+    if (!$currentUser->email_verified) {
       Response::error('[AUTH] Email not verified', [], HttpStatus::HTTP_FORBIDDEN);
     }
   }
@@ -542,7 +542,7 @@ class Authentication
       return null;
 
     $user = User::current();
-    if (isset($user->email_verified) && !$user->email_verified) {
+    if (!$user->email_verified) {
       $cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
       $cspNonce = is_scalar($cspNonceRaw) ? (string) $cspNonceRaw : '';
       $i18n = [];

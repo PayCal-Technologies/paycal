@@ -126,7 +126,7 @@ final class OrganizationNotificationService
         continue;
       }
 
-      $email = trim(InputSanitizer::sanitizeEmail((string) ($recipient->email ?? '')));
+      $email = trim(InputSanitizer::sanitizeEmail($recipient->email));
       if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         continue;
       }
@@ -138,7 +138,7 @@ final class OrganizationNotificationService
       try {
         EmailGarum::sendOrganizationEventNotification(
           emailTo: $email,
-          recipientName: (string) ($recipient->full_name ?? ''),
+          recipientName: $recipient->full_name,
           organizationName: $organizationName,
           eventLabel: $label,
           eventDetail: $eventDetail,
@@ -170,7 +170,7 @@ final class OrganizationNotificationService
     $activeMembers = OrganizationMemberRepository::forOrganization($orgId, null, 'active');
     $roleIndex = [];
     foreach ($activeMembers as $member) {
-      $uuid = trim((string) ($member['user']->user_uuid ?? ''));
+      $uuid = trim($member['user']->user_uuid);
       $role = $this->normalizeRole((string) $member['role']);
       if ($uuid === '' || $role === '') {
         continue;

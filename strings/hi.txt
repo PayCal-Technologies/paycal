@@ -129,6 +129,8 @@ FULL_NAME नाम
 FULL_NAME_PLACEHOLDER कृपया पूरा नाम दर्ज करें।
 FUN मजेदार!
 GERMAN जर्मन
+GITHUB GitHub
+GITHUB_HTML <em>G</em>itHub
 GO_TO जाएं
 GROSS सकल
 HINDI हिंदी
@@ -295,6 +297,8 @@ FULL_NAME नाम
 FULL_NAME_PLACEHOLDER कृपया पूरा नाम दर्ज करें।
 FUN मजेदार!
 GERMAN जर्मन
+GITHUB GitHub
+GITHUB_HTML <em>G</em>itHub
 GO_TO जाएं
 GROSS सकल
 HINDI हिंदी

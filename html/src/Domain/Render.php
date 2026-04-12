@@ -356,6 +356,7 @@ class Render
       $ariaLabel = (string) ($link['arialabel'] ?? $name);
       $accessKey = (string) ($link['access_key'] ?? '');
       $iconContent = (string) ($link['icon'] ?? '');
+      $extraAttrs = (string) ($link['extra_attrs'] ?? '');
 
       if ($activePage === $linkPage) {
         $css .= ' active';
@@ -377,6 +378,7 @@ class Render
           '__ACCESS_KEY__' => $accessKey,
           '__SICON__' => $icon,
           '__NAME__' => $name,
+          '__EXTRA_ATTRS__' => $extraAttrs,
       ];
 
       $buffer .= Render::template('nav-link-item', $renders);

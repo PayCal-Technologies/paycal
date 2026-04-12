@@ -129,6 +129,8 @@ FULL_NAME Buong Pangalan
 FULL_NAME_PLACEHOLDER Buong pangalan, pakiusap.
 FUN Saya!
 GERMAN Aleman
+GITHUB GitHub
+GITHUB_HTML <em>G</em>itHub
 GO_TO Pumunta sa
 GROSS Kabuuan
 HINDI Hindi
