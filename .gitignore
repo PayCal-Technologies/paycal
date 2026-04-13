@@ -105,3 +105,9 @@ scripts/.DS_Store
 .github/workflows/private-phpunit.yml
 .github/workflows/private-release-policy.yml
 .github/workflows/private-security-gates.yml
+
+# Source dumps — never commit full codebase export files
+*-source-dump*.txt
+*-source-dump*.sql
+*-source-dump*.json
+*source_dump*
