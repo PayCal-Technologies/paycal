@@ -95,3 +95,13 @@ scripts/.DS_Store
 !docs/data-shapes/theme-research-brief-template.md
 !docs/data-shapes/theme-token-dictionary-v1.md
 !.github/sync-to-dev/SKILLS.md
+
+# Private-only workflows (local, not tracked in public repo)
+.github/workflows/private-ci-smoke.yml
+.github/workflows/private-enforce-strict-types.yml
+.github/workflows/private-javascript.yml
+.github/workflows/private-no-redis-cli.yml
+.github/workflows/private-phpstan.yml
+.github/workflows/private-phpunit.yml
+.github/workflows/private-release-policy.yml
+.github/workflows/private-security-gates.yml
