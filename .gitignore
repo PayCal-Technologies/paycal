@@ -84,6 +84,10 @@ scripts/.DS_Store
 # Copilot operational scripts (local-only)
 /copilot-scripts/
 
+# SOC2 compliance evidence — private repo only, never promote to public
+/soc2/
+/ai-notes/soc2-evidence/
+
 # -------------------------------------------------------------------
 # Documentation
 # -------------------------------------------------------------------
