@@ -20,6 +20,7 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         '9d2b9fc6db0f153a0a149fefb182415e' => __DIR__ . '/..' . '/symfony/polyfill-php84/bootstrap.php',
         '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
+        'd92f49fe138fde4e7a3ec6f988960524' => __DIR__ . '/..' . '/stripe/stripe-php/lib/version_check.php',
         '00d4d0c4e50d2f055be30e13157d724e' => __DIR__ . '/../..' . '/html/bootstrap/class_aliases.php',
     );
 
@@ -27,6 +28,10 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         'l' =>
         array (
             'lbuchs\\WebAuthn\\' => 16,
+        ),
+        'Z' =>
+        array (
+            'ZipStream\\' => 10,
         ),
         'S' =>
         array (
@@ -61,15 +66,23 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         ),
         'P' =>
         array (
+            'Psr\\SimpleCache\\' => 16,
             'Psr\\Log\\' => 8,
             'Psr\\EventDispatcher\\' => 20,
             'Psr\\Container\\' => 14,
             'PhpParser\\' => 10,
             'PhpOption\\' => 10,
+            'PhpOffice\\PhpSpreadsheet\\' => 25,
             'PhpCsFixer\\' => 11,
             'PayCal\\Observability\\' => 21,
+            'PayCal\\Infrastructure\\' => 22,
             'PayCal\\Domain\\' => 14,
             'PayCal\\Controllers\\' => 19,
+            'Pachico\\Magoo\\' => 14,
+        ),
+        'M' =>
+        array (
+            'Matrix\\' => 7,
         ),
         'G' =>
         array (
@@ -82,6 +95,7 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         'E' =>
         array (
             'Evenement\\' => 10,
+            'Ergebnis\\AgentDetector\\' => 23,
         ),
         'D' =>
         array (
@@ -93,6 +107,7 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
             'Composer\\XdebugHandler\\' => 23,
             'Composer\\Semver\\' => 16,
             'Composer\\Pcre\\' => 14,
+            'Complex\\' => 8,
             'Clue\\React\\NDJson\\' => 18,
         ),
     );
@@ -101,6 +116,10 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         'lbuchs\\WebAuthn\\' =>
         array (
             0 => __DIR__ . '/..' . '/lbuchs/webauthn/src',
+        ),
+        'ZipStream\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/maennchen/zipstream-php/src',
         ),
         'Symfony\\Polyfill\\Php84\\' =>
         array (
@@ -202,6 +221,10 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         array (
             0 => __DIR__ . '/..' . '/react/cache/src',
         ),
+        'Psr\\SimpleCache\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/psr/simple-cache/src',
+        ),
         'Psr\\Log\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/log/src',
@@ -222,6 +245,10 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
         ),
+        'PhpOffice\\PhpSpreadsheet\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet',
+        ),
         'PhpCsFixer\\' =>
         array (
             0 => __DIR__ . '/..' . '/friendsofphp/php-cs-fixer/src',
@@ -230,6 +257,10 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         array (
             0 => __DIR__ . '/../..' . '/html/src/Observability',
         ),
+        'PayCal\\Infrastructure\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/html/src/Infrastructure',
+        ),
         'PayCal\\Domain\\' =>
         array (
             0 => __DIR__ . '/../..' . '/html/src/Domain',
@@ -237,6 +268,14 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         'PayCal\\Controllers\\' =>
         array (
             0 => __DIR__ . '/../..' . '/html/src/Controllers',
+        ),
+        'Pachico\\Magoo\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/yupmin/magoo/src',
+        ),
+        'Matrix\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/markbaker/matrix/classes/src',
         ),
         'GrahamCampbell\\ResultType\\' =>
         array (
@@ -249,6 +288,10 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         'Evenement\\' =>
         array (
             0 => __DIR__ . '/..' . '/evenement/evenement/src',
+        ),
+        'Ergebnis\\AgentDetector\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/ergebnis/agent-detector/src',
         ),
         'Dotenv\\' =>
         array (
@@ -270,9 +313,23 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         array (
             0 => __DIR__ . '/..' . '/composer/pcre/src',
         ),
+        'Complex\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/markbaker/complex/classes/src',
+        ),
         'Clue\\React\\NDJson\\' =>
         array (
             0 => __DIR__ . '/..' . '/clue/ndjson-react/src',
+        ),
+    );
+
+    public static $prefixesPsr0 = array (
+        'P' =>
+        array (
+            'Parsedown' =>
+            array (
+                0 => __DIR__ . '/..' . '/erusev/parsedown',
+            ),
         ),
     );
 
@@ -1220,6 +1277,12 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         'PHPUnit\\Util\\Xml\\Loader' => __DIR__ . '/..' . '/phpunit/phpunit/src/Util/Xml/Loader.php',
         'PHPUnit\\Util\\Xml\\XmlException' => __DIR__ . '/..' . '/phpunit/phpunit/src/Util/Exception/XmlException.php',
         'PayCal\\Domain\\I18n' => __DIR__ . '/../..' . '/html/src/i18n.php',
+        'Pdo\\Dblib' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Dblib.php',
+        'Pdo\\Firebird' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Firebird.php',
+        'Pdo\\Mysql' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Mysql.php',
+        'Pdo\\Odbc' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Odbc.php',
+        'Pdo\\Pgsql' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Pgsql.php',
+        'Pdo\\Sqlite' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Sqlite.php',
         'PharIo\\Manifest\\Application' => __DIR__ . '/..' . '/phar-io/manifest/src/values/Application.php',
         'PharIo\\Manifest\\ApplicationName' => __DIR__ . '/..' . '/phar-io/manifest/src/values/ApplicationName.php',
         'PharIo\\Manifest\\Author' => __DIR__ . '/..' . '/phar-io/manifest/src/values/Author.php',
@@ -1295,6 +1358,7 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'ReflectionConstant' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/ReflectionConstant.php',
         'ReturnTypeWillChange' => __DIR__ . '/..' . '/symfony/polyfill-php81/Resources/stubs/ReturnTypeWillChange.php',
+        'RoundingMode' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/RoundingMode.php',
         'SebastianBergmann\\CliParser\\AmbiguousOptionException' => __DIR__ . '/..' . '/sebastian/cli-parser/src/exceptions/AmbiguousOptionException.php',
         'SebastianBergmann\\CliParser\\Exception' => __DIR__ . '/..' . '/sebastian/cli-parser/src/exceptions/Exception.php',
         'SebastianBergmann\\CliParser\\OptionDoesNotAllowArgumentException' => __DIR__ . '/..' . '/sebastian/cli-parser/src/exceptions/OptionDoesNotAllowArgumentException.php',
@@ -1521,6 +1585,7 @@ class ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit8ea2686a76377f875c56e4195f3cc8eb::$classMap;
 
         }, null, ClassLoader::class);

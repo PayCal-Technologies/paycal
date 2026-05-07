@@ -1,0 +1,54 @@
+{
+    "name": "yupmin/magoo",
+    "type": "library",
+    "description": "PHP library to mask (redact) credit card numbers, emails and more.",
+    "license": "MIT",
+    "keywords": [
+        "Mask",
+        "Masking",
+        "Sensitive",
+        "Credit card",
+        "Email",
+        "Security",
+        "Obfuscation",
+        "Redact",
+        "Bleep out"
+
+    ],
+    "authors": [
+        {
+            "name": "Mariano F.co Benítez Mulet",
+            "email": "pachicodev@gmail.com",
+            "homepage": "https://github.com/pachico",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Pachico\\Magoo\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Pachico\\MagooTest\\": "tests/"
+        }
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^7.4|^8.0|^8.1",
+        "psr/log": "^1.0|^2.0"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "sniff": "phpcs -p --standard=PSR12 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src/ tests/",
+        "format": "phpcbf -p --standard=PSR12 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src/ tests/"
+    },
+    "require-dev": {
+        "codacy/coverage": "dev-master",
+        "phpunit/phpunit": "*",
+        "squizlabs/php_codesniffer": "^2.7|^3.7"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

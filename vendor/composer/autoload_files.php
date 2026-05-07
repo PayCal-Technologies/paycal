@@ -19,5 +19,6 @@ return array(
     '9d2b9fc6db0f153a0a149fefb182415e' => $vendorDir . '/symfony/polyfill-php84/bootstrap.php',
     '9b38cf48e83f5d8f60375221cd213eee' => $vendorDir . '/phpstan/phpstan/bootstrap.php',
     'ec07570ca5a812141189b1fa81503674' => $vendorDir . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
+    'd92f49fe138fde4e7a3ec6f988960524' => $vendorDir . '/stripe/stripe-php/lib/version_check.php',
     '00d4d0c4e50d2f055be30e13157d724e' => $baseDir . '/html/bootstrap/class_aliases.php',
 );
