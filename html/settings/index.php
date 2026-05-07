@@ -774,12 +774,11 @@ echo Render::dialog([
     <div class="flex f_baseline w100" id="text">
       <label class="w25"><?php echo settings_index_i18n('TEXT'); ?></label>
       <div class="w75">
-        <div class="security_slider_row security_slider_row_compact" data-hover-help="Text size adjustment in pixels. 0 is the default.">
-          <span class="security_slider_edge">-5px</span>
-          <input type="range" id="text_slider" name="text" min="-5" max="5" step="1" value="<?php echo $textSliderValue; ?>" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="<?php echo $textSliderValue; ?>" aria-label="Text size adjustment in pixels" aria-describedby="text_slider_value">
-          <span class="security_slider_edge">+5px</span>
+        <div class="security_slider_row security_slider_row_compact" data-hover-help="Text size adjustment. 0 is the default.">
+          <span class="security_slider_edge">-</span>
+          <input type="range" id="text_slider" name="text" min="-5" max="5" step="1" value="<?php echo $textSliderValue; ?>" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="<?php echo $textSliderValue; ?>" aria-label="Text size adjustment">
+          <span class="security_slider_edge">+</span>
         </div>
-        <p id="text_slider_value" class="security_level_value"><?php echo (($textSliderValue > 0) ? '+' : '').$textSliderValue; ?>px</p>
       </div>
     </div>
 
@@ -789,11 +788,10 @@ echo Render::dialog([
       <label class="w25"><?php echo settings_index_i18n('SPACING'); ?></label>
       <div class="w75">
         <div class="security_slider_row security_slider_row_compact" data-hover-help="Spacing adjustment. 0 is the default.">
-          <span class="security_slider_edge">-5px</span>
-          <input type="range" id="spacing_slider" name="spacing" min="-5" max="5" step="1" value="<?php echo $spacingSliderValue; ?>" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="<?php echo $spacingSliderValue; ?>" aria-label="Spacing adjustment" aria-describedby="spacing_slider_value">
-          <span class="security_slider_edge">+5px</span>
+          <span class="security_slider_edge">-</span>
+          <input type="range" id="spacing_slider" name="spacing" min="-5" max="5" step="1" value="<?php echo $spacingSliderValue; ?>" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="<?php echo $spacingSliderValue; ?>" aria-label="Spacing adjustment">
+          <span class="security_slider_edge">+</span>
         </div>
-        <p id="spacing_slider_value" class="security_level_value"><?php echo (($spacingSliderValue > 0) ? '+' : '').$spacingSliderValue; ?>px</p>
       </div>
     </div>
 

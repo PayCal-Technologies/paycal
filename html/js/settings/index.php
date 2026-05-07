@@ -2313,7 +2313,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const toAdjustmentLabel = (value) => {
     const normalized = clampSliderAdjustment(value);
-    return `${normalized > 0 ? '+' : ''}${normalized}px`;
+    const rem = normalized * 0.125;
+    return `${rem > 0 ? '+' : ''}${parseFloat(rem.toFixed(3))}rem`;
   };
 
   const applyRootScaleAdjustment = (group, value) => {
