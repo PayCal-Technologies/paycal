@@ -117,10 +117,12 @@ async function handleRunTests() {
   if (passRateElement) {
     passRateElement.textContent = '--';
   }
+
+  const legacyWsHttpBase = '/ws/';
   
   try {
     const capabilityToken = await getCapabilityToken('admin.tests.run');
-    const stream = new EventSource(`/ws/?channel=test_suite_stream&capability_token=${encodeURIComponent(capabilityToken)}`);
+    const stream = new EventSource(`${legacyWsHttpBase}?channel=test_suite_stream&capability_token=${encodeURIComponent(capabilityToken)}`);
     activeTestStream = stream;
 
     stream.addEventListener('start', () => {

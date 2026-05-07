@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use PayCal\Domain\EmailGarum;
 use PayCal\Domain\Database;
-use PayCal\Domain\ContactSupportTelemetry;
+use PayCal\Infrastructure\Telemetry\ContactSupportTelemetry;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Response;
 use PayCal\Domain\Strings;

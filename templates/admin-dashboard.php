@@ -87,6 +87,29 @@
   <section class='f_column w100 pad_md'>
     <h2>__ADMIN_DASHBOARD_TESTING_TOOLS_TITLE__</h2>
     <p class='text-muted'>__ADMIN_DASHBOARD_TESTING_TOOLS_SUBTITLE__</p>
+  <section class='flex f_row panel w100 mar_sm pad_md' aria-label='System Audit Event Feed'>
+    <section class='f_column w100 pad_md'>
+      <h2>System Audit Event Feed</h2>
+      <p class='text-muted'>
+        Live stream of immutable ledger events over a real WebSocket transport.
+        <span id='audit_stream_status' class='text-muted'> — Connecting…</span>
+      </p>
+      <div class='admin-card'>
+        <div class='admin-card-header'>
+          <h3>Recent &amp; Live Events <small id='audit_event_count'>(0)</small></h3>
+          <button class='btn btn_secondary' id='btn_audit_stream_reconnect' type='button'>Reconnect</button>
+        </div>
+        <div class='admin-card-body audit-event-feed-wrapper'>
+          <ol id='audit_event_feed' class='audit-event-feed' reversed aria-live='polite' aria-label='System audit events'></ol>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class='flex f_row panel w100 mar_sm pad_md' aria-label='__ADMIN_DASHBOARD_TESTING_TOOLS_ARIA__'>
+    <section class='f_column w100 pad_md'>
+      <h2>__ADMIN_DASHBOARD_TESTING_TOOLS_TITLE__</h2>
+      <p class='text-muted'>__ADMIN_DASHBOARD_TESTING_TOOLS_SUBTITLE__</p>
     
     <div class='admin-card'>
       <div class='admin-card-header'>

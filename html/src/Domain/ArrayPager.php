@@ -5,18 +5,26 @@ namespace PayCal\Domain;
 /**
  * ArrayPager.php
  *
- * Purpose: Define the ArrayPager class for PayCal\Domain.
+ * Purpose: In-memory pager implementation for array-backed collections that
+ * need the shared pager interface and metadata contract.
  *
- * PHP version 8.4.16
+ * Developer notes:
+ * - Paging calculations here should remain deterministic because controllers
+ *   and templates may rely on stable page counts and offsets.
+ * - Keep this focused on array pagination, not storage-layer querying.
  *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
+ * Architectural role:
+ * - Reusable domain utility implementing PagerInterface for already-loaded
+ *   array datasets.
+ * - Encapsulates array pagination behavior outside the HTTP layer.
  *
  * @category   Domain
  * @package    PayCal\Domain
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 

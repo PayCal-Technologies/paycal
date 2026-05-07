@@ -4,7 +4,7 @@ namespace Tests\Integration;
 
 use PayCal\Controllers\SecurityController;
 use PayCal\Domain\Database;
-use PayCal\Domain\SecurityLog;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PHPUnit\Framework\TestCase;
 
 final class SecurityControllerIntegrationTest extends TestCase

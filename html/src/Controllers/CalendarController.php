@@ -45,11 +45,19 @@ use PayCal\Observability\Lens;
  * - Delegated organization writes must emit audit and denial telemetry.
  * - Correlation of financial/site metadata must remain behind broker checks.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 
@@ -713,25 +721,26 @@ class CalendarController
     $pattern = Keys::WORK . ':' . User::currentUUID() . ":{$filteredDateID}:*";
     $success = WorkEntry::deleteWorkEntriesByPattern($pattern);
 
-    if ($success) {
-      // Always recalculate affected week after delete so overtime distribution updates in real time
-      Work::processWorkWeekContainingDate($user->user_uuid, $filteredDateID);
-      \PayCal\Observability\Lens::add('Calendar Week Recalculation', [
-        'mode' => 'delete',
-        'day_id' => $filteredDateID,
-      ], 'recalc');
-
-      // Return updated week payload for grid refresh
-      $week = ('cli' === PHP_SAPI) ? [] : $this->buildWeekPayload($filteredDateID, $user->user_uuid);
-      $responsePayload = [];
-      if ([] !== $week) {
-        $responsePayload['week'] = $week;
-      }
-
-      Response::success('[CC] Deletion successful.', $responsePayload, \PayCal\Domain\Enums\HttpStatus::HTTP_OK);
-    } else {
+    if (!$success) {
       \PayCal\Domain\Response::error('[CC] Deletion unprocessible.', [], \PayCal\Domain\Enums\HttpStatus::HTTP_UNPROCESSABLE);
+      return;
     }
+
+    // Always recalculate affected week after delete so overtime distribution updates in real time
+    Work::processWorkWeekContainingDate($user->user_uuid, $filteredDateID);
+    \PayCal\Observability\Lens::add('Calendar Week Recalculation', [
+      'mode' => 'delete',
+      'day_id' => $filteredDateID,
+    ], 'recalc');
+
+    // Return updated week payload for grid refresh
+    $week = ('cli' === PHP_SAPI) ? [] : $this->buildWeekPayload($filteredDateID, $user->user_uuid);
+    $responsePayload = [];
+    if ([] !== $week) {
+      $responsePayload['week'] = $week;
+    }
+
+    Response::success('[CC] Deletion successful.', $responsePayload, \PayCal\Domain\Enums\HttpStatus::HTTP_OK);
   }
 
   /**
@@ -781,15 +790,8 @@ class CalendarController
       $calendarData = $this->generateCalendarData($calendar, $year, $month, $user);
       Response::success('[CC] Calendar data retrieved.', $calendarData, \PayCal\Domain\Enums\HttpStatus::HTTP_OK);
     } catch (Throwable $e) {
-
-      Response::json('debug', '[CC] Exception caught.', HttpStatus::HTTP_INTERNAL_SERVER_ERROR, [
-        'message' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine(),
-        'trace' => $e->getTraceAsString(),
-      ]);
-
-     exit;
+      Log::error('[CC] getCalendar exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+      Response::error('[CC] Failed to retrieve calendar data.', [], HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 

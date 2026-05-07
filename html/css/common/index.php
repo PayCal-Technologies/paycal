@@ -132,7 +132,7 @@ $sanitizeFontFamily = static function (mixed $raw, string $default): string {
 
 $lineHeight = $resolveCssLengthOrNumber(\PayCal\Domain\Config\SystemConfig::get('font_line_height'), '1.5');
 $fontXs = $resolveCssLength( strtolower(trim((string) \PayCal\Domain\Config\SystemConfig::get('font_size_xs'))), [], '0.50rem');
-$fontSm = $resolveCssLength( strtolower(trim((string) \PayCal\Domain\Config\SystemConfig::get('font_size_sm'))), [], '0.90rem');
+$fontSm = $resolveCssLength( strtolower(trim((string) \PayCal\Domain\Config\SystemConfig::get('font_size_sm'))), [], '1.00rem');
 $fontMd = $resolveCssLength( strtolower(trim((string) \PayCal\Domain\Config\SystemConfig::get('font_size_md'))), [], '1.10rem');
 $fontLg = $resolveCssLength( strtolower(trim((string) \PayCal\Domain\Config\SystemConfig::get('font_size_lg'))), [], '1.30rem');
 $fontXl = $resolveCssLength( strtolower(trim((string) \PayCal\Domain\Config\SystemConfig::get('font_size_xl'))), [], '1.70rem');
@@ -161,7 +161,7 @@ $navBarStickiness = "static";
 
 /* VARIABLES */
 :root {
-  --text-base:                           1rem;
+  --text-base:                           1.125rem;
   --text-adjustment-px:                  <?php echo $combinedTextAdjustment; ?>px;
   --text:                                clamp(0.75rem, calc(var(--text-base) + var(--text-adjustment-px)), 1.5rem);
   --line-height:                         <?php echo $lineHeight; ?>;
@@ -169,7 +169,7 @@ $navBarStickiness = "static";
   --density-adjustment-px:               <?php echo $combinedDensityAdjustment; ?>px;
   --spacing:                             clamp(0.60rem, calc(var(--density-base) + var(--density-adjustment-px)), 1.5rem);
   --font-xs:                             <?php echo $fontXs; ?>;
-  --font-sm:                             <?php echo $fontSm; ?>;
+  --font-sm:                             max(1rem, <?php echo $fontSm; ?>);
   --font-md:                             <?php echo $fontMd; ?>;
   --font-lg:                             <?php echo $fontLg; ?>;
   --font-xl:                             <?php echo $fontXl; ?>;
@@ -187,10 +187,10 @@ $navBarStickiness = "static";
   --pad-sm:                              calc(var(--pad) / 2);
   --pad-md:                              var(--pad);
   --pad-lg:                              calc(var(--pad) * 2);
-  --gap-xs:                              1px;
-  --gap-sm:                              2px;
-  --gap-md:                              4px;
-  --gap-lg:                              8px;
+  --gap-xs:                              var(--pad-xs);
+  --gap-sm:                              var(--pad-sm);
+  --gap-md:                              var(--pad-md);
+  --gap-lg:                              var(--pad-lg);
   --chrome-height:                       4rem;
   --profile-menu-width:                  8rem;
   --blur-size:                           2px;
@@ -352,7 +352,7 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: var(--sans-serif);
-  font-size: var(--text, 1rem);
+  font-size: var(--text, 1.125rem);
   background-color: var(--color-bg);
   color: var(--color-text);
   overflow-x: hidden;
@@ -581,6 +581,12 @@ svg {
   letter-spacing: 0.05rem;
 }
 
+/* Reserve hover border space in footer nav links to prevent 1-2px layout shift. */
+#page_footer .nav_menu li a {
+  border: var(--border-size) double transparent;
+  border-radius: var(--border-radius);
+}
+
 .nav_menu a:active { border-top: calc(var(--border-size)) inset var(--panel-border); }
 
 .nav_menu li:hover a {
@@ -590,6 +596,10 @@ svg {
   background-color: var(--color-text);
   color: var(--color-text-inverse);
   transition: background-color var(--short-transition) ease;
+}
+
+#page_footer .nav_menu li:hover a {
+  border-radius: var(--border-radius);
 }
 
 .nav_menu li.active a {
@@ -1147,7 +1157,7 @@ dialog::backdrop {
 
 /* CONTROLS */
 label {
-  font-size: var(--font-sm);
+  font-size: var(--text, 1.125rem);
   cursor: pointer;
 }
 
@@ -1156,7 +1166,7 @@ input, select, button {
   border: var(--border-size) double transparent;
   border-color: var(--button-border);
   border-radius: var(--radius-control, var(--border-radius));
-  font-size: var(--font-sm);
+  font-size: var(--text, 1.125rem);
   font-weight: var(--font-weight);
   line-height: var(--line-height);
   text-align: center;
@@ -1492,8 +1502,8 @@ label:focus {
 .panel {
   width: 100%;
   max-width: 100%;
-  padding: clamp(0.5rem, 2vw, 1rem);
-  margin: 0 auto clamp(0.5rem, 2vw, 1rem) auto;
+  padding: var(--pad-md);
+  margin: 0 auto var(--mar-md) auto;
   border-radius: var(--radius-panel, var(--border-radius));
   background-color: var(--panel-bg);
   color: var(--panel-text);
@@ -1640,8 +1650,187 @@ details summary:hover {
   cursor: pointer;
 }
 
+/* ============================================================================
+   BREADCRUMB TICKET STUB STYLE
+   Ticket stub design: |text>text>text> with notches via clip-path
+   Fallback for browsers without clip-path support
+   ========================================================================== */
+
 .doc-breadcrumb {
-  padding-block: var(--pad-xs);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  padding-block: var(--pad-sm);
+  padding-inline: var(--pad-md);
+  margin: 0 0 var(--mar-md) 0;
+  background-color: transparent;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+/* Individual breadcrumb items */
+.doc-breadcrumb a,
+.doc-breadcrumb .current {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  margin-inline-end: 0;
+  background-color: var(--panel-bg, #f5f5f5);
+  color: inherit;
+  text-decoration: none;
+  position: relative;
+  /* Fallback for browsers without clip-path: simple border */
+  border: 1px solid var(--border-color, #cccccc);
+  border-radius: 0;
+  /* Modern browsers: ticket stub notch via clip-path */
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+  margin-inline-start: -1px; /* Overlap borders for seamless connection */
+  z-index: 1;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.doc-breadcrumb a:hover,
+.doc-breadcrumb a:focus {
+  background-color: var(--panel-hover-bg, #efefef);
+  color: var(--color-primary, #0066cc);
+  outline: none;
+}
+
+.doc-breadcrumb a:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #0096d6);
+  outline-offset: -2px;
+}
+
+/* First breadcrumb item: no left notch, but show right notch with border */
+.doc-breadcrumb a:first-of-type,
+.doc-breadcrumb .current:first-of-type {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  margin-inline-start: 0;
+  box-shadow: 
+    inset -3px 0 0 var(--border-color, #cccccc),
+    inset 0 -3px 0 var(--border-color, #cccccc),
+    inset 0 3px 0 var(--border-color, #cccccc),
+    inset -10px -6px 0 -8px var(--border-color, #cccccc),
+    inset -10px 6px 0 -8px var(--border-color, #cccccc);
+}
+
+/* Last breadcrumb item: current page indicator */
+.doc-breadcrumb .current {
+  background-color: var(--color-primary, #0066cc);
+  color: var(--button-primary-text, white);
+  font-weight: 500;
+  cursor: default;
+  pointer-events: none;
+  /* Reduced right notch for current item */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%);
+}
+
+/* Separators - hidden in modern browsers (clip-path creates visual separators) */
+.doc-breadcrumb .separator,
+.blog_breadcrumbs [aria-hidden="true"] {
+  display: none;
+}
+
+/* Fallback styles for browsers without clip-path support */
+@supports not (clip-path: polygon(0 0, 1px 1px)) {
+  .doc-breadcrumb a,
+  .doc-breadcrumb .current {
+    clip-path: none;
+    margin-inline-start: 0;
+    padding: 0.5rem 1rem;
+    border-radius: 2px;
+    margin-inline-end: 8px;
+  }
+
+  .doc-breadcrumb a:first-of-type,
+  .doc-breadcrumb .current:first-of-type {
+    clip-path: none;
+    margin-inline-start: 0;
+  }
+
+  .doc-breadcrumb .current {
+    clip-path: none;
+  }
+
+  .doc-breadcrumb .separator {
+    display: inline-block;
+    margin: 0 4px;
+    color: var(--text-muted, #888888);
+    content: ">";
+    opacity: 0.6;
+  }
+
+  .blog_breadcrumbs [aria-hidden="true"] {
+    display: inline-block;
+    margin: 0 4px;
+    color: var(--text-muted, #888888);
+    opacity: 0.6;
+  }
+}
+
+/* ============================================================================
+   BLOG BREADCRUMBS - Enhanced with ticket stub style
+   ========================================================================== */
+
+.blog_breadcrumbs {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  padding-block: var(--pad-sm);
+  padding-inline: var(--pad-md);
+  margin: 0 0 var(--mar-md) 0;
+  background-color: transparent;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.blog_breadcrumbs a,
+.blog_breadcrumbs .current {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  text-decoration: none;
+  position: relative;
+  background-color: var(--panel-bg, #f5f5f5);
+  color: inherit;
+  border: 1px solid var(--border-color, #dddddd);
+  /* Ticket stub notch effect */
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
+  margin-inline-start: -1px;
+  z-index: 1;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease;
+}
+
+.blog_breadcrumbs a:first-of-type {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+  margin-inline-start: 0;
+  box-shadow: 
+    inset -3px 0 0 var(--border-color, #dddddd),
+    inset 0 -3px 0 var(--border-color, #dddddd),
+    inset 0 3px 0 var(--border-color, #dddddd),
+    inset -8px -5px 0 -7px var(--border-color, #dddddd),
+    inset -8px 5px 0 -7px var(--border-color, #dddddd);
+}
+
+.blog_breadcrumbs a:hover {
+  background-color: var(--panel-hover-bg, #efefef);
+  text-decoration: none;
+}
+
+.blog_breadcrumbs .current {
+  background-color: var(--color-primary, #0066cc);
+  color: white;
+  font-weight: 500;
+  cursor: default;
+  border-color: var(--color-primary, #0066cc);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%);
+}
+
+.blog_breadcrumbs .separator {
+  display: none;
 }
 
 /* TOOLTIPS */
@@ -1924,12 +2113,13 @@ footer nav {
   gap: var(--gap-lg, 2rem);
 }
 
-footer nav a {
+footer nav:not(.nav_menu) a {
   color: var(--color-text);
   text-decoration: none;
 }
 
-footer nav a:hover, footer nav a:focus {
+footer nav:not(.nav_menu) a:hover,
+footer nav:not(.nav_menu) a:focus {
   background-color: var(--panel-text);
   color: var(--panel-bg);
   border-radius: 4px;

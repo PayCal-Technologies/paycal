@@ -18,13 +18,11 @@ namespace PayCal\Domain\Enums;
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
  */
-
-
-
 /**
- * HttpStatus
+ * HttpStatus constants.
  */
-final class HttpStatus {
+final class HttpStatus
+{
   // Success codes
   public const HTTP_OK = 200;
   public const HTTP_CREATED = 201;

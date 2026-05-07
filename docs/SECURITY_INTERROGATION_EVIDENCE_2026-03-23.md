@@ -1500,6 +1500,43 @@ Tags: cycle-22, workstream-B, P0, telemetry-governance, stream-isolation
   - Remaining blocker: one telemetry read path is now migrated, but additional telemetry analytics/query surfaces still read datastore directly.
   - Next immediate step: expand tokenized repository read governance into additional telemetry aggregation surfaces and add integration proof for denied cross-stream access at endpoint level.
 
+### Delta Report: Cycle 23 (2026-03-23)
+Tags: cycle-23, workstream-B, P0, telemetry-governance, encryption-summary, endpoint-deny-proof
+
+1. What changed (files and behaviors)
+  - `html/src/Domain/Telemetry/TelemetryRepository.php`
+    - Added `fetchEncryptionClientCounters(...)` for security-stream telemetry reads behind tokenized authorization.
+    - Enforces bounded telemetry type set and returns structured allow/deny envelope.
+  - `html/src/Controllers/EncryptionController.php`
+    - `getTelemetrySummary()` now routes reads through `TelemetryRepository::fetchEncryptionClientCounters(...)`.
+    - Added `guardCrossStreamJoin(...)` check with explicit deny response for mixed stream requests.
+  - `html/tests/Unit/TelemetryRepositoryTest.php`
+    - Added unit proof for encryption telemetry counter read deny/allow behavior.
+  - `html/tests/Integration/EncryptionControllerIntegrationTest.php`
+    - Added endpoint-level integration proof that admin request with `join_stream=product` is denied with `cross_stream_join_denied`.
+  - `docs/security/PHASE_CLOSURE_PROGRAM.md`
+    - Updated Workstream B progress to include second migrated query path and endpoint deny proof.
+
+2. What was verified (tests/commands and results)
+  - Focused test run (tool):
+    - `tests/Unit/TelemetryRepositoryTest.php`
+    - `tests/Integration/EncryptionControllerIntegrationTest.php`
+    - `tests/Unit/TelemetryControllerTest.php`
+    - `tests/Contract/TelemetryPolicyContractTest.php`
+    - `tests/Integration/TelemetryControllerIntegrationTest.php`
+    - `tests/Integration/TelemetryControllerPayloadIntegrationTest.php`
+  - Result: `passed=19 failed=0`
+  - Command: `cd /private/var/www/paycal/dev/html && ./vendor/bin/phpstan analyse src/Domain/Telemetry/TelemetryRepository.php src/Controllers/TelemetryController.php src/Controllers/EncryptionController.php src/Domain/MetricsService.php tests/Unit/TelemetryRepositoryTest.php tests/Integration/EncryptionControllerIntegrationTest.php --level=9`
+  - Result: `[OK] No errors`
+
+3. Which statuses changed (Q1..Q7)
+  - No status label changed in this cycle.
+  - Q1 architecture closure and Workstream B maturity improved: two distinct telemetry read paths now enforce tokenized repository governance, with endpoint-level cross-stream deny proof.
+
+4. Remaining blockers and next immediate step
+  - Remaining blocker: additional telemetry consumers (outside `MetricsService` and `EncryptionController` summary) still may use direct telemetry datastore reads.
+  - Next immediate step: inventory and migrate remaining telemetry read surfaces to repository-token boundary and add one consolidated integration contract for stream-role matrix enforcement.
+
 ### Delta Report: Cycle 25 (2026-03-23)
 Tags: cycle-25, workstream-B, P0, telemetry-governance, endpoint-integration-proof
 
@@ -1667,6 +1704,7 @@ Tags: cycle-29, workstream-C, P1, admin-policy-closure, deny-safe-proof
     - `tests/Unit/TelemetryRepositoryTest.php`
   - Result: `passed=19 failed=0`
   - Command: `cd <REPO_ROOT>/html && ./vendor/bin/phpstan analyse tests/Integration/AdminPageControllerIntegrationTest.php tests/Integration/HealthControllerIntegrationTest.php tests/Unit/TelemetryRepositoryTest.php src/Controllers/AdminPageController.php --level=9`
+
   - Result: `[OK] No errors`
 
 3. Which statuses changed (Q1..Q7)
@@ -1881,3 +1919,4 @@ Tags: cycle-36, workstream-D, P2, runtime-lifecycle, hidden-delay, locked-state-
 4. Remaining blockers and next immediate step
   - Remaining blocker: explicit long-hidden-tab zeroization proof under a true unlocked DEK state and post-zeroization re-unlock UX assertions are not yet automated.
   - Next immediate step: add a controlled test seam or harness fixture for unlocked-DEK simulation to verify hidden-delay expiry zeroization and deterministic recovery flow.
+

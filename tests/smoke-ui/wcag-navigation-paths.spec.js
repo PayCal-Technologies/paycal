@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 const publicRouteMatrix = [
   {
     path: '/help/',
-    currentLabel: 'Help',
+    currentLabel: 'Help Center',
     expectedLinks: [
       { name: 'Home', href: '/' },
       { name: 'Transparency Hub', href: '/transparency/' },
@@ -12,7 +12,7 @@ const publicRouteMatrix = [
   },
   {
     path: '/transparency/',
-    currentLabel: 'Transparency',
+    currentLabel: 'Transparency Hub',
     expectedLinks: [
       { name: 'Home', href: '/' },
       { name: 'Read our accessibility standard, recent work, and feedback path', href: '/transparency/accessibility/' },
@@ -21,7 +21,7 @@ const publicRouteMatrix = [
   },
   {
     path: '/transparency/accessibility/',
-    currentLabel: 'Accessibility',
+    currentLabel: 'Accessibility Transparency',
     expectedLinks: [
       { name: 'Transparency', href: '/transparency/' },
     ],

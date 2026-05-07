@@ -10,6 +10,7 @@ use PayCal\Domain\DataGrid;
 use PayCal\Domain\Database;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
+use PayCal\Infrastructure\Audit\OrganizationAuditControlTestService;
 use PayCal\Domain\OrganizationDiscoveryService;
 use PayCal\Domain\RequestGuard;
 use PayCal\Domain\Response;
@@ -32,6 +33,20 @@ use PayCal\Domain\UserRepository;
  *   on stable column keys, sorting, and paging metadata.
  * - Permission failures should continue to map through the shared status helper
  *   so endpoint behavior stays uniform.
+ *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
+ * @category   Controllers
+ * @package    PayCal\Controllers
+ * @subpackage HTTP
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 /**
@@ -1719,6 +1734,43 @@ final class OrganizationDiscoveryController
     }
   }
 
+  #[Route('organizations/{organizationID}/audit/control-test', ['POST'])]
+  public function generateAuditControlTest(string $organizationID): void
+  {
+    $filtered = RequestGuard::filterPost(['summary'], []);
+    if (false === $filtered) {
+      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $summaryRaw = $filtered['summary'] ?? '';
+    $summary = is_scalar($summaryRaw) ? (string) $summaryRaw : '';
+
+    $service = new OrganizationAuditControlTestService();
+    $result = $service->generateErrorTest(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($organizationID),
+      [
+        'summary' => $summary,
+        'source' => 'organizations_ui',
+      ]
+    );
+
+    if ($result['success']) {
+      Response::success('[OrgC] Audit control test generated.', $result['data'], HttpStatus::HTTP_CREATED);
+
+      return;
+    }
+
+    $message = strtolower(trim($result['message']));
+    $httpCode = str_contains($message, 'do not have permission')
+      ? HttpStatus::HTTP_FORBIDDEN
+      : (str_contains($message, 'gcs') ? HttpStatus::HTTP_INTERNAL_SERVER_ERROR : HttpStatus::HTTP_BAD_REQUEST);
+
+    Response::error('[OrgC] ' . $result['message'], $result['data'], $httpCode);
+  }
+
   /**
    * GET/POST organizations/{organizationID}/audit/grid
    *
@@ -2300,6 +2352,58 @@ final class OrganizationDiscoveryController
     }
 
     return $publicProfile;
+  }
+
+  /**
+   * GET organizations/{organizationID}/audit
+   *
+   * Returns the full org audit timeline for org owners and coordinators.
+   * Callers without manage-access are rejected by the service layer.
+   * Members can use /audit/member to see only events related to them.
+   */
+  #[Route('organizations/{organizationID}/audit', ['GET'])]
+  /**
+   * Handles getAuditTimeline operation.
+   */
+  public function getAuditTimeline(string $organizationID): void
+  {
+    $orgId   = InputSanitizer::sanitizeString($organizationID);
+    $service = new OrganizationDiscoveryService();
+    $result  = $service->listAuditTimeline(User::currentUUID(), $orgId);
+
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::recordReadAccess(
+      User::currentUUID(),
+      'org_audit_timeline_read'
+    );
+
+    if ($result['success']) {
+      Response::success('[OrgC] Organization audit timeline retrieved.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
+  }
+
+  /**
+   * GET organizations/{organizationID}/audit/member
+   *
+   * Returns the member-scoped audit view for the current user, showing only
+   * events related to that user's own membership activity in this org.
+   */
+  #[Route('organizations/{organizationID}/audit/member', ['GET'])]
+  /**
+   * Handles getAuditTimelineForMember operation.
+   */
+  public function getAuditTimelineForMember(string $organizationID): void
+  {
+    $orgId   = InputSanitizer::sanitizeString($organizationID);
+    $service = new OrganizationDiscoveryService();
+    $result  = $service->listAuditTimelineForMember(User::currentUUID(), $orgId);
+
+    if ($result['success']) {
+      Response::success('[OrgC] Member audit timeline retrieved.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
   }
 }
 

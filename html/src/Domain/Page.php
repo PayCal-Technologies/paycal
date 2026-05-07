@@ -18,18 +18,15 @@ namespace PayCal\Domain;
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
  */
-
-
-
 /**
- * Page
+ * Page enum.
  */
 enum Page: string
 {
-  case INDEX = "PAGE_INDEX";
-  case EARNINGS = "PAGE_EARNINGS";
-  case SITES = "PAGE_SITES";
-  case PROFILE = "PAGE_PROFILE";
-  case ORGANIZATIONS = "PAGE_ORGANIZATIONS";
-  case ADMIN = "PAGE_ADMIN";
+  case INDEX = 'PAGE_INDEX';
+  case EARNINGS = 'PAGE_EARNINGS';
+  case SITES = 'PAGE_SITES';
+  case PROFILE = 'PAGE_PROFILE';
+  case ORGANIZATIONS = 'PAGE_ORGANIZATIONS';
+  case ADMIN = 'PAGE_ADMIN';
 }

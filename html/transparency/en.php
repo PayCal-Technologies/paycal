@@ -143,7 +143,7 @@ require_once HTML.'/header.php';
         <p><?php echo $i18n['TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_3']; ?></p>
       </section>
 
-      <div class="doc-panel-grid" aria-label="<?php echo $i18n['TRANSPARENCY_HUB_PANELS_ARIA']; ?>">
+      <div class="doc-panel-grid doc-panel-grid--responsive-3" aria-label="<?php echo $i18n['TRANSPARENCY_HUB_PANELS_ARIA']; ?>">
         <section class="doc-section">
           <h2><?php echo $i18n['TRANSPARENCY_HUB_SECURITY_AUDIT_TITLE']; ?></h2>
           <p class="doc-article-meta">Published: <time datetime="2026-03-23">2026-03-23</time></p>
@@ -182,7 +182,7 @@ require_once HTML.'/header.php';
             <li><?php echo $i18n['TRANSPARENCY_HUB_ACCESSIBILITY_FACT_5']; ?></li>
             <li><?php echo $i18n['TRANSPARENCY_HUB_ACCESSIBILITY_FACT_6']; ?></li>
           </ul>
-          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/accessibility/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/accessibility/'); ?>"><?php echo $i18n['TRANSPARENCY_HUB_ACCESSIBILITY_READ_MORE']; ?></a></p>
         </section>
 
         <section class="doc-section">
@@ -231,6 +231,21 @@ require_once HTML.'/header.php';
             <li>Clarifies the principle of backend policy as source of truth with UI as projection only</li>
           </ul>
           <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/organization-membership/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
+          <h2>SOC 2 Compliance at PayCal</h2>
+          <p class="doc-article-meta">Published: <time datetime="2026-04-13">2026-04-13</time></p>
+          <p>
+            PayCal maintains a SOC 2 aligned control environment using deterministic evidence
+            generation, approval-linked change governance, runtime verification, and reproducible audit artifacts.
+          </p>
+          <ul class="doc-fact-list">
+            <li>Control coverage focused on Security (CC1-CC9)</li>
+            <li>Automated evidence pipeline with runtime traces, approval artifacts, and hash validation</li>
+            <li>Report access handled through NDA request workflow</li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/soc2/'); ?>"><?php echo $readMoreLabel; ?></a></p>
         </section>
 
         <section class="doc-section">
@@ -321,7 +336,7 @@ require_once HTML.'/header.php';
             <li><?php echo $i18n['TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_2']; ?></li>
             <li><?php echo $i18n['TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_3']; ?></li>
           </ul>
-          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/taxes/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/taxes/'); ?>"><?php echo $i18n['TRANSPARENCY_HUB_TAX_METHODOLOGY_READ_MORE']; ?></a></p>
         </section>
 
         <section class="doc-section">

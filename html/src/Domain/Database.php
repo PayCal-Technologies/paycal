@@ -76,17 +76,19 @@ class Database
     // Empty result may indicate replica lag - fallback to primary
     $isEmpty = (is_array($result) && [] === $result) || (is_string($result) && '' === $result) || (is_bool($result) && !$result);
 
-    if ($isEmpty) {
-      try {
-        $result = $fallbackOp(self::getWriteInstance());
+    if (!$isEmpty) {
+      return $result;
+    }
 
-        // Track replica misses for monitoring replication health
-        if (class_exists('PayCal\\Observability\\Lens')) {
-          \PayCal\Observability\Lens::increment('redis.replica.fallback');
-        }
-      } catch (\Throwable $e) {
-        // Suppress fallback errors, return original empty result
+    try {
+      $result = $fallbackOp(self::getWriteInstance());
+
+      // Track replica misses for monitoring replication health
+      if (class_exists('PayCal\\Observability\\Lens')) {
+        \PayCal\Observability\Lens::increment('redis.replica.fallback');
       }
+    } catch (\Throwable $e) {
+      // Suppress fallback errors, return original empty result
     }
 
     return $result;
@@ -174,10 +176,18 @@ class Database
   public static function getWriteInstance(): Redis
   {
     if (is_null(self::$writeInstance)) {
-      self::$writeInstance = new Redis(Environment::redisServer(), Environment::redisWritePort());
+      $server = Environment::redisServer();
+      $port = Environment::redisWritePort();
+      $db = Environment::redisDb();
+      if (class_exists('PayCal\\Domain\\Log')) {
+        \PayCal\Domain\Log::debug('[REDIS] Connecting (write) to ' . $server . ':' . $port . ' db=' . $db);
+      }
+      self::$writeInstance = new Redis($server, $port);
     }
     $dbNum = self::$writeInstance->client->getDbNum();
-
+    if (class_exists('PayCal\\Domain\\Log')) {
+      \PayCal\Domain\Log::debug('[REDIS] getWriteInstance dbNum=' . $dbNum);
+    }
     return self::$writeInstance;
   }
 
@@ -604,8 +614,36 @@ class Database
   }
 
 
-  // ////////////////////////////////////////////////////////////////////////////
-  // CUSTOM METHODS
+  /**
+   * Add a member to a sorted set with a given score.
+   *
+   * @param string $key    Sorted set key
+   * @param float  $score  Numeric score for ordering
+   * @param string $member Member value
+   * @return int Number of elements added (0 if already existed and score updated)
+   */
+  public static function zadd(string $key, float $score, string $member): int
+  {
+    return (int) self::getWriteInstance()->client->zAdd($key, $score, $member);
+  }
+
+
+  /**
+   * Return members of a sorted set within a score range (inclusive).
+   *
+   * Pass '-inf' or '+inf' as string values for open-ended ranges.
+   *
+   * @param string     $key   Sorted set key
+   * @param float|string $min Minimum score or '-inf'
+   * @param float|string $max Maximum score or '+inf'
+   * @return array<int, string> Ordered list of member strings
+   */
+  public static function zrangebyscore(string $key, float|string $min, float|string $max): array
+  {
+    $result = self::getReadInstance()->client->zRangeByScore($key, (string) $min, (string) $max);
+
+    return is_array($result) ? array_values(array_map('strval', $result)) : [];
+  }
 
   /**
    * Resets fields and sets dummy values for all keys matching a pattern using pipelining.

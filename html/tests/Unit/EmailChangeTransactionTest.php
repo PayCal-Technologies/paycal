@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use PayCal\Domain\EmailChangeTransaction;
+use PayCal\Infrastructure\Transaction\EmailChangeTransaction;
 use PayCal\Domain\Database;
 use PayCal\Domain\Constants\Keys;
 use PHPUnit\Framework\TestCase;

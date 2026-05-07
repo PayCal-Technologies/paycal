@@ -429,6 +429,136 @@ let currentLang = '<?php echo \PayCal\Domain\Language::DEFAULT; ?>';
   setupSystemLimitsHandlers();
 });
 
+  // ==================== System Audit Event Stream ====================
+
+  /**
+   * Connects a real WebSocket to exact /ws and renders immutable audit events
+   * into #audit_event_feed on the admin dashboard.
+   *
+   * Purpose: replace the prior SSE transport with a true WebSocket while
+   * preserving the legacy /ws/ HTTP channels used elsewhere in the app.
+   */
+  function initAuditEventStream() {
+    const feedEl = document.getElementById('audit_event_feed');
+    const statusEl = document.getElementById('audit_stream_status');
+    const countEl = document.getElementById('audit_event_count');
+    const reconnectBtn = document.getElementById('btn_audit_stream_reconnect');
+    if (!feedEl) return;
+
+    let eventCount = 0;
+    let socket = null;
+    let reconnectTimer = null;
+    let manualReconnect = false;
+
+    function websocketURL() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      return `${protocol}//${window.location.host}/ws`;
+    }
+
+    function renderAuditEvent(data) {
+      eventCount++;
+      if (countEl) countEl.textContent = `(${eventCount})`;
+
+      const ts = data.created_at ? new Date(data.created_at).toLocaleTimeString() : '';
+      const seq = data.ledger_sequence ? `#${data.ledger_sequence}` : '';
+      const actor = String(data.actor_uuid || '').slice(0, 8);
+      const type = String(data.event_type || 'unknown');
+
+      const li = document.createElement('li');
+      li.className = 'audit-event-item';
+      li.textContent = [ts, seq, type, actor ? `actor:${actor}…` : ''].filter(Boolean).join('  ');
+      feedEl.prepend(li);
+
+      while (feedEl.children.length > 100) {
+        feedEl.removeChild(feedEl.lastChild);
+      }
+    }
+
+    function scheduleReconnect() {
+      if (manualReconnect) {
+        manualReconnect = false;
+        return;
+      }
+
+      if (reconnectTimer !== null) {
+        window.clearTimeout(reconnectTimer);
+      }
+
+      reconnectTimer = window.setTimeout(() => {
+        connect();
+      }, 2000);
+    }
+
+    function connect() {
+      if (reconnectTimer !== null) {
+        window.clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+
+      if (socket) {
+        socket.close();
+      }
+
+      if (statusEl) statusEl.textContent = ' — Connecting…';
+
+      socket = new WebSocket(websocketURL());
+
+      socket.addEventListener('open', () => {
+        if (statusEl) statusEl.textContent = ' — Connected';
+        socket.send(JSON.stringify({ action: 'subscribe', channel: 'system_audit' }));
+      });
+
+      socket.addEventListener('message', (message) => {
+        let payload;
+        try {
+          payload = JSON.parse(message.data);
+        } catch {
+          return;
+        }
+
+        if (payload.type === 'audit_snapshot' && Array.isArray(payload.events)) {
+          feedEl.textContent = '';
+          eventCount = 0;
+          payload.events.slice().reverse().forEach((event) => renderAuditEvent(event));
+          return;
+        }
+
+        if (payload.type === 'audit_event' && payload.event) {
+          renderAuditEvent(payload.event);
+          return;
+        }
+
+        if (payload.type === 'error' && statusEl) {
+          statusEl.textContent = ` — ${String(payload.message || 'Connection error')}`;
+        }
+      });
+
+      socket.addEventListener('close', () => {
+        if (statusEl) statusEl.textContent = ' — Reconnecting…';
+        scheduleReconnect();
+      });
+
+      socket.addEventListener('error', () => {
+        if (statusEl) statusEl.textContent = ' — Reconnecting…';
+      });
+    }
+
+    connect();
+
+    if (reconnectBtn) {
+      reconnectBtn.addEventListener('click', () => {
+        manualReconnect = true;
+        eventCount = 0;
+        if (countEl) countEl.textContent = '(0)';
+        if (feedEl) feedEl.textContent = '';
+        if (statusEl) statusEl.textContent = ' — Connecting…';
+        connect();
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initAuditEventStream);
+
 function loadLangContent(lang) {
   fetch(`<?php echo Environment::appURL('admin/languages.php'); ?>?lang=${lang}`)
     .then(async (response) => {

@@ -14,13 +14,12 @@ namespace PayCal\Domain\Attributes;
  *
  * @category   Attributes
  * @package    PayCal\Domain\Attributes
+ * @subpackage Metadata
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
  * MinLength attribute.
  *
@@ -28,9 +27,6 @@ namespace PayCal\Domain\Attributes;
  * - Provide declarative minimum-length constraints for field validators.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-/**
- * MinLength metadata value object.
- */
 class MinLength
 {
   /**

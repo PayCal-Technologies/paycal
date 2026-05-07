@@ -13,6 +13,7 @@ return [
     'admin.surface.enabled' => true,
     'admin.page.paths' => [
       '/admin/',
+      '/admin/soc2/',
       '/admin/metrics/',
       '/admin/languages/',
       '/admin/stripe/',
@@ -23,6 +24,7 @@ return [
     ],
     'admin.nav.links' => [
       ['href' => '/admin/', 'label_key' => 'ADMIN', 'icon' => 'admin', 'match_prefix' => '/admin'],
+      ['href' => '/admin/soc2/', 'label_key' => 'SOC2', 'icon' => 'admin', 'match_prefix' => '/admin/soc2'],
       ['href' => '/admin/metrics/', 'label_key' => 'METRICS', 'icon' => 'metrics', 'match_prefix' => '/admin/metrics'],
       ['href' => '/admin/languages/', 'label_key' => 'ADMIN_DASHBOARD_LANGUAGES', 'icon' => 'settings', 'match_prefix' => '/admin/languages'],
       ['href' => '/admin/stripe/', 'label_key' => 'STRIPE', 'icon' => 'metrics', 'match_prefix' => '/admin/stripe'],

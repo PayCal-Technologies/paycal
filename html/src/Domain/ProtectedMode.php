@@ -4,6 +4,7 @@ namespace PayCal\Domain;
 
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Enums\HttpStatus;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 
 /**
  * ProtectedMode.php

@@ -14,13 +14,12 @@ namespace PayCal\Domain\Attributes;
  *
  * @category   Attributes
  * @package    PayCal\Domain\Attributes
+ * @subpackage Metadata
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
  * Required attribute.
  *
@@ -28,9 +27,6 @@ namespace PayCal\Domain\Attributes;
  * - Mark fields that cannot be null/empty in validated payloads.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-/**
- * Required metadata marker.
- */
 class Required
 {
 }

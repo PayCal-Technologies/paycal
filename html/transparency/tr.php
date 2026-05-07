@@ -54,7 +54,7 @@ require_once HTML.'/header.php';
         <p>Ürünü şekillendiren son güncellemeler — faturalandırma ve profil yönetişim akışları dahil — framework/backend ve test yönetişimi sayfalarımızda takip edilmektedir.</p>
       </section>
 
-      <div class="doc-panel-grid" aria-label="Şeffaflık detay panelleri">
+      <div class="doc-panel-grid doc-panel-grid--responsive-3" aria-label="Şeffaflık detay panelleri">
         <section class="doc-section">
           <h2>Güvenlik Denetimi Durumu</h2>
           <p class="doc-article-meta">Published: <time datetime="2026-03-23">2026-03-23</time></p>

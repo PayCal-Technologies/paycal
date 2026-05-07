@@ -13,13 +13,12 @@ namespace PayCal\Domain\Attributes;
  *
  * @category   Attributes
  * @package    PayCal\Domain\Attributes
+ * @subpackage Metadata
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
  * Email attribute.
  *
@@ -27,9 +26,6 @@ namespace PayCal\Domain\Attributes;
  * - Mark fields that require email-format validation.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-/**
- * Email metadata marker.
- */
 class Email
 {
 }

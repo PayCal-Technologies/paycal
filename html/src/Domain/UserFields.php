@@ -64,6 +64,7 @@ enum UserFields: string
   case THEME = 'theme';
   case VARIANT = 'variant';
   case LANGUAGE = 'language';
+  case LOCALE = 'locale';
   case TEXT = 'text';
   case DENSITY = 'density';
   case DYSLEXIA_TYPOGRAPHY = 'dyslexia_typography';

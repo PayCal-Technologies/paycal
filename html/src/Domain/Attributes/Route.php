@@ -14,13 +14,12 @@ namespace PayCal\Domain\Attributes;
  *
  * @category   Attributes
  * @package    PayCal\Domain\Attributes
+ * @subpackage Metadata
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
  * Route attribute.
  *
@@ -29,9 +28,6 @@ namespace PayCal\Domain\Attributes;
  * - Provide stable metadata consumed by runtime route registration.
  */
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-/**
- * Route metadata value object.
- */
 class Route
 {
   /**

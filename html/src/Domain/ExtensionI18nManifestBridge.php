@@ -12,21 +12,10 @@ namespace PayCal\Domain;
  * - Strings must remain stable when extension runtime is absent.
  * - Manifest ordering affects override precedence and should remain explicit.
  */
-/**
- * Extension i18n manifest bridge.
- *
- * Responsibilities:
- * - Read active extension manifests when runtime is available.
- * - Normalize manifest payloads for i18n consumption.
- * - Apply deterministic manifest ordering for override precedence.
- */
 final class ExtensionI18nManifestBridge
 {
   private const RUNTIME_CLASS = 'PayCal\\Domain\\Extensions\\ExtensionRuntime';
 
-  /**
-   * Handles runtimeAvailable operation.
-   */
   public static function runtimeAvailable(): bool
   {
     return class_exists(self::RUNTIME_CLASS);

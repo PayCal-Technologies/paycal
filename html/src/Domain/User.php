@@ -111,6 +111,7 @@ final class User
   public string $theme                               = UserPreferenceDefaults::DEFAULT_THEME;
   public string $variant                             = 'dark';
   public string $language                            = Language::DEFAULT;
+  public string $locale                              = 'en-CA';
   public string $text                                = UserPreferenceDefaults::DEFAULT_TEXT;
   public string $density                             = UserPreferenceDefaults::DEFAULT_DENSITY;
   public string $dyslexia_typography                 = UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY;
@@ -413,7 +414,7 @@ final class User
       return;
 
     $timestamp = strval(time());
-    $ip        = Security::getVisitorRealIPAddress();
+    $ip        = Security::getClientIPAddress();
     Database::hset(Keys::SESSION . ":" . $sessionHash, ['last_signin' => $timestamp]);
     Database::hset(Keys::SESSION . ":" . $sessionHash, ['last_ip' => $ip]);
   }

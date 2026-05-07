@@ -81,8 +81,125 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   min-width: 0;
 }
 
+#panel-personal-info .personal_wage_input_shell {
+  position: relative;
+  width: 100%;
+}
+
+#panel-personal-info .personal_wage_currency_symbol {
+  position: absolute;
+  left: 0.62rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--color-text, #f5f5f5) 80%, transparent);
+  pointer-events: none;
+}
+
+#panel-personal-info .personal_wage_input_shell #organizations_personal_default_wage {
+  padding-left: 1.8rem;
+}
+
+#panel-personal-info .personal_phone_input_shell {
+  position: relative;
+  width: 100%;
+}
+
+#panel-personal-info .personal_phone_country_code {
+  position: absolute;
+  left: 0.62rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--color-text, #f5f5f5) 80%, transparent);
+  pointer-events: none;
+}
+
+#panel-personal-info .personal_phone_input_shell #edit_details_phone {
+  padding-left: 2.4rem;
+}
+
 #panel-personal-info {
   position: relative;
+}
+
+#panel-internationalization {
+  position: relative;
+}
+
+#panel-internationalization .profile_i18n_grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.25rem;
+  align-items: start;
+}
+
+#panel-internationalization .item_pair {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.4rem 1rem;
+  align-items: center;
+  margin: 0;
+  padding: 0.08rem 0;
+  min-width: 0;
+}
+
+#panel-internationalization .item_label {
+  display: flex;
+  align-items: center;
+  line-height: 1.3;
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+  flex: 0 1 8.5rem;
+  min-width: 6.5rem;
+  min-height: 2.3rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#panel-internationalization .item_value {
+  display: grid;
+  gap: 0.25rem;
+  width: 100%;
+  max-width: 25rem;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+#panel-internationalization .item_value input,
+#panel-internationalization .item_value select,
+#panel-internationalization .currency_finder_search,
+#panel-internationalization .timezone_finder_search {
+  min-height: 2.3rem;
+  margin: 0;
+  padding: 0.42rem 0.62rem;
+  box-sizing: border-box;
+}
+
+#panel-internationalization .profile_i18n_preview {
+  margin-top: var(--mar-md, 1rem);
+  padding: var(--pad-md, 0.8rem);
+  border: 1px solid var(--panel-border, #3a3a3a);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel-bg, #1f2530) 86%, black 14%);
+}
+
+#panel-internationalization .profile_i18n_preview_rows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+#panel-internationalization .profile_i18n_preview_rows > div {
+  font-size: var(--font-sm, 1rem);
+  line-height: 1.4;
+}
+
+#panel-internationalization:has(.currency_finder[aria-expanded="true"]),
+#panel-internationalization:has(.timezone_finder[aria-expanded="true"]) {
+  z-index: 1600;
 }
 
 #panel-personal-info:has(.currency_finder[aria-expanded="true"]),
@@ -173,6 +290,22 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 #panel-pay-period #organizations_personal_form .pay_period_preview_compact {
   margin-top: var(--mar-sm, 0.8rem);
+}
+
+#panel-pay-period #organizations_personal_form .organizations_payperiod_warning {
+  display: none;
+  margin-top: 0.65rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--color-danger, #d64545) 75%, var(--border, #444));
+  background: color-mix(in srgb, var(--color-danger, #d64545) 16%, transparent);
+  color: color-mix(in srgb, var(--color-danger, #d64545) 78%, var(--color-text, #f5f5f5));
+  border-radius: 8px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+#panel-pay-period #organizations_personal_form .organizations_payperiod_warning.is-visible {
+  display: block;
 }
 
 #panel-pay-period #organizations_personal_preview.organizations_preview_box {
@@ -582,6 +715,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
   #panel-personal-info .profile_personal_info_grid {
     grid-template-columns: 1fr;
+
+  #panel-internationalization .profile_i18n_grid,
+  #panel-internationalization .profile_i18n_preview_rows {
+    grid-template-columns: 1fr;
+  }
   }
 
   #panel-personal-info .item_pair {

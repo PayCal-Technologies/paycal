@@ -60,6 +60,8 @@ const setRegisterStatus = (msg) => {
 
 const authBannerEl = document.getElementById('auth-feedback-banner');
 let authBannerTimer = null;
+let recoveryStartInFlight = false;
+const RECOVERY_PREFILL_SESSION_KEY = 'paycal.recovery.prefill';
 const registerUnsupportedWarning = 'This browser cannot create a passkey. Use a modern WebAuthn browser on HTTPS to create your account.';
 const registerUnsupportedHelpLabel = 'Why passkeys are required and how your encrypted data is protected';
 
@@ -101,10 +103,65 @@ const showAuthBanner = (msg, type = 'error', options = {}) => {
 
   if (authBannerTimer) {
     clearTimeout(authBannerTimer);
+    authBannerTimer = null;
   }
-  authBannerTimer = setTimeout(() => {
-    authBannerEl.classList.remove('show');
-  }, 10500);
+
+  const autoHideMs = Number(options.autoHideMs ?? 10500);
+  if (Number.isFinite(autoHideMs) && autoHideMs > 0) {
+    authBannerTimer = setTimeout(() => {
+      authBannerEl.classList.remove('show');
+    }, autoHideMs);
+  }
+};
+
+const recoveryUrlWithLanguage = () => {
+  const current = new URL(window.location.href);
+  const language = String(current.searchParams.get('l') || '').trim();
+  const target = new URL('/auth/recover/', window.location.origin);
+  if (language !== '') {
+    target.searchParams.set('l', language);
+  }
+  return target.toString();
+};
+
+const showRecoveryCodeComposer = (prefillEmail = '') => {
+  if (!authBannerEl) return;
+
+  showAuthBanner('Passkey sign-in failed. Enter your account email to send a recovery code.', 'error', {
+    autoHideMs: 0,
+  });
+
+  const actions = document.createElement('div');
+  actions.className = 'auth-feedback-banner-actions';
+
+  const input = document.createElement('input');
+  input.type = 'email';
+  input.className = 'auth-feedback-banner-input';
+  input.placeholder = 'you@example.com';
+  input.value = String(prefillEmail || '').trim();
+  input.autocomplete = 'email';
+  input.setAttribute('aria-label', 'Email for recovery code');
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'auth-feedback-banner-btn';
+  button.textContent = 'Send recovery code';
+
+  button.addEventListener('click', async () => {
+    const email = String(input.value || '').trim();
+    if (!email || !email.includes('@')) {
+      showAuthBanner('Enter a valid email address to send a recovery code.', 'error', { autoHideMs: 0 });
+      showRecoveryCodeComposer(email);
+      return;
+    }
+    await requestRecoveryCodeAndRedirect(email, { source: 'manual' });
+  });
+
+  actions.appendChild(input);
+  actions.appendChild(button);
+  authBannerEl.appendChild(actions);
+
+  input.focus();
 };
 
 const showAuthError = (msg, context = 'signin') => {
@@ -325,16 +382,34 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
 
     const finishPayload = finishPayloadRaw && typeof finishPayloadRaw === 'object' ? finishPayloadRaw : {};
     if (!finishResponse.ok || finishPayload.status !== 'success') {
+      const finishErrorCode = String(finishPayload.error || '').trim();
       // 403 means credential mismatch (passkey not registered for this email)
       if (finishResponse.status === 403 && email) {
         const error = new Error('This passkey isn\'t registered for this account.');
         error.isPasskeyMismatch = true;
+        error.isPasskeyRecoverable = true;
+        error.email = email;
+        throw error;
+      }
+      if (finishErrorCode === 'passkey_compromised' && email) {
+        const error = new Error('This passkey can no longer be used. Use a recovery link to continue.');
+        error.isPasskeyRecoverable = true;
+        error.email = email;
+        throw error;
+      }
+      if (finishErrorCode === 'passkey_invalid' && email) {
+        const error = new Error('This passkey is no longer valid for this account.');
+        error.isPasskeyRecoverable = true;
         error.email = email;
         throw error;
       }
       // 401 means the passkey credential was not found or authentication failed
       if (finishResponse.status === 401) {
-        throw new Error('Passkey not recognized. Make sure you\'re using a passkey registered with this account.');
+        const error = new Error('Passkey not recognized.');
+        error.isPasskeyRecoverable = true;
+        error.email = email;
+        error.requiresEmailForRecovery = !email;
+        throw error;
       }
       throw new Error(finishPayload.message || 'Passkey login failed.');
     }
@@ -347,21 +422,14 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
   } catch (error) {
     const msg = error?.message || 'Sign-in failed. Try again.';
     
-    // Show recovery option for passkey mismatch
-    if (error?.isPasskeyMismatch && error?.email) {
-      showAuthBanner(msg, 'error', {
-        linkHref: '#',
-        linkLabel: 'Send recovery code to email',
-      });
-      
-      // Attach handler to recovery link
-      const links = authBannerEl?.querySelectorAll('a');
-      if (links && links.length > 0) {
-        const recoveryLink = links[links.length - 1];
-        recoveryLink.addEventListener('click', async (e) => {
-          e.preventDefault();
-          await requestRecoveryEmail(error.email);
-        });
+    // Send recovery code and redirect to recovery page when passkey cannot be used.
+    if (error?.isPasskeyRecoverable) {
+      const recoveryEmail = String(error?.email || '').trim();
+      if (recoveryEmail !== '') {
+        await requestRecoveryCodeAndRedirect(recoveryEmail, { source: 'auto' });
+      } else {
+        showRecoveryCodeComposer('');
+        setPasskeyStatus('Enter your email to send a recovery code.');
       }
     } else {
       showAuthError(msg, 'signin');
@@ -373,44 +441,83 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
   }
 };
 
-const requestRecoveryEmail = async (email) => {
+const requestRecoveryCodeAndRedirect = async (email, options = {}) => {
+  if (recoveryStartInFlight) {
+    return;
+  }
+
+  recoveryStartInFlight = true;
+  const source = String(options.source || 'manual');
+
   try {
-    setPasskeyStatus('Sending recovery code…');
-    const { response } = await fetchJsonWithTimeout('/api/v1/auth/passkey/send-recovery-email', {
+    setPasskeyStatus('Sending recovery code...');
+    const { response, payload } = await fetchJsonWithTimeout('/api/v1/auth/recovery/start', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ email }),
     });
 
-    if (response.ok) {
+    const startPayload = payload && typeof payload === 'object' ? payload : {};
+    const txnId = String(startPayload.txnId || startPayload?.data?.txnId || '').trim();
+    const txnSecret = String(startPayload.txnSecret || startPayload?.data?.txnSecret || '').trim();
+
+    if (response.ok && startPayload.status === 'success' && txnId !== '' && txnSecret !== '') {
+      const normalizedEmail = String(email || '').trim();
+      try {
+        window.sessionStorage.setItem(RECOVERY_PREFILL_SESSION_KEY, JSON.stringify({
+          txnId,
+          txnSecret,
+          email: normalizedEmail,
+          createdAt: Date.now(),
+        }));
+      } catch (_) {
+        // If sessionStorage is blocked, continue with plain redirect.
+      }
+
       showAuthBanner(
-        'Recovery code sent to ' + email + '. Check your email for login instructions.',
+        'Recovery code sent to ' + normalizedEmail + '. Redirecting to recovery...',
         'success',
         {
-          linkHref: '/auth/recover/',
+          linkHref: recoveryUrlWithLanguage(),
           linkLabel: 'Go to recovery page',
+          autoHideMs: source === 'auto' ? 2200 : 1800,
         }
       );
-      setPasskeyStatus('Recovery code sent. Check your email.');
+
+      setPasskeyStatus('Recovery code sent. Redirecting...');
+      window.setTimeout(() => {
+        window.location.href = recoveryUrlWithLanguage();
+      }, source === 'auto' ? 300 : 500);
     } else {
-      throw new Error('Failed to send recovery code.');
+      throw new Error('Unable to start account recovery.');
     }
   } catch (error) {
     const msg = error?.message || 'Unable to send recovery code. Try again.';
-    showAuthBanner(msg, 'error');
-    setPasskeyStatus(DEFAULT_SIGNIN_STATUS);
+    showAuthBanner(msg, 'error', { autoHideMs: 0 });
+    showRecoveryCodeComposer(String(email || '').trim());
+    setPasskeyStatus('Recovery code could not be sent. Try again.');
+  } finally {
+    recoveryStartInFlight = false;
   }
 };
 
-// Conditional UI: attempt discoverable passkey autofill if supported
-if (window.PublicKeyCredential && typeof PublicKeyCredential.isConditionalMediationAvailable === 'function') {
-  PublicKeyCredential.isConditionalMediationAvailable().then((available) => {
-    if (available) {
-      runPasskeySignin(true);
-    }
-  }).catch(() => {});
-}
+const isSigninPanelActive = () => {
+  const shell = document.getElementById('auth-shell');
+  if (shell && shell.classList.contains('is-register')) {
+    return false;
+  }
+
+  const signinPanel = document.getElementById('panel-signin');
+  if (signinPanel && signinPanel.getAttribute('aria-hidden') === 'true') {
+    return false;
+  }
+
+  return true;
+};
+
+// Keep passkey sign-in user-initiated to avoid background 401s from silent
+// conditional mediation probes that create confusing console noise.
 
 const passkeyButton = document.getElementById('signin-passkey');
 if (passkeyButton) {

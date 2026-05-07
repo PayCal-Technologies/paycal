@@ -4,12 +4,14 @@ namespace PayCal\Domain;
 
 require_once '../../config.php';
 
-$assetVersion = Environment::appVersion();
+$assetVersion = Environment::devSecurityDisabled() ? (string) time() : Environment::appVersion();
 $language = strtolower(trim((string) InputSanitizer::getString('l')));
 $authLanguageQuery = '';
 if ($language !== '' && in_array($language, Language::getCodes(), true)) {
   $authLanguageQuery = '?l=' . rawurlencode($language);
 }
+$magicLinkToken = trim((string) InputSanitizer::getString('ml_token'));
+$hasMagicLinkToken = $magicLinkToken !== '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,24 +30,26 @@ if ($language !== '' && in_array($language, Language::getCodes(), true)) {
     <header class="recovery-header">
       <a class="recovery-back" href="/auth/<?php echo $authLanguageQuery; ?>">Back to sign in</a>
       <h1>Recover your account</h1>
-      <p>We'll help you regain access in three steps.<br>You'll need: a code from your email and your Recovery Key.</p>
+      <p>We'll help you regain access in three steps.<br>Use either a recovery code or magic link from your email, plus your Recovery Key.</p>
     </header>
     <section class="recovery-card">
       <ol class="recovery-steps" aria-label="Recovery steps">
-        <li class="is-active" data-step-indicator="1">Verify</li>
-        <li data-step-indicator="2">Passkey</li>
+        <li<?php echo $hasMagicLinkToken ? '' : ' class="is-active"'; ?> data-step-indicator="1">Verify</li>
+        <li<?php echo $hasMagicLinkToken ? ' class="is-active"' : ''; ?> data-step-indicator="2">Passkey</li>
         <li data-step-indicator="3">Success</li>
       </ol>
-      <p class="recovery-status" id="recovery-status" aria-live="assertive">Enter your account email to begin.</p>
-      <section class="recovery-panel" data-step="1">
+      <p class="recovery-status" id="recovery-status" aria-live="assertive"><?php echo $hasMagicLinkToken ? 'Verifying recovery link...' : 'Enter your account email to begin.'; ?></p>
+      <section class="recovery-panel<?php echo $hasMagicLinkToken ? ' is-hidden' : ''; ?>" data-step="1">
         <form id="recovery-start-form">
           <label for="recovery-email">Account email</label>
           <input id="recovery-email" name="email" type="email" autocomplete="email" required>
           <button id="recovery-send-code" type="submit" class="btn btn_primary">Send code</button>
         </form>
         <form id="recovery-verify-form" class="is-hidden">
-          <label for="recovery-code">Recovery code</label>
-          <input id="recovery-code" name="code" type="text" autocomplete="one-time-code" maxlength="6" required>
+          <div id="recovery-code-block">
+            <label for="recovery-code">Recovery code</label>
+            <input id="recovery-code" name="code" type="text" autocomplete="one-time-code" maxlength="6" required>
+          </div>
           <label for="recovery-key">Recovery Key</label>
           <input id="recovery-key" name="recoveryKey" type="text" autocomplete="off" spellcheck="false" required>
           <div class="recovery-actions">
@@ -54,7 +58,7 @@ if ($language !== '' && in_array($language, Language::getCodes(), true)) {
           </div>
         </form>
       </section>
-      <section class="recovery-panel is-hidden" data-step="2">
+      <section class="recovery-panel<?php echo $hasMagicLinkToken ? '' : ' is-hidden'; ?>" data-step="2">
         <p>Verified. Now register a new passkey for this account.</p>
         <label for="recovery-device-name">New passkey name</label>
         <input id="recovery-device-name" name="deviceName" type="text" autocomplete="off" value="Recovered Passkey">

@@ -11,7 +11,7 @@ final class SecurityLogHookContractTest extends TestCase
 {
   public function testSecurityLogDispatchesAuditEventThroughHookBus(): void
   {
-    $source = $this->readProjectFile('src/Domain/SecurityLog.php');
+    $source = $this->readProjectFile('src/Infrastructure/Telemetry/SecurityLog.php');
 
     $this->assertStringContainsString("ExtensionHookBridge::dispatch('security.audit_event', [", $source);
     $this->assertStringContainsString('\'event\' => $event', $source);
@@ -21,7 +21,7 @@ final class SecurityLogHookContractTest extends TestCase
 
   public function testSecurityLogStillWritesCoreSecurityLogLine(): void
   {
-    $source = $this->readProjectFile('src/Domain/SecurityLog.php');
+    $source = $this->readProjectFile('src/Infrastructure/Telemetry/SecurityLog.php');
 
     $this->assertStringContainsString('Log::error(\'[SECURITY] \' . json_encode($payload));', $source);
   }

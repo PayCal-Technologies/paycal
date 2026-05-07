@@ -2,7 +2,7 @@
 
 namespace Tests\Integration;
 
-require_once __DIR__ . '/Support/PlaintextWorkTestUser.php';
+require_once __DIR__ . '/Support/EncryptedWorkTestUser.php';
 
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Constants\Keys;
@@ -13,7 +13,7 @@ use PayCal\Controllers\EarningsController;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Skip;
 use PHPUnit\Framework\TestCase;
-use Tests\Integration\Support\PlaintextWorkTestUser;
+use Tests\Integration\Support\EncryptedWorkTestUser;
 
 /**
  * Integration parity test between Calendar and Earnings retrieval paths.
@@ -27,7 +27,7 @@ use Tests\Integration\Support\PlaintextWorkTestUser;
 #[Group('integration')]
 final class EarningsCalendarParityIntegrationTest extends TestCase
 {
-  private PlaintextWorkTestUser $fixture;
+  private EncryptedWorkTestUser $fixture;
   private string $userUUID;
   private string $siteId;
   private string $siteName;
@@ -36,7 +36,7 @@ final class EarningsCalendarParityIntegrationTest extends TestCase
   {
     parent::setUp();
 
-    $this->fixture = PlaintextWorkTestUser::create();
+    $this->fixture = EncryptedWorkTestUser::create();
     $this->userUUID = $this->fixture->userUUID;
     $this->siteId = 'S' . strtolower(substr(bin2hex(random_bytes(8)), 0, 9));
     $this->siteName = 'Strathcona Resources Ltd.';
@@ -104,10 +104,11 @@ final class EarningsCalendarParityIntegrationTest extends TestCase
     }
   }
 
-  #[Skip('Temporarily disabled while investigating local stall in renderSections lazy parity path')]
+  #[Skip('renderSections("lazy") stalls in PHPUnit process (confirmed rendering-infra issue unrelated to gross omission). The gross-absent aggregation path is exercised by EarningsWorkTotalsIntegrationTest::getWorkTotalsForRange_returnsGrossIncomeCents. Fix stall separately before enabling this test.')]
+  #[Group('skip')]
   public function testRenderSectionsLazyDoesNotFatalWhenEncryptedWorkRowOmitsGross(): void
   {
-    $this->markTestSkipped('Temporarily disabled while investigating local stall in renderSections lazy parity path');
+    $this->markTestSkipped('renderSections("lazy") stalls in PHPUnit process — see skip reason above');
 
     $year = max((int) SystemConfig::get('year_min'), 2026);
     $workDate = sprintf('%04d-06-15', $year);
@@ -161,6 +162,9 @@ final class EarningsCalendarParityIntegrationTest extends TestCase
     $year = max((int) SystemConfig::get('year_min'), 2026);
     $workDate = sprintf('%04d-05-04', $year);
     $workKey = Keys::WORK . ':' . $this->userUUID . ':' . $workDate . ':' . $this->siteId;
+    // Delete any existing key so setUp-seeded split fields (regular_hours, overtime_hours)
+    // do not interfere with the "omits split" scenario this test exercises.
+    Database::del($workKey);
     Database::hset($workKey, [
       'date' => $workDate,
       'site_id' => $this->siteId,

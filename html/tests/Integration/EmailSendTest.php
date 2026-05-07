@@ -3,7 +3,7 @@
 namespace Tests\Integration;
 
 use PayCal\Domain\Config\Environment;
-use PayCal\Domain\EmailTransport;
+use PayCal\Infrastructure\Email\EmailTransport;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 

@@ -39,6 +39,8 @@ import { initializeBillingSection } from "../core/billing.js";
 
   const isAdminUser = <?php echo User::isAdmin() ? 'true' : 'false'; ?>;
   const isSuperAdminUser = <?php echo User::isSuperAdmin() ? 'true' : 'false'; ?>;
+  const appEnv = '<?php echo addslashes((string) \PayCal\Domain\Config\Environment::appEnv()); ?>';
+  const isDevEnvironment = appEnv === 'dev' || appEnv === 'mac' || window.location.hostname === 'dev.paycal.local';
   const isManagerUser = <?php echo User::isManager() ? 'true' : 'false'; ?>;
   const hasActivePremiumSubscription = <?php echo SubscriptionGate::hasActivePremium(User::currentUUID()) ? 'true' : 'false'; ?>;
   const isElevatedStaffUser = isAdminUser || isSuperAdminUser || isManagerUser;
@@ -451,6 +453,7 @@ import { initializeBillingSection } from "../core/billing.js";
     personalPayAnchor: document.getElementById('organizations_personal_pay_anchor'),
     personalPayPeriodStart: document.getElementById('organizations_personal_pay_period_start'),
     personalPayPeriodLength: document.getElementById('organizations_personal_pay_period_length'),
+    personalPayPeriodWarning: document.getElementById('organizations_personal_payperiod_warning'),
     personalEditingGraceDays: document.getElementById('organizations_personal_editing_grace_days'),
     personalEditingGraceDayRadios: document.querySelectorAll('input[name="organizations_personal_editing_grace_days"]'),
     personalDefaultWage: document.getElementById('organizations_personal_default_wage'),
@@ -458,6 +461,9 @@ import { initializeBillingSection } from "../core/billing.js";
     personalTimezoneSearch: document.getElementById('organizations_personal_timezone_search'),
     personalCurrency: document.getElementById('organizations_personal_currency'),
     personalCurrencySearch: document.getElementById('organizations_personal_currency_search'),
+    personalLanguage: document.getElementById('organizations_personal_language'),
+    personalLocale: document.getElementById('organizations_personal_locale'),
+    personalI18nPreview: document.getElementById('organizations_i18n_preview'),
     personalPreview: document.getElementById('organizations_personal_preview'),
     accountActivityStatus: document.getElementById('account_activity_status'),
     accountActivityPanel: document.getElementById('panel-account-activity'),
@@ -504,6 +510,10 @@ import { initializeBillingSection } from "../core/billing.js";
     currencySearch: document.getElementById('organizations_editor_currency_search'),
     preview: document.getElementById('organizations_editor_preview'),
     ownerSummary: document.getElementById('organizations_owner_summary'),
+    auditControlTestPanel: document.getElementById('organizations_audit_control_test_panel'),
+    auditControlTestSummary: document.getElementById('organizations_audit_control_test_summary'),
+    auditControlTestButton: document.getElementById('organizations_audit_control_test_button'),
+    auditControlTestStatus: document.getElementById('organizations_audit_control_test_status'),
     domainPolicyStatus: document.getElementById('organizations_editor_domain_policy_status'),
     enforceContactDomain: document.getElementById('organizations_editor_enforce_contact_domain'),
     allowedContactDomains: document.getElementById('organizations_editor_allowed_contact_domains'),
@@ -716,7 +726,7 @@ import { initializeBillingSection } from "../core/billing.js";
     }
 
     if (state.customContactCards.length === 0) {
-      elements.customCardsContainer.innerHTML = '';
+      elements.customCardsContainer.textContent = '';
       return;
     }
 
@@ -1624,6 +1634,63 @@ import { initializeBillingSection } from "../core/billing.js";
     return canManageOrganizationAccess(organization);
   };
 
+  const canGenerateAuditControlTest = (organization) => {
+    if (!organization || typeof organization !== 'object') {
+      return false;
+    }
+
+    return isAdminUser || isSuperAdminUser;
+  };
+
+  const GATED_PANEL_SELECTORS = [
+    '#organizations_audit_control_test_panel',
+    '.organizations_panel_sites_discovery',
+    '.organizations_panel_audit_timeline',
+    '#organizations_members_requests_section',
+    '#organizations_members_invite_section',
+    '#organizations_members_import_section',
+  ];
+
+  const syncDevGatedPanelBorders = () => {
+    GATED_PANEL_SELECTORS.forEach((selector) => {
+      document.querySelectorAll(selector).forEach((node) => {
+        if (!(node instanceof HTMLElement)) {
+          return;
+        }
+        node.classList.toggle('organizations_dev_gated_panel', isDevEnvironment);
+      });
+    });
+  };
+
+  const setAuditControlTestStatus = (message, tone = 'info') => {
+    if (!(elements.auditControlTestStatus instanceof HTMLElement)) {
+      return;
+    }
+
+    elements.auditControlTestStatus.textContent = String(message || '');
+    elements.auditControlTestStatus.classList.remove('error', 'success');
+    if (tone === 'error' || tone === 'success') {
+      elements.auditControlTestStatus.classList.add(tone);
+    }
+  };
+
+  const syncAuditControlTestPanel = (organization) => {
+    if (!(elements.auditControlTestPanel instanceof HTMLElement)) {
+      return;
+    }
+
+    const allowed = !!organization && canGenerateAuditControlTest(organization);
+    elements.auditControlTestPanel.hidden = !allowed;
+
+    if (elements.auditControlTestButton instanceof HTMLButtonElement) {
+      elements.auditControlTestButton.disabled = !allowed;
+    }
+
+    if (!allowed) {
+      setAuditControlTestStatus('');
+    }
+  };
+
   const showAccessManagementDeniedWarning = (message = ACCESS_MANAGE_WARNING) => {
     const warning = String(message || ACCESS_MANAGE_WARNING);
     setCurrentOrganizationStatus(warning);
@@ -1744,6 +1811,7 @@ import { initializeBillingSection } from "../core/billing.js";
     }
 
     updatePremiumNotice(organization);
+    syncDevGatedPanelBorders();
   };
 
   const blockPremiumActionWhenLocked = () => {
@@ -2299,6 +2367,8 @@ import { initializeBillingSection } from "../core/billing.js";
     window.dispatchEvent(new CustomEvent('paycal:notifications-updated'));
   };
 
+  const legacyWsHttpBase = '/ws/';
+
   const fetchOrganizationNotificationSnapshot = async () => {
     const params = new URLSearchParams({
       channel: 'organization_notifications',
@@ -2308,7 +2378,7 @@ import { initializeBillingSection } from "../core/billing.js";
       params.set('since_signature', state.notificationsSignature);
     }
 
-    const response = await fetch(`/ws/?${params.toString()}`, {
+    const response = await fetch(`${legacyWsHttpBase}?${params.toString()}`, {
       method: 'GET',
       credentials: 'same-origin',
       cache: 'no-store',
@@ -2781,6 +2851,85 @@ import { initializeBillingSection } from "../core/billing.js";
         radio.checked = radio.value === normalizedValue;
       }
     });
+  };
+
+  const isValidYmdDate = (value) => {
+    const text = String(value || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+      return false;
+    }
+
+    const date = new Date(`${text}T00:00:00`);
+    if (Number.isNaN(date.getTime())) {
+      return false;
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}` === text;
+  };
+
+  const setPersonalPayPeriodWarning = (message) => {
+    if (!(elements.personalPayPeriodWarning instanceof HTMLElement)) {
+      return;
+    }
+
+    const text = String(message || '').trim();
+    elements.personalPayPeriodWarning.textContent = text;
+    elements.personalPayPeriodWarning.classList.toggle('is-visible', text !== '');
+  };
+
+  const getPersonalPayPeriodValidationMessage = () => {
+    const frequency = elements.personalPayFrequency instanceof HTMLSelectElement
+      ? String(elements.personalPayFrequency.value || '').trim().toLowerCase()
+      : 'biweekly';
+    const allowedFrequencies = Object.keys(FREQUENCY_LENGTHS);
+    if (!allowedFrequencies.includes(frequency)) {
+      return 'Invalid pay period frequency selected.';
+    }
+
+    const expectedLength = String(FREQUENCY_LENGTHS[frequency] || '14');
+    const actualLength = elements.personalPayPeriodLength instanceof HTMLInputElement
+      ? String(elements.personalPayPeriodLength.value || '').trim()
+      : expectedLength;
+    if (actualLength !== expectedLength) {
+      return `Invalid pay period length for ${frequency}. Expected ${expectedLength} days.`;
+    }
+
+    const anchor = getPersonalPayAnchor();
+    if (!(anchor in PAY_PERIOD_WEEKDAY_MAP)) {
+      return 'Invalid pay period anchor day selected.';
+    }
+
+    const graceRaw = getPersonalEditingGraceDays();
+    const graceValue = parseInt(graceRaw, 10);
+    const allowedGraceValues = Array.from(elements.personalEditingGraceDayRadios)
+      .filter((radio) => radio instanceof HTMLInputElement)
+      .map((radio) => parseInt(String(radio.value || ''), 10))
+      .filter((value) => Number.isFinite(value));
+    const graceMin = allowedGraceValues.length > 0 ? Math.min(...allowedGraceValues) : 0;
+    const graceMax = allowedGraceValues.length > 0 ? Math.max(...allowedGraceValues) : 3;
+    if (!Number.isFinite(graceValue) || graceValue < graceMin || graceValue > graceMax) {
+      return `Invalid grace-day selection. Choose between ${graceMin} and ${graceMax} days.`;
+    }
+
+    const payPeriodStart = getPersonalPayPeriodStart();
+    if ((frequency === 'weekly' || frequency === 'biweekly') && payPeriodStart === '') {
+      return 'Select a calendar day in the preview to set your pay period start date.';
+    }
+
+    if (payPeriodStart !== '' && !isValidYmdDate(payPeriodStart)) {
+      return 'Invalid pay period start date. Use a valid YYYY-MM-DD date.';
+    }
+
+    return '';
+  };
+
+  const refreshPersonalPayPeriodValidation = () => {
+    const message = getPersonalPayPeriodValidationMessage();
+    setPersonalPayPeriodWarning(message);
+    return message === '';
   };
 
   const toTitleLabel = (value, fallback = '') => {
@@ -3310,6 +3459,13 @@ import { initializeBillingSection } from "../core/billing.js";
       elements.personalCurrency.value = cur;
       displayCurrencyValue(elements.personalCurrencySearch, cur);
     }
+    if (elements.personalLanguage instanceof HTMLSelectElement) {
+      elements.personalLanguage.value = String(settings.language || 'en');
+    }
+    if (elements.personalLocale instanceof HTMLSelectElement) {
+      const locale = String(settings.locale || 'en-CA');
+      elements.personalLocale.value = locale;
+    }
     if (elements.personalPayFrequency instanceof HTMLSelectElement) {
       elements.personalPayFrequency.value = String(settings.pay_frequency || 'biweekly');
     }
@@ -3322,7 +3478,158 @@ import { initializeBillingSection } from "../core/billing.js";
     state.personalEditingGraceDaysValue = getPersonalEditingGraceDays();
 
     syncPersonalFrequency();
+    refreshPersonalPayPeriodValidation();
     schedulePersonalPreviewRender();
+    syncPersonalWageCurrencyAdornment();
+    syncProfilePhoneCountryAdornment();
+    renderPersonalInternationalizationPreview();
+  };
+
+  const syncPersonalWageCurrencyAdornment = () => {
+    if (!(elements.personalDefaultWage instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const input = elements.personalDefaultWage;
+    const parent = input.parentElement;
+    if (!(parent instanceof HTMLElement)) {
+      return;
+    }
+
+    let shell = parent.querySelector('.personal_wage_input_shell');
+    if (!(shell instanceof HTMLElement)) {
+      shell = document.createElement('div');
+      shell.className = 'personal_wage_input_shell';
+      parent.insertBefore(shell, input);
+      shell.appendChild(input);
+    }
+
+    let symbolEl = shell.querySelector('.personal_wage_currency_symbol');
+    if (!(symbolEl instanceof HTMLElement)) {
+      symbolEl = document.createElement('span');
+      symbolEl.className = 'personal_wage_currency_symbol';
+      symbolEl.setAttribute('aria-hidden', 'true');
+      shell.insertBefore(symbolEl, input);
+    }
+
+    const currencyCode = elements.personalCurrency instanceof HTMLInputElement
+      ? String(elements.personalCurrency.value || 'CAD').trim().toUpperCase()
+      : 'CAD';
+    const currencyMeta = CURRENCY_LIST[currencyCode] || null;
+    const symbol = currencyMeta && String(currencyMeta.symbol || '').trim() !== ''
+      ? String(currencyMeta.symbol)
+      : '$';
+
+    symbolEl.textContent = symbol;
+  };
+
+  const resolveDialCodeFromLocale = (localeValue) => {
+    const locale = String(localeValue || '').trim();
+    const dialCodesByLocale = {
+      'en-CA': '+1',
+      'fr-CA': '+1',
+      'en-US': '+1',
+      'en-GB': '+44',
+      'fr-FR': '+33',
+      'de-DE': '+49',
+      'es-ES': '+34',
+      'pt-BR': '+55',
+    };
+
+    return dialCodesByLocale[locale] || '+1';
+  };
+
+  const syncProfilePhoneCountryAdornment = () => {
+    const phoneInput = document.getElementById('edit_details_phone');
+    if (!(phoneInput instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const parent = phoneInput.parentElement;
+    if (!(parent instanceof HTMLElement)) {
+      return;
+    }
+
+    let shell = parent.querySelector('.personal_phone_input_shell');
+    if (!(shell instanceof HTMLElement)) {
+      shell = document.createElement('div');
+      shell.className = 'personal_phone_input_shell';
+      parent.insertBefore(shell, phoneInput);
+      shell.appendChild(phoneInput);
+    }
+
+    let dialCodeEl = shell.querySelector('.personal_phone_country_code');
+    if (!(dialCodeEl instanceof HTMLElement)) {
+      dialCodeEl = document.createElement('span');
+      dialCodeEl.className = 'personal_phone_country_code';
+      dialCodeEl.setAttribute('aria-hidden', 'true');
+      shell.insertBefore(dialCodeEl, phoneInput);
+    }
+
+    const locale = elements.personalLocale instanceof HTMLSelectElement
+      ? String(elements.personalLocale.value || 'en-CA')
+      : 'en-CA';
+    dialCodeEl.textContent = resolveDialCodeFromLocale(locale);
+  };
+
+  const renderPersonalInternationalizationPreview = () => {
+    if (!(elements.personalI18nPreview instanceof HTMLElement)) {
+      return;
+    }
+
+    const locale = elements.personalLocale instanceof HTMLSelectElement
+      ? String(elements.personalLocale.value || 'en-CA')
+      : 'en-CA';
+    const timeZone = elements.personalTimezone instanceof HTMLInputElement
+      ? String(elements.personalTimezone.value || 'UTC')
+      : 'UTC';
+    const currency = elements.personalCurrency instanceof HTMLInputElement
+      ? String(elements.personalCurrency.value || 'CAD').toUpperCase()
+      : 'CAD';
+    const language = elements.personalLanguage instanceof HTMLSelectElement
+      ? String(elements.personalLanguage.value || 'en')
+      : 'en';
+    const languageLabel = elements.personalLanguage instanceof HTMLSelectElement
+      ? String(elements.personalLanguage.options[elements.personalLanguage.selectedIndex]?.text || language)
+      : language;
+
+    const sampleDate = new Date(Date.UTC(2026, 3, 13, 20, 45, 0));
+
+    let numberSample = '';
+    let currencySample = '';
+    let dateSample = '';
+    try {
+      numberSample = new Intl.NumberFormat(locale, {
+        useGrouping: true,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(45977.2);
+      currencySample = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency,
+      }).format(45977.2);
+      dateSample = new Intl.DateTimeFormat(locale, {
+        dateStyle: 'full',
+        timeStyle: 'short',
+        timeZone,
+      }).format(sampleDate);
+    } catch (_error) {
+      numberSample = '45,977.20';
+      currencySample = '$45,977.20';
+      dateSample = sampleDate.toISOString();
+    }
+
+    Guardian.setHTML(elements.personalI18nPreview, `
+      <div class="profile_i18n_preview_rows">
+        <div><strong>Language:</strong> ${escapeHtml(languageLabel)} (${escapeHtml(language)})</div>
+        <div><strong>Locale:</strong> ${escapeHtml(locale)}</div>
+        <div><strong>Timezone:</strong> ${escapeHtml(timeZone)}</div>
+        <div><strong>Currency:</strong> ${escapeHtml(currency)}</div>
+        <div><strong>Number:</strong> ${escapeHtml(numberSample)}</div>
+        <div><strong>Money:</strong> ${escapeHtml(currencySample)}</div>
+        <div><strong>Date + Time:</strong> ${escapeHtml(dateSample)}</div>
+      </div>
+    `);
   };
 
   const buildPersonalSettingsFormData = () => {
@@ -3345,6 +3652,8 @@ import { initializeBillingSection } from "../core/billing.js";
     formData.set('pay_rate', elements.personalDefaultWage instanceof HTMLInputElement ? elements.personalDefaultWage.value.trim() : '');
     formData.set('timezone', elements.personalTimezone instanceof HTMLInputElement ? elements.personalTimezone.value.trim() : '');
     formData.set('currency', elements.personalCurrency instanceof HTMLInputElement ? elements.personalCurrency.value.trim() : '');
+    formData.set('language', elements.personalLanguage instanceof HTMLSelectElement ? elements.personalLanguage.value.trim() : '');
+    formData.set('locale', elements.personalLocale instanceof HTMLSelectElement ? elements.personalLocale.value.trim() : '');
 
     return formData;
   };
@@ -3358,6 +3667,10 @@ import { initializeBillingSection } from "../core/billing.js";
    * 3) If a save is already running, queue one final save with the latest values.
    */
   const savePersonalOrganizationSettings = async (source = 'auto') => {
+    if (!refreshPersonalPayPeriodValidation()) {
+      return;
+    }
+
     const formData = buildPersonalSettingsFormData();
 
     // Build a stable signature of the current values for dedup.
@@ -3370,6 +3683,8 @@ import { initializeBillingSection } from "../core/billing.js";
       formData.get('pay_rate'),
       formData.get('timezone'),
       formData.get('currency'),
+      formData.get('language'),
+      formData.get('locale'),
     ].join('|');
 
     if (state.personalSaveInFlight) {
@@ -3401,6 +3716,8 @@ import { initializeBillingSection } from "../core/billing.js";
           pay_rate: formData.get('pay_rate'),
           timezone: formData.get('timezone'),
           currency: formData.get('currency'),
+          language: formData.get('language'),
+          locale: formData.get('locale'),
         };
         debugLog('[savePersonalOrganizationSettings] Sending to /api/v1/profile/update/', debugPayload);
 
@@ -3456,6 +3773,7 @@ import { initializeBillingSection } from "../core/billing.js";
     }
 
     state.personalEditingGraceDaysValue = nextValue;
+    refreshPersonalPayPeriodValidation();
     schedulePersonalPreviewRender();
     PC.showToast('Saving pay period settings...', 'save');
     schedulePersonalAutoSave(180, 'grace');
@@ -3483,6 +3801,7 @@ import { initializeBillingSection } from "../core/billing.js";
 
     setPersonalPayPeriodStart(selectedYmd);
     setPersonalPayAnchor(selectedAnchor);
+    refreshPersonalPayPeriodValidation();
     schedulePersonalPreviewRender();
     schedulePersonalAutoSave(120, 'calendar-day');
   };
@@ -3832,6 +4151,7 @@ import { initializeBillingSection } from "../core/billing.js";
     syncEditorRiskBaselineFromInputs();
     setTransferAvailability(organization);
     setPremiumLockedState(organization);
+    syncAuditControlTestPanel(organization);
     populateOrgDetails(organization);
   };
 
@@ -5011,7 +5331,7 @@ import { initializeBillingSection } from "../core/billing.js";
       params.set('since_signature', state.liveRequestsSignature);
     }
 
-    const response = await fetch(`/ws/?${params.toString()}`, {
+    const response = await fetch(`${legacyWsHttpBase}?${params.toString()}`, {
       method: 'GET',
       credentials: 'same-origin',
       cache: 'no-store',
@@ -5263,7 +5583,7 @@ import { initializeBillingSection } from "../core/billing.js";
       params.set('since_event_id', sinceEventId);
     }
 
-    const response = await fetch(`/ws/?${params.toString()}`, {
+    const response = await fetch(`${legacyWsHttpBase}?${params.toString()}`, {
       method: 'GET',
       credentials: 'same-origin',
       cache: 'no-store',
@@ -5796,7 +6116,69 @@ import { initializeBillingSection } from "../core/billing.js";
       return;
     }
 
+    if (state.editorSaveInFlight) {
+      showOrganizationsToast('Update already in progress. Please wait.', 'save', 2600, true);
+      return;
+    }
+
+    const pendingPayload = collectOrganizationEditorPayload();
+    const pendingSignature = buildEditorPayloadSignature(pendingPayload);
+    if (pendingSignature === state.editorLastSavedSignature) {
+      showOrganizationsToast('No changes to update.', 'save', 2600, true);
+      return;
+    }
+
     await saveOrganizationEditorSettings('manual', true);
+  };
+
+  const handleGenerateAuditControlTest = async () => {
+    if (state.selectedOrganizationId === '') {
+      PC.showToast(T.selectFirst, 'error', 5000, true);
+      return;
+    }
+
+    const organization = getSelectedOrganization();
+    if (!organization || !canGenerateAuditControlTest(organization)) {
+      const message = 'Only platform Admin or Superadmin can generate audit control test errors.';
+      setAuditControlTestStatus(message, 'error');
+      PC.showToast(message, 'error', 7000, true);
+      return;
+    }
+
+    const summary = elements.auditControlTestSummary instanceof HTMLInputElement
+      ? String(elements.auditControlTestSummary.value || '').trim()
+      : '';
+
+    if (elements.auditControlTestButton instanceof HTMLButtonElement) {
+      elements.auditControlTestButton.disabled = true;
+    }
+    setAuditControlTestStatus('Generating controlled audit error and GCS alert artifact...');
+
+    try {
+      const payload = await postForm(`/api/v1/organizations/${encodeURIComponent(state.selectedOrganizationId)}/audit/control-test`, {
+        summary,
+      });
+      const gcs = payload && typeof payload === 'object' ? payload.gcs || {} : {};
+      const objectPath = String(gcs.object_path || '');
+      const message = objectPath === ''
+        ? 'Audit control test recorded.'
+        : `Audit control test recorded and alert artifact uploaded: ${objectPath}`;
+
+      setAuditControlTestStatus(message, 'success');
+      showOrganizationsToast(message, 'save', 6000, true);
+      await loadOrganizationAudit(state.selectedOrganizationId);
+    } catch (error) {
+      PW.error(error);
+      const message = error instanceof Error && error.message
+        ? error.message
+        : 'Unable to generate audit control test error.';
+      setAuditControlTestStatus(message, 'error');
+      showOrganizationsToast(message, 'error', 7000, true);
+    } finally {
+      if (elements.auditControlTestButton instanceof HTMLButtonElement) {
+        elements.auditControlTestButton.disabled = !canGenerateAuditControlTest(getSelectedOrganization());
+      }
+    }
   };
 
   const handleBootstrapOrganizationDek = async () => {
@@ -5974,7 +6356,7 @@ import { initializeBillingSection } from "../core/billing.js";
       params.set('since_signature', state.discoverySignature);
     }
 
-    const response = await fetch(`/ws/?${params.toString()}`, {
+    const response = await fetch(`${legacyWsHttpBase}?${params.toString()}`, {
       method: 'GET',
       credentials: 'same-origin',
       cache: 'no-store',
@@ -7385,6 +7767,16 @@ import { initializeBillingSection } from "../core/billing.js";
       });
     });
     elements.saveButton?.addEventListener('click', handleSaveOrganization);
+    elements.auditControlTestButton?.addEventListener('click', () => {
+      handleGenerateAuditControlTest().catch((error) => {
+        PW.error(error);
+        const message = error instanceof Error && error.message
+          ? error.message
+          : 'Unable to generate audit control test error.';
+        setAuditControlTestStatus(message, 'error');
+        showOrganizationsToast(message, 'error', 7000, true);
+      });
+    });
     elements.inviteSend?.addEventListener('click', handleSendInvite);
     elements.scopeGrid?.addEventListener('change', (event) => {
       const input = event.target;
@@ -7610,7 +8002,7 @@ import { initializeBillingSection } from "../core/billing.js";
         document.body.appendChild(popover);
       }
 
-      popover.innerHTML = detailsHtml;
+      window.Guardian.setHTML(popover, detailsHtml);
       openAuditDetailsPopoverFor(row, popover);
     };
 
@@ -7630,10 +8022,12 @@ import { initializeBillingSection } from "../core/billing.js";
     elements.discoveryRun?.addEventListener('click', handleDiscovery);
     elements.personalPayFrequency?.addEventListener('change', () => {
       syncPersonalFrequency();
+      refreshPersonalPayPeriodValidation();
       schedulePersonalPreviewRender();
       schedulePersonalAutoSave(180, 'frequency');
     });
     elements.personalPayAnchor?.addEventListener('change', () => {
+      refreshPersonalPayPeriodValidation();
       schedulePersonalPreviewRender();
       schedulePersonalAutoSave(180, 'anchor');
     });
@@ -7660,10 +8054,25 @@ import { initializeBillingSection } from "../core/billing.js";
     initCurrencyFinder('organizations_editor_currency_search', 'organizations_editor_currency', 'organizations_editor_currency_listbox', 'organizations_editor_currency_finder');
     initTimezoneFinder('organizations_personal_timezone_search', 'organizations_personal_timezone', 'organizations_personal_timezone_listbox', 'organizations_personal_timezone_finder');
     initTimezoneFinder('organizations_editor_timezone_search', 'organizations_editor_timezone', 'organizations_editor_timezone_listbox', 'organizations_editor_timezone_finder');
-    [elements.personalName, elements.personalDefaultWage, elements.personalTimezone, elements.personalCurrency].forEach((input) => {
+    [elements.personalName, elements.personalDefaultWage, elements.personalTimezone, elements.personalCurrency, elements.personalLanguage, elements.personalLocale].forEach((input) => {
       input?.addEventListener('change', () => {
+        syncPersonalWageCurrencyAdornment();
+        syncProfilePhoneCountryAdornment();
+        renderPersonalInternationalizationPreview();
         schedulePersonalAutoSave(180, 'details');
       });
+    });
+    elements.personalTimezoneSearch?.addEventListener('change', () => {
+      syncPersonalWageCurrencyAdornment();
+      syncProfilePhoneCountryAdornment();
+      renderPersonalInternationalizationPreview();
+      schedulePersonalAutoSave(180, 'details');
+    });
+    elements.personalCurrencySearch?.addEventListener('change', () => {
+      syncPersonalWageCurrencyAdornment();
+      syncProfilePhoneCountryAdornment();
+      renderPersonalInternationalizationPreview();
+      schedulePersonalAutoSave(180, 'details');
     });
     if (elements.personalDefaultWage instanceof HTMLInputElement) {
       let personalWageInputDebounceId = null;
@@ -8386,7 +8795,7 @@ import { initializeBillingSection } from "../core/billing.js";
         field.appendChild(trigger);
         field.appendChild(popover);
 
-        firstCell.innerHTML = '';
+        firstCell.textContent = '';
         firstCell.appendChild(field);
 
         trigger.addEventListener('click', (e) => {

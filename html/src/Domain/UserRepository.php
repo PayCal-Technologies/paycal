@@ -143,9 +143,9 @@ final class UserRepository
    * @param string    $userUUID        User UUID
    * @param string    $passwordHash    Password Hash
        * @param string    $email           Email Address
-   * @param AuthLevel $authLevel       User Authoriation level (unverified, user, admin, etc...)
+   * @param AuthLevel $authLevel       User Authorization level (unverified, user, admin, etc...)
    * @param string    $fullName        Full name (John Smith)
-   * @param string    $lastSessionHash Last Sesssion hash (TODO: convert to datetime?)
+   * @param string    $lastSessionHash Last Session hash (TODO: convert to datetime?)
    * @param string    $phone           Phone number
    */
   public static function setUser(
@@ -338,7 +338,7 @@ final class UserRepository
       Log::error('User::touchLastSignin has invalid user UUID');
 
     $ts  = (string) time();
-    $ip  = (string) Security::getVisitorRealIPAddress();
+    $ip  = (string) Security::getClientIPAddress();
     $key = Keys::USER . ":{$userUUID}";
 
     Database::hset($key, ['last_signin' => $ts]);
@@ -513,6 +513,9 @@ final class UserRepository
         return;
       case 'language':
         $user->language = $value;
+        return;
+      case 'locale':
+        $user->locale = $value;
         return;
       case 'text':
         $user->text = $value;

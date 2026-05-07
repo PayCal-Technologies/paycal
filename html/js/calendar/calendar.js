@@ -26,6 +26,18 @@
   let dayContextMenuDocumentBound = false;
   let calendarLockedForVerification = false;
   let calendarScreenMode = 'normal';
+  let calendarShiftKeyHeld = false;
+  let calendarShiftAnchorDateId = '';
+  const calendarSiteWageMatrix = Object.create(null);
+  const calendarSiteWageById = new Map();
+  let calendarSiteCatalogPromise = null;
+  const calendarDailyEarningsByDate = Object.create(null);
+  const calendarDailyEarningsLoadedYears = new Set();
+  const calendarDailyEarningsLoadingYears = new Set();
+  let calendarHoverTooltipEl = null;
+  let calendarHoverTooltipCell = null;
+  // In-memory clipboard: never touches any storage API; cleared by zeroize and on page unload.
+  let calendarClipboard = null;
 
   const calendarDebugChannels = (() => {
     const defaults = {
@@ -306,6 +318,7 @@
         const cells = grid.querySelectorAll('.datagrid_month_cell[data-work-entries]');
         cells.forEach((cell) => {
           cell.setAttribute('data-work-entries', '[]');
+          updateCalendarDayTooltip(cell, []);
           const content = cell.querySelector('.datagrid_month_cell_content');
           if (content) {
             Guardian.setHTML(content, '');
@@ -338,11 +351,7 @@
         menu.hidden = true;
       }
 
-      try {
-        localStorage.removeItem('cal_work_data');
-      } catch {
-        // Ignore storage failures.
-      }
+      calendarClipboard = null;
     } catch (err) {
       cryptoLog('[CRYPTO] DOM scrub warning', {
         reason,
@@ -728,6 +737,7 @@
         }
       };
 
+      // eslint-disable-next-line no-unused-vars -- intentional stub: password fallback is reserved for future re-enablement
       const unlockWithPasswordFallback = async () => {
         if (!interactive) {
           return false;
@@ -1131,6 +1141,9 @@
       attachModalHandlers();
       attachDayContextMenuKeyboardCapture();
       attachDayContextMenuHandlers(grid);
+      refreshAllCalendarDayTooltips(grid);
+      void ensureCalendarSiteCatalog();
+      ensureVisibleDailyEarningsLoaded(grid);
 
       const initialCellCount = grid.querySelectorAll('.datagrid_month_cell').length;
       calendarConsoleDebug('grid handlers attached', {
@@ -1341,6 +1354,7 @@
       }
       
       cell.setAttribute('data-work-entries', JSON.stringify(decrypted));
+      updateCalendarDayTooltip(cell, decrypted);
       const content = cell.querySelector('.datagrid_month_cell_content');
       if (content) {
         const dateAria = cell.getAttribute('data-date-aria') || cell.getAttribute('data-date') || cellId || '';
@@ -1453,6 +1467,7 @@
         const cell = document.querySelector(`.datagrid_month_cell[data-id="${date}"]`);
         if (cell) {
           cell.setAttribute('data-work-entries', '[]');
+          updateCalendarDayTooltip(cell, []);
           const content = cell.querySelector('.datagrid_month_cell_content');
           if (content) {
             content.replaceChildren();
@@ -1596,12 +1611,20 @@
     const grid = targetCell.closest('.datagrid_month_grid');
     if (!grid) return;
 
+    const previousFocusDate = window._CALENDAR_LAST_GRID_FOCUS_DATE || '';
+    const targetDateId = targetCell.getAttribute('data-id') || '';
+    if (!calendarShiftKeyHeld && previousFocusDate !== '' && targetDateId !== '' && targetDateId !== previousFocusDate) {
+      clearShiftRangeSelection(grid);
+    }
+
     const allCells = grid.querySelectorAll('.datagrid_month_cell');
     allCells.forEach((cell) => {
       const isSelected = cell === targetCell;
       cell.setAttribute('tabindex', isSelected ? '0' : '-1');
       cell.setAttribute('aria-selected', isSelected ? 'true' : 'false');
     });
+
+    applyShiftRangeSelection(grid, targetCell);
 
     if (focusCell) {
       try {
@@ -1618,6 +1641,79 @@
     }
   }
 
+  function clearShiftRangeSelection(grid) {
+    if (!grid) {
+      return;
+    }
+
+    grid.querySelectorAll('.datagrid_month_cell_shift_range, .datagrid_month_cell_shift_range_start, .datagrid_month_cell_shift_range_end, .datagrid_month_cell[data-selected="true"]').forEach((cell) => {
+      cell.classList.remove('datagrid_month_cell_shift_range');
+      cell.classList.remove('datagrid_month_cell_shift_range_start');
+      cell.classList.remove('datagrid_month_cell_shift_range_end');
+      cell.removeAttribute('data-selected');
+      cell.removeAttribute('data-selected-start');
+      cell.removeAttribute('data-selected-end');
+    });
+
+    refreshAllCalendarDayTooltips(grid);
+  }
+
+  function applyShiftRangeSelection(grid, targetCell) {
+    if (!calendarShiftKeyHeld || !targetCell) {
+      return;
+    }
+
+    clearShiftRangeSelection(grid);
+
+    const cells = Array.from(grid.querySelectorAll('.datagrid_month_cell'));
+    const currentIndex = cells.indexOf(targetCell);
+    if (currentIndex < 0) {
+      return;
+    }
+
+    let anchorIndex = -1;
+    if (calendarShiftAnchorDateId !== '') {
+      anchorIndex = cells.findIndex((cell) => cell.getAttribute('data-id') === calendarShiftAnchorDateId);
+    }
+
+    if (anchorIndex < 0) {
+      anchorIndex = currentIndex;
+      calendarShiftAnchorDateId = targetCell.getAttribute('data-id') || '';
+    }
+
+    const start = Math.min(anchorIndex, currentIndex);
+    const end = Math.max(anchorIndex, currentIndex);
+    for (let i = start; i <= end; i += 1) {
+      const rangeCell = cells[i];
+      if (rangeCell) {
+        rangeCell.classList.add('datagrid_month_cell_shift_range');
+        rangeCell.setAttribute('data-selected', 'true');
+      }
+    }
+
+    if (cells[start]) {
+      cells[start].classList.add('datagrid_month_cell_shift_range_start');
+      cells[start].setAttribute('data-selected-start', 'true');
+    }
+    if (cells[end]) {
+      cells[end].classList.add('datagrid_month_cell_shift_range_end');
+      cells[end].setAttribute('data-selected-end', 'true');
+    }
+
+    refreshAllCalendarDayTooltips(grid);
+  }
+
+  function refreshShiftRangeSelectionOnActiveCell() {
+    const grid = document.querySelector('#calendar-grid .datagrid_month_grid');
+    if (!grid) {
+      return;
+    }
+
+    const activeCell = grid.querySelector('.datagrid_month_cell[tabindex="0"]')
+      || (document.activeElement && document.activeElement.closest ? document.activeElement.closest('.datagrid_month_cell') : null);
+    applyShiftRangeSelection(grid, activeCell);
+  }
+
   /**
    * Attach click and keyboard handlers to month grid cells.
    * @param {HTMLElement} grid - The calendar grid container
@@ -1632,6 +1728,11 @@
       cell.addEventListener('click', handleGridCellClick);
       cell.addEventListener('keydown', handleGridCellKeydown);
       cell.addEventListener('focus', () => setGridCellFocusState(cell, false));
+      cell.addEventListener('mouseenter', handleCalendarCellTooltipEnter);
+      cell.addEventListener('mousemove', handleCalendarCellTooltipMove);
+      cell.addEventListener('mouseleave', handleCalendarCellTooltipLeave);
+      cell.addEventListener('focus', handleCalendarCellTooltipFocus);
+      cell.addEventListener('blur', handleCalendarCellTooltipBlur);
       
       // Initialize single selected cell semantics.
       cell.setAttribute('tabindex', index === 0 ? '0' : '-1');
@@ -1642,6 +1743,151 @@
     if (cells.length > 0) {
       setGridCellFocusState(cells[0], true);
     }
+  }
+
+  function ensureCalendarHoverTooltip() {
+    if (calendarHoverTooltipEl) {
+      return calendarHoverTooltipEl;
+    }
+
+    const tooltip = document.createElement('div');
+    tooltip.id = 'calendar_day_hover_tooltip';
+    tooltip.className = 'calendar_day_hover_tooltip hidden';
+    tooltip.setAttribute('role', 'tooltip');
+    tooltip.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tooltip);
+    calendarHoverTooltipEl = tooltip;
+    return tooltip;
+  }
+
+  function setCalendarHoverTooltipText(text) {
+    const tooltip = ensureCalendarHoverTooltip();
+    tooltip.replaceChildren();
+
+    const rows = String(text || '')
+      .split('|')
+      .map((part) => part.trim())
+      .filter((part) => part !== '');
+
+    rows.forEach((row) => {
+      const separatorIndex = row.indexOf(':');
+      if (separatorIndex === -1) {
+        const line = document.createElement('div');
+        line.className = 'calendar_day_hover_tooltip_line';
+        line.textContent = row;
+        tooltip.appendChild(line);
+        return;
+      }
+
+      const label = row.slice(0, separatorIndex).trim();
+      const value = row.slice(separatorIndex + 1).trim();
+
+      const pair = document.createElement('div');
+      pair.className = 'calendar_day_hover_tooltip_line item_pair';
+
+      const labelEl = document.createElement('div');
+      labelEl.className = 'calendar_day_hover_tooltip_label item_label';
+      labelEl.textContent = `${label}:`;
+
+      const valueEl = document.createElement('div');
+      valueEl.className = 'calendar_day_hover_tooltip_value item_value';
+      valueEl.textContent = value;
+
+      pair.appendChild(labelEl);
+      pair.appendChild(valueEl);
+      tooltip.appendChild(pair);
+    });
+  }
+
+  function positionCalendarHoverTooltip(clientX, clientY) {
+    const tooltip = ensureCalendarHoverTooltip();
+    const pad = 16;
+    const offset = 18;
+
+    tooltip.style.left = '0px';
+    tooltip.style.top = '0px';
+
+    const rect = tooltip.getBoundingClientRect();
+    let left = clientX + offset;
+    let top = clientY + offset;
+
+    if (left + rect.width + pad > window.innerWidth) {
+      left = Math.max(pad, clientX - rect.width - offset);
+    }
+    if (top + rect.height + pad > window.innerHeight) {
+      top = Math.max(pad, clientY - rect.height - offset);
+    }
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+
+  function showCalendarHoverTooltip(cell, clientX, clientY) {
+    if (!cell) {
+      return;
+    }
+
+    const tooltipText = cell.getAttribute('data-tooltip') || '';
+    if (tooltipText.trim() === '') {
+      return;
+    }
+
+    setCalendarHoverTooltipText(tooltipText);
+    const tooltip = ensureCalendarHoverTooltip();
+    tooltip.classList.remove('hidden');
+    tooltip.setAttribute('aria-hidden', 'false');
+    calendarHoverTooltipCell = cell;
+    positionCalendarHoverTooltip(clientX, clientY);
+  }
+
+  function hideCalendarHoverTooltip() {
+    const tooltip = ensureCalendarHoverTooltip();
+    tooltip.classList.add('hidden');
+    tooltip.setAttribute('aria-hidden', 'true');
+    calendarHoverTooltipCell = null;
+  }
+
+  function handleCalendarCellTooltipEnter(event) {
+    const cell = event.currentTarget && event.currentTarget.closest
+      ? event.currentTarget.closest('.datagrid_month_cell')
+      : null;
+    if (!cell) {
+      return;
+    }
+
+    const x = Number.isFinite(event.clientX) ? event.clientX : 0;
+    const y = Number.isFinite(event.clientY) ? event.clientY : 0;
+    showCalendarHoverTooltip(cell, x, y);
+  }
+
+  function handleCalendarCellTooltipMove(event) {
+    if (!calendarHoverTooltipCell) {
+      return;
+    }
+
+    const x = Number.isFinite(event.clientX) ? event.clientX : 0;
+    const y = Number.isFinite(event.clientY) ? event.clientY : 0;
+    positionCalendarHoverTooltip(x, y);
+  }
+
+  function handleCalendarCellTooltipLeave() {
+    hideCalendarHoverTooltip();
+  }
+
+  function handleCalendarCellTooltipFocus(event) {
+    const cell = event.currentTarget && event.currentTarget.closest
+      ? event.currentTarget.closest('.datagrid_month_cell')
+      : null;
+    if (!cell) {
+      return;
+    }
+
+    const rect = cell.getBoundingClientRect();
+    showCalendarHoverTooltip(cell, rect.left + 24, rect.top + 24);
+  }
+
+  function handleCalendarCellTooltipBlur() {
+    hideCalendarHoverTooltip();
   }
 
   /**
@@ -1793,6 +2039,8 @@
         break;
       case 'Escape':
         event.preventDefault();
+        clearShiftRangeSelection(cell.closest('.datagrid_month_grid'));
+        calendarShiftAnchorDateId = '';
         closeModal();
         break;
     }
@@ -2016,17 +2264,7 @@
   }
 
   function getClipboardDayEntries() {
-    const raw = localStorage.getItem('cal_work_data');
-    if (!raw) {
-      return [];
-    }
-
-    try {
-      const parsed = JSON.parse(raw);
-      return normalizeEntriesForSave(parsed);
-    } catch {
-      return [];
-    }
+    return calendarClipboard ? [...calendarClipboard] : [];
   }
 
   function getDayContextMenuState(dateId) {
@@ -2330,7 +2568,7 @@
       return;
     }
 
-    localStorage.setItem('cal_work_data', JSON.stringify(entries));
+    calendarClipboard = entries;
     coreLog('[Calendar Context Menu] Copied day entries', { dateId, count: entries.length });
     PayCalCore.updateStatusMessage(`Copied ${entries.length} entry/entries from ${dateLabel}`, 'copy', 3000);
   }
@@ -2345,26 +2583,10 @@
       return;
     }
 
-    const raw = localStorage.getItem('cal_work_data');
-    if (!raw) {
+    const entries = calendarClipboard ? [...calendarClipboard] : [];
+    if (entries.length === 0) {
       coreLog('[Calendar Context Menu] Paste skipped - clipboard empty');
       PayCalCore.updateStatusMessage(`Clipboard is empty for ${dateLabel}`, 'info', 2000);
-      return;
-    }
-
-    let entries = [];
-    try {
-      const parsed = JSON.parse(raw);
-      entries = normalizeEntriesForSave(parsed);
-    } catch (error) {
-      coreLog('[Calendar Context Menu] Paste skipped - invalid clipboard JSON', error);
-      PayCalCore.updateStatusMessage(`Invalid clipboard data for ${dateLabel}`, 'error', 3000);
-      return;
-    }
-
-    if (entries.length === 0) {
-      coreLog('[Calendar Context Menu] Paste skipped - clipboard has no valid entries');
-      PayCalCore.updateStatusMessage(`No valid clipboard entries for ${dateLabel}`, 'info', 2000);
       return;
     }
 
@@ -2607,6 +2829,14 @@
     gridKeyboardNavigationBound = true;
 
     document.addEventListener('keydown', function(event) {
+      if (isCalendarPageContext() && event.shiftKey && !calendarShiftKeyHeld) {
+        calendarShiftKeyHeld = true;
+        const activeCell = document.querySelector('#calendar-grid .datagrid_month_grid .datagrid_month_cell[tabindex="0"]')
+          || (document.activeElement && document.activeElement.closest ? document.activeElement.closest('.datagrid_month_cell') : null);
+        calendarShiftAnchorDateId = activeCell ? (activeCell.getAttribute('data-id') || '') : '';
+        refreshShiftRangeSelectionOnActiveCell();
+      }
+
       if (event.defaultPrevented) {
         return;
       }
@@ -2761,6 +2991,15 @@
           closeModal();
         }
       }
+    });
+
+    document.addEventListener('keyup', function(event) {
+      if (event.key !== 'Shift' || !calendarShiftKeyHeld) {
+        return;
+      }
+
+      calendarShiftKeyHeld = false;
+      calendarShiftAnchorDateId = '';
     });
   }
 
@@ -3113,6 +3352,9 @@
         if (grid) {
           attachGridCellHandlers(grid);
           attachDayContextMenuHandlers(grid);
+          refreshAllCalendarDayTooltips(grid);
+          void ensureCalendarSiteCatalog();
+          ensureVisibleDailyEarningsLoaded(grid);
           attachMonthNavigationHandlers();
           setCalendarScreenMode(calendarScreenMode);
           announceCurrentMonth();
@@ -3792,7 +4034,8 @@
         .filter(site => (site.status || '').toLowerCase() === 'active')
         .map(site => ({
           site_id: (site.id || '').toString().trim(),
-          site_name: (site.site_name || '').toString().trim()
+          site_name: (site.site_name || '').toString().trim(),
+          wage: parseMoneyValue(site.wage ?? 0),
         }))
         .filter(site => site.site_name) // Remove empty names
         .sort((a, b) => a.site_name.localeCompare(b.site_name));
@@ -3929,6 +4172,356 @@
     return Number(numeric.toFixed(2)).toString();
   }
 
+  function parseMoneyValue(value) {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value !== 'string') {
+      return 0;
+    }
+
+    const normalized = value.replace(/[^0-9.-]/g, '').trim();
+    if (normalized === '') {
+      return 0;
+    }
+
+    const numeric = parseFloat(normalized);
+    return Number.isFinite(numeric) ? numeric : 0;
+  }
+
+  function formatMoneyValue(value) {
+    const numeric = Number.isFinite(value) ? value : 0;
+    return numeric.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  function resolveOvertimeScale() {
+    const rawScale = window?.PayCalCore?.config?.pay_overtime_scale;
+    const parsed = parseFloat(rawScale);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1.5;
+  }
+
+  function getEntriesFromCalendarCell(cell) {
+    if (!cell) {
+      return [];
+    }
+
+    try {
+      const raw = cell.getAttribute('data-work-entries') || '[]';
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function setCalendarSiteWages(siteCatalog) {
+    if (!Array.isArray(siteCatalog)) {
+      return;
+    }
+
+    Object.keys(calendarSiteWageMatrix).forEach((key) => {
+      delete calendarSiteWageMatrix[key];
+    });
+    calendarSiteWageById.clear();
+
+    for (const site of siteCatalog) {
+      if (!site || typeof site !== 'object') {
+        continue;
+      }
+
+      const parsedWage = parseMoneyValue(site.wage ?? 0);
+      if (!(parsedWage > 0)) {
+        continue;
+      }
+
+      const candidateIds = [site.site_uuid, site.site_id, site.uuid, site.id];
+      for (const candidate of candidateIds) {
+        const siteId = (candidate || '').toString().trim();
+        if (siteId === '') {
+          continue;
+        }
+
+        calendarSiteWageMatrix[siteId] = parsedWage;
+        calendarSiteWageById.set(siteId, parsedWage);
+      }
+    }
+
+    window.PAYCAL_SITE_WAGE_MATRIX = calendarSiteWageMatrix;
+  }
+
+  function extractApiPayload(jsonResponse) {
+    if (!jsonResponse || typeof jsonResponse !== 'object') {
+      return {};
+    }
+
+    if (jsonResponse.data && typeof jsonResponse.data === 'object') {
+      return jsonResponse.data;
+    }
+
+    const { status: _status, message: _message, ...rest } = jsonResponse;
+    return rest;
+  }
+
+  async function ensureDailyEarningsYear(year) {
+    const yearString = String(parseInt(year, 10) || '');
+    if (yearString === '') {
+      return;
+    }
+    if (calendarDailyEarningsLoadedYears.has(yearString) || calendarDailyEarningsLoadingYears.has(yearString)) {
+      return;
+    }
+
+    calendarDailyEarningsLoadingYears.add(yearString);
+    try {
+      const response = await fetch(`/api/v1/daily/year/${yearString}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+      if (!response.ok) {
+        return;
+      }
+
+      const payload = extractApiPayload(await response.json());
+      Object.entries(payload).forEach(([dateId, row]) => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateId))) {
+          return;
+        }
+        if (!row || typeof row !== 'object' || Array.isArray(row)) {
+          return;
+        }
+
+        const gross = parseMoneyValue(row.gross ?? 0);
+        const deductions = parseMoneyValue(row.deductions ?? row.tax ?? 0);
+        const net = parseMoneyValue(row.net ?? (gross - deductions));
+        calendarDailyEarningsByDate[dateId] = { gross, deductions, net };
+      });
+
+      calendarDailyEarningsLoadedYears.add(yearString);
+      const grid = document.getElementById('calendar-grid');
+      if (grid) {
+        refreshAllCalendarDayTooltips(grid);
+      }
+    } catch {
+      // Ignore API errors and keep fallback calculations.
+    } finally {
+      calendarDailyEarningsLoadingYears.delete(yearString);
+    }
+  }
+
+  function ensureVisibleDailyEarningsLoaded(grid) {
+    if (!grid) {
+      return;
+    }
+
+    const years = new Set();
+    grid.querySelectorAll('.datagrid_month_cell[data-id]').forEach((cell) => {
+      const dateId = (cell.getAttribute('data-id') || '').trim();
+      const year = dateId.split('-')[0] || '';
+      if (/^\d{4}$/.test(year)) {
+        years.add(year);
+      }
+    });
+
+    years.forEach((year) => {
+      void ensureDailyEarningsYear(year);
+    });
+  }
+
+  function getSiteWageForEntry(entry) {
+    if (!entry || typeof entry !== 'object') {
+      return 0;
+    }
+
+    const siteId = (entry.site_id ?? entry.s ?? '').toString().trim();
+    if (siteId === '') {
+      return 0;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(calendarSiteWageMatrix, siteId)) {
+      return parseMoneyValue(calendarSiteWageMatrix[siteId]);
+    }
+
+    return calendarSiteWageById.get(siteId) || 0;
+  }
+
+  function ensureCalendarSiteCatalog() {
+    if (calendarSiteCatalogPromise) {
+      return calendarSiteCatalogPromise;
+    }
+
+    calendarSiteCatalogPromise = fetchAllSites()
+      .then((sites) => {
+        setCalendarSiteWages(sites);
+        const grid = document.getElementById('calendar-grid');
+        if (grid) {
+          refreshAllCalendarDayTooltips(grid);
+        }
+        return sites;
+      })
+      .catch(() => [])
+      .finally(() => {
+        calendarSiteCatalogPromise = null;
+      });
+
+    return calendarSiteCatalogPromise;
+  }
+
+  function computeCalendarTotals(entries, dateId = '') {
+    const list = Array.isArray(entries) ? entries : [];
+    const overtimeScale = resolveOvertimeScale();
+    let regularTotal = 0;
+    let overtimeTotal = 0;
+    let grossTotal = 0;
+    let netTotal = 0;
+
+    for (const entry of list) {
+      if (!entry || typeof entry !== 'object') {
+        continue;
+      }
+
+      const hasEncryptedBlob = !!entry.encrypted_blob;
+      const hasExplicitHours = (
+        entry.hours !== undefined || entry.h !== undefined ||
+        entry.regular_hours !== undefined || entry.regular !== undefined || entry.r !== undefined ||
+        entry.overtime_hours !== undefined || entry.overtime !== undefined || entry.o !== undefined ||
+        entry.living_out_allowance !== undefined || entry.living_out !== undefined || entry.loa !== undefined || entry.l !== undefined ||
+        entry.travel_hours !== undefined || entry.travel !== undefined || entry.t !== undefined
+      );
+      if (hasEncryptedBlob && !hasExplicitHours) {
+        continue;
+      }
+
+      const regularRaw = entry.regular_hours ?? entry.regular ?? entry.r;
+      const overtimeRaw = entry.overtime_hours ?? entry.overtime ?? entry.o;
+      const fallbackHoursRaw = entry.hours ?? entry.h ?? 0;
+
+      const regular = parseFloat(
+        (regularRaw !== undefined && regularRaw !== null)
+          ? regularRaw
+          : ((overtimeRaw === undefined || overtimeRaw === null) ? fallbackHoursRaw : 0)
+      ) || 0;
+      const overtime = parseFloat(overtimeRaw ?? 0) || 0;
+
+      regularTotal += regular;
+      overtimeTotal += overtime;
+
+      const hasGross = entry.gross !== undefined || entry.g !== undefined;
+      const hasNet = entry.net !== undefined || entry.nv !== undefined;
+      const hasTax = entry.tax !== undefined || entry.tx !== undefined || entry.deductions !== undefined;
+
+      const explicitGross = parseMoneyValue(entry.gross ?? entry.g ?? 0);
+      const explicitNet = parseMoneyValue(entry.net ?? entry.nv ?? 0);
+      const explicitTax = parseMoneyValue(entry.tax ?? entry.tx ?? entry.deductions ?? 0);
+
+      const directWage = parseMoneyValue(entry.wage ?? entry.w ?? 0);
+      const siteWage = getSiteWageForEntry(entry);
+      const wage = directWage > 0 ? directWage : siteWage;
+      const computedGross = wage > 0 ? (regular * wage) + (overtime * wage * overtimeScale) : 0;
+      const gross = hasGross ? explicitGross : computedGross;
+      const net = hasNet ? explicitNet : (hasTax ? (gross - explicitTax) : gross);
+
+      grossTotal += gross;
+      netTotal += net;
+    }
+
+    if (dateId && Object.prototype.hasOwnProperty.call(calendarDailyEarningsByDate, dateId)) {
+      const daily = calendarDailyEarningsByDate[dateId];
+      grossTotal = parseMoneyValue(daily.gross ?? 0);
+      netTotal = parseMoneyValue(daily.net ?? 0);
+    }
+
+    return {
+      regularTotal,
+      overtimeTotal,
+      grossTotal,
+      netTotal,
+    };
+  }
+
+  function computeCalendarDayTooltip(entries, dateId = '') {
+    const totals = computeCalendarTotals(entries, dateId);
+
+    return [
+      `Regular: ${formatHourValue(totals.regularTotal)}`,
+      `Overtime: ${formatHourValue(totals.overtimeTotal)}`,
+      `Gross: $${formatMoneyValue(totals.grossTotal)}`,
+      `Deductions: $${formatMoneyValue(Math.max(0, totals.grossTotal - totals.netTotal))}`,
+      `Net: $${formatMoneyValue(totals.netTotal)}`,
+    ].join(' | ');
+  }
+
+  function updateCalendarDayTooltip(cell, entries = null) {
+    if (!cell) {
+      return;
+    }
+
+    const grid = cell.closest('.datagrid_month_grid');
+    const selectedCells = grid
+      ? Array.from(grid.querySelectorAll('.datagrid_month_cell[data-selected="true"]'))
+      : [];
+
+    if (cell.getAttribute('data-selected') === 'true' && selectedCells.length > 0) {
+      let regularTotal = 0;
+      let overtimeTotal = 0;
+      let grossTotal = 0;
+      let netTotal = 0;
+
+      selectedCells.forEach((selectedCell) => {
+        const selectedEntries = getEntriesFromCalendarCell(selectedCell);
+        const selectedDateId = selectedCell.getAttribute('data-id') || '';
+        const cellTotals = computeCalendarTotals(selectedEntries, selectedDateId);
+        regularTotal += cellTotals.regularTotal;
+        overtimeTotal += cellTotals.overtimeTotal;
+        grossTotal += cellTotals.grossTotal;
+        netTotal += cellTotals.netTotal;
+      });
+
+      const rangeTitle = [
+        `Regular: ${formatHourValue(regularTotal)}`,
+        `Overtime: ${formatHourValue(overtimeTotal)}`,
+        `Gross: $${formatMoneyValue(grossTotal)}`,
+        `Deductions: $${formatMoneyValue(Math.max(0, grossTotal - netTotal))}`,
+        `Net: $${formatMoneyValue(netTotal)}`,
+      ].join(' | ');
+      selectedCells.forEach((selectedCell) => {
+        selectedCell.setAttribute('data-tooltip', rangeTitle);
+        selectedCell.removeAttribute('title');
+      });
+      return;
+    }
+
+    let sourceEntries = entries;
+    if (!Array.isArray(sourceEntries)) {
+      sourceEntries = getEntriesFromCalendarCell(cell);
+    }
+
+    const dateId = cell.getAttribute('data-id') || '';
+    const tooltipText = computeCalendarDayTooltip(sourceEntries, dateId);
+    cell.setAttribute('data-tooltip', tooltipText);
+    cell.removeAttribute('title');
+
+    if (calendarHoverTooltipCell === cell) {
+      setCalendarHoverTooltipText(tooltipText);
+    }
+  }
+
+  function refreshAllCalendarDayTooltips(grid) {
+    if (!grid) {
+      return;
+    }
+
+    grid.querySelectorAll('.datagrid_month_cell[data-id]').forEach((cell) => {
+      updateCalendarDayTooltip(cell);
+    });
+  }
+
   if (!window.PayCalAriaEcho) {
     window.PayCalAriaEcho = class AriaEcho {
       static normalizeText(text) {
@@ -4043,15 +4636,17 @@
 
   async function updateGridCellFromWeekPayload(activeDate, weekData) {
     if (!weekData || !weekData.days) {
-      modalLog('[Calendar Modal] Missing week payload for update', { activeDate, hasWeek: !!weekData });
-      return;
+      throw new Error('Calendar save response is missing week reconciliation payload.');
     }
 
     // Get work entry position from grid
     const grid = document.getElementById('calendar-grid');
     const workEntryPosition = grid ? grid.dataset.workEntryPosition : 'left';
 
-    // Update ALL cells in the week, not just the active one
+    // Phase 1 (atomic prep): validate and decrypt every entry for the week first.
+    // If any day fails integrity/decryption checks, abort without mutating UI state.
+    const decryptedWeekByDate = Object.create(null);
+
     for (const [dateId, workEntries] of Object.entries(weekData.days)) {
       const cell = document.querySelector(`.datagrid_month_cell[data-id="${dateId}"]`);
       if (!cell) {
@@ -4062,17 +4657,34 @@
       const safeEntries = Array.isArray(workEntries) ? workEntries : [];
       const decryptedEntries = [];
       for (const entry of safeEntries) {
-        try {
-          const decrypted = await decryptEntry(entry);
-          if (decrypted) {
-            decryptedEntries.push(decrypted);
-          }
-        } catch (error) {
-          modalLog('[Calendar Modal] Failed to decrypt week entry', { dateId, error });
+        if (!entry || typeof entry !== 'object' || typeof entry.encrypted_blob !== 'string' || entry.encrypted_blob.trim() === '') {
+          throw new Error(`Week payload integrity error for ${dateId}: missing encrypted_blob.`);
         }
+
+        const decrypted = await decryptEntry(entry);
+        if (!decrypted || typeof decrypted !== 'object') {
+          throw new Error(`Week payload decrypt returned empty data for ${dateId}.`);
+        }
+
+        decryptedEntries.push(decrypted);
       }
 
+      decryptedWeekByDate[dateId] = decryptedEntries;
+    }
+
+    // Phase 2 (single apply): update all week cells only after full validation.
+    for (const [dateId, decryptedEntries] of Object.entries(decryptedWeekByDate)) {
+      const cell = document.querySelector(`.datagrid_month_cell[data-id="${dateId}"]`);
+      if (!cell) {
+        continue;
+      }
+
+      // Invalidate stale server-cached daily earnings so the tooltip
+      // recomputes gross/net from the fresh entries.
+      delete calendarDailyEarningsByDate[dateId];
+
       cell.setAttribute('data-work-entries', JSON.stringify(decryptedEntries));
+      updateCalendarDayTooltip(cell, decryptedEntries);
 
       const content = cell.querySelector('.datagrid_month_cell_content');
       if (!content) {
@@ -4093,8 +4705,13 @@
       return;
     }
 
+    // Invalidate stale server-cached daily earnings so the tooltip
+    // recomputes gross/net immediately from the optimistic entries.
+    delete calendarDailyEarningsByDate[activeDate];
+
     const safeEntries = Array.isArray(entries) ? entries : [];
     activeCell.setAttribute('data-work-entries', JSON.stringify(safeEntries));
+    updateCalendarDayTooltip(activeCell, safeEntries);
 
     const content = activeCell.querySelector('.datagrid_month_cell_content');
     if (!content) {
@@ -4215,7 +4832,7 @@
       if (weekPayload) {
         await updateGridCellFromWeekPayload(activeDate, weekPayload);
       } else {
-        coreLog('[Calendar Save] Missing week in response', { activeDate, savePayload });
+        throw new Error('Calendar save response is missing week reconciliation payload.');
       }
 
       return savePayload;

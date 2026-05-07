@@ -23,11 +23,19 @@ use PayCal\Domain\WorkEntry;
  *   separated from production user workflows.
  * - Keep heavy or sensitive inspection logic behind authenticated/internal use.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 
@@ -380,10 +388,10 @@ class TestsPageController
     $html .= '<span class="timestamp">'.htmlspecialchars($timestamp).'</span>';
     $html .= '</div>';
     $html .= '<div class="last_run_stats">';
-    $html .= '<div class="stat"><label>' . self::batchI18n('TESTS_DASHBOARD_TESTS') . ':</label> <span>'.$testCount.'</span></div>';
-    $html .= '<div class="stat"><label>' . self::batchI18n('TESTS_DASHBOARD_ASSERTIONS') . ':</label> <span>'.$assertionCount.'</span></div>';
-    $html .= '<div class="stat"><label>' . self::batchI18n('TESTS_DASHBOARD_FAILURES') . ':</label> <span>'.$failures.'</span></div>';
-    $html .= '<div class="stat"><label>' . self::batchI18n('TESTS_DASHBOARD_DURATION') . ':</label> <span>'.round($duration, 2).'s</span></div>';
+    $html .= '<div class="stat"><label>' . self::batchI18n('TESTS_DASHBOARD_TESTS') . ':</label> <span>' . Strings::formatLocalizedNumber($testCount, 0, 0) . '</span></div>';
+    $html .= '<div class="stat"><label>' . self::batchI18n('TESTS_DASHBOARD_ASSERTIONS') . ':</label> <span>' . Strings::formatLocalizedNumber($assertionCount, 0, 0) . '</span></div>';
+    $html .= '<div class="stat"><label>' . self::batchI18n('TESTS_DASHBOARD_FAILURES') . ':</label> <span>' . Strings::formatLocalizedNumber($failures, 0, 0) . '</span></div>';
+    $html .= '<div class="stat"><label>' . self::batchI18n('TESTS_DASHBOARD_DURATION') . ':</label> <span>' . Strings::formatLocalizedNumber($duration, 2, 2) . 's</span></div>';
     $html .= '</div>';
 
     if (!empty($lastRun['output'])) {

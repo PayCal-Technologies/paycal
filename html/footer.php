@@ -105,6 +105,15 @@ if ($isAuthenticated) {
 <?php echo Render::renderNavLinks($navLinks, $currentPage); ?>
       </ul>
     </nav>
+    <div class="footer_soc2_badge_wrap">
+      <a
+        class="footer_soc2_badge"
+        href="/soc2/"
+        title="SOC 2 Audit-Ready — view compliance details"
+        aria-label="SOC 2 Audit-Ready — view compliance details"
+      ><svg class="footer_soc2_badge_icon" width="11" height="13" viewBox="0 0 12 14" fill="none" aria-hidden="true" focusable="false"><path d="M6 1 L1 3 V7 C1 10.2 3.4 12.9 6 13.5 C8.6 12.9 11 10.2 11 7 V3 Z" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="0.9" stroke-linejoin="round"/><polyline points="3.5,7.5 5.5,9.5 8.5,5.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>SOC 2 Audit-Ready
+      </a>
+    </div>
     <p class="footer_copyright"><?php echo $i18n['FOOTER_TRADEMARK']; ?></p>
   </footer>
 
@@ -143,15 +152,15 @@ $memoryUsageGB = $memoryUsageMB / 1024;
 
 if ($memoryUsageMB < 1024) {
   // If less than 1024 MB, show in MB
-  $formattedMemoryUsage = number_format($memoryUsageMB, 2, '.', ',').' MB';
+  $formattedMemoryUsage = Strings::formatLocalizedNumber($memoryUsageMB, 2, 2).' MB';
 } else {
   // If 1024 MB or more, show in GB
-  $formattedMemoryUsage = number_format($memoryUsageGB, 2, '.', ',').' GB';
+  $formattedMemoryUsage = Strings::formatLocalizedNumber($memoryUsageGB, 2, 2).' GB';
 }
 
 $peakMemoryBytes = memory_get_peak_usage();
 $peakMemoryMB = $peakMemoryBytes / (1024 * 1024);
-$formattedPeakMemoryUsage = number_format($peakMemoryMB, 2, '.', ',').' MB';
+$formattedPeakMemoryUsage = Strings::formatLocalizedNumber($peakMemoryMB, 2, 2).' MB';
 
 $userAgent = is_string($_SERVER['HTTP_USER_AGENT'] ?? null) ? $_SERVER['HTTP_USER_AGENT'] : '';
 $acceptLanguage = is_string($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? null) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '';

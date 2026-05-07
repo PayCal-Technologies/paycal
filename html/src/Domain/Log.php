@@ -205,7 +205,7 @@ final class Log
     $userUuid = User::currentUUID();
     $messages = [];
     foreach (self::$buffer as $entry) {
-      $messages[] = $entry['timestamp'].' '.Security::getVisitorRealIPAddress().' '.$userUuid.' '.$entry['key'].'='.$entry['value'];
+      $messages[] = $entry['timestamp'].' '.Security::getClientIPAddress().' '.$userUuid.' '.$entry['key'].'='.$entry['value'];
     }
 
     $content = implode(PHP_EOL, $messages).PHP_EOL;
@@ -248,7 +248,7 @@ final class Log
     @file_put_contents(
       $file,
       self::now()
-       .' '.Security::getVisitorRealIPAddress()
+       .' '.Security::getClientIPAddress()
        ." {$message}".PHP_EOL,
       FILE_APPEND
     );

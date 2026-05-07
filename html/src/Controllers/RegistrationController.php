@@ -18,15 +18,20 @@ use PayCal\Domain\Response;
  *   user settings, so keep it aligned with the domain Registration service.
  * - This controller should validate request shape and delegate business rules.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
  * Registration API surface.
  *
@@ -53,6 +58,15 @@ class RegistrationController
 
     $result = Registration::register($input);
     self::logResult($result);
+
+    if ($result['success'] && $result['userUUID'] !== null && $result['userUUID'] !== '') {
+      try {
+        \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.account.created', $result['userUUID'], [
+          'method' => 'registration',
+        ]);
+      } catch (\Throwable) {
+      }
+    }
 
     self::redirectByResult($result);
   }

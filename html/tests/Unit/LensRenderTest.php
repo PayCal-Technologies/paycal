@@ -71,6 +71,7 @@ final class LensRenderTest extends TestCase
 
   protected function tearDown(): void
   {
+    Environment::bootstrap($_ENV);
     $this->resetLens();
     $_GET = [];
     $_SERVER = [];

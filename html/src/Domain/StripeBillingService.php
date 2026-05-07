@@ -3,8 +3,34 @@
 namespace PayCal\Domain;
 
 use PayCal\Domain\Constants\Keys;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 use Stripe\StripeClient;
 use Stripe\Webhook;
+
+/**
+ * StripeBillingService.php
+ *
+ * Purpose: Encapsulate Stripe checkout, billing-portal, subscription, and
+ * webhook flows behind a single provider integration boundary.
+ *
+ * Developer notes:
+ * - Webhook deduplication, retry semantics, and queue limits are part of the
+ *   integration contract.
+ * - Keep Stripe transport details here so controllers stay provider-agnostic.
+ *
+ * Architectural role:
+ * - Reusable domain integration service for Stripe checkout, portal, and
+ *   webhook-driven billing operations.
+ * - Encapsulates external billing provider behavior outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Core
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
 
 /**
  * StripeBillingService
@@ -15,9 +41,15 @@ final class StripeBillingService
 {
   private const WEBHOOK_EVENT_TTL_SECONDS = 604800; // 7 days
   private const WEBHOOK_TELEMETRY_PREFIX = 'billing:webhook';
-  private const WEBHOOK_QUEUE_MAX_ITEMS = 2000;
-  private const WEBHOOK_QUEUE_MAX_RETRIES = 5;
-  private const WEBHOOK_DEAD_LETTER_MAX_ITEMS = 500;
+  // Queue capacity intentionally small: signature is pre-validated before enqueue
+  // so only cryptographically verified Stripe events reach this list.
+  private const WEBHOOK_QUEUE_MAX_ITEMS = 25;
+  private const WEBHOOK_QUEUE_MAX_RETRIES = 3;
+  private const WEBHOOK_DEAD_LETTER_MAX_ITEMS = 50;
+  // Stripe signs with HMAC-SHA256 using STRIPE_WEBHOOK_SECRET. A valid Stripe-Signature
+  // header contains a Unix timestamp (t=) and at least one v1= HMAC value.
+  // Reject anything more than 5 minutes old (Stripe's own recommended tolerance is 5 min).
+  private const WEBHOOK_TIMESTAMP_TOLERANCE_SECONDS = 300;
 
   private readonly ?\Closure $portalCustomerResolver;
   private readonly ?\Closure $portalSessionCreator;
@@ -444,7 +476,64 @@ final class StripeBillingService
   }
 
   /**
+   * Perform a fast pre-queue Stripe signature check.
+   *
+   * This is NOT a full cryptographic verification (that happens in processWebhook).
+   * It checks two inexpensive conditions that reject the vast majority of garbage:
+   *   1. The t= timestamp in the header is within WEBHOOK_TIMESTAMP_TOLERANCE_SECONDS.
+   *   2. The header contains at least one v1= HMAC value that is 64 hex chars.
+   *
+   * Reject at the door so forgery and flood traffic never occupy queue slots.
+   * Full Webhook::constructEvent() verification still runs during drain.
+   *
+   * @return array{valid: bool, reason: string}
+   */
+  private function preValidateSignatureHeader(string $signatureHeader, int $now): array
+  {
+    if ($signatureHeader === '') {
+      return ['valid' => false, 'reason' => 'signature_header_empty'];
+    }
+
+    $timestamp = 0;
+    $hasV1 = false;
+
+    foreach (explode(',', $signatureHeader) as $part) {
+      $part = trim($part);
+      if (str_starts_with($part, 't=')) {
+        $ts = substr($part, 2);
+        if (ctype_digit($ts)) {
+          $timestamp = (int) $ts;
+        }
+      } elseif (str_starts_with($part, 'v1=')) {
+        $hmac = substr($part, 3);
+        // SHA-256 HMAC in hex = exactly 64 lowercase hex characters.
+        if (strlen($hmac) === 64 && ctype_xdigit($hmac)) {
+          $hasV1 = true;
+        }
+      }
+    }
+
+    if ($timestamp === 0) {
+      return ['valid' => false, 'reason' => 'signature_timestamp_missing'];
+    }
+
+    if (abs($now - $timestamp) > self::WEBHOOK_TIMESTAMP_TOLERANCE_SECONDS) {
+      return ['valid' => false, 'reason' => 'signature_timestamp_stale'];
+    }
+
+    if (!$hasV1) {
+      return ['valid' => false, 'reason' => 'signature_v1_missing_or_malformed'];
+    }
+
+    return ['valid' => true, 'reason' => 'ok'];
+  }
+
+  /**
    * Queue a Stripe webhook payload for asynchronous processing.
+   *
+   * Signature is pre-validated (timestamp freshness + HMAC format) before the
+   * payload is queued. Full cryptographic verification happens during drain.
+   * This rejects garbage at the door and keeps the queue small.
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
@@ -463,6 +552,17 @@ final class StripeBillingService
         'signature_timestamp_missing' => 'true',
       ]);
       return $this->fail('Missing Stripe-Signature header.');
+    }
+
+    // Pre-validate before touching the queue: reject stale timestamps and
+    // malformed HMAC values without performing a full signature computation.
+    $preCheck = $this->preValidateSignatureHeader($signatureHeader, time());
+    if (!$preCheck['valid']) {
+      $this->recordWebhookFailure('signature_precheck_failed', $payloadContext + $signatureContext + [
+        'precheck_reason' => $preCheck['reason'],
+      ]);
+      // Return HTTP 400 semantics — Stripe will retry; attackers receive no useful signal.
+      return $this->fail('Stripe-Signature header failed pre-validation.');
     }
 
     $envelope = [

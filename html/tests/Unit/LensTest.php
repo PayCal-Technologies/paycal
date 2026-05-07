@@ -48,6 +48,12 @@ final class LensTest extends TestCase
     return array_merge($defaults, $overrides);
   }
 
+  protected function tearDown(): void
+  {
+    Environment::bootstrap($_ENV);
+    parent::tearDown();
+  }
+
   #[Test]
   public function lensCollectsEventsTimersCountersAndNormalizesPayload(): void
   {

@@ -16,8 +16,10 @@ final class CryptoLifecycleTest extends TestCase
   private function resolveSimulationScript(): ?string
   {
     $candidates = [
-      '/private/var/www/paycal/scripts/crypto/simulate_rotation.php',
       '/var/www/paycal/scripts/crypto/simulate_rotation.php',
+      '/var/www/paycal-private/scripts/crypto/simulate_rotation.php',
+      '/private/var/www/paycal/scripts/crypto/simulate_rotation.php',
+      '/private/var/www/paycal/dev/scripts/crypto/simulate_rotation.php',
     ];
 
     foreach ($candidates as $candidate) {

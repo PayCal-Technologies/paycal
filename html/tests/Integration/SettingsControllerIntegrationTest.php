@@ -8,6 +8,7 @@ use PayCal\Domain\Database;
 use PayCal\Domain\Enums\AuthLevel;
 use PayCal\Domain\UserRepository;
 use PHPUnit\Framework\TestCase;
+use Tests\Integration\Support\EncryptedWorkTestUser;
 
 final class SettingsControllerIntegrationTest extends TestCase
 {
@@ -233,29 +234,35 @@ final class SettingsControllerIntegrationTest extends TestCase
 
   public function testExportAccountDataIncludesPortablePayloadAndWarning(): void
   {
-    $context = $this->createAuthenticatedContext();
+    // Use EncryptedWorkTestUser so financial data (wage, gross) is stored only inside
+    // AES-256-GCM encrypted_blob — never as plaintext fields in Redis.
+    // exportAccountData() requires only a valid session (no CSRF), so the fixture's
+    // session is sufficient without createAuthenticatedContext().
+    $fixture = EncryptedWorkTestUser::create();
 
     try {
-      Database::hset(Keys::SITE . ':' . $context['userUUID'] . ':SITEA', [
-        'site_name' => 'Export Site',
-        'wage' => '52.10',
-        'living_out_allowance' => '20.00',
-        'travel_hours' => '1.50',
-        'status' => 'active',
-        'province' => 'BC',
+      $fixture->addSite('SITEA', 'Export Site', 52.10);
+      $fixture->seedWorkRow([
+        'date'                 => '2026-04-10',
+        'site_id'              => 'SITEA',
+        'site_name'            => 'Export Site',
+        'hours'                => 8.0,
+        'regular_hours'        => 8.0,
+        'overtime_hours'       => 0.0,
+        'travel_hours'         => 1.5,
+        'living_out_allowance' => 20.0,
+        'wage'                 => 52.10,
       ]);
 
-      Database::hset(Keys::WORK . ':' . $context['userUUID'] . ':2026-04-10:SITEA', [
-        'date' => '2026-04-10',
-        'site_id' => 'SITEA',
-        'site_name' => 'Export Site',
-        'hours' => '8.00',
-        'regular_hours' => '8.00',
-        'overtime_hours' => '0.00',
-        'wage' => '52.10',
-      ]);
+      $_SERVER['REQUEST_METHOD'] = 'POST';
+      $_POST = [];
 
-      $decoded = $this->runAuthenticatedSettingsMethodCall($context, 'exportAccountData');
+      ob_start();
+      (new SettingsController())->exportAccountData();
+      $output = ob_get_clean();
+      $this->assertNotFalse($output);
+
+      $decoded = $this->decodeJsonPayload((string) $output);
 
       $this->assertSame('success', $decoded['status'] ?? null);
       $data = $decoded['data'] ?? [];
@@ -273,7 +280,7 @@ final class SettingsControllerIntegrationTest extends TestCase
       $this->assertGreaterThanOrEqual(1, count($payload['sites'] ?? []));
       $this->assertGreaterThanOrEqual(1, count($payload['work_entries'] ?? []));
     } finally {
-      $this->cleanupAuthenticatedContext($context);
+      $fixture->cleanup();
     }
   }
 

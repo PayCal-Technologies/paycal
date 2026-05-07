@@ -10,14 +10,21 @@ namespace PayCal\Domain\Attributes;
  *
  * Developer notes:
  * - Bootstrap stage naming must remain stable for extension runtime reflection.
+ *
+ * Architectural role:
+ * - Reusable attribute metadata consumed by extension bootstrap discovery and
+ *   lifecycle orchestration.
+ * - Encapsulates declarative bootstrap staging outside the HTTP layer.
+ *
+ * @category   Attributes
+ * @package    PayCal\Domain\Attributes
+ * @subpackage Metadata
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
-/**
- * Extension bootstrap attribute.
- *
- * Responsibilities:
- * - Mark classes/methods participating in extension bootstrap stages.
- */
 final class ExtensionBootstrap
 {
   /**

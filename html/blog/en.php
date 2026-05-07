@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-use PayCal\Domain\BlogRepository;
+use PayCal\Infrastructure\Content\BlogRepository;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Render;
 use PayCal\Domain\Strings;

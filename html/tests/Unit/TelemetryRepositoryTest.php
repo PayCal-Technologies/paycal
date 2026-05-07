@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 use PayCal\Domain\Telemetry\TelemetryAccessToken;
-use PayCal\Domain\Telemetry\TelemetryRepository;
+use PayCal\Infrastructure\Telemetry\TelemetryRepository;
 use PayCal\Domain\TelemetryPolicy;
 use PayCal\Domain\Database;
 use PayCal\Domain\Constants\Keys;

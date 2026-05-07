@@ -29,11 +29,19 @@ use PayCal\Domain\User;
  * - Keep correlation-sensitive metrics and diagnostics behind the existing
  *   admin and broker checks before exposing them to templates.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 
@@ -382,9 +390,9 @@ class AdminPageController
       . "<div class='admin-card'>"
       . "<div class='admin-card-header'><h3>" . htmlspecialchars(self::batchI18n('ADMIN_CONTACT_PIPELINE_HEALTH'), ENT_QUOTES, 'UTF-8') . "</h3></div>"
       . "<div class='admin-card-body'>"
-      . "<p>" . htmlspecialchars(self::batchI18n('ADMIN_TOTAL_SUBMISSIONS'), ENT_QUOTES, 'UTF-8') . ": <strong>" . number_format($totalSubmissions) . "</strong></p>"
-      . "<p>" . htmlspecialchars(self::batchI18n('TODAY'), ENT_QUOTES, 'UTF-8') . ": <strong>" . number_format($todayTotal) . "</strong></p>"
-      . "<p class='" . $failureClass . "'>" . htmlspecialchars(self::batchI18n('ADMIN_TODAY_FAILURES'), ENT_QUOTES, 'UTF-8') . ": <strong>" . number_format($todayFailure) . "</strong></p>"
+      . "<p>" . htmlspecialchars(self::batchI18n('ADMIN_TOTAL_SUBMISSIONS'), ENT_QUOTES, 'UTF-8') . ": <strong>" . Strings::formatLocalizedNumber($totalSubmissions, 0, 0) . "</strong></p>"
+      . "<p>" . htmlspecialchars(self::batchI18n('TODAY'), ENT_QUOTES, 'UTF-8') . ": <strong>" . Strings::formatLocalizedNumber($todayTotal, 0, 0) . "</strong></p>"
+      . "<p class='" . $failureClass . "'>" . htmlspecialchars(self::batchI18n('ADMIN_TODAY_FAILURES'), ENT_QUOTES, 'UTF-8') . ": <strong>" . Strings::formatLocalizedNumber($todayFailure, 0, 0) . "</strong></p>"
       . "<p>" . htmlspecialchars(self::batchI18n('ADMIN_LAST_SUBMISSION'), ENT_QUOTES, 'UTF-8') . ": <strong>" . htmlspecialchars($lastSubmissionText, ENT_QUOTES, 'UTF-8') . "</strong></p>"
       . "</div>"
       . "<div class='admin-card-footer'><a href='/admin/metrics' class='btn btn_secondary'>" . htmlspecialchars(self::batchI18n('ADMIN_OPEN_DETAILED_HEALTH'), ENT_QUOTES, 'UTF-8') . "</a></div>"
@@ -413,10 +421,10 @@ class AdminPageController
       . "<div class='admin-card'>"
       . "<div class='admin-card-header'><h3>" . htmlspecialchars(self::batchI18n('ADMIN_STRIPE_OVERVIEW'), ENT_QUOTES, 'UTF-8') . "</h3></div>"
       . "<div class='admin-card-body'>"
-      . "<p>" . htmlspecialchars(self::batchI18n('ADMIN_TODAY_PROCESSED_WEBHOOKS'), ENT_QUOTES, 'UTF-8') . ": <strong>" . number_format($processedWebhooks) . "</strong></p>"
+      . "<p>" . htmlspecialchars(self::batchI18n('ADMIN_TODAY_PROCESSED_WEBHOOKS'), ENT_QUOTES, 'UTF-8') . ": <strong>" . Strings::formatLocalizedNumber($processedWebhooks, 0, 0) . "</strong></p>"
       . "<p class='" . $stripeHealthClass . "'>" . htmlspecialchars(self::batchI18n('ADMIN_VERIFICATION_FAILURES_REJECTED_EVENTS'), ENT_QUOTES, 'UTF-8') . ": <strong>"
-      . number_format($verificationFailures) . " / " . number_format($rejectedWebhooks) . "</strong></p>"
-      . "<p>" . htmlspecialchars(self::batchI18n('ADMIN_TRACKED_EVENT_TYPES_WITH_ACTIVITY'), ENT_QUOTES, 'UTF-8') . ": <strong>" . number_format($trackedEventTypes) . "</strong></p>"
+      . Strings::formatLocalizedNumber($verificationFailures, 0, 0) . " / " . Strings::formatLocalizedNumber($rejectedWebhooks, 0, 0) . "</strong></p>"
+      . "<p>" . htmlspecialchars(self::batchI18n('ADMIN_TRACKED_EVENT_TYPES_WITH_ACTIVITY'), ENT_QUOTES, 'UTF-8') . ": <strong>" . Strings::formatLocalizedNumber($trackedEventTypes, 0, 0) . "</strong></p>"
       . "</div>"
       . "<div class='admin-card-footer'>"
       . "<a href='/admin/stripe/' class='btn btn_primary'>" . htmlspecialchars(self::batchI18n('ADMIN_OPEN_STRIPE_DASHBOARD'), ENT_QUOTES, 'UTF-8') . "</a>"

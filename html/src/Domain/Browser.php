@@ -5,18 +5,27 @@ namespace PayCal\Domain;
 /**
  * Browser.php
  *
- * Purpose: Define the Browser class for PayCal\Domain.
+ * Purpose: Browser and device introspection helper for remote IP, user agent,
+ * platform, and browser-version detection.
  *
- * PHP version 8.4.16
+ * Developer notes:
+ * - Detection heuristics should remain conservative because downstream logging
+ *   and UX labels may rely on these normalized values.
+ * - Keep this focused on client-environment parsing rather than request-policy
+ *   enforcement.
  *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
+ * Architectural role:
+ * - Reusable domain helper for browser and device detection consumed by
+ *   security, activity, and presentation flows.
+ * - Encapsulates client-environment parsing outside the HTTP layer.
  *
  * @category   Domain
  * @package    PayCal\Domain
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 

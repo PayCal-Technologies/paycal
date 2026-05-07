@@ -12,33 +12,46 @@ use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
-use PayCal\Domain\SecurityLog;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Domain\User;
 
 /**
  * RecoveryEmailController.php
  *
- * Purpose: Handle recovery email verification and management.
+ * Purpose: Recovery-email controller for initiating, verifying, and resending
+ * account recovery email proofs at the HTTP boundary.
  *
- * Endpoints:
- * - POST /api/v1/account/recovery-email/start - Start recovery email verification
- * - POST /api/v1/account/recovery-email/verify - Verify recovery email code
- * - POST /api/v1/account/recovery-email/resend - Resend recovery email code
+ * Developer notes:
+ * - Recovery contact changes are security-sensitive and should preserve
+ *   explicit verification and logging behavior.
+ * - Keep controller logic thin and let domain services own persistent state
+ *   and verification semantics.
  *
- * PHP version 8.4.16
- *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
  *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
+ * Recovery-email API surface.
+ *
+ * Responsibilities:
+ * - Start, verify, and resend recovery-email verification flows.
+ * - Validate inbound request shape before invoking domain behavior.
+ * - Preserve auditability for recovery-contact changes.
  */
 final class RecoveryEmailController
 {
-
   /**
    * Start recovery email verification by sending a code.
    * POST /api/v1/account/recovery-email/start

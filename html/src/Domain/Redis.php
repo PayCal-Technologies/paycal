@@ -71,6 +71,11 @@ class Redis
             }
         }
 
+        $db = Environment::redisDb();
+        if ($db > 0) {
+            $this->client->select($db);
+        }
+
         $prefix = getenv('REDIS_PREFIX');
         if (is_string($prefix) && '' !== $prefix) {
             $this->client->setOption(\Redis::OPT_PREFIX, $prefix);

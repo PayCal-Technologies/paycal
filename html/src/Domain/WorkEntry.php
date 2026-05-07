@@ -3,6 +3,8 @@
 namespace PayCal\Domain;
 
 use PayCal\Domain\Config\SystemConfig;
+use PayCal\Infrastructure\Cache\EarningsCacheService;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 
 use PayCal\Observability\Lens;
 use PayCal\Domain\Constants\Keys;
@@ -362,43 +364,45 @@ class WorkEntry
       $canonical['hours'] = $hours;
     }
 
-    if ($hours !== null) {
-      $dailyRegularCap = (float) SystemConfig::get('max_daily_regular_hours');
-      if ($dailyRegularCap <= 0.0 || $dailyRegularCap > self::MAX_DAILY_HOURS) {
-        $dailyRegularCap = 8.0;
-      }
+    if ($hours === null) {
+      return $canonical;
+    }
 
-      if (
-        $hasRegularSource
-        && $hasOvertimeSource
-        && isset($canonical['regular_hours'], $canonical['overtime_hours'])
-        && is_numeric((string) $canonical['regular_hours'])
-        && is_numeric((string) $canonical['overtime_hours'])
-      ) {
-        $regular = max(0.0, (float) $canonical['regular_hours']);
-        $overtime = max(0.0, (float) $canonical['overtime_hours']);
-        $splitMatchesHours = abs(($regular + $overtime) - $hours) < 0.0001;
+    $dailyRegularCap = (float) SystemConfig::get('max_daily_regular_hours');
+    if ($dailyRegularCap <= 0.0 || $dailyRegularCap > self::MAX_DAILY_HOURS) {
+      $dailyRegularCap = 8.0;
+    }
 
-        // Legacy rows can contain a flat split (all hours in regular, overtime zero)
-        // even when total hours exceed the configured daily regular cap.
-        if ($hours > $dailyRegularCap && $overtime <= 0.0001 && $splitMatchesHours) {
-          $regular = min($hours, $dailyRegularCap);
-          $canonical['regular_hours'] = $regular;
-          $canonical['overtime_hours'] = max(0.0, $hours - $regular);
-        }
-      }
+    if (
+      $hasRegularSource
+      && $hasOvertimeSource
+      && isset($canonical['regular_hours'], $canonical['overtime_hours'])
+      && is_numeric((string) $canonical['regular_hours'])
+      && is_numeric((string) $canonical['overtime_hours'])
+    ) {
+      $regular = max(0.0, (float) $canonical['regular_hours']);
+      $overtime = max(0.0, (float) $canonical['overtime_hours']);
+      $splitMatchesHours = abs(($regular + $overtime) - $hours) < 0.0001;
 
-      if (!$hasRegularSource && !$hasOvertimeSource) {
+      // Legacy rows can contain a flat split (all hours in regular, overtime zero)
+      // even when total hours exceed the configured daily regular cap.
+      if ($hours > $dailyRegularCap && $overtime <= 0.0001 && $splitMatchesHours) {
         $regular = min($hours, $dailyRegularCap);
         $canonical['regular_hours'] = $regular;
         $canonical['overtime_hours'] = max(0.0, $hours - $regular);
-      } elseif (!$hasRegularSource && isset($canonical['overtime_hours']) && is_numeric((string) $canonical['overtime_hours'])) {
-        $overtime = max(0.0, (float) $canonical['overtime_hours']);
-        $canonical['regular_hours'] = max(0.0, $hours - $overtime);
-      } elseif (!$hasOvertimeSource && isset($canonical['regular_hours']) && is_numeric((string) $canonical['regular_hours'])) {
-        $regular = max(0.0, (float) $canonical['regular_hours']);
-        $canonical['overtime_hours'] = max(0.0, $hours - $regular);
       }
+    }
+
+    if (!$hasRegularSource && !$hasOvertimeSource) {
+      $regular = min($hours, $dailyRegularCap);
+      $canonical['regular_hours'] = $regular;
+      $canonical['overtime_hours'] = max(0.0, $hours - $regular);
+    } elseif (!$hasRegularSource && isset($canonical['overtime_hours']) && is_numeric((string) $canonical['overtime_hours'])) {
+      $overtime = max(0.0, (float) $canonical['overtime_hours']);
+      $canonical['regular_hours'] = max(0.0, $hours - $overtime);
+    } elseif (!$hasOvertimeSource && isset($canonical['regular_hours']) && is_numeric((string) $canonical['regular_hours'])) {
+      $regular = max(0.0, (float) $canonical['regular_hours']);
+      $canonical['overtime_hours'] = max(0.0, $hours - $regular);
     }
 
     return $canonical;

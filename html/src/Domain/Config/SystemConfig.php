@@ -15,11 +15,18 @@ use PayCal\Domain\Database;
  *   logic, validation, and settings UI.
  * - Treat key/schema changes as cross-system compatibility changes.
  *
+ * Architectural role:
+ * - Reusable configuration authority for system defaults, limits, and runtime
+ *   schema metadata.
+ * - Encapsulates system-level configuration policy outside the HTTP layer.
+ *
  * @category   Config
  * @package    PayCal\Domain\Config
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 /**
@@ -818,7 +825,7 @@ final class SystemConfig
 
       case 'enum':
         $optionsRaw = $schema['options'] ?? [];
-        $options = is_array($optionsRaw) ? $optionsRaw : [];
+        $options = $optionsRaw;
         if (!in_array($value, $options, true)) {
           return ['valid' => false, 'value' => $schema['default'], 'error' => 'Invalid option'];
         }

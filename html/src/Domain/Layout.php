@@ -186,14 +186,7 @@ class Layout
 
     header('Report-To: {"group":"csp-endpoint","max_age":10886400,"endpoints":[{"url":"' . $cspReportUrl . '"}]}');
 
-    header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-    header("Permissions-Policy: accelerometer=(), camera=(), microphone=(), geolocation=(), usb=(), unload=()");
-    header('X-Content-Type-Options: nosniff');
-    header('X-Frame-Options: DENY');
-    header('Referrer-Policy: strict-origin-when-cross-origin');
-    // COEP disabled in dev to allow WebWorker loading
-    header('Cross-Origin-Opener-Policy: same-origin');
-    header('Cross-Origin-Resource-Policy: same-site');
+    Security::sendCoreSecurityHeaders();
     header('X-Robots-Tag: index, follow, noai, noimageai');
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Pragma: no-cache');

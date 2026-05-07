@@ -24,11 +24,18 @@ use PayCal\Domain\Enums\AuthLevel;
  * - Prefer helper methods here over duplicating auth/session rules in
  *   controllers or templates.
  *
+ * Architectural role:
+ * - Reusable domain authority for session resolution, auth-level checks, and
+ *   request identity policy.
+ * - Encapsulates authentication and session policy outside the HTTP layer.
+ *
  * @category   Domain
  * @package    PayCal\Domain
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 
@@ -363,13 +370,15 @@ class Authentication
    */
   public static function redirectUnverifiedToVerificationPage(): void
   {
-    if (self::validateAndTouchSession()) {
-      $currentUser = User::current();
-      if (!$currentUser->email_verified) {
-        self::sendRedirectSecurityHeaders();
-        header('Location: ' . Environment::appURL('/unverified/'));
-        exit;
-      }
+    if (!self::validateAndTouchSession()) {
+      return;
+    }
+
+    $currentUser = User::current();
+    if (!$currentUser->email_verified) {
+      self::sendRedirectSecurityHeaders();
+      header('Location: ' . Environment::appURL('/unverified/'));
+      exit;
     }
   }
 
@@ -378,15 +387,8 @@ class Authentication
    */
   private static function sendRedirectSecurityHeaders(): void
   {
-    header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+    Security::sendCoreSecurityHeaders();
     header("Content-Security-Policy: default-src 'self' https: data: blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'");
-    header('X-Content-Type-Options: nosniff');
-    header('X-Frame-Options: DENY');
-    header('Referrer-Policy: strict-origin-when-cross-origin');
-    // COEP disabled in dev to allow WebWorker loading
-    header('Cross-Origin-Opener-Policy: same-origin');
-    header('Cross-Origin-Resource-Policy: same-site');
-    header("Permissions-Policy: accelerometer=(), camera=(), microphone=(), geolocation=(), usb=(), unload=()");
   }
 
   /**
@@ -471,7 +473,7 @@ class Authentication
   {
     $sessionKey     = Keys::SESSION . ':' . InputSanitizer::sanitizeString($sessionHash);
     $createdAt      = $lastSignin    = InputSanitizer::sanitizeString(strval(time()));
-    $firstIPAddress = $lastIPAddress = InputSanitizer::sanitizeString(strval(Security::getVisitorRealIPAddress()));
+    $firstIPAddress = $lastIPAddress = InputSanitizer::sanitizeString(strval(Security::getClientIPAddress()));
     $rawUserAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
     $userAgent = is_scalar($rawUserAgent) ? trim((string) $rawUserAgent) : '';
     if ($userAgent !== '') {
@@ -542,38 +544,38 @@ class Authentication
       return null;
 
     $user = User::current();
-    if (!$user->email_verified) {
-      $cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
-      $cspNonce = is_scalar($cspNonceRaw) ? (string) $cspNonceRaw : '';
-      $i18n = [];
-      $i18nKeys = [
-        'AUTH_VERIFICATION_REMINDER_TITLE',
-        'AUTH_VERIFICATION_REMINDER_BODY',
-        'AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER',
-        'AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON',
-        'AUTH_VERIFICATION_REMINDER_RESEND_LINK',
-      ];
-      foreach ($i18nKeys as $key) {
-        $i18n[$key] = Strings::i18n($key);
-      }
-
-      $renders = [
-        '__SITE_REGISTER_VERIFY_URL__' => Environment::appURL('verify/'),
-        '__SITE_API_RESEND_VERIFY_URL__' => Environment::appURL('api/v1/account/resend-verification'),
-        '__VERIFICATION_REMINDER_JS_URL__' => Environment::appURL('js/signin/verification-reminder.js') . '?v=' . Environment::appVersion(),
-        '__VERIFICATION_REMINDER_JS_INTEGRITY_ATTR__' => Render::sriAttribute('js/signin/verification-reminder.js'),
-        '__AUTH_VERIFICATION_REMINDER_TITLE__' => $i18n['AUTH_VERIFICATION_REMINDER_TITLE'],
-        '__AUTH_VERIFICATION_REMINDER_BODY__' => $i18n['AUTH_VERIFICATION_REMINDER_BODY'],
-        '__AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER__' => $i18n['AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER'],
-        '__AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON__' => $i18n['AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON'],
-        '__AUTH_VERIFICATION_REMINDER_RESEND_LINK__' => $i18n['AUTH_VERIFICATION_REMINDER_RESEND_LINK'],
-        '__CSP_NONCE__' => $cspNonce,
-      ];
-
-      return Render::template('verification-reminder', $renders);
+    if ($user->email_verified) {
+      return null;
     }
 
-    return null;
+    $cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
+    $cspNonce = is_scalar($cspNonceRaw) ? (string) $cspNonceRaw : '';
+    $i18n = [];
+    $i18nKeys = [
+      'AUTH_VERIFICATION_REMINDER_TITLE',
+      'AUTH_VERIFICATION_REMINDER_BODY',
+      'AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER',
+      'AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON',
+      'AUTH_VERIFICATION_REMINDER_RESEND_LINK',
+    ];
+    foreach ($i18nKeys as $key) {
+      $i18n[$key] = Strings::i18n($key);
+    }
+
+    $renders = [
+      '__SITE_REGISTER_VERIFY_URL__' => Environment::appURL('verify/'),
+      '__SITE_API_RESEND_VERIFY_URL__' => Environment::appURL('api/v1/account/resend-verification'),
+      '__VERIFICATION_REMINDER_JS_URL__' => Environment::appURL('js/signin/verification-reminder.js') . '?v=' . Environment::appVersion(),
+      '__VERIFICATION_REMINDER_JS_INTEGRITY_ATTR__' => Render::sriAttribute('js/signin/verification-reminder.js'),
+      '__AUTH_VERIFICATION_REMINDER_TITLE__' => $i18n['AUTH_VERIFICATION_REMINDER_TITLE'],
+      '__AUTH_VERIFICATION_REMINDER_BODY__' => $i18n['AUTH_VERIFICATION_REMINDER_BODY'],
+      '__AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER__' => $i18n['AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER'],
+      '__AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON__' => $i18n['AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON'],
+      '__AUTH_VERIFICATION_REMINDER_RESEND_LINK__' => $i18n['AUTH_VERIFICATION_REMINDER_RESEND_LINK'],
+      '__CSP_NONCE__' => $cspNonce,
+    ];
+
+    return Render::template('verification-reminder', $renders);
   }
 
 

@@ -13,13 +13,14 @@ use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Log;
+use PayCal\Domain\Language;
 use PayCal\Domain\OrganizationDiscoveryService;
 use PayCal\Domain\PayPeriodGenerator;
 use PayCal\Domain\Enums\PayFrequency;
-use PayCal\Domain\RedisReliabilityService;
+use PayCal\Infrastructure\Resilience\RedisReliabilityService;
 use PayCal\Domain\RequestGuard;
 use PayCal\Domain\Response;
-use PayCal\Domain\SecurityLog;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Domain\Enums\SessionTimeout;
 use PayCal\Domain\Enums\Timezone;
 use PayCal\Domain\SystemLimits;
@@ -42,11 +43,19 @@ use PayCal\Domain\WorkEntryLockService;
  * - Keep field validation and normalization aligned with UserRepository and
  *   UserSettings rather than duplicating rules in controller branches.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 
@@ -62,8 +71,26 @@ use PayCal\Domain\WorkEntryLockService;
 class SettingsController
 {
   private const DATA_TRANSFER_SCHEMA_VERSION = 2;
+
+  /**
+   * Constructor. Aborts with 401 if the request is not authenticated.
+   */
+  public function __construct()
+  {
+    Authentication::abortIfUnauthenticated();
+  }
   private const DATA_IMPORT_TTL_SECONDS = 1800;
   private const DATA_EXPORT_PLAINTEXT_WARNING = 'Export payload includes plaintext account and work data. Treat the file as sensitive.';
+  private const SUPPORTED_LOCALES = [
+    'en-CA',
+    'fr-CA',
+    'en-US',
+    'en-GB',
+    'fr-FR',
+    'de-DE',
+    'es-ES',
+    'pt-BR',
+  ];
 
   /**
    * GET profile/settings
@@ -115,7 +142,7 @@ class SettingsController
    */
   public function updateProfileSettings(): void
   {
-    $allowedStrings = ['name', 'pay_frequency', 'pay_anchor', 'pay_period_start', 'pay_period_length', 'editing_grace_days', 'default_wage', 'timezone', 'currency'];
+    $allowedStrings = ['name', 'pay_frequency', 'pay_anchor', 'pay_period_start', 'pay_period_length', 'editing_grace_days', 'default_wage', 'timezone', 'currency', 'language', 'locale'];
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
@@ -347,7 +374,7 @@ class SettingsController
     try {
       $decoded = json_decode($payloadJson, true, 512, JSON_THROW_ON_ERROR);
     } catch (\JsonException $e) {
-      Response::error('[SC] Invalid import JSON payload.', ['error' => $e->getMessage()], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[SC] Invalid import JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
@@ -462,7 +489,7 @@ class SettingsController
     try {
       $payload = json_decode($payloadJson, true, 512, JSON_THROW_ON_ERROR);
     } catch (\JsonException $e) {
-      Response::error('[SC] Import payload decoding failed.', ['error' => $e->getMessage()], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[SC] Import payload decoding failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
@@ -585,6 +612,7 @@ class SettingsController
       'timezone' => (string) $user->timezone,
       'currency' => (string) $user->currency,
       'language' => (string) $user->language,
+      'locale' => (string) ($user->locale !== '' ? $user->locale : 'en-CA'),
       'pay_frequency' => (string) ($user->pay_frequency ?? ''),
       'pay_anchor' => (string) ($user->pay_anchor ?? ''),
       'pay_period_start' => (string) $user->pay_period_start,
@@ -621,6 +649,7 @@ class SettingsController
       'timezone',
       'currency',
       'language',
+      'locale',
       'pay_frequency',
       'pay_anchor',
       'pay_period_start',
@@ -1034,57 +1063,58 @@ class SettingsController
       Log::debug('[SC] Saved to Redis: '.json_encode($debugSaved));
     }
 
-    if ($ok) {
-      // Refresh the nonce TTL for subsequent requests
-      $timeout = $user->getSessionTimeoutSeconds();
-      $ttl = (int) min((int) SessionTimeout::TWO_HOURS->value, max((int) SessionTimeout::ONE_MIN->value, $timeout));
-      $key = Keys::USER.':'.$user->user_uuid.':nonce';
-      if (Database::exists($key)) {
-        Database::expire($key, $ttl);
-      }
-
-      // Return updated lock boundary if grace days changed (prevents stale cache)
-      $responseData = [];
-      if ($payPeriodUpdated) {
-        try {
-          $responseData['lockBoundary'] = WorkEntryLockService::getLockBoundaryDate($user->user_uuid);
-        } catch (\Throwable $e) {
-          $sideEffects['pay_period_side_effect_error'] = trim(
-            ($sideEffects['pay_period_side_effect_error'] === '' ? '' : $sideEffects['pay_period_side_effect_error'] . ' | ')
-            . 'lock_boundary: ' . $e->getMessage()
-          );
-          Log::error('[SC] Lock boundary refresh failed: ' . $e->getMessage());
-          Lens::add('Lock boundary refresh failed', ['error' => $e->getMessage()], 'error');
-        }
-      }
-
-      $canonicalUser = UserRepository::getByUUID($user->user_uuid);
-      $savedEcho = [];
-      $canonicalEcho = [];
-      foreach ($filtered as $key => $value) {
-        $savedEcho[$key] = (string) $value;
-        if ($canonicalUser && isset($canonicalUser->{$key})) {
-          $canonicalValue = $canonicalUser->{$key};
-          if (is_bool($canonicalValue)) {
-            $canonicalEcho[$key] = $canonicalValue ? '1' : '0';
-          } else {
-            $canonicalEcho[$key] = is_scalar($canonicalValue) ? (string) $canonicalValue : '';
-          }
-        }
-      }
-
-      $responseData['saved'] = $savedEcho;
-      $responseData['canonical'] = $canonicalEcho;
-      $responseData['side_effects'] = $sideEffects;
-
-      if (Environment::devSecurityDisabled()) {
-        $responseData['dropped_fields'] = array_values(array_unique($droppedKeys));
-      }
-
-      Response::success('[SC] Update success.', $responseData, \PayCal\Domain\Enums\HttpStatus::HTTP_OK);
-    } else {
+    if (!$ok) {
       \PayCal\Domain\Response::error('[SC] Update failed.', [], \PayCal\Domain\Enums\HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+      return;
     }
+
+    // Refresh the nonce TTL for subsequent requests
+    $timeout = $user->getSessionTimeoutSeconds();
+    $ttl = (int) min((int) SessionTimeout::TWO_HOURS->value, max((int) SessionTimeout::ONE_MIN->value, $timeout));
+    $key = Keys::USER.':'.$user->user_uuid.':nonce';
+    if (Database::exists($key)) {
+      Database::expire($key, $ttl);
+    }
+
+    // Return updated lock boundary if grace days changed (prevents stale cache)
+    $responseData = [];
+    if ($payPeriodUpdated) {
+      try {
+        $responseData['lockBoundary'] = WorkEntryLockService::getLockBoundaryDate($user->user_uuid);
+      } catch (\Throwable $e) {
+        $sideEffects['pay_period_side_effect_error'] = trim(
+          ($sideEffects['pay_period_side_effect_error'] === '' ? '' : $sideEffects['pay_period_side_effect_error'] . ' | ')
+          . 'lock_boundary: ' . $e->getMessage()
+        );
+        Log::error('[SC] Lock boundary refresh failed: ' . $e->getMessage());
+        Lens::add('Lock boundary refresh failed', ['error' => $e->getMessage()], 'error');
+      }
+    }
+
+    $canonicalUser = UserRepository::getByUUID($user->user_uuid);
+    $savedEcho = [];
+    $canonicalEcho = [];
+    foreach ($filtered as $key => $value) {
+      $savedEcho[$key] = (string) $value;
+      if ($canonicalUser && isset($canonicalUser->{$key})) {
+        $canonicalValue = $canonicalUser->{$key};
+        if (is_bool($canonicalValue)) {
+          $canonicalEcho[$key] = $canonicalValue ? '1' : '0';
+        } else {
+          $canonicalEcho[$key] = is_scalar($canonicalValue) ? (string) $canonicalValue : '';
+        }
+      }
+    }
+
+    $responseData['saved'] = $savedEcho;
+    $responseData['canonical'] = $canonicalEcho;
+    $responseData['side_effects'] = $sideEffects;
+
+    if (Environment::devSecurityDisabled()) {
+      $responseData['dropped_fields'] = array_values(array_unique($droppedKeys));
+    }
+
+    Response::success('[SC] Update success.', $responseData, \PayCal\Domain\Enums\HttpStatus::HTTP_OK);
   }
 
   /**
@@ -1309,7 +1339,7 @@ class SettingsController
    * @return array<string, mixed>
    */
   /**
-   * Validate and normalize account-info fields: timezone, currency, pay_rate.
+  * Validate and normalize account-info fields: timezone, currency, pay_rate, language, locale.
    *
    * @param array<string, mixed> $filtered
    * @return array<string, mixed>
@@ -1340,6 +1370,24 @@ class SettingsController
         unset($filtered['pay_rate']);
       } else {
         $filtered['pay_rate'] = $rate;
+      }
+    }
+
+    if (isset($filtered['language'])) {
+      $language = is_scalar($filtered['language']) ? strtolower(trim((string) $filtered['language'])) : '';
+      if ($language === '' || !Language::isSupported($language)) {
+        unset($filtered['language']);
+      } else {
+        $filtered['language'] = $language;
+      }
+    }
+
+    if (isset($filtered['locale'])) {
+      $locale = is_scalar($filtered['locale']) ? trim((string) $filtered['locale']) : '';
+      if ($locale === '' || !in_array($locale, self::SUPPORTED_LOCALES, true)) {
+        unset($filtered['locale']);
+      } else {
+        $filtered['locale'] = $locale;
       }
     }
 

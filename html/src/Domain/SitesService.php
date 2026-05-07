@@ -85,30 +85,32 @@ final class SitesService
     }
 
     // Handle per-row site updates
-    if (!empty($data['sites']) && is_array($data['sites'])) {
-      foreach ($data['sites'] as $siteUUID => $row) {
-        $row = (array) $row;
-        $keys = array_map('strval', array_keys($row));
-        $values = array_values($row);
-        $row = array_combine($keys, $values) ?: [];
-        if (!$this->validateSite($siteUUID, $row)) {
-          continue;
-        }
+    if (empty($data['sites']) || !is_array($data['sites'])) {
+      return true;
+    }
 
-        $normalized = $this->normalizeSite($row);
+    foreach ($data['sites'] as $siteUUID => $row) {
+      $row = (array) $row;
+      $keys = array_map('strval', array_keys($row));
+      $values = array_values($row);
+      $row = array_combine($keys, $values) ?: [];
+      if (!$this->validateSite($siteUUID, $row)) {
+        continue;
+      }
 
-        // Generate new site ID if it's a temporary "new_" ID
-        if (str_starts_with($siteUUID, 'new_')) {
-          $newSiteUUID = $this->generateSiteId();
-          $key = "site:{$userUUID}:{$newSiteUUID}";
-          $normalized['id'] = $newSiteUUID; // Store the ID in the data
-        } else {
-          $key = "site:{$userUUID}:{$siteUUID}";
-        }
+      $normalized = $this->normalizeSite($row);
 
-        foreach ($normalized as $field => $value) {
-          Database::hset($key, [(string) $field => (string) $value]);
-        }
+      // Generate new site ID if it's a temporary "new_" ID
+      if (str_starts_with($siteUUID, 'new_')) {
+        $newSiteUUID = $this->generateSiteId();
+        $key = "site:{$userUUID}:{$newSiteUUID}";
+        $normalized['id'] = $newSiteUUID; // Store the ID in the data
+      } else {
+        $key = "site:{$userUUID}:{$siteUUID}";
+      }
+
+      foreach ($normalized as $field => $value) {
+        Database::hset($key, [(string) $field => (string) $value]);
       }
     }
 
@@ -239,27 +241,29 @@ final class SitesService
     foreach ($keys as $key) {
       $data = Database::hgetall($key);
 
-      if (!empty($data)) {
-        $gross = (float) ($data['gross'] ?? $data['g'] ?? 0);
-        $hours = (float) ($data['hours'] ?? $data['h'] ?? 0);
-        $date = $data['date'] ?? $data['d'] ?? '';
-        $siteName = $data['site_name'] ?? $data['n'] ?? '';
-
-        $totalEarnings += $gross;
-        $totalHours += $hours;
-
-        if ($date) {
-          $dates[] = $date;
-        }
-
-        $entries[] = [
-            'date' => $date,
-            'site_name' => $siteName,
-            'hours' => $hours,
-            'gross' => $gross,
-            'key' => $key,
-        ];
+      if (empty($data)) {
+        continue;
       }
+
+      $gross = (float) ($data['gross'] ?? $data['g'] ?? 0);
+      $hours = (float) ($data['hours'] ?? $data['h'] ?? 0);
+      $date = $data['date'] ?? $data['d'] ?? '';
+      $siteName = $data['site_name'] ?? $data['n'] ?? '';
+
+      $totalEarnings += $gross;
+      $totalHours += $hours;
+
+      if ($date) {
+        $dates[] = $date;
+      }
+
+      $entries[] = [
+          'date' => $date,
+          'site_name' => $siteName,
+          'hours' => $hours,
+          'gross' => $gross,
+          'key' => $key,
+      ];
     }
 
     sort($dates);

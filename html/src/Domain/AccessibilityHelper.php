@@ -5,6 +5,32 @@ namespace PayCal\Domain;
 use PayCal\Domain\Config\Environment;
 
 /**
+ * AccessibilityHelper.php
+ *
+ * Purpose: Accessibility utility helper for ARIA attributes, focus behavior,
+ * keyboard affordances, and environment-aware UI compliance helpers.
+ *
+ * Developer notes:
+ * - Keep generated attributes and accessibility defaults aligned with the
+ *   frontend semantics consumed by server-rendered and dynamic interfaces.
+ * - This helper should shape accessible output, not become a general UI state
+ *   container.
+ *
+ * Architectural role:
+ * - Reusable domain helper consumed by templates, controllers, and UI-support
+ *   code that need stable accessibility conventions.
+ * - Encapsulates presentational accessibility rules outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Core
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
  * AccessibilityHelper
  *
  * Utilities for keyboard navigation, focus management, ARIA attributes,

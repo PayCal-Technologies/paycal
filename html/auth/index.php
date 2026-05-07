@@ -173,11 +173,12 @@ require_once __DIR__ . '/../header.php';
                 </p>
                 <p class="status" id="signin-passkey-status" role="status" aria-live="polite" aria-atomic="true"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_STATUS'], ENT_QUOTES, 'UTF-8'); ?></p>
                 <?php if ($accountRecoveryEnabled) { ?>
-                  <p><a href="/auth/recover/<?php echo $authLanguageQuery; ?>"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_ACCOUNT'], ENT_QUOTES, 'UTF-8'); ?></a></p>
+                  <hr class="auth-recover-divider" aria-hidden="true">
+                  <p class="auth-recover-link"><a href="/auth/recover/<?php echo $authLanguageQuery; ?>"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_ACCOUNT'], ENT_QUOTES, 'UTF-8'); ?></a></p>
                 <?php } ?>
               </section>
 
-              <p><?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_PREFIX'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#terms"><?php echo htmlspecialchars($i18n['AUTH_TERMS_LINK'], ENT_QUOTES, 'UTF-8'); ?></a> <?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_AND'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#privacy"><?php echo htmlspecialchars($i18n['AUTH_PRIVACY_LINK'], ENT_QUOTES, 'UTF-8'); ?></a>.</p>
+              <p>By signing in you agree to our <a href="/policies/#terms"><?php echo htmlspecialchars($i18n['AUTH_TERMS_LINK'], ENT_QUOTES, 'UTF-8'); ?></a> <?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_AND'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#privacy"><?php echo htmlspecialchars($i18n['AUTH_PRIVACY_LINK'], ENT_QUOTES, 'UTF-8'); ?></a>.</p>
             </form>
           </section>
 

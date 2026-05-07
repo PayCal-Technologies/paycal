@@ -4,7 +4,7 @@ namespace PayCal\Domain;
 
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Telemetry\TelemetryAccessToken;
-use PayCal\Domain\Telemetry\TelemetryRepository;
+use PayCal\Infrastructure\Telemetry\TelemetryRepository;
 
 /**
  * MetricsService.php

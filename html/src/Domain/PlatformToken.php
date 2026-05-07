@@ -3,6 +3,32 @@
 namespace PayCal\Domain;
 
 /**
+ * PlatformToken.php
+ *
+ * Purpose: Platform-detection helper for normalizing client operating-system
+ * hints into a stable token set used by frontend and policy decisions.
+ *
+ * Developer notes:
+ * - Platform token normalization should stay deterministic across header-hint
+ *   and User-Agent fallback paths.
+ * - Keep the exported token set stable because callers may persist or branch
+ *   on these normalized values.
+ *
+ * Architectural role:
+ * - Reusable domain helper for platform normalization consumed by higher-level
+ *   policy and rendering code.
+ * - Encapsulates platform parsing outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Core
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
  * Class PlatformToken
  *
  * Detects and normalises the client's operating-system platform token from

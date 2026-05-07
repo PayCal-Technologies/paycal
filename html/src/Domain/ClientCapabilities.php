@@ -5,22 +5,27 @@ namespace PayCal\Domain;
 /**
  * ClientCapabilities.php
  *
- * Purpose: Define the ClientCapabilities class for PayCal\Domain.
+ * Purpose: Client-crypto capability service for collecting, storing, and
+ * comparing browser cryptographic support signals.
  *
- * PHP version 8.4.16
+ * Developer notes:
+ * - Capability keys and derived support decisions are compatibility-sensitive
+ *   because encryption flows branch on them.
+ * - Keep this file focused on capability semantics, not controller transport.
  *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
+ * Architectural role:
+ * - Reusable domain service for client-side cryptographic capability handling
+ *   consumed by encryption bootstrap and telemetry flows.
+ * - Encapsulates capability policy outside the HTTP layer.
  *
  * @category   Domain
  * @package    PayCal\Domain
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
  * Class ClientCapabilities
  *

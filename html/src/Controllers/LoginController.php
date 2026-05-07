@@ -17,15 +17,20 @@ use PayCal\Observability\Lens;
  *   exists to provide a clear API contract for that state.
  * - Keep any future auth-path additions aligned with the passkey-first model.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
  * Login API surface.
  *
@@ -42,9 +47,6 @@ final class LoginController
      * return a clear error directing users to passkey authentication.
      */
     #[\PayCal\Domain\Attributes\Route('auth/login', ['POST'])]
-    /**
-     * Handles login operation.
-     */
     public function login(): void
     {
         Lens::boot('auth/login');

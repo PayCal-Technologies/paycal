@@ -74,14 +74,14 @@ $versionedPrefix = $apiBase . $version . '/';
 
 if (!str_starts_with($requestURI, $apiBase)) {
   $debug['error'] = 'Invalid API base';
-  Response::json('debug', '[API] Invalid endpoint.', 404, $debug);
+  Response::json('error', '[API] Invalid endpoint.', 404, $safeDebug());
   exit;
 }
 
 if (!str_starts_with($requestURI, $versionedPrefix)) {
   $debug['error'] = 'Version prefix mismatch';
   $debug['expected_prefix'] = $versionedPrefix;
-  Response::json('debug', '[API] API version missing or unsupported.', 404, $debug);
+  Response::json('error', '[API] API version missing or unsupported.', 404, $safeDebug());
   exit;
 }
 
@@ -99,6 +99,13 @@ $debug['normalized'] = [
 ];
 
 $debug['routes_discovered'] = $routes;
+
+// Strip internal route/controller enumeration from non-dev error responses to
+// prevent reconnaissance via API 404s and dispatch failures.
+$devMode = Environment::devSecurityDisabled();
+$safeDebug = static function () use (&$debug, $devMode): array {
+  return $devMode ? $debug : [];
+};
 
 foreach ($routes as $route) {
 
@@ -168,13 +175,13 @@ foreach ($routes as $route) {
 
   if (!class_exists($controllerClass)) {
     $debug['error'] = 'Controller class missing at dispatch';
-    Response::json('debug', '[API] Controller missing.', 500, $debug);
+    Response::json('error', '[API] Controller missing.', 500, $safeDebug());
     exit;
   }
 
   if (!method_exists($controllerClass, $action)) {
     $debug['error'] = 'Controller method missing at dispatch';
-    Response::json('debug', '[API] Method missing.', 500, $debug);
+    Response::json('error', '[API] Method missing.', 500, $safeDebug());
     exit;
   }
 
@@ -185,5 +192,5 @@ foreach ($routes as $route) {
 }
 
 $debug['error'] = 'Route not found';
-Response::json('debug', '[API] Route not found.', 404, $debug);
+Response::json('error', '[API] Route not found.', 404, $safeDebug());
 exit;

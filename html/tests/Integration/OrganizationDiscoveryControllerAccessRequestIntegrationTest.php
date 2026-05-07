@@ -217,6 +217,19 @@ final class OrganizationDiscoveryControllerAccessRequestIntegrationTest extends 
     $this->assertSame(403, (int) ($payload['__http_code'] ?? 0));
   }
 
+  public function testGenerateAuditControlTestRouteDeniedForViewerSession(): void
+  {
+    $this->seedRelationship($this->requesterUUID, 'viewer', 'work.read,sites.read');
+
+    $payload = $this->invokeControllerRoute('generateAuditControlTest', $this->organizationId, 'POST', [
+      'summary' => 'Viewer should be denied',
+      'csrf_token' => 'test-csrf',
+    ], [], $this->requesterSession);
+
+    $this->assertNotSame('success', $payload['status'] ?? null);
+    $this->assertSame(403, (int) ($payload['__http_code'] ?? 0));
+  }
+
   public function testPrepareInviteImportEnforcesAuthorityDomain(): void
   {
     $payload = $this->invokeControllerRoute('prepareInviteImport', $this->organizationId, 'POST', [

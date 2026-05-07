@@ -191,21 +191,23 @@ class Taxes
   /** @return array{federal:array<int, list<array<int,int>>>, provincial:array<string, array<int, list<array<int,int>>>>} */
   private static function loadRateTables(): array
   {
-    if (self::$rateTables === null) {
-      $raw = file_get_contents(__DIR__ . '/TaxRateTablesData.json');
-      if (!is_string($raw) || $raw === '') {
-        throw new \RuntimeException('Unable to load tax table dataset.');
-      }
-
-      $decoded = json_decode($raw, true);
-      if (!is_array($decoded)) {
-        throw new \RuntimeException('Invalid tax table dataset format.');
-      }
-
-      /** @var array<string, mixed> $decoded */
-
-      self::$rateTables = self::normalizeRateTables($decoded);
+    if (self::$rateTables !== null) {
+      return self::$rateTables;
     }
+
+    $raw = file_get_contents(__DIR__ . '/TaxRateTablesData.json');
+    if (!is_string($raw) || $raw === '') {
+      throw new \RuntimeException('Unable to load tax table dataset.');
+    }
+
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) {
+      throw new \RuntimeException('Invalid tax table dataset format.');
+    }
+
+    /** @var array<string, mixed> $decoded */
+
+    self::$rateTables = self::normalizeRateTables($decoded);
 
     return self::$rateTables;
   }

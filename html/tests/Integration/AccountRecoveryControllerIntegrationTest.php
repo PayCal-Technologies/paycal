@@ -2,7 +2,7 @@
 
 namespace Tests\Integration;
 
-use PayCal\Domain\AccountRecoveryTransaction;
+use PayCal\Infrastructure\Transaction\AccountRecoveryTransaction;
 use PayCal\Domain\Authentication;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Config\SystemConfig;

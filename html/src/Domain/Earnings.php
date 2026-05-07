@@ -3,6 +3,7 @@
 namespace PayCal\Domain;
 
 use PayCal\Domain\Constants\Keys;
+use PayCal\Infrastructure\Organization\OrganizationEncryptionService;
 
 /**
  * Earnings.php
@@ -252,31 +253,33 @@ class Earnings
     }
 
     $hasGrossAfterMerge = isset($merged['gross']) || isset($merged['g']);
-    if (!$hasGrossAfterMerge) {
-      $regularHours = self::numericFloat($merged['regular_hours'] ?? $merged['r'] ?? 0);
-      $overtimeHours = self::numericFloat($merged['overtime_hours'] ?? $merged['o'] ?? 0);
-      $travelHours = self::numericFloat($merged['travel_hours'] ?? $merged['t'] ?? 0);
-      $loa = self::numericFloat($merged['living_out_allowance'] ?? $merged['l'] ?? 0);
+    if ($hasGrossAfterMerge) {
+      return $merged;
+    }
 
-      $wage = null;
-      if (isset($merged['wage']) && is_numeric($merged['wage'])) {
-        $wage = (string) $merged['wage'];
-      } elseif (isset($merged['w']) && is_numeric($merged['w'])) {
-        $wage = (string) $merged['w'];
-      }
+    $regularHours = self::numericFloat($merged['regular_hours'] ?? $merged['r'] ?? 0);
+    $overtimeHours = self::numericFloat($merged['overtime_hours'] ?? $merged['o'] ?? 0);
+    $travelHours = self::numericFloat($merged['travel_hours'] ?? $merged['t'] ?? 0);
+    $loa = self::numericFloat($merged['living_out_allowance'] ?? $merged['l'] ?? 0);
 
-      $grossCents = Money::dollarsToCents((string) $loa);
-      if ($wage !== null) {
-        $grossCents += Money::calculateGross($regularHours, $overtimeHours, $wage);
-        if ($travelHours > 0) {
-          $travelPay = $travelHours * (float) $wage;
-          $grossCents += Money::dollarsToCents((string) $travelPay);
-        }
-      }
+    $wage = null;
+    if (isset($merged['wage']) && is_numeric($merged['wage'])) {
+      $wage = (string) $merged['wage'];
+    } elseif (isset($merged['w']) && is_numeric($merged['w'])) {
+      $wage = (string) $merged['w'];
+    }
 
-      if ($grossCents > 0) {
-        $merged['gross'] = Money::centsToDollars($grossCents);
+    $grossCents = Money::dollarsToCents((string) $loa);
+    if ($wage !== null) {
+      $grossCents += Money::calculateGross($regularHours, $overtimeHours, $wage);
+      if ($travelHours > 0) {
+        $travelPay = $travelHours * (float) $wage;
+        $grossCents += Money::dollarsToCents((string) $travelPay);
       }
+    }
+
+    if ($grossCents > 0) {
+      $merged['gross'] = Money::centsToDollars($grossCents);
     }
 
     return $merged;
@@ -672,23 +675,25 @@ class Earnings
     $keys = [];
     foreach ([$keyVersion] as $version) {
       $pubKeyPath = "/var/www/paycal/dev/keys/{$keyUUID}-public-signing-v{$version}.key";
-      if (file_exists($pubKeyPath)) {
-        $keyContent = file_get_contents($pubKeyPath);
-        if ($keyContent === false) {
-          error_log("Failed to read public key file: {$pubKeyPath}");
-          $keys[$version] = '';
-          continue;
-        }
-        $pubKey = trim($keyContent);
-        $decoded = base64_decode($pubKey, true);
-        if ($decoded && strlen($decoded) === SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES) {
-          $keys[$version] = $pubKey;
-        } else {
-          error_log("Invalid Ed25519 public key size for version {$version}: " . (strlen($decoded ?: '')));
-          $keys[$version] = '';
-        }
-      } else {
+      if (!file_exists($pubKeyPath)) {
         error_log("Public key file not found: {$pubKeyPath}");
+        $keys[$version] = '';
+        continue;
+      }
+
+      $keyContent = file_get_contents($pubKeyPath);
+      if ($keyContent === false) {
+        error_log("Failed to read public key file: {$pubKeyPath}");
+        $keys[$version] = '';
+        continue;
+      }
+
+      $pubKey = trim($keyContent);
+      $decoded = base64_decode($pubKey, true);
+      if ($decoded && strlen($decoded) === SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES) {
+        $keys[$version] = $pubKey;
+      } else {
+        error_log("Invalid Ed25519 public key size for version {$version}: " . (strlen($decoded ?: '')));
         $keys[$version] = '';
       }
     }
@@ -1421,6 +1426,7 @@ class Earnings
       $cSV           = self::batchI18n('CSV');
       $tXT           = self::batchI18n('TXT');
       $pDF           = self::batchI18n('PDF');
+      $xLSX          = 'XLSX';
       $monthly       = self::batchI18n('MONTHLY');
       $daily         = self::batchI18n('DAILY');
       $earningsAriaLabel = self::batchI18n('EARNINGS_LABEL') . ' ' . $year;
@@ -1436,6 +1442,12 @@ class Earnings
       $loadingYtdSummary = self::batchI18n('EARNINGS_LOADING_YEAR_TO_DATE_SUMMARY');
       $loadingPayPeriods = self::batchI18n('EARNINGS_LOADING_PAY_PERIODS');
       $loadingMonthlySummary = self::batchI18n('EARNINGS_LOADING_MONTHLY_SUMMARY');
+      $trendHelp = htmlspecialchars($earningsTrend . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
+      $historicalHelp = htmlspecialchars('Historical Intelligence ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
+      $yearToDateHelp = htmlspecialchars($yearToDate . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
+      $payPeriodsHelp = htmlspecialchars($payPeriods . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
+      $monthlyHelp = htmlspecialchars($monthly . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
+      $dailyHelp = htmlspecialchars($daily . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
 
       $activeClass = $active ? ' active' : '';
       $eagerYtdHtml = $compareRequested
@@ -1460,7 +1472,7 @@ class Earnings
 
       $contents .= <<<HTML
 <div id="tab-{$year}" data-tab-content="tab-{$year}" class="f_column{$activeClass}" aria-label="{$earningsAriaLabel}">
-  <section class="panel w100 earnings_panel">
+  <section class="panel w100 earnings_panel" data-hover-help="{$trendHelp}">
     <h2 class="earnings_panel_title">{$earningsTrend}</h2>
     <div class="earnings-graph-container">
       <div class="visually_hidden">
@@ -1472,41 +1484,44 @@ class Earnings
     </div>
   </section>
 
-  <section class="panel w100 earnings_panel">
+  <section class="panel w100 earnings_panel" data-hover-help="{$historicalHelp}">
     {$historicalIntelligenceHtml}
   </section>
 
   {$pieGraphsHtml}
 
-  <section class="panel w100 earnings_panel">
+  <section class="panel w100 earnings_panel" data-hover-help="{$yearToDateHelp}">
     <h2 class="earnings_panel_title">{$yearToDate}</h2>
     <div class="earnings_export_actions" role="group" aria-label="{$yearToDateExportAria}">
       <button type="button" class="paycal_export_btn" data-export-scope="yearly" data-export-format="csv" data-export-year="{$year}">{$cSV}</button> &sdot;
+      <button type="button" class="paycal_export_btn" data-export-scope="yearly" data-export-format="xlsx" data-export-year="{$year}">{$xLSX}</button> &sdot;
       <button type="button" class="paycal_export_btn" data-export-scope="yearly" data-export-format="txt" data-export-year="{$year}">{$tXT}</button> &sdot;
       <button type="button" class="paycal_export_btn" data-export-scope="yearly" data-export-format="pdf" data-export-year="{$year}">{$pDF}</button>
     </div>
     {$yearToDateHtml}
   </section>
 
-  <section class="panel w100 earnings_panel">
+  <section class="panel w100 earnings_panel" data-hover-help="{$payPeriodsHelp}">
     <h2 class="earnings_panel_title">{$payPeriods}</h2>
     {$payPeriodsHtml}
   </section>
 
-  <section class="panel w100 earnings_panel">
+  <section class="panel w100 earnings_panel" data-hover-help="{$monthlyHelp}">
     <h2 class="earnings_panel_title">{$monthly}</h2>
     <div class="earnings_export_actions" role="group" aria-label="{$monthlyExportAria}">
       <button type="button" class="paycal_export_btn" data-export-scope="monthly" data-export-format="csv" data-export-year="{$year}">{$cSV}</button> &sdot;
+      <button type="button" class="paycal_export_btn" data-export-scope="monthly" data-export-format="xlsx" data-export-year="{$year}">{$xLSX}</button> &sdot;
       <button type="button" class="paycal_export_btn" data-export-scope="monthly" data-export-format="txt" data-export-year="{$year}">{$tXT}</button> &sdot;
       <button type="button" class="paycal_export_btn" data-export-scope="monthly" data-export-format="pdf" data-export-year="{$year}">{$pDF}</button>
     </div>
     {$monthlyHtml}
   </section>
 
-  <section class="panel w100 earnings_panel">
+  <section class="panel w100 earnings_panel" data-hover-help="{$dailyHelp}">
     <h2 class="earnings_panel_title">{$daily}</h2>
     <div class="earnings_export_actions" role="group" aria-label="{$dailyExportAria}">
       <button type="button" class="paycal_export_btn" data-export-scope="daily" data-export-format="csv" data-export-year="{$year}">{$cSV}</button> &sdot;
+      <button type="button" class="paycal_export_btn" data-export-scope="daily" data-export-format="xlsx" data-export-year="{$year}">{$xLSX}</button> &sdot;
       <button type="button" class="paycal_export_btn" data-export-scope="daily" data-export-format="txt" data-export-year="{$year}">{$tXT}</button> &sdot;
       <button type="button" class="paycal_export_btn" data-export-scope="daily" data-export-format="pdf" data-export-year="{$year}">{$pDF}</button>
     </div>
@@ -1860,6 +1875,7 @@ HTML;
   <h3 class="pay-period-card_title">{$startDate} - {$endDate}</h3>
   <div class="pay-period-card_exports" role="group" aria-label="Pay period export formats for {$startDate} to {$endDate}">
     <button type="button" class="paycal_export_btn" data-export-scope="payperiod" data-export-format="csv" data-export-start="{$startDateIso}" data-export-end="{$endDateIso}">CSV</button> &sdot;
+    <button type="button" class="paycal_export_btn" data-export-scope="payperiod" data-export-format="xlsx" data-export-start="{$startDateIso}" data-export-end="{$endDateIso}">XLSX</button> &sdot;
     <button type="button" class="paycal_export_btn" data-export-scope="payperiod" data-export-format="txt" data-export-start="{$startDateIso}" data-export-end="{$endDateIso}">TXT</button> &sdot;
     <button type="button" class="paycal_export_btn" data-export-scope="payperiod" data-export-format="pdf" data-export-start="{$startDateIso}" data-export-end="{$endDateIso}">PDF</button>
   </div>

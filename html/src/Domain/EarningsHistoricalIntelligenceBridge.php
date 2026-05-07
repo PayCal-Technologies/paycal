@@ -3,6 +3,32 @@
 namespace PayCal\Domain;
 
 /**
+ * EarningsHistoricalIntelligenceBridge.php
+ *
+ * Purpose: Bridge historical-intelligence rendering from the core earnings
+ * domain into optional private extension implementations.
+ *
+ * Developer notes:
+ * - Core earnings flows should remain stable regardless of whether historical
+ *   intelligence extensions are installed.
+ * - Keep extension fallback behavior explicit so missing extensions degrade
+ *   predictably.
+ *
+ * Architectural role:
+ * - Reusable domain bridge that isolates historical-intelligence extension
+ *   loading from core earnings workflows.
+ * - Encapsulates optional extension wiring outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Extensions
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
  * Isolates core Earnings domain from private historical intelligence extension implementation.
  */
 final class EarningsHistoricalIntelligenceBridge

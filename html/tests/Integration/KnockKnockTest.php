@@ -467,7 +467,7 @@ final class KnockKnockTest extends TestCase
       && (str_contains($sampleLower, '/signin') || str_contains($sampleLower, 'name="password"'));
 
     $publicPagePrefixes = [
-      '/', '/about/', '/auth/', '/blog/', '/contact/', '/faq/', '/help/', '/media/', '/policies/', '/transparency/', '/verify/'
+      '/', '/about/', '/auth/', '/blog/', '/contact/', '/faq/', '/help/', '/media/', '/policies/', '/security/', '/soc2/', '/transparency/', '/verify/'
     ];
 
     $publicPageExact = [
@@ -476,6 +476,7 @@ final class KnockKnockTest extends TestCase
 
     $publicAPIPrefixes = [
       '/api/v1/auth/recovery/cancel',
+      '/api/v1/auth/passkey/send-recovery-email',  // intentionally public: serves unauthenticated passkey recovery flow
       '/api/v1/health',
       '/api/v1/security/csp/report',
       '/api/v1/system/kek/salt',

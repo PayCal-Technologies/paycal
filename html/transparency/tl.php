@@ -54,7 +54,7 @@ require_once HTML.'/header.php';
         <p>Ang mga kamakailang update na humubog sa produkto — kabilang ang mga daloy ng billing at profile governance — ay sinusubaybayan sa aming mga pahina ng framework/backend at test governance.</p>
       </section>
 
-      <div class="doc-panel-grid" aria-label="Mga panel ng detalye ng transparency">
+      <div class="doc-panel-grid doc-panel-grid--responsive-3" aria-label="Mga panel ng detalye ng transparency">
         <section class="doc-section">
           <h2>Katayuan ng Security Audit</h2>
           <p class="doc-article-meta">Published: <time datetime="2026-03-23">2026-03-23</time></p>

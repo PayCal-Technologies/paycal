@@ -3,6 +3,32 @@
 namespace PayCal\Domain;
 
 /**
+ * TelemetryPolicy.php
+ *
+ * Purpose: Telemetry retention and access-policy definition for security and
+ * product streams with stable role-based boundaries.
+ *
+ * Developer notes:
+ * - Stream retention and access role sets are policy surfaces and should
+ *   remain explicit, reviewable, and stable for downstream consumers.
+ * - Keep this file focused on policy constants and access helpers rather than
+ *   storage or controller concerns.
+ *
+ * Architectural role:
+ * - Reusable domain policy helper for telemetry access and retention decisions
+ *   consumed by controllers and repositories.
+ * - Encapsulates telemetry governance policy outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Core
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
  * TelemetryPolicy
  *
  * Defines retention and access boundaries for telemetry streams.
@@ -50,9 +76,6 @@ final class TelemetryPolicy
     ];
   }
 
-  /**
-   * Handles canAccess operation.
-   */
   public static function canAccess(string $stream, string $role): bool
   {
     $streamMeta = self::describeStream($stream);

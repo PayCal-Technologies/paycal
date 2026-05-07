@@ -64,23 +64,6 @@ final class Security
   }
 
   /**
-   * Determine the real IP Address of the website visitor.
-   *
-   * @return string $pAddress
-   */
-  public static function getVisitorRealIPAddress(): string
-  {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-      return InputSanitizer::sanitizeIPAddress($_SERVER['HTTP_CLIENT_IP']);
-    }
-    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-      return InputSanitizer::sanitizeIPAddress($_SERVER['HTTP_X_FORWARDED_FOR']);
-    }
-
-    return InputSanitizer::sanitizeIPAddress($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-  }
-
-  /**
    * Handles isTrustedProxy operation.
    */
   private static function isTrustedProxy(string $remoteAddr): bool
@@ -127,6 +110,26 @@ final class Security
       $code .= $set[random_int(0, $maxLength - 1)];
     }
     return strtoupper($code);
+  }
+
+  /**
+   * Emits the security response headers shared by all request paths.
+   *
+   * Covers HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy,
+   * COOP, CORP, and Permissions-Policy. CSP is intentionally excluded because
+   * it is context-specific (nonce-based on page loads, simpler on redirects).
+   * Call this once per response; the caller is responsible for CSP separately.
+   */
+  public static function sendCoreSecurityHeaders(): void
+  {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    // COEP disabled in dev to allow WebWorker loading
+    header('Cross-Origin-Opener-Policy: same-origin');
+    header('Cross-Origin-Resource-Policy: same-site');
+    header("Permissions-Policy: accelerometer=(), camera=(), microphone=(), geolocation=(), usb=(), unload=()");
   }
 }
 

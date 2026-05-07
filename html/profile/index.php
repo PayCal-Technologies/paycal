@@ -41,6 +41,16 @@ $pageTitle = profile_index_i18n('PROFILE') . ' - [' . profile_index_i18n('SITE_N
 $pageLabel = profile_index_i18n('PROFILE');
 $pageLanguage = (string) User::current()->language;
 $settingsCsrfNonce = User::current()->generateFormNonce('settings');
+$localeOptions = [
+  'en-CA' => 'English (Canada)',
+  'fr-CA' => 'French (Canada)',
+  'en-US' => 'English (United States)',
+  'en-GB' => 'English (United Kingdom)',
+  'fr-FR' => 'French (France)',
+  'de-DE' => 'German (Germany)',
+  'es-ES' => 'Spanish (Spain)',
+  'pt-BR' => 'Portuguese (Brazil)',
+];
 
 require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
 ?>
@@ -215,37 +225,73 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
         </div>
 
         <div class="item_pair">
-          <label for="organizations_personal_timezone_search" class="item_label"><?php echo profile_index_i18n('ORGANIZATIONS_TIMEZONE'); ?></label>
-          <div class="item_value">
-            <div class="timezone_finder" id="organizations_personal_timezone_finder" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="organizations_personal_timezone_listbox">
-              <input class="timezone_finder_search" id="organizations_personal_timezone_search" type="text" autocomplete="off" spellcheck="false" placeholder="<?php echo profile_index_i18n('PROFILE_SEARCH_TIMEZONES_PLACEHOLDER'); ?>" aria-autocomplete="list" aria-controls="organizations_personal_timezone_listbox" aria-label="<?php echo profile_index_i18n('ORGANIZATIONS_TIMEZONE'); ?>">
-              <input id="organizations_personal_timezone" type="hidden">
-              <ul id="organizations_personal_timezone_listbox" class="timezone_finder_list" role="listbox" hidden></ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="item_pair">
           <label for="edit_details_address_postal" class="item_label"><?php echo profile_index_i18n('PROFILE_POSTAL_LABEL'); ?></label>
           <div class="item_value">
             <input type="text" id="edit_details_address_postal" name="address_postal" value="<?php echo (string) ($user->address_postal ?? ''); ?>" maxlength="20" aria-describedby="edit_details_status edit_details_address_postal_error">
             <div id="edit_details_address_postal_error" class="status_text compact_hint" role="status" aria-live="polite"></div>
           </div>
         </div>
+      </div>
 
-        <div class="item_pair">
-          <label for="organizations_personal_currency_search" class="item_label"><?php echo profile_index_i18n('ORGANIZATIONS_CURRENCY'); ?></label>
-          <div class="item_value">
-            <div class="currency_finder" id="organizations_personal_currency_finder" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="organizations_personal_currency_listbox">
-              <input class="currency_finder_search" id="organizations_personal_currency_search" type="text" autocomplete="off" spellcheck="false" placeholder="<?php echo profile_index_i18n('PROFILE_SEARCH_CURRENCIES_PLACEHOLDER'); ?>" aria-autocomplete="list" aria-controls="organizations_personal_currency_listbox" aria-label="<?php echo profile_index_i18n('ORGANIZATIONS_CURRENCY'); ?>">
-              <input id="organizations_personal_currency" type="hidden">
-              <ul id="organizations_personal_currency_listbox" class="currency_finder_list" role="listbox" hidden></ul>
-            </div>
+    </form>
+  </section>
+
+  <section class="panel" id="panel-internationalization" title="Internationalization" data-hover-help="Language, locale, currency, and timezone preferences with live formatting preview.">
+    <div class="organizations_section_header">
+      <div>
+        <h2>Internationalization</h2>
+      </div>
+    </div>
+
+    <div class="profile_i18n_grid">
+      <div class="item_pair">
+        <label for="organizations_personal_language" class="item_label"><?php echo profile_index_i18n('LANGUAGE'); ?></label>
+        <div class="item_value">
+          <select id="organizations_personal_language" name="language" aria-describedby="edit_details_status edit_details_language_error">
+            <?php foreach (Language::AVAILABLE as $languageCode => $languageName) { ?>
+              <option value="<?php echo htmlspecialchars($languageCode, ENT_QUOTES, 'UTF-8'); ?>"<?php if ((string) $user->language === (string) $languageCode) { echo ' selected'; } ?>><?php echo htmlspecialchars($languageName, ENT_QUOTES, 'UTF-8'); ?></option>
+            <?php } ?>
+          </select>
+          <div id="edit_details_language_error" class="status_text compact_hint" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="item_pair">
+        <label for="organizations_personal_locale" class="item_label"><?php echo profile_index_i18n('LOCALE'); ?></label>
+        <div class="item_value">
+          <select id="organizations_personal_locale" name="locale" aria-describedby="edit_details_status edit_details_locale_error">
+            <?php foreach ($localeOptions as $localeCode => $localeLabel) { ?>
+              <option value="<?php echo htmlspecialchars($localeCode, ENT_QUOTES, 'UTF-8'); ?>"<?php if ((string) (($user->locale ?? '') !== '' ? $user->locale : 'en-CA') === (string) $localeCode) { echo ' selected'; } ?>><?php echo htmlspecialchars($localeLabel, ENT_QUOTES, 'UTF-8'); ?></option>
+            <?php } ?>
+          </select>
+          <div id="edit_details_locale_error" class="status_text compact_hint" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="item_pair">
+        <label for="organizations_personal_currency_search" class="item_label"><?php echo profile_index_i18n('ORGANIZATIONS_CURRENCY'); ?></label>
+        <div class="item_value">
+          <div class="currency_finder" id="organizations_personal_currency_finder" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="organizations_personal_currency_listbox">
+            <input class="currency_finder_search" id="organizations_personal_currency_search" type="text" autocomplete="off" spellcheck="false" placeholder="<?php echo profile_index_i18n('PROFILE_SEARCH_CURRENCIES_PLACEHOLDER'); ?>" aria-autocomplete="list" aria-controls="organizations_personal_currency_listbox" aria-label="<?php echo profile_index_i18n('ORGANIZATIONS_CURRENCY'); ?>">
+            <input id="organizations_personal_currency" type="hidden">
+            <ul id="organizations_personal_currency_listbox" class="currency_finder_list" role="listbox" hidden></ul>
           </div>
         </div>
       </div>
 
-    </form>
+      <div class="item_pair">
+        <label for="organizations_personal_timezone_search" class="item_label"><?php echo profile_index_i18n('ORGANIZATIONS_TIMEZONE'); ?></label>
+        <div class="item_value">
+          <div class="timezone_finder" id="organizations_personal_timezone_finder" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="organizations_personal_timezone_listbox">
+            <input class="timezone_finder_search" id="organizations_personal_timezone_search" type="text" autocomplete="off" spellcheck="false" placeholder="<?php echo profile_index_i18n('PROFILE_SEARCH_TIMEZONES_PLACEHOLDER'); ?>" aria-autocomplete="list" aria-controls="organizations_personal_timezone_listbox" aria-label="<?php echo profile_index_i18n('ORGANIZATIONS_TIMEZONE'); ?>">
+            <input id="organizations_personal_timezone" type="hidden">
+            <ul id="organizations_personal_timezone_listbox" class="timezone_finder_list" role="listbox" hidden></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="organizations_i18n_preview" class="profile_i18n_preview" role="status" aria-live="polite"></div>
   </section>
 
   <section class="panel" id="panel-pay-period" title="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_PANEL_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_PANEL_HELP'); ?>"
@@ -258,6 +304,8 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
       'pay_rate'           => (string) ($user->pay_rate            ?? ''),
       'timezone'           => (string) ($user->timezone            ?? 'America/Edmonton'),
       'currency'           => (string) ($user->currency            ?? 'CAD'),
+      'language'           => (string) ($user->language            ?? 'en'),
+      'locale'             => (string) (($user->locale             ?? '') !== '' ? $user->locale : 'en-CA'),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}'), ENT_QUOTES, 'UTF-8'); ?>'>
     <div class="organizations_section_header">
       <div>
@@ -298,6 +346,8 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
           </div>
         </div>
       </div>
+
+      <div id="organizations_personal_payperiod_warning" class="organizations_payperiod_warning" role="alert" aria-live="assertive"></div>
 
       <div id="organizations_personal_preview" class="organizations_preview_box pay_period_preview_compact" aria-live="polite" title="<?php echo profile_index_i18n('PROFILE_PAY_PREVIEW_HELP'); ?>"></div>
     </form>
@@ -410,7 +460,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
     </div>
   </section>
 
-  <section class="panel" id="panel-account-activity" title="Account activity for current and active sessions." data-hover-help="Account activity for current and active sessions.">
+  <section class="panel" id="panel-account-activity" data-hover-help="Account activity for current and active sessions.">
     <div class="organizations_section_header">
       <div>
         <h2>Account Activity</h2>

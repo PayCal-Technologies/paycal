@@ -5,24 +5,29 @@ namespace PayCal\Domain;
 /**
  * CalendarFields.php
  *
- * Purpose: Define the CalendarFields enum for PayCal\Domain.
+ * Purpose: Enumerate canonical calendar field keys used by calendar payloads
+ * and work-entry representations.
  *
- * PHP version 8.4.16
+ * Developer notes:
+ * - Enum values are payload-contract keys and should remain stable across API
+ *   and rendering flows.
+ * - Keep this file focused on field identity, not validation logic.
  *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
+ * Architectural role:
+ * - Reusable domain enum for calendar field identifiers shared across core
+ *   calendar and work-entry flows.
+ * - Encapsulates field identity outside the HTTP layer.
  *
  * @category   Domain
  * @package    PayCal\Domain
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
- * CalendarFields
+ * CalendarFields enum.
  */
 enum CalendarFields: string
 {

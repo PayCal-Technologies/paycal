@@ -3,6 +3,32 @@
 namespace PayCal\Domain;
 
 /**
+ * EarningsDailyExtensionBridge.php
+ *
+ * Purpose: Bridge core daily earnings payload rendering into optional private
+ * extension implementations while preserving a stable core contract.
+ *
+ * Developer notes:
+ * - Keep extension dispatch behavior deterministic so core earnings pages do
+ *   not depend on extension-specific internals.
+ * - Normalization should protect the core payload contract when extensions are
+ *   present or absent.
+ *
+ * Architectural role:
+ * - Reusable domain bridge that isolates extension hook loading from core
+ *   daily earnings flows.
+ * - Encapsulates optional extension wiring outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Extensions
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
  * Isolates core earnings daily payload from private extension implementation.
  */
 final class EarningsDailyExtensionBridge

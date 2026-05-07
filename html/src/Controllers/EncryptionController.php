@@ -14,7 +14,7 @@ use PayCal\Domain\Log;
 use PayCal\Domain\Response;
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Telemetry\TelemetryAccessToken;
-use PayCal\Domain\Telemetry\TelemetryRepository;
+use PayCal\Infrastructure\Telemetry\TelemetryRepository;
 use PayCal\Domain\User;
 
 /**
@@ -29,11 +29,19 @@ use PayCal\Domain\User;
  * - Capability reporting should remain lightweight and rate-limited because it
  *   can be emitted by many clients automatically.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 /**

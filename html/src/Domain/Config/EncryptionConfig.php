@@ -5,18 +5,26 @@ namespace PayCal\Domain\Config;
 /**
  * EncryptionConfig.php
  *
- * Purpose: Define the EncryptionConfig class for PayCal\Domain\Config.
+ * Purpose: Typed encryption configuration value object for flags, algorithm
+ * options, and derived crypto-runtime settings.
  *
- * PHP version 8.4.16
+ * Developer notes:
+ * - Encryption settings are compatibility-sensitive and should remain explicit
+ *   so runtime crypto behavior is reviewable.
+ * - Keep this focused on config representation, not operational logic.
  *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
+ * Architectural role:
+ * - Reusable configuration value object consumed by encryption services and
+ *   bootstrap paths.
+ * - Encapsulates encryption configuration outside the HTTP layer.
  *
  * @category   Config
  * @package    PayCal\Domain\Config
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 class EncryptionConfig
@@ -79,34 +87,34 @@ class EncryptionConfig
     return $this->flags;
   }
 
-    /**
-     * @return array<string, bool>
-     */
-    public static function getConfig(): array
-    {
-      $enabled = self::$cryptoEnabled ?? \PayCal\Domain\Config\Environment::encryptionEnabled();
-      $required = self::$cryptoRequired ?? false;
+  /**
+   * @return array<string, bool>
+   */
+  public static function getConfig(): array
+  {
+    $enabled = self::$cryptoEnabled ?? \PayCal\Domain\Config\Environment::encryptionEnabled();
+    $required = self::$cryptoRequired ?? false;
 
-        return [
-        'crypto_enabled' => $enabled,
-        'crypto_required' => $required,
-        ];
-    }
+    return [
+      'crypto_enabled' => $enabled,
+      'crypto_required' => $required,
+    ];
+  }
 
-    /**
-     * Handles isEnabled operation.
-     */
-    public static function isEnabled(): bool
-    {
-      return self::$cryptoEnabled ?? \PayCal\Domain\Config\Environment::encryptionEnabled();
-    }
+  /**
+   * Handles isEnabled operation.
+   */
+  public static function isEnabled(): bool
+  {
+    return self::$cryptoEnabled ?? \PayCal\Domain\Config\Environment::encryptionEnabled();
+  }
 
-    /**
-     * Handles isRequired operation.
-     */
-    public static function isRequired(): bool
-    {
-      return self::$cryptoRequired ?? false;
-    }
+  /**
+   * Handles isRequired operation.
+   */
+  public static function isRequired(): bool
+  {
+    return self::$cryptoRequired ?? false;
+  }
 }
 

@@ -3,6 +3,32 @@
 namespace PayCal\Domain;
 
 /**
+ * AriaEcho.php
+ *
+ * Purpose: Accessibility narration utility for shaping spoken rhythm, pauses,
+ * and repeated-content pacing for assistive output.
+ *
+ * Developer notes:
+ * - This helper influences accessibility narration semantics and should remain
+ *   focused on readable, predictable output transforms.
+ * - Preserve the existing accessibility-oriented intent rather than turning it
+ *   into a generic string helper.
+ *
+ * Architectural role:
+ * - Reusable domain helper for assistive-text normalization and narration-safe
+ *   output shaping.
+ * - Encapsulates accessibility narration rules outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Core
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
  * AriaEcho
  *
  * Echo is the guardian who repeats digital content across assistive pathways

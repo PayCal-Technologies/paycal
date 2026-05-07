@@ -841,9 +841,47 @@ header('Expires: 0');
 }
 
 .passkey_action_status {
-  margin-top: 0.45rem;
-  text-align: center;
+  margin-top: 0.65rem;
   min-height: 1.25rem;
+}
+
+.status_message_callout {
+  display: none;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.55rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.status_message_callout.is-visible {
+  display: block;
+}
+
+.status_message_callout.is-info {
+  color: #0f4f87;
+  border-color: #85b8e5;
+  background: #e8f3ff;
+}
+
+.status_message_callout.is-success {
+  color: #1f5f34;
+  border-color: #7bcf9b;
+  background: #e8f8ee;
+}
+
+.status_message_callout.is-warning {
+  color: #7a4a00;
+  border-color: #f0c27d;
+  background: #fff4e5;
+}
+
+.status_message_callout.is-error {
+  color: #7a1f1f;
+  border-color: #e2a8a8;
+  background: #fdeeee;
 }
 
 @keyframes settingsBusySpin {

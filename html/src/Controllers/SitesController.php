@@ -11,7 +11,7 @@ use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\OrganizationDiscoveryService;
-use PayCal\Domain\OrganizationEncryptionService;
+use PayCal\Infrastructure\Organization\OrganizationEncryptionService;
 use PayCal\Domain\RequestGuard;
 use PayCal\Domain\Response;
 use PayCal\Domain\Money;
@@ -45,11 +45,19 @@ use PayCal\Observability\Lens;
  * - Grid handlers should preserve stable payload shape because the frontend
  *   datagrid JS expects predictable keys and paging semantics.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 /**

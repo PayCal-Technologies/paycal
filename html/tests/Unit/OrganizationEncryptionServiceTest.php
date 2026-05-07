@@ -4,7 +4,7 @@ use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Database;
 use PayCal\Domain\OrganizationDiscoveryService;
-use PayCal\Domain\OrganizationEncryptionService;
+use PayCal\Infrastructure\Organization\OrganizationEncryptionService;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

@@ -54,7 +54,7 @@ require_once HTML.'/header.php';
         <p>Las actualizaciones recientes que han dado forma al producto, incluidos los flujos de facturación y gobernanza de perfil, se rastrean en nuestras páginas de framework/backend y gobernanza de pruebas.</p>
       </section>
 
-      <div class="doc-panel-grid" aria-label="Paneles de detalle de transparencia">
+      <div class="doc-panel-grid doc-panel-grid--responsive-3" aria-label="Paneles de detalle de transparencia">
         <section class="doc-section">
           <h2>Estado de la auditoría de seguridad</h2>
           <p class="doc-article-meta">Published: <time datetime="2026-03-23">2026-03-23</time></p>

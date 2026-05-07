@@ -4,6 +4,8 @@ namespace PayCal\Domain;
 
 use PayCal\Domain\Config\Environment;
 use PayCal\Domain\Constants\Keys;
+use PayCal\Infrastructure\Email\EmailTransport;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Observability\Lens;
 
 /**
@@ -164,21 +166,23 @@ class EmailGarum
       return $status;
     }
 
-    if ($newEmail === $confirmNewEmail) {
-      $verificationCode = Security::generateVerificationCode(6);
-      User::addVerificationCode($verificationCode, $userUuid);
-      $emailResult = self::emailVerificationCode(verificationCode: $verificationCode, emailTo: $newEmail);
+    if ($newEmail !== $confirmNewEmail) {
+      return $status;
+    }
 
-      if (str_contains($emailResult, 'Successfully')) {
-        Database::hset(Keys::USER.':'.$userUuid, ['new_email' => $newEmail]);
-        $status->status = 'SUCCESS';
-        $status->message = 'User Email update in progress. Verification code needed.';
-        $status->stage = 'verification_code_input';
-        $status->message = 'Waiting for verification code step.';
-      } else {
-        $status->stage = 'error';
-        $status->message = 'Failed to send verification email.';
-      }
+    $verificationCode = Security::generateVerificationCode(6);
+    User::addVerificationCode($verificationCode, $userUuid);
+    $emailResult = self::emailVerificationCode(verificationCode: $verificationCode, emailTo: $newEmail);
+
+    if (str_contains($emailResult, 'Successfully')) {
+      Database::hset(Keys::USER.':'.$userUuid, ['new_email' => $newEmail]);
+      $status->status = 'SUCCESS';
+      $status->message = 'User Email update in progress. Verification code needed.';
+      $status->stage = 'verification_code_input';
+      $status->message = 'Waiting for verification code step.';
+    } else {
+      $status->stage = 'error';
+      $status->message = 'Failed to send verification email.';
     }
 
     return $status;
@@ -396,26 +400,27 @@ class EmailGarum
       headers: $headers
     );
     
-    if (!$sent) {
-      self::logVerificationEmailDebug('link_email_send_failed', [
-        'email_to' => $emailTo,
-        'subject' => $subject,
-        'transport_error' => $transport->getLastError(),
-      ]);
-      SecurityLog::log('verification_link_email_send_failed', [
-        'email_to' => $emailTo,
-        'subject' => $subject,
-        'transport_error' => $transport->getLastError(),
-        'smtp_server' => Environment::smtpServer(),
-        'smtp_port' => Environment::smtpPort(),
-      ]);
-      error_log('[Email] sendVerificationEmail failed: ' . $transport->getLastError());
-    } else {
+    if ($sent) {
       self::logVerificationEmailDebug('link_email_send_success', [
         'email_to' => $emailTo,
         'subject' => $subject,
       ]);
+      return $sent;
     }
+
+    self::logVerificationEmailDebug('link_email_send_failed', [
+      'email_to' => $emailTo,
+      'subject' => $subject,
+      'transport_error' => $transport->getLastError(),
+    ]);
+    SecurityLog::log('verification_link_email_send_failed', [
+      'email_to' => $emailTo,
+      'subject' => $subject,
+      'transport_error' => $transport->getLastError(),
+      'smtp_server' => Environment::smtpServer(),
+      'smtp_port' => Environment::smtpPort(),
+    ]);
+    error_log('[Email] sendVerificationEmail failed: ' . $transport->getLastError());
     
     return $sent;
   }
@@ -437,30 +442,32 @@ class EmailGarum
       : '';
     $rawHost = $forwardedHost !== '' ? $forwardedHost : $httpHost;
 
-    if ($rawHost !== '') {
-      // If multiple hosts are provided by a proxy, use the first entry.
-      $host = trim(explode(',', $rawHost)[0]);
-
-      if (preg_match('/^[a-zA-Z0-9.:-]+$/', $host) === 1) {
-        $forwardedProto = isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && is_string($_SERVER['HTTP_X_FORWARDED_PROTO'])
-          ? trim($_SERVER['HTTP_X_FORWARDED_PROTO'])
-          : '';
-        $https = isset($_SERVER['HTTPS']) && is_string($_SERVER['HTTPS'])
-          ? strtolower($_SERVER['HTTPS'])
-          : '';
-        $scheme = $forwardedProto !== ''
-          ? strtolower(explode(',', $forwardedProto)[0])
-          : (($https !== '' && $https !== 'off') ? 'https' : 'http');
-
-        if ($scheme !== 'http' && $scheme !== 'https') {
-          $scheme = 'https';
-        }
-
-        return rtrim($scheme.'://'.$host, '/');
-      }
+    if ($rawHost === '') {
+      return Environment::appBaseURL();
     }
 
-    return Environment::appBaseURL();
+    // If multiple hosts are provided by a proxy, use the first entry.
+    $host = trim(explode(',', $rawHost)[0]);
+
+    if (preg_match('/^[a-zA-Z0-9.:-]+$/', $host) !== 1) {
+      return Environment::appBaseURL();
+    }
+
+    $forwardedProto = isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && is_string($_SERVER['HTTP_X_FORWARDED_PROTO'])
+      ? trim($_SERVER['HTTP_X_FORWARDED_PROTO'])
+      : '';
+    $https = isset($_SERVER['HTTPS']) && is_string($_SERVER['HTTPS'])
+      ? strtolower($_SERVER['HTTPS'])
+      : '';
+    $scheme = $forwardedProto !== ''
+      ? strtolower(explode(',', $forwardedProto)[0])
+      : (($https !== '' && $https !== 'off') ? 'https' : 'http');
+
+    if ($scheme !== 'http' && $scheme !== 'https') {
+      $scheme = 'https';
+    }
+
+    return rtrim($scheme.'://'.$host, '/');
   }
 
   /**
@@ -522,6 +529,35 @@ class EmailGarum
 
     $htmlBody = Render::template('email-account-recovery-code-html', $templateData);
     $textBody = Render::template('email-account-recovery-code-text', $templateData);
+    $transport = new EmailTransport();
+    $bcc = !empty(Environment::emailDebug()) ? [Environment::emailDebug()] : [];
+
+    return $transport->send(
+      to: $emailTo,
+      subject: $subject,
+      htmlBody: $htmlBody,
+      textBody: $textBody,
+      from: Environment::emailReplyTo(),
+      bcc: $bcc
+    );
+  }
+
+  /**
+   * Send account recovery magic link.
+   */
+  public static function sendAccountRecoveryMagicLink(string $emailTo, string $userName, string $magicLink, int $ttlMinutes): bool
+  {
+    $appName = self::appName();
+    $subject = '[' . $appName . '] - Account Recovery Link';
+    $templateData = [
+      '__USER_NAME__' => htmlspecialchars($userName ?: 'there', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+      '__RECOVERY_LINK__' => htmlspecialchars($magicLink, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+      '__EXPIRES_IN_MINUTES__' => (string) max(1, $ttlMinutes),
+      '__PC_NAME__' => $appName,
+    ];
+
+    $htmlBody = Render::template('email-account-recovery-magic-link-html', $templateData);
+    $textBody = Render::template('email-account-recovery-magic-link-text', $templateData);
     $transport = new EmailTransport();
     $bcc = !empty(Environment::emailDebug()) ? [Environment::emailDebug()] : [];
 

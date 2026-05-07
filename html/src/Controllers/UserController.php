@@ -24,15 +24,20 @@ use PayCal\Domain\User;
  * - Prefer repository/domain helpers for user reads and writes instead of
  *   direct storage access.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
  * User API surface.
  *
@@ -54,9 +59,6 @@ class UserController
    * Search for users by name or email.
    */
   #[Route('users/search', ['GET'])]
-  /**
-   * Handles searchUsers operation.
-   */
   public function searchUsers(): void
   {
     $query = InputSanitizer::getString('q') ?? '';

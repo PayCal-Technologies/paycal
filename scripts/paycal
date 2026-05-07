@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+source "${SCRIPT_DIR}/lib/common.sh"
+
+usage() {
+  cat <<'EOF'
+PayCal script suite
+
+Usage:
+  scripts/paycal <category:action> [args]
+
+Categories:
+  hooks:install
+  hooks:pre-commit
+  hooks:pre-push
+  checks:composer-state
+  checks:semantic-diff [--cached|--base-ref REF --head-ref REF] [--paths-file FILE]
+  checks:staged-sensitive
+  checks:public-promotion-scope [git-range]
+  checks:soc2-control-map [path-to-map]
+  checks:soc2-evidence-freshness [max-age-days] [path-to-map]
+  checks:soc2-change-management [git-range]
+  checks:soc2-test-controls
+  checks:soc2-auth-runtime [event-limit] [seed-if-empty]
+  checks:soc2-export-validate [YYYY-MM]
+  checks:edge
+  soc2:bundle [YYYY-MM]
+  soc2:auditor-index [YYYY-MM] [path-to-map]
+  soc2:snapshot [output-markdown-path] [max-age-days]
+  soc2:package [YYYY-MM] [output-zip-path]
+  crypto:census
+  crypto:migrate-plaintext
+  refactor:fix-headers
+  refactor:dedupe-uses
+  migrate:redis-field-names
+  sync:redis-dev
+  tests:affected [base-ref] [head-ref]
+
+Examples:
+  scripts/paycal hooks:install
+  scripts/paycal checks:composer-state
+  scripts/paycal checks:semantic-diff --cached
+  scripts/paycal checks:semantic-diff --base-ref origin/main --head-ref HEAD
+  scripts/paycal checks:staged-sensitive
+  scripts/paycal checks:public-promotion-scope main...HEAD
+  scripts/paycal checks:soc2-control-map
+  scripts/paycal checks:soc2-evidence-freshness 35
+  scripts/paycal checks:soc2-change-management main...HEAD
+  scripts/paycal checks:soc2-test-controls
+  scripts/paycal checks:soc2-auth-runtime 400
+  scripts/paycal checks:soc2-auth-runtime 400 0
+  scripts/paycal checks:soc2-export-validate 2026-04
+  scripts/paycal soc2:bundle 2026-04
+  scripts/paycal soc2:snapshot
+  scripts/paycal soc2:package 2026-04 /var/www/paycal-soc2-handoff-2026-04-fixed.zip
+  scripts/paycal checks:edge
+  scripts/paycal crypto:census --json
+  scripts/paycal crypto:migrate-plaintext --dry-run
+  scripts/paycal tests:affected origin/main HEAD
+EOF
+}
+
+cmd="${1:-help}"
+shift || true
+
+case "${cmd}" in
+  hooks:install)
+    exec "${SCRIPT_DIR}/hooks/install.sh" "$@"
+    ;;
+  hooks:pre-commit)
+    exec "${SCRIPT_DIR}/hooks/pre-commit.sh" "$@"
+    ;;
+  hooks:pre-push)
+    exec "${SCRIPT_DIR}/hooks/pre-push.sh" "$@"
+    ;;
+  checks:staged-sensitive)
+    exec "${SCRIPT_DIR}/hooks/check-staged-sensitive.sh" "$@"
+    ;;
+  checks:composer-state)
+    exec "${SCRIPT_DIR}/hooks/check-composer-state.sh" "$@"
+    ;;
+  checks:semantic-diff)
+    exec php "${SCRIPT_DIR}/check-semantic-diff.php" "$@"
+    ;;
+  checks:public-promotion-scope)
+    exec "${SCRIPT_DIR}/check-public-promotion-scope.sh" "$@"
+    ;;
+  checks:soc2-control-map)
+    exec "${SCRIPT_DIR}/soc2-validate-control-map.sh" "$@"
+    ;;
+  checks:soc2-evidence-freshness)
+    exec "${SCRIPT_DIR}/soc2-evidence-freshness-check.sh" "$@"
+    ;;
+  checks:soc2-change-management)
+    exec "${SCRIPT_DIR}/soc2-export-change-management-trace.sh" "$@"
+    ;;
+  checks:soc2-test-controls)
+    exec "${SCRIPT_DIR}/soc2-export-test-control-trace.sh" "$@"
+    ;;
+  checks:soc2-auth-runtime)
+    exec "${SCRIPT_DIR}/soc2-export-auth-access-runtime-evidence.sh" "$@"
+    ;;
+  checks:soc2-export-validate)
+    exec "${SCRIPT_DIR}/soc2-export-validate.sh" "$@"
+    ;;
+  checks:edge)
+    exec "${SCRIPT_DIR}/get-errors-edge-cases.sh" "$@"
+    ;;
+  soc2:bundle)
+    exec "${SCRIPT_DIR}/soc2-monthly-evidence-bundle.sh" "$@"
+    ;;
+  soc2:auditor-index)
+    exec "${SCRIPT_DIR}/soc2-generate-auditor-index.sh" "$@"
+    ;;
+  soc2:snapshot)
+    exec "${SCRIPT_DIR}/create-soc2-compliance-snapshot.sh" "$@"
+    ;;
+  soc2:package)
+    exec "${SCRIPT_DIR}/soc2-export-package.sh" "$@"
+    ;;
+  crypto:census)
+    exec php "${SCRIPT_DIR}/crypto-census.php" "$@"
+    ;;
+  crypto:migrate-plaintext)
+    exec php "${REPO_ROOT}/copilot-scripts/crypto-migrate-plaintext.php" "$@"
+    ;;
+  refactor:fix-headers)
+    exec php "${SCRIPT_DIR}/fix-php-headers.php" "$@"
+    ;;
+  refactor:dedupe-uses)
+    exec php "${SCRIPT_DIR}/remove-duplicate-uses.php" "$@"
+    ;;
+  migrate:redis-field-names)
+    exec php "${SCRIPT_DIR}/migrate-redis-field-names.php" "$@"
+    ;;
+  sync:redis-dev)
+    exec "${REPO_ROOT}/copilot-scripts/redis-sync.sh" "$@"
+    ;;
+  tests:affected)
+    exec php "${SCRIPT_DIR}/test/affected-tests.php" "$@"
+    ;;
+  help|-h|--help|list)
+    usage
+    ;;
+  *)
+    paycal_log "fatal" "unknown command: ${cmd}"
+    usage
+    exit 2
+    ;;
+esac

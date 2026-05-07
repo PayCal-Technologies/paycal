@@ -18,11 +18,8 @@ namespace PayCal\Domain;
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
  */
-
-
-
 /**
- * SiteFields
+ * SiteFields enum.
  */
 enum SiteFields: string
 {

@@ -17,78 +17,6 @@ require_once __DIR__.'/../bootstrap.php';
 #[Group('unit')]
 final class EarningsTest extends TestCase
 {
-  #[Skip('This test requires Redis and authenticated user context; move to integration tests')]
-  #[Group('skip')]
-  public function testAdditivityInvariantForMoneyFields(): void
-  {
-    $this->markTestSkipped('This test requires Redis and authenticated user context; move to integration tests');
-    
-    $year = 2023;
-    $start = new DateTimeImmutable("{$year}-01-01");
-    $end = new DateTimeImmutable("{$year}-12-31");
-
-    // Split year into two halves
-    $mid = new DateTimeImmutable("{$year}-07-01");
-    $firstHalfEnd = $mid->modify('-1 day');
-
-    $totalsFull = Earnings::getWorkTotalsForRange($start, $end);
-    $totalsFirst = Earnings::getWorkTotalsForRange($start, $firstHalfEnd);
-    $totalsSecond = Earnings::getWorkTotalsForRange($mid, $end);
-
-    // Gross additivity
-    $sumGross = $totalsFirst['grossIncomeCents'] + $totalsSecond['grossIncomeCents'];
-    if (null !== $totalsFull['grossIncomeCents'] && 0 !== $totalsFull['grossIncomeCents']) {
-      $this->assertSame(
-        $totalsFull['grossIncomeCents'],
-        $sumGross,
-        "Additivity failed: sum of halves ({$sumGross}) != full period ({$totalsFull['grossIncomeCents']})"
-      );
-    }
-
-    // Net additivity
-    $sumNet = $totalsFirst['netCents'] + $totalsSecond['netCents'];
-    if (null !== $totalsFull['netCents'] && 0 !== $totalsFull['netCents']) {
-      $this->assertSame(
-        $totalsFull['netCents'],
-        $sumNet,
-        "Additivity failed: sum of halves ({$sumNet}) != full period ({$totalsFull['netCents']})"
-      );
-    }
-
-    // Tax additivity
-    $sumTax = $totalsFirst['taxCents'] + $totalsSecond['taxCents'];
-    if (null !== $totalsFull['taxCents'] && 0 !== $totalsFull['taxCents']) {
-      $this->assertSame(
-        $totalsFull['taxCents'],
-        $sumTax,
-        "Additivity failed: sum of halves ({$sumTax}) != full period ({$totalsFull['taxCents']})"
-      );
-    }
-  }
-
-  #[Skip('This test requires Redis and authenticated user context; move to integration tests')]
-  #[Group('skip')]
-  public function testNonNegativeGuaranteesForTaxAndNet(): void
-  {
-    $this->markTestSkipped('This test requires Redis and authenticated user context; move to integration tests');
-    
-    $year = 2024;
-    $start = new DateTimeImmutable("{$year}-01-01");
-    $end = new DateTimeImmutable("{$year}-12-31");
-
-    $totals = Earnings::getWorkTotalsForRange($start, $end);
-
-    // Tax must be >= 0
-    $this->assertGreaterThanOrEqual(0, $totals['taxCents'], 'TaxCents should be non-negative');
-
-    // Net must be >= 0 unless negative adjustment (edge case)
-    // If grossIncomeCents >= taxCents, netCents must be >= 0
-    if ($totals['grossIncomeCents'] >= $totals['taxCents']) {
-      $this->assertGreaterThanOrEqual(0, $totals['netCents'], 'NetCents should be non-negative when gross >= tax');
-    }
-    // If grossIncomeCents < taxCents, netCents can be negative (rare, but allowed for adjustments)
-  }
-
   #[Test]
   public function earnings_getInstance_returnsEarningsInstance(): void
   {
@@ -789,67 +717,7 @@ final class EarningsTest extends TestCase
   // Cents-Based Aggregation Tests
   // =====
 
-  /**
-   * Test that getWorkTotalsForRange returns grossIncomeCents field.
-   */
-  #[Skip('Requires authenticated user context; covered by integration tests')]
-  #[Group('skip')]
-  #[Test]
-  public function getWorkTotalsForRange_returnsGrossIncomeCents(): void
-  {
-    $this->markTestSkipped('Requires authenticated user context; covered by integration tests');
 
-    $start = new DateTimeImmutable('2024-01-01');
-    $end = new DateTimeImmutable('2024-01-31');
-
-    $totals = Earnings::getWorkTotalsForRange($start, $end);
-
-    $this->assertArrayHasKey('grossIncomeCents', $totals);
-    $this->assertIsInt($totals['grossIncomeCents']);
-  }
-
-  /**
-   * Test that grossIncomeCents is consistent with grossIncome.
-   */
-  #[Skip('Requires authenticated user context; covered by integration tests')]
-  #[Group('skip')]
-  #[Test]
-  public function getWorkTotalsForRange_grossIncomeCents_matchesGrossIncome(): void
-  {
-    $this->markTestSkipped('Requires authenticated user context; covered by integration tests');
-
-    $start = new DateTimeImmutable('2024-01-01');
-    $end = new DateTimeImmutable('2024-12-31');
-
-    $totals = Earnings::getWorkTotalsForRange($start, $end);
-
-    // grossIncomeCents should equal dollarsToCents(grossIncome)
-    $expectedCents = Money::dollarsToCents((string) $totals['grossIncome']);
-
-    $this->assertSame(
-      $expectedCents,
-      $totals['grossIncomeCents'],
-      "grossIncomeCents ({$totals['grossIncomeCents']}) should match dollarsToCents(grossIncome) ({$expectedCents})"
-    );
-  }
-
-  /**
-   * Test that grossIncome is still a float for backward compatibility.
-   */
-  #[Skip('Requires authenticated user context; covered by integration tests')]
-  #[Group('skip')]
-  #[Test]
-  public function getWorkTotalsForRange_grossIncome_isFloat(): void
-  {
-    $this->markTestSkipped('Requires authenticated user context; covered by integration tests');
-
-    $start = new DateTimeImmutable('2024-01-01');
-    $end = new DateTimeImmutable('2024-01-31');
-
-    $totals = Earnings::getWorkTotalsForRange($start, $end);
-
-    $this->assertIsFloat($totals['grossIncome']);
-  }
 
   /**
    * Simulate the current float aggregation path in Earnings.

@@ -15,11 +15,18 @@ namespace PayCal\Domain\Config;
  * - Security-impacting flags (e.g., encryption and dev overrides) should remain
  *   explicit and auditable in this class.
  *
+ * Architectural role:
+ * - Reusable configuration facade and bootstrap authority for environment
+ *   resolution across the application.
+ * - Encapsulates typed environment access outside the HTTP layer.
+ *
  * @category   Config
  * @package    PayCal\Domain\Config
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 /**
@@ -108,6 +115,18 @@ final class Environment
     self::$payrollPublicKey       = $env["PAYROLL_SIGNING_PUBLIC_KEY"] ?? "";
     self::$devAllowInlineScripts  = isset($env["DEV_ALLOW_INLINE_SCRIPTS"]) ? self::toBool($env["DEV_ALLOW_INLINE_SCRIPTS"]) : false;
     self::$devSecurityDisabled    = isset($env["DEV_SECURITY_DISABLED"]) ? self::toBool($env["DEV_SECURITY_DISABLED"]) : false;
+    // Guard: DEV_* overrides are only honored in non-production environments
+    $knownDevEnvs = ['mac', 'dev', 'local', 'test'];
+    if (!in_array(self::$appEnv, $knownDevEnvs, true)) {
+      if (self::$devSecurityDisabled) {
+        \PayCal\Domain\Log::error('DEV_SECURITY_DISABLED=true ignored in non-dev environment (APP_ENV=' . self::$appEnv . ')');
+        self::$devSecurityDisabled = false;
+      }
+      if (self::$devAllowInlineScripts) {
+        \PayCal\Domain\Log::error('DEV_ALLOW_INLINE_SCRIPTS=true ignored in non-dev environment (APP_ENV=' . self::$appEnv . ')');
+        self::$devAllowInlineScripts = false;
+      }
+    }
     // When DEV_SECURITY_DISABLED is true, force encryption off
     self::$encryptionEnabled      = self::$devSecurityDisabled ? false : (isset($env["ENCRYPTION_ENABLED"]) ? self::toBool($env["ENCRYPTION_ENABLED"]) : false);
   }

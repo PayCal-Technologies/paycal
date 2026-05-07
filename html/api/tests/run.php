@@ -78,7 +78,9 @@ try {
   }
   @file_put_contents($lastRunPath, json_encode($result, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
   
-  echo json_encode($result, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+  $publicResult = $result;
+  unset($publicResult['output']);
+  echo json_encode($publicResult, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 } catch (Exception $e) {
   http_response_code(500);
   echo json_encode([

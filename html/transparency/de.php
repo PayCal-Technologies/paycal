@@ -54,7 +54,7 @@ require_once HTML.'/header.php';
         <p>Neueste Änderungen, die das Produkt geprägt haben – einschließlich Abrechnungs- und Profilgovernance-Abläufe – werden auf den Seiten Framework/Backend und Testgovernance verfolgt.</p>
       </section>
 
-      <div class="doc-panel-grid" aria-label="Transparenz-Detailpanels">
+      <div class="doc-panel-grid doc-panel-grid--responsive-3" aria-label="Transparenz-Detailpanels">
         <section class="doc-section">
           <h2>Sicherheitsaudit-Status</h2>
           <p class="doc-article-meta">Published: <time datetime="2026-03-23">2026-03-23</time></p>

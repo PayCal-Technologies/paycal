@@ -3,9 +3,10 @@
 namespace PayCal\Controllers;
 
 use PayCal\Domain\Attributes\Route;
+use PayCal\Domain\Log;
 use PayCal\Domain\MetricsService;
 use PayCal\Domain\Response;
-use PayCal\Domain\StripeBillingQueueMonitor;
+use PayCal\Infrastructure\Queue\StripeBillingQueueMonitor;
 use PayCal\Domain\User;
 
 /**
@@ -18,11 +19,19 @@ use PayCal\Domain\User;
  * - Health payloads are operationally sensitive and must remain admin-gated.
  * - Keep this controller read-only; write or repair behavior belongs elsewhere.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 /**
@@ -71,10 +80,10 @@ class HealthController
       ];
     } catch (\Exception $e) {
       http_response_code(500);
+      Log::error('[Health] getHealthSnapshot exception: ' . $e->getMessage());
       return [
         'status' => 'error',
         'error' => 'Failed to retrieve health metrics',
-        'message' => $e->getMessage(),
       ];
     }
   }
@@ -126,9 +135,9 @@ class HealthController
       return MetricsService::getRedisInfo();
     } catch (\Exception $e) {
       http_response_code(500);
+      Log::error('[Health] getRedisHealth exception: ' . $e->getMessage());
       return [
         'error' => 'Failed to retrieve Redis metrics',
-        'message' => $e->getMessage(),
       ];
     }
   }
@@ -151,9 +160,9 @@ class HealthController
       return MetricsService::getSessionMetrics();
     } catch (\Exception $e) {
       http_response_code(500);
+      Log::error('[Health] getSessionHealth exception: ' . $e->getMessage());
       return [
         'error' => 'Failed to retrieve session metrics',
-        'message' => $e->getMessage(),
       ];
     }
   }
@@ -176,9 +185,9 @@ class HealthController
       return MetricsService::getBusinessMetrics();
     } catch (\Exception $e) {
       http_response_code(500);
+      Log::error('[Health] getBusinessHealth exception: ' . $e->getMessage());
       return [
         'error' => 'Failed to retrieve business metrics',
-        'message' => $e->getMessage(),
       ];
     }
   }
@@ -211,9 +220,9 @@ class HealthController
       ];
     } catch (\Exception $e) {
       http_response_code(500);
+      Log::error('[Health] getWebhookQueueHealth exception: ' . $e->getMessage());
       return [
         'error' => 'Failed to retrieve webhook queue metrics',
-        'message' => $e->getMessage(),
       ];
     }
   }

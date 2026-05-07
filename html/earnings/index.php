@@ -36,6 +36,37 @@ $pageLabel = $i18n['EARNINGS'];
 $pageLanguage = 'en';
 $earningsMode = InputSanitizer::getString('earnings_mode') === 'eager' ? 'eager' : 'lazy';
 
+$user = User::current();
+$payFrequency = strtolower(trim((string) ($user->pay_frequency ?? 'biweekly')));
+$payPeriodLength = (int) ($user->pay_period_length ?? 14);
+$payPeriodStart = trim((string) ($user->pay_period_start ?? ''));
+$editingGraceDays = (int) ($user->editing_grace_days ?? 0);
+$expectedLengths = [
+  'weekly' => 7,
+  'biweekly' => 14,
+  'semimonthly' => 15,
+  'monthly' => 30,
+];
+
+$payPeriodWarning = '';
+if (!array_key_exists($payFrequency, $expectedLengths)) {
+  $payPeriodWarning = 'Warning: Pay period frequency is invalid. Open Profile > Pay Period to fix your settings.';
+} elseif ($payPeriodLength !== $expectedLengths[$payFrequency]) {
+  $payPeriodWarning = 'Warning: Pay period length does not match frequency. Open Profile > Pay Period to fix your settings.';
+} elseif (($payFrequency === 'weekly' || $payFrequency === 'biweekly') && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $payPeriodStart)) {
+  $payPeriodWarning = 'Warning: Pay period start date is missing or invalid. Open Profile > Pay Period and pick a valid start date.';
+} else {
+  $graceMin = (int) SystemLimits::get('editing_grace_days_min');
+  $graceMax = (int) SystemLimits::get('editing_grace_days_max');
+  if ($editingGraceDays < $graceMin || $editingGraceDays > $graceMax) {
+    $payPeriodWarning = 'Warning: Grace-day setting is out of range. Open Profile > Pay Period to fix your settings.';
+  }
+}
+
+if ($payPeriodWarning !== '') {
+  $message = htmlspecialchars($payPeriodWarning, ENT_QUOTES, 'UTF-8');
+}
+
 Lens::boot('earnings');
 
 if (InputSanitizer::getString('lens') === '1') {
@@ -59,7 +90,7 @@ require_once Environment::appHome().'html/header.php';
 
 <section class="f_column w100">
   <h1 class="visually_hidden"><?php echo htmlspecialchars($i18n['EARNINGS'], ENT_QUOTES, 'UTF-8'); ?></h1>
-  <div class="status centered"><?php echo $message; ?></div>
+  <div class="status centered" role="status" aria-live="polite"><?php echo $message; ?></div>
   <?php echo Earnings::getInstance()->renderSections($earningsMode); ?>
 </section><!-- page wrapper -->
 

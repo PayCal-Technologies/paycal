@@ -181,14 +181,7 @@ if (!in_array($normalizedRequestPath, $allowedRequestPaths, true)) {
 	http_response_code(404);
 	header('Content-Type: text/html; charset=UTF-8');
 	header('X-Robots-Tag: noindex, nofollow');
-	header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-	header('X-Content-Type-Options: nosniff');
-	header('X-Frame-Options: DENY');
-	header('Referrer-Policy: strict-origin-when-cross-origin');
-	// COEP disabled in dev to allow WebWorker loading
-	header('Cross-Origin-Opener-Policy: same-origin');
-	header('Cross-Origin-Resource-Policy: same-site');
-	header("Permissions-Policy: accelerometer=(), camera=(), microphone=(), geolocation=(), usb=(), unload=()");
+	Security::sendCoreSecurityHeaders();
 	echo '<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars((string) html_index_i18n('NOT_FOUND_404_TITLE'), ENT_QUOTES, 'UTF-8') . '</title></head><body><main><h1>' . htmlspecialchars((string) html_index_i18n('NOT_FOUND_404_TITLE'), ENT_QUOTES, 'UTF-8') . '</h1><p>' . htmlspecialchars((string) html_index_i18n('NOT_FOUND_404_BODY'), ENT_QUOTES, 'UTF-8') . '</p></main></body></html>';
 	exit;
 }
@@ -530,6 +523,38 @@ $datePickerDialog = Render::template('calendar-date-picker-dialog', [
 
 $calendarMonthContext = (new \DateTimeImmutable(sprintf('%04d-%02d-01', (int) $yearParam, (int) $monthNumberParam)))->format('F Y');
 
+$calendarControlsTrailingHtml = '';
+if (count($viewableMembers) > 1) {
+	ob_start();
+	?>
+	<div class="calendar_user_selector calendar_user_selector--toolbar f_row f_center_y gap8">
+		<label for="calendar_user_lookup">View as</label>
+		<form id="calendar_user_view_form" method="GET" action="/" class="calendar_user_selector_form" data-self-label="<?php echo htmlspecialchars(calendar_member_label($viewableMembers[$actorUUID] ?? $selectedCalendarUser), ENT_QUOTES, 'UTF-8'); ?>">
+			<input type="hidden" name="month" value="<?php echo htmlspecialchars($monthParam, ENT_QUOTES, 'UTF-8'); ?>">
+			<input type="hidden" id="calendar_user_uuid_hidden" name="user_uuid" value="<?php echo htmlspecialchars($selectedCalendarUserUUID, ENT_QUOTES, 'UTF-8'); ?>">
+			<div class="calendar_user_lookup_wrap<?php echo $isDelegatedCalendarView ? ' has-clear' : ''; ?>">
+				<input id="calendar_user_lookup" type="text" list="calendar_user_lookup_list" autocomplete="off" value="<?php echo htmlspecialchars($selectedCalendarUserLabel, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Select calendar user">
+				<?php if ($isDelegatedCalendarView) { ?>
+				<button id="calendar_user_clear_btn" type="submit" name="clear_user_view" value="1" class="btn btn_secondary calendar_user_clear calendar_user_clear_inline" aria-label="Clear delegated calendar view" formnovalidate>
+					<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">
+						<path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+					</svg>
+				</button>
+				<?php } ?>
+			</div>
+			<datalist id="calendar_user_lookup_list">
+				<?php foreach ($viewableMembers as $memberUUID => $member) {
+					$label = calendar_member_label($member);
+				?>
+				<option value="<?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>" data-user-uuid="<?php echo htmlspecialchars($memberUUID, ENT_QUOTES, 'UTF-8'); ?>"></option>
+				<?php } ?>
+			</datalist>
+		</form>
+	</div>
+	<?php
+	$calendarControlsTrailingHtml = (string) ob_get_clean();
+}
+
 $grid = new DataGrid([
 		'id' => 'calendar-grid',
 		'columns' => [
@@ -546,7 +571,7 @@ $grid = new DataGrid([
 				['key' => 'entry_count', 'label' => html_index_i18n('CALENDAR_COL_ENTRIES'), 'sortable' => true],
 				['key' => 'total_hours', 'label' => html_index_i18n('CALENDAR_COL_TOTAL_HOURS'), 'sortable' => true, 'compute' => function($row, $col) {
 					$hours = (float) ($row[$col['key']] ?? 0);
-					return number_format($hours, 2);
+					return Strings::formatLocalizedNumber($hours, 2, 2);
 				}],
 				['key' => 'adjacent', 'label' => html_index_i18n('CALENDAR_COL_ADJACENT'), 'sortable' => true, 'compute' => function($row, $col) {
 					$adjacent = (int) ($row[$col['key']] ?? 0);
@@ -559,6 +584,7 @@ $grid = new DataGrid([
 				'descriptionId' => 'calendar-grid-instructions calendar-grid-context calendar-month-status',
 				'year' => (int) $yearParam,
 				'month' => (int) $monthNumberParam,
+				'controlsTrailingHtml' => $calendarControlsTrailingHtml,
 				'searchEnabled' => false,
 				'rowActions' => [],
 				// Positioning configuration - uses normalized user preferences
@@ -593,28 +619,6 @@ require_once Environment::appHome().'html/header.php';
 	data-calendar-user-uuid="<?php echo htmlspecialchars($selectedCalendarUserUUID, ENT_QUOTES, 'UTF-8'); ?>"
 >
 	<h1 id="calendar-landmark-title" class="visually_hidden"><?php echo html_index_i18n('CALENDAR'); ?></h1>
-	<?php if (count($viewableMembers) > 1) { ?>
-	<div class="calendar_user_selector f_row f_center_y gap8">
-		<label for="calendar_user_lookup">View as</label>
-		<form id="calendar_user_view_form" method="GET" action="/" class="calendar_user_selector_form" data-self-label="<?php echo htmlspecialchars(calendar_member_label($viewableMembers[$actorUUID] ?? $selectedCalendarUser), ENT_QUOTES, 'UTF-8'); ?>">
-			<input type="hidden" name="month" value="<?php echo htmlspecialchars($monthParam, ENT_QUOTES, 'UTF-8'); ?>">
-			<input type="hidden" id="calendar_user_uuid_hidden" name="user_uuid" value="<?php echo htmlspecialchars($selectedCalendarUserUUID, ENT_QUOTES, 'UTF-8'); ?>">
-			<input id="calendar_user_lookup" type="text" list="calendar_user_lookup_list" autocomplete="off" value="<?php echo htmlspecialchars($selectedCalendarUserLabel, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Select calendar user">
-			<datalist id="calendar_user_lookup_list">
-				<?php foreach ($viewableMembers as $memberUUID => $member) {
-					$label = calendar_member_label($member);
-				?>
-				<option value="<?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>" data-user-uuid="<?php echo htmlspecialchars($memberUUID, ENT_QUOTES, 'UTF-8'); ?>"></option>
-				<?php } ?>
-			</datalist>
-			<button id="calendar_user_clear_btn" type="submit" name="clear_user_view" value="1" class="btn btn_secondary calendar_user_clear" aria-label="Clear delegated calendar view" formnovalidate>
-				<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">
-					<path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-				</svg>
-			</button>
-		</form>
-	</div>
-	<?php } ?>
 	<p id="calendar-grid-instructions" class="visually_hidden"><?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_GRID_INSTRUCTIONS'), ENT_QUOTES, 'UTF-8'); ?></p>
 	<p id="calendar-grid-context" class="visually_hidden"><?php echo htmlspecialchars($calendarMonthContext, ENT_QUOTES, 'UTF-8'); ?> <?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_GRID_CONTEXT_SUFFIX'), ENT_QUOTES, 'UTF-8'); ?></p>
 	<p id="calendar-month-status" class="visually_hidden" role="status" aria-live="polite" aria-atomic="true"></p>

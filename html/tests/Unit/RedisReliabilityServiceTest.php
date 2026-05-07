@@ -2,7 +2,7 @@
 
 namespace PayCal\Tests\Unit;
 
-use PayCal\Domain\RedisReliabilityService;
+use PayCal\Infrastructure\Resilience\RedisReliabilityService;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 

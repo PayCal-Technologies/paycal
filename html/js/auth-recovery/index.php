@@ -3,12 +3,14 @@
 header('Content-Type: application/javascript; charset=utf-8');
 ?>
 (function () {
+  const RECOVERY_PREFILL_SESSION_KEY = 'paycal.recovery.prefill';
   const state = {
     txnId: '',
     txnSecret: '',
     proofPayload: null,
     bootstrap: null,
     credentialId: '',
+    magicLinkVerified: false,
   };
 
   const startForm = document.getElementById('recovery-start-form');
@@ -20,6 +22,7 @@ header('Content-Type: application/javascript; charset=utf-8');
   const statusEl = document.getElementById('recovery-status');
   const emailInput = document.getElementById('recovery-email');
   const codeInput = document.getElementById('recovery-code');
+  const recoveryCodeBlock = document.getElementById('recovery-code-block');
   const recoveryKeyInput = document.getElementById('recovery-key');
   const deviceNameInput = document.getElementById('recovery-device-name');
   const workerVersion = document.body?.dataset?.workerVersion || String(Date.now());
@@ -117,6 +120,17 @@ header('Content-Type: application/javascript; charset=utf-8');
 
     registerButton.disabled = false;
     registerButton.removeAttribute('aria-disabled');
+  }
+
+  function hideRecoveryCodeInput() {
+    if (recoveryCodeBlock) {
+      recoveryCodeBlock.classList.add('is-hidden');
+    }
+    if (codeInput) {
+      codeInput.required = false;
+      codeInput.value = '';
+      codeInput.disabled = true;
+    }
   }
 
   function ensureWorker() {
@@ -246,15 +260,17 @@ header('Content-Type: application/javascript; charset=utf-8');
       return;
     }
     verifyInFlight = true;
-    if (codeInput) codeInput.disabled = true;
+    if (codeInput && !state.magicLinkVerified) codeInput.disabled = true;
     if (recoveryKeyInput) recoveryKeyInput.disabled = true;
     setStatus('Working…');
     try {
-      await postJson('/api/v1/auth/recovery/verify-email', {
-        txnId: state.txnId,
-        txnSecret: state.txnSecret,
-        code: codeInput.value.trim(),
-      });
+      if (!state.magicLinkVerified) {
+        await postJson('/api/v1/auth/recovery/verify-email', {
+          txnId: state.txnId,
+          txnSecret: state.txnSecret,
+          code: codeInput ? codeInput.value.trim() : '',
+        });
+      }
 
       state.proofPayload = await postJson('/api/v1/auth/recovery/proof-payload', {
         txnId: state.txnId,
@@ -293,8 +309,87 @@ header('Content-Type: application/javascript; charset=utf-8');
       setStatus('Verified. Confirm on your device to register a new passkey.');
     } finally {
       verifyInFlight = false;
-      if (codeInput) codeInput.disabled = false;
+      if (codeInput && !state.magicLinkVerified) codeInput.disabled = false;
       if (recoveryKeyInput) recoveryKeyInput.disabled = false;
+    }
+  }
+
+  async function consumeMagicLinkIfPresent() {
+    const currentUrl = new URL(window.location.href);
+    const token = String(currentUrl.searchParams.get('ml_token') || '').trim();
+    if (token === '') {
+      return false;
+    }
+
+    setStatus('Verifying recovery link...');
+    const payload = await postJson('/api/v1/auth/recovery/magic-link/consume', { token });
+    state.txnId = String(payload?.txnId || '');
+    state.txnSecret = String(payload?.txnSecret || '');
+    state.magicLinkVerified = true;
+
+    // Magic-link flow skips manual verify inputs and opens passkey registration directly.
+    state.bootstrap = await postJson('/api/v1/auth/recovery/bootstrap', {
+      txnId: state.txnId,
+      txnSecret: state.txnSecret,
+    });
+
+    startForm?.classList.add('is-hidden');
+    verifyForm?.classList.add('is-hidden');
+    hideRecoveryCodeInput();
+    setStep(2);
+    setStatus('Recovery link verified. Create your new passkey now.', 'sent');
+
+    // Remove one-time token from the URL after successful consumption.
+    currentUrl.searchParams.delete('ml_token');
+    window.history.replaceState({}, '', currentUrl.toString());
+    return true;
+  }
+
+  function consumeSigninRecoveryPrefill() {
+    let raw = '';
+    try {
+      raw = String(window.sessionStorage.getItem(RECOVERY_PREFILL_SESSION_KEY) || '');
+    } catch (_) {
+      return false;
+    }
+
+    if (raw.trim() === '') {
+      return false;
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+      const txnId = String(parsed?.txnId || '').trim();
+      const txnSecret = String(parsed?.txnSecret || '').trim();
+      const email = String(parsed?.email || '').trim();
+      const createdAt = Number(parsed?.createdAt || 0);
+
+      // Ignore stale handoff payloads.
+      if (!txnId || !txnSecret || !createdAt || (Date.now() - createdAt) > (15 * 60 * 1000)) {
+        window.sessionStorage.removeItem(RECOVERY_PREFILL_SESSION_KEY);
+        return false;
+      }
+
+      state.txnId = txnId;
+      state.txnSecret = txnSecret;
+      if (emailInput && email !== '') {
+        emailInput.value = email;
+      }
+
+      startForm?.classList.add('is-hidden');
+      verifyForm?.classList.remove('is-hidden');
+      setStatus('Recovery code sent. Enter the code from your email and your Recovery Key.', 'sent');
+      codeInput?.focus();
+
+      window.sessionStorage.removeItem(RECOVERY_PREFILL_SESSION_KEY);
+      return true;
+    } catch (_) {
+      try {
+        window.sessionStorage.removeItem(RECOVERY_PREFILL_SESSION_KEY);
+      } catch (__){
+        // Ignore storage cleanup errors.
+      }
+      return false;
     }
   }
 
@@ -313,11 +408,28 @@ header('Content-Type: application/javascript; charset=utf-8');
         throw new Error(WEB_AUTHN_UNSUPPORTED_MESSAGE);
       }
 
-      const startPayload = await postJson('/api/v1/auth/recovery/register-passkey/start', {
+      const startRequestBody = {
         txnId: state.txnId,
         txnSecret: state.txnSecret,
         deviceName: deviceNameInput?.value?.trim() || 'Recovered Passkey',
-      });
+      };
+
+      let startPayload;
+      try {
+        startPayload = await postJson('/api/v1/auth/recovery/register-passkey/start', startRequestBody);
+      } catch (startError) {
+        const message = String(startError?.message || '');
+        if (!/Recovery bootstrap unavailable/i.test(message)) {
+          throw startError;
+        }
+
+        // Refresh bootstrap once, then retry passkey registration start.
+        state.bootstrap = await postJson('/api/v1/auth/recovery/bootstrap', {
+          txnId: state.txnId,
+          txnSecret: state.txnSecret,
+        });
+        startPayload = await postJson('/api/v1/auth/recovery/register-passkey/start', startRequestBody);
+      }
 
       const options = startPayload.publicKey || {};
       options.challenge = b64urlToBuffer(options.challenge || '');
@@ -438,4 +550,14 @@ header('Content-Type: application/javascript; charset=utf-8');
   cancelButton?.addEventListener('click', () => {
     cancelRecovery().catch((error) => setStatus(error.message || 'Unable to cancel recovery.'));
   });
+
+  consumeMagicLinkIfPresent()
+    .then((consumed) => {
+      if (!consumed) {
+        consumeSigninRecoveryPrefill();
+      }
+    })
+    .catch((error) => {
+      setStatus(error?.message || 'Recovery link is invalid or expired. Request a new link.');
+    });
 })();

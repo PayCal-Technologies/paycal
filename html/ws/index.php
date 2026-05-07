@@ -2,6 +2,8 @@
 
 namespace PayCal\Domain;
 
+use PayCal\Infrastructure\Auth\CapabilityTokenService;
+
 require_once '../config.php';
 
 Authentication::abortIfUnauthenticated();
@@ -548,6 +550,125 @@ if ($channel === 'organization_notifications') {
     'unread_by_org' => $summary['by_org'],
     'timestamp_utc' => gmdate('Y-m-d\\TH:i:s\\Z'),
   ]);
+
+  return;
+}
+
+if ($channel === 'system_audit_live') {
+  // JSON snapshot of most-recent system audit events (admin only).
+  // Clients poll this for the initial load and periodic refresh.
+  if (!User::isAdmin()) {
+    wsRespond(['status' => 'error', 'message' => 'Admin access required.'], 403);
+    return;
+  }
+
+  try {
+    SystemAuditPolicy::assertCanRead(User::current());
+  } catch (AuditAccessDeniedException $e) {
+    wsRespond(['status' => 'error', 'message' => $e->getMessage()], 403);
+    return;
+  }
+
+  SystemAuditRepository::recordReadAccess(User::currentUUID(), 'admin_live_feed');
+
+  $events = SystemAuditRepository::recent(50);
+
+  wsRespond([
+    'status'        => 'success',
+    'service'       => 'ws-system-audit-live',
+    'channel'       => 'system_audit_live',
+    'events'        => $events,
+    'timestamp_utc' => gmdate('Y-m-d\\TH:i:s\\Z'),
+  ]);
+
+  return;
+}
+
+if ($channel === 'system_audit_stream') {
+  // SSE stream: subscribes to system:audit:pubsub and pushes each new event
+  // to connected admin clients in real time. Requires admin auth.
+  // Keepalive comment sent every 30 s when no events arrive; client auto-reconnects
+  // via EventSource. Session is capped at 5 minutes then a clean disconnect is sent.
+  if (!User::isAdmin()) {
+    if (!headers_sent()) {
+      http_response_code(403);
+      header('Content-Type: text/event-stream');
+      header('Cache-Control: no-cache, no-store, must-revalidate');
+    }
+    wsEmitEvent('error', ['error' => 'Admin access required.']);
+    return;
+  }
+
+  try {
+    SystemAuditPolicy::assertCanRead(User::current());
+  } catch (AuditAccessDeniedException $e) {
+    if (!headers_sent()) {
+      http_response_code(403);
+      header('Content-Type: text/event-stream');
+      header('Cache-Control: no-cache, no-store, must-revalidate');
+    }
+    wsEmitEvent('error', ['error' => $e->getMessage()]);
+    return;
+  }
+
+  if (!headers_sent()) {
+    header('Content-Type: text/event-stream');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Connection: keep-alive');
+    header('X-Accel-Buffering: no');
+  }
+
+  @ini_set('output_buffering', 'off');
+  @ini_set('zlib.output_compression', '0');
+  @set_time_limit(0);
+
+  while (ob_get_level() > 0) {
+    @ob_end_flush();
+  }
+  ob_implicit_flush(true);
+
+  wsEmitEvent('connected', [
+    'channel'   => 'system_audit_stream',
+    'timestamp' => date('c'),
+  ]);
+
+  $deadline  = time() + 300; // 5-minute session; EventSource auto-reconnects after
+  $pubsubKey = Constants\Keys::systemAuditPubsubChannel();
+
+  while (!connection_aborted() && time() < $deadline) {
+    try {
+      $subConn = new Redis(
+        Config\Environment::redisServer(),
+        Config\Environment::redisWritePort()
+      );
+      $subConn->client->setOption(\Redis::OPT_READ_TIMEOUT, 30);
+
+      $subConn->client->subscribe(
+        [$pubsubKey],
+        static function (\Redis $rdx, string $ch, string $msg) use ($deadline): void {
+          if (connection_aborted() || time() > $deadline) {
+            $rdx->unsubscribe();
+            return;
+          }
+
+          $data = json_decode($msg, true);
+          wsEmitEvent('audit_event', is_array($data) ? $data : ['raw' => $msg]);
+        }
+      );
+
+      // subscribe() returned cleanly (unsubscribed from inside the callback).
+      break;
+    } catch (\RedisException) {
+      // Read timeout (30 s) — send a keepalive SSE comment and re-subscribe.
+      if (!connection_aborted() && time() < $deadline) {
+        echo ": keepalive\n\n";
+        @flush();
+      }
+    }
+  }
+
+  wsEmitEvent('disconnect', ['reason' => 'stream_ended', 'timestamp' => date('c')]);
 
   return;
 }

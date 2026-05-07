@@ -69,6 +69,7 @@ final class ResponseTest extends TestCase
 
   protected function tearDown(): void
   {
+    Environment::bootstrap($_ENV);
     $this->resetLens();
     parent::tearDown();
   }

@@ -10,14 +10,21 @@ namespace PayCal\Domain\Attributes;
  *
  * Developer notes:
  * - Capability names are contract keys between core and extension runtime.
+ *
+ * Architectural role:
+ * - Reusable attribute metadata consumed by reflection-based capability
+ *   discovery in extension-aware runtime paths.
+ * - Encapsulates declarative capability tagging outside the HTTP layer.
+ *
+ * @category   Attributes
+ * @package    PayCal\Domain\Attributes
+ * @subpackage Metadata
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 #[\Attribute(\Attribute::TARGET_METHOD)]
-/**
- * Extension capability attribute.
- *
- * Responsibilities:
- * - Declare a capability name for reflection/runtime capability discovery.
- */
 final class ExtensionCapability
 {
   /**

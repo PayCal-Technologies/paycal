@@ -5,6 +5,32 @@ namespace PayCal\Domain;
 use PayCal\Domain\Constants\Keys;
 
 /**
+ * OrganizationNotificationService.php
+ *
+ * Purpose: Organization notification service for unread counters, role-aware
+ * event fanout, and transactional messaging around organization activity.
+ *
+ * Developer notes:
+ * - Notification fanout rules are part of the user-facing organization event
+ *   contract and should remain centralized here.
+ * - Keep unread counters and email delivery side effects coordinated so event
+ *   state remains predictable for recipients.
+ *
+ * Architectural role:
+ * - Reusable domain service for organization event notification persistence,
+ *   recipient fanout, and delivery helpers.
+ * - Encapsulates notification policy outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Core
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
  * OrganizationNotificationService
  *
  * Purpose:

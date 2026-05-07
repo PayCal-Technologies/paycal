@@ -78,6 +78,32 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .earnings_export_actions {
   margin: 0 0 0.6rem;
 }
+
+.hover_help_tooltip {
+  position: fixed;
+  z-index: 1400;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  max-width: min(32rem, calc(100vw - 2rem));
+  padding: 1.25rem 1.75rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: var(--back, #101010);
+  color: var(--fore, #f5f5f5);
+  box-shadow: var(--shadow-lg);
+  font-size: 1.125rem;
+  line-height: 1.5;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.hover_help_tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 #daily_earnings,
 [id^="daily_earnings_"] {
   display: block;

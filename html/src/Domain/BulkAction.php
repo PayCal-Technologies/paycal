@@ -5,22 +5,27 @@ namespace PayCal\Domain;
 /**
  * BulkAction.php
  *
- * Purpose: Define the BulkAction enum for PayCal\Domain.
+ * Purpose: Enumerate supported bulk actions for site and list-management flows
+ * that need stable action identifiers.
  *
- * PHP version 8.4.16
+ * Developer notes:
+ * - Enum case values are contract-sensitive because UI actions and backend
+ *   handling may persist or compare them directly.
+ * - Keep action semantics explicit and additive when expanding the set.
  *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
+ * Architectural role:
+ * - Reusable domain enum for bulk-action identifiers consumed by controllers,
+ *   services, and UI workflows.
+ * - Encapsulates action identity outside the HTTP layer.
  *
  * @category   Domain
  * @package    PayCal\Domain
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
  * Enum BulkAction.
  *

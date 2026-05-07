@@ -11,11 +11,11 @@ use PayCal\Domain\Enums\FormTTL;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
-use PayCal\Domain\RedisReliabilityService;
+use PayCal\Infrastructure\Resilience\RedisReliabilityService;
 use PayCal\Domain\RecoveryKey;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
-use PayCal\Domain\SecurityLog;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Domain\User;
 use PayCal\Observability\Lens;
 
@@ -31,11 +31,19 @@ use PayCal\Observability\Lens;
  * - Recovery-key follow-up actions should remain coupled to successful
  *   verification rather than being callable through alternate paths.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 
@@ -550,17 +558,19 @@ final class EmailVerificationController
     foreach ($userKeys as $userKey) {
       $userData = Database::hgetall($userKey);
 
-      if (isset($userData['email_verify_token_hash']) && $userData['email_verify_token_hash'] === $tokenHash) {
-        $matchedUserUUID = (string) ($userData['user_uuid'] ?? '');
-        if ($matchedUserUUID !== '') {
-          $expiry = (int) ($userData['email_verify_expiry'] ?? 0);
-          $ttl = max(0, $expiry - time());
-          if ($ttl > 0) {
-            Database::set(Keys::EMAIL_VERIFICATION.':'.$tokenHash, $matchedUserUUID, $ttl);
-          }
-        }
-        return User::getByUUID($matchedUserUUID);
+      if (!isset($userData['email_verify_token_hash']) || $userData['email_verify_token_hash'] !== $tokenHash) {
+        continue;
       }
+
+      $matchedUserUUID = (string) ($userData['user_uuid'] ?? '');
+      if ($matchedUserUUID !== '') {
+        $expiry = (int) ($userData['email_verify_expiry'] ?? 0);
+        $ttl = max(0, $expiry - time());
+        if ($ttl > 0) {
+          Database::set(Keys::EMAIL_VERIFICATION.':'.$tokenHash, $matchedUserUUID, $ttl);
+        }
+      }
+      return User::getByUUID($matchedUserUUID);
     }
 
     return null;

@@ -338,7 +338,7 @@ HTML;
       'request_uri' => self::serverString($_SERVER, 'REQUEST_URI'),
       'request_method' => self::serverString($_SERVER, 'REQUEST_METHOD'),
       'host' => self::serverString($_SERVER, 'HTTP_HOST'),
-      'client_ip' => Security::getVisitorRealIPAddress(),
+      'client_ip' => Security::getClientIPAddress(),
       'sapi' => PHP_SAPI,
       'summary' => $summary,
     ];

@@ -17,13 +17,21 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 /* CALENDAR DATE PICKER & MODAL */
 #modal_cal_picker {
-  width: min(980px, 90vw);
-  max-width: 90vw;
+  width: min(1200px, 80vw);
+  max-width: 80vw;
   max-height: 90vh;
   padding: 0;
   font-family: var(--sans-serif);
   font-weight: 700;
   overflow: hidden;
+}
+
+#modal_cal_picker .modal_header {
+  padding: 0.9rem 1.25rem;
+}
+
+#modal_cal_picker .modal_content {
+  padding: 1rem 1.1rem;
 }
 
 #month_nav_prev:hover, #month_nav_next:hover, #cal_picker_button:hover,
@@ -46,11 +54,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   flex-grow: 1;
   align-items: stretch;
   justify-content: flex-start;
-  gap: var(--gap-sm, 0.5rem);
+  gap: var(--gap-md, 0.85rem);
   flex: 1;
   width: 20%;
   height: 100%;
-  padding: var(--pad-sm, 0.5rem);
+  padding: var(--pad-md, 0.9rem);
   border-right: var(--border-size) solid var(--border-inset-color);
 }
 
@@ -69,8 +77,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   flex: 2;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 2px;
-  padding: 1px;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
 }
 
 button.cal_menu_years, button.cal_menu_months {
@@ -92,7 +100,8 @@ button.cal_menu_years {
 }
 
 button.cal_menu_months {
-  padding: var(--pad-sm);
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.55rem;
   text-align: center;
   color: var(--color-text);
 }
@@ -107,9 +116,9 @@ button.cal_menu_years:hover, button.cal_menu_months:hover {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 1rem;
   width: 100%;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   font-size: var(--font-sm);
   color: var(--color-text);
   opacity: 0.8;
@@ -118,7 +127,7 @@ button.cal_menu_years:hover, button.cal_menu_months:hover {
 #modal_cal_picker .modal_footer {
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.8rem;
 }
 
 #modal_cal_picker .date_picker_actions {
@@ -126,13 +135,13 @@ button.cal_menu_years:hover, button.cal_menu_months:hover {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   width: 100%;
 }
 
 #modal_cal_picker .date_picker_actions .btn {
   flex: 0 0 auto;
-  min-width: 7.5rem;
+  min-width: 8.25rem;
   margin: 0;
 }
 
@@ -160,6 +169,16 @@ button.cal_menu_years:hover, button.cal_menu_months:hover {
   gap: 0.5rem;
   margin: 0;
   flex: 1 1 auto;
+}
+
+.calendar_user_lookup_wrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.calendar_user_lookup_wrap.has-clear #calendar_user_lookup {
+  padding-right: 2.25rem;
 }
 
 .calendar_user_selector #calendar_user_lookup {
@@ -615,12 +634,73 @@ button.cal_menu_selected:focus-visible {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
 }
 
+.datagrid_layout_month .datagrid_controls_trailing {
+  margin-left: auto;
+  flex: 0 1 32rem;
+  min-width: 16rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.datagrid_layout_month .datagrid_controls_trailing .calendar_user_selector {
+  margin: 0;
+  width: 100%;
+  max-width: 32rem;
+  font-family: var(--sans-serif);
+}
+
+.datagrid_layout_month .datagrid_controls_trailing .calendar_user_selector_form {
+  min-width: 0;
+  font-family: var(--sans-serif);
+}
+
+.datagrid_layout_month .datagrid_controls_trailing #calendar_user_lookup {
+  min-height: 2.25rem;
+  height: 2.25rem;
+  margin: 0;
+  padding: 0 0.65rem;
+  border-width: 1px;
+  font-family: var(--sans-serif);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.calendar_user_clear_inline {
+  position: absolute;
+  top: 50%;
+  right: 0.3rem;
+  transform: translateY(-50%);
+  width: 1.6rem;
+  height: 1.6rem;
+  min-width: 1.6rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted, var(--color-text));
+  box-shadow: none;
+}
+
+.calendar_user_clear_inline:hover,
+.calendar_user_clear_inline:focus-visible {
+  background: color-mix(in srgb, var(--button-bg-hover) 55%, transparent);
+  color: var(--button-text-hover, var(--color-text));
+}
+
+.datagrid_layout_month .datagrid_controls_trailing .calendar_user_selector label {
+  margin: 0;
+  white-space: nowrap;
+  font-family: var(--sans-serif);
+}
+
 .calendar-v2-month-title {
-  font-size: 16px;
+  font-family: var(--sans-serif);
+  font-size: 1rem;
+  line-height: 1.2;
   font-weight: 600;
   color: var(--color-text, var(--panel-text));
   background-color: transparent;
@@ -630,12 +710,14 @@ button.cal_menu_selected:focus-visible {
 }
 
 .datagrid_layout_month .datagrid_control {
+  font-family: var(--sans-serif);
   padding: 8px 12px;
   border: 1px solid var(--btn-border);
   border-radius: 4px;
   background-color: var(--button-bg);
   color: var(--button-text);
-  font-size: 13px;
+  font-size: 1rem;
+  line-height: 1.2;
   cursor: pointer;
   transition: background-color 120ms ease;
   font-weight: 500;
@@ -655,13 +737,32 @@ button.cal_menu_selected:focus-visible {
    ========================================================================= */
 .datagrid_layout_month .datagrid_controls {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
 }
 .calendar-v2-nav-button:hover {
   background-color: var(--button-bg-hover);
+}
+
+@media (max-width: 900px) {
+  .datagrid_layout_month .datagrid_controls {
+    flex-wrap: wrap;
+  }
+
+  .datagrid_layout_month .datagrid_controls_trailing {
+    order: -1;
+    margin-left: 0;
+    min-width: 0;
+    flex: 1 1 100%;
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .datagrid_layout_month .datagrid_controls_trailing .calendar_user_selector {
+    max-width: 100%;
+  }
 }
 
 /* =========================================================================
@@ -766,6 +867,37 @@ button.cal_menu_selected:focus-visible {
   background: var(--calendar-day-focus, color-mix(in srgb, var(--panel-bg) 88%, var(--panel-text) 12%));
 }
 
+.datagrid_month_cell[data-selected="true"],
+.datagrid_month_cell.datagrid_month_cell_shift_range {
+  background: var(--calendar-day-selected, color-mix(in srgb, var(--button-primary-bg) 18%, var(--panel-bg)));
+  z-index: 1;
+}
+
+.datagrid_month_cell[data-selected="true"]:hover,
+.datagrid_month_cell.datagrid_month_cell_shift_range:hover {
+  background: var(--calendar-day-selected, color-mix(in srgb, var(--button-primary-bg) 18%, var(--panel-bg)));
+}
+
+.datagrid_month_grid .datagrid_month_cell[data-selected="true"]:focus,
+.datagrid_month_grid .datagrid_month_cell[data-selected="true"]:focus-visible,
+.datagrid_month_grid .datagrid_month_cell.datagrid_month_cell_shift_range:focus,
+.datagrid_month_grid .datagrid_month_cell.datagrid_month_cell_shift_range:focus-visible {
+  background: var(--calendar-day-selected, color-mix(in srgb, var(--button-primary-bg) 18%, var(--panel-bg)));
+}
+
+.datagrid_month_row .datagrid_month_cell[data-selected="true"] + .datagrid_month_cell[data-selected="true"],
+.datagrid_month_row .datagrid_month_cell.datagrid_month_cell_shift_range + .datagrid_month_cell.datagrid_month_cell_shift_range {
+  border-left-color: transparent;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.datagrid_month_row .datagrid_month_cell[data-selected="true"]:not([data-selected-end="true"]),
+.datagrid_month_row .datagrid_month_cell.datagrid_month_cell_shift_range:not(.datagrid_month_cell_shift_range_end) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 .datagrid_month_cell.datagrid_month_cell_today .datagrid_month_cell_header {
   font-weight: 700;
 }
@@ -773,6 +905,12 @@ button.cal_menu_selected:focus-visible {
 .datagrid_month_cell.datagrid_month_cell_adjacent {
   background: color-mix(in srgb, var(--calendar-day-bg, var(--panel-bg)) 82%, var(--panel-bg));
   opacity: 0.7;
+}
+
+.datagrid_month_cell.datagrid_month_cell_adjacent[data-selected="true"],
+.datagrid_month_cell.datagrid_month_cell_adjacent.datagrid_month_cell_shift_range {
+  opacity: 1;
+  background: var(--calendar-day-selected, color-mix(in srgb, var(--button-primary-bg) 18%, var(--panel-bg)));
 }
 
 /* Locked calendar cell (historical record locking) */
@@ -831,6 +969,52 @@ button.cal_menu_selected:focus-visible {
   min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.calendar_day_hover_tooltip {
+  position: fixed;
+  z-index: 12000;
+  pointer-events: none;
+  min-width: 140px;
+  max-width: min(80vw, 240px);
+  padding: 9px 11px;
+  border: 1px solid color-mix(in srgb, var(--color-focus-ring, #0096d6) 45%, var(--panel-border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--panel-bg) 80%, transparent);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
+  color: var(--panel-text);
+  font-size: 16.5px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.calendar_day_hover_tooltip .item_pair {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  width: 100%;
+}
+
+.calendar_day_hover_tooltip .item_label,
+.calendar_day_hover_tooltip .item_value {
+  flex: 1;
+  padding: 0;
+}
+
+.calendar_day_hover_tooltip .item_label {
+  padding-right: 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.calendar_day_hover_tooltip .item_value {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.calendar_day_hover_tooltip_line + .calendar_day_hover_tooltip_line {
+  margin-top: 4px;
 }
 
 .datagrid_month_cell_content::-webkit-scrollbar {

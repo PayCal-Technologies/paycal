@@ -499,6 +499,21 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
             <div id="organizations_owner_summary" class="organizations_owner_summary_grid" role="status" aria-live="polite" aria-atomic="true"></div>
           </section>
 
+          <section id="organizations_audit_control_test_panel" class="organizations_editor_card organizations_editor_card_full organizations_editor_panel" hidden title="Generate one controlled audit failure for Redis, The Watcher, and GCS alert-evidence validation." data-hover-help="Generate one controlled audit failure for Redis, The Watcher, and GCS alert-evidence validation.">
+            <div class="organizations_section_header">
+              <h3>Audit Control Test</h3>
+            </div>
+            <p class="help_text">Use this once to generate a controlled organization error event. It records the test in Redis, appends it to The Watcher, and uploads a chained GCS alert artifact. Restricted to owners and authorized managers.</p>
+            <div class="organizations_field_grid">
+              <label for="organizations_audit_control_test_summary">Test summary</label>
+              <input id="organizations_audit_control_test_summary" type="text" maxlength="240" value="Manual organization audit control test" placeholder="Describe why this controlled error was generated">
+            </div>
+            <div class="organizations_actions_row">
+              <button id="organizations_audit_control_test_button" type="button" class="btn btn_delete">Generate Test Error</button>
+            </div>
+            <p id="organizations_audit_control_test_status" class="help_text" role="status" aria-live="polite" aria-atomic="true"></p>
+          </section>
+
           <section class="organizations_editor_card organizations_editor_card_full organizations_editor_panel" title="Core organization profile including legal details, role defaults, contact info, and address." data-hover-help="Core organization profile including legal details, role defaults, contact info, and address.">
             <h3><?php echo organizations_index_i18n('ORGANIZATIONS_EDITOR_DETAILS_H3'); ?></h3>
             <p class="help_text"><?php echo organizations_index_i18n('ORGANIZATIONS_EDITOR_DETAILS_NOTICE'); ?></p>
@@ -916,7 +931,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
           </section>
 
           <!-- Member List Section -->
-          <section class="organizations_members_section">
+          <section class="organizations_members_section" id="organizations_members_invite_section">
             <div class="organizations_section_header">
               <h3><?php echo organizations_index_i18n('ORGANIZATIONS_MEMBERS_H3'); ?></h3>
               <div class="members_list_controls">
@@ -977,7 +992,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
               </div>
             </div>
 
-            <div class="organizations_members_import_block organizations_members_import_card">
+            <div class="organizations_members_import_block organizations_members_import_card" id="organizations_members_import_section">
               <h4><?php echo organizations_index_i18n('ORGANIZATIONS_IMPORT_H4'); ?></h4>
               <p class="help_text organizations_members_import_intro"><?php echo organizations_index_i18n('ORGANIZATIONS_IMPORT_HELP'); ?></p>
 

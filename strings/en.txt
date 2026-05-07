@@ -868,6 +868,7 @@ HELP_TOC_POLICIES_LEGAL Policies & Legal
 HELP_TOC_SETUP_WORK_SITE Setup a Work Site
 HELP_TOC_TAX_BRACKETS Canadian Tax Brackets
 HELP_TOC_TRANSPARENCY_HUB Transparency Hub
+HELP_TOC_TRANSPARENCY_HUB_PREFIX For a full overview of PayCal's transparency practices, visit the
 HELP_TOC_TROUBLESHOOTING Troubleshooting
 HELP_TROUBLESHOOTING_ACCOUNT_LOCKED_PREFIX Repeated failed sign-in attempts may trigger a temporary hold on the account. Wait briefly and try again. If the problem continues, contact support at
 HELP_TROUBLESHOOTING_ACCOUNT_LOCKED_TITLE Account appears locked or shows errors
@@ -2620,6 +2621,8 @@ SETTINGS_EDIT_DETAILS_PROVINCE_HOVER Select your province for payroll and tax de
 SETTINGS_EDIT_DETAILS_TIMEZONE_HOVER Pick your local timezone for calendar and pay periods.
 SETTINGS_EDIT_DETAILS_EMPLOYMENT_LABEL Employment
 SETTINGS_EDIT_DETAILS_EMPLOYMENT_HOVER Set your employment category for profile context.
+JOB_TITLE Job Title
+LOCALE Locale
 SETTINGS_EDIT_DETAILS_JOB_TITLE_LABEL Job Title
 SETTINGS_EDIT_DETAILS_JOB_TITLE_HOVER Your current role or position title.
 SETTINGS_EDIT_DETAILS_DEPARTMENT_LABEL Department

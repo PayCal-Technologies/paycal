@@ -22,6 +22,7 @@ use PayCal\Controllers\RecoveryEmailController;
 use PayCal\Controllers\SecurityController;
 use PayCal\Controllers\SettingsController;
 use PayCal\Controllers\SitesController;
+use PayCal\Controllers\Soc2StatusController;
 use PayCal\Controllers\UserController;
 
 /**
@@ -33,13 +34,19 @@ use PayCal\Controllers\UserController;
  * Developer notes:
  * - Keep this list explicit so API surface changes are review-visible.
  * - Admin/extension diagnostics controllers remain gated by AdminSurface.
- */
-/**
- * API controller registry.
  *
- * Responsibilities:
- * - Provide the complete set of discoverable API controller classes.
- * - Gate optional admin controllers based on runtime admin-surface policy.
+ * Architectural role:
+ * - Reusable domain registry that exposes the complete API controller set to
+ *   bootstrap and route-discovery code.
+ * - Encapsulates controller enumeration outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Core
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 final class ApiControllerRegistry
 {
@@ -65,6 +72,7 @@ final class ApiControllerRegistry
       SecurityController::class,
       SettingsController::class,
       SitesController::class,
+      Soc2StatusController::class,
       UserController::class,
     ];
 

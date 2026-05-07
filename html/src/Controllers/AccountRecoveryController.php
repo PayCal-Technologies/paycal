@@ -4,8 +4,8 @@ namespace PayCal\Controllers;
 
 use lbuchs\WebAuthn\WebAuthn;
 use lbuchs\WebAuthn\WebAuthnException;
-use PayCal\Domain\AccountRecoveryAbuseGuard;
-use PayCal\Domain\AccountRecoveryTransaction;
+use PayCal\Infrastructure\RateControl\AccountRecoveryAbuseGuard;
+use PayCal\Infrastructure\Transaction\AccountRecoveryTransaction;
 use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\Authentication;
 use PayCal\Domain\Config\Environment;
@@ -17,7 +17,7 @@ use PayCal\Domain\Encryption\EnvelopeFormat;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\RecoveryKey;
-use PayCal\Domain\RateLimiter;
+use PayCal\Infrastructure\RateControl\RateLimiter;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
 use PayCal\Domain\User;
@@ -40,11 +40,19 @@ use PayCal\Domain\UserRepository;
  * - This controller coordinates security workflows; helper extraction is fine,
  *   but alternate bypass paths are not.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 /**
@@ -119,6 +127,68 @@ final class AccountRecoveryController
       'txnId' => $transaction->id(),
       'txnSecret' => $created['txnSecret'],
       'cooldownSeconds' => (int) SystemConfig::get('account_recovery_resend_cooldown_seconds'),
+    ]);
+  }
+
+  /**
+   * POST auth/recovery/magic-link/consume
+   *
+   * Consumes a one-time recovery magic link token and advances the recovery
+   * transaction to email-verified state without requiring manual code entry.
+   */
+  #[Route('auth/recovery/magic-link/consume', ['POST'])]
+  /**
+   * Handles consumeMagicLink operation.
+   */
+  public function consumeMagicLink(): void
+  {
+    if (!$this->featureEnabled()) {
+      $this->fail('Recovery is unavailable.', HttpStatus::HTTP_SERVICE_UNAVAILABLE);
+    }
+
+    $body = $this->jsonBody();
+    $token = InputSanitizer::sanitizeString($this->scalarString($body['token'] ?? ''));
+    if ($token === '') {
+      $this->fail('Recovery link is invalid or expired.', HttpStatus::HTTP_BAD_REQUEST);
+    }
+
+    $this->enforceRecoveryRateLimit('magic-link-consume', $token);
+
+    $linkKey = Keys::accountRecoveryMagicLink($token);
+    $linkData = Database::hgetall($linkKey);
+    Database::unlink($linkKey);
+    if ($linkData === []) {
+      $this->fail('Recovery link is invalid or expired.', HttpStatus::HTTP_BAD_REQUEST);
+    }
+
+    $txnId = $this->scalarString($linkData['txn_id'] ?? '');
+    $txnSecret = $this->scalarString($linkData['txn_secret'] ?? '');
+    $transaction = AccountRecoveryTransaction::load($txnId);
+    if ($transaction === null || !$transaction->verifySecret($txnSecret) || $transaction->isExpired()) {
+      $this->fail('Recovery link is invalid or expired.', HttpStatus::HTTP_BAD_REQUEST);
+    }
+
+    if ($transaction->status() === AccountRecoveryTransaction::STATUS_PENDING) {
+      if (!$transaction->markEmailVerifiedByMagicLink($this->clientFingerprintHash(), $this->clientIpClass())) {
+        $this->fail('Recovery link is invalid or expired.', HttpStatus::HTTP_BAD_REQUEST);
+      }
+    } elseif (!in_array($transaction->status(), [
+      AccountRecoveryTransaction::STATUS_EMAIL_VERIFIED,
+      AccountRecoveryTransaction::STATUS_PROOF_VERIFIED,
+      AccountRecoveryTransaction::STATUS_BOOTSTRAP_ISSUED,
+    ], true)) {
+      $this->fail('Recovery link is invalid or expired.', HttpStatus::HTTP_BAD_REQUEST);
+    }
+
+    if (!$transaction->elevateForMagicLinkPasskey($this->clientFingerprintHash(), $this->clientIpClass())) {
+      $this->fail('Recovery link is invalid or expired.', HttpStatus::HTTP_BAD_REQUEST);
+    }
+
+    Response::success('Recovery link confirmed.', [
+      'txnId' => $transaction->id(),
+      'txnSecret' => $txnSecret,
+      'status' => $transaction->status(),
+      'passkeyReady' => true,
     ]);
   }
 

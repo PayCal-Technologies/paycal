@@ -30,6 +30,22 @@ Expected behavior when private extensions are present and enabled:
 3. Override precedence applies where override and basic share the same extension id.
 4. Optional surfaces (including admin) can be re-enabled by extension capability flags.
 
+## SOC2 Surface Policy
+
+Current policy:
+
+1. SOC2 dashboard and SOC2 extension capabilities are private-repo only.
+2. Public repo should not include SOC2 admin routes, SOC2 extension manifests, or SOC2 evidence/policy bundles.
+3. If a user attempts `/admin/soc2/` in a public install, that surface should be unavailable by design.
+
+Private-only SOC2 components:
+
+1. `html/admin/soc2/`
+2. `html/css/admin/soc2/`
+3. `html/src/Domain/Soc2Surface.php`
+4. `html/extensions/overrides/soc2-surface/`
+5. `soc2/` evidence/policy/report content
+
 ## Admin Notes
 
 Current policy:

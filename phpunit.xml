@@ -17,6 +17,9 @@
         <testsuite name="PayCal Contract">
             <directory>html/tests/Contract</directory>
         </testsuite>
+        <testsuite name="PayCal Soc2">
+            <directory>html/tests/Soc2</directory>
+        </testsuite>
         <testsuite name="PayCal Timezone">
             <file>html/tests/Unit/PayPeriodsTest.php</file>
         </testsuite>

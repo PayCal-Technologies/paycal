@@ -5,6 +5,7 @@ namespace PayCal\Controllers;
 use PayCal\Domain\Attributes\BillingProviderMode;
 use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\BillingProvider;
+use PayCal\Domain\Config\Environment;
 use PayCal\Domain\Enums\Subscription;
 use PayCal\Domain\SubscriptionRepository;
 use PayCal\Domain\Authentication;
@@ -13,11 +14,41 @@ use PayCal\Domain\MetricsService;
 use PayCal\Domain\Response;
 use PayCal\Domain\StripeBillingService;
 use PayCal\Domain\User;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 
 /**
- * BillingController
+ * BillingController.php
  *
- * Stripe billing endpoints for checkout, billing portal, and webhooks.
+ * Purpose: Controller boundary for billing checkout, portal access, webhook
+ * handling, and provider-mode-aware subscription actions.
+ *
+ * Developer notes:
+ * - Billing flows are externally integrated and financially sensitive.
+ * - Keep request validation and response contracts stable at this layer while
+ *   delegating provider-specific behavior to domain services.
+ *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
+ * @category   Controllers
+ * @package    PayCal\Controllers
+ * @subpackage HTTP
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
+ * Billing API surface.
+ *
+ * Responsibilities:
+ * - Accept billing-related requests for checkout, portal access, and webhook intake.
+ * - Delegate provider-specific behavior to StripeBillingService and related domain helpers.
+ * - Preserve deterministic subscription and provider-mode response contracts.
  */
 final class BillingController
 {
@@ -42,7 +73,13 @@ final class BillingController
     $successRaw = $this->requestString('success_url', '/profile/?billing=success');
     $cancelRaw = $this->requestString('cancel_url', '/profile/?billing=cancel');
     $successTarget = $this->normalizeAppURL($successRaw, '/profile/?billing=success');
-    $successURL = $this->normalizeAppURL('/api/v1/billing/checkout-return?next=' . rawurlencode($successTarget), '/api/v1/billing/checkout-return');
+    // Sign the ?next= value so handleCheckoutReturn can reject attacker-crafted URLs.
+    $sessionHash = Authentication::getSessionHashFromCookie() ?? '';
+    $returnPath  = '/api/v1/billing/checkout-return?next=' . rawurlencode($successTarget);
+    if ($sessionHash !== '') {
+      $returnPath .= '&nxt_sig=' . hash_hmac('sha256', $successTarget, $sessionHash);
+    }
+    $successURL = $this->normalizeAppURL($returnPath, '/api/v1/billing/checkout-return');
     $cancelURL = $this->normalizeAppURL($cancelRaw, '/profile/?billing=cancel');
 
     $user = User::current();
@@ -103,8 +140,9 @@ final class BillingController
     $sessionRaw = $_GET['session_id'] ?? '';
     $sessionId = is_scalar($sessionRaw) ? trim((string) $sessionRaw) : '';
 
-    $nextRaw = $_GET['next'] ?? '/profile/?billing=success';
-    $nextUrl = $this->normalizeAppURL($nextRaw, '/profile/?billing=success');
+    $nextRaw = $_GET['next'] ?? '';
+    $sigRaw  = $_GET['nxt_sig'] ?? '';
+    $nextUrl = $this->verifiedRedirectTarget($nextRaw, $sigRaw);
 
     if ($sessionId !== '') {
       $service = new StripeBillingService();
@@ -269,8 +307,17 @@ final class BillingController
    * POST billing/webhook
    *
    * Receives a signed Stripe webhook event and enqueues it for asynchronous
-   * processing.  Signature is verified inside the billing service before the
-   * payload is persisted.
+   * processing.
+   *
+   * Security layers applied in order before the body is read:
+   *   1. URL token gate — ?wt=<STRIPE_WEBHOOK_URL_TOKEN> must match.
+   *      This is a shared secret embedded in the Stripe webhook URL
+   *      configured in the Stripe dashboard. An attacker who does not
+   *      know the URL cannot reach the signature or queueing logic at all.
+   *   2. Pre-validation in enqueueWebhook() — timestamp freshness and
+   *      HMAC format check reject structurally invalid Stripe-Signature
+   *      headers before a queue slot is consumed.
+   *   3. Full Webhook::constructEvent() HMAC verification during drain.
    */
   #[Route('billing/webhook', ['POST'])]
   #[BillingProviderMode([BillingProvider::STRIPE])]
@@ -281,6 +328,16 @@ final class BillingController
   {
     if (!$this->billingProviderAllows(__FUNCTION__)) {
       Response::error('[Billing] Stripe webhooks are unavailable in public toggle mode.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    // Layer 1: URL token gate.
+    // STRIPE_WEBHOOK_URL_TOKEN is a secret path component embedded in the
+    // webhook endpoint URL registered in the Stripe dashboard.
+    // Stripe sends it on every delivery; we verify it before reading the body.
+    if (!$this->verifyWebhookUrlToken()) {
+      // Return 403 rather than 401 — do not hint that an auth upgrade exists.
+      Response::error('[Billing] Forbidden.', [], HttpStatus::HTTP_FORBIDDEN);
       return;
     }
 
@@ -298,11 +355,41 @@ final class BillingController
     }
 
     $message = strtolower((string) $result['message']);
-    $status = (str_contains($message, 'missing') || str_contains($message, 'empty'))
+    $status = (str_contains($message, 'missing') || str_contains($message, 'empty') || str_contains($message, 'pre-validation'))
       ? HttpStatus::HTTP_BAD_REQUEST
       : HttpStatus::HTTP_INTERNAL_SERVER_ERROR;
 
     Response::error('[Billing] ' . $result['message'], $result['data'], $status);
+  }
+
+  /**
+   * Verify the URL-embedded webhook token supplied as ?wt=<token>.
+   *
+   * STRIPE_WEBHOOK_URL_TOKEN must be set as an environment variable.
+   * The value is embedded in the Stripe webhook endpoint URL (not the body)
+   * and is unknown to anyone who has not been explicitly given the URL.
+   *
+   * Returns true when the token is absent from env (unconfigured),
+   * allowing deployment without the feature while avoiding a hard failure.
+   * An operator SHOULD configure this token; if unconfigured a SecurityLog
+   * warning is emitted so the gap is visible.
+   */
+  private function verifyWebhookUrlToken(): bool
+  {
+    $expected = (string) (getenv('STRIPE_WEBHOOK_URL_TOKEN') ?: '');
+
+    if ($expected === '') {
+      // Token not configured: allow through but emit a warning so ops can see the gap.
+      SecurityLog::log('billing_webhook_url_token_unconfigured', [
+        'note' => 'STRIPE_WEBHOOK_URL_TOKEN env var is unset; URL-token gate is inactive',
+      ]);
+      return true;
+    }
+
+    $supplied = isset($_GET['wt']) && is_scalar($_GET['wt']) ? trim((string) $_GET['wt']) : '';
+
+    // hash_equals prevents timing-oracle attacks.
+    return $supplied !== '' && hash_equals($expected, $supplied);
   }
 
   /**
@@ -377,7 +464,12 @@ final class BillingController
   }
 
   /**
-   * Handles normalizeAppURL operation.
+   * Normalise a caller-supplied URL to a safe same-origin destination.
+   *
+   * Relative paths are attached to the resolved application origin.
+   * Absolute URLs are validated by comparing scheme, host, and port via
+   * parse_url() — a string-prefix check is NOT sufficient because
+   * "https://app.example.com.evil.com" starts with "https://app.example.com".
    */
   private function normalizeAppURL(mixed $value, string $fallbackPath): string
   {
@@ -390,21 +482,84 @@ final class BillingController
       return $appOrigin . $fallbackPath;
     }
 
-    // If a relative path is provided, attach application origin.
+    // Relative path: safe to prepend the application origin.
     if (str_starts_with($candidate, '/')) {
       return $appOrigin . $candidate;
     }
 
-    // Absolute URL: allow current-request host and configured app origin only.
-    if (str_starts_with($candidate, $appOrigin)) {
+    // Absolute URL: compare scheme + host + port exactly, not as a string prefix.
+    if ($this->isSameOrigin($candidate, $appOrigin)) {
       return $candidate;
     }
 
-    if ($defaultOrigin !== $appOrigin && str_starts_with($candidate, $defaultOrigin)) {
+    if ($defaultOrigin !== $appOrigin && $this->isSameOrigin($candidate, $defaultOrigin)) {
       return $candidate;
     }
 
     return $appOrigin . $fallbackPath;
+  }
+
+  /**
+   * Returns true only when $candidate's scheme, host, and port all match $origin exactly.
+   *
+   * parse_url() is used so that "https://app.example.com.evil.com" never satisfies
+   * an "app.example.com" origin — str_starts_with is insufficient for this check.
+   */
+  private function isSameOrigin(string $candidate, string $origin): bool
+  {
+    $pc = parse_url($candidate);
+    $po = parse_url($origin);
+
+    if (!is_array($pc) || !is_array($po)) {
+      return false;
+    }
+
+    $schemeMatch = isset($pc['scheme'], $po['scheme'])
+      && strtolower($pc['scheme']) === strtolower($po['scheme']);
+
+    $hostMatch = isset($pc['host'], $po['host'])
+      && strtolower($pc['host']) === strtolower($po['host']);
+
+    // Both sides default to null (no explicit port) which is correct:
+    // "https://example.com" and "https://example.com:443" would differ, intentionally.
+    $portMatch = ($pc['port'] ?? null) === ($po['port'] ?? null);
+
+    return $schemeMatch && $hostMatch && $portMatch;
+  }
+
+  /**
+   * Verify the HMAC signature on an incoming ?next= redirect parameter and
+   * return a safe redirect destination.
+   *
+   * The signature was produced in createCheckoutSession() using the user's
+   * session hash as the key. If the signature is absent, wrong, or the session
+   * hash is unavailable, the caller is sent to the default billing success page.
+   * This prevents an attacker from crafting a ?next= link independently of a
+   * real checkout flow.
+   */
+  private function verifiedRedirectTarget(mixed $nextRaw, mixed $sigRaw): string
+  {
+    $fallback = $this->defaultAppOrigin() . '/profile/?billing=success';
+
+    $next = is_scalar($nextRaw) ? trim((string) $nextRaw) : '';
+    $sig  = is_scalar($sigRaw)  ? trim((string) $sigRaw)  : '';
+
+    // sha256 HMAC = exactly 64 lowercase hex chars.
+    if ($next === '' || strlen($sig) !== 64) {
+      return $fallback;
+    }
+
+    $sessionHash = Authentication::getSessionHashFromCookie() ?? '';
+    if ($sessionHash === '') {
+      return $fallback;
+    }
+
+    $expected = hash_hmac('sha256', $next, $sessionHash);
+    if (!hash_equals($expected, $sig)) {
+      return $fallback;
+    }
+
+    return $this->normalizeAppURL($next, '/profile/?billing=success');
   }
 
   /**
@@ -512,29 +667,7 @@ final class BillingController
    */
   private function defaultAppOrigin(): string
   {
-    $origin = $_ENV['APP_ORIGIN'] ?? null;
-    if (is_scalar($origin)) {
-      $normalized = rtrim((string) $origin, '/');
-      if ($normalized !== '') {
-        return $normalized;
-      }
-    }
-
-    $originFromEnv = getenv('APP_ORIGIN');
-    if (is_string($originFromEnv)) {
-      $normalized = rtrim($originFromEnv, '/');
-      if ($normalized !== '') {
-        return $normalized;
-      }
-    }
-
-    $domain = $_ENV['APP_DOMAIN'] ?? getenv('APP_DOMAIN');
-    $domain = is_string($domain) ? trim($domain) : 'dev.paycal.local';
-    if ($domain === '') {
-      $domain = 'dev.paycal.local';
-    }
-
-    return 'https://' . rtrim($domain, '/');
+    return Environment::appScheme() . '://' . rtrim(Environment::appDomain(), '/');
   }
 
   /**

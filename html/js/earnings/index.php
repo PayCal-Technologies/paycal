@@ -212,8 +212,9 @@ function verifySignature(serialized, signatureBase64, publicKeyBase64) {
 ?>
 window.PAYROLL_SIGNING_PUBLIC_KEYS = <?php echo json_encode($publicKeys, JSON_UNESCAPED_SLASHES); ?>;
 window.PAYROLL_SIGNING_REVOKED_KEYS = <?php echo json_encode($revokedKeys, JSON_UNESCAPED_SLASHES); ?>;
-window.PAYCAL_USER_UUID = '<?php echo $userUUID; ?>';
-window.PAYCAL_EXPORT_IDENTITY = <?php echo json_encode($exportIdentity, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>;
+// Non-enumerable: hidden from window property enumeration by extensions and injected scripts.
+Object.defineProperty(window, 'PAYCAL_USER_UUID', { configurable: true, enumerable: false, writable: true, value: '<?php echo $userUUID; ?>' });
+Object.defineProperty(window, 'PAYCAL_EXPORT_IDENTITY', { configurable: true, enumerable: false, writable: true, value: <?php echo json_encode($exportIdentity, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?> });
 
 // Do not expose plaintext profile PII in page source.
 // Profile data must be fetched/decrypted through authenticated runtime paths only.
@@ -275,6 +276,90 @@ document.addEventListener("DOMContentLoaded", () => {
     const value = String(PC?.config?.[key] ?? '').trim();
     return value !== '' ? value : fallback;
   }
+
+  function initDelayedHoverHelp() {
+    const targets = Array.from(document.querySelectorAll('[data-hover-help]'));
+    if (targets.length === 0) {
+      return;
+    }
+
+    const tooltipEl = document.createElement('div');
+    tooltipEl.className = 'hover_help_tooltip';
+    tooltipEl.setAttribute('role', 'tooltip');
+    tooltipEl.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tooltipEl);
+
+    let showTimer = null;
+    let activeTarget = null;
+
+    const clearShowTimer = () => {
+      if (showTimer !== null) {
+        window.clearTimeout(showTimer);
+        showTimer = null;
+      }
+    };
+
+    const hideTooltip = () => {
+      clearShowTimer();
+      activeTarget = null;
+      tooltipEl.classList.remove('is-visible');
+      tooltipEl.setAttribute('aria-hidden', 'true');
+    };
+
+    const positionTooltip = (targetEl) => {
+      if (!targetEl) {
+        return;
+      }
+
+      tooltipEl.style.bottom = '1.5rem';
+      tooltipEl.style.right = '1.5rem';
+      tooltipEl.style.top = 'auto';
+      tooltipEl.style.left = 'auto';
+    };
+
+    const showTooltip = (targetEl) => {
+      const helpText = (targetEl?.getAttribute('data-hover-help') || '').trim();
+      if (!helpText) {
+        return;
+      }
+
+      activeTarget = targetEl;
+      tooltipEl.textContent = helpText;
+      tooltipEl.classList.add('is-visible');
+      tooltipEl.setAttribute('aria-hidden', 'false');
+      positionTooltip(targetEl);
+    };
+
+    const scheduleShow = (targetEl) => {
+      clearShowTimer();
+      showTimer = window.setTimeout(() => {
+        showTimer = null;
+        showTooltip(targetEl);
+      }, 250);
+    };
+
+    targets.forEach((targetEl) => {
+      targetEl.addEventListener('mouseenter', () => scheduleShow(targetEl));
+      targetEl.addEventListener('mouseleave', hideTooltip);
+      targetEl.addEventListener('focus', () => scheduleShow(targetEl));
+      targetEl.addEventListener('blur', hideTooltip);
+      targetEl.addEventListener('mousedown', hideTooltip);
+    });
+
+    window.addEventListener('scroll', () => {
+      if (activeTarget && tooltipEl.classList.contains('is-visible')) {
+        positionTooltip(activeTarget);
+      }
+    }, true);
+
+    window.addEventListener('resize', () => {
+      if (activeTarget && tooltipEl.classList.contains('is-visible')) {
+        positionTooltip(activeTarget);
+      }
+    });
+  }
+
+  initDelayedHoverHelp();
 
   function buildDailyGridCell(content, colId) {
     const cell = document.createElement('div');
@@ -1156,7 +1241,7 @@ document.addEventListener("DOMContentLoaded", () => {
     svgEl.textContent = '';
 
     if (!Number.isFinite(total) || total <= 0) {
-      legendEl.innerHTML = '<p class="earnings_piegraphs_empty">No values available.</p>';
+      window.Guardian.setHTML(legendEl, '<p class="earnings_piegraphs_empty">No values available.</p>');
       return;
     }
 
@@ -1209,13 +1294,13 @@ document.addEventListener("DOMContentLoaded", () => {
     totalText.textContent = formatPieAmount(total);
     svgEl.appendChild(totalText);
 
-    legendEl.innerHTML = parts.map((seg) => (
+    window.Guardian.setHTML(legendEl, parts.map((seg) => (
       `<div class="earnings_piegraphs_legend_row" data-seg-key="${escapeHtml(seg.key)}">`
       + `<span class="earnings_piegraphs_legend_dot earnings_piegraphs_legend_dot_${seg.key}"></span>`
       + `<span class="earnings_piegraphs_legend_label">${escapeHtml(seg.label)}</span>`
       + `<span class="earnings_piegraphs_legend_value">${formatPieAmount(seg.value)} (${formatPiePercent(seg.pct)})</span>`
       + `</div>`
-    )).join('');
+    )).join(''));
 
     const setHoveredSegment = (segKey) => {
       svgEl.querySelectorAll('.earnings_piegraphs_slice').forEach((slice) => {
@@ -1264,15 +1349,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const months = Object.keys(dataset.monthly).sort();
     if (months.length === 0) {
-      monthSelect.innerHTML = '';
+      monthSelect.textContent = '';
       renderPieSvg(monthSvg, monthLegend, { gross: 0, deductions: 0, net: 0 }, palette);
       return;
     }
 
     const selectedBefore = String(monthSelect.value || '');
-    monthSelect.innerHTML = months.map((monthKey) => (
+    window.Guardian.setHTML(monthSelect, months.map((monthKey) => (
       `<option value="${escapeHtml(monthKey)}">${escapeHtml(monthLabelFromKey(monthKey))}</option>`
-    )).join('');
+    )).join(''));
 
     const selected = months.includes(selectedBefore) ? selectedBefore : months[months.length - 1];
     monthSelect.value = selected;
@@ -1422,6 +1507,18 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(`Unsupported export scope: ${normalizedScope}`);
       }
       EarningsExport.downloadTextFile(csv, `paycal-${normalizedScope}-${fileSuffix}.csv`, 'text/csv;charset=utf-8');
+      return;
+    }
+
+    if (format === 'xlsx') {
+      await EarningsExport.downloadXlsxFile(
+        normalizedScope,
+        rows,
+        report,
+        `paycal-${normalizedScope}-${fileSuffix}.xlsx`,
+        startDate,
+        endDate,
+      );
       return;
     }
 
@@ -1649,10 +1746,10 @@ async function render_daily_year(year) {
 
     try {
       const html = await fetchSectionHtml(section, year);
-      target.innerHTML = html || '<p class="earnings_async_status">No data available.</p>';
+      window.Guardian.setHTML(target, html || '<p class="earnings_async_status">No data available.</p>');
       loadedSections.add(key);
     } catch (error) {
-      target.innerHTML = `<p class="earnings_async_status">Unable to load section: ${escapeHtml(error.message || 'unknown error')}.</p>`;
+      window.Guardian.setHTML(target, `<p class="earnings_async_status">Unable to load section: ${escapeHtml(error.message || 'unknown error')}.</p>`);
       PW.error(`[EARNINGS] ${section} year ${year} failed: ${error.message}`);
     }
   }

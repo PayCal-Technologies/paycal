@@ -18,12 +18,7 @@ namespace PayCal\Domain;
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
  */
-
-
-
 /**
- * InvalidArgumentException
+ * InvalidArgumentException.
  */
-class InvalidArgumentException extends \InvalidArgumentException
-{
-}
+class InvalidArgumentException extends \InvalidArgumentException {}

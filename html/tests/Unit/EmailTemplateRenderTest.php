@@ -25,6 +25,7 @@ final class EmailTemplateRenderTest extends TestCase
 
   protected function tearDown(): void
   {
+    Environment::bootstrap($_ENV);
     Render::setStrictMode(false);
   }
 

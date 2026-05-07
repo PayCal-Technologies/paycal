@@ -12,15 +12,19 @@ namespace PayCal\Domain;
  * - This class is bootstrap-oriented and should remain side-effect predictable.
  * - Prefer newer typed config facades for runtime reads where available.
  *
+ * Architectural role:
+ * - Legacy compatibility loader for older bootstrap paths that still require
+ *   constant-definition behavior.
+ * - Encapsulates configuration bootstrap compatibility outside the HTTP layer.
+ *
  * @category   Domain
  * @package    PayCal\Domain
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
-
-
-
 /**
  * Legacy configuration loader.
  *

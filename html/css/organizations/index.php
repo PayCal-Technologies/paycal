@@ -158,6 +158,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--panel-border, #2a2a2a) 24%, transparent);
 }
 
+.organizations_dev_gated_panel {
+  border: 2px solid #a020f0 !important;
+}
+
 .organizations_live_requests_panel .organizations_section_header h2 {
   display: inline-flex;
   align-items: center;

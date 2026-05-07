@@ -313,25 +313,29 @@ final class StripeBillingServiceTest extends TestCase
     $this->assertIsString($payload);
 
     try {
+      // A v1= value that is NOT 64 hex chars fails the pre-enqueue signature check;
+      // enqueueWebhook now rejects garbage before it consumes a queue slot.
       $queued = $this->service->enqueueWebhook($payload, 't=' . time() . ',v1=invalid');
-      $this->assertTrue($queued['success']);
+      $this->assertFalse($queued['success'], 'Malformed v1= should be rejected at pre-validation');
 
+      // Queue is empty — nothing to drain and no dead-letter entry.
       $drained = $this->service->drainWebhookQueue(10);
       $this->assertTrue($drained['success']);
       $data = $drained['data'];
-      $this->assertSame(1, (int) ($data['processed'] ?? 0));
-      $this->assertSame(1, (int) ($data['failed'] ?? 0));
+      $this->assertSame(0, (int) ($data['processed'] ?? 0));
+      $this->assertSame(0, (int) ($data['failed'] ?? 0));
       $this->assertSame(0, (int) ($data['requeued'] ?? 0));
-      $this->assertSame(1, (int) ($data['dead_lettered'] ?? 0));
-      $this->assertSame('1', Database::get($this->webhookTelemetryKey('queue_dead_lettered')));
+      $this->assertSame(0, (int) ($data['dead_lettered'] ?? 0));
     } finally {
       Database::unlink(Keys::BILLING_WEBHOOK_QUEUE);
       Database::unlink(Keys::BILLING_WEBHOOK_DEAD_LETTER);
       Database::unlink($this->webhookTelemetryKey('queued'));
+      Database::unlink($this->webhookTelemetryKey('signature_precheck_failed'));
       Database::unlink($this->webhookTelemetryKey('verification_failed'));
       Database::unlink($this->webhookTelemetryKey('verification_failed:checkout_session_completed'));
       Database::unlink($this->webhookTelemetryKey('queue_dead_lettered'));
       Database::unlink('security:event:billing_webhook_queued');
+      Database::unlink('security:event:billing_webhook_signature_precheck_failed');
       Database::unlink('security:event:billing_webhook_verification_failed');
       Database::unlink('security:event:billing_webhook_queue_dead_lettered');
     }

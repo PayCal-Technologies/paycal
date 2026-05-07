@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use PayCal\Domain\CapabilityTokenService;
+use PayCal\Infrastructure\Auth\CapabilityTokenService;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Database;
 use PHPUnit\Framework\TestCase;

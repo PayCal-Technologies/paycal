@@ -30,7 +30,6 @@ enum AuthLevel: string
   case ADMIN      = 'admin';
   case SUPERADMIN = 'superadmin';
 
-
   /**
    * Numeric rank for hierarchical comparisons.
    * Higher number = higher privilege.
@@ -38,7 +37,6 @@ enum AuthLevel: string
    */
   public function rank(): int
   {
-
     return match ($this) {
       self::PUBLIC     => 0,
       self::GUEST      => 10,
@@ -51,13 +49,11 @@ enum AuthLevel: string
     };
   }
 
-
   /**
    * True if current level >= given level.
    */
   public function atLeast(self $level): bool
   {
-
     return $this->rank() >= $level->rank();
   }
 

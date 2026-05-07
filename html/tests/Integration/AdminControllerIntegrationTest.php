@@ -3,7 +3,7 @@
 namespace Tests\Integration;
 
 use PayCal\Controllers\AdminController;
-use PayCal\Domain\CapabilityTokenService;
+use PayCal\Infrastructure\Auth\CapabilityTokenService;
 use PayCal\Domain\Database;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Enums\AuthLevel;

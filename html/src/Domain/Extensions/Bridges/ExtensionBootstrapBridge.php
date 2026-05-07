@@ -19,9 +19,6 @@ final class ExtensionBootstrapBridge
    * Failures are logged but do not halt application startup.
    */
   #[ExtensionBootstrap('runtime')]
-  /**
-   * Handles initialize operation.
-   */
   public static function initialize(): void
   {
     $bootstrapPath = __DIR__ . '/../../../../extensions/bootstrap.php';

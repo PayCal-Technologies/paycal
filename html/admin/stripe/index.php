@@ -5,6 +5,7 @@ use PayCal\Domain\AdminSurface;
 use PayCal\Domain\DataGrid;
 use PayCal\Domain\MetricsService;
 use PayCal\Domain\Render;
+use PayCal\Domain\Strings;
 
 require_once '../../config.php';
 
@@ -37,6 +38,10 @@ function getStringValue(array $arr, string $key, string $default = ''): string {
   return isset($arr[$key]) && is_scalar($arr[$key]) ? (string) $arr[$key] : $default;
 }
 
+function formatStripeNumber(int|float $value, int $fractionDigits = 0): string {
+  return Strings::formatLocalizedNumber($value, $fractionDigits, $fractionDigits);
+}
+
 $billingWebhooks = MetricsService::getBillingWebhookMetrics();
 $billingWebhookOutcomes = getArrayValue($billingWebhooks, 'outcomes');
 $billingWebhookEvents = getArrayValue($billingWebhooks, 'event_types');
@@ -51,8 +56,8 @@ foreach ($billingWebhookEvents as $eventType => $summary) {
   $eventSummary = is_array($summary) ? $summary : [];
   $eventTypesRows[] = [
     'event_type' => (string) $eventType,
-    'processed' => number_format(getIntValue($eventSummary, 'processed', 0)),
-    'duplicate' => number_format(getIntValue($eventSummary, 'duplicate', 0)),
+    'processed' => formatStripeNumber(getIntValue($eventSummary, 'processed', 0)),
+    'duplicate' => formatStripeNumber(getIntValue($eventSummary, 'duplicate', 0)),
   ];
 }
 
@@ -62,10 +67,10 @@ foreach ($billingWebhookRecentDays as $row) {
   $day = is_array($row) ? $row : [];
   $sevenDayRows[] = [
     'date' => getStringValue($day, 'date', ''),
-    'processed' => number_format(getIntValue($day, 'processed', 0)),
-    'duplicate' => number_format(getIntValue($day, 'duplicate', 0)),
-    'verify_fail' => number_format(getIntValue($day, 'verification_failed', 0)),
-    'rejected' => number_format(getIntValue($day, 'event_rejected', 0)),
+    'processed' => formatStripeNumber(getIntValue($day, 'processed', 0)),
+    'duplicate' => formatStripeNumber(getIntValue($day, 'duplicate', 0)),
+    'verify_fail' => formatStripeNumber(getIntValue($day, 'verification_failed', 0)),
+    'rejected' => formatStripeNumber(getIntValue($day, 'event_rejected', 0)),
   ];
 }
 
@@ -75,10 +80,10 @@ foreach ($billingWebhookRecentThirtyDays as $row) {
   $day = is_array($row) ? $row : [];
   $thirtyDayRows[] = [
     'date' => getStringValue($day, 'date', ''),
-    'processed' => number_format(getIntValue($day, 'processed', 0)),
-    'duplicate' => number_format(getIntValue($day, 'duplicate', 0)),
-    'verify_fail' => number_format(getIntValue($day, 'verification_failed', 0)),
-    'rejected' => number_format(getIntValue($day, 'event_rejected', 0)),
+    'processed' => formatStripeNumber(getIntValue($day, 'processed', 0)),
+    'duplicate' => formatStripeNumber(getIntValue($day, 'duplicate', 0)),
+    'verify_fail' => formatStripeNumber(getIntValue($day, 'verification_failed', 0)),
+    'rejected' => formatStripeNumber(getIntValue($day, 'event_rejected', 0)),
   ];
 }
 
@@ -141,35 +146,35 @@ echo '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL('admin/me
     <p>Admin-only overview of webhook processing health and event coverage for <?= htmlspecialchars($summaryDate, ENT_QUOTES, 'UTF-8') ?>.</p>
     <div class="metric-row">
       <span class="metric-label">Processed</span>
-      <span class="metric-value success"><?= number_format(getIntValue($billingWebhookOutcomes, 'processed', 0)) ?></span>
+      <span class="metric-value success"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'processed', 0)) ?></span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Duplicates</span>
-      <span class="metric-value"><?= number_format(getIntValue($billingWebhookOutcomes, 'duplicate', 0)) ?></span>
+      <span class="metric-value"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'duplicate', 0)) ?></span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Verification Failed</span>
-      <span class="metric-value danger"><?= number_format(getIntValue($billingWebhookOutcomes, 'verification_failed', 0)) ?></span>
+      <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'verification_failed', 0)) ?></span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Rejected Events</span>
-      <span class="metric-value danger"><?= number_format(getIntValue($billingWebhookOutcomes, 'event_rejected', 0)) ?></span>
+      <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'event_rejected', 0)) ?></span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Empty Payloads</span>
-      <span class="metric-value danger"><?= number_format(getIntValue($billingWebhookOutcomes, 'payload_empty', 0)) ?></span>
+      <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'payload_empty', 0)) ?></span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Missing Signatures</span>
-      <span class="metric-value danger"><?= number_format(getIntValue($billingWebhookOutcomes, 'signature_missing', 0)) ?></span>
+      <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'signature_missing', 0)) ?></span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Stripe Secret Missing</span>
-      <span class="metric-value danger"><?= number_format(getIntValue($billingWebhookOutcomes, 'secret_key_missing', 0)) ?></span>
+      <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'secret_key_missing', 0)) ?></span>
     </div>
     <div class="metric-row">
       <span class="metric-label">Webhook Secret Missing</span>
-      <span class="metric-value danger"><?= number_format(getIntValue($billingWebhookOutcomes, 'webhook_secret_missing', 0)) ?></span>
+      <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'webhook_secret_missing', 0)) ?></span>
     </div>
   </div>
 
@@ -186,10 +191,10 @@ echo '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL('admin/me
   <div class="metric-card">
     <h2>30-Day Trend</h2>
     <p>
-      Total processed: <strong><?= number_format(getIntValue($billingWebhookRollingThirtyTotals, 'processed', 0)) ?></strong> /
-      duplicate: <strong><?= number_format(getIntValue($billingWebhookRollingThirtyTotals, 'duplicate', 0)) ?></strong> /
-      verification failed: <strong><?= number_format(getIntValue($billingWebhookRollingThirtyTotals, 'verification_failed', 0)) ?></strong> /
-      rejected: <strong><?= number_format(getIntValue($billingWebhookRollingThirtyTotals, 'event_rejected', 0)) ?></strong>
+      Total processed: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'processed', 0)) ?></strong> /
+      duplicate: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'duplicate', 0)) ?></strong> /
+      verification failed: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'verification_failed', 0)) ?></strong> /
+      rejected: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'event_rejected', 0)) ?></strong>
     </p>
     <?php echo $thirtyDayGrid->table(); ?>
   </div>

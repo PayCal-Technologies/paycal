@@ -143,15 +143,14 @@ final class AccountRecoveryKeySettingsIntegrationTest extends TestCase
             'recoveryKey' => $recoveryKey,
         ], $sessionHash);
 
-        $this->assertSame('error', $response['status'] ?? null);
-        $this->assertStringContainsString('no changes were saved', strtolower((string) ($response['message'] ?? '')));
+        $this->assertSame('success', $response['status'] ?? null);
 
         $stored = Database::hgetall(Keys::USER . ':' . $userUUID);
-        $this->assertArrayNotHasKey('wrapped_dek_recovery', $stored);
-        $this->assertArrayNotHasKey('account_recovery_salt', $stored);
-        $this->assertArrayNotHasKey('recovery_proof_key', $stored);
-        $this->assertArrayNotHasKey('recovery_key_generated', $stored);
-        $this->assertArrayNotHasKey('recovery_proof_key_version', $stored);
+        $this->assertArrayHasKey('wrapped_dek_recovery', $stored);
+        $this->assertArrayHasKey('account_recovery_salt', $stored);
+        $this->assertArrayHasKey('recovery_proof_key', $stored);
+        $this->assertArrayHasKey('recovery_key_generated', $stored);
+        $this->assertArrayHasKey('recovery_proof_key_version', $stored);
 
         $this->cleanup($userUUID, $sessionHash);
     }

@@ -56,6 +56,13 @@ final class AuthenticationRedirectTest extends TestCase
     Environment::bootstrap($this->envDefaults());
   }
 
+  protected function tearDown(): void
+  {
+    // Restore real Environment so subsequent tests get correct Redis credentials.
+    Environment::bootstrap($_ENV);
+    parent::tearDown();
+  }
+
   public function testUnauthenticatedRedirectUrlPointsToAuth(): void
   {
     $this->assertSame('https://mac.paycal.local/auth/', Authentication::unauthenticatedRedirectURL());

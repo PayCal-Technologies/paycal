@@ -381,9 +381,60 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
 
-  const setPasskeyStatus = (message) => {
-    if (addPasskeyStatusEl) {
-      addPasskeyStatusEl.textContent = message;
+  const simplifyPasskeyStatusMessage = (message, fallbackMessage = 'Something went wrong. Try again.') => {
+    const raw = normalizeErrorMessage(message, fallbackMessage);
+    if (!raw) {
+      return fallbackMessage;
+    }
+
+    const compact = raw
+      .replace(/^\[[^\]]+\]\s*/u, '')
+      .replace(/\s*\(HTTP\s+\d+\)\s*/iu, ' ')
+      .replace(/\s*\[[A-Z0-9_:-]+\]\s*$/u, '')
+      .trim();
+
+    if (/already has a passkey/i.test(compact)) {
+      return 'This device already has a passkey for this account.';
+    }
+    if (/cancelled|canceled|timed out|registration cancelled/i.test(compact)) {
+      return 'Passkey setup was cancelled. Try again when you are ready.';
+    }
+    if (/network error/i.test(compact)) {
+      return 'Network issue while adding passkey. Check your connection and try again.';
+    }
+    if (/unable to start passkey registration|invalid challenge payload/i.test(compact)) {
+      return 'Could not start passkey setup. Try again.';
+    }
+    if (/unable to finish passkey registration/i.test(compact)) {
+      return 'Could not complete passkey setup. Try again.';
+    }
+
+    return compact || fallbackMessage;
+  };
+
+  const setPasskeyStatus = (message, tone = 'info') => {
+    if (!addPasskeyStatusEl) {
+      return;
+    }
+
+    const text = typeof message === 'string' ? message.trim() : '';
+    if (text === '') {
+      addPasskeyStatusEl.textContent = '';
+      addPasskeyStatusEl.classList.remove('is-visible', 'is-info', 'is-success', 'is-warning', 'is-error');
+      return;
+    }
+
+    addPasskeyStatusEl.textContent = text;
+    addPasskeyStatusEl.classList.add('is-visible');
+    addPasskeyStatusEl.classList.remove('is-info', 'is-success', 'is-warning', 'is-error');
+    if (tone === 'success') {
+      addPasskeyStatusEl.classList.add('is-success');
+    } else if (tone === 'warning') {
+      addPasskeyStatusEl.classList.add('is-warning');
+    } else if (tone === 'error') {
+      addPasskeyStatusEl.classList.add('is-error');
+    } else {
+      addPasskeyStatusEl.classList.add('is-info');
     }
   };
 
@@ -614,7 +665,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       renderPasskeyCredentials(listPayload.credentials || []);
     } catch (error) {
-      setPasskeyStatus('Unable to load passkeys. Try again.');
+      setPasskeyStatus('Unable to load passkeys. Try again.', 'error');
       setPasskeyGridStatus('Unable to load passkeys. Try again.');
       PW.error(error);
     }
@@ -660,7 +711,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      setPasskeyStatus('Working…');
+      setPasskeyStatus('Removing passkey...', 'info');
       setPasskeyGridStatus('Removing passkey...');
       const response = await fetch('/api/v1/auth/passkey/delete', {
         method: 'POST',
@@ -674,10 +725,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error(payload.message || 'Unable to remove passkey.');
       }
 
-      setPasskeyStatus('Passkey removed.');
+      setPasskeyStatus('Passkey removed.', 'success');
       await refreshPasskeyCredentials();
     } catch (error) {
-      setPasskeyStatus(error?.message || 'Unable to update passkeys. Try again.');
+      setPasskeyStatus(simplifyPasskeyStatusMessage(error, 'Unable to update passkeys. Try again.'), 'error');
       setPasskeyGridStatus('Unable to update passkeys. Try again.');
       PW.error(error);
     }
@@ -685,7 +736,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const addPasskeyAction = async () => {
     if (!isWebAuthnCapableBrowser()) {
-      setPasskeyStatus(WEB_AUTHN_UNSUPPORTED_MESSAGE);
+      setPasskeyStatus(WEB_AUTHN_UNSUPPORTED_MESSAGE, 'warning');
       setPasskeyGridStatus(WEB_AUTHN_UNSUPPORTED_MESSAGE);
       return;
     }
@@ -693,7 +744,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Avoid blocking click handler timing with a synchronous prompt.
     const deviceName = 'Passkey';
 
-    setPasskeyStatus('Working…');
+    setPasskeyStatus('Starting passkey setup...', 'info');
     setPasskeyGridStatus('Starting passkey registration...');
 
     let startResponse;
@@ -737,7 +788,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       delete options.authenticatorSelection.authenticatorAttachment;
     }
 
-    setPasskeyStatus('Confirm on your device…');
+    setPasskeyStatus('Confirm the passkey prompt on your device.', 'info');
     setPasskeyGridStatus('Confirm passkey registration on your device.');
     let credential;
     try {
@@ -791,15 +842,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // [CRYPTO] After successful registration, wrap DEK with passkey KEK
     // This requires an immediate authentication to get the assertion signature
-    setPasskeyStatus('Securing your data…');
+    setPasskeyStatus('Securing your data with this passkey...', 'info');
     setPasskeyGridStatus('Securing your data with the new passkey...');
     try {
       await wrapDEKWithNewPasskey();
-      setPasskeyStatus('Passkey added.');
+      setPasskeyStatus('Passkey added successfully.', 'success');
       setPasskeyGridStatus('Passkey added successfully. Refreshing passkeys list...');
     } catch (dekWrapError) {
       PW.error(dekWrapError);
-      setPasskeyStatus('Passkey added. Open your calendar once to complete setup.');
+      setPasskeyStatus('Passkey added. Open your calendar once to complete setup.', 'warning');
       setPasskeyGridStatus('Passkey added. Open your calendar once to complete setup.');
     }
 
@@ -990,7 +1041,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       passkeyActionHardDisabled = true;
       addPasskeyButtonEl.disabled = true;
       addPasskeyButtonEl.setAttribute('aria-disabled', 'true');
-      setPasskeyStatus(WEB_AUTHN_UNSUPPORTED_MESSAGE);
+      setPasskeyStatus(WEB_AUTHN_UNSUPPORTED_MESSAGE, 'warning');
       setPasskeyGridStatus(WEB_AUTHN_UNSUPPORTED_MESSAGE);
     }
 
@@ -999,8 +1050,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       try {
         await addPasskeyAction();
       } catch (error) {
-        const errorMessage = normalizeErrorMessage(error);
-        setPasskeyStatus(errorMessage);
+        const errorMessage = simplifyPasskeyStatusMessage(error);
+        setPasskeyStatus(errorMessage, 'error');
         setPasskeyGridStatus(`Passkey add failed: ${errorMessage}`);
         PW.error(`[PASSKEY] Add device failed: ${errorMessage}`);
       } finally {

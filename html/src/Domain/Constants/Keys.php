@@ -117,8 +117,21 @@ final class Keys
   public const ORGANIZATION_DEK            = 'organization:dek';
   public const ORGANIZATION_DEK_VERSION    = 'organization:dek:version';
   public const ORGANIZATION_DEK_WRAP       = 'organization:dek:wrap';
+  public const ORGANIZATION_AUDIT_CONTROL_TEST = 'organization:audit:control_test';
+  public const ORGANIZATION_AUDIT_CONTROL_TEST_INDEX = 'organization:audit:control_test:index';
   public const SYSTEM_AUDIT                = 'system:audit';
   public const SYSTEM_AUDIT_EVENT          = 'system:audit:event';
+  public const SYSTEM_AUDIT_LEDGER         = 'system:audit:ledger';
+  public const SYSTEM_AUDIT_LEDGER_BLOCK   = 'system:audit:ledger:block';
+  public const SYSTEM_AUDIT_LEDGER_EVENT   = 'system:audit:ledger:event';
+  public const SYSTEM_AUDIT_ANCHOR         = 'system:audit:anchor';
+  public const SYSTEM_AUDIT_BLOCKCHAIN         = 'system:audit:blockchain';
+  public const SYSTEM_AUDIT_VERIFICATION_REPORT = 'system:audit:verification_report';
+  public const SYSTEM_AUDIT_PUBSUB         = 'system:audit:pubsub';
+  /** Stores the GCS object path + SHA-256 hash of the last successfully uploaded evidence artifact.
+   *  Used to chain evidence objects: each artifact references the previous one by path and hash.
+   *  Value: JSON {"object_path":"...","object_hash":"..."} — no TTL (permanent chain anchor). */
+  public const SYSTEM_AUDIT_GCS_CHAIN_TIP  = 'system:audit:gcs:chain_tip';
   public const ORGANIZATION_ACCESS_REQUEST  = 'organization:access:request';
   public const ORGANIZATION_ACCESS_REQUEST_ORG = 'organization:access:request:org';
   public const ORGANIZATION_ACCESS_REQUEST_REQUESTER = 'organization:access:request:requester';
@@ -262,6 +275,22 @@ final class Keys
   }
 
   /**
+   * Handles organizationAuditControlTest operation.
+   */
+  public static function organizationAuditControlTest(string $testId): string
+  {
+    return self::ORGANIZATION_AUDIT_CONTROL_TEST . self::SEPARATOR . $testId;
+  }
+
+  /**
+   * Handles organizationAuditControlTestIndex operation.
+   */
+  public static function organizationAuditControlTestIndex(string $orgId): string
+  {
+    return self::ORGANIZATION_AUDIT_CONTROL_TEST_INDEX . self::SEPARATOR . $orgId;
+  }
+
+  /**
    * Handles organizationNotificationUnreadByUser operation.
    * Hash fields are organization IDs and values are unread counts.
    */
@@ -337,6 +366,14 @@ final class Keys
   }
 
   /**
+   * Handles accountRecoveryMagicLink operation.
+   */
+  public static function accountRecoveryMagicLink(string $token): string
+  {
+    return 'account_recovery:magic_link' . self::SEPARATOR . $token;
+  }
+
+  /**
    * Handles accountRecoveryReplayCounter operation.
    */
   public static function accountRecoveryReplayCounter(string $ipHash, string $window): string
@@ -374,6 +411,106 @@ final class Keys
   public static function capabilityReplay(string $token): string
   {
     return 'capability' . self::SEPARATOR . 'replay' . self::SEPARATOR . $token;
+  }
+
+  /**
+   * Handles systemAuditLedgerBlock operation.
+   */
+  public static function systemAuditLedgerBlock(int $sequence): string
+  {
+    return self::SYSTEM_AUDIT_LEDGER_BLOCK . self::SEPARATOR . (string) $sequence;
+  }
+
+  /**
+   * Handles systemAuditLedgerEventSequence operation.
+   */
+  public static function systemAuditLedgerEventSequence(string $eventId): string
+  {
+    return self::SYSTEM_AUDIT_LEDGER_EVENT . self::SEPARATOR . $eventId;
+  }
+
+  /**
+   * Handles systemAuditLedgerHeadSequence operation.
+   */
+  public static function systemAuditLedgerHeadSequence(): string
+  {
+    return self::SYSTEM_AUDIT_LEDGER . self::SEPARATOR . 'head_sequence';
+  }
+
+  /**
+   * Handles systemAuditLedgerHeadHash operation.
+   */
+  public static function systemAuditLedgerHeadHash(): string
+  {
+    return self::SYSTEM_AUDIT_LEDGER . self::SEPARATOR . 'head_hash';
+  }
+
+  /**
+   * Handles systemAuditLedgerSequenceCounter operation.
+   */
+  public static function systemAuditLedgerSequenceCounter(): string
+  {
+    return self::SYSTEM_AUDIT_LEDGER . self::SEPARATOR . 'sequence';
+  }
+
+  /**
+   * Handles systemAuditLedgerOrder operation.
+   */
+  public static function systemAuditLedgerOrder(): string
+  {
+    return self::SYSTEM_AUDIT_LEDGER . self::SEPARATOR . 'order';
+  }
+
+  /**
+   * Handles systemAuditAnchor operation.
+   */
+  public static function systemAuditAnchor(string $anchorId): string
+  {
+    return self::SYSTEM_AUDIT_ANCHOR . self::SEPARATOR . $anchorId;
+  }
+
+  /**
+   * Handles systemAuditAnchorIndex operation.
+   */
+  public static function systemAuditAnchorIndex(): string
+  {
+    return self::SYSTEM_AUDIT_ANCHOR . self::SEPARATOR . 'index';
+  }
+
+  /**
+   * Handles systemAuditBlockchainAnchorQueue operation.
+   */
+  public static function systemAuditBlockchainAnchorQueue(): string
+  {
+    return self::SYSTEM_AUDIT_BLOCKCHAIN . self::SEPARATOR . 'anchor_queue';
+  }
+
+  /**
+   * Handles systemAuditVerificationReport operation.
+   * Stores a single JSON verification report keyed by RFC 3339 timestamp.
+   */
+  public static function systemAuditVerificationReport(string $timestamp): string
+  {
+    return self::SYSTEM_AUDIT_VERIFICATION_REPORT . self::SEPARATOR . $timestamp;
+  }
+
+  /**
+   * Sorted set of verification report timestamps (score = unix timestamp).
+   * Used to page through historical verification runs via zrangebyscore.
+   */
+  public static function systemAuditVerificationReportIndex(): string
+  {
+    return self::SYSTEM_AUDIT_VERIFICATION_REPORT . self::SEPARATOR . 'index';
+  }
+
+  /**
+   * Redis pub/sub channel for real-time system audit event fan-out.
+   * Published to by SystemAuditRepository::append(); currently consumed by the
+   * legacy SSE stream and reserved for future fan-out paths.
+   */
+  public static function systemAuditPubsubChannel(): string
+  {
+    return self::SYSTEM_AUDIT_PUBSUB;
   }
 }
 

@@ -8,6 +8,8 @@ use PayCal\Domain\Enums\Currency;
 use PayCal\Domain\Enums\PayFrequency;
 use PayCal\Domain\Enums\Subscription;
 use PayCal\Domain\Enums\Timezone;
+use PayCal\Infrastructure\Audit\SystemAuditRepository;
+use PayCal\Infrastructure\Organization\OrganizationEncryptionService;
 
 /**
  * OrganizationDiscoveryService.php
@@ -157,6 +159,38 @@ final class OrganizationDiscoveryService
     ],
     self::MEMBERSHIP_STATE_REVOKED   => [self::MEMBERSHIP_STATE_ACTIVE => true],
     'withdrawn'                      => [self::MEMBERSHIP_STATE_ACTIVE => true],
+  ];
+
+  /**
+   * Org-level event types that are security-significant enough to be mirrored
+   * into the immutable TheLedger system audit chain (SystemAuditRepository).
+   *
+   * Classification:
+   *   CRITICAL — governance changes, access grants, privilege mutations
+   *   HIGH     — access removal, key management, configuration changes
+   *
+   * Events NOT listed here (invite.sent, access.requested, site.linked,
+   * access.request.notification, org.consent.accepted) remain in org audit
+   * only — they are operational/informational and not SOC2 evidence events.
+   *
+   * @var array<string, string> event_type => 'critical'|'high'
+   */
+  private const LEDGER_EVENTS = [
+    // CRITICAL — CC6.1: new org / access grants / privilege changes
+    'organization.created'         => 'critical',
+    'ownership.transferred'        => 'critical',
+    'relationship.revoked'         => 'critical',
+    'relationship.role_updated'    => 'critical',
+    'access.request.approved'      => 'critical',
+    'invite.accepted'              => 'critical',
+    'invite.bulk_import_committed' => 'critical',
+    // HIGH — CC6.1/CC6.2/CC6.7/CC9.1: access decisions, key mgmt, config
+    'access.request.rejected'      => 'high',
+    'invite.revoked'               => 'high',
+    'relationship.withdrawn'       => 'high',
+    'settings.updated'             => 'high',
+    'org.dek.wrap.bootstrap'       => 'high',
+    'org.dek.wrap.bootstrap.bulk'  => 'high',
   ];
 
   /**
@@ -1882,47 +1916,47 @@ final class OrganizationDiscoveryService
       return false;
     }
 
-    if ($orgId !== '') {
-      $actorRelationship = $this->relationship($orgId, $actorUUID);
-      $ownerRelationship = $this->relationship($orgId, $ownerUUID);
+    if ($orgId === '') {
+      // Without explicit organization context, keep legacy self-only write behavior.
+      return $actorUUID === $ownerUUID;
+    }
 
-      if ([] === $actorRelationship || [] === $ownerRelationship) {
-        return false;
-      }
+    $actorRelationship = $this->relationship($orgId, $actorUUID);
+    $ownerRelationship = $this->relationship($orgId, $ownerUUID);
 
-      if (($actorRelationship['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE
-        || ($ownerRelationship['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE) {
-        return false;
-      }
+    if ([] === $actorRelationship || [] === $ownerRelationship) {
+      return false;
+    }
 
-      if ($this->canManageOrganization($orgId, $actorUUID)) {
-        return true;
-      }
+    if (($actorRelationship['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE
+      || ($ownerRelationship['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE) {
+      return false;
+    }
 
-      $scopeSet = $this->scopeMap((string) ($actorRelationship['scopes'] ?? ''));
-
-      if (isset($scopeSet['all'])) {
-        return true;
-      }
-
-      if (!isset($scopeSet['work.write'])) {
-        return false;
-      }
-
-      if (isset($scopeSet['work.scope.org'])) {
-        return true;
-      }
-
-      if (isset($scopeSet['work.scope.self'])) {
-        return $actorUUID === $ownerUUID;
-      }
-
-      // Legacy bare work.write grants org-wide mutation until relationship scopes are resaved.
+    if ($this->canManageOrganization($orgId, $actorUUID)) {
       return true;
     }
 
-    // Without explicit organization context, keep legacy self-only write behavior.
-    return $actorUUID === $ownerUUID;
+    $scopeSet = $this->scopeMap((string) ($actorRelationship['scopes'] ?? ''));
+
+    if (isset($scopeSet['all'])) {
+      return true;
+    }
+
+    if (!isset($scopeSet['work.write'])) {
+      return false;
+    }
+
+    if (isset($scopeSet['work.scope.org'])) {
+      return true;
+    }
+
+    if (isset($scopeSet['work.scope.self'])) {
+      return $actorUUID === $ownerUUID;
+    }
+
+    // Legacy bare work.write grants org-wide mutation until relationship scopes are resaved.
+    return true;
   }
 
   /** @return array{success: bool, message: string, data: array<string, mixed>} */
@@ -2407,12 +2441,12 @@ final class OrganizationDiscoveryService
     }
 
     $timestamp = date('c');
-      $previousOwnerScopes = implode(',', self::ROLE_SCOPE_PRESETS['coordinator']);
+    $previousOwnerScopes = implode(',', self::ROLE_SCOPE_PRESETS['coordinator']);
 
     $this->setRelationship($orgId, $actorUUID, [
-        'role' => 'coordinator',
+      'role' => 'coordinator',
       'status' => 'active',
-        'scopes' => $previousOwnerScopes,
+      'scopes' => $previousOwnerScopes,
       'transferred_at' => $timestamp,
       'transferred_to' => $targetUUID,
     ]);
@@ -2994,20 +3028,24 @@ final class OrganizationDiscoveryService
     $customJson = array_key_exists('contact_custom_json', $normalizedOverrides)
       ? (string) $normalizedOverrides['contact_custom_json']
       : (string) $existingSettings['contact_custom_json'];
-    if ($customJson !== '') {
-      $decoded = json_decode($customJson, true);
-      if (is_array($decoded)) {
-        foreach ($decoded as $row) {
-          if (!is_array($row) || !array_key_exists('email', $row)) {
-            continue;
-          }
+    if ($customJson === '') {
+      return array_values(array_unique($emails));
+    }
 
-          $candidate = is_scalar($row['email']) ? (string) $row['email'] : '';
-          $clean = InputSanitizer::sanitizeEmail($candidate);
-          if ($clean !== '' && filter_var($clean, FILTER_VALIDATE_EMAIL)) {
-            $emails[] = strtolower($clean);
-          }
-        }
+    $decoded = json_decode($customJson, true);
+    if (!is_array($decoded)) {
+      return array_values(array_unique($emails));
+    }
+
+    foreach ($decoded as $row) {
+      if (!is_array($row) || !array_key_exists('email', $row)) {
+        continue;
+      }
+
+      $candidate = is_scalar($row['email']) ? (string) $row['email'] : '';
+      $clean = InputSanitizer::sanitizeEmail($candidate);
+      if ($clean !== '' && filter_var($clean, FILTER_VALIDATE_EMAIL)) {
+        $emails[] = strtolower($clean);
       }
     }
 
@@ -4317,6 +4355,28 @@ final class OrganizationDiscoveryService
 
     Database::sadd(Keys::ORGANIZATION_AUDIT . ':' . $orgId, $eventID);
 
+    // Mirror security-significant events into the immutable TheLedger chain.
+    // The system audit stream is the authoritative SOC2 evidence ledger; org
+    // events classified as critical or high must appear there for CC6.1/CC6.2/
+    // CC6.7/CC9.1 evidence. Fire-and-forget: ledger failure must not block the
+    // org audit write or the calling business operation.
+    if (isset(self::LEDGER_EVENTS[$eventType])) {
+      try {
+        SystemAuditRepository::append(
+          'org.' . $eventType,
+          $actorUUID,
+          array_merge($normalizedDetails, [
+            'organization_id'   => $orgId,
+            'org_event_id'      => $eventID,
+            'ledger_event_level' => self::LEDGER_EVENTS[$eventType],
+          ])
+        );
+      } catch (\Throwable) {
+        // Intentionally silent: ledger mirroring failure must not disrupt
+        // the underlying org mutation or audit write.
+      }
+    }
+
     OrganizationSignalHooks::onOrganizationAuditEvent([
       'event_id' => $eventID,
       'organization_id' => $orgId,
@@ -4347,6 +4407,35 @@ final class OrganizationDiscoveryService
     }
 
     $this->appendAuditEvent($orgId, $eventType, $actorUUID, $details);
+  }
+
+  public function canTriggerAuditControlTest(string $orgId, string $actorUUID): bool
+  {
+    $orgId = trim(InputSanitizer::sanitizeString($orgId));
+    $actorUUID = trim(InputSanitizer::sanitizeString($actorUUID));
+
+    if ($orgId === '' || $actorUUID === '') {
+      return false;
+    }
+
+    if (null !== $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId)) {
+      return false;
+    }
+
+    return $this->canManageAccess($orgId, $actorUUID) || $this->canManageOrganization($orgId, $actorUUID);
+  }
+
+  /** @return array<string, string> */
+  public function getRelationshipSummary(string $orgId, string $userUUID): array
+  {
+    $orgId = trim(InputSanitizer::sanitizeString($orgId));
+    $userUUID = trim(InputSanitizer::sanitizeString($userUUID));
+
+    if ($orgId === '' || $userUUID === '') {
+      return [];
+    }
+
+    return $this->relationship($orgId, $userUUID);
   }
 
   /** @param array<string, mixed> $data

@@ -28,9 +28,6 @@ final class ExtensionHookBridge
    * @return array<int, mixed>
    */
   #[ExtensionHook('dynamic')]
-  /**
-   * Handles dispatch operation.
-   */
   public static function dispatch(string $hookName, array $payload = []): array
   {
     if (!class_exists(\PayCal\Domain\Extensions\HookBus::class)) {

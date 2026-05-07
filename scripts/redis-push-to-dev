@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/common.sh"
+
+LOCAL_HOST="127.0.0.1"
+LOCAL_PORT="6379"
+DEV_HOST="deploy@dev.paycal.app"
+DEV_REDIS_HOST="127.0.0.1"
+DEV_REDIS_PORT="6379"
+PATTERN="*"
+DRY_RUN=0
+
+usage() {
+  cat <<'EOF'
+Push Redis keys from local Redis to dev Redis.
+
+Usage:
+  scripts/redis-push-to-dev.sh [options]
+
+Options:
+  --pattern <glob>        Redis key pattern to sync (default: *)
+  --local-host <host>     Local Redis host (default: 127.0.0.1)
+  --local-port <port>     Local Redis port (default: 6379)
+  --dev-host <ssh-host>   SSH host for dev (default: deploy@dev.paycal.app)
+  --dev-redis-host <host> Dev Redis host from dev box (default: 127.0.0.1)
+  --dev-redis-port <port> Dev Redis port from dev box (default: 6379)
+  --dry-run               Show counts only, no key transfer
+  -h, --help              Show help
+
+Examples:
+  scripts/redis-push-to-dev.sh --pattern 'user:*'
+  scripts/redis-push-to-dev.sh --pattern 'work:*' --dry-run
+  scripts/redis-push-to-dev.sh --pattern 'webauthn:*'
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --pattern)
+      PATTERN="${2:-}"
+      shift 2
+      ;;
+    --local-host)
+      LOCAL_HOST="${2:-}"
+      shift 2
+      ;;
+    --local-port)
+      LOCAL_PORT="${2:-}"
+      shift 2
+      ;;
+    --dev-host)
+      DEV_HOST="${2:-}"
+      shift 2
+      ;;
+    --dev-redis-host)
+      DEV_REDIS_HOST="${2:-}"
+      shift 2
+      ;;
+    --dev-redis-port)
+      DEV_REDIS_PORT="${2:-}"
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      paycal_log "fatal" "unknown option: $1"
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+paycal_require_cmd redis-cli
+paycal_require_cmd ssh
+paycal_require_cmd mktemp
+paycal_require_cmd base64
+paycal_require_cmd wc
+
+tmpfile="$(mktemp "${TMPDIR:-/tmp}/paycal-redis-push.XXXXXX")"
+cleanup() {
+  rm -f "$tmpfile"
+}
+trap cleanup EXIT
+
+paycal_log "info" "Scanning local Redis keys host=${LOCAL_HOST} port=${LOCAL_PORT} pattern=${PATTERN}"
+
+key_count=0
+while IFS= read -r key; do
+  [[ -z "$key" ]] && continue
+  key_count=$((key_count + 1))
+
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    continue
+  fi
+
+  ttl="$(redis-cli -h "$LOCAL_HOST" -p "$LOCAL_PORT" PTTL "$key")"
+  if [[ "$ttl" -lt 0 ]]; then
+    ttl=0
+  fi
+
+  dump_b64="$(redis-cli --raw -h "$LOCAL_HOST" -p "$LOCAL_PORT" DUMP "$key" | base64)"
+  if [[ -z "$dump_b64" ]]; then
+    paycal_log "warn" "Skipping key with empty DUMP payload: $key"
+    continue
+  fi
+
+  printf '%s\t%s\t%s\n' "$key" "$ttl" "$dump_b64" >> "$tmpfile"
+done < <(redis-cli --raw -h "$LOCAL_HOST" -p "$LOCAL_PORT" --scan --pattern "$PATTERN")
+
+if [[ "$key_count" -eq 0 ]]; then
+  paycal_log "warn" "No keys matched pattern=${PATTERN}; nothing to sync"
+  exit 0
+fi
+
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  paycal_log "info" "Dry-run only: matched ${key_count} keys"
+  exit 0
+fi
+
+payload_count="$(wc -l < "$tmpfile" | tr -d ' ')"
+paycal_log "info" "Prepared ${payload_count} keys for transfer to ${DEV_HOST}"
+
+remote_cmd="set -euo pipefail; \
+if ! command -v redis-cli >/dev/null 2>&1; then echo '[fatal] redis-cli not found on dev host' >&2; exit 1; fi; \
+synced=0; \
+while IFS=$'\\t' read -r key ttl dump_b64; do \
+  [[ -z \"\${key}\" ]] && continue; \
+  [[ -z \"\${dump_b64}\" ]] && continue; \
+  if [[ \"\${ttl}\" =~ ^-?[0-9]+$ ]]; then [[ \"\${ttl}\" -lt 0 ]] && ttl=0; else ttl=0; fi; \
+  printf '%s' \"\${dump_b64}\" | base64 --decode | redis-cli -x -h '${DEV_REDIS_HOST}' -p '${DEV_REDIS_PORT}' RESTORE \"\${key}\" \"\${ttl}\" REPLACE >/dev/null; \
+  synced=\$((synced + 1)); \
+done; \
+echo \"[ok] synced \${synced} keys to dev redis\""
+
+cat "$tmpfile" | ssh -o StrictHostKeyChecking=yes "$DEV_HOST" "$remote_cmd"
+
+paycal_log "info" "Redis push complete"

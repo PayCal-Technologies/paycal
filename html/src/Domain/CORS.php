@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 namespace PayCal\Domain;
+
 use PayCal\Domain\Config\Environment;
 
 /**
@@ -39,9 +40,9 @@ class CORS
    */
   public static function handleORIGIN(): void
   {
-    $origin = $_SERVER['SERVER_NAME'] ?? '';
-    if ('paycal.app' === $origin || 'www.paycal.app' === $origin) {
-      header("Access-Control-Allow-Origin: https://{$origin}");
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    if ('https://paycal.app' === $origin || 'https://www.paycal.app' === $origin) {
+      header("Access-Control-Allow-Origin: {$origin}");
       header('Vary: Origin');
     }
   }
@@ -55,9 +56,11 @@ class CORS
   public static function handleOPTIONS(): void
   {
     if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
+      http_response_code(204);
       header('Access-Control-Allow-Origin: '.Environment::appDomain());
       header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
       header('Access-Control-Allow-Headers: Content-Type, X-Resource-ID');
+      exit;
     }
   }
 

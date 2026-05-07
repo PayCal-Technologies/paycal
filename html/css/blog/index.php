@@ -10,7 +10,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 ?>
 
 .blog_page {
-  width: min(74rem, calc(100% - 2.5rem));
+  width: min(92vw, 88rem);
   margin: 2rem auto;
   padding: 1.5rem;
   border: 1px solid var(--panel-border);
@@ -28,17 +28,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   color: var(--color-primary);
 }
 
-.blog_breadcrumbs {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
-
-.blog_breadcrumbs a {
-  text-decoration: none;
-}
+/* Note: .blog_breadcrumbs styles are now in html/css/common/index.php with ticket stub design */
 
 .blog_deck {
   margin: 0;

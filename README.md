@@ -6,10 +6,10 @@ PayCal™ is a payroll tracking platform focused on transparency, accessibility,
 
 The goal is simple: make pay easier to understand while keeping personal financial data private.
 
-Latest documented release: **v1.049.000**
+Latest documented release: **v1.054.000**
 
 [![Test
-Suite](https://img.shields.io/badge/tests-1479%20listed-blue)](html/tests/)
+Suite](https://img.shields.io/badge/tests-1565%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -172,11 +172,11 @@ PayCal organizes functionality into clearly scoped components.
 
 # Test Coverage
 
-Suite inventory (as of 2026-04-09):
+Suite inventory (as of 2026-04-12):
 
-- **1,479 listed tests**
-- **161 test files**
-- **70 Unit**, **53 Integration**, **30 Contract**, **2 Manual**
+- **1,509 listed tests**
+- **163 test files**
+- **77 Unit**, **54 Integration**, **30 Contract**, **2 Manual**
 
 Latest validation snapshot (2026-03-26):
 
@@ -196,7 +196,7 @@ Latest validation snapshot (2026-03-26):
 | Contract tests (30 files) | API and persistence boundary guarantees |
 | Manual tests (2 files) | Operator verification scripts for complex scenarios |
 
-Current inventory reflects the active PHPUnit suite layout in `phpunit.xml` as re-evaluated on 2026-04-09 via `./vendor/bin/phpunit --configuration phpunit.xml --list-tests`.
+Current inventory reflects the active PHPUnit suite layout in `phpunit.xml` as re-evaluated on 2026-04-12 via `./vendor/bin/phpunit --configuration phpunit.xml --list-tests`.
 
 ### Run Tests
 
@@ -347,6 +347,31 @@ bash scripts/native-fix-redis-launchagent.sh
 ---
 
 # Recent Releases
+
+## v1.053.000 (2026-04-18)
+
+- Added live calendar earnings hover tooltip showing per-day pay totals inline on the calendar grid.
+- Applied breadcrumb styling enhancements: ticket-stub shaped borders, clip-path fix removing unintended left notches on leading elements, and increased box-shadow prominence (2px → 3px).
+
+## v1.052.000 (2026-04-15)
+
+- Added safe formatter release guardrails: `format:check`, `format:fix`, and `quality:semantic-diff` composer scripts, plus `scripts/paycal checks:semantic-diff` support.
+- Added `scripts/check-semantic-diff.php` to detect suspicious formatter-like rewrites such as guard collapse, temp-var narrowing removal, call-signature mutation, and control-flow simplification.
+- Hardened `scripts/hooks/pre-commit.sh` with staged PHP lint, staged semantic diff scanning, existing PHPStan/docblock gates, safe formatter dry-run enforcement, and reliable temp-file cleanup.
+- Added `docs/engineering/formatter-policy.md` as the canonical policy document for allowed autofix, forbidden autofix, protected shapes, and review rules.
+- Wired formatter policy and semantic diff enforcement into GitHub Actions for PHPUnit and PHPStan so CI enforces the same style-vs-semantics boundary as local hooks.
+
+## v1.051.000 (2026-04-11)
+
+- Added settings page jump-navigation with anchor links to all 6 panels (Calendar, Style, Audio, Passkeys, Security, Data Portability) using token-based CSS variables.
+- Added import commit confirmation gate: "Commit Import" now opens a confirmation dialog displaying staged record counts before destructive write.
+
+## v1.050.000 (2026-04-11)
+
+- Added account data portability (export/import) to settings page with checksummed schema-versioned JSON payloads, staging via Redis, and three supporting integration tests.
+- Removed legacy `wrapped_dek_passkey` single-field migration; tightened DEK credential resolution to require active session credential match.
+- Hardened Sync Dev script with split `LOCAL_PATH`/`REMOTE_PATH` and corrected `.vscode/tasks.json` relative path.
+- Applied PHPStan Level 9 fixes across `SettingsController`, `EarningsController`, `SitesController`, and `Earnings`.
 
 ## v1.049.000 (2026-04-09)
 

@@ -15,11 +15,18 @@ use PayCal\Domain\Enums\PayFrequency;
  * - Grid shape, weekday labeling, and date-boundary behavior are UI contracts
  *   consumed by calendar rendering code and APIs.
  *
+ * Architectural role:
+ * - Reusable domain helper for calendar-grid generation, month navigation, and
+ *   date normalization used by page and API flows.
+ * - Encapsulates calendar math outside the HTTP layer.
+ *
  * @category   Domain
  * @package    PayCal\Domain
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 /**
  * Calendar grid and navigation helper.

@@ -5,7 +5,7 @@ namespace PayCal\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use PayCal\Domain\Database;
 use PayCal\Domain\Constants\Keys;
-use PayCal\Domain\StripeBillingQueueMonitor;
+use PayCal\Infrastructure\Queue\StripeBillingQueueMonitor;
 
 /**
  * StripeBillingQueueMonitorTest.php

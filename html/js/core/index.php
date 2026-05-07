@@ -189,7 +189,7 @@ const PayCalCore = (() => {
   /** INIT */
   const config = {
     pc_api               : '<?php echo \PayCal\Domain\Environment::appURL('api/v1'); ?>',
-    USER_LOCALE          : '<?php echo $user->language; ?>',
+    USER_LOCALE          : '<?php echo htmlspecialchars((string) (($user->locale ?? '') !== '' ? $user->locale : $user->language), ENT_QUOTES, 'UTF-8'); ?>',
     CAPSLOCK_ACTIVE      : '<?php echo htmlspecialchars($i18n['CAPSLOCK_ACTIVE'], ENT_QUOTES, 'UTF-8'); ?>',
     KEYBOARD_SHORTCUTS   : '<?php echo htmlspecialchars($i18n['KEYBOARD_SHORTCUTS'], ENT_QUOTES, 'UTF-8'); ?>',
     OPENED_DIALOG        : '<?php echo htmlspecialchars($i18n['OPENED_DIALOG'], ENT_QUOTES, 'UTF-8'); ?>',
@@ -422,7 +422,7 @@ const PayCalCore = (() => {
       if (el) trustLayer.setHTML(el, config.CAPSLOCK_ACTIVE);
     });
     showToast(config.CAPSLOCK_ACTIVE);
-    const icon = getElement("capslock_icon");
+    const icon = document.getElementById("capslock_icon");
     if (icon) icon.classList.add('visibility-visible');
   }
 
@@ -430,8 +430,22 @@ const PayCalCore = (() => {
     queryAll("center.status_message").forEach(el => {
       if (el) trustLayer.setHTML(el, "&nbsp;");
     });
-    const icon = getElement("capslock_icon");
+    const icon = document.getElementById("capslock_icon");
     if (icon) icon.classList.remove('visibility-visible');
+  }
+
+  function warnNotificationsPollingError(error) {
+    if (error instanceof Error) {
+      PW.warn(error.message || 'Organizations notifications polling failed.');
+      return;
+    }
+
+    if (typeof error === 'string' && error.trim() !== '') {
+      PW.warn(error);
+      return;
+    }
+
+    PW.warn('Organizations notifications polling failed.');
   }
 
   function ensureDialogChrome(dialog) { a11y.ensureDialogChrome(dialog); }
@@ -1855,6 +1869,8 @@ const PayCalCore = (() => {
         `);
       };
 
+      const legacyWsHttpBase = '/ws/';
+
       const pollDashboardHeartbeat = async () => {
         if (!heartbeatContentEl || heartbeatInFlight) {
           return;
@@ -1863,7 +1879,7 @@ const PayCalCore = (() => {
         heartbeatInFlight = true;
 
         try {
-          const response = await fetch('/ws/', {
+          const response = await fetch(legacyWsHttpBase, {
             method: 'GET',
             credentials: 'same-origin',
             cache: 'no-store',
@@ -2168,7 +2184,7 @@ const PayCalCore = (() => {
         params.set('since_signature', orgNotificationsSignature);
       }
 
-      const response = await fetch(`/ws/?${params.toString()}`, {
+      const response = await fetch(`${legacyWsHttpBase}?${params.toString()}`, {
         method: 'GET',
         credentials: 'same-origin',
         cache: 'no-store',
@@ -2188,19 +2204,19 @@ const PayCalCore = (() => {
     };
 
     const startOrganizationsNotificationsPolling = () => {
-      pollOrganizationsNotifications().catch((error) => PW.warn(error));
+      pollOrganizationsNotifications().catch((error) => warnNotificationsPollingError(error));
       if (orgNotificationsIntervalId !== null) {
         clearInterval(orgNotificationsIntervalId);
         orgNotificationsIntervalId = null;
       }
       orgNotificationsIntervalId = window.setInterval(() => {
-        pollOrganizationsNotifications().catch((error) => PW.warn(error));
+        pollOrganizationsNotifications().catch((error) => warnNotificationsPollingError(error));
       }, 60000);
     };
 
     startOrganizationsNotificationsPolling();
     orgNotificationsUpdateHandler = () => {
-      pollOrganizationsNotifications().catch((error) => PW.warn(error));
+      pollOrganizationsNotifications().catch((error) => warnNotificationsPollingError(error));
     };
     window.addEventListener('paycal:notifications-updated', orgNotificationsUpdateHandler);
 

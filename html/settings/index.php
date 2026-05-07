@@ -771,45 +771,6 @@ echo Render::dialog([
 
     <br>
 
-    <div class="flex f_baseline w100">
-      <label for="language_picker" class="w25"><?php echo settings_index_i18n('LANG'); ?></label>
-      <select id="language_picker" name="language" class="w75" aria-label="<?php echo settings_index_i18n('LANGUAGE_PICKER'); ?>" data-hover-help="Language updates labels and UI copy throughout PayCal.">
-        <option value="choose" selected><?php echo settings_index_i18n('CHOOSE_A_LANGUAGE'); ?></option>
-        <option value="nl"<?php if ($currentLanguage === 'nl') {
-          echo ' selected';
-        } ?>><?php echo settings_index_i18n('DUTCH'); ?></option>
-        <option value="en"<?php if ($currentLanguage === 'en') {
-          echo ' selected';
-        } ?>><?php echo settings_index_i18n('ENGLISH'); ?></option>
-        <option value="fr"<?php if ($currentLanguage === 'fr') {
-          echo ' selected';
-        } ?>><?php echo settings_index_i18n('FRENCH'); ?></option>
-        <option value="de"<?php if ($currentLanguage === 'de') {
-          echo ' selected';
-        } ?>><?php echo settings_index_i18n('GERMAN'); ?></option>
-        <option value="hi"<?php if ($currentLanguage === 'hi') {
-          echo ' selected';
-        } ?>><?php echo settings_index_i18n('HINDI'); ?></option>
-        <option value="it"<?php if ($currentLanguage === 'it') {
-          echo ' selected';
-        } ?>><?php echo settings_index_i18n('ITALIAN'); ?></option>
-        <option value="pt"<?php if ($currentLanguage === 'pt') {
-          echo ' selected';
-        } ?>><?php echo settings_index_i18n('PORTUGUESE'); ?></option>
-        <option value="es"<?php if ($currentLanguage === 'es') {
-          echo ' selected';
-        } ?>><?php echo settings_index_i18n('SPANISH'); ?></option>
-        <option value="tl"<?php if ($currentLanguage === 'tl') {
-          echo ' selected';
-        } ?>><?php echo settings_index_i18n('TAGALOG'); ?></option>
-        <option value="tr"<?php if ($currentLanguage === 'tr') {
-          echo ' selected';
-        } ?>><?php echo settings_index_i18n('TURKISH'); ?></option>
-      </select>
-    </div>
-
-    <br>
-
     <div class="flex f_baseline w100" id="text">
       <label class="w25"><?php echo settings_index_i18n('TEXT'); ?></label>
       <div class="w75">
@@ -934,7 +895,7 @@ echo Render::dialog([
       <div class="security_passkey_actions">
         <button id="add_passkey_button" type="button" class="btn btn_primary" data-hover-help="Add another passkey before replacing devices to avoid lockout."><?php echo settings_index_i18n('SETTINGS_ADD_DEVICE'); ?></button>
       </div>
-      <div id="add_passkey_status" class="status_message passkey_action_status" role="status" aria-live="polite" aria-atomic="true"></div>
+      <div id="add_passkey_status" class="status_message status_message_callout passkey_action_status" role="status" aria-live="polite" aria-atomic="true"></div>
     </div>
   </div>
 </section>
@@ -999,7 +960,7 @@ echo Render::dialog([
         <input id="emergency_signout_window_ms" name="emergency_signout_window_ms" type="range" min="200" max="2000" step="200" value="<?php echo htmlspecialchars((string) ($user->emergency_signout_window_ms ?? '600'), ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo settings_index_i18n('SETTINGS_SECURITY_EMERGENCY_WINDOW_ARIA'); ?>" data-hover-help="<?php echo settings_index_i18n('SETTINGS_SECURITY_EMERGENCY_WINDOW_HOVER'); ?>">
         <span class="security_slider_edge">2.0s</span>
       </div>
-      <p id="emergency_signout_hint" class="help_text">Press ESC x3 in <span id="emergency_signout_window_ms_value"><?php echo htmlspecialchars(number_format(((int) ($user->emergency_signout_window_ms ?? '600')) / 1000, 1), ENT_QUOTES, 'UTF-8'); ?></span>s to sign out to a safe site.</p>
+      <p id="emergency_signout_hint" class="help_text">Press ESC x3 in <span id="emergency_signout_window_ms_value"><?php echo htmlspecialchars(Strings::formatLocalizedNumber(((int) ($user->emergency_signout_window_ms ?? '600')) / 1000, 1, 1), ENT_QUOTES, 'UTF-8'); ?></span>s to sign out to a safe site.</p>
     </div>
 
     <input type="hidden" id="session_timeout" name="session_timeout" value="<?php echo htmlspecialchars((string) ($user->session_timeout ?? '3600'), ENT_QUOTES, 'UTF-8'); ?>">

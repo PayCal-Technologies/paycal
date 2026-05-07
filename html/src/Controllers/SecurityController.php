@@ -6,12 +6,40 @@ use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
-use PayCal\Domain\SecurityLog;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 
 /**
- * SecurityController
+ * SecurityController.php
  *
- * Security endpoints for browser-surface telemetry ingestion.
+ * Purpose: Security-event ingestion controller for browser telemetry and
+ * client-reported signals that feed audit and abuse-detection pipelines.
+ *
+ * Developer notes:
+ * - Payload clipping and normalization here protect downstream logging paths.
+ * - Keep this controller narrowly focused on intake and bounded shaping.
+ *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
+ * @category   Controllers
+ * @package    PayCal\Controllers
+ * @subpackage HTTP
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
+ * Security telemetry API surface.
+ *
+ * Responsibilities:
+ * - Accept browser-surface security telemetry and normalize bounded payloads.
+ * - Forward auditable client-reported security signals into downstream logging.
+ * - Keep intake behavior narrowly scoped to ingestion rather than policy decisions.
  */
 final class SecurityController
 {

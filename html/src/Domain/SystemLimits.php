@@ -22,9 +22,6 @@ use PayCal\Domain\Config\SystemConfig;
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
  */
-
-
-
 /**
  * System-limit facade.
  *

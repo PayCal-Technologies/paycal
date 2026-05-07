@@ -16,6 +16,19 @@ use PayCal\Domain\Attributes\ExtensionCapability;
  *   otherwise.
  * - Route/nav/page checks here intentionally enforce least exposure for admin
  *   endpoints and links.
+ *
+ * Architectural role:
+ * - Reusable domain policy adapter for admin-surface enablement, route gating,
+ *   and navigation visibility decisions.
+ * - Encapsulates admin capability policy outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Core
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 /**
  * Admin surface policy adapter.

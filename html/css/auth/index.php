@@ -132,7 +132,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     padding: 0.75rem;
     border-radius: 10px;
     border: 1px solid transparent;
-    font-size: 0.95rem;
+    font-size: var(--text, 1.125rem);
     line-height: 1.35;
   }
 
@@ -160,7 +160,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     background: rgba(131, 31, 47, 0.95);
     color: #ffe8ec;
     padding: 0.72rem 0.9rem;
-    font-size: 0.94rem;
+    font-size: var(--text, 1.125rem);
     line-height: 1.35;
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.38);
     opacity: 0;
@@ -191,6 +191,52 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     outline: 2px solid rgba(255, 255, 255, 0.9);
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  .auth-feedback-banner-actions {
+    margin-top: 0.6rem;
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+  }
+
+  .auth-feedback-banner-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 8px;
+    background: rgba(10, 10, 10, 0.35);
+    color: #ffffff;
+    padding: 0.45rem 0.55rem;
+    font: inherit;
+    line-height: 1.2;
+  }
+
+  .auth-feedback-banner-input::placeholder {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .auth-feedback-banner-input:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.92);
+    outline-offset: 1px;
+  }
+
+  .auth-feedback-banner-btn {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    padding: 0.45rem 0.65rem;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .auth-feedback-banner-btn:hover,
+  .auth-feedback-banner-btn:focus-visible {
+    background: rgba(255, 255, 255, 0.26);
   }
 
   .auth-card {
@@ -263,7 +309,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
   .auth-panel .status {
     margin-top: 0.5rem;
-    font-size: 0.92rem;
+    font-size: var(--text, 1.125rem);
     color: var(--text-1);
   }
 
@@ -320,12 +366,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     margin-bottom: 0.2rem;
     color: var(--text-1);
     font-weight: 700;
-    font-size: 0.92rem;
+    font-size: var(--text, 1.125rem);
     letter-spacing: 0.01em;
   }
 
   .auth-panel p {
     color: var(--text-1);
+    font-size: var(--text, 1.125rem);
     line-height: 1.45;
     margin: 0.5rem 0;
   }
@@ -334,8 +381,38 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     text-align: center;
   }
 
+  .auth-panel .auth-recover-link {
+    text-align: center;
+    margin: 1rem 0 1rem;
+  }
+
+  .auth-panel .auth-recover-divider {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 0.85rem 0 0.75rem;
+  }
+
+  .auth-panel .auth-recover-link a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
   .auth-panel a {
     color: #60cdff;
+    padding: 0;
+    text-underline-offset: 2px;
+  }
+
+  .auth-panel a:hover,
+  .auth-panel a:active,
+  .auth-panel a:focus-visible,
+  .auth-panel .btn-link:hover,
+  .auth-panel .btn-link:active,
+  .auth-panel .btn-link:focus-visible {
+    background: transparent;
+    color: #60cdff;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
     text-underline-offset: 2px;
   }
 
@@ -351,7 +428,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     padding: 0.7rem 0.8rem;
     outline: none;
     transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
-    font-size: 0.98rem;
+    font-size: var(--text, 1.125rem);
   }
 
   .auth-panel input::placeholder {
@@ -455,6 +532,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 2px;
+    -webkit-tap-highlight-color: transparent;
   }
 
   @media (max-width: 560px) {

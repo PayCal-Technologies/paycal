@@ -7,8 +7,6 @@
  *   import A11yModule from '/js/core/a11y.js';
  */
 
-import PW from '/js/phantomwing/';
-
 const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, configObj) => (() => {
 
   /**

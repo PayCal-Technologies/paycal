@@ -93,7 +93,8 @@ final class ChainVerifier
     $payloadHash = hash('sha256', $canonical);
     $chainHash = hash('sha256', $prevHash . $payloadHash);
 
-    if ($chainHash !== $period['chainHash']) {
+    $storedChainHash = $period['chainHash'] ?? '';
+    if (!is_string($storedChainHash) || !hash_equals($storedChainHash, $chainHash)) {
       return false;
     }
 

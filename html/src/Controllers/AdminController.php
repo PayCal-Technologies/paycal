@@ -3,19 +3,20 @@
 namespace PayCal\Controllers;
 
 use PayCal\Domain\Attributes\Route;
-use PayCal\Domain\CapabilityTokenService;
+use PayCal\Infrastructure\Auth\CapabilityTokenService;
 use PayCal\Domain\Enums\AuthLevel;
 use PayCal\Domain\Authentication;
 use PayCal\Domain\AdminSurface;
 use PayCal\Domain\Database;
 use PayCal\Domain\Enums\HttpStatus;
+use PayCal\Domain\Log;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\InvalidArgumentException;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Language;
 use PayCal\Domain\Money;
 use PayCal\Domain\RequestGuard;
-use PayCal\Domain\RedisReliabilityService;
+use PayCal\Infrastructure\Resilience\RedisReliabilityService;
 use PayCal\Domain\Response;
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\TaxBracketCollection;
@@ -37,11 +38,19 @@ use PayCal\Domain\ValueError;
  * - Prefer domain/service helpers for durable business rules so admin actions
  *   do not become alternate policy paths.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 
@@ -176,7 +185,7 @@ class AdminController
     UserRepository::setUser($userUUID, $user->password_hash, $email, $authLevel, $fullName, $lastSessionHash, $phone);
 
     if ($previousAuthLevel !== $authLevel->value) {
-      \PayCal\Domain\SystemAuditRepository::append('user.auth_level.changed', $actor->user_uuid, [
+      \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.auth_level.changed', $actor->user_uuid, [
         'target_uuid'    => $userUUID,
         'previous_level' => $previousAuthLevel,
         'new_level'      => $authLevel->value,
@@ -260,7 +269,7 @@ class AdminController
     $deletedAuthLevel = (string) ($userData['auth_level'] ?? '');
     self::purgeUserData($userUUID, $email, $newEmail);
 
-    \PayCal\Domain\SystemAuditRepository::append('user.account.deleted', User::currentUUID(), [
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.account.deleted', User::currentUUID(), [
       'target_uuid'  => $userUUID,
       'target_email' => $email,
       'auth_level'   => $deletedAuthLevel,
@@ -328,6 +337,10 @@ class AdminController
     // Reload Redis for this language
     $this->reloadLanguage($lang);
 
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.languages.updated', User::currentUUID(), [
+      'lang' => $lang,
+    ]);
+
     Response::success('Language file updated successfully.', [], HttpStatus::HTTP_OK);
   }
 
@@ -372,6 +385,10 @@ class AdminController
 
     // Store in Redis
     Database::set(Keys::SYSTEM . ':invite_code', $inviteCode);
+
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.settings.invite_code_updated', User::currentUUID(), [
+      'invite_code_length' => (string) strlen($inviteCode),
+    ]);
 
     Response::success('Invite code updated successfully.', [], HttpStatus::HTTP_OK);
   }
@@ -442,6 +459,10 @@ class AdminController
       Database::hset(Keys::SYSTEM . ':tax_brackets', [
 				'canada:federal' => $encoded
 			]);
+      \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.tax_brackets.updated', User::currentUUID(), [
+        'jurisdiction'  => 'canada:federal',
+        'bracket_count' => (string) count($brackets),
+      ]);
       Response::success('Federal tax brackets updated successfully.', [], HttpStatus::HTTP_OK);
     } catch (\InvalidArgumentException $e) {
       Response::error('Invalid bracket data: '.$e->getMessage(), [], HttpStatus::HTTP_BAD_REQUEST);
@@ -533,6 +554,10 @@ class AdminController
       Database::hset(Keys::SYSTEM . ':tax_brackets', [
 				"canada:{$province}" => $encoded
 			]);
+      \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.tax_brackets.updated', User::currentUUID(), [
+        'jurisdiction'  => 'canada:' . $province,
+        'bracket_count' => (string) count($brackets),
+      ]);
       Response::success("Provincial tax brackets for {$province} updated successfully.", [], HttpStatus::HTTP_OK);
     } catch (\InvalidArgumentException $e) {
       Response::error('Invalid bracket data: '.$e->getMessage(), [], HttpStatus::HTTP_BAD_REQUEST);
@@ -620,6 +645,11 @@ class AdminController
       $message .= ' ('.$result['warning'].')';
     }
 
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.system_limit.updated', User::currentUUID(), [
+      'key'   => $key,
+      'value' => (string) $result['value'],
+    ]);
+
     Response::success($message, ['value' => $result['value']], HttpStatus::HTTP_OK);
   }
 
@@ -665,6 +695,10 @@ class AdminController
 
     $schema = SystemConfig::getSchema();
     $defaultValue = $schema[$key]['default'] ?? null;
+
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.system_limit.reset', User::currentUUID(), [
+      'key' => $key,
+    ]);
 
     Response::success('Limit reset to default', ['value' => $defaultValue], HttpStatus::HTTP_OK);
   }
@@ -753,6 +787,7 @@ class AdminController
     }
 
     SystemConfig::resetAll();
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.system_limits.reset_all', User::currentUUID(), []);
     Response::success('All limits reset to defaults', [], HttpStatus::HTTP_OK);
   }
 
@@ -772,8 +807,25 @@ class AdminController
         HttpStatus::HTTP_OK
       );
     } catch (\Throwable $e) {
-      Response::error('[Admin] Failed to load Redis reliability snapshot.', ['error' => $e->getMessage()], HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+      Log::error('[Admin] getRedisReliabilityStatus exception: ' . $e->getMessage());
+      Response::error('[Admin] Failed to load Redis reliability snapshot.', [], HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
     }
+  }
+
+  /**
+   * AST graph/data API passthrough.
+   * Delegates to the existing admin AST data handler implementation.
+   */
+  #[Route('admin/ast', ['GET', 'POST'])]
+  public function astData(): void
+  {
+    if (!$this->authorized) {
+      Response::error('Unauthorized.', [], HttpStatus::HTTP_UNAUTHORIZED);
+
+      return;
+    }
+
+    require __DIR__ . '/../../admin/ast/data/index.php';
   }
 
   /**
@@ -818,6 +870,11 @@ class AdminController
 
     RedisReliabilityService::setMutationFreeze($enabled === '1', (string) $reason);
 
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.redis.mutation_freeze.updated', User::currentUUID(), [
+      'enabled' => $enabled,
+      'reason'  => (string) $reason,
+    ]);
+
     Response::success(
       '[Admin] Redis mutation freeze updated.',
       [
@@ -847,6 +904,10 @@ class AdminController
     }
     RedisReliabilityService::openCircuitBreaker((string) $reason);
 
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.redis.circuit_breaker.opened', User::currentUUID(), [
+      'reason' => (string) $reason,
+    ]);
+
     Response::success('[Admin] Redis circuit breaker opened.', ['reason' => (string) $reason], HttpStatus::HTTP_OK);
   }
 
@@ -864,6 +925,7 @@ class AdminController
     }
 
     RedisReliabilityService::resetCircuitBreaker();
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.redis.circuit_breaker.reset', User::currentUUID(), []);
     Response::success('[Admin] Redis circuit breaker reset.', [], HttpStatus::HTTP_OK);
   }
 

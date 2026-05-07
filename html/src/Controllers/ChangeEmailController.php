@@ -6,38 +6,51 @@ use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\Authentication;
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Database;
-use PayCal\Domain\EmailChangeTransaction;
+use PayCal\Infrastructure\Transaction\EmailChangeTransaction;
 use PayCal\Domain\EmailGarum;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
-use PayCal\Domain\SecurityLog;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Domain\User;
 use PayCal\Domain\UserRepository;
 
 /**
  * ChangeEmailController.php
  *
- * Purpose: Handle secure email change with dual verification.
+ * Purpose: Secure email-change controller for dual-verification flows, resend
+ * handling, and cancellation of in-flight address change transactions.
  *
- * Endpoints:
- * - POST /api/v1/account/change-email/start - Initiate email change with passkey step-up
- * - POST /api/v1/account/change-email/verify - Verify both old and new email codes
- * - POST /api/v1/account/change-email/resend - Resend verification codes
- * - POST /api/v1/account/change-email/cancel - Cancel email change transaction
+ * Developer notes:
+ * - Email-change flows are identity-sensitive and should preserve step-up,
+ *   dual-proof, and anti-enumeration behavior.
+ * - Keep this controller focused on HTTP orchestration and delegate durable
+ *   transaction rules to EmailChangeTransaction and related domain services.
  *
- * PHP version 8.4.16
- *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
  *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
+ * Change-email API surface.
+ *
+ * Responsibilities:
+ * - Start, verify, resend, and cancel secure email-change transactions.
+ * - Enforce bounded request validation at the controller boundary.
+ * - Preserve transaction integrity through domain-backed verification flows.
  */
 final class ChangeEmailController
 {
@@ -277,6 +290,12 @@ final class ChangeEmailController
         'new_email' => $txn->getNewEmail(),
         'txn_id' => $txnId,
       ]);
+      try {
+        \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.email.changed', $user->user_uuid, [
+          'txn_id' => $txnId,
+        ]);
+      } catch (\Throwable) {
+      }
 
       // Send confirmation emails
       EmailGarum::sendEmailChangeConfirmation($txn->getOldEmail(), $user->full_name, $txn->getNewEmail(), 'old');

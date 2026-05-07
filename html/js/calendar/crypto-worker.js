@@ -14,6 +14,7 @@ const decoder = new TextDecoder();
  * This replaces the persistent fingerprint with a per-session random token.
  * Token is discarded on DEK lock, creating no long-term correlation.
  */
+// eslint-disable-next-line no-unused-vars -- reserved for DEK initialization session-token wiring
 function generateSessionDiagnosticToken() {
   const randomBytes = crypto.getRandomValues(new Uint8Array(32));
   return bytesToB64(randomBytes);
@@ -39,20 +40,6 @@ function b64ToBytes(b64) {
 
 function bytesToB64(bytes) {
   return btoa(String.fromCharCode(...bytes));
-}
-
-function concatBytes(...arrays) {
-  const total = arrays.reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
-  const out = new Uint8Array(total);
-  let offset = 0;
-  for (const arr of arrays) {
-    if (!arr || arr.length === 0) {
-      continue;
-    }
-    out.set(arr, offset);
-    offset += arr.length;
-  }
-  return out;
 }
 
 function withTimeout(promise, timeoutMs, label) {
@@ -133,9 +120,14 @@ async function derivePasskeyKEK(credentialId, userId, saltBase64, derivationMode
       3000,
       'HKDF deriveKey'
     );
-  } catch {
+  } catch (deriveKeyErr) {
+    // deriveKey timed out or failed: fall back to deriveBits + importKey.
+    // Cryptographically identical: same HKDF-SHA-256 params, same 256-bit AES-GCM key.
+    // This path exists solely for a documented WebCrypto Worker bug in some Safari/WebKit builds
+    // where deriveKey hangs indefinitely while deriveBits succeeds.
+    // console.error is intentional: this path must never fire silently.
+    console.error('[CryptoWorker] HKDF deriveKey unavailable, using deriveBits fallback. Browser may have a known WebCrypto Worker bug:', deriveKeyErr?.message);
     try {
-      // Deterministic fallback #1: derive raw bits then import as AES-GCM key.
       const keyBits = await withTimeout(
         crypto.subtle.deriveBits(hkdfParams, ikm, 256),
         3000,

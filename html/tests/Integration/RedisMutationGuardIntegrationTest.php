@@ -4,7 +4,7 @@ namespace Tests\Integration;
 
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Database;
-use PayCal\Domain\RedisReliabilityService;
+use PayCal\Infrastructure\Resilience\RedisReliabilityService;
 use PHPUnit\Framework\TestCase;
 
 final class RedisMutationGuardIntegrationTest extends TestCase
@@ -200,11 +200,11 @@ final class RedisMutationGuardIntegrationTest extends TestCase
 
   public function testDeleteAccountBlockedWhenMutationFreezeEnabled(): void
   {
+    $session = $this->createAuthenticatedSession();
     RedisReliabilityService::setMutationFreeze(true, 'integration-test-freeze');
-    $_POST['confirm_phrase'] = 'PLEASE DELETE';
 
     try {
-      $decoded = $this->runControllerCall('\\PayCal\\Controllers\\SettingsController', 'deleteAccount', 'POST');
+      $decoded = $this->runControllerCall('\\PayCal\\Controllers\\SettingsController', 'deleteAccount', 'POST', $session['sessionHash']);
 
       $this->assertSame('error', $decoded['status'] ?? null);
       $this->assertStringContainsString('reliability guard blocked mutation', strtolower((string) ($decoded['message'] ?? '')));
@@ -212,7 +212,7 @@ final class RedisMutationGuardIntegrationTest extends TestCase
       $this->assertIsArray($guard);
       $this->assertSame('MUTATION_FREEZE', $guard['code'] ?? null);
     } finally {
-      unset($_POST['confirm_phrase']);
+      $this->cleanupAuthenticatedSession($session['userUUID'], $session['sessionHash']);
     }
   }
 }

@@ -6,14 +6,14 @@ use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\Authentication;
 use PayCal\Domain\Database;
 use PayCal\Domain\Earnings;
-use PayCal\Domain\EarningsCacheService;
 use PayCal\Domain\EarningsDailyExtensionBridge;
+use PayCal\Infrastructure\Cache\EarningsCacheService;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Log;
 use PayCal\Domain\Money;
 use PayCal\Domain\OrganizationDiscoveryService;
-use PayCal\Domain\OrganizationEncryptionService;
+use PayCal\Infrastructure\Organization\OrganizationEncryptionService;
 use PayCal\Domain\Enums\PayFrequency;
 use PayCal\Domain\PayPeriods;
 use PayCal\Domain\Response;
@@ -27,6 +27,7 @@ use PayCal\Domain\Taxes;
 use PayCal\Domain\User;
 use PayCal\Domain\Work;
 use PayCal\Domain\WorkEntry;
+use PayCal\Domain\Xlsx;
 use PayCal\Observability\Lens;
 
 /**
@@ -45,11 +46,19 @@ use PayCal\Observability\Lens;
  * - Encryption unwrap/bootstrap logic here is security-sensitive; avoid adding
  *   alternate bypass paths in controller code.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 /**
@@ -159,33 +168,35 @@ class EarningsController
 
     // Calculate gross if missing by using decrypted component fields.
     $hasGrossAfterMerge = isset($merged['gross']) || isset($merged['g']);
-    if (!$hasGrossAfterMerge) {
-      $regularHours = self::numericFloat($merged['regular_hours'] ?? $merged['r'] ?? 0);
-      $overtimeHours = self::numericFloat($merged['overtime_hours'] ?? $merged['o'] ?? 0);
-      $travelHours = self::numericFloat($merged['travel_hours'] ?? $merged['t'] ?? 0);
-      $loa = self::numericFloat($merged['living_out_allowance'] ?? $merged['l'] ?? 0);
+    if ($hasGrossAfterMerge) {
+      return $merged;
+    }
 
-      $wage = null;
-      if (isset($merged['wage']) && is_numeric($merged['wage'])) {
-        $wage = (string) $merged['wage'];
-      } elseif (isset($merged['w']) && is_numeric($merged['w'])) {
-        $wage = (string) $merged['w'];
-      }
+    $regularHours = self::numericFloat($merged['regular_hours'] ?? $merged['r'] ?? 0);
+    $overtimeHours = self::numericFloat($merged['overtime_hours'] ?? $merged['o'] ?? 0);
+    $travelHours = self::numericFloat($merged['travel_hours'] ?? $merged['t'] ?? 0);
+    $loa = self::numericFloat($merged['living_out_allowance'] ?? $merged['l'] ?? 0);
 
-      $grossCents = Money::dollarsToCents((string) $loa);
-      if ($wage !== null) {
-        // Backfill effective wage so API consumers can compute travel/regular splits consistently.
-        $merged['wage'] = $wage;
-        $grossCents += Money::calculateGross($regularHours, $overtimeHours, $wage);
-        if ($travelHours > 0) {
-          $travelPay = $travelHours * (float) $wage;
-          $grossCents += Money::dollarsToCents((string) $travelPay);
-        }
-      }
+    $wage = null;
+    if (isset($merged['wage']) && is_numeric($merged['wage'])) {
+      $wage = (string) $merged['wage'];
+    } elseif (isset($merged['w']) && is_numeric($merged['w'])) {
+      $wage = (string) $merged['w'];
+    }
 
-      if ($grossCents > 0) {
-        $merged['gross'] = Money::centsToDollars($grossCents);
+    $grossCents = Money::dollarsToCents((string) $loa);
+    if ($wage !== null) {
+      // Backfill effective wage so API consumers can compute travel/regular splits consistently.
+      $merged['wage'] = $wage;
+      $grossCents += Money::calculateGross($regularHours, $overtimeHours, $wage);
+      if ($travelHours > 0) {
+        $travelPay = $travelHours * (float) $wage;
+        $grossCents += Money::dollarsToCents((string) $travelPay);
       }
+    }
+
+    if ($grossCents > 0) {
+      $merged['gross'] = Money::centsToDollars($grossCents);
     }
 
     return $merged;
@@ -1073,7 +1084,8 @@ class EarningsController
     try {
       $postData = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
     } catch (\JsonException $e) {
-      Response::error('[EC] Invalid JSON: ' . $e->getMessage(), [], HttpStatus::HTTP_BAD_REQUEST);
+      Log::error('[EC] initializeExport: invalid JSON body: ' . $e->getMessage());
+      Response::error('[EC] Invalid JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
@@ -1101,7 +1113,7 @@ class EarningsController
     }
 
     // Log the export event immediately
-    \PayCal\Domain\SecurityLog::log('earnings_export', [
+    \PayCal\Infrastructure\Telemetry\SecurityLog::log('earnings_export', [
       'scope' => $scope,
       'format' => $format,
       'year' => $year,
@@ -1111,6 +1123,85 @@ class EarningsController
     Response::success('[EC] Export initialized.', [
       'reference_code' => $referenceCode,
     ]);
+  }
+
+  #[Route('export/xlsx', ['POST'])]
+  /**
+   * Generate and stream an XLSX earnings report.
+   *
+   * Expects a JSON body with:
+   *   scope        string  yearly|monthly|daily|payperiod
+   *   rows         array   Day-level detailed rows (from buildDetailedRows in JS)
+   *   report       object  Aggregated report object (from buildXxxReportJson in JS)
+   *   year         int     Report year (used for filename)
+   *   start_date   string  ISO date (payperiod only)
+   *   end_date     string  ISO date (payperiod only)
+   */
+  public function exportXlsx(): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    $body = file_get_contents('php://input');
+    if ($body === false || $body === '') {
+      Response::error('[EC] Empty request body.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    try {
+      $postData = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+    } catch (\JsonException $e) {
+      Log::error('[EC] exportXlsx: invalid JSON body: ' . $e->getMessage());
+      Response::error('[EC] Invalid JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    if (!is_array($postData)) {
+      Response::error('[EC] JSON payload must be an object.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $scope     = isset($postData['scope']) && is_string($postData['scope']) ? trim($postData['scope']) : '';
+    $rows      = isset($postData['rows']) && is_array($postData['rows']) ? $postData['rows'] : [];
+    $report    = isset($postData['report']) && is_array($postData['report']) ? $postData['report'] : [];
+    $year      = isset($postData['year']) && is_numeric($postData['year']) ? (int) $postData['year'] : (int) date('Y');
+    $startDate = isset($postData['start_date']) && is_string($postData['start_date']) ? preg_replace('/[^0-9\-]/', '', $postData['start_date']) : '';
+    $endDate   = isset($postData['end_date']) && is_string($postData['end_date']) ? preg_replace('/[^0-9\-]/', '', $postData['end_date']) : '';
+
+    $allowedScopes = ['yearly', 'monthly', 'daily', 'payperiod'];
+    if (!in_array($scope, $allowedScopes, true)) {
+      Response::error('[EC] Invalid export scope.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    if (count($rows) === 0) {
+      Response::error('[EC] No rows to export.', [], HttpStatus::HTTP_UNPROCESSABLE);
+      return;
+    }
+
+    $fileSuffix = ($scope === 'payperiod' && $startDate !== '' && $endDate !== '')
+      ? "{$startDate}_to_{$endDate}"
+      : (string) $year;
+    $filename = "paycal-{$scope}-{$fileSuffix}.xlsx";
+
+    try {
+      $xlsx = Xlsx::generate($scope, $rows, $report);
+    } catch (\InvalidArgumentException $e) {
+      Log::error('[EC] exportXlsx: Xlsx generation failed: ' . $e->getMessage());
+      Response::error('[EC] Invalid export parameters.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    \PayCal\Infrastructure\Telemetry\SecurityLog::log('earnings_export', [
+      'scope'  => $scope,
+      'format' => 'xlsx',
+      'year'   => $year,
+    ]);
+
+    http_response_code(HttpStatus::HTTP_OK);
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+    echo $xlsx;
   }
 }
 

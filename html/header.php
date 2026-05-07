@@ -39,15 +39,8 @@ $isAuthenticated = $hash !== '';
 $publicPages = ['PAGE_SIGNIN', 'PAGE_REGISTER', 'PAGE_CONTACT', 'PAGE_AUTH', 'PAGE_ABOUT', 'PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA'];
 
 if (!$isAuthenticated && !in_array($currentPage, $publicPages, true)) {
-  header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+  Security::sendCoreSecurityHeaders();
   header("Content-Security-Policy: default-src 'self' https: data: blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'");
-  header('X-Content-Type-Options: nosniff');
-  header('X-Frame-Options: DENY');
-  header('Referrer-Policy: strict-origin-when-cross-origin');
-  // COEP disabled in dev to allow WebWorker loading
-  header('Cross-Origin-Opener-Policy: same-origin');
-  header('Cross-Origin-Resource-Policy: same-site');
-  header("Permissions-Policy: accelerometer=(), camera=(), microphone=(), geolocation=(), usb=(), unload=()");
   header('Location: '.Authentication::unauthenticatedRedirectURL());
   exit;
 }
@@ -79,19 +72,123 @@ if (!isset($pageTitle) || $pageTitle === '') {
   };
 }
 
+$metaDescription = Strings::headerI18n('META_DESCRIPTION');
+$metaDescriptionLong = Strings::headerI18n('META_DESCRIPTION_LONG');
+$requestUriRaw = $_SERVER['REQUEST_URI'] ?? '/';
+$requestUriForStructuredData = is_scalar($requestUriRaw) ? (string) $requestUriRaw : '/';
+$requestPathRaw = parse_url($requestUriForStructuredData, PHP_URL_PATH);
+$requestPathForStructuredData = is_string($requestPathRaw) ? $requestPathRaw : '/';
+if ($requestPathForStructuredData === '') {
+  $requestPathForStructuredData = '/';
+}
+
+$pageStructuredDataUrl = Environment::appURL(
+  $requestPathForStructuredData === '/' ? '/' : ltrim($requestPathForStructuredData, '/')
+);
+$pageLanguageTag = str_replace('_', '-', $pageLanguage);
+$structuredDataLanguageTag = match ($pageLanguageTag) {
+  'en' => 'en-CA',
+  'fr' => 'fr-CA',
+  default => $pageLanguageTag,
+};
+$websiteStructuredDataId = Environment::appURL('/') . '#website';
+$organizationStructuredDataId = Environment::appURL('/') . '#organization';
+$softwareStructuredDataId = Environment::appURL('/') . '#software';
+$webPageStructuredDataId = $pageStructuredDataUrl . '#webpage';
+$isAuthStructuredDataPage = in_array($currentPage, ['PAGE_AUTH', 'PAGE_SIGNIN', 'PAGE_REGISTER'], true);
+$authStructuredDataDescription = match ($currentPage) {
+  'PAGE_REGISTER' => 'Create a PayCal account to start tracking work hours and payroll-ready records.',
+  default => 'Sign in to PayCal to access your payroll records and account tools.',
+};
+
+$websiteStructuredData = [
+  '@type' => 'WebSite',
+  '@id' => $websiteStructuredDataId,
+  'url' => Environment::appURL('/'),
+  'name' => $siteName,
+  'description' => $metaDescription,
+  'inLanguage' => $structuredDataLanguageTag,
+  'publisher' => ['@id' => $organizationStructuredDataId],
+];
+
+$organizationStructuredData = [
+  '@type' => 'Organization',
+  '@id' => $organizationStructuredDataId,
+  'name' => 'PayCal Technologies Inc.',
+  'url' => Environment::appURL('/'),
+  'logo' => [
+    '@type' => 'ImageObject',
+    'url' => Environment::appURL('apple-touch-icon.png'),
+  ],
+  'email' => 'info@paycal.app',
+  'foundingDate' => '2023-09-01',
+  'contactPoint' => [[
+    '@type' => 'ContactPoint',
+    'contactType' => 'customer support',
+    'email' => 'info@paycal.app',
+    'url' => Environment::appURL('contact/'),
+  ]],
+  'sameAs' => [
+    'https://github.com/PayCal-Technologies/paycal',
+    'https://mastodon.social/@paycal',
+  ],
+];
+
+$webPageStructuredData = [
+  '@type' => 'WebPage',
+  '@id' => $webPageStructuredDataId,
+  'url' => $pageStructuredDataUrl,
+  'name' => $pageTitle,
+  'description' => $isAuthStructuredDataPage ? $authStructuredDataDescription : $metaDescription,
+  'isPartOf' => ['@id' => $websiteStructuredDataId],
+  'about' => ['@id' => $organizationStructuredDataId],
+  'inLanguage' => $structuredDataLanguageTag,
+];
+
+$structuredDataGraph = [
+  $websiteStructuredData,
+  $organizationStructuredData,
+  $webPageStructuredData,
+];
+
+if (!$isAuthStructuredDataPage) {
+  $structuredDataGraph[] = [
+    '@type' => 'SoftwareApplication',
+    '@id' => $softwareStructuredDataId,
+    'name' => $siteName,
+    'url' => Environment::appURL('/'),
+    'applicationCategory' => 'BusinessApplication',
+    'operatingSystem' => 'Web',
+    'browserRequirements' => 'Requires JavaScript and a modern web browser.',
+    'description' => $metaDescriptionLong,
+    'inLanguage' => $structuredDataLanguageTag,
+    'publisher' => ['@id' => $organizationStructuredDataId],
+    'offers' => [
+      '@type' => 'Offer',
+      'price' => '0.00',
+      'priceCurrency' => 'USD',
+    ],
+  ];
+
+  $structuredDataGraph[2]['mainEntity'] = ['@id' => $softwareStructuredDataId];
+}
+
+$jsonLdDocument = json_encode(
+  ['@context' => 'https://schema.org', '@graph' => $structuredDataGraph],
+  JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_INVALID_UTF8_SUBSTITUTE
+);
+
+if ($jsonLdDocument === false) {
+  $jsonLdDocument = '{}';
+}
+
 /*
  * Force live updates: disable browser/proxy caching for page responses.
  */
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
-header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: DENY');
-header('Referrer-Policy: strict-origin-when-cross-origin');
-// COEP disabled in dev to allow WebWorker loading
-header('Cross-Origin-Opener-Policy: same-origin');
-header('Cross-Origin-Resource-Policy: same-site');
+Security::sendCoreSecurityHeaders();
 
 // CORS
 $allowedOrigins = ['https://paycal.app', 'https://www.paycal.app'];
@@ -157,9 +254,6 @@ header('Report-To: {"group":"csp-endpoint","max_age":10886400,"endpoints":[{"url
 header('Accept-CH: Sec-CH-UA-Platform');
 
 $platformToken = PlatformToken::detect();
-
-// FEATURE/PERMISSION POLICY
-header("Permissions-Policy: accelerometer=(), camera=(), microphone=(), geolocation=(), usb=(), unload=()");
 
 // SEO-RELATED HEADER
 header('X-Robots-Tag: index, follow, noai, noimageai, noodp, noydir, maximage-preview: large');
@@ -344,7 +438,10 @@ header('X-Robots-Tag: index, follow, noai, noimageai, noodp, noydir, maximage-pr
 
   <!-- Set -->
 <?php
-  $hajRenders = ['__CSP_NONCE__' => $cspNonce];
+  $hajRenders = [
+    '__CSP_NONCE__' => $cspNonce,
+    '__JSON_LD__' => $jsonLdDocument,
+  ];
   echo Render::template('header-application-json-linked-data', $hajRenders);
 ?>
 

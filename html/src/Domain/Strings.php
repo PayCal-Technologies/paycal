@@ -77,6 +77,55 @@ final class Strings
   }
 
   /**
+   * Format a number for display using the active user locale with grouped thousands.
+   */
+  public static function formatLocalizedNumber(int|float $value, int $minFractionDigits = 0, int $maxFractionDigits = 2): string
+  {
+    $min = max(0, $minFractionDigits);
+    $max = max($min, $maxFractionDigits);
+
+    if (class_exists('\\NumberFormatter')) {
+      $formatter = new \NumberFormatter(self::numberLocale(), \NumberFormatter::DECIMAL);
+      $formatter->setAttribute(\NumberFormatter::GROUPING_USED, 1);
+      $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $min);
+      $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $max);
+      $formatted = $formatter->format($value);
+      if (is_string($formatted) && $formatted !== '') {
+        return $formatted;
+      }
+    }
+
+    if ($max === 0) {
+      return number_format((float) $value, 0, '.', ',');
+    }
+
+    $formatted = number_format((float) $value, $max, '.', ',');
+    if ($max > $min && str_contains($formatted, '.')) {
+      [$whole, $fraction] = explode('.', $formatted, 2);
+      $fraction = rtrim($fraction, '0');
+      if (strlen($fraction) < $min) {
+        $fraction = str_pad($fraction, $min, '0');
+      }
+
+      return $fraction === '' ? $whole : $whole . '.' . $fraction;
+    }
+
+    return $formatted;
+  }
+
+  /**
+   * Resolve locale used for numeric display formatting.
+   */
+  private static function numberLocale(): string
+  {
+    if (defined('USER_LOCALE') && is_string(USER_LOCALE) && USER_LOCALE !== '') {
+      return USER_LOCALE;
+    }
+
+    return 'en_US';
+  }
+
+  /**
    * Extract a specific piece from a delimited string.
    *
    * @param string $input     input string

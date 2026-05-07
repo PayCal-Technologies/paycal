@@ -42,6 +42,39 @@ const FORM_JSON_AJAX_HEADERS = Object.freeze({
   ...JSON_AJAX_HEADERS,
 });
 const AVAILABLE_EARNINGS_YEARS = <?php echo json_encode(array_values($availableEarningsYears), JSON_UNESCAPED_SLASHES); ?>;
+const NUMBER_FORMATTER_CACHE = new Map();
+
+function getNumberFormatter(minimumFractionDigits = 0, maximumFractionDigits = minimumFractionDigits) {
+  const min = Number.isFinite(minimumFractionDigits) ? Math.max(0, Number(minimumFractionDigits)) : 0;
+  const max = Number.isFinite(maximumFractionDigits) ? Math.max(min, Number(maximumFractionDigits)) : min;
+  const cacheKey = `${min}:${max}`;
+  if (NUMBER_FORMATTER_CACHE.has(cacheKey)) {
+    return NUMBER_FORMATTER_CACHE.get(cacheKey);
+  }
+
+  const locale = PC?.config?.USER_LOCALE || undefined;
+  const formatter = new Intl.NumberFormat(locale, {
+    useGrouping: true,
+    minimumFractionDigits: min,
+    maximumFractionDigits: max,
+  });
+  NUMBER_FORMATTER_CACHE.set(cacheKey, formatter);
+  return formatter;
+}
+
+function formatNumberLocale(value, minimumFractionDigits = 0, maximumFractionDigits = minimumFractionDigits) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return '0';
+  }
+
+  return getNumberFormatter(minimumFractionDigits, maximumFractionDigits).format(numeric);
+}
+
+function formatCurrencyLocale(value) {
+  return `$${formatNumberLocale(value, 2, 2)}`;
+}
+
 debugLog('API configuration', {
   apiBase,
   resolvedExample: apiUrl('sites/earnings?year=2025'),
@@ -804,7 +837,7 @@ document.addEventListener("DOMContentLoaded", async () =>
             ${site.site_status === 'archived' ? '<span class="site_archived_badge"> (Archived)</span>' : ''}
           </div>
           <div class="site_earnings_amount">
-            $${site.total_earnings.toFixed(2)}
+            ${formatCurrencyLocale(site.total_earnings)}
           </div>
         </div>
         
@@ -813,8 +846,8 @@ document.addEventListener("DOMContentLoaded", async () =>
         </div>
         
         <div class="flex f_space_between site_earnings_details">
-          <span>${site.total_hours.toFixed(1)} hours (${site.regular_hours.toFixed(1)} reg, ${site.overtime_hours.toFixed(1)} OT)</span>
-          <span>${site.work_days} days ◆ ${percentage.toFixed(1)}%</span>
+          <span>${formatNumberLocale(site.total_hours, 1, 1)} hours (${formatNumberLocale(site.regular_hours, 1, 1)} reg, ${formatNumberLocale(site.overtime_hours, 1, 1)} OT)</span>
+          <span>${formatNumberLocale(site.work_days, 0, 0)} days ◆ ${formatNumberLocale(percentage, 1, 1)}%</span>
         </div>
       `);
 
@@ -850,11 +883,11 @@ document.addEventListener("DOMContentLoaded", async () =>
           <div class="datagrid_body" role="rowgroup">
             <div class="datagrid_row" role="row">
               <div class="datagrid_row_content" role="presentation">
-                <div class="datagrid_item" role="gridcell">$${totals.earnings.toFixed(2)}</div>
-                <div class="datagrid_item" role="gridcell">${totals.hours.toFixed(1)}</div>
-                <div class="datagrid_item" role="gridcell">${totals.work_days}</div>
-                <div class="datagrid_item" role="gridcell">${totals.sites_count}</div>
-                <div class="datagrid_item" role="gridcell">$${avgPerSite.toFixed(2)}</div>
+                <div class="datagrid_item" role="gridcell">${formatCurrencyLocale(totals.earnings)}</div>
+                <div class="datagrid_item" role="gridcell">${formatNumberLocale(totals.hours, 1, 1)}</div>
+                <div class="datagrid_item" role="gridcell">${formatNumberLocale(totals.work_days, 0, 0)}</div>
+                <div class="datagrid_item" role="gridcell">${formatNumberLocale(totals.sites_count, 0, 0)}</div>
+                <div class="datagrid_item" role="gridcell">${formatCurrencyLocale(avgPerSite)}</div>
               </div>
             </div>
           </div>
@@ -979,15 +1012,15 @@ document.addEventListener("DOMContentLoaded", async () =>
           <div class="archived-summary-card">
             <div class="flex f_space_between archived-summary-row">
               <strong>Total Archived Entries:</strong>
-              <span>${summary.count}</span>
+                <span>${formatNumberLocale(summary.count, 0, 0)}</span>
             </div>
             <div class="flex f_space_between archived-summary-row">
               <strong>Total Earnings:</strong>
-              <span class="primary-text">$${summary.total_earnings.toFixed(2)}</span>
+                <span class="primary-text">${formatCurrencyLocale(summary.total_earnings)}</span>
             </div>
             <div class="flex f_space_between archived-summary-row">
               <strong>Total Hours:</strong>
-              <span>${summary.total_hours.toFixed(1)}</span>
+                <span>${formatNumberLocale(summary.total_hours, 1, 1)}</span>
             </div>
             <div class="flex f_space_between">
               <strong>Date Range:</strong>
@@ -1007,11 +1040,11 @@ document.addEventListener("DOMContentLoaded", async () =>
             <div class="archived-entry-item">
               <div class="flex f_space_between">
                 <strong>${entry.date}</strong>
-                <span class="primary-text">$${entry.gross.toFixed(2)}</span>
+                <span class="primary-text">${formatCurrencyLocale(entry.gross)}</span>
               </div>
               <div class="flex f_space_between archived-entry-meta">
                 <span>${entry.site_name}</span>
-                <span>${entry.hours.toFixed(1)} hours</span>
+                <span>${formatNumberLocale(entry.hours, 1, 1)} hours</span>
               </div>
             </div>
           `;
@@ -1380,7 +1413,7 @@ document.addEventListener("DOMContentLoaded", async () =>
           <h3 class="orphaned_group_name">${escapeHTML(group.site_name)}</h3>
           <div class="orphaned_group_stats">
             <span class="orphaned_stat">${group.count} ${group.count === 1 ? 'entry' : 'entries'}</span>
-            <span class="orphaned_stat">${group.total_hours.toFixed(1)} hours</span>
+            <span class="orphaned_stat">${formatNumberLocale(group.total_hours, 1, 1)} hours</span>
             <span class="orphaned_stat">${escapeHTML(group.date_range)}</span>
           </div>
         </div>

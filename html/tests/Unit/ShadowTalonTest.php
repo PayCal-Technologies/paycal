@@ -54,6 +54,12 @@ final class ShadowTalonTest extends TestCase
     Environment::bootstrap($this->envDefaults());
   }
 
+  protected function tearDown(): void
+  {
+    Environment::bootstrap($_ENV);
+    parent::tearDown();
+  }
+
   public function testWantsJsonRequestForApiRoutes(): void
   {
     $this->assertTrue(ShadowTalon::wantsJsonRequest([

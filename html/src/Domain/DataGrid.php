@@ -196,6 +196,7 @@ class DataGrid
 
     $rowActions = self::listAssoc($this->meta['rowActions'] ?? []);
     $controls = self::listAssoc($this->meta['controls'] ?? []);
+    $controlsTrailingHtml = self::toString($this->meta['controlsTrailingHtml'] ?? '', '');
     $columnCount = count($this->columns);
     $totalColumnCount = $columnCount + (!empty($rowActions) ? 1 : 0);
     $rowCount = count($rows);
@@ -377,7 +378,8 @@ class DataGrid
     }
 
     $controls = self::listAssoc($this->meta['controls'] ?? []);
-    
+    $controlsTrailingHtml = self::toString($this->meta['controlsTrailingHtml'] ?? '', '');
+
     // Get positioning from config (set at DataGrid initialization based on context needs)
     $dateLabelPosition = self::toString($this->meta['dateLabelPosition'] ?? 'left', 'left');
     $workEntryPosition = self::toString($this->meta['workEntryPosition'] ?? 'left', 'left');
@@ -490,6 +492,9 @@ class DataGrid
           >
             <?php echo $this->escape(self::toString($control['label'] ?? $i18n['ACTION'], $i18n['ACTION'])); ?>
           </button>
+        <?php } ?>
+        <?php if ($controlsTrailingHtml !== '') { ?>
+          <div class="datagrid_controls_trailing"><?php echo $controlsTrailingHtml; ?></div>
         <?php } ?>
       </div>
 

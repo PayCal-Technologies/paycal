@@ -11,14 +11,15 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 ?>
 
 .contact-page {
-  max-width: 72rem;
+  width: min(92vw, 88rem);
+  max-width: none;
   margin: 0 auto;
-  padding: clamp(1rem, 2.4vw, 2rem);
+  padding: 0;
 }
 
 .contact-page .doc-article-header,
 .contact-page .doc-article-body {
-  max-width: 64rem;
+  max-width: none;
   margin: 0 auto;
 }
 
@@ -41,7 +42,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 .contact-form-section {
-  border: 1px solid var(--color-border, #ccc);
+  border: 1px solid var(--panel-border, var(--color-border, #ccc));
   border-radius: 0.5rem;
   background: var(--color-surface, #fff);
   padding: var(--pad-md);
@@ -69,7 +70,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   box-sizing: border-box;
   display: grid;
   gap: 0.75rem;
-  border: 1px solid var(--color-border, #ccc);
+  border: 1px solid var(--panel-border, var(--color-border, #ccc));
   border-radius: 0.5rem;
   background: var(--color-surface, #fff);
   padding: var(--pad-md);
@@ -117,7 +118,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .contact-status {
   margin: 0 0 1rem 0;
-  border: 1px solid var(--color-border, #7a7a7a);
+  border: 1px solid var(--panel-border, var(--color-border, #7a7a7a));
   border-left-width: 4px;
   border-radius: var(--border-radius, 0.5rem);
   padding: 0.85rem 1rem;
@@ -152,7 +153,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .contact-form-footer {
   grid-column: 1 / -1;
   margin-bottom: 0;
-  border-top: 1px solid var(--color-border, #ccc);
+  border-top: 1px solid var(--panel-border, var(--color-border, #ccc));
   padding-top: 1rem;
 }
 
@@ -175,7 +176,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .contact-field select {
   width: 100%;
   padding: 0.65rem 0.7rem;
-  border: 1px solid var(--color-border, #ccc);
+  border: 1px solid var(--panel-border, var(--color-border, #ccc));
   border-radius: 0.3rem;
   background-color: var(--color-surface, #fff);
   color: var(--color-text, #1d1d1d);
@@ -208,7 +209,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .contact-help-section {
   margin-top: 0.5rem;
   padding: 0;
-  border: 1px solid var(--color-border, #ccc);
+  border: 1px solid var(--panel-border, var(--color-border, #ccc));
   border-radius: 0.3rem;
   background: var(--color-surface, #fff);
 }
@@ -226,7 +227,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 .contact-help-section[open] > summary {
-  border-bottom: 1px solid var(--color-border, #ccc);
+  border-bottom: 1px solid var(--panel-border, var(--color-border, #ccc));
 }
 
 .contact-help-content {
@@ -258,7 +259,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .contact-help-divider {
   height: 1px;
   margin: 0.75rem 0;
-  background: var(--color-border, #ccc);
+  background: var(--panel-border, var(--color-border, #ccc));
 }
 
 .contact-sla-info {
@@ -276,7 +277,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .contact-support-callout {
   display: grid;
   gap: var(--pad-md);
-  border: 1px solid var(--color-border, #ccc);
+  border: 1px solid var(--panel-border, var(--color-border, #ccc));
   border-radius: 0.5rem;
   background: var(--color-surface, #fff);
 }
@@ -384,7 +385,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   width: 20px;
   height: 20px;
   cursor: pointer;
-  border: 2px solid #5a6f7d;
+  border: 2px solid var(--panel-border, #5a6f7d);
   border-radius: 3px;
   background: transparent;
   margin: 0;
@@ -394,13 +395,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 .contact-chip-input:hover {
-  border-color: #00BCD4;
+  border-color: var(--color-primary, #2c5aa0);
   box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.1);
 }
 
 .contact-chip-input:focus {
   outline: none;
-  border-color: #00BCD4;
+  border-color: var(--color-primary, #2c5aa0);
   box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.2);
 }
 
@@ -410,8 +411,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 .contact-chip-input:checked {
-  background: #00BCD4;
-  border-color: #00BCD4;
+  background: var(--color-primary, #2c5aa0);
+  border-color: var(--color-primary, #2c5aa0);
 }
 
 .contact-chip-input:checked::after {

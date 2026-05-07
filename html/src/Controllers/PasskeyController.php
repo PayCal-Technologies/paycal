@@ -7,9 +7,11 @@ use lbuchs\WebAuthn\WebAuthnException;
 use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\Enums\AuthLevel;
 use PayCal\Domain\Authentication;
+use PayCal\Infrastructure\Transaction\AccountRecoveryTransaction;
 use PayCal\Domain\Database;
 use PayCal\Domain\EmailGarum;
 use PayCal\Domain\Config\Environment;
+use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Enums\FormTTL;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
@@ -17,7 +19,7 @@ use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\OrganizationDiscoveryService;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
-use PayCal\Domain\SecurityLog;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Domain\User;
 use PayCal\Domain\UserRepository;
 use PayCal\Domain\RecoveryKey;
@@ -35,11 +37,19 @@ use PayCal\Observability\Lens;
  * - Credential registration and deletion affect encryption bootstrap and org
  *   wrap flows, so changes here can have broader security implications.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 
@@ -92,7 +102,7 @@ final class PasskeyController
     }
 
     $expectedInviteCode = trim(Environment::inviteCode());
-    if ($expectedInviteCode !== '' && trim($inviteCode) !== $expectedInviteCode) {
+    if ($expectedInviteCode !== '' && !hash_equals($expectedInviteCode, trim($inviteCode))) {
       Response::error('Invalid invite code.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
@@ -258,6 +268,12 @@ final class PasskeyController
       'user_uuid' => $userUUID,
       'credential_id' => $credentialId,
     ]);
+    try {
+      \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.passkey.signup_success', $userUUID, [
+        'credential_id' => $credentialId,
+      ]);
+    } catch (\Throwable) {
+    }
 
     $verificationStatus = $this->sendVerificationEmailIfNeeded($userUUID);
 
@@ -431,6 +447,13 @@ final class PasskeyController
       'credential_id' => $credentialId,
       'device_name' => $deviceName,
     ]);
+    try {
+      \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.passkey.registered', $expectedUserUUID, [
+        'credential_id' => $credentialId,
+        'device_name' => $deviceName,
+      ]);
+    } catch (\Throwable) {
+    }
 
       $verificationStatus = $this->sendVerificationEmailIfNeeded($expectedUserUUID);
 
@@ -479,7 +502,7 @@ final class PasskeyController
       $credentialIds = $this->credentialIdBinaries($userUUID);
       if ([] === $credentialIds) {
         \PayCal\Observability\Lens::add('[PASSKEY] User has no credentials', ['user_uuid' => $userUUID]);
-        Response::error('Authentication failed.', [], HttpStatus::HTTP_UNAUTHORIZED);
+        Response::error('Authentication failed.', ['error' => 'passkey_invalid'], HttpStatus::HTTP_UNAUTHORIZED);
         return;
       }
     }
@@ -554,11 +577,17 @@ final class PasskeyController
         'credentialId' => $credentialId,
         'credentialKey' => $credentialKey,
       ]);
-      Response::error('Authentication failed.', [], HttpStatus::HTTP_UNAUTHORIZED);
+      Response::error('Authentication failed.', ['error' => 'passkey_invalid'], HttpStatus::HTTP_UNAUTHORIZED);
       return;
     }
 
     $credentialData = Database::hgetall($credentialKey);
+    $isRevoked = $this->scalarString($credentialData['revoked_at'] ?? '') !== '';
+    if ($isRevoked) {
+      Response::error('Authentication failed.', ['error' => 'passkey_invalid'], HttpStatus::HTTP_UNAUTHORIZED);
+      return;
+    }
+
     $expectedUserUUID = $this->scalarString($challengeData['user_uuid'] ?? '');
     $credentialUserUUID = $this->scalarString($credentialData['user_uuid'] ?? '');
 
@@ -616,19 +645,32 @@ final class PasskeyController
 
       $newSignCount = (int) ($webauthn->getSignatureCounter() ?? 0);
     } catch (WebAuthnException) {
-      Response::error('Authentication failed.', [], HttpStatus::HTTP_UNAUTHORIZED);
+      Response::error('Authentication failed.', ['error' => 'passkey_invalid'], HttpStatus::HTTP_UNAUTHORIZED);
       return;
     }
 
     $oldSignCount = (int) $this->scalarString($credentialData['sign_count'] ?? '0');
     $suspectedClone = $newSignCount > 0 && $oldSignCount > 0 && $newSignCount < $oldSignCount;
     if ($suspectedClone) {
+      Database::hset($credentialKey, [
+        'revoked_at' => (string) time(),
+      ]);
       SecurityLog::log('passkey_clone_suspected', [
         'user_uuid' => $expectedUserUUID,
         'credential_id' => $credentialId,
         'old_sign_count' => $oldSignCount,
         'new_sign_count' => $newSignCount,
       ]);
+      try {
+        \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.passkey.clone_suspected', $expectedUserUUID, [
+          'credential_id' => $credentialId,
+          'old_sign_count' => (string) $oldSignCount,
+          'new_sign_count' => (string) $newSignCount,
+        ]);
+      } catch (\Throwable) {
+      }
+      Response::error('Authentication failed.', ['error' => 'passkey_compromised'], HttpStatus::HTTP_UNAUTHORIZED);
+      return;
     }
 
     $sessionHash = bin2hex(random_bytes(self::SECRET_BYTES));
@@ -659,6 +701,12 @@ final class PasskeyController
       'user_uuid' => $expectedUserUUID,
       'credential_id' => $credentialId,
     ]);
+    try {
+      \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.passkey.login_success', $expectedUserUUID, [
+        'credential_id' => $credentialId,
+      ]);
+    } catch (\Throwable) {
+    }
 
     // Log post-login encryption state for debugging
     $loginUser = UserRepository::getByUUID($expectedUserUUID);
@@ -847,6 +895,13 @@ final class PasskeyController
       'user_uuid' => $userUUID,
       'credential_id' => $credentialId,
     ]);
+    try {
+      \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.passkey.deleted', $userUUID, [
+        'credential_id' => $credentialId,
+        'remaining_credentials' => (string) $remaining,
+      ]);
+    } catch (\Throwable) {
+    }
 
     Response::success('[PASSKEY] Passkey deleted.', [
       'remaining' => $remaining,
@@ -854,7 +909,7 @@ final class PasskeyController
   }
 
   /**
-   * Send a recovery email from the sign-in page when passkey login fails.
+   * Send a recovery magic link from the sign-in page when passkey login fails.
    */
   #[Route('auth/passkey/send-recovery-email', ['POST'])]
   public function sendRecoveryEmail(): void
@@ -880,9 +935,28 @@ final class PasskeyController
     try {
       $user = User::getByUUID($userUUID);
       if ($user !== null && $user->email_verified) {
-        $code = Security::generateVerificationCode(6);
-        // TODO: Integrate with AccountRecoveryTransaction for full recovery flow
-        EmailGarum::sendAccountRecoveryCode($user->email, $user->full_name, $code);
+        $created = AccountRecoveryTransaction::create($user->email, $user->user_uuid, $user->full_name);
+        $transaction = $created['transaction'];
+        $txnSecret = $created['txnSecret'];
+
+        $token = rtrim(strtr(base64_encode(random_bytes(self::SECRET_BYTES)), '+/', '-_'), '=');
+        $ttlSeconds = max(600, (int) SystemConfig::get('account_recovery_txn_ttl_minutes') * 60);
+        $magicKey = Keys::accountRecoveryMagicLink($token);
+        Database::hset($magicKey, [
+          'txn_id' => $transaction->id(),
+          'txn_secret' => $txnSecret,
+          'email_hash' => hash('sha256', $email),
+          'created_at' => (string) time(),
+        ]);
+        Database::expire($magicKey, $ttlSeconds);
+
+        $recoverUrl = rtrim(Environment::appPublicURL(), '/') . '/auth/recover/?ml_token=' . rawurlencode($token);
+        EmailGarum::sendAccountRecoveryMagicLink(
+          $user->email,
+          $user->full_name,
+          $recoverUrl,
+          max(10, (int) ceil($ttlSeconds / 60))
+        );
       }
     } catch (\Throwable) {
       // Silently fail to prevent email enumeration
@@ -1075,6 +1149,10 @@ final class PasskeyController
         continue;
       }
 
+      if ($this->scalarString($record['revoked_at'] ?? '') !== '') {
+        continue;
+      }
+
       $decoded = $this->decodeB64Url($credentialId);
       if ($decoded === null) {
         continue;
@@ -1137,7 +1215,7 @@ final class PasskeyController
     $ip = Security::getClientIPAddress();
     $clientIP = $ip !== '' ? $ip : '0.0.0.0';
     $currentMinute = (int) floor(time() / FormTTL::ONE_MIN->value);
-    $key = 'ratelimit:passkey:' . $endpoint . ':' . md5($clientIP) . ':' . $currentMinute;
+    $key = 'ratelimit:passkey:' . $endpoint . ':' . hash('sha256', $clientIP) . ':' . $currentMinute;
     $count = Database::incr($key);
     if (1 === $count) {
       Database::expire($key, self::RATE_WINDOW_SECONDS);

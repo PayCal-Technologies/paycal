@@ -15,6 +15,31 @@ This master changelog provides a high-level overview of major version milestones
 
 ## Version 1.x
 
+### [1.054.000] - 2026-05-04
+**SOC2 v2 pipeline, JS security hardening, a11y fixes, and transparency enhancements**
+- Introduced SOC2 v2 DSL pipeline with CC1–CC9 control test suites, monthly evidence bundle (2026-04), Type I packet index, and public Trust Hub page (`/security/`).
+- Enforced deterministic E2EE week reconciliation in calendar to prevent stale split fields from contaminating range totals.
+- Migrated all `innerHTML` assignments in admin/earnings/organizations JS files to `Guardian.setHTML()` / `textContent = ''` to satisfy JS security gate.
+- Fixed breadcrumb contrast violation for light-primary themes (e.g. Win10 Dark): `color: white` → `color: var(--button-primary-text, white)`.
+- Corrected WCAG a11y test expectations: navigation-path breadcrumb labels, auth-required graceful-skip pattern for complex-descriptions/shortcuts/shortcut-map/live-regions suites.
+- Added Transparency Hub link to `/help/` intro and per-section read-more labels on `/transparency/` hub for accessibility navigation compliance.
+- Applied JSON-LD page-aware metadata refinements and SOC2 scalar type fixes (mixed cast removal, scalar decoding hardening).
+- Updated ESLint config: `caughtErrorsIgnorePattern` for intentionally-ignored catch parameters; removed stale imports and unused variables across JS files.
+- Composer update: `phpstan/phpstan`, `stripe/stripe-php`, `symfony/*` packages refreshed.
+
+### [1.053.000] - 2026-04-18
+**Calendar earnings hover tooltip and breadcrumb styling enhancements**
+- Added live calendar earnings hover tooltip showing per-day pay totals inline on the calendar grid.
+- Applied breadcrumb styling enhancements: ticket-stub shaped borders, clip-path fix removing unintended left notches on leading elements, and increased inset box-shadow prominence (2px → 3px).
+
+### [1.052.000] - 2026-04-15
+**Formatter policy enforcement, semantic diff scanning, and CI release guardrails**
+- Added safe formatter release guardrails with `format:check`, `format:fix`, and `quality:semantic-diff` composer scripts plus `scripts/paycal checks:semantic-diff` support.
+- Added `scripts/check-semantic-diff.php` to fail closed on suspicious formatter-style semantic rewrites including guard collapse, temp-var narrowing removal, merged cleanup statements, and function-signature mutation.
+- Hardened `scripts/hooks/pre-commit.sh` with staged semantic diff scanning, PHP lint, PHPStan/docblock gates, safe formatter dry-run enforcement, and reliable temp-file cleanup.
+- Added `docs/engineering/formatter-policy.md` documenting allowed autofix, forbidden autofix, protected shapes, and review rules for formatter use.
+- Wired formatter policy and semantic diff checks into `.github/workflows/phpunit.yml` and `.github/workflows/phpstan.yml` so CI enforces the same style-vs-semantics boundary as local hooks.
+
 ### [1.049.000] - 2026-04-09
 **Verification and organization workflow hardening, earnings parity follow-through, transparency chronology updates, and release hygiene sync**
 - Added publication timestamp metadata across transparency hub/article pages (all maintained locales) plus supporting style updates to improve chronology visibility.

@@ -54,7 +54,7 @@ require_once HTML.'/header.php';
         <p>उत्पाद को आकार देने वाले हाल के अपडेट — बिलिंग और प्रोफ़ाइल गवर्नेंस प्रवाह सहित — हमारे framework/backend और परीक्षण गवर्नेंस पृष्ठों पर ट्रैक किए जाते हैं।</p>
       </section>
 
-      <div class="doc-panel-grid" aria-label="पारदर्शिता विवरण पैनल">
+      <div class="doc-panel-grid doc-panel-grid--responsive-3" aria-label="पारदर्शिता विवरण पैनल">
         <section class="doc-section">
           <h2>सुरक्षा ऑडिट स्थिति</h2>
           <p class="doc-article-meta">Published: <time datetime="2026-03-23">2026-03-23</time></p>

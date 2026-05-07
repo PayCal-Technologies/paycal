@@ -18,9 +18,6 @@ namespace PayCal\Domain\Enums;
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
  */
-
-
-
 /**
  * Enum SiteStatus.
  *

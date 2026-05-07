@@ -5,6 +5,7 @@ use PayCal\Domain\Calendar;
 use PayCal\Domain\Earnings;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Render;
+use PayCal\Domain\Strings;
 use PayCal\Observability\Lens;
 
 /**
@@ -51,10 +52,8 @@ $pageLanguage = 'en';
 
 require_once HTML.'/header.php';
 
-use DateTimeImmutable;
-
 $payPeriods = Calendar::getCurrentPayPeriods();
-$ppData = $payPeriods->getPayPeriodForDate(new DateTimeImmutable('now'));
+$ppData = $payPeriods->getPayPeriodForDate(new \DateTimeImmutable('now'));
 
 $totals = Earnings::getTotalsForRange($ppData['start'], $ppData['end']);
 
@@ -110,15 +109,15 @@ $renders = [
     '__PROGRESS_BAR__' => $progressBar,
     '__PROGRESS_TEXT__' => $progressText,
     '__REGULAR_HOURS_LABEL__' => $i18n['REGULAR'],
-    '__REGULAR_HOURS__' => number_format($regular, 2),
+    '__REGULAR_HOURS__' => Strings::formatLocalizedNumber($regular, 2, 2),
     '__OVERTIME_HOURS_LABEL__' => $i18n['OVERTIME'],
-    '__OVERTIME_HOURS__' => number_format($overtime, 2),
+    '__OVERTIME_HOURS__' => Strings::formatLocalizedNumber($overtime, 2, 2),
     '__GROSS_LABEL__' => $i18n['GROSS'],
-    '__GROSS__' => '$'.number_format($gross, 2),
+    '__GROSS__' => '$'.Strings::formatLocalizedNumber($gross, 2, 2),
     '__DEDUCTIONS_LABEL__' => $i18n['DEDUCTIONS'],
-    '__DEDUCTIONS__' => '$'.number_format($deductions, 2),
+    '__DEDUCTIONS__' => '$'.Strings::formatLocalizedNumber($deductions, 2, 2),
     '__NET_LABEL__' => $i18n['NET'],
-    '__NET__' => '$'.number_format($net, 2),
+    '__NET__' => '$'.Strings::formatLocalizedNumber($net, 2, 2),
 ];
 
 echo "<div class='data-cards'>";

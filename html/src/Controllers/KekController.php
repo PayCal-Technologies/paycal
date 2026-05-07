@@ -10,7 +10,7 @@ use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Log;
-use PayCal\Domain\RedisReliabilityService;
+use PayCal\Infrastructure\Resilience\RedisReliabilityService;
 use PayCal\Domain\Response;
 use PayCal\Domain\Config\SystemConfig;
 
@@ -26,11 +26,19 @@ use PayCal\Domain\Config\SystemConfig;
  * - Keep crypto semantics in domain helpers/config where possible; this layer
  *   should primarily adapt HTTP requests into those operations.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 

@@ -410,7 +410,9 @@ final class CalendarControllerIntegrationTest extends TestCase
         $orgId = 'org-write-' . bin2hex(random_bytes(4));
         $targetUserUUID = 'target-user-' . bin2hex(random_bytes(6));
         $targetSiteId = 'S' . strtoupper(substr(bin2hex(random_bytes(5)), 0, 9));
-        $day = date('Y-m-d');
+        // Use the target user's timezone (America/Edmonton) to compute today's date so that
+        // isDateInCurrentPayPeriodForUser() resolves "now" in that same timezone and finds the seeded period.
+        $day = (new \DateTimeImmutable('now', new \DateTimeZone('America/Edmonton')))->format('Y-m-d');
         $payPeriodKeys = [];
 
         Database::hset(Keys::USER . ':' . $targetUserUUID, [

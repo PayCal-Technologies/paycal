@@ -6,18 +6,26 @@ use PayCal\Domain\Enums\FormTTL;
 /**
  * Clock.php
  *
- * Purpose: Define the Clock class for PayCal\Domain.
+ * Purpose: Time-source helper for runtime timestamps, test-time freezing, and
+ * normalized time-related convenience helpers.
  *
- * PHP version 8.4.16
+ * Developer notes:
+ * - Frozen-time behavior is test-sensitive and should remain explicit and easy
+ *   to reset between scenarios.
+ * - Keep time semantics centralized here rather than scattering ad hoc clocks.
  *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
+ * Architectural role:
+ * - Reusable domain helper for time access and testable time control consumed
+ *   across core services.
+ * - Encapsulates clock behavior outside the HTTP layer.
  *
  * @category   Domain
  * @package    PayCal\Domain
+ * @subpackage Core
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 class Clock
 {

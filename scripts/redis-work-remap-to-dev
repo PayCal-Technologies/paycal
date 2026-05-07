@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SRC_UID="${1:-Ufd5760c0}"
+DST_UID="${2:-Ub9127d01}"
+DEV_HOST="${DEV_HOST:-deploy@paycal}"
+DEV_REDIS_USER="${DEV_REDIS_USER:-paycal}"
+DEV_REDIS_AUTH="${DEV_REDIS_AUTH:-}"
+DEV_REDIS_DB="${DEV_REDIS_DB:-0}"
+DRY_RUN="${DRY_RUN:-0}"
+
+if [[ "${SRC_UID}" == "${DST_UID}" ]]; then
+  echo "[fatal] SRC_UID and DST_UID must differ" >&2
+  exit 2
+fi
+
+if [[ -z "${DEV_REDIS_AUTH}" ]]; then
+  echo "[fatal] DEV_REDIS_AUTH is required (export it in your shell)" >&2
+  exit 2
+fi
+
+TS="$(date +%Y%m%d_%H%M%S)"
+WORKDIR="/tmp/paycal_work_remap_${SRC_UID}_to_${DST_UID}_${TS}"
+mkdir -p "${WORKDIR}"
+SRC_KEYS_FILE="${WORKDIR}/src_keys.txt"
+MAP_FILE="${WORKDIR}/key_map.tsv"
+BACKUP_FILE="${WORKDIR}/remote_backup_before_${DST_UID}_${TS}.txt"
+MISMATCH_FILE="${WORKDIR}/mismatches_${TS}.txt"
+
+remote_redis() {
+  local cmd="$1"
+  ssh "${DEV_HOST}" "redis-cli --user '${DEV_REDIS_USER}' -a '${DEV_REDIS_AUTH}' -n '${DEV_REDIS_DB}' ${cmd}"
+}
+
+{
+  redis-cli -n 0 --scan --pattern "work:${SRC_UID}:*"
+  redis-cli -n 0 --scan --pattern "work:archived:${SRC_UID}:*"
+} | sort -u > "${SRC_KEYS_FILE}"
+
+SRC_COUNT="$(wc -l < "${SRC_KEYS_FILE}" | tr -d ' ')"
+if [[ "${SRC_COUNT}" -eq 0 ]]; then
+  echo "source_keys=0"
+  exit 0
+fi
+
+awk -v s="${SRC_UID}" -v d="${DST_UID}" '{ src=$0; dst=src; gsub(":" s ":", ":" d ":", dst); print src "\t" dst }' "${SRC_KEYS_FILE}" > "${MAP_FILE}"
+
+if [[ "${DRY_RUN}" == "1" ]]; then
+  echo "dry_run=1"
+  echo "source_keys=${SRC_COUNT}"
+  echo "map_file=${MAP_FILE}"
+  exit 0
+fi
+
+: > "${BACKUP_FILE}"
+while IFS=$'\t' read -r srcKey dstKey; do
+  exists="$(remote_redis "EXISTS '${dstKey}'" | tail -n 1 | tr -d '\r')"
+  if [[ "${exists}" == "1" ]]; then
+    {
+      echo "### KEY ${dstKey}"
+      remote_redis "--raw HGETALL '${dstKey}'"
+      echo
+    } >> "${BACKUP_FILE}"
+  fi
+done < "${MAP_FILE}"
+
+MIGRATED=0
+CREATED=0
+OVERWRITTEN=0
+
+while IFS=$'\t' read -r srcKey dstKey; do
+  srcData="$(redis-cli -n 0 --raw HGETALL "${srcKey}")"
+  [[ -z "${srcData}" ]] && continue
+
+  dstExists="$(remote_redis "EXISTS '${dstKey}'" | tail -n 1 | tr -d '\r')"
+  if [[ "${dstExists}" == "1" ]]; then
+    OVERWRITTEN=$((OVERWRITTEN + 1))
+  else
+    CREATED=$((CREATED + 1))
+  fi
+
+  remote_redis "DEL '${dstKey}' >/dev/null"
+
+  while IFS= read -r field && IFS= read -r value; do
+    escField=${field//\'/\'\"\'\"\'}
+    escValue=${value//\'/\'\"\'\"\'}
+    remote_redis "HSET '${dstKey}' '${escField}' '${escValue}' >/dev/null"
+  done <<< "${srcData}"
+
+  MIGRATED=$((MIGRATED + 1))
+done < "${MAP_FILE}"
+
+MISMATCH=0
+: > "${MISMATCH_FILE}"
+while IFS=$'\t' read -r srcKey dstKey; do
+  srcHash="$(redis-cli -n 0 --raw HGETALL "${srcKey}" | shasum -a 256 | awk '{print $1}')"
+  dstHash="$(remote_redis "--raw HGETALL '${dstKey}'" | shasum -a 256 | awk '{print $1}')"
+  if [[ "${srcHash}" != "${dstHash}" ]]; then
+    echo "MISMATCH ${srcKey} -> ${dstKey}" >> "${MISMATCH_FILE}"
+    MISMATCH=$((MISMATCH + 1))
+  fi
+done < "${MAP_FILE}"
+
+REMOTE_ACTIVE="$(remote_redis "--scan --pattern 'work:${DST_UID}:*' | wc -l" | tail -n 1 | tr -d '[:space:]')"
+REMOTE_ARCHIVED="$(remote_redis "--scan --pattern 'work:archived:${DST_UID}:*' | wc -l" | tail -n 1 | tr -d '[:space:]')"
+
+printf 'src_uid=%s\ndst_uid=%s\nsource_keys=%s\nmigrated=%s\ncreated=%s\noverwritten=%s\nmismatches=%s\nbackup_file=%s\nmap_file=%s\nmismatch_file=%s\nremote_active=%s\nremote_archived=%s\n' \
+  "${SRC_UID}" "${DST_UID}" "${SRC_COUNT}" "${MIGRATED}" "${CREATED}" "${OVERWRITTEN}" "${MISMATCH}" "${BACKUP_FILE}" "${MAP_FILE}" "${MISMATCH_FILE}" "${REMOTE_ACTIVE}" "${REMOTE_ARCHIVED}"

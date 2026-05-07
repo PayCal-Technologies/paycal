@@ -3,7 +3,7 @@
 namespace PayCal\Controllers;
 
 use PayCal\Domain\Attributes\Route;
-use PayCal\Domain\ActivityMonitor;
+use PayCal\Infrastructure\Session\ActivityMonitor;
 use PayCal\Domain\Authentication;
 use PayCal\Domain\Config\Environment;
 use PayCal\Domain\Database;
@@ -13,9 +13,9 @@ use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\ProtectedMode;
 use PayCal\Domain\RecoveryKey;
-use PayCal\Domain\RedisReliabilityService;
+use PayCal\Infrastructure\Resilience\RedisReliabilityService;
 use PayCal\Domain\Response;
-use PayCal\Domain\SecurityLog;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Domain\User;
 use PayCal\Domain\UserFields;
 
@@ -31,11 +31,19 @@ use PayCal\Domain\UserFields;
  * - Protected-mode gates, reliability checks, and security logging are part of
  *   the behavior contract for these endpoints.
  *
+ * Architectural role:
+ * - Entry-point controller for request handling, authorization enforcement,
+ *   and response or render shaping at the web boundary.
+ * - Domain policy, persistence rules, and side-effect orchestration should
+ *   stay in collaborators rather than expanding controller state.
+ *
  * @category   Controllers
  * @package    PayCal\Controllers
+ * @subpackage HTTP
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
  */
 
 
@@ -157,7 +165,9 @@ class AccountController
 
         if ($wrappedDekPasskey !== '') {
             $decodedEnvelope = base64_decode($wrappedDekPasskey, true);
-            if (is_string($decodedEnvelope) && $decodedEnvelope !== '') {
+            if (!is_string($decodedEnvelope) || $decodedEnvelope === '') {
+                // non-decodable envelope; leave meta defaults
+            } else {
                 $wrappedDekPasskeyMeta['decodeOk'] = true;
                 $envelope = json_decode($decodedEnvelope, true);
                 if (is_array($envelope)) {
@@ -319,6 +329,12 @@ class AccountController
             'user_uuid' => $user->user_uuid,
             'email' => $user->email,
         ]);
+        try {
+            \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.recovery_key.created', $user->user_uuid, [
+                'method' => 'settings',
+            ]);
+        } catch (\Throwable) {
+        }
 
         Response::success('Recovery key created and emailed.', ['emailSent' => true]);
     }

@@ -56,6 +56,10 @@ function getArrayValue(array $arr, string $key): array {
   return isset($arr[$key]) && is_array($arr[$key]) ? $arr[$key] : [];
 }
 
+function formatMetricNumber(int|float $value, int $fractionDigits = 0): string {
+  return Strings::formatLocalizedNumber($value, $fractionDigits, $fractionDigits);
+}
+
 // Extract sub-arrays for type-safe access
 $redis = getArrayValue($metrics, 'redis');
 $sessions = getArrayValue($metrics, 'sessions');
@@ -104,23 +108,23 @@ ob_start();
         <h2>🔴 <?php echo metrics_index_i18n('ADMIN_METRICS_REDIS_SERVER'); ?></h2>
         <div class="metric-row">
           <span class="metric-label">Memory Used</span>
-          <span class="metric-value"><?= getFloatValue($redis, 'used_memory_mb', 0.0) ?> MB</span>
+          <span class="metric-value"><?= formatMetricNumber(getFloatValue($redis, 'used_memory_mb', 0.0), 2) ?> MB</span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Peak Memory</span>
-          <span class="metric-value"><?= getFloatValue($redis, 'used_memory_peak_mb', 0.0) ?> MB</span>
+          <span class="metric-value"><?= formatMetricNumber(getFloatValue($redis, 'used_memory_peak_mb', 0.0), 2) ?> MB</span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Connected Clients</span>
-          <span class="metric-value"><?= getIntValue($redis, 'connected_clients', 0) ?></span>
+          <span class="metric-value"><?= formatMetricNumber(getIntValue($redis, 'connected_clients', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Cache Hit Rate</span>
-          <span class="metric-value success"><?= getFloatValue($redis, 'hit_rate_percent', 0.0) ?>%</span>
+          <span class="metric-value success"><?= formatMetricNumber(getFloatValue($redis, 'hit_rate_percent', 0.0), 2) ?>%</span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Uptime</span>
-          <span class="metric-value"><?= getIntValue($redis, 'uptime_in_days', 0) ?> days</span>
+          <span class="metric-value"><?= formatMetricNumber(getIntValue($redis, 'uptime_in_days', 0)) ?> days</span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Version</span>
@@ -181,11 +185,11 @@ ob_start();
         <h2>📈 <?php echo metrics_index_i18n('ADMIN_DASHBOARD_PLATFORM_METRICS_TITLE'); ?></h2>
         <div class="metric-row">
           <span class="metric-label">Total Users</span>
-          <span class="metric-value success"><?= number_format(getIntValue($business, 'total_users', 0)) ?></span>
+          <span class="metric-value success"><?= formatMetricNumber(getIntValue($business, 'total_users', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Total Work Entries</span>
-          <span class="metric-value"><?= number_format(getIntValue($business, 'total_work_entries', 0)) ?></span>
+          <span class="metric-value"><?= formatMetricNumber(getIntValue($business, 'total_work_entries', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Avg Entries/User</span>
@@ -197,19 +201,19 @@ ob_start();
         </div>
         <div class="metric-row">
           <span class="metric-label">Total Sites</span>
-          <span class="metric-value"><?= number_format(getIntValue($business, 'total_sites', 0)) ?></span>
+          <span class="metric-value"><?= formatMetricNumber(getIntValue($business, 'total_sites', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Active Sites</span>
-          <span class="metric-value success"><?= number_format(getIntValue($business, 'active_sites', 0)) ?></span>
+          <span class="metric-value success"><?= formatMetricNumber(getIntValue($business, 'active_sites', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Archived Sites</span>
-          <span class="metric-value"><?= number_format(getIntValue($business, 'archived_sites', 0)) ?></span>
+          <span class="metric-value"><?= formatMetricNumber(getIntValue($business, 'archived_sites', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Max Entries (Single User)</span>
-          <span class="metric-value"><?= number_format(getIntValue($business, 'max_work_entries_single_user', 0)) ?></span>
+          <span class="metric-value"><?= formatMetricNumber(getIntValue($business, 'max_work_entries_single_user', 0)) ?></span>
         </div>
       </div>
     </div>
@@ -221,7 +225,7 @@ ob_start();
         <?php foreach ($keys ?? [] as $namespace => $count): ?>
           <div class="metric-row">
             <span class="metric-label"><?= htmlspecialchars((string)$namespace) ?>:*</span>
-            <span class="metric-value"><?= number_format((float)$count) ?> keys</span>
+            <span class="metric-value"><?= formatMetricNumber((float) $count) ?> keys</span>
           </div>
         <?php endforeach; ?>
       </div>
@@ -236,7 +240,7 @@ ob_start();
             <div class="metric-row">
               <span class="metric-label"><?= htmlspecialchars((string)$eventType) ?></span>
               <span class="metric-value <?= str_contains($eventType, 'failure') ? 'danger' : 'success' ?>">
-                <?= number_format((float)$count) ?>
+                <?= formatMetricNumber((float) $count) ?>
               </span>
             </div>
           <?php endforeach; ?>
@@ -253,27 +257,27 @@ ob_start();
         <h2>💳 <?php echo metrics_index_i18n('ADMIN_METRICS_STRIPE_WEBHOOKS_TODAY'); ?></h2>
         <div class="metric-row">
           <span class="metric-label">Processed</span>
-          <span class="metric-value success"><?= number_format(getIntValue($billingWebhookOutcomes, 'processed', 0)) ?></span>
+          <span class="metric-value success"><?= formatMetricNumber(getIntValue($billingWebhookOutcomes, 'processed', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Duplicates</span>
-          <span class="metric-value"><?= number_format(getIntValue($billingWebhookOutcomes, 'duplicate', 0)) ?></span>
+          <span class="metric-value"><?= formatMetricNumber(getIntValue($billingWebhookOutcomes, 'duplicate', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Verification Failed</span>
-          <span class="metric-value danger"><?= number_format(getIntValue($billingWebhookOutcomes, 'verification_failed', 0)) ?></span>
+          <span class="metric-value danger"><?= formatMetricNumber(getIntValue($billingWebhookOutcomes, 'verification_failed', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Rejected Events</span>
-          <span class="metric-value danger"><?= number_format(getIntValue($billingWebhookOutcomes, 'event_rejected', 0)) ?></span>
+          <span class="metric-value danger"><?= formatMetricNumber(getIntValue($billingWebhookOutcomes, 'event_rejected', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Empty Payloads</span>
-          <span class="metric-value danger"><?= number_format(getIntValue($billingWebhookOutcomes, 'payload_empty', 0)) ?></span>
+          <span class="metric-value danger"><?= formatMetricNumber(getIntValue($billingWebhookOutcomes, 'payload_empty', 0)) ?></span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Missing Signatures</span>
-          <span class="metric-value danger"><?= number_format(getIntValue($billingWebhookOutcomes, 'signature_missing', 0)) ?></span>
+          <span class="metric-value danger"><?= formatMetricNumber(getIntValue($billingWebhookOutcomes, 'signature_missing', 0)) ?></span>
         </div>
 
         <?php if (!empty($billingWebhookEvents)): ?>
@@ -283,8 +287,8 @@ ob_start();
               <div class="metric-row">
                 <span class="metric-label"><?= htmlspecialchars((string) $eventType) ?></span>
                 <span class="metric-value">
-                  <?= number_format(getIntValue($eventSummary, 'processed', 0)) ?> <?php echo metrics_index_i18n('ADMIN_STRIPE_PROCESSED_LOWER'); ?> /
-                  <?= number_format(getIntValue($eventSummary, 'duplicate', 0)) ?> <?php echo metrics_index_i18n('ADMIN_STRIPE_DUPLICATE_LOWER'); ?>
+                  <?= formatMetricNumber(getIntValue($eventSummary, 'processed', 0)) ?> <?php echo metrics_index_i18n('ADMIN_STRIPE_PROCESSED_LOWER'); ?> /
+                  <?= formatMetricNumber(getIntValue($eventSummary, 'duplicate', 0)) ?> <?php echo metrics_index_i18n('ADMIN_STRIPE_DUPLICATE_LOWER'); ?>
                 </span>
               </div>
             <?php endforeach; ?>
@@ -303,39 +307,39 @@ ob_start();
       <h2>🛡️ <?php echo metrics_index_i18n('SCRAPER_DEFENSE'); ?></h2>
       <div class="metric-row">
         <span class="metric-label">Total Attempts</span>
-        <span class="metric-value danger"><?= number_format(getIntValue($scraperDefense, 'total_attempts', 0)) ?></span>
+        <span class="metric-value danger"><?= formatMetricNumber(getIntValue($scraperDefense, 'total_attempts', 0)) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Avg Attempts / Day</span>
-        <span class="metric-value"><?= number_format(getFloatValue($scraperDefense, 'avg_per_day', 0.0), 2) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getFloatValue($scraperDefense, 'avg_per_day', 0.0), 2) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Avg Attempts / Week</span>
-        <span class="metric-value"><?= number_format(getFloatValue($scraperDefense, 'avg_per_week', 0.0), 2) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getFloatValue($scraperDefense, 'avg_per_week', 0.0), 2) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Avg Attempts / Month</span>
-        <span class="metric-value"><?= number_format(getFloatValue($scraperDefense, 'avg_per_month', 0.0), 2) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getFloatValue($scraperDefense, 'avg_per_month', 0.0), 2) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Avg Attempts / Year</span>
-        <span class="metric-value"><?= number_format(getFloatValue($scraperDefense, 'avg_per_year', 0.0), 2) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getFloatValue($scraperDefense, 'avg_per_year', 0.0), 2) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Attempts Today</span>
-        <span class="metric-value"><?= number_format(getIntValue($scraperDefense, 'attempts_today', 0)) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getIntValue($scraperDefense, 'attempts_today', 0)) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Attempts This Week</span>
-        <span class="metric-value"><?= number_format(getIntValue($scraperDefense, 'attempts_this_week', 0)) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getIntValue($scraperDefense, 'attempts_this_week', 0)) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Attempts This Month</span>
-        <span class="metric-value"><?= number_format(getIntValue($scraperDefense, 'attempts_this_month', 0)) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getIntValue($scraperDefense, 'attempts_this_month', 0)) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Attempts This Year</span>
-        <span class="metric-value"><?= number_format(getIntValue($scraperDefense, 'attempts_this_year', 0)) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getIntValue($scraperDefense, 'attempts_this_year', 0)) ?></span>
       </div>
     </div>
 
@@ -344,27 +348,27 @@ ob_start();
       <h2>✉️ <?php echo metrics_index_i18n('ADMIN_CONTACT_PIPELINE_HEALTH'); ?></h2>
       <div class="metric-row">
         <span class="metric-label">Total Submissions</span>
-        <span class="metric-value"><?= number_format(getIntValue($contact, 'total_submissions', 0)) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getIntValue($contact, 'total_submissions', 0)) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Successful Submissions</span>
-        <span class="metric-value success"><?= number_format(getIntValue($contact, 'successful_submissions', 0)) ?></span>
+        <span class="metric-value success"><?= formatMetricNumber(getIntValue($contact, 'successful_submissions', 0)) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Failed Submissions</span>
-        <span class="metric-value danger"><?= number_format(getIntValue($contact, 'failed_submissions', 0)) ?></span>
+        <span class="metric-value danger"><?= formatMetricNumber(getIntValue($contact, 'failed_submissions', 0)) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Today (Total / Success / Failure)</span>
-        <span class="metric-value"><?= number_format(getIntValue($contact, 'today_total', 0)) ?> / <?= number_format(getIntValue($contact, 'today_success', 0)) ?> / <?= number_format(getIntValue($contact, 'today_failure', 0)) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getIntValue($contact, 'today_total', 0)) ?> / <?= formatMetricNumber(getIntValue($contact, 'today_success', 0)) ?> / <?= formatMetricNumber(getIntValue($contact, 'today_failure', 0)) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Week Total</span>
-        <span class="metric-value"><?= number_format(getIntValue($contact, 'week_total', 0)) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getIntValue($contact, 'week_total', 0)) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Month Total</span>
-        <span class="metric-value"><?= number_format(getIntValue($contact, 'month_total', 0)) ?></span>
+        <span class="metric-value"><?= formatMetricNumber(getIntValue($contact, 'month_total', 0)) ?></span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Last Submission</span>
@@ -380,15 +384,15 @@ ob_start();
       </div>
       <div class="metric-row">
         <span class="metric-label">Log Size</span>
-        <span class="metric-value"><?= number_format(getIntValue($contact, 'log_size_bytes', 0)) ?> bytes</span>
+        <span class="metric-value"><?= formatMetricNumber(getIntValue($contact, 'log_size_bytes', 0)) ?> bytes</span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Rotation Policy</span>
-        <span class="metric-value">max <?= number_format(getIntValue($contact, 'rotation_max_bytes', 0)) ?> bytes, keep <?= number_format(getIntValue($contact, 'rotation_keep_files', 0)) ?> files</span>
+        <span class="metric-value">max <?= formatMetricNumber(getIntValue($contact, 'rotation_max_bytes', 0)) ?> bytes, keep <?= formatMetricNumber(getIntValue($contact, 'rotation_keep_files', 0)) ?> files</span>
       </div>
       <div class="metric-row">
         <span class="metric-label">Log Write Failures</span>
-        <span class="metric-value <?= getIntValue($contact, 'log_write_failures', 0) > 0 ? 'danger' : 'success' ?>"><?= number_format(getIntValue($contact, 'log_write_failures', 0)) ?></span>
+        <span class="metric-value <?= getIntValue($contact, 'log_write_failures', 0) > 0 ? 'danger' : 'success' ?>"><?= formatMetricNumber(getIntValue($contact, 'log_write_failures', 0)) ?></span>
       </div>
     </div>
 
@@ -413,7 +417,7 @@ ob_start();
             ?>
             <div class="metric-row">
               <span class="metric-label"><?= htmlspecialchars($rowName) ?></span>
-              <span class="metric-value danger"><?= number_format($rowAttempts) ?></span>
+              <span class="metric-value danger"><?= formatMetricNumber($rowAttempts) ?></span>
             </div>
           <?php endforeach; ?>
         <?php endif; ?>

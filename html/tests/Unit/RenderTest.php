@@ -28,6 +28,7 @@ final class RenderTest extends TestCase
 
   protected function tearDown(): void
   {
+    Environment::bootstrap($_ENV);
     Render::setStrictMode(false);
     $this->removeDirRecursive($this->tempRoot);
   }

@@ -1059,6 +1059,32 @@ export function downloadPdfFile(pdfData, filename = 'earnings-report.pdf') {
   window.URL.revokeObjectURL(url);
 }
 
+export async function downloadXlsxFile(scope, rows, report, filename, startDate = '', endDate = '') {
+  const year = Number(report?.meta?.year) || new Date().getFullYear();
+  const body = JSON.stringify({ scope, rows, report, year, start_date: startDate, end_date: endDate });
+
+  const resp = await fetch('/api/v1/export/xlsx', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  });
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`XLSX export failed (${resp.status}): ${text}`);
+  }
+
+  const blob = await resp.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
+
 const EarningsExport = {
   buildDetailedRows,
   buildYearlyReportJson,
@@ -1074,6 +1100,7 @@ const EarningsExport = {
   generatePdfWithExternalUtility,
   downloadPdfFile,
   downloadTextFile,
+  downloadXlsxFile,
 };
 
 if (typeof window !== 'undefined') {

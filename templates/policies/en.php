@@ -112,6 +112,8 @@
 
       <h3>10. Contact</h3>
 
+      <p>PayCal maintains SOC 2 aligned controls for security and operational integrity.</p>
+
       <p>If you have questions about these terms, email <a href="mailto:info@paycal.app">info@paycal.app</a>.</p>
     </section>
   </section>
@@ -184,6 +186,8 @@
       <p>We may update this policy from time to time. When we do, we will update the date on this page.</p>
 
       <h3>10. Contact</h3>
+
+      <p>PayCal maintains SOC 2 aligned controls for security and operational integrity.</p>
 
       <p>If you have privacy questions, email <a href="mailto:info@paycal.app">info@paycal.app</a>.</p>
     </section>

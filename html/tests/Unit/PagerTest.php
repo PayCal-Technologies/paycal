@@ -3,7 +3,7 @@
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PayCal\Domain\Pager;
+use PayCal\Infrastructure\Persistence\Pager;
 use PayCal\Domain\Redis;
 use PHPUnit\Framework\Attributes\Group;
 

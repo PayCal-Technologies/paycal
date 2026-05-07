@@ -54,7 +54,7 @@ require_once HTML.'/header.php';
         <p>Recente productvormende updates, inclusief facturatie en profielgovernance-flows, worden bijgehouden op onze pagina's voor framework/backend en testgovernance.</p>
       </section>
 
-      <div class="doc-panel-grid" aria-label="Transparantie detailpanelen">
+      <div class="doc-panel-grid doc-panel-grid--responsive-3" aria-label="Transparantie detailpanelen">
         <section class="doc-section">
           <h2>Status beveiligingsaudit</h2>
           <p class="doc-article-meta">Published: <time datetime="2026-03-23">2026-03-23</time></p>

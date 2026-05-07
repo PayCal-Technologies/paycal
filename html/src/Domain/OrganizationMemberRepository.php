@@ -5,6 +5,32 @@ namespace PayCal\Domain;
 use PayCal\Domain\Constants\Keys;
 
 /**
+ * OrganizationMemberRepository.php
+ *
+ * Purpose: Organization membership repository for enumerating relationships,
+ * role data, and user-to-organization membership mirrors from Redis.
+ *
+ * Developer notes:
+ * - This repository is intentionally read-focused and should not absorb access
+ *   control policy from calling services or controllers.
+ * - Keep key-layout assumptions aligned with the structures written by the
+ *   organization discovery domain.
+ *
+ * Architectural role:
+ * - Reusable domain repository for organization membership queries and lookup
+ *   helpers consumed by higher-level services.
+ * - Encapsulates membership data access outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Core
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
  * OrganizationMemberRepository
  *
  * Pure data-access layer for enumerating and querying org membership.
@@ -13,11 +39,6 @@ use PayCal\Domain\Constants\Keys;
  * Key layout (read-only mirrors of what ODS writes):
  *   organization:relationship:{orgId}:{userUUID}  – HASH: role, status, scopes, user_uuid, updated_at
  *   organization:user:{userUUID}                  – SET of orgIds the user belongs to
- *
- * PHP version 8.4.16
- *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
  *
  * @category   Domain
  * @package    PayCal\Domain

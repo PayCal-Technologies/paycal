@@ -60,6 +60,10 @@ if (!defined('USER_UUID')) {
   define('USER_UUID', 'test-user-uuid-001');
 }
 
+if (!defined('USER_LANGUAGE')) {
+  define('USER_LANGUAGE', 'en');
+}
+
 if (!defined('YEAR')) {
   define('YEAR', (int) date('Y'));
 }

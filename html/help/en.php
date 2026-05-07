@@ -51,9 +51,10 @@ require_once HTML.'/header.php';
         <section class="doc-section highlight">
           <p><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_INTRO'), ENT_QUOTES, 'UTF-8'); ?></p>
           <p><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ACCESSIBILITY_PREFIX'), ENT_QUOTES, 'UTF-8'); ?> <a href="/transparency/accessibility/"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ACCESSIBILITY_LINK'), ENT_QUOTES, 'UTF-8'); ?></a>.</p>
+          <p><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_TRANSPARENCY_HUB_PREFIX'), ENT_QUOTES, 'UTF-8'); ?> <a href="/transparency/"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_TRANSPARENCY_HUB'), ENT_QUOTES, 'UTF-8'); ?></a>.</p>
         </section>
 
-        <div class="doc-panel-grid" aria-label="<?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ARIA'), ENT_QUOTES, 'UTF-8'); ?>">
+        <div class="doc-panel-grid doc-panel-grid--responsive-3" aria-label="<?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ARIA'), ENT_QUOTES, 'UTF-8'); ?>">
 
           <section class="doc-section">
             <h2><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_GETTING_STARTED'), ENT_QUOTES, 'UTF-8'); ?></h2>

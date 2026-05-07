@@ -5,6 +5,31 @@ namespace PayCal\Domain;
 use PayCal\Domain\Attributes\ExtensionHook;
 
 /**
+ * EarningsYtdExtensionBridge.php
+ *
+ * Purpose: Bridge year-to-date earnings rendering from core payloads into
+ * optional extension paths and hook-based implementations.
+ *
+ * Developer notes:
+ * - YTD rendering must preserve core payload expectations whether extensions
+ *   are loaded from override, basic, or hook-driven paths.
+ * - Keep extension-mode handling explicit so fallback behavior stays legible.
+ *
+ * Architectural role:
+ * - Reusable domain bridge that isolates YTD extension dispatch and file-path
+ *   lookup from core earnings flows.
+ * - Encapsulates optional extension wiring outside the HTTP layer.
+ *
+ * @category   Domain
+ * @package    PayCal\Domain
+ * @subpackage Extensions
+ * @author     Chris Simmons <cshaiku@gmail.com>
+ * @copyright  2026 PayCal Technologies Inc.
+ * @license    Proprietary License - See LICENSE.txt for full terms
+ * @version    1.051.001
+ */
+
+/**
  * Isolates core Earnings domain from concrete extension paths/classes.
  */
 final class EarningsYtdExtensionBridge
@@ -41,9 +66,6 @@ final class EarningsYtdExtensionBridge
    * @param array<string, string> $payload
    */
   #[ExtensionHook('earnings.ytd.render')]
-  /**
-   * Handles renderFromHookBusAuto operation.
-   */
   public static function renderFromHookBusAuto(int $year, array $payload): ?string
   {
     /** @var array<int, mixed> $hookResults */

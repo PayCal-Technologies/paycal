@@ -60,6 +60,7 @@ final class BillingControllerUrlNormalizationTest extends TestCase
 
   protected function tearDown(): void
   {
+    Environment::bootstrap($_ENV);
     $_SERVER = $this->serverBackup;
     putenv('TRUSTED_PROXIES');
     parent::tearDown();
