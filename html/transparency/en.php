@@ -74,6 +74,12 @@ $i18nKeys = [
   'TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_2',
   'TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_3',
   'TRANSPARENCY_HUB_DEPENDENCY_CI_READ_MORE',
+  'TRANSPARENCY_HUB_PHP_PACKAGES_TITLE',
+  'TRANSPARENCY_HUB_PHP_PACKAGES_TEXT_1',
+  'TRANSPARENCY_HUB_PHP_PACKAGES_FACT_1',
+  'TRANSPARENCY_HUB_PHP_PACKAGES_FACT_2',
+  'TRANSPARENCY_HUB_PHP_PACKAGES_FACT_3',
+  'TRANSPARENCY_HUB_PHP_PACKAGES_READ_MORE',
   'TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TITLE',
   'TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TEXT_1',
   'TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_1',
@@ -298,6 +304,19 @@ require_once HTML.'/header.php';
             <li><?php echo $i18n['TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_3']; ?></li>
           </ul>
           <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/dependency-ci/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
+          <h2><?php echo $i18n['TRANSPARENCY_HUB_PHP_PACKAGES_TITLE']; ?></h2>
+
+            <p class="doc-article-meta">Published: <time datetime="2026-05-07">2026-05-07</time></p>
+          <p><?php echo $i18n['TRANSPARENCY_HUB_PHP_PACKAGES_TEXT_1']; ?></p>
+          <ul class="doc-fact-list">
+            <li><?php echo $i18n['TRANSPARENCY_HUB_PHP_PACKAGES_FACT_1']; ?></li>
+            <li><?php echo $i18n['TRANSPARENCY_HUB_PHP_PACKAGES_FACT_2']; ?></li>
+            <li><?php echo $i18n['TRANSPARENCY_HUB_PHP_PACKAGES_FACT_3']; ?></li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/php-packages/'); ?>"><?php echo $i18n['TRANSPARENCY_HUB_PHP_PACKAGES_READ_MORE']; ?></a></p>
         </section>
 
         <section class="doc-section">

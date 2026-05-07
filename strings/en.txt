@@ -1234,6 +1234,9 @@ ORGANIZATIONS_FREE_AUDIT_ARIA My organization audit timeline
 ORGANIZATIONS_FREE_AUDIT_EMPTY No audit events found for this profile yet.
 ORGANIZATIONS_FREE_AUDIT_PANEL_HELP Audit events related to your profile in the current organization.
 ORGANIZATIONS_FREE_AUDIT_SR Audit timeline related to your current profile. Each row includes time, event type, actor, and details.
+ORGANIZATIONS_FREE_INTRO_HELP Search for organizations to connect with, or review your current membership below. Creating and managing organizations requires Premium.
+ORGANIZATIONS_FREE_INTRO_PANEL_HELP Organization discovery and membership overview.
+ORGANIZATIONS_FREE_INTRO_TITLE Find Your Organization
 ORGANIZATIONS_GRID_ARIA Organizations results
 ORGANIZATIONS_GRID_PANEL_HELP Browse and filter your organizations. Select a row to open organization details.
 ORGANIZATIONS_GRID_PLACEHOLDER Your organizations will appear here.
@@ -1241,7 +1244,7 @@ ORGANIZATIONS_GRID_SR_CONTEXT Rows include organization name, type, role, and st
 ORGANIZATIONS_GRID_SR_INSTRUCTIONS Organizations grid. Use search to filter organizations and click a row to view details.
 ORGANIZATIONS_HEADER_PANEL_HELP Manage organizations and create a new organization from this header panel.
 ORGANIZATIONS_HTML <em>O</em>rganizations
-ORGANIZATIONS_HUB_CALLOUT_FREE Join an organization or grant member access to your work.
+ORGANIZATIONS_HUB_CALLOUT_FREE Find and connect with an organization, or view your current membership.
 ORGANIZATIONS_HUB_CALLOUT_PREMIUM If you need to connect with another organization or share your own personal work data, you can do that too!
 ORGANIZATIONS_HUB_PANEL_HELP Access request and member-access tools for collaborating across organizations.
 ORGANIZATIONS_IMPORT_BTN_COMMIT 3. Send Invites
@@ -1507,10 +1510,10 @@ PROFILE_BILLING_DOWNGRADE_HELP If Stripe portal does not show a cancellation opt
 PROFILE_BILLING_DOWNGRADE_PHRASE DOWNGRADE ME
 PROFILE_BILLING_DOWNGRADE_PROMPT_PREFIX Type
 PROFILE_BILLING_FREE_ARIA Current free plan details
-PROFILE_BILLING_FREE_HELP You are on Free. Upgrade for shared organizations and advanced payroll tools.
+PROFILE_BILLING_FREE_HELP You are on Free. Connect with organizations as a member, or upgrade to create and manage your own.
 PROFILE_BILLING_FREE_PLAN Free Plan
 PROFILE_BILLING_MEMBER_SINCE Member since
-PROFILE_BILLING_ORGS_LINK Check out your new Organizations page!
+PROFILE_BILLING_ORGS_LINK Go to Organizations
 PROFILE_BILLING_PANEL_HELP View and manage your subscription and billing.
 PROFILE_BILLING_PLAN_PREMIUM Premium
 PROFILE_BILLING_PORTAL_BUTTON Manage Billing in Stripe
@@ -1973,6 +1976,40 @@ TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW4_CONTROL Theme-level contrast conformance v
 TRANSPARENCY_DEPENDENCY_CI_USAGE_ROW4_PURPOSE Contrast matrix generation
 TRANSPARENCY_DEPENDENCY_CI_USAGE_TITLE What npm Is Used For
 TRANSPARENCY_DEPENDENCY_CI_VERIFICATION_METADATA_TITLE Verification Metadata
+TRANSPARENCY_PHP_PACKAGES_CICD_GATE_TEXT_1 Every change must pass PHPStan Level 9 and the full PHPUnit test suite before it can be merged. Composer is locked to a deterministic dependency graph — no floating versions in production.
+TRANSPARENCY_PHP_PACKAGES_CICD_GATE_TITLE CI/CD Controls
+TRANSPARENCY_PHP_PACKAGES_CVE_TEXT_1 Periodically GitHub Dependabot alerts flag packages as vulnerable. Before removing or replacing a package, PayCal verifies the specific CVE status at the installed version using the upstream advisory and the Packagist security database. During the 2026-05 audit, four moderate Dependabot alerts were raised. Investigation confirmed all four were already patched at the installed versions — no remediation action was required.
+TRANSPARENCY_PHP_PACKAGES_CVE_TEXT_2 Separately, two packages — erusev/parsedown and yupmin/magoo — were found to have no usage anywhere in the codebase. They were removed regardless of CVE status. A package that is not loaded is a package that cannot be exploited.
+TRANSPARENCY_PHP_PACKAGES_CVE_TITLE CVE Review and the 2026-05 Audit
+TRANSPARENCY_PHP_PACKAGES_DECK This page documents every PHP package PayCal directly depends on, why each is included, and the philosophy behind our approach to third-party dependencies.
+TRANSPARENCY_PHP_PACKAGES_DEV_DEPS_TEXT_1 Dev-time dependencies are never loaded in production. The following packages are used exclusively during development and CI.
+TRANSPARENCY_PHP_PACKAGES_DEV_DEPS_TITLE Development-Only Dependencies
+TRANSPARENCY_PHP_PACKAGES_HOW_TO_VERIFY_TITLE How to Verify
+TRANSPARENCY_PHP_PACKAGES_LAST_VERIFIED_LABEL Last verified:
+TRANSPARENCY_PHP_PACKAGES_NEXT_REVIEW_LABEL Next review due:
+TRANSPARENCY_PHP_PACKAGES_PAGE_TITLE PHP Package Dependency Transparency
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_FACT_1 Every package must justify its existence by active call sites. A zero-reference dependency is removed regardless of CVE status.
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_FACT_2 When a package is only used at one or two narrow call sites, we evaluate whether a first-party implementation is practical. Fewer moving parts means a smaller attack surface.
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_FACT_3 All packages are pinned in composer.lock. No floating versions. No silent upgrades.
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_FACT_4 Transitive dependencies are reviewed as a side effect of direct dependency audits. Orphaned vendor directories are removed.
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_TEXT_1 PayCal's position on third-party dependencies is: use the minimum possible, own what is practical to own, and pin everything else. This is not a reaction to a specific incident — it is the standing default.
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_TITLE Our Dependency Philosophy
+TRANSPARENCY_PHP_PACKAGES_PHPDOTENV_DECISION_TEXT_1 PayCal previously loaded .env files using vlucas/phpdotenv, a widely-used library with three transitive dependencies (phpoption, graham-campbell/result-type). The library was used at exactly two call sites: one safeLoad in the bootstrap file, and one load in config.php.
+TRANSPARENCY_PHP_PACKAGES_PHPDOTENV_DECISION_TEXT_2 Rather than maintain an external dependency for 11 lines of active usage, we wrote PayCal\Infrastructure\Env\Dotenv — a 140-line first-party class that covers the full surface we actually use: KEY=VALUE parsing, blank and comment skipping, optional quote stripping, inline comment stripping, immutable mode, and a forceKeys override for specific keys (which eliminated a separate 20-line manual workaround that had existed in config.php for the SMTP password).
+TRANSPARENCY_PHP_PACKAGES_PHPDOTENV_DECISION_TEXT_3 The replacement removed 63 vendor files and three packages from the dependency graph. The public source for PayCal\Infrastructure\Env\Dotenv is available in the public repository.
+TRANSPARENCY_PHP_PACKAGES_PHPDOTENV_DECISION_TITLE Why We Replaced vlucas/phpdotenv
+TRANSPARENCY_PHP_PACKAGES_ROUTE_LABEL Route:
+TRANSPARENCY_PHP_PACKAGES_RUNTIME_DEPS_TEXT_1 These are the only PHP packages loaded in a production request. Each is justified by active usage and has no alternative that would reduce the dependency further without significant first-party engineering effort.
+TRANSPARENCY_PHP_PACKAGES_RUNTIME_DEPS_TITLE Runtime Dependencies
+TRANSPARENCY_PHP_PACKAGES_SCOPE_LABEL Verification scope:
+TRANSPARENCY_PHP_PACKAGES_SCOPE_VALUE Composer runtime and dev-time direct dependencies, transitive dependency graph, CVE status, and replacement decisions.
+TRANSPARENCY_PHP_PACKAGES_TABLE_ARIA PHP runtime dependency table
+TRANSPARENCY_PHP_PACKAGES_TABLE_DEV_ARIA PHP dev-time dependency table
+TRANSPARENCY_PHP_PACKAGES_TABLE_PACKAGE Package
+TRANSPARENCY_PHP_PACKAGES_TABLE_PURPOSE Purpose
+TRANSPARENCY_PHP_PACKAGES_TABLE_TRANSITIVE Transitive packages pulled in
+TRANSPARENCY_PHP_PACKAGES_TABLE_VERSION Version
+TRANSPARENCY_PHP_PACKAGES_VERIFICATION_METADATA_TITLE Verification Metadata
 TRANSPARENCY_EMAIL_DECK This page explains which emails PayCal sends, how each message is assembled and delivered, and how we verify reliability.
 TRANSPARENCY_EMAIL_DELIVERY_PIPELINE_TITLE Delivery Pipeline
 TRANSPARENCY_EMAIL_DELIVERY_TEXT_1 PayCal uses a two-layer email stack:
@@ -2367,6 +2404,12 @@ TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_1 Documents lockfile-first npm policy and
 TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_2 Maps JavaScript quality gates and backend pipeline stages to workflow controls.
 TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_3 Lists known documentation limitations and planned governance improvements.
 TRANSPARENCY_HUB_DEPENDENCY_CI_READ_MORE Read dependency and CI/CD governance policy
+TRANSPARENCY_HUB_PHP_PACKAGES_FACT_1 Documents all runtime and dev-time PHP packages with active-usage justification for each.
+TRANSPARENCY_HUB_PHP_PACKAGES_FACT_2 Explains the decision to replace vlucas/phpdotenv with a first-party implementation.
+TRANSPARENCY_HUB_PHP_PACKAGES_FACT_3 Covers the 2026-05 CVE audit outcome and our broader dependency philosophy.
+TRANSPARENCY_HUB_PHP_PACKAGES_READ_MORE Read PHP package dependency transparency
+TRANSPARENCY_HUB_PHP_PACKAGES_TEXT_1 This article documents every PHP package PayCal directly depends on, how CVEs are evaluated, and the principle that drives dependency decisions.
+TRANSPARENCY_HUB_PHP_PACKAGES_TITLE PHP Package Dependency Transparency
 TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TITLE Framework and Backend Change Ledger
 TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TEXT_1 This page tracks backend architecture and framework-level changes with public explanations of what changed and why.
 TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_1 Summarizes service/controller changes that materially affect behavior.
