@@ -1515,35 +1515,62 @@ POLICIES_PAGE_TITLE PayCal Policies
 POLICIES_STRIPE_BILLING_NOTE PayCal subscription billing is processed by Stripe. Stripe support is available at
 PREVIOUS Previous
 PREVIOUS_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -900 600 600" width="24"><path d="m 432 -480 l 156 156 q 11 11 11 28 t -11 28 q -11 11 -28 11 t -28 -11 L 348 -452 q -6 -6 -8.5 -13 t -2.5 -15 q 0 -8 2.5 -15 t 8.5 -13 l 184 -184 q 11 -11 28 -11 t 28 11 q 11 11 11 28 t -11 28 L 432 -480 Z"/></svg>
-PREMIUM_PAGE_ACCESS_BODY PayCal meets WCAG 2.1 AA accessibility standards. Full keyboard navigation, screen reader support, dyslexia-friendly typography, and high-contrast themes are available to all users — free and premium alike.
-PREMIUM_PAGE_ACCESS_TITLE Built for everyone.
 PREMIUM_PAGE_COL_FEATURE Feature
 PREMIUM_PAGE_COL_FREE Free
 PREMIUM_PAGE_COL_PREMIUM Premium
 PREMIUM_PAGE_COMPARE_TITLE Free vs Premium
-PREMIUM_PAGE_CTA_UPGRADE Upgrade Securely
-PREMIUM_PAGE_DECK Track your earnings, manage your team, and run payroll with confidence.
-PREMIUM_PAGE_FAQ_A1 Yes. Premium is billed monthly at $4.99 CAD. You can cancel at any time from your profile page, with no penalty.
-PREMIUM_PAGE_FAQ_A2 Your personal records and earnings history stay intact. You lose access to organization management features, but your individual data is never deleted.
-PREMIUM_PAGE_FAQ_A3 Yes. Free users can be invited to and join organizations as members. Premium is only required to create and manage your own organization.
-PREMIUM_PAGE_FAQ_A4 Payment is handled entirely by Stripe. PayCal never stores your card number or billing details.
-PREMIUM_PAGE_FAQ_Q1 Is Premium a subscription?
-PREMIUM_PAGE_FAQ_Q2 What happens to my data if I cancel?
-PREMIUM_PAGE_FAQ_Q3 Can I join a team without Premium?
-PREMIUM_PAGE_FAQ_Q4 Is my payment information secure?
+PREMIUM_PAGE_CTA_COMPARE Compare Plans
+PREMIUM_PAGE_CTA_UPGRADE Create My Organization
+PREMIUM_PAGE_FAQ_A1 No. Personal payroll tracking remains free.
+PREMIUM_PAGE_FAQ_A2 Premium allows you to create and manage organizations and teams.
+PREMIUM_PAGE_FAQ_A3 No. Pricing is per organization.
+PREMIUM_PAGE_FAQ_A4 Yes.
+PREMIUM_PAGE_FAQ_A5 Yes. Workers can still track their own hours and records for free.
+PREMIUM_PAGE_FAQ_Q1 Is Premium required to use PayCal?
+PREMIUM_PAGE_FAQ_Q2 What does Premium unlock?
+PREMIUM_PAGE_FAQ_Q3 Is pricing per user?
+PREMIUM_PAGE_FAQ_Q4 Can I cancel anytime?
+PREMIUM_PAGE_FAQ_Q5 Can workers use PayCal without Premium?
 PREMIUM_PAGE_FAQ_TITLE Common questions
-PREMIUM_PAGE_HERO_DECK Track your earnings, manage your team, and run payroll with confidence.
-PREMIUM_PAGE_HERO_H1 Built for workers and teams.
-PREMIUM_PAGE_ORGS_BODY Organizations are shared workspaces where managers and employees track payroll together. With Premium, you create your own organization, invite your team, assign roles, and manage payroll access — all in one place.
-PREMIUM_PAGE_ORGS_TITLE What are Organizations?
-PREMIUM_PAGE_PRICE_NOTE Premium — $4.99 CAD/month. Cancel anytime.
+PREMIUM_PAGE_FINAL_BODY Create your organization and start managing payroll records securely with PayCal.
+PREMIUM_PAGE_FINAL_TITLE Ready to organize your team payroll workflow?
+PREMIUM_PAGE_FREE_TAGLINE Track your own work hours and earnings for free.
+PREMIUM_PAGE_HERO_DECK Create an organization, invite workers, assign roles, review hours, and keep payroll records organized in one secure workspace.
+PREMIUM_PAGE_HERO_H1 Run payroll tracking for your team.
+PREMIUM_PAGE_ORG_FEATURE1_BODY View team activity and payroll records from a central workspace.
+PREMIUM_PAGE_ORG_FEATURE1_TITLE Organization Dashboard
+PREMIUM_PAGE_ORG_FEATURE2_BODY Assign owners, managers, members, and viewers with controlled permissions.
+PREMIUM_PAGE_ORG_FEATURE2_TITLE Role-Based Access
+PREMIUM_PAGE_ORG_FEATURE3_BODY Keep payroll records organized across your organization.
+PREMIUM_PAGE_ORG_FEATURE3_TITLE Shared Payroll Visibility
+PREMIUM_PAGE_ORG_FEATURE4_BODY Built with encryption-first architecture and worker privacy in mind.
+PREMIUM_PAGE_ORG_FEATURE4_TITLE Secure Team Collaboration
+PREMIUM_PAGE_ORGS_TITLE Organization Features
+PREMIUM_PAGE_PREMIUM_TAGLINE Built for managers, small businesses, contractors, and growing teams.
+PREMIUM_PAGE_PRICE_NOTE $4.99 CAD/month per organization. Cancel anytime.
 PREMIUM_PAGE_PRICING_NOTE No contracts. Cancel anytime. Full Premium access the moment you upgrade.
 PREMIUM_PAGE_PRICING_TITLE Simple pricing.
-PREMIUM_PAGE_SECURITY_BODY PayCal uses zero-knowledge encryption. Your payroll records and earnings data are encrypted before being stored. We cannot read your data — and neither can anyone else.
-PREMIUM_PAGE_SECURITY_TITLE Your data stays private.
 PREMIUM_PAGE_STRIPE_LINK Contact PayCal support
 PREMIUM_PAGE_STRIPE_NOTE Secure billing powered by Stripe. Questions?
 PREMIUM_PAGE_TITLE Premium — PayCal
+PREMIUM_PAGE_TRUST_ACCESS_BODY Built to remain usable and understandable for everyone.
+PREMIUM_PAGE_TRUST_ACCESS_TITLE Accessible
+PREMIUM_PAGE_TRUST_PRIVATE_BODY Worker information is handled with privacy-focused controls.
+PREMIUM_PAGE_TRUST_PRIVATE_TITLE Private
+PREMIUM_PAGE_TRUST_SECURE_BODY Encryption-first architecture designed to protect payroll data.
+PREMIUM_PAGE_TRUST_SECURE_TITLE Secure
+PREMIUM_PAGE_TRUST_TITLE Built to be trusted.
+PREMIUM_PAGE_TRUST_TRANSPARENT_BODY Clear payroll calculations and audit-friendly record keeping.
+PREMIUM_PAGE_TRUST_TRANSPARENT_TITLE Transparent
+PREMIUM_PAGE_WHO_BOOKKEEPER_BODY Review and export payroll-ready records quickly.
+PREMIUM_PAGE_WHO_BOOKKEEPER_TITLE Bookkeepers
+PREMIUM_PAGE_WHO_BIZ_BODY Manage employee hours and payroll records in one place.
+PREMIUM_PAGE_WHO_BIZ_TITLE Small Businesses
+PREMIUM_PAGE_WHO_CONTRACTOR_BODY Organize crews, projects, and work periods with shared visibility.
+PREMIUM_PAGE_WHO_CONTRACTOR_TITLE Contractors
+PREMIUM_PAGE_WHO_TEAMS_BODY Assign roles and scale your organization as your team grows.
+PREMIUM_PAGE_WHO_TEAMS_TITLE Growing Teams
+PREMIUM_PAGE_WHO_TITLE Who Premium is for
 PROFILE Profile
 PROFILE_ADDRESS_LABEL Address
 PROFILE_BILLING_CANCEL_DATE_DETAILS_ARIA Cancellation date and time details
