@@ -4,7 +4,31 @@ updates:
     directory: /
     schedule:
       interval: daily
+    open-pull-requests-limit: 10
     commit-message:
       prefix: "ci"
     labels:
       - "dependencies"
+      - "security"
+
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "deps(php)"
+    labels:
+      - "dependencies"
+      - "security"
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "deps(js)"
+    labels:
+      - "dependencies"
+      - "security"
