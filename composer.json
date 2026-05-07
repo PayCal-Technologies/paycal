@@ -63,6 +63,7 @@
       "test:affected": "php scripts/test/affected-tests.php | xargs -r vendor/bin/phpunit --configuration phpunit.xml",
       "quality:docblocks:missing-methods": "php scripts/test/check-missing-method-docblocks.php",
       "quality:docblocks:duplicates": "php scripts/test/check-duplicate-docblocks.php",
-      "quality:docblocks": "@quality:docblocks:missing-methods && @quality:docblocks:duplicates"
+      "quality:docblocks": "@quality:docblocks:missing-methods && @quality:docblocks:duplicates",
+      "security:audit": "bash scripts/check-dependency-security.sh"
     }
 }

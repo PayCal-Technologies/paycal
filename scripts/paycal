@@ -18,6 +18,7 @@ Categories:
   hooks:pre-commit
   hooks:pre-push
   checks:composer-state
+  checks:dependency-security
   checks:semantic-diff [--cached|--base-ref REF --head-ref REF] [--paths-file FILE]
   checks:staged-sensitive
   checks:public-promotion-scope [git-range]
@@ -43,6 +44,7 @@ Categories:
 Examples:
   scripts/paycal hooks:install
   scripts/paycal checks:composer-state
+  scripts/paycal checks:dependency-security
   scripts/paycal checks:semantic-diff --cached
   scripts/paycal checks:semantic-diff --base-ref origin/main --head-ref HEAD
   scripts/paycal checks:staged-sensitive
@@ -82,6 +84,9 @@ case "${cmd}" in
     ;;
   checks:composer-state)
     exec "${SCRIPT_DIR}/hooks/check-composer-state.sh" "$@"
+    ;;
+  checks:dependency-security)
+    exec "${SCRIPT_DIR}/check-dependency-security.sh" "$@"
     ;;
   checks:semantic-diff)
     exec php "${SCRIPT_DIR}/check-semantic-diff.php" "$@"
