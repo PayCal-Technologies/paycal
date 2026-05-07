@@ -29,14 +29,13 @@ if (!isset($pageLanguage) || $pageLanguage === '') {
 
 // METRICS
 $startTime = -microtime(true);
-$startMemory = memory_get_usage();
 
 /** AUTHENTICATION GUARD - Redirect unauthenticated users */
 $hash = Authentication::getCookie();
 $isAuthenticated = $hash !== '';
 
 /** Public pages that don't require authentication */
-$publicPages = ['PAGE_SIGNIN', 'PAGE_REGISTER', 'PAGE_CONTACT', 'PAGE_AUTH', 'PAGE_ABOUT', 'PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA'];
+$publicPages = ['PAGE_SIGNIN', 'PAGE_REGISTER', 'PAGE_CONTACT', 'PAGE_AUTH', 'PAGE_ABOUT', 'PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA', 'PAGE_PREMIUM'];
 
 if (!$isAuthenticated && !in_array($currentPage, $publicPages, true)) {
   Security::sendCoreSecurityHeaders();
@@ -65,6 +64,7 @@ if (!isset($pageTitle) || $pageTitle === '') {
     'PAGE_SITES' => Strings::headerI18n('SITES').' - ['.$siteName.']',
     'PAGE_ORGANIZATIONS' => Strings::headerI18n('ORGANIZATIONS').' - ['.$siteName.']',
     'PAGE_PROFILE' => Strings::headerI18n('PROFILE').' - ['.$siteName.']',
+    'PAGE_PREMIUM' => Strings::headerI18n('PREMIUM_PAGE_TITLE').' - ['.$siteName.']',
     'PAGE_ADMIN' => Strings::headerI18n('ADMIN').' - ['.$siteName.']',
     'PAGE_TESTS' => Strings::headerI18n('TESTS').' - ['.$siteName.']',
     'PAGE_TRANSPARENCY' => Strings::headerI18n('TRANSPARENCY').' - ['.$siteName.']',
@@ -409,21 +409,20 @@ header('X-Robots-Tag: index, follow, noai, noimageai, noodp, noydir, maximage-pr
     'PAGE_PROFILE' => 'profile',
     'PAGE_TESTS' => 'admin',
     'PAGE_TRANSPARENCY' => 'transparency',
+    'PAGE_PREMIUM' => 'premium',
     'PAGE_PAYPERIODS' => 'payperiods',
     'PAGE_AUTH' => 'auth',
   ];
   $pageFile = $pageFileMap[$currentPage] ?? 'content';
   $cssVersion = (string) time();
-  $navCssVersion = $cssVersion;
-  $cssNonce = User::nonce();
   ?>
-  <link rel="stylesheet" fetchpriority="high" href="<?php echo Environment::appURL('css/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cssNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/navigation/'); ?>?v=<?php echo $navCssVersion; ?>" nonce="<?php echo $cssNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/utilities/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cssNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/datagrid/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cssNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/' . $pageFile . '/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cssNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/phantomwing/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cssNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/responsive/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cssNonce; ?>">
+  <link rel="stylesheet" fetchpriority="high" href="<?php echo Environment::appURL('css/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
+  <link rel="stylesheet" href="<?php echo Environment::appURL('css/navigation/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
+  <link rel="stylesheet" href="<?php echo Environment::appURL('css/utilities/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
+  <link rel="stylesheet" href="<?php echo Environment::appURL('css/datagrid/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
+  <link rel="stylesheet" href="<?php echo Environment::appURL('css/' . $pageFile . '/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
+  <link rel="stylesheet" href="<?php echo Environment::appURL('css/phantomwing/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
+  <link rel="stylesheet" href="<?php echo Environment::appURL('css/responsive/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
 
   <link rel="dns-prefetch"                                 href="<?php echo Environment::appBaseURL(); ?>">
   <link rel="preconnect"                                   href="<?php echo Environment::appBaseURL(); ?>">

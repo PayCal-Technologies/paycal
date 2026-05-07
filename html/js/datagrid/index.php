@@ -10,8 +10,6 @@ CORS::handleORIGIN();
 
 CORS::renderContentType('text/javascript');
 Javascript::renderDocBlock();
-
-$user = User::current();
 ?>
 
 import PC from "<?php echo Environment::appURL('js/'); ?>";

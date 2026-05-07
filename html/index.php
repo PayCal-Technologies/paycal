@@ -218,8 +218,7 @@ $monthParam = $monthParam ?? $pathMonthParam ?? date('Y-m');
 
 $recalcWeekEntriesRaw = InputSanitizer::getString('recalc_week_entries');
 $recalcWeekEntries = is_string($recalcWeekEntriesRaw) && trim($recalcWeekEntriesRaw) !== '';
-$isDelegatedRefresh = $selectedCalendarUserUUID !== '' && $selectedCalendarUserUUID !== $actorUUID;
-$shouldRecalcWeekEntries = $recalcWeekEntries || $isDelegatedRefresh;
+$shouldRecalcWeekEntries = $recalcWeekEntries || $isDelegatedCalendarView;
 if ($shouldRecalcWeekEntries) {
 	calendar_recalculate_month_weeks($selectedCalendarUserUUID, $monthParam);
 }
@@ -264,7 +263,6 @@ $context = stream_context_create([
 $decoded = null;
 
 // Try API call via file_get_contents first
-$apiError = null;
 foreach ($apiCandidates as $apiURL) {
 	$raw = @file_get_contents($apiURL, false, $context);
 	if ($raw !== false) {

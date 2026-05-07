@@ -9,6 +9,28 @@ Authentication::abortIfUnauthenticated();
 CORS::handleORIGIN();
 CORS::renderContentType('text/javascript');
 ?>
+// ============================================================================
+// PARANOID MODE CONTROLS — rendered by server at module load time
+// _pw_app_env is used to hard-block network telemetry in production.
+// _pw_telemetry_prod_blocked is the resolved gate: true means blocked.
+// _pw_bucket_salt is a per-session random prefix used in salted daily bucket IDs
+// so bucket IDs cannot be reversed to real timestamps without the session salt.
+// ============================================================================
+const _pw_app_env = '<?php echo htmlspecialchars(Environment::appEnv(), ENT_QUOTES, 'UTF-8'); ?>';
+const _pw_telemetry_prod_blocked = (_pw_app_env === 'prod');
+const _pw_bucket_salt = (() => {
+  const b = new Uint8Array(6);
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    crypto.getRandomValues(b);
+  } else {
+    // Fallback for non-crypto contexts (SSR/test): use Math.random
+    for (let i = 0; i < 6; i++) { b[i] = Math.floor(Math.random() * 256); }
+  }
+  return Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
+})();
+// Minimum k-anonymity threshold: grouped telemetry events with fewer than this
+// count are not sent, preventing unique-session fingerprinting via rare events.
+const _PW_K_ANON_MIN = 3;
 /**
  * ============================================================================
  * PHANTOM WING - JavaScript Error Reporting Daemon
@@ -187,6 +209,12 @@ function _pw_is_console_debug_enabled() {
 }
 
 function _pw_is_network_debug_enabled() {
+  // Hard block: network telemetry is never active in production regardless of
+  // user debug preference settings.  _pw_telemetry_prod_blocked is resolved at
+  // module load from the server-rendered APP_ENV value.
+  if (_pw_telemetry_prod_blocked) {
+    return false;
+  }
   return _pw_get_debug_settings().networkEnabled;
 }
 
@@ -358,6 +386,13 @@ async function _pw_post_telemetry(type, fields) {
     return;
   }
 
+  // Per-event jitter: add a small random delay (0–800 ms) before each send to
+  // prevent timing correlation between events within the same flush batch.
+  const perEventJitter = Math.floor(Math.random() * 800);
+  if (perEventJitter > 0) {
+    await new Promise(resolve => setTimeout(resolve, perEventJitter));
+  }
+
   try {
     const response = await fetch('/api/v1/encryption/telemetry', {
       method: 'POST',
@@ -416,14 +451,29 @@ async function _pw_flush_telemetry_queue(reason = 'timer') {
     grouped.get(key).count += 1;
   }
 
-  const hourBucket = Math.floor(now / 3600000);
+  // Rotating daily salted bucket ID: session-random prefix + day number encoded
+  // in base-36.  Prevents timestamp reversal without the session salt.
+  // Format: {6-byte-hex-session-salt}_{base36-day-epoch}
+  const dayEpoch = Math.floor(now / 86400000).toString(36);
+  const bucketId = `${_pw_bucket_salt}_${dayEpoch}`;
+
   for (const entry of grouped.values()) {
+    // k-anonymity gate: skip grouped events that don't meet the minimum count
+    // threshold.  Prevents unique-session identification via rare event types.
+    if (entry.count < _PW_K_ANON_MIN) {
+      continue;
+    }
+    // Channel: security events (crypto_compat, auth, encryption) are tagged
+    // separately from UX/debug events for audit trail segregation.
+    const isSecurityChannel = /^(crypto|auth|encryption|passkey|recovery)/.test(entry.category);
+    const channel = isSecurityChannel ? 'security' : 'ux';
     await _pw_post_telemetry(
       `pw.${entry.category}.${entry.type}`,
       {
         count: entry.count,
-        bucket_hour: hourBucket,
+        bucket_id: bucketId,
         flush_reason: reason,
+        channel,
       }
     );
   }

@@ -27,8 +27,6 @@ if (function_exists('organizations_index_i18n') === false) {
 
 Authentication::redirectHomeIfUnauthenticated();
 
-/** @var User $user */
-$user = User::current();
 $userUUID = User::currentUUID();
 $hasActivePremiumSubscription = $userUUID !== '' && SubscriptionGate::hasActivePremium($userUUID);
 $isFreeProfile = !User::isAdmin() && !$hasActivePremiumSubscription;
@@ -39,8 +37,6 @@ $pageTitle = organizations_index_i18n('ORGANIZATIONS') . ' - [' . organizations_
 $pageLabel = organizations_index_i18n('ORGANIZATIONS');
 $pageLanguage = (string) User::current()->language;
 $organizationsCsrfNonce = User::current()->generateFormNonce('organizations');
-$graceDaysMin = (int) SystemLimits::get('editing_grace_days_min');
-$graceDaysMax = (int) SystemLimits::get('editing_grace_days_max');
 
 if (InputSanitizer::getString('lens') === '1') {
   $organizationIds = Database::smembers(\PayCal\Domain\Constants\Keys::ORGANIZATION_USER . ':' . $userUUID);
@@ -241,6 +237,15 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
   </section>
 
   <div class="organizations_separator" role="separator" aria-hidden="true"></div>
+<?php } ?>
+
+<?php if ($isFreeProfile) { ?>
+  <section class="panel organizations_free_intro_panel" title="<?php echo organizations_index_i18n('ORGANIZATIONS_FREE_INTRO_PANEL_HELP'); ?>" data-hover-help="<?php echo organizations_index_i18n('ORGANIZATIONS_FREE_INTRO_PANEL_HELP'); ?>">
+    <div class="organizations_section_header">
+      <h2><?php echo organizations_index_i18n('ORGANIZATIONS_FREE_INTRO_TITLE'); ?></h2>
+    </div>
+    <p class="help_text"><?php echo organizations_index_i18n('ORGANIZATIONS_FREE_INTRO_HELP'); ?></p>
+  </section>
 <?php } ?>
 
 <?php if ($isFreeProfile) { ?>

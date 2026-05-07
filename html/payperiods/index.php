@@ -43,7 +43,6 @@ foreach ($i18nKeys as $i18nKey) {
 Authentication::redirectHomeIfUnauthenticated();
 
 $currentPage = 'PAGE_PAYPERIODS';
-$message = '&nbsp;';
 $pageTitle = 'Pay Periods - [PayCal]';
 $pageLabel = 'Pay Periods';
 $pageLanguage = 'en';

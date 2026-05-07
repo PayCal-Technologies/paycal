@@ -363,7 +363,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
     </div>
     <div id="billing_status_sr" class="visually_hidden" role="status" aria-live="polite" aria-atomic="true"></div>
     <?php if ($isStripeBilling) { ?>
-      <p class="help_text"><?php echo profile_index_i18n('PROFILE_BILLING_STRIPE_NOTE_PREFIX'); ?> <a href="https://support.stripe.com/" target="_blank" rel="noopener noreferrer"><?php echo profile_index_i18n('PROFILE_BILLING_STRIPE_NOTE_LINK'); ?></a>.</p>
+      <p class="help_text"><?php echo profile_index_i18n('PROFILE_BILLING_STRIPE_NOTE_PREFIX'); ?> <a href="/contact"><?php echo profile_index_i18n('PROFILE_BILLING_STRIPE_NOTE_LINK'); ?></a>.</p>
     <?php } else { ?>
       <p class="help_text">Public Core ships with a local Premium toggle for experimenting with organizations and shared features.</p>
     <?php } ?>
@@ -376,6 +376,9 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
             ? profile_index_i18n('PROFILE_BILLING_FREE_HELP')
             : 'You are on Free. Enable Premium to try organizations and collaboration features locally.'; ?></p>
           <h3><?php echo $isStripeBilling ? profile_index_i18n('PROFILE_BILLING_UPGRADE_PRICE') : 'Premium mode'; ?></h3>
+          <?php if ($isStripeBilling) { ?>
+            <a href="/premium" class="btn btn_secondary"><?php echo profile_index_i18n('PROFILE_BILLING_EXPLORE_BUTTON'); ?></a>
+          <?php } ?>
           <button type="button" id="billing_upgrade_btn" class="btn btn_primary"><?php echo $isStripeBilling ? profile_index_i18n('PROFILE_BILLING_UPGRADE_BUTTON') : 'Enable Premium'; ?></button>
           <div id="billing_upgrade_status" class="status_text compact_hint" role="status" aria-live="polite"></div>
         </section>
@@ -387,6 +390,8 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_2'); ?></span></li>
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_3'); ?></span></li>
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_4'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_5'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_6'); ?></span></li>
           </ul>
         </section>
       </div>
@@ -443,6 +448,8 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_2'); ?></span></li>
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_3'); ?></span></li>
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_4'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_5'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_6'); ?></span></li>
           </ul>
         </section>
       </div>

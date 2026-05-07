@@ -38,7 +38,6 @@ Authentication::redirectHomeIfUnauthenticated();
 
 Lens::boot('sites');
 
-$message = '&nbsp;';
 $pageTitle = sites_index_i18n('SITES') . ' - [' . sites_index_i18n('SITE_NAME') . ']';
 $pageLabel = sites_index_i18n('SITES');
 $pageLanguage = 'en';

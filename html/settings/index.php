@@ -19,7 +19,6 @@ use PayCal\Observability\Lens;
  * @license    Proprietary License - See LICENSE.txt for full terms
  */
 $currentPage = 'PAGE_SETTINGS';
-$message = '&nbsp;';
 
 require_once __DIR__.'/../config.php';
 
@@ -48,17 +47,10 @@ $pageLanguage = (string) User::current()->language;
 /** @var User $user */
 $user = User::current();
 $csrfNonce = $user->generateFormNonce('settings');
-$currentLanguage = (string) ($user->language ?? 'en');
 $payFrequency = $user->pay_frequency ?? '';
 if ('' === $payFrequency) {
   $payFrequency = ((int) $user->pay_period_length === 7) ? 'weekly' : 'biweekly';
 }
-$payAnchor = $user->pay_anchor ?? 'Monday';
-$payPeriodEditorStart = Calendar::getCurrentPayPeriods($user)->start()->format('Y-m-d');
-$graceDaysMin = (int) SystemLimits::get('editing_grace_days_min');
-$graceDaysMax = (int) SystemLimits::get('editing_grace_days_max');
-$currentGraceDays = (int) ($user->editing_grace_days ?? UserPreferenceDefaults::DEFAULT_EDITING_GRACE_DAYS);
-
 $normalizeSliderPreference = static function (mixed $raw, array $legacyMap): int {
   $value = is_scalar($raw) ? strtolower(trim((string) $raw)) : '';
   if ($value === '') {

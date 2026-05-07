@@ -6,8 +6,6 @@ require_once '../../config.php';
 
 Authentication::abortIfUnauthenticated();
 
-$user = User::current();
-
 $i18nKeys = [
   'INFO_UPDATED',
   'SIGN_OUT',

@@ -1498,6 +1498,35 @@ PORTUGUESE Portuguese
 PREFERENCES Preferences
 PREVIOUS Previous
 PREVIOUS_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -900 600 600" width="24"><path d="m 432 -480 l 156 156 q 11 11 11 28 t -11 28 q -11 11 -28 11 t -28 -11 L 348 -452 q -6 -6 -8.5 -13 t -2.5 -15 q 0 -8 2.5 -15 t 8.5 -13 l 184 -184 q 11 -11 28 -11 t 28 11 q 11 11 11 28 t -11 28 L 432 -480 Z"/></svg>
+PREMIUM_PAGE_ACCESS_BODY PayCal meets WCAG 2.1 AA accessibility standards. Full keyboard navigation, screen reader support, dyslexia-friendly typography, and high-contrast themes are available to all users — free and premium alike.
+PREMIUM_PAGE_ACCESS_TITLE Built for everyone.
+PREMIUM_PAGE_COL_FEATURE Feature
+PREMIUM_PAGE_COL_FREE Free
+PREMIUM_PAGE_COL_PREMIUM Premium
+PREMIUM_PAGE_COMPARE_TITLE Free vs Premium
+PREMIUM_PAGE_CTA_UPGRADE Upgrade Securely
+PREMIUM_PAGE_DECK Track your earnings, manage your team, and run payroll with confidence.
+PREMIUM_PAGE_FAQ_A1 Yes. Premium is billed monthly at $4.99 CAD. You can cancel at any time from your profile page, with no penalty.
+PREMIUM_PAGE_FAQ_A2 Your personal records and earnings history stay intact. You lose access to organization management features, but your individual data is never deleted.
+PREMIUM_PAGE_FAQ_A3 Yes. Free users can be invited to and join organizations as members. Premium is only required to create and manage your own organization.
+PREMIUM_PAGE_FAQ_A4 Payment is handled entirely by Stripe. PayCal never stores your card number or billing details.
+PREMIUM_PAGE_FAQ_Q1 Is Premium a subscription?
+PREMIUM_PAGE_FAQ_Q2 What happens to my data if I cancel?
+PREMIUM_PAGE_FAQ_Q3 Can I join a team without Premium?
+PREMIUM_PAGE_FAQ_Q4 Is my payment information secure?
+PREMIUM_PAGE_FAQ_TITLE Common questions
+PREMIUM_PAGE_HERO_DECK Track your earnings, manage your team, and run payroll with confidence.
+PREMIUM_PAGE_HERO_H1 Built for workers and teams.
+PREMIUM_PAGE_ORGS_BODY Organizations are shared workspaces where managers and employees track payroll together. With Premium, you create your own organization, invite your team, assign roles, and manage payroll access — all in one place.
+PREMIUM_PAGE_ORGS_TITLE What are Organizations?
+PREMIUM_PAGE_PRICE_NOTE Premium — $4.99 CAD/month. Cancel anytime.
+PREMIUM_PAGE_PRICING_NOTE No contracts. Cancel anytime. Full Premium access the moment you upgrade.
+PREMIUM_PAGE_PRICING_TITLE Simple pricing.
+PREMIUM_PAGE_SECURITY_BODY PayCal uses zero-knowledge encryption. Your payroll records and earnings data are encrypted before being stored. We cannot read your data — and neither can anyone else.
+PREMIUM_PAGE_SECURITY_TITLE Your data stays private.
+PREMIUM_PAGE_STRIPE_LINK Contact PayCal support
+PREMIUM_PAGE_STRIPE_NOTE Secure billing powered by Stripe. Questions?
+PREMIUM_PAGE_TITLE Premium — PayCal
 PRIMARY Primary
 PROFILE Profile
 PROFILE_ADDRESS_LABEL Address
@@ -1510,8 +1539,8 @@ PROFILE_BILLING_DOWNGRADE_HELP If Stripe portal does not show a cancellation opt
 PROFILE_BILLING_DOWNGRADE_PHRASE DOWNGRADE ME
 PROFILE_BILLING_DOWNGRADE_PROMPT_PREFIX Type
 PROFILE_BILLING_FREE_ARIA Current free plan details
-PROFILE_BILLING_FREE_HELP You are on Free. Connect with organizations as a member, or upgrade to create and manage your own.
-PROFILE_BILLING_FREE_PLAN Free Plan
+PROFILE_BILLING_FREE_HELP Track your own work hours, earnings, and pay periods at no cost. Upgrade to Premium to unlock team features, organization management, payroll tools, and advanced insights.
+PROFILE_BILLING_FREE_PLAN Current Plan: Free
 PROFILE_BILLING_MEMBER_SINCE Member since
 PROFILE_BILLING_ORGS_LINK Go to Organizations
 PROFILE_BILLING_PANEL_HELP View and manage your subscription and billing.
@@ -1519,19 +1548,22 @@ PROFILE_BILLING_PLAN_PREMIUM Premium
 PROFILE_BILLING_PORTAL_BUTTON Manage Billing in Stripe
 PROFILE_BILLING_PREMIUM_ARIA Current premium plan details
 PROFILE_BILLING_PREMIUM_BENEFITS_ARIA Premium benefits
-PROFILE_BILLING_PREMIUM_BENEFITS_TITLE Premium benefits
+PROFILE_BILLING_PREMIUM_BENEFITS_TITLE Premium includes
 PROFILE_BILLING_PREMIUM_FEATURES_ARIA Premium features
-PROFILE_BILLING_PREMIUM_FEATURE_1 Unlimited organizations and members
-PROFILE_BILLING_PREMIUM_FEATURE_2 Work analytics dashboard
-PROFILE_BILLING_PREMIUM_FEATURE_3 Mass import and export management
-PROFILE_BILLING_PREMIUM_FEATURE_4 Role-based access controls with audit history
+PROFILE_BILLING_PREMIUM_FEATURE_1 Manage teams and shared organizations
+PROFILE_BILLING_PREMIUM_FEATURE_2 Invite managers and employees
+PROFILE_BILLING_PREMIUM_FEATURE_3 Import and export payroll records
+PROFILE_BILLING_PREMIUM_FEATURE_4 Role-based permissions and audit history
+PROFILE_BILLING_PREMIUM_FEATURE_5 Advanced earnings analytics
+PROFILE_BILLING_PREMIUM_FEATURE_6 Priority future features
 PROFILE_BILLING_RENEWS Renews
-PROFILE_BILLING_STRIPE_NOTE_LINK support.stripe.com
-PROFILE_BILLING_STRIPE_NOTE_PREFIX We use Stripe for subscription billing. Support:
+PROFILE_BILLING_STRIPE_NOTE_LINK Contact PayCal support
+PROFILE_BILLING_STRIPE_NOTE_PREFIX Secure billing powered by Stripe. Questions?
 PROFILE_BILLING_TIMEZONES Timezones
 PROFILE_BILLING_TITLE Subscription
-PROFILE_BILLING_UPGRADE_BUTTON Upgrade with Stripe
-PROFILE_BILLING_UPGRADE_PRICE Upgrade to Premium - $4.99 CAD/month
+PROFILE_BILLING_UPGRADE_BUTTON Upgrade Securely
+PROFILE_BILLING_UPGRADE_PRICE Premium — $4.99 CAD/month
+PROFILE_BILLING_EXPLORE_BUTTON Explore Premium
 PROFILE_CHANGE_EMAIL_DESC Change your account email in two steps: request verification codes, then enter both codes to confirm the update.
 PROFILE_CHANGE_EMAIL_HELP Click to securely change your email address.
 PROFILE_CITY_LABEL City

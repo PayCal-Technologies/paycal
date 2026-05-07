@@ -31,14 +31,13 @@ $spacing = SystemConfig::SPACING_LESS;
 $lineHeight = SystemConfig::LINEHEIGHT_LESS;
 $audioVisibility = 'hidden';
 
-// Set public as default
-$userUuid = 'PUBLIC';
 $userTheme = SystemConfig::PC_THEME_DEFAULT;
 $userLang = SystemConfig::DEFAULT_LANGUAGE;
 
 $user = User::current();
 $hash = Authentication::getSessionHashFromCookie();
-if ($hash !== null && Authentication::sessionExists($hash)) {
+$isAuthenticated = $hash !== null && Authentication::sessionExists($hash);
+if ($isAuthenticated) {
   $userTheme = $user->theme;
   $userLang = $user->language;
 
@@ -69,19 +68,8 @@ if ($hash !== null && Authentication::sessionExists($hash)) {
     ? SystemConfig::TEXT_LARGER
     : (($textAdjustment < 0) ? SystemConfig::TEXT_SMALLER : SystemConfig::TEXT_BASE);
 
-  switch (true) {
-    case $spacingAdjustment > 0:
-      $spacing = SystemConfig::SPACING_MORE;
-      $lineHeight = SystemConfig::LINEHEIGHT_MORE;
-
-      break;
-
-    default:
-      $spacing = SystemConfig::SPACING_LESS;
-      $lineHeight = SystemConfig::LINEHEIGHT_LESS;
-
-      break;
-  }
+  $spacing = $spacingAdjustment > 0 ? SystemConfig::SPACING_MORE : SystemConfig::SPACING_LESS;
+  $lineHeight = $spacingAdjustment > 0 ? SystemConfig::LINEHEIGHT_MORE : SystemConfig::LINEHEIGHT_LESS;
 
   $audioVisibility = 'none' !== $user->audio_feedback
     ? 'visible'
@@ -91,7 +79,6 @@ if ($hash !== null && Authentication::sessionExists($hash)) {
 // Derived Locale
 
 $userLocale = strtolower($userLang).'_'.strtoupper($userLang);
-$userLocaleJs = strtolower($userLang).'-'.strtoupper($userLang);
 
 if (!defined('USER_THEME')) {
   define('USER_THEME', $userTheme);
@@ -103,10 +90,6 @@ if (!defined('USER_LANGUAGE')) {
 
 if (!defined('USER_LOCALE')) {
   define('USER_LOCALE', $userLocale);
-}
-
-if (!defined('USER_LOCALE_JS')) {
-  define('USER_LOCALE_JS', $userLocaleJs);
 }
 
 if (!defined('USER_TEXT_SIZING')) {
@@ -126,7 +109,7 @@ if (!defined('AUDIO_FEEDBACK_VISIBILITY')) {
 }
 // Logged-in-only constants
 
-if ($hash !== null && Authentication::sessionExists($hash)) {
+if ($isAuthenticated) {
   $authCookieRaw = $_COOKIE['PAYCAL_AUTH'] ?? '';
   $authCookie = is_scalar($authCookieRaw) ? (string) $authCookieRaw : '';
   Config::createStringConstants([

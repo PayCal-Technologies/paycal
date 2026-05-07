@@ -145,7 +145,6 @@ if ($isAuthenticated) {
 
 $backendLoadMs = max(0.0, ($startTime + microtime(true)) * 1000);
 $timeTaken = sprintf('%.2fms', $backendLoadMs);
-$visitorRealIPAddress = Security::getVisitorRealIpAddress();
 $memoryUsageBytes = memory_get_usage();
 $memoryUsageMB = $memoryUsageBytes / (1024 * 1024);
 $memoryUsageGB = $memoryUsageMB / 1024;
