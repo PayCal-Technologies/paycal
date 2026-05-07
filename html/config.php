@@ -8,7 +8,7 @@ use PayCal\Domain\Extensions\Bridges\ExtensionBootstrapBridge;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $dotenv = \PayCal\Infrastructure\Env\Dotenv::createImmutable(__DIR__);
-$dotenv->load(['PC_EMAIL_PASSWORD']);
+$dotenv->safeLoad(['PC_EMAIL_PASSWORD']);
 
 Environment::bootstrap($_ENV);
 
