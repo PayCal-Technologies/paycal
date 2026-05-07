@@ -7,31 +7,8 @@ use PayCal\Domain\Extensions\Bridges\ExtensionBootstrapBridge;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
-
-// Ensure SMTP password comes from local .env for deterministic dev/runtime behavior.
-$envFilePath = __DIR__ . '/.env';
-if (is_file($envFilePath)) {
-	$envLines = file($envFilePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-	if (is_array($envLines)) {
-		foreach ($envLines as $envLine) {
-			$trimmedLine = trim($envLine);
-			if ($trimmedLine === '' || str_starts_with($trimmedLine, '#')) {
-				continue;
-			}
-
-			if (!str_starts_with($trimmedLine, 'PC_EMAIL_PASSWORD=')) {
-				continue;
-			}
-
-			$dotenvPassword = substr($trimmedLine, strlen('PC_EMAIL_PASSWORD='));
-			$_ENV['PC_EMAIL_PASSWORD'] = $dotenvPassword;
-			putenv('PC_EMAIL_PASSWORD=' . $dotenvPassword);
-			break;
-		}
-	}
-}
+$dotenv = \PayCal\Infrastructure\Env\Dotenv::createImmutable(__DIR__);
+$dotenv->load(['PC_EMAIL_PASSWORD']);
 
 Environment::bootstrap($_ENV);
 

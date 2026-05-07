@@ -4,10 +4,8 @@ namespace PayCal\Domain;
 
 require_once __DIR__.'/../../vendor/autoload.php';
 
-if (class_exists('Dotenv\\Dotenv')) {
-	$dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__));
-	$dotenv->safeLoad();
-}
+$dotenv = \PayCal\Infrastructure\Env\Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->safeLoad();
 
 if (class_exists('PayCal\\Domain\\Environment')) {
 	$bootstrapEnv = [];
