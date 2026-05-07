@@ -446,7 +446,7 @@ SKIP_PRIMARY_NAVIGATION Primaire Navigatie Overslaan
 SKIP_TO_CONTENT Naar Inhoud Gaan
 SKIP_TO_MAIN_CONTENT Naar hoofdinhoud gaan
 SMALLER Kleiner
-DENSITY Ruimte
+SPACING Ruimte
 SPANISH Spaans
 START Start
 STATIC Statisch
@@ -486,7 +486,7 @@ TOOLTIP_NAV_BAR Voorkeur scrollgedrag van navigatiebalk.
 TOOLTIP_NEW_EMAIL Geef het nieuwe e-mailadres op dat je wilt gebruiken.
 TOOLTIP_NEW_PASSWORD Geef het nieuwe wachtwoord op dat je wilt gebruiken.
 TOOLTIP_PASSWORD_REQUIRED Je wachtwoord is vereist om door te gaan.
-TOOLTIP_DENSITY Voorkeur ruimte van de interface.
+TOOLTIP_SPACING Voorkeur ruimte van de interface.
 TOOLTIP_TEXT Voorkeur tekstgrootte van de interface.
 TOOLTIP_THEME Uiterlijk & gevoel van de interface.
 TRAVEL_HOURS REIS
@@ -508,7 +508,7 @@ UPDATING_PAY_PERIOD Loonperiode Bijwerken
 UPDATING_PHONE Telefoon Bijwerken
 UPDATING_PROVINCE Provincie bijwerken...
 PROVINCE_UPDATED Provincie bijgewerkt
-UPDATING_DENSITY_TO Ruimte bijwerken naar
+UPDATING_SPACING_TO Ruimte bijwerken naar
 UPDATING_TEXT_TO Tekst bijwerken naar
 UPDATING_THEME_TO Thema bijwerken naar
 TIMEZONE_UPDATED Tijdzone bijgewerkt

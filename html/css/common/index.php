@@ -12,14 +12,14 @@ if (ob_get_level() === 0) {
 if (headers_sent() === false) {
   header('Content-type: text/css');
 }
-// This endpoint is user-preference aware (theme, density, text scale), so cache by cookie context.
+// This endpoint is user-preference aware (theme, spacing, text scale), so cache by cookie context.
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, pragma: no-cache, expires: -1');
 header('Vary: Cookie');
 
 $user = User::current();
 
 $textSizingRaw = strtolower(trim((string) ($user->text ?? UserPreferenceDefaults::DEFAULT_TEXT)));
-$densityRaw = strtolower(trim((string) ($user->density ?? UserPreferenceDefaults::DEFAULT_DENSITY)));
+$spacingRaw = strtolower(trim((string) ($user->spacing ?? UserPreferenceDefaults::DEFAULT_SPACING)));
 
 $normalizeAdjustment = static function (string $value, array $legacyMap): int {
   if ($value === '') {
@@ -60,7 +60,7 @@ $textAdjustment = $normalizeAdjustment($textSizingRaw, [
   'x-large' => 5,
 ]);
 
-$densityAdjustment = $normalizeAdjustment($densityRaw, [
+$spacingAdjustment = $normalizeAdjustment($spacingRaw, [
   'tight' => -5,
   'compact' => -5,
   'comfy' => 0,
@@ -68,12 +68,12 @@ $densityAdjustment = $normalizeAdjustment($densityRaw, [
 ]);
 
 $textOverrideRaw = trim((string) \PayCal\Domain\Config\SystemConfig::get(\PayCal\Domain\Config\SystemConfig::FONT_SIZE_ADJUSTMENT_OVERRIDE));
-$densityOverrideRaw = trim((string) \PayCal\Domain\Config\SystemConfig::get(\PayCal\Domain\Config\SystemConfig::DENSITY_ADJUSTMENT_OVERRIDE));
+$spacingOverrideRaw = trim((string) \PayCal\Domain\Config\SystemConfig::get(\PayCal\Domain\Config\SystemConfig::SPACING_ADJUSTMENT_OVERRIDE));
 $textOverride = $normalizeAdjustment(strtolower($textOverrideRaw), []);
-$densityOverride = $normalizeAdjustment(strtolower($densityOverrideRaw), []);
+$spacingOverride = $normalizeAdjustment(strtolower($spacingOverrideRaw), []);
 
 $combinedTextAdjustment = max(-5, min(5, $textAdjustment + $textOverride));
-$combinedDensityAdjustment = max(-5, min(5, $densityAdjustment + $densityOverride));
+$combinedSpacingAdjustment = max(-5, min(5, $spacingAdjustment + $spacingOverride));
 
 $resolveCssLengthOrNumber = static function (mixed $raw, string $default): string {
   if (!is_scalar($raw) && $raw !== null) {
@@ -166,7 +166,7 @@ $navBarStickiness = "static";
   --text:                                clamp(0.75rem, calc(var(--text-base) + var(--text-adjustment)), 1.5rem);
   --line-height:                         <?php echo $lineHeight; ?>;
   --spacing-base:                         1rem;
-  --spacing-adjustment:                   <?php echo ($combinedDensityAdjustment * 0.125); ?>rem;
+  --spacing-adjustment:                   <?php echo ($combinedSpacingAdjustment * 0.125); ?>rem;
   --spacing:                             clamp(0.60rem, calc(var(--spacing-base) + var(--spacing-adjustment)), 1.5rem);
   --font-xs:                             <?php echo $fontXs; ?>;
   --font-sm:                             max(1rem, <?php echo $fontSm; ?>);

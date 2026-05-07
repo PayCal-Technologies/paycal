@@ -282,7 +282,7 @@ SKIP_PRIMARY_NAVIGATION Ignorer la navigation principale
 SKIP_TO_CONTENT Aller au contenu
 SKIP_TO_MAIN_CONTENT Aller au contenu principal
 SMALLER Plus petit
-DENSITY Espacement
+SPACING Espacement
 SPANISH Espagnol
 START Commencer
 STATIC Statique
@@ -322,7 +322,7 @@ TOOLTIP_NAV_BAR Comportement de défilement préféré de la barre de navigation
 TOOLTIP_NEW_EMAIL Fournissez la nouvelle adresse e-mail que vous souhaitez utiliser.
 TOOLTIP_NEW_PASSWORD Fournissez le nouveau mot de passe que vous souhaitez utiliser.
 TOOLTIP_PASSWORD_REQUIRED Votre mot de passe est requis pour continuer.
-TOOLTIP_DENSITY Espacement préféré de l\'interface.
+TOOLTIP_SPACING Espacement préféré de l\'interface.
 TOOLTIP_TEXT Taille de texte préférée de l\'interface.
 TOOLTIP_THEME Apparence et convivialité de l\'interface.
 TRAVEL_HOURS DÉPLACEMENT
@@ -344,7 +344,7 @@ UPDATING_PAY_PERIOD Mise à jour de la période de paie
 UPDATING_PHONE Mise à jour du téléphone
 UPDATING_PROVINCE Mise à jour de la province...
 PROVINCE_UPDATED Province mise à jour
-UPDATING_DENSITY_TO Mise à jour de l'espacement vers
+UPDATING_SPACING_TO Mise à jour de l'espacement vers
 UPDATING_TEXT_TO Mise à jour du texte vers
 UPDATING_THEME_TO Mise à jour du thème vers
 TIMEZONE_UPDATED Fuseau horaire mis à jour
@@ -938,9 +938,9 @@ HELP_ACCOUNT_STORED_DISPLAYED_3 Phone: optional, used for identification purpose
 HELP_ACCOUNT_STORED_DISPLAYED_4 Province: used for provincial tax bracket calculations in earnings estimates.
 HELP_ACCOUNT_STORED_DISPLAYED_5 Timezone: used for calendar and time display across the app.
 HELP_ACCOUNT_STORED_DISPLAYED_TITLE What is stored and displayed
-HELP_ACCOUNT_TEXT_DENSITY_1 Text Size: Small, Medium, Large, or X-Large. Use larger sizes if default text feels too small on your screen.
-HELP_ACCOUNT_TEXT_DENSITY_2 Density: Compact, Comfy, or Spacious. Compact shows more content at once; Spacious adds breathing room between elements.
-HELP_ACCOUNT_TEXT_DENSITY_TITLE Text Size and Density
+HELP_ACCOUNT_TEXT_SPACING_1 Text Size: Small, Medium, Large, or X-Large. Use larger sizes if default text feels too small on your screen.
+HELP_ACCOUNT_TEXT_SPACING_2 Spacing: Compact, Comfy, or Spacious. Compact shows more content at once; Spacious adds breathing room between elements.
+HELP_ACCOUNT_TEXT_SPACING_TITLE Text Size and Spacing
 HELP_ACCOUNT_THEME_VARIANT_TEXT Choose a visual theme from a grouped set of options including OS-inspired designs (BeOS lineage, Linux families, classic Mac OS, Windows generations) and others. Each theme is available in a Light or Dark variant.
 HELP_ACCOUNT_THEME_VARIANT_TITLE Theme and Variant
 HELP_ACCOUNT_THEMES_TEXT All appearance and interface settings are in Settings under the Style section. Changes apply immediately when saved.

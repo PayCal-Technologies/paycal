@@ -43,7 +43,7 @@ if ($hash !== null && Authentication::sessionExists($hash)) {
   $userLang = $user->language;
 
   $textRaw = strtolower(trim($user->text));
-  $densityRaw = strtolower(trim($user->density));
+  $spacingRaw = strtolower(trim($user->spacing));
 
   $textAdjustment = 0;
   if ($textRaw === 'small') {
@@ -56,13 +56,13 @@ if ($hash !== null && Authentication::sessionExists($hash)) {
     $textAdjustment = max(-5, min(5, (int) $textRaw));
   }
 
-  $densityAdjustment = 0;
-  if ($densityRaw === 'tight' || $densityRaw === 'compact') {
-    $densityAdjustment = -5;
-  } elseif ($densityRaw === 'spacious') {
-    $densityAdjustment = 5;
-  } elseif (preg_match('/^-?\d+$/', $densityRaw) === 1) {
-    $densityAdjustment = max(-5, min(5, (int) $densityRaw));
+  $spacingAdjustment = 0;
+  if ($spacingRaw === 'tight' || $spacingRaw === 'compact') {
+    $spacingAdjustment = -5;
+  } elseif ($spacingRaw === 'spacious') {
+    $spacingAdjustment = 5;
+  } elseif (preg_match('/^-?\d+$/', $spacingRaw) === 1) {
+    $spacingAdjustment = max(-5, min(5, (int) $spacingRaw));
   }
 
   $textSizing = ($textAdjustment > 0)
@@ -70,7 +70,7 @@ if ($hash !== null && Authentication::sessionExists($hash)) {
     : (($textAdjustment < 0) ? SystemConfig::TEXT_SMALLER : SystemConfig::TEXT_BASE);
 
   switch (true) {
-    case $densityAdjustment > 0:
+    case $spacingAdjustment > 0:
       $spacing = SystemConfig::SPACING_MORE;
       $lineHeight = SystemConfig::LINEHEIGHT_MORE;
 

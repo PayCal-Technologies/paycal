@@ -281,7 +281,7 @@ SKIP_PRIMARY_NAVIGATION Pular Navegação Principal
 SKIP_TO_CONTENT Pular para Conteúdo
 SKIP_TO_MAIN_CONTENT Pular para conteúdo principal
 SMALLER Menor
-DENSITY Espaçamento
+SPACING Espaçamento
 SPANISH Espanhol
 START Iniciar
 STATIC Estático
@@ -321,7 +321,7 @@ TOOLTIP_NAV_BAR Comportamento de rolagem preferido da barra de navegação.
 TOOLTIP_NEW_EMAIL Forneça o novo endereço de email que deseja usar.
 TOOLTIP_NEW_PASSWORD Forneça a nova senha que deseja usar.
 TOOLTIP_PASSWORD_REQUIRED Sua senha é necessária para continuar.
-TOOLTIP_DENSITY Espaçamento preferido da interface.
+TOOLTIP_SPACING Espaçamento preferido da interface.
 TOOLTIP_TEXT Tamanho de texto preferido da interface.
 TOOLTIP_THEME Aparência e sensação da interface.
 TRAVEL_HOURS HORAS DE VIAGEM
@@ -343,7 +343,7 @@ UPDATING_PAY_PERIOD Atualizando Período de Pagamento
 UPDATING_PHONE Atualizando Telefone
 UPDATING_PROVINCE Atualizando Província...
 PROVINCE_UPDATED Província atualizada
-UPDATING_DENSITY_TO Atualizando espaçamento para
+UPDATING_SPACING_TO Atualizando espaçamento para
 UPDATING_TEXT_TO Atualizando texto para
 UPDATING_THEME_TO Atualizando tema para
 TIMEZONE_UPDATED Fuso horário atualizado

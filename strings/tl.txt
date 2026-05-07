@@ -282,7 +282,7 @@ SKIP_PRIMARY_NAVIGATION Laktawan ang Pangunahing Navigasyon
 SKIP_TO_CONTENT Laktawan sa Nilalaman
 SKIP_TO_MAIN_CONTENT Laktawan sa pangunahing nilalaman
 SMALLER Mas Maliit
-DENSITY Espasyo
+SPACING Espasyo
 SPANISH Espanyol
 START Simulan
 STATIC Static
@@ -322,7 +322,7 @@ TOOLTIP_NAV_BAR Nais na pag-scroll ng navigation bar.
 TOOLTIP_NEW_EMAIL Ibigay ang bagong email address na nais mong gamitin.
 TOOLTIP_NEW_PASSWORD Ibigay ang bagong password na nais mong gamitin.
 TOOLTIP_PASSWORD_REQUIRED Kinakailangan ang iyong password upang magpatuloy.
-TOOLTIP_DENSITY Nais na pagkakalagay ng interface.
+TOOLTIP_SPACING Nais na pagkakalagay ng interface.
 TOOLTIP_TEXT Nais na laki ng teksto ng interface.
 TOOLTIP_THEME Hitsura at pakiramdam ng interface.
 TRAVEL_HOURS ORAS NG PAGBIAHAY
@@ -344,7 +344,7 @@ UPDATING_PAY_PERIOD Ina-update ang Panahon ng Bayad
 UPDATING_PHONE Ina-update ang Telepono
 UPDATING_PROVINCE Ina-update ang Lalawigan...
 PROVINCE_UPDATED Na-update ang lalawigan
-UPDATING_DENSITY_TO Ina-update ang espasyo sa
+UPDATING_SPACING_TO Ina-update ang espasyo sa
 UPDATING_TEXT_TO Ina-update ang teksto sa
 UPDATING_THEME_TO Ina-update ang tema sa
 TIMEZONE_UPDATED Na-update ang time zone

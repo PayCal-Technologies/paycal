@@ -520,8 +520,8 @@ final class UserRepository
       case 'text':
         $user->text = $value;
         return;
-      case 'density':
-        $user->density = ($value === 'compact') ? 'tight' : $value;
+      case 'spacing':
+        $user->spacing = ($value === 'compact') ? 'tight' : $value;
         return;
       case 'dyslexia_typography':
         $user->dyslexia_typography = $value;

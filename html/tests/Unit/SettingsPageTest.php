@@ -196,17 +196,17 @@ final class SettingsPageTest extends TestCase
   }
 
   #[Test]
-  public function densitySliderRangeIsValid(): void
+  public function spacingSliderRangeIsValid(): void
   {
-    $fieldName = 'density';
+    $fieldName = 'spacing';
 
     $min = -5;
     $max = 5;
     $default = 0;
 
-    $this->assertSame(-5, $min, 'density slider minimum should be -5px');
-    $this->assertSame(5, $max, 'density slider maximum should be +5px');
-    $this->assertSame(0, $default, 'density slider default should be 0px');
+    $this->assertSame(-5, $min, 'spacing slider minimum should be -5px');
+    $this->assertSame(5, $max, 'spacing slider maximum should be +5px');
+    $this->assertSame(0, $default, 'spacing slider default should be 0px');
   }
 
   /**

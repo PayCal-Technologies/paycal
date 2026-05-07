@@ -281,7 +281,7 @@ SKIP_PRIMARY_NAVIGATION Salta Navigazione Principale
 SKIP_TO_CONTENT Salta al Contenuto
 SKIP_TO_MAIN_CONTENT Salta al contenuto principale
 SMALLER Più Piccolo
-DENSITY Spaziatura
+SPACING Spaziatura
 SPANISH Spagnolo
 START Inizio
 STATIC Statico
@@ -321,7 +321,7 @@ TOOLTIP_NAV_BAR Comportamento di scorrimento preferito della barra di navigazion
 TOOLTIP_NEW_EMAIL Fornisci il nuovo indirizzo email che vuoi usare.
 TOOLTIP_NEW_PASSWORD Fornisci la nuova password che vuoi usare.
 TOOLTIP_PASSWORD_REQUIRED La tua password è richiesta per procedere.
-TOOLTIP_DENSITY Spaziatura preferita dell\'interfaccia.
+TOOLTIP_SPACING Spaziatura preferita dell\'interfaccia.
 TOOLTIP_TEXT Dimensione del testo preferita dell\'interfaccia.
 TOOLTIP_THEME Aspetto e sensazione dell\'interfaccia.
 TRAVEL_HOURS VIAGGIO
@@ -343,7 +343,7 @@ UPDATING_PAY_PERIOD Aggiornamento Periodo Paga
 UPDATING_PHONE Aggiornamento Telefono
 UPDATING_PROVINCE Aggiornamento Provincia...
 PROVINCE_UPDATED Provincia aggiornata
-UPDATING_DENSITY_TO Aggiornamento spaziatura a
+UPDATING_SPACING_TO Aggiornamento spaziatura a
 UPDATING_TEXT_TO Aggiornamento testo a
 UPDATING_THEME_TO Aggiornamento tema a
 TIMEZONE_UPDATED Fuso orario aggiornato

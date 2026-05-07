@@ -624,7 +624,7 @@ class SettingsController
       'theme' => (string) $user->theme,
       'variant' => (string) $user->variant,
       'text' => (string) $user->text,
-      'density' => (string) $user->density,
+      'spacing' => (string) $user->spacing,
       'dyslexia_typography' => (string) $user->dyslexia_typography,
       'voice' => (string) $user->voice,
       'audio_feedback' => (string) $user->audio_feedback,
@@ -661,7 +661,7 @@ class SettingsController
       'theme',
       'variant',
       'text',
-      'density',
+      'spacing',
       'dyslexia_typography',
       'voice',
       'audio_feedback',
@@ -1224,8 +1224,8 @@ class SettingsController
       ], 0);
     }
 
-    if (isset($filtered['density'])) {
-      $filtered['density'] = $normalizeSliderAdjustment($filtered['density'], [
+    if (isset($filtered['spacing'])) {
+      $filtered['spacing'] = $normalizeSliderAdjustment($filtered['spacing'], [
         'tight' => -5,
         'compact' => -5,
         'comfy' => 0,

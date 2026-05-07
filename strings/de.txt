@@ -283,7 +283,7 @@ SKIP_PRIMARY_NAVIGATION Hauptnavigation überspringen
 SKIP_TO_CONTENT Zum Inhalt springen
 SKIP_TO_MAIN_CONTENT Zum Hauptinhalt springen
 SMALLER Kleiner
-DENSITY Abstände
+SPACING Abstände
 SPANISH Spanisch
 START Start
 STATIC Statisch
@@ -323,7 +323,7 @@ TOOLTIP_NAV_BAR Bevorzugtes Scrollverhalten der Navigationsleiste.
 TOOLTIP_NEW_EMAIL Geben Sie die neue E-Mail-Adresse ein, die Sie verwenden möchten.
 TOOLTIP_NEW_PASSWORD Geben Sie das neue Passwort ein, das Sie verwenden möchten.
 TOOLTIP_PASSWORD_REQUIRED Ihr Passwort ist erforderlich, um fortzufahren.
-TOOLTIP_DENSITY Bevorzugter Abstand der Benutzeroberfläche.
+TOOLTIP_SPACING Bevorzugter Abstand der Benutzeroberfläche.
 TOOLTIP_TEXT Bevorzugte Textgröße der Benutzeroberfläche.
 TOOLTIP_THEME Aussehen & Verhalten der Benutzeroberfläche.
 TRAVEL_HOURS REISE
@@ -345,7 +345,7 @@ UPDATING_PAY_PERIOD Zahlungsperiode aktualisieren
 UPDATING_PHONE Telefon aktualisieren
 UPDATING_PROVINCE Provinz aktualisieren...
 PROVINCE_UPDATED Provinz aktualisiert
-UPDATING_DENSITY_TO Abstände aktualisieren auf
+UPDATING_SPACING_TO Abstände aktualisieren auf
 UPDATING_TEXT_TO Text aktualisieren auf
 UPDATING_THEME_TO Design aktualisieren auf
 TIMEZONE_UPDATED Zeitzone aktualisiert

@@ -27,22 +27,22 @@ foreach (Database::scanKeys(Keys::USER . ':*') as $key) {
   }
 
   $scanned++;
-  $density = (string) Database::hget($redisKey, 'density');
-  if ($density !== 'compact') {
+  $spacing = (string) Database::hget($redisKey, 'spacing');
+  if ($spacing !== 'compact') {
     continue;
   }
 
   $found++;
   if ($mode === 'execute') {
-    Database::hset($redisKey, ['density' => 'tight']);
+    Database::hset($redisKey, ['spacing' => 'tight']);
     $updated++;
   }
 }
 
 printf("Mode: %s\n", $mode);
 printf("Keys scanned: %d\n", $scanned);
-printf("Compact densities found: %d\n", $found);
-printf("Densities updated to tight: %d\n", $updated);
+printf("Compact spacings found: %d\n", $found);
+printf("Spacings updated to tight: %d\n", $updated);
 
 if ($mode === 'dry-run') {
   echo "No data changed. Re-run with --execute to apply updates.\n";

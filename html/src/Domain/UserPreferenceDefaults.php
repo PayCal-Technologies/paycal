@@ -37,12 +37,12 @@ final class UserPreferenceDefaults
     public const DEFAULT_TEXT = '0';
 
   /**
-   * Default spacing (density) preference.
+   * Default spacing preference.
    *
-  * Range: -5 to +5 px adjustment (stored as a string integer)
+   * Range: -5 to +5 rem adjustment (stored as a string integer)
    * Controls UI element spacing for accessibility.
    */
-  public const DEFAULT_DENSITY = '0';
+  public const DEFAULT_SPACING = '0';
 
   /**
    * Default dyslexia-friendly typography mode.

@@ -78,10 +78,10 @@ require_once HTML . '/header.php';
       <h3><?php echo htmlspecialchars(help_as_i18n('HELP_ACCOUNT_LANGUAGE_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h3>
       <p><?php echo htmlspecialchars(help_as_i18n('HELP_ACCOUNT_LANGUAGE_TEXT'), ENT_QUOTES, 'UTF-8'); ?></p>
 
-      <h3><?php echo htmlspecialchars(help_as_i18n('HELP_ACCOUNT_TEXT_DENSITY_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h3>
+      <h3><?php echo htmlspecialchars(help_as_i18n('HELP_ACCOUNT_TEXT_SPACING_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h3>
       <ul class="doc-fact-list">
-        <li><?php echo htmlspecialchars(help_as_i18n('HELP_ACCOUNT_TEXT_DENSITY_1'), ENT_QUOTES, 'UTF-8'); ?></li>
-        <li><?php echo htmlspecialchars(help_as_i18n('HELP_ACCOUNT_TEXT_DENSITY_2'), ENT_QUOTES, 'UTF-8'); ?></li>
+        <li><?php echo htmlspecialchars(help_as_i18n('HELP_ACCOUNT_TEXT_SPACING_1'), ENT_QUOTES, 'UTF-8'); ?></li>
+        <li><?php echo htmlspecialchars(help_as_i18n('HELP_ACCOUNT_TEXT_SPACING_2'), ENT_QUOTES, 'UTF-8'); ?></li>
       </ul>
 
       <h3><?php echo htmlspecialchars(help_as_i18n('HELP_ACCOUNT_NAV_POSITION_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h3>

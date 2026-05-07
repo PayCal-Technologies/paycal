@@ -113,7 +113,7 @@ final class User
   public string $language                            = Language::DEFAULT;
   public string $locale                              = 'en-CA';
   public string $text                                = UserPreferenceDefaults::DEFAULT_TEXT;
-  public string $density                             = UserPreferenceDefaults::DEFAULT_DENSITY;
+  public string $spacing                             = UserPreferenceDefaults::DEFAULT_SPACING;
   public string $dyslexia_typography                 = UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY;
   public string $nav_position_primary                = UserPreferenceDefaults::DEFAULT_NAV_POSITION_PRIMARY;
   public string $nav_state_primary                   = UserPreferenceDefaults::DEFAULT_NAV_STATE_PRIMARY;
@@ -337,8 +337,8 @@ final class User
     if (empty($newSettings))
       return false;
 
-    if (isset($newSettings['density']) && (string) $newSettings['density'] === 'compact') {
-      $newSettings['density'] = 'tight';
+    if (isset($newSettings['spacing']) && (string) $newSettings['spacing'] === 'compact') {
+      $newSettings['spacing'] = 'tight';
     }
 
     // Convert all values to strings for Redis hset

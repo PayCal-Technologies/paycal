@@ -83,7 +83,7 @@ $textSliderValue = $normalizeSliderPreference($user->text ?? UserPreferenceDefau
   'x-large' => 5,
 ]);
 
-$densitySliderValue = $normalizeSliderPreference($user->density ?? UserPreferenceDefaults::DEFAULT_DENSITY, [
+$spacingSliderValue = $normalizeSliderPreference($user->spacing ?? UserPreferenceDefaults::DEFAULT_SPACING, [
   'tight' => -5,
   'compact' => -5,
   'comfy' => 0,
@@ -100,7 +100,7 @@ if (InputSanitizer::getString('lens') === '1') {
     'theme' => (string) ($user->theme ?? 'default'),
     'variant' => (string) ($user->variant ?? 'default'),
     'text' => (string) ($user->text ?? '0'),
-    'density' => (string) ($user->density ?? '0'),
+    'spacing' => (string) ($user->spacing ?? '0'),
     'dyslexia_typography' => (string) ($user->dyslexia_typography ?? UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY),
     'audio_feedback' => (string) ($user->audio_feedback ?? 'all'),
     'default_site_set' => !empty((string) ($user->default_site_id ?? '')),  ]);
@@ -786,14 +786,14 @@ echo Render::dialog([
     <br>
 
     <div class="flex f_baseline w100">
-      <label class="w25"><?php echo settings_index_i18n('DENSITY'); ?></label>
+      <label class="w25"><?php echo settings_index_i18n('SPACING'); ?></label>
       <div class="w75">
-        <div class="security_slider_row security_slider_row_compact" data-hover-help="Density adjustment in pixels. 0 is the default.">
+        <div class="security_slider_row security_slider_row_compact" data-hover-help="Spacing adjustment. 0 is the default.">
           <span class="security_slider_edge">-5px</span>
-          <input type="range" id="density_slider" name="density" min="-5" max="5" step="1" value="<?php echo $densitySliderValue; ?>" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="<?php echo $densitySliderValue; ?>" aria-label="Density adjustment in pixels" aria-describedby="density_slider_value">
+          <input type="range" id="spacing_slider" name="spacing" min="-5" max="5" step="1" value="<?php echo $spacingSliderValue; ?>" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="<?php echo $spacingSliderValue; ?>" aria-label="Spacing adjustment" aria-describedby="spacing_slider_value">
           <span class="security_slider_edge">+5px</span>
         </div>
-        <p id="density_slider_value" class="security_level_value"><?php echo (($densitySliderValue > 0) ? '+' : '').$densitySliderValue; ?>px</p>
+        <p id="spacing_slider_value" class="security_level_value"><?php echo (($spacingSliderValue > 0) ? '+' : '').$spacingSliderValue; ?>px</p>
       </div>
     </div>
 

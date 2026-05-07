@@ -66,7 +66,7 @@ enum UserFields: string
   case LANGUAGE = 'language';
   case LOCALE = 'locale';
   case TEXT = 'text';
-  case DENSITY = 'density';
+  case SPACING = 'spacing';
   case DYSLEXIA_TYPOGRAPHY = 'dyslexia_typography';
   case NAV_POSITION_PRIMARY = 'nav_position_primary';
   case NAV_STATE_PRIMARY = 'nav_state_primary';

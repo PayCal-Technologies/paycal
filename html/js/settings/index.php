@@ -2279,9 +2279,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const languagePicker = PC.getElement('language_picker');
   const styleForm = PC.getElement('account_style_form');
   const textSlider = PC.getElement('text_slider');
-  const densitySlider = PC.getElement('density_slider');
+  const spacingSlider = PC.getElement('spacing_slider');
   const textSliderValue = PC.getElement('text_slider_value');
-  const densitySliderValue = PC.getElement('density_slider_value');
+  const spacingSliderValue = PC.getElement('spacing_slider_value');
 
   const lockChooseOption = (selectEl) => {
     if (!(selectEl instanceof HTMLSelectElement)) {
@@ -2324,7 +2324,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    if (group === 'density') {
+    if (group === 'spacing') {
       root.style.setProperty('--spacing-adjustment', `${(normalized * 0.125).toFixed(4)}rem`);
     }
   };
@@ -2432,21 +2432,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  if (densitySlider instanceof HTMLInputElement) {
-    densitySlider.addEventListener('input', () => {
-      if (densitySliderValue) {
-        densitySliderValue.textContent = toAdjustmentLabel(densitySlider.value);
+  if (spacingSlider instanceof HTMLInputElement) {
+    spacingSlider.addEventListener('input', () => {
+      if (spacingSliderValue) {
+        spacingSliderValue.textContent = toAdjustmentLabel(spacingSlider.value);
       }
-      applyRootScaleAdjustment('density', densitySlider.value);
+      applyRootScaleAdjustment('spacing', spacingSlider.value);
     });
 
-    densitySlider.addEventListener('change', () => {
-      submitSliderPreference('density', densitySlider, densitySliderValue, 'Spacing');
+    spacingSlider.addEventListener('change', () => {
+      submitSliderPreference('spacing', spacingSlider, spacingSliderValue, 'Spacing');
     });
 
-    applyRootScaleAdjustment('density', densitySlider.value);
-    if (densitySliderValue) {
-      densitySliderValue.textContent = toAdjustmentLabel(densitySlider.value);
+    applyRootScaleAdjustment('spacing', spacingSlider.value);
+    if (spacingSliderValue) {
+      spacingSliderValue.textContent = toAdjustmentLabel(spacingSlider.value);
     }
   }
   Array.from(PC.queryAll('input[name="dyslexia_typography"]')).forEach(radioButton => {

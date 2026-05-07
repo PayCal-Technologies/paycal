@@ -489,14 +489,14 @@ return [
         'label' => 'Font Size Adjustment Override (px)',
         'help' => 'Global pixel adjustment applied on top of user text slider values',
     ],
-    'density_adjustment_override_px' => [
+    'spacing_adjustment_override_rem' => [
         'type' => 'int',
         'category' => 'ui',
         'default' => 0,
         'min' => -5,
         'max' => 5,
-        'label' => 'Density Adjustment Override (px)',
-        'help' => 'Global pixel adjustment applied on top of user density slider values',
+        'label' => 'Spacing Adjustment Override (rem)',
+        'help' => 'Global rem adjustment applied on top of user spacing slider values',
     ],
     'default_theme' => [
         'type' => 'string',

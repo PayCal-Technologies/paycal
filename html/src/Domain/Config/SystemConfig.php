@@ -40,7 +40,7 @@ use PayCal\Domain\Database;
 final class SystemConfig
 {
   public const FONT_SIZE_ADJUSTMENT_OVERRIDE = 'font_size_adjustment_override_px';
-  public const DENSITY_ADJUSTMENT_OVERRIDE = 'density_adjustment_override_px';
+  public const SPACING_ADJUSTMENT_OVERRIDE = 'spacing_adjustment_override_rem';
   public const TEXT_SMALLER = "smaller";
   public const TEXT_BASE = "base";
   public const TEXT_LARGER = "larger";
@@ -645,14 +645,14 @@ final class SystemConfig
         'label' => 'Font Size Adjustment Override (px)',
         'help' => 'Global pixel adjustment applied on top of user text slider values',
       ],
-      'density_adjustment_override_px' => [
+      'spacing_adjustment_override_rem' => [
         'type' => 'int',
         'category' => 'ui',
         'default' => 0,
         'min' => -5,
         'max' => 5,
-        'label' => 'Density Adjustment Override (px)',
-        'help' => 'Global pixel adjustment applied on top of user density slider values',
+        'label' => 'Spacing Adjustment Override (rem)',
+        'help' => 'Global rem adjustment applied on top of user spacing slider values',
       ],
       'font_family_sans' => [
         'type' => 'string',

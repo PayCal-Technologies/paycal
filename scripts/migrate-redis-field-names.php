@@ -5,7 +5,8 @@
  *
  * Migrate user preference field names in Redis:
  * - Rename 'text_sizing' → 'text'
- * - Rename 'spacing' → 'density'
+ * - Rename 'spacing' → 'density'  (NOTE: this migration was run and has since been reverted;
+ *   the 'density' field was renamed back to 'spacing' via migrate-field-density-to-spacing.php)
  *
  * This script safely handles existing user data with:
  * - Dry-run mode (default) to preview changes

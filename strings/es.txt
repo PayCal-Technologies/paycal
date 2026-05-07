@@ -281,7 +281,7 @@ SKIP_PRIMARY_NAVIGATION Skip Primary Navigation
 SKIP_TO_CONTENT Skip to Content
 SKIP_TO_MAIN_CONTENT Skip to main content
 SMALLER Smaller
-DENSITY Espaciado
+SPACING Espaciado
 SPANISH Spanish
 START Start
 STATIC Static
@@ -321,7 +321,7 @@ TOOLTIP_NAV_BAR Preferred scroll behaviour of navigation bar.
 TOOLTIP_NEW_EMAIL Provide the new email address you want to use.
 TOOLTIP_NEW_PASSWORD Provide the new password you want to use.
 TOOLTIP_PASSWORD_REQUIRED Your password is required to proceed.
-TOOLTIP_DENSITY Preferred spacing of the interface.
+TOOLTIP_SPACING Preferred spacing of the interface.
 TOOLTIP_TEXT Preferred text size of the interface.
 TOOLTIP_THEME Look & feel of the interface.
 TRAVEL_HOURS TRAVEL
@@ -343,7 +343,7 @@ UPDATING_PAY_PERIOD Updating Pay Period
 UPDATING_PHONE Updating Phone
 UPDATING_PROVINCE Updating Province...
 PROVINCE_UPDATED Provincia actualizada
-UPDATING_DENSITY_TO Actualizando espaciado a
+UPDATING_SPACING_TO Actualizando espaciado a
 UPDATING_TEXT_TO Updating text to
 UPDATING_THEME_TO Updating theme to
 TIMEZONE_UPDATED Zona horaria actualizada

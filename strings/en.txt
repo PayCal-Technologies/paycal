@@ -484,7 +484,7 @@ DELETE_SITE Delete Site
 DELETE_WORK Delete Work
 DELETE_WORK_WITH Delete Work with Delete.
 DEMOTE Demote
-DENSITY Spacing
+SPACING Spacing
 DETAILED_GUIDES Detailed Guides
 DEVICE Device
 DUTCH Dutch
@@ -706,9 +706,9 @@ HELP_ACCOUNT_STORED_DISPLAYED_3 Phone: optional, used for identification purpose
 HELP_ACCOUNT_STORED_DISPLAYED_4 Province: used for provincial tax bracket calculations in earnings estimates.
 HELP_ACCOUNT_STORED_DISPLAYED_5 Timezone: used for calendar and time display across the app.
 HELP_ACCOUNT_STORED_DISPLAYED_TITLE What is stored and displayed
-HELP_ACCOUNT_TEXT_DENSITY_1 Text Size: Small, Medium, Large, or X-Large. Use larger sizes if default text feels too small on your screen.
-HELP_ACCOUNT_TEXT_DENSITY_2 Density: Compact, Comfy, or Spacious. Compact shows more content at once; Spacious adds breathing room between elements.
-HELP_ACCOUNT_TEXT_DENSITY_TITLE Text Size and Density
+HELP_ACCOUNT_TEXT_SPACING_1 Text Size: Small, Medium, Large, or X-Large. Use larger sizes if default text feels too small on your screen.
+HELP_ACCOUNT_TEXT_SPACING_2 Spacing: Compact, Comfy, or Spacious. Compact shows more content at once; Spacious adds breathing room between elements.
+HELP_ACCOUNT_TEXT_SPACING_TITLE Text Size and Spacing
 HELP_ACCOUNT_THEMES_TEXT All appearance and interface settings are in Settings under the Style section. Changes apply immediately when saved.
 HELP_ACCOUNT_THEMES_TITLE Changing Themes and Preferences
 HELP_ACCOUNT_THEME_VARIANT_TEXT Choose a visual theme from a grouped set of options including OS-inspired designs (BeOS lineage, Linux families, classic Mac OS, Windows generations) and others. Each theme is available in a Light or Dark variant.
@@ -1756,7 +1756,7 @@ TOOLTIP_CONFIRM_EMAIL Confirm your new email address.
 TOOLTIP_CONFIRM_PASSWORD Confirm your new password.
 TOOLTIP_CURRENT_EMAIL Current email address.
 TOOLTIP_CURRENT_PASSWORD Current password.
-TOOLTIP_DENSITY Preferred spacing of the interface.
+TOOLTIP_SPACING Preferred spacing of the interface.
 TOOLTIP_LANGUAGE Preferred language.
 TOOLTIP_NAV_BAR Preferred scroll behaviour of navigation bar.
 TOOLTIP_NEW_EMAIL Provide the new email address you want to use.
@@ -2260,7 +2260,7 @@ UPDATING_CALENDAR_AUTOFOCUS_TO Updating Calendar autofocus to
 UPDATING_CALENDAR_DATE_LABEL_POSITION_TO Updating Calendar date label position to
 UPDATING_CALENDAR_DAY_NAME_FORMAT_TO Updating Calendar Day Name Format to
 UPDATING_CALENDAR_WORK_ENTRY_POSITION_TO Updating Calendar work entry position to
-UPDATING_DENSITY_TO Updating spacing to
+UPDATING_SPACING_TO Updating spacing to
 UPDATING_INFO Updating Info...
 UPDATING_LANGUAGE_TO Updating language to
 UPDATING_NAME Updating Name
