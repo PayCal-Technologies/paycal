@@ -1,0 +1,26 @@
+title = "PayCal Gitleaks Configuration"
+
+[allowlist]
+  description = "Suppress false positives and revoked historical credentials"
+
+  # Revoked OpenAI key that was removed from constants.php and replaced with env var.
+  # Key has been revoked at platform.openai.com — no longer active.
+  commits = [
+    "822ad2b947aa6a9eb73165f7c8fca72413da3dd6",
+  ]
+
+  paths = [
+    # Third-party vendor code — sample keys in library docs/tests are not ours
+    '''vendor/''',
+    '''html/vendor/''',
+
+    # PHP CS Fixer cache contains hashes that trip generic-api-key rule
+    '''html/\.php-cs-fixer\.cache''',
+
+    # Test fixtures — dummy keys used only as test inputs, never real credentials
+    '''html/tests/''',
+
+    # Internal AI notes and generated docs — no live credentials
+    '''ai-notes/''',
+    '''docs/''',
+  ]

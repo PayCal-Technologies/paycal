@@ -141,4 +141,4 @@ jobs:
           gitleaks version
 
       - name: Run Gitleaks
-        run: gitleaks detect --source . --redact --exit-code 1
+        run: gitleaks detect --source . --redact --config .gitleaks.toml --exit-code 1
