@@ -162,12 +162,12 @@ $navBarStickiness = "static";
 /* VARIABLES */
 :root {
   --text-base:                           1.125rem;
-  --text-adjustment-px:                  <?php echo $combinedTextAdjustment; ?>px;
-  --text:                                clamp(0.75rem, calc(var(--text-base) + var(--text-adjustment-px)), 1.5rem);
+  --text-adjustment:                      <?php echo ($combinedTextAdjustment * 0.125); ?>rem;
+  --text:                                clamp(0.75rem, calc(var(--text-base) + var(--text-adjustment)), 1.5rem);
   --line-height:                         <?php echo $lineHeight; ?>;
   --density-base:                        1rem;
-  --density-adjustment-px:               <?php echo $combinedDensityAdjustment; ?>px;
-  --spacing:                             clamp(0.60rem, calc(var(--density-base) + var(--density-adjustment-px)), 1.5rem);
+  --density-adjustment:                   <?php echo ($combinedDensityAdjustment * 0.125); ?>rem;
+  --spacing:                             clamp(0.60rem, calc(var(--density-base) + var(--density-adjustment)), 1.5rem);
   --font-xs:                             <?php echo $fontXs; ?>;
   --font-sm:                             max(1rem, <?php echo $fontSm; ?>);
   --font-md:                             <?php echo $fontMd; ?>;
