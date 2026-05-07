@@ -112,16 +112,6 @@ require_once Environment::appHome().'html/header.php';
 
   <h1 class="visually_hidden"><?php echo settings_index_i18n('SETTINGS'); ?></h1>
 
-  <!-- SETTINGS JUMP NAV -->
-  <nav class="settings_jump_nav" aria-label="<?php echo settings_index_i18n('SETTINGS'); ?> sections">
-    <a href="#panel-calendar" class="settings_jump_link"><?php echo settings_index_i18n('CALENDAR'); ?></a>
-    <a href="#panel-style" class="settings_jump_link"><?php echo settings_index_i18n('STYLE'); ?></a>
-    <a href="#panel-audio" class="settings_jump_link"><?php echo settings_index_i18n('AUDIO'); ?></a>
-    <a href="#panel-passkeys" class="settings_jump_link"><?php echo settings_index_i18n('SETTINGS_SECTION_PASSKEYS'); ?></a>
-    <a href="#panel-security" class="settings_jump_link"><?php echo settings_index_i18n('SETTINGS_SECTION_SECURITY'); ?></a>
-    <a href="#panel-data-portability" class="settings_jump_link"><?php echo settings_index_i18n('SETTINGS_SECTION_DATA_PORTABILITY'); ?></a>
-  </nav>
-
   <!-- MODAL CHANGE EMAIL -->
   <dialog id="modal_change_email" aria-labelledby="modal_change_email_title" aria-describedby="modal_change_email_desc change_email_status">
   <form id="change_email_form" name="change_email_form" aria-label="<?php echo settings_index_i18n('CHANGE_EMAIL'); ?>">
