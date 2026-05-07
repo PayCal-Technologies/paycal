@@ -278,7 +278,7 @@ SKIP_PRIMARY_NAVIGATION Ignorer la navigation principale
 SKIP_TO_CONTENT Aller au contenu
 SKIP_TO_MAIN_CONTENT Aller au contenu principal
 SMALLER Plus petit
-DENSITY Densité
+DENSITY Espacement
 SPANISH Espagnol
 START Commencer
 STATIC Statique
@@ -340,7 +340,7 @@ UPDATING_PAY_PERIOD Mise à jour de la période de paie
 UPDATING_PHONE Mise à jour du téléphone
 UPDATING_PROVINCE Mise à jour de la province...
 PROVINCE_UPDATED Province mise à jour
-UPDATING_DENSITY_TO Mise à jour de la densité vers
+UPDATING_DENSITY_TO Mise à jour de l'espacement vers
 UPDATING_TEXT_TO Mise à jour du texte vers
 UPDATING_THEME_TO Mise à jour du thème vers
 TIMEZONE_UPDATED Fuseau horaire mis à jour

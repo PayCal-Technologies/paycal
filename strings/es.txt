@@ -281,7 +281,7 @@ SKIP_PRIMARY_NAVIGATION Skip Primary Navigation
 SKIP_TO_CONTENT Skip to Content
 SKIP_TO_MAIN_CONTENT Skip to main content
 SMALLER Smaller
-DENSITY Density
+DENSITY Espaciado
 SPANISH Spanish
 START Start
 STATIC Static
@@ -343,7 +343,7 @@ UPDATING_PAY_PERIOD Updating Pay Period
 UPDATING_PHONE Updating Phone
 UPDATING_PROVINCE Updating Province...
 PROVINCE_UPDATED Provincia actualizada
-UPDATING_DENSITY_TO Updating density to
+UPDATING_DENSITY_TO Actualizando espaciado a
 UPDATING_TEXT_TO Updating text to
 UPDATING_THEME_TO Updating theme to
 TIMEZONE_UPDATED Zona horaria actualizada

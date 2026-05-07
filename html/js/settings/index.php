@@ -2320,12 +2320,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const root = document.documentElement;
     const normalized = clampSliderAdjustment(value);
     if (group === 'text') {
-      root.style.setProperty('--text-adjustment-px', `${normalized}px`);
+      root.style.setProperty('--text-adjustment', `${(normalized * 0.125).toFixed(4)}rem`);
       return;
     }
 
     if (group === 'density') {
-      root.style.setProperty('--density-adjustment-px', `${normalized}px`);
+      root.style.setProperty('--spacing-adjustment', `${(normalized * 0.125).toFixed(4)}rem`);
     }
   };
 
@@ -2441,7 +2441,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     densitySlider.addEventListener('change', () => {
-      submitSliderPreference('density', densitySlider, densitySliderValue, 'Density');
+      submitSliderPreference('density', densitySlider, densitySliderValue, 'Spacing');
     });
 
     applyRootScaleAdjustment('density', densitySlider.value);

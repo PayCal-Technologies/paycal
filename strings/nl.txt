@@ -446,7 +446,7 @@ SKIP_PRIMARY_NAVIGATION Primaire Navigatie Overslaan
 SKIP_TO_CONTENT Naar Inhoud Gaan
 SKIP_TO_MAIN_CONTENT Naar hoofdinhoud gaan
 SMALLER Kleiner
-DENSITY Dichtheid
+DENSITY Ruimte
 SPANISH Spaans
 START Start
 STATIC Statisch
@@ -508,7 +508,7 @@ UPDATING_PAY_PERIOD Loonperiode Bijwerken
 UPDATING_PHONE Telefoon Bijwerken
 UPDATING_PROVINCE Provincie bijwerken...
 PROVINCE_UPDATED Provincie bijgewerkt
-UPDATING_DENSITY_TO Dichtheid bijwerken naar
+UPDATING_DENSITY_TO Ruimte bijwerken naar
 UPDATING_TEXT_TO Tekst bijwerken naar
 UPDATING_THEME_TO Thema bijwerken naar
 TIMEZONE_UPDATED Tijdzone bijgewerkt

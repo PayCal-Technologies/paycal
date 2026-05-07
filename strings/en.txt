@@ -484,7 +484,7 @@ DELETE_SITE Delete Site
 DELETE_WORK Delete Work
 DELETE_WORK_WITH Delete Work with Delete.
 DEMOTE Demote
-DENSITY Density
+DENSITY Spacing
 DETAILED_GUIDES Detailed Guides
 DEVICE Device
 DUTCH Dutch
@@ -2260,7 +2260,7 @@ UPDATING_CALENDAR_AUTOFOCUS_TO Updating Calendar autofocus to
 UPDATING_CALENDAR_DATE_LABEL_POSITION_TO Updating Calendar date label position to
 UPDATING_CALENDAR_DAY_NAME_FORMAT_TO Updating Calendar Day Name Format to
 UPDATING_CALENDAR_WORK_ENTRY_POSITION_TO Updating Calendar work entry position to
-UPDATING_DENSITY_TO Updating density to
+UPDATING_DENSITY_TO Updating spacing to
 UPDATING_INFO Updating Info...
 UPDATING_LANGUAGE_TO Updating language to
 UPDATING_NAME Updating Name

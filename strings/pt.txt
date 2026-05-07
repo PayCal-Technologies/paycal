@@ -281,7 +281,7 @@ SKIP_PRIMARY_NAVIGATION Pular Navegação Principal
 SKIP_TO_CONTENT Pular para Conteúdo
 SKIP_TO_MAIN_CONTENT Pular para conteúdo principal
 SMALLER Menor
-DENSITY Densidade
+DENSITY Espaçamento
 SPANISH Espanhol
 START Iniciar
 STATIC Estático
@@ -343,7 +343,7 @@ UPDATING_PAY_PERIOD Atualizando Período de Pagamento
 UPDATING_PHONE Atualizando Telefone
 UPDATING_PROVINCE Atualizando Província...
 PROVINCE_UPDATED Província atualizada
-UPDATING_DENSITY_TO Atualizando densidade para
+UPDATING_DENSITY_TO Atualizando espaçamento para
 UPDATING_TEXT_TO Atualizando texto para
 UPDATING_THEME_TO Atualizando tema para
 TIMEZONE_UPDATED Fuso horário atualizado
