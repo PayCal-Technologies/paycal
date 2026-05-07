@@ -1,4 +1,4 @@
-<?php
+?php declare(strict_types=1);
 $i18nKeys = [
   'CONTACT_US',
   'FAQ_A1',

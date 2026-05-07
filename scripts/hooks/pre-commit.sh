@@ -27,6 +27,17 @@ if [[ -n "${staged_php_files}" ]]; then
     php -l "${file}" >/dev/null
   done <<< "${staged_php_files}"
 
+  paycal_log "pre-commit" "Checking staged PHP files declare strict_types=1"
+  strict_fail=0
+  while IFS= read -r file; do
+    [[ -z "${file}" ]] && continue
+    if ! grep -q "declare(strict_types=1);" "${file}"; then
+      paycal_log "fatal" "Missing declare(strict_types=1): ${file}"
+      strict_fail=1
+    fi
+  done <<< "${staged_php_files}"
+  if [[ "${strict_fail}" -eq 1 ]]; then exit 1; fi
+
   paycal_log "pre-commit" "Scanning staged PHP diff for semantic-looking rewrites"
   staged_php_paths_file="$(mktemp "${repo_root}/tmp/staged-php-semantic-diff.XXXXXX.txt")"
   trap 'rm -f "${staged_php_paths_file}"' EXIT

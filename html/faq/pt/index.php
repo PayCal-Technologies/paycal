@@ -1,4 +1,4 @@
-<?php
+?php declare(strict_types=1);
 $i18nKeys = ['CONTACT_US','FAQ_A1','FAQ_A2','FAQ_A3','FAQ_A4','FAQ_A5','FAQ_A6','FAQ_A7','FAQ_CONTACT_TEXT','FAQ_Q1','FAQ_Q2','FAQ_Q3','FAQ_Q4','FAQ_Q5','FAQ_Q6','FAQ_Q7','FAQ_TITLE','LAST_UPDATED'];
 $i18n = [];
 foreach ($i18nKeys as $i18nKey) {
