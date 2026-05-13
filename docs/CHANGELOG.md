@@ -15,6 +15,21 @@ This master changelog provides a high-level overview of major version milestones
 
 ## Version 1.x
 
+### [1.055.000] - 2026-05-12
+**Security deep-sweep, Redis atomicity hardening, SOC2 audit trail, CSS design token migration, and CI overhaul**
+- Completed two rounds of security sweeps covering host-header injection, open redirect, CORS, TOCTOU race conditions, IP-spoofing, dev-flag exposure, chain-hash integrity, API route-map leak, exception-detail leakage, and rate-limiter key upgrade (MD5 → sha256).
+- Centralized all core security headers into `Security::sendCoreSecurityHeaders()`; replaced `exec()` with `proc_open` argument-array in SOC2 admin script runner.
+- Replaced all non-atomic `hset+expire` calls with `hsetex`; added `pconnect`, atomic `GETDEL` token consumption, and `WAIT` replica confirmation across Redis layer.
+- Added admin audit trail, org governance event mirroring into TheLedger (13 events), and SOC2 dashboard admin actions panel; converted SOC2 dashboard tables to shared DataGrid component.
+- Added `/premium` upgrade landing page with outcome-focused UX and billing profile messaging updates.
+- Migrated all hardcoded `px` font-sizes to rem design tokens across calendar, datagrid, common, help, organizations, and settings CSS.
+- Renamed density preference to Spacing throughout (DB field, PHP, JS, CSS, i18n, tests).
+- Added language editor and audit dashboard under `/admin/` with dedicated CSS and i18n strings.
+- Localized auth-recover, help, organizations, profile, security, and sites pages.
+- Replaced `vlucas/phpdotenv` with first-party `Infrastructure\Env\Dotenv`; removed unused packages (`erusev/parsedown`, `yupmin/magoo`, `pdf-lib`); upgraded PHPUnit 12 → 13.
+- Hardened GitHub Actions workflows (SHA pinning, permissions, timeouts, Composer cache); added daily dependabot for Composer + npm; added PHPStan CI job; set up gitleaks secret scanning with allowlist.
+- Added ContentView doc-page text/PDF view system and May 2026 auth/passkey/Redis hardening transparency disclosure.
+
 ### [1.054.000] - 2026-05-04
 **SOC2 v2 pipeline, JS security hardening, a11y fixes, and transparency enhancements**
 - Introduced SOC2 v2 DSL pipeline with CC1–CC9 control test suites, monthly evidence bundle (2026-04), Type I packet index, and public Trust Hub page (`/security/`).

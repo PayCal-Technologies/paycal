@@ -6,10 +6,10 @@ PayCal™ is a payroll tracking platform focused on transparency, accessibility,
 
 The goal is simple: make pay easier to understand while keeping personal financial data private.
 
-Latest documented release: **v1.054.000**
+Latest documented release: **v1.055.000**
 
 [![Test
-Suite](https://img.shields.io/badge/tests-1565%20listed-blue)](html/tests/)
+Suite](https://img.shields.io/badge/tests-1574%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -347,6 +347,27 @@ bash scripts/native-fix-redis-launchagent.sh
 ---
 
 # Recent Releases
+
+## v1.055.000 (2026-05-12)
+
+- Completed two rounds of deep security sweeps: host-header injection, open redirect, CORS enforcement, TOCTOU race conditions, IP-spoofing, dev-flag guards, chain-hash integrity, API route-map disclosure, exception-detail leakage, and rate-limiter key upgrade (MD5 → sha256).
+- Centralized core security headers into `Security::sendCoreSecurityHeaders()`; replaced `exec()` with `proc_open` argument-array in SOC2 script runner; scoped calendar work clipboard from sessionStorage to in-memory IIFE.
+- Hardened Redis layer: replaced all non-atomic `hset+expire` with `hsetex`, added `pconnect`, atomic `GETDEL` token consumption, `WAIT` replica confirmation, and fixed TOCTOU counter/dedup races.
+- Added admin audit trail, mirrored 13 org governance events into TheLedger, and converted SOC2 dashboard tables to shared DataGrid component.
+- Added `/premium` upgrade landing page with outcome-focused copy and updated billing profile UX.
+- Migrated all hardcoded `px` font-sizes to rem design tokens across calendar, datagrid, common, help, organizations, and settings CSS; renamed density preference to Spacing throughout.
+- Added language editor and audit dashboard under `/admin/`; localized auth-recover, help, organizations, profile, security, and sites pages.
+- Added ContentView doc-page text/PDF view system and May 2026 transparency hardening disclosure.
+- Upgraded PHPUnit 12 → 13; replaced `vlucas/phpdotenv` with first-party `Infrastructure\Env\Dotenv`; removed unused packages; hardened GitHub Actions (SHA pinning, permissions, daily dependabot, PHPStan CI job, gitleaks scanning).
+
+## v1.054.000 (2026-05-04)
+
+- Introduced SOC2 v2 DSL pipeline with CC1–CC9 control test suites, monthly evidence bundle (2026-04), Type I packet index, and public Trust Hub page (`/security/`).
+- Enforced deterministic E2EE week reconciliation in calendar to prevent stale split fields from contaminating range totals.
+- Migrated all `innerHTML` assignments in admin/earnings/organizations JS files to `Guardian.setHTML()` / `textContent = ''` to satisfy JS security gate.
+- Fixed breadcrumb contrast violation for light-primary themes: `color: white` → `color: var(--button-primary-text, white)`.
+- Added Transparency Hub link to `/help/` intro and per-section read-more labels on `/transparency/` hub for accessibility navigation compliance.
+- Updated ESLint config: `caughtErrorsIgnorePattern` for intentionally-ignored catch parameters; removed stale imports and unused variables across JS files.
 
 ## v1.053.000 (2026-04-18)
 
