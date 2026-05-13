@@ -94,6 +94,8 @@ if ($isAuthenticated) {
   echo Render::jsScript('org-dek-auto-bootstrap');
 }
 
+
+
 ?>
 
 
@@ -247,3 +249,8 @@ Lens::render();
 
 </body>
 </html>
+<?php
+if (ContentView::isDocPage($currentPage)) {
+  ContentView::process($currentPage, $cspNonce ?? '', $pageTitle ?? '');
+}
+?>

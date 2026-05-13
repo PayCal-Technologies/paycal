@@ -434,8 +434,7 @@ final class User
 
     $created = strval(time());
     $key     = Keys::VERIFICATION_CODES . ":" . InputSanitizer::sanitizeString($userUUID);
-    Database::hset($key, [InputSanitizer::sanitizeString($code) => $created]);
-    Database::expire($key, FormTTL::ONE_HOUR->value);
+    Database::hsetex($key, [InputSanitizer::sanitizeString($code) => $created], FormTTL::ONE_HOUR->value);
   }
 
 

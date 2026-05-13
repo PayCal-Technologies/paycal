@@ -119,12 +119,12 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
   </div>
   <section class="panel organizations_definitions_panel" aria-labelledby="organizations_hierarchy_guide_title">
     <div class="organizations_section_header">
-      <h2 id="organizations_hierarchy_guide_title">Hierarchy, Permissions, and Consequences</h2>
+      <h2 id="organizations_hierarchy_guide_title"><?php echo organizations_index_i18n('ORGANIZATIONS_HIERARCHY_TITLE'); ?></h2>
     </div>
     <p class="help_text organizations_hierarchy_intro">This defines the operating model for shared organizations.</p>
     <div class="organizations_hierarchy_consequence_strip" role="note" aria-label="Hierarchy permissions and consequences">
       <section class="organizations_hierarchy_section_panel" aria-labelledby="organizations_hierarchy_ownership_title">
-        <h3 id="organizations_hierarchy_ownership_title" class="organizations_hierarchy_section_title">Ownership</h3>
+        <h3 id="organizations_hierarchy_ownership_title" class="organizations_hierarchy_section_title"><?php echo organizations_index_i18n('ORGANIZATIONS_HIERARCHY_OWNERSHIP_TITLE'); ?></h3>
         <ul class="organizations_hierarchy_list">
           <li>Ownership transfer is immediate and exclusive.</li>
           <li>The previous owner is automatically demoted to manager.</li>
@@ -132,7 +132,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
         </ul>
       </section>
       <section class="organizations_hierarchy_section_panel" aria-labelledby="organizations_hierarchy_roles_title">
-        <h3 id="organizations_hierarchy_roles_title" class="organizations_hierarchy_section_title organizations_hierarchy_section_title_roles">Roles</h3>
+        <h3 id="organizations_hierarchy_roles_title" class="organizations_hierarchy_section_title organizations_hierarchy_section_title_roles"><?php echo organizations_index_i18n('ORGANIZATIONS_HIERARCHY_ROLES_TITLE'); ?></h3>
         <ul class="organizations_hierarchy_list organizations_hierarchy_roles_list">
           <li><strong>Owner</strong><br>Full system control (settings, access, audit, ownership).</li>
           <li><strong>Manager</strong><br>Full operational control, including access management, but no ownership authority.</li>
@@ -142,7 +142,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
         </ul>
       </section>
       <section class="organizations_hierarchy_section_panel" aria-labelledby="organizations_hierarchy_permissions_title">
-        <h3 id="organizations_hierarchy_permissions_title" class="organizations_hierarchy_section_title">Permissions and Scope</h3>
+        <h3 id="organizations_hierarchy_permissions_title" class="organizations_hierarchy_section_title"><?php echo organizations_index_i18n('ORGANIZATIONS_HIERARCHY_PERMISSIONS_TITLE'); ?></h3>
         <ul class="organizations_hierarchy_list">
           <li>Permissions are role-based with scope constraints.</li>
           <li>Work actions require both capability (write access) and scope validation (org or self).</li>
@@ -150,7 +150,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
         </ul>
       </section>
       <section class="organizations_hierarchy_section_panel" aria-labelledby="organizations_hierarchy_consequences_title">
-        <h3 id="organizations_hierarchy_consequences_title" class="organizations_hierarchy_section_title">Consequences</h3>
+        <h3 id="organizations_hierarchy_consequences_title" class="organizations_hierarchy_section_title"><?php echo organizations_index_i18n('ORGANIZATIONS_HIERARCHY_CONSEQUENCES_TITLE'); ?></h3>
         <ul class="organizations_hierarchy_list">
           <li>Permission changes are applied immediately.</li>
           <li>Updates to role, status, or ownership take effect in real time.</li>
@@ -506,7 +506,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
 
           <section id="organizations_audit_control_test_panel" class="organizations_editor_card organizations_editor_card_full organizations_editor_panel" hidden title="Generate one controlled audit failure for Redis, The Watcher, and GCS alert-evidence validation." data-hover-help="Generate one controlled audit failure for Redis, The Watcher, and GCS alert-evidence validation.">
             <div class="organizations_section_header">
-              <h3>Audit Control Test</h3>
+              <h3><?php echo organizations_index_i18n('ORGANIZATIONS_AUDIT_CONTROL_TEST_H3'); ?></h3>
             </div>
             <p class="help_text">Use this once to generate a controlled organization error event. It records the test in Redis, appends it to The Watcher, and uploads a chained GCS alert artifact. Restricted to owners and authorized managers.</p>
             <div class="organizations_field_grid">
@@ -820,7 +820,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
 
           <section class="organizations_editor_card organizations_editor_card_full organizations_editor_panel organizations_danger_zone_panel" title="High-risk ownership transfer controls. Use only when you intend to hand off owner authority." data-hover-help="High-risk ownership transfer controls. Use only when you intend to hand off owner authority.">
             <div class="organizations_section_header">
-              <h3>DANGER ZONE</h3>
+              <h3><?php echo organizations_index_i18n('ORGANIZATIONS_DANGER_ZONE'); ?></h3>
             </div>
             <p id="organizations_transfer_notice" class="help_text"></p>
             <div class="organizations_inline_form">

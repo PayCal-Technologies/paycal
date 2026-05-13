@@ -84,11 +84,11 @@ class RegistrationController
       $email = InputSanitizer::postString('register_email');
     }
 
+    // Note: password/confirm_password fields are intentionally not collected;
+    // password registration is disabled and the passkey flow handles all signup.
     return [
         'full_name' => $fullName,
         'email' => $email,
-        'password' => InputSanitizer::postString('password'),
-        'confirm_password' => InputSanitizer::postString('confirm_password'),
         'invite_code' => InputSanitizer::postString('invite_code'),
     ];
   }

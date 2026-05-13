@@ -366,6 +366,21 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   color: var(--color-on-primary);
 }
 
+.doc-badge.high {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.doc-badge.medium {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.doc-badge.low {
+  background: #cce5ff;
+  color: #004085;
+}
+
 .doc-fact-list {
   margin: 0.75rem 0;
   padding-left: 1.25rem;

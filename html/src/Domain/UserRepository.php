@@ -217,18 +217,23 @@ final class UserRepository
     $emailKey = Keys::EMAIL . ':' . $sanitizedEmail;
     $legacyEmailKey = Keys::EMAIL . $sanitizedEmail;
 
-    Database::hset($emailKey, ['user_uuid'     => $userUUID]);
-    Database::hset($emailKey, ['created'       => $timestamp]);
-    Database::hset($emailKey, ['last_modified' => $timestamp]);
-
     // Legacy key format omitted ':' (e.g. emailuser@example.com). Do not write it.
     Database::unlink($legacyEmailKey);
 
-    if ($maintenance)
-      Database::expire($emailKey, FormTTL::ONE_DAY->value);
-
-    if ($maintenance)
+    if ($maintenance) {
+      Database::hsetex($emailKey, [
+        'user_uuid'     => $userUUID,
+        'created'       => $timestamp,
+        'last_modified' => $timestamp,
+      ], FormTTL::ONE_DAY->value);
       Database::unlink($legacyEmailKey);
+    } else {
+      Database::hset($emailKey, [
+        'user_uuid'     => $userUUID,
+        'created'       => $timestamp,
+        'last_modified' => $timestamp,
+      ]);
+    }
   }
 
     /**

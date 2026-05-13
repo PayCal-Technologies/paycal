@@ -93,8 +93,7 @@ $netblockCountKey = $scraperPrefix . ':netblock:count:' . $netblock['slug'];
 $netblockLabelsKey = $scraperPrefix . ':netblock:labels';
 Database::incr($netblockCountKey);
 Database::expire($netblockCountKey, 4000 * 24 * 3600);
-Database::hset($netblockLabelsKey, [$netblock['slug'] => $netblock['label']]);
-Database::expire($netblockLabelsKey, 4000 * 24 * 3600);
+Database::hsetex($netblockLabelsKey, [$netblock['slug'] => $netblock['label']], 4000 * 24 * 3600);
 
 $scoreKey = 'sec:ip:' . $ip . ':score';
 $reqKey = 'sec:ip:' . $ip . ':req';

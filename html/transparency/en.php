@@ -398,6 +398,23 @@ require_once HTML.'/header.php';
         </section>
 
         <section class="doc-section">
+          <h2>Auth, Passkey &amp; Redis Hardening — May 2026</h2>
+
+          <p class="doc-article-meta">Published: <time datetime="2026-05-12">2026-05-12</time></p>
+          <p>
+            An internal audit on May 12, 2026 found eleven security issues in our own authentication,
+            passkey, and Redis infrastructure code. We are publishing every finding, its impact, and
+            exactly what we changed.
+          </p>
+          <ul class="doc-fact-list">
+            <li>3 high-severity: non-atomic Redis writes, logout/CSRF silent failures, WebAuthn UV bypass</li>
+            <li>5 medium-severity: clone detection boundary error, sign count, revoked passkey re-registration, account enumeration, recovery key ordering</li>
+            <li>3 low-severity: dead code, disabled-path input collection, info disclosure in 403 body</li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/auth-hardening-2026-05/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
           <h2>Extensions Paradigm</h2>
 
           <p class="doc-article-meta">Published: <time datetime="2026-04-03">2026-04-03</time></p>

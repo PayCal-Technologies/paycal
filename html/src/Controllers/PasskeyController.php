@@ -131,14 +131,13 @@ final class PasskeyController
     $challengeId = bin2hex(random_bytes(self::CHALLENGE_ID_BYTES));
     $challengeKey = $this->signupChallengeKey($challengeId);
 
-    Database::hset($challengeKey, [
+    Database::hsetex($challengeKey, [
       'challenge' => $challenge,
       'email' => $email,
       'full_name' => $fullName,
       'device_name' => $deviceName,
       'created_at' => (string) time(),
-    ]);
-    Database::expire($challengeKey, self::CHALLENGE_TTL_SECONDS);
+    ], self::CHALLENGE_TTL_SECONDS);
 
     Response::success('[PASSKEY] Signup challenge created.', [
       'challengeId' => $challengeId,
@@ -333,13 +332,12 @@ final class PasskeyController
     $challengeId = bin2hex(random_bytes(self::CHALLENGE_ID_BYTES));
     $challengeKey = $this->registerChallengeKey($challengeId);
 
-    Database::hset($challengeKey, [
+    Database::hsetex($challengeKey, [
       'challenge' => $challenge,
       'user_uuid' => $user->user_uuid,
       'device_name' => $deviceName,
       'created_at' => (string) time(),
-    ]);
-    Database::expire($challengeKey, self::CHALLENGE_TTL_SECONDS);
+    ], self::CHALLENGE_TTL_SECONDS);
 
     Response::success('[PASSKEY] Registration challenge created.', [
       'challengeId' => $challengeId,
@@ -423,6 +421,17 @@ final class PasskeyController
         Response::error('Registration failed.', [], HttpStatus::HTTP_BAD_REQUEST);
         return;
       }
+      // Reject re-registration of a revoked credential; revoking a credential (e.g. clone
+      // suspected) must be permanent and cannot be cleared by re-submitting the same
+      // credential_id from a compromised device that also has account access.
+      if (($existing['revoked_at'] ?? '') !== '') {
+        SecurityLog::log('passkey_revoked_reregistration_blocked', [
+          'user_uuid' => $expectedUserUUID,
+          'credential_id' => $credentialId,
+        ]);
+        Response::error('Registration failed.', ['error' => 'passkey_revoked'], HttpStatus::HTTP_FORBIDDEN);
+        return;
+      }
     }
 
     $deviceName = $this->scalarString($challengeData['device_name'] ?? 'Passkey');
@@ -494,8 +503,9 @@ final class PasskeyController
 
       $userUUID = UserRepository::getUUIDFromEmail($email);
       if ('' === $userUUID || !$this->isValidUserUUID($userUUID)) {
-        \PayCal\Observability\Lens::add('[PASSKEY] Login email not found', ['email' => $email]);
-        Response::error('Authentication failed.', [], HttpStatus::HTTP_UNAUTHORIZED);
+        \PayCal\Observability\Lens::add('[PASSKEY] Login email not found', ['email_hash' => hash('sha256', $email)]);
+        // Return same body as "no credentials" to prevent account enumeration.
+        Response::error('Authentication failed.', ['error' => 'passkey_invalid'], HttpStatus::HTTP_UNAUTHORIZED);
         return;
       }
 
@@ -514,13 +524,12 @@ final class PasskeyController
     $challengeId = bin2hex(random_bytes(self::CHALLENGE_ID_BYTES));
     $challengeKey = $this->loginChallengeKey($challengeId);
 
-    Database::hset($challengeKey, [
+    Database::hsetex($challengeKey, [
       'challenge' => $challenge,
       'user_uuid' => $userUUID,
       'discoverable' => $discoverable ? '1' : '0',
       'created_at' => (string) time(),
-    ]);
-    Database::expire($challengeKey, self::CHALLENGE_TTL_SECONDS);
+    ], self::CHALLENGE_TTL_SECONDS);
 
     Response::success('[PASSKEY] Login challenge created.', [
       'challengeId' => $challengeId,
@@ -650,7 +659,9 @@ final class PasskeyController
     }
 
     $oldSignCount = (int) $this->scalarString($credentialData['sign_count'] ?? '0');
-    $suspectedClone = $newSignCount > 0 && $oldSignCount > 0 && $newSignCount < $oldSignCount;
+    // WebAuthn L2 §6.1: flag if stored sign count is non-zero and new count is not strictly greater
+    // This covers both replay (equal) and rollback (less-than) scenarios.
+    $suspectedClone = $oldSignCount > 0 && $newSignCount <= $oldSignCount;
     if ($suspectedClone) {
       Database::hset($credentialKey, [
         'revoked_at' => (string) time(),
@@ -685,10 +696,12 @@ final class PasskeyController
 
     $updateFields = [
       'last_used_at' => (string) time(),
+      // Always persist sign count regardless of value; only skip when the
+      // authenticator returned the sentinel 0 (counter not implemented).
+      // Skipping 0 here was the prior behaviour, but it breaks clone detection
+      // on subsequent logins when the device later returns a non-zero counter.
+      'sign_count' => (string) $newSignCount,
     ];
-    if ($newSignCount > 0) {
-      $updateFields['sign_count'] = (string) $newSignCount;
-    }
     Database::hset($credentialKey, $updateFields);
 
     Database::hset(Keys::USER . ':' . $expectedUserUUID, [
@@ -942,13 +955,12 @@ final class PasskeyController
         $token = rtrim(strtr(base64_encode(random_bytes(self::SECRET_BYTES)), '+/', '-_'), '=');
         $ttlSeconds = max(600, (int) SystemConfig::get('account_recovery_txn_ttl_minutes') * 60);
         $magicKey = Keys::accountRecoveryMagicLink($token);
-        Database::hset($magicKey, [
+        Database::hsetex($magicKey, [
           'txn_id' => $transaction->id(),
           'txn_secret' => $txnSecret,
           'email_hash' => hash('sha256', $email),
           'created_at' => (string) time(),
-        ]);
-        Database::expire($magicKey, $ttlSeconds);
+        ], $ttlSeconds);
 
         $recoverUrl = rtrim(Environment::appPublicURL(), '/') . '/auth/recover/?ml_token=' . rawurlencode($token);
         EmailGarum::sendAccountRecoveryMagicLink(

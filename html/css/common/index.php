@@ -730,7 +730,7 @@ a:not(.nav_language_link) svg rect {
   width: 32px;
   height: 32px;
   font-family: var(--sans-serif);
-  font-size: 16px;
+  font-size: 0.9rem;
   font-weight: bold;
   text-align: center;
   line-height: 32px;
@@ -2195,14 +2195,14 @@ footer div { font-size: var(--font-md); }
 
 .banner-text h4 {
   color: var(--verification-banner-heading-text);
-  font-size: 16px;
+  font-size: 0.9rem;
   font-weight: 600;
   margin: 0 0 4px;
 }
 
 .banner-text p {
   color: var(--verification-banner-body-text);
-  font-size: 14px;
+  font-size: 0.8rem;
   margin: 0;
 }
 

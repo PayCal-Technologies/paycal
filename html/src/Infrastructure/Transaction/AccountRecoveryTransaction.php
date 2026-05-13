@@ -105,8 +105,7 @@ final class AccountRecoveryTransaction
       'status' => self::STATUS_PENDING,
     ];
 
-    Database::hset(Keys::accountRecoveryTransaction($txnId), $record);
-    Database::expire(Keys::accountRecoveryTransaction($txnId), $ttlSeconds);
+    Database::hsetex(Keys::accountRecoveryTransaction($txnId), $record, $ttlSeconds);
 
     return [
       'transaction' => new self($txnId, $record),

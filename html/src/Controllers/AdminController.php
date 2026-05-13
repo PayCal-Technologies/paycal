@@ -79,6 +79,8 @@ class AdminController
     'admin.testing.create-orphaned-work',
     'admin.tests.run',
     'admin.languages.update',
+    'admin.languages.audit',
+    'admin.languages.translate',
     'admin.settings.update-invite',
     'admin.tax-brackets.federal',
     'admin.tax-brackets.provincial',
@@ -1085,6 +1087,118 @@ class AdminController
 				$sKey => $sValue
 			]);
     }
+  }
+
+  // ─── Language audit + AI translation endpoints ───────────────────────────
+
+  /**
+   * Return a full language audit report for the dashboard.
+   *
+   * GET /api/v1/admin/languages/audit
+   */
+  #[Route('admin/languages/audit', ['GET'])]
+  public function languageAudit(): void
+  {
+    if (!$this->requireCapability('admin.languages.audit')) {
+      return;
+    }
+
+    $stringsDir = dirname(__DIR__, 3) . '/strings';
+    $service    = new \PayCal\Domain\LanguageAuditService($stringsDir);
+
+    try {
+      $report = $service->fullReport();
+    } catch (\Throwable $e) {
+      Response::error('Audit failed: ' . $e->getMessage(), [], HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+      return;
+    }
+
+    Response::success('Language audit complete', ['report' => $report], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * Translate one batch of untranslated keys for a language via OpenAI.
+   *
+   * POST /api/v1/admin/languages/translate
+   * Body: lang=de&batch_index=0
+   *
+   * Returns the translated [key => value] map plus progress metadata so
+   * the client can poll batch-by-batch and update the dashboard live.
+   */
+  #[Route('admin/languages/translate', ['POST'])]
+  public function translateLanguageBatch(): void
+  {
+    if (!$this->requireCapability('admin.languages.translate')) {
+      return;
+    }
+
+    $allowedStrings = ['lang', 'batch_index'];
+    $filteredArray  = RequestGuard::filterPost($allowedStrings, []);
+    if (false === $filteredArray) {
+      Response::error('RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    /** @var array<string, string> $filteredArray */
+    $lang       = trim($filteredArray['lang'] ?? '');
+    $batchIndex = max(0, (int) ($filteredArray['batch_index'] ?? 0));
+
+    if (!Language::isSupported($lang) || $lang === 'en') {
+      Response::error('Invalid or unsupported language code.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $apiKeyRaw = $_ENV['PC_OPENAI_API_KEY'] ?? '';
+    $apiKey = is_string($apiKeyRaw) ? $apiKeyRaw : '';
+    if ($apiKey === '') {
+      Response::error('OpenAI API key not configured.', [], HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+      return;
+    }
+
+    $stringsDir = dirname(__DIR__, 3) . '/strings';
+    $service    = new \PayCal\Domain\LanguageAuditService($stringsDir);
+    $enMap      = $service->getEnglishMap();
+    $batches    = $service->getBatches($lang, $enMap);
+    $totalBatches = count($batches);
+
+    if ($totalBatches === 0 || !isset($batches[$batchIndex])) {
+      Response::success('No keys to translate.', [
+        'applied'        => 0,
+        'batch_index'    => $batchIndex,
+        'total_batches'  => $totalBatches,
+        'done'           => true,
+      ], HttpStatus::HTTP_OK);
+      return;
+    }
+
+    $batch = $batches[$batchIndex];
+
+    try {
+      $translations = $service->translateBatch($batch, $lang, $apiKey);
+      $applied      = $service->applyTranslations($lang, $translations);
+    } catch (\Throwable $e) {
+      Response::error('Translation failed: ' . $e->getMessage(), [
+        'batch_index'   => $batchIndex,
+        'total_batches' => $totalBatches,
+      ], HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+      return;
+    }
+
+    $isLast = $batchIndex >= $totalBatches - 1;
+
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.languages.translated', User::currentUUID(), [
+      'lang'        => $lang,
+      'batch_index' => (string) $batchIndex,
+      'applied'     => (string) $applied,
+    ]);
+
+    Response::success("Batch {$batchIndex} translated.", [
+      'applied'        => $applied,
+      'translations'   => $translations,
+      'batch_index'    => $batchIndex,
+      'total_batches'  => $totalBatches,
+      'done'           => $isLast,
+    ], HttpStatus::HTTP_OK);
   }
 }
 

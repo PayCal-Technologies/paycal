@@ -47,15 +47,14 @@ final class SystemAuditRepository
 
     $eventKey = Keys::SYSTEM_AUDIT_EVENT . ':' . $eventId;
 
-    Database::hset($eventKey, [
+    Database::hsetex($eventKey, [
       'event_id'   => $eventId,
       'event_type' => $eventType,
       'actor_uuid' => $actorUUID,
       'details'    => json_encode($normalizedDetails, JSON_UNESCAPED_SLASHES) ?: '{}',
       'created_at' => $createdAt,
-    ]);
+    ], self::RETENTION_SECONDS);
 
-    Database::expire($eventKey, self::RETENTION_SECONDS);
     Database::sadd(Keys::SYSTEM_AUDIT, $eventId);
 
     $proof = TheLedger::append(

@@ -408,13 +408,12 @@ final class AccountRecoveryController
 
     $challengeId = bin2hex(random_bytes(self::CHALLENGE_ID_BYTES));
     $challenge = $this->encodeB64Url($webauthn->getChallenge()->getBinaryString());
-    Database::hset(Keys::webauthnChallenge('recovery-register', $challengeId), [
+    Database::hsetex(Keys::webauthnChallenge('recovery-register', $challengeId), [
       'challenge' => $challenge,
       'txn_id' => $transaction->id(),
       'user_uuid' => $user->user_uuid,
       'device_name' => $deviceName !== '' ? $deviceName : 'Recovered Passkey',
-    ]);
-    Database::expire(Keys::webauthnChallenge('recovery-register', $challengeId), self::CHALLENGE_TTL_SECONDS);
+    ], self::CHALLENGE_TTL_SECONDS);
 
     Response::success('Recovery passkey challenge created.', [
       'challengeId' => $challengeId,
@@ -461,7 +460,9 @@ final class AccountRecoveryController
 
     try {
       $webauthn = $this->createWebAuthn();
-      $result = $webauthn->processCreate($clientDataJSON, $attestationObject, $challengeBinary, false, true);
+      // UV must be enforced: the challenge was issued with userVerification='required'.
+      // Passing false here would let a modified client clear the UV flag and bypass biometrics.
+      $result = $webauthn->processCreate($clientDataJSON, $attestationObject, $challengeBinary, true, true);
       $credentialId = $this->encodeB64Url($result->credentialId);
       $publicKeyPem = (string) $result->credentialPublicKey;
       $signCount = (int) ($result->signatureCounter ?? 0);

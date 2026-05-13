@@ -428,10 +428,10 @@ require_once Environment::appHome().'html/header.php';
 
   <!-- Archived Work Viewer Dialog -->
   <dialog id='modal_archived_work' class='dialog modal_archived_work' aria-labelledby='archived_work_title' aria-describedby='archived_work_aria archived_work_content'>
-    <p id='archived_work_aria' class='visually_hidden'>Review archived work records for the selected site, then close to return to site management.</p>
+    <p id='archived_work_aria' class='visually_hidden'><?php echo sites_index_i18n('SITES_ARCHIVED_WORK_ARIA'); ?></p>
     <section class='modal_header'>
       <button type='button' class='btn_close' data-dialog-close='modal_archived_work' aria-label='<?php echo sites_index_i18n('CLOSE'); ?>'>&times;</button>
-      <h2 class='modal_title' id='archived_work_title'>Archived Work</h2>
+      <h2 class='modal_title' id='archived_work_title'><?php echo sites_index_i18n('SITES_ARCHIVED_WORK_TITLE'); ?></h2>
     </section>
     <section class='modal_content' id='archived_work_content'>
       <p class='archived_work_loading'>Loading...</p>
@@ -450,10 +450,10 @@ require_once Environment::appHome().'html/header.php';
 
   <!-- Finality Delete Confirmation Dialog -->
   <dialog id='modal_finality_delete' class='dialog' aria-labelledby='modal_finality_delete_title' aria-describedby='finality_delete_aria finality_delete_message'>
-    <p id='finality_delete_aria' class='visually_hidden'>This confirms permanent deletion of archived work data. Continue only if you intend to remove records permanently.</p>
+    <p id='finality_delete_aria' class='visually_hidden'><?php echo sites_index_i18n('SITES_FINALITY_DELETE_ARIA'); ?></p>
     <section class='modal_header'>
       <button type='button' class='btn_close' data-dialog-close='modal_finality_delete' aria-label='<?php echo sites_index_i18n('CLOSE'); ?>'>&times;</button>
-      <h2 id='modal_finality_delete_title' class='modal_title modal_title_danger'>⚠️ PERMANENT DELETION</h2>
+      <h2 id='modal_finality_delete_title' class='modal_title modal_title_danger'>⚠️ <?php echo sites_index_i18n('SITES_FINALITY_DELETE_TITLE'); ?></h2>
     </section>
     <section class='modal_content'>
       <p id='finality_delete_message'></p>
@@ -472,14 +472,14 @@ require_once Environment::appHome().'html/header.php';
 
   <!-- Orphaned Work Recovery Dialog -->
   <dialog id='modal_orphaned_work' class='dialog modal_orphaned_work' aria-labelledby='modal_orphaned_work_title' aria-describedby='modal_orphaned_work_aria modal_orphaned_work_desc'>
-    <p id='modal_orphaned_work_aria' class='visually_hidden'>Recover orphaned work entries by linking each orphaned site identifier to a real site.</p>
+    <p id='modal_orphaned_work_aria' class='visually_hidden'><?php echo sites_index_i18n('SITES_ORPHANED_MODAL_ARIA'); ?></p>
     <section class='modal_header'>
-      <h2 id='modal_orphaned_work_title' class='modal_title'>🔧 Recover Orphaned Work Entries</h2>
-      <button type='button' class='btn_close' data-dialog-close='modal_orphaned_work' aria-label='Close'>&times;</button>
+      <h2 id='modal_orphaned_work_title' class='modal_title'>🔧 <?php echo sites_index_i18n('SITES_ORPHANED_MODAL_TITLE'); ?></h2>
+      <button type='button' class='btn_close' data-dialog-close='modal_orphaned_work' aria-label='<?php echo sites_index_i18n('CLOSE'); ?>'>&times;</button>
     </section>
     <section class='modal_content'>
       <div id='modal_orphaned_work_desc' class='orphaned_work_disclaimer'>
-        The following work entries have no corresponding site. You can recover them by creating a site to bind the data to.
+        <?php echo sites_index_i18n('SITES_ORPHANED_MODAL_DESC'); ?>
       </div>
       <div id='orphaned_groups_container' class='orphaned_groups_container'>
         <!-- Orphaned groups populated via JavaScript -->
@@ -494,10 +494,10 @@ require_once Environment::appHome().'html/header.php';
 
   <!-- Recovery Site Dialog -->
   <dialog id='modal_recovery_site' class='dialog' aria-labelledby='modal_recovery_site_title' aria-describedby='recovery_site_aria recovery_site_info'>
-    <p id='recovery_site_aria' class='visually_hidden'>Create a site to attach orphaned work entries and restore them to normal reporting.</p>
+    <p id='recovery_site_aria' class='visually_hidden'><?php echo sites_index_i18n('SITES_RECOVERY_SITE_ARIA'); ?></p>
     <section class='modal_header'>
-      <h2 id='modal_recovery_site_title' class='modal_title'>Create Site for Orphaned Work</h2>
-      <button type='button' class='btn_close' data-dialog-close='modal_recovery_site' aria-label='Close'>&times;</button>
+      <h2 id='modal_recovery_site_title' class='modal_title'><?php echo sites_index_i18n('SITES_RECOVERY_SITE_TITLE'); ?></h2>
+      <button type='button' class='btn_close' data-dialog-close='modal_recovery_site' aria-label='<?php echo sites_index_i18n('CLOSE'); ?>'>&times;</button>
     </section>
     <form id='recovery_site_form'>
       <input type='hidden' id='recovery_orphaned_site_id' name='orphaned_site_id' value=''>

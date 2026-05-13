@@ -402,14 +402,13 @@ class SettingsController
 
     $importId = $this->generateReferenceCode('IMP');
     $importKey = $this->importSessionKey($importId);
-    Database::hset($importKey, [
+    Database::hsetex($importKey, [
       'actor_uuid' => User::currentUUID(),
       'created_at' => (string) time(),
       'schema_version' => (string) $schemaVersion,
       'checksum_sha256' => hash('sha256', $payloadJson),
       'payload_json' => $payloadJson,
-    ]);
-    Database::expire($importKey, self::DATA_IMPORT_TTL_SECONDS);
+    ], self::DATA_IMPORT_TTL_SECONDS);
 
     SecurityLog::log('account_data_import_prepared', [
       'user_uuid' => User::currentUUID(),

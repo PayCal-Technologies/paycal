@@ -95,8 +95,35 @@ class Database
   }
 
 
-  /**
-   * Sets a field in a Database hash.
+  /**   * Sets fields in a hash and applies a TTL atomically (MULTI/EXEC).
+   *
+   * Use this everywhere a hset is immediately followed by expire on the same
+   * key.  Without atomicity, a process crash between the two calls leaves the
+   * key alive forever with no expiry.
+   *
+   * @param string                $key     Hash key
+   * @param array<string, string> $fields  Field => value map
+   * @param int                   $ttlSeconds TTL in seconds (must be > 0)
+   */
+  public static function hsetex(string $key, array $fields, int $ttlSeconds): void
+  {
+    if ([] === $fields || $ttlSeconds <= 0) {
+      return;
+    }
+
+    $normalized = [];
+    foreach ($fields as $field => $value) {
+      $normalized[(string) $field] = (string) $value;
+    }
+
+    self::transaction(function (\Redis $r) use ($key, $normalized, $ttlSeconds): void {
+      $r->hMSet($key, $normalized);
+      $r->expire($key, $ttlSeconds);
+    });
+  }
+
+
+  /**   * Sets a field in a Database hash.
    * @param string $key    Database hash key
    * @param array<string, string>  $fields Associative array of field => value
    */
@@ -117,11 +144,18 @@ class Database
 
   /**
    * Deletes one or more Database keys matching the given pattern.
+   *
+   * IMPORTANT: Key enumeration must use the write instance. Using the read
+   * replica here created a silent failure window: under replica lag the replica
+   * returned an empty key list, so the subsequent DEL on the primary was never
+   * issued. Affected callers include destroySession() (logout) and
+   * validateCSRFToken() (nonce invalidation), making one-shot keys reusable.
+   *
    * @param string $pattern Pattern to delete
    */
   public static function del(string $pattern): int|false
   {
-    $keys = self::getReadInstance()->client->keys($pattern);
+    $keys = self::getWriteInstance()->client->keys($pattern);
     $deletedCount = 0;
     if (!empty($keys)) {
       foreach ($keys as $key) {

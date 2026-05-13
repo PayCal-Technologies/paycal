@@ -177,8 +177,7 @@ class Authentication
   public static function touchSession(string $hash): void
   {
     $key = Keys::SESSION . ":" . $hash;
-    Database::hset($key, ["last_activity" => (string) time()]);
-    Database::expire($key, Environment::redisNewSessionTTL());
+    Database::hsetex($key, ["last_activity" => (string) time()], Environment::redisNewSessionTTL());
   }
 
   /**
@@ -480,17 +479,18 @@ class Authentication
       $userAgent = substr($userAgent, 0, 512);
     }
 
-    Database::hset($sessionKey,   ['user_uuid' => $userUUID]);
-    Database::hset($sessionKey,   ['created_at' => $createdAt]);
-    Database::hset($sessionKey,   ['last_signin' => $lastSignin]);
-    Database::hset($sessionKey,   ['last_activity' => $createdAt]);
-    Database::hset($sessionKey,   ['first_ip' => $firstIPAddress]);
-    Database::hset($sessionKey,   ['last_ip' => $lastIPAddress]);
-    Database::hset($sessionKey,   ['auth_method' => 'session_start']);
-    Database::hset($sessionKey,   ['auth_strength' => 'unknown']);
-    Database::hset($sessionKey,   ['user_agent' => $userAgent]);
-      Database::hset($sessionKey,   ['login_time' => $createdAt]); // For session duration metrics
-    Database::expire($sessionKey, Environment::redisNewSessionTTL());
+    Database::hsetex($sessionKey, [
+      'user_uuid'     => $userUUID,
+      'created_at'    => $createdAt,
+      'last_signin'   => $lastSignin,
+      'last_activity' => $createdAt,
+      'first_ip'      => $firstIPAddress,
+      'last_ip'       => $lastIPAddress,
+      'auth_method'   => 'session_start',
+      'auth_strength' => 'unknown',
+      'user_agent'    => $userAgent,
+      'login_time'    => $createdAt, // For session duration metrics
+    ], Environment::redisNewSessionTTL());
 
       // Telemetry: Track login event (aggregate only, no PII)
       $loginKey = Keys::TELEMETRY . ':auth:login:' . date('Y-m-d');

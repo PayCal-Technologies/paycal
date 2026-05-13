@@ -4,6 +4,7 @@ use PayCal\Domain\Authentication;
 use PayCal\Domain\AdminSurface;
 use PayCal\Domain\Config\Environment;
 use PayCal\Domain\InputSanitizer;
+use PayCal\Domain\Render;
 
 require_once __DIR__ . '/../config.php';
 
@@ -62,30 +63,30 @@ if ('POST' === $_SERVER['REQUEST_METHOD']) {
 
 // Default: show editor
 require_once HTML.'/header.php';
+$cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
+$cspNonce = is_scalar($cspNonceRaw) ? (string) $cspNonceRaw : '';
+echo '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL('admin'), ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL;
 ?>
 
-<section class='flex f_row panel w100 mar_sm pad_md admin-language-editor-panel admin-language-editor-panel--standalone' aria-label='Language Editor'>
-  <div class='f_column sidebar pad_md'>
+<section class='lang-editor' aria-label='Language Editor'>
+  <div class='lang-editor__header'>
     <h2>Language Editor</h2>
-    <p class='text-muted'>Edit and save language bundles for all supported locales.</p>
-    <h3>Languages</h3>
-    <div class='vertical_tabs'>
-      <?php
-      $langs = ['en' => 'English', 'de' => 'German', 'fr' => 'French', 'es' => 'Spanish', 'it' => 'Italian', 'nl' => 'Dutch', 'pt' => 'Portuguese', 'hi' => 'Hindi', 'tl' => 'Tagalog', 'tr' => 'Turkish'];
+    <p class='lang-editor__desc'>Edit and save language bundles for all supported locales.</p>
+  </div>
+  <div class='lang-editor__tabs'>
+    <?php
+    $langs = ['en' => 'English', 'de' => 'German', 'fr' => 'French', 'es' => 'Spanish', 'it' => 'Italian', 'nl' => 'Dutch', 'pt' => 'Portuguese', 'hi' => 'Hindi', 'tl' => 'Tagalog', 'tr' => 'Turkish'];
 foreach ($langs as $code => $name) {
   $checked = 'en' === $code ? 'checked' : '';
-  echo "<input type='radio' id='lang_{$code}' name='lang_tabs' {$checked}>";
-  echo "<label for='lang_{$code}' class='tab_label'>{$name} ({$code})</label>";
+  echo "<input type='radio' id='lang_{$code}' name='lang_tabs' class='lang-editor__radio' {$checked}>";
+  echo "<label for='lang_{$code}'>{$name}</label>";
 }
 ?>
-    </div>
   </div>
-  <div class='f_column content pad_md'>
-    <div class='' id='content_shared'>
-      <h2 id='lang_title'>English Language Editor</h2>
-      <textarea class='language_textarea' id='language_textarea' rows='24' placeholder='Language file content will load here...'></textarea>
-      <button class='btn btn_primary' id='save_btn'>Save Changes</button>
-    </div>
+  <div class='lang-editor__content' id='content_shared'>
+    <h2 id='lang_title'>English Language Editor</h2>
+    <textarea class='lang-editor__textarea' id='language_textarea' rows='40' placeholder='Language file content will load here...'></textarea>
+    <button class='btn btn_primary' id='save_btn'>Save Changes</button>
   </div>
 </section>
 

@@ -999,7 +999,7 @@ header('Expires: 0');
 
 .details_inset_title {
   margin: 0 0 0.35rem;
-  font-size: 1rem;
+  font-size: var(--font-sm);
 }
 
 .details_inset_text {

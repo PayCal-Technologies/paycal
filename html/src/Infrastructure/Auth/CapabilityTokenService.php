@@ -74,14 +74,13 @@ final class CapabilityTokenService
     $expiresAt = time() + self::TTL_SECONDS;
 
     $key = Keys::capabilityToken($userUuid, $token);
-    Database::hset($key, [
+    Database::hsetex($key, [
       'user_uuid' => $userUuid,
       'session_hash' => $sessionHash,
       'action' => $normalizedAction,
       'issued_at' => (string) time(),
       'expires_at' => (string) $expiresAt,
-    ]);
-    Database::expire($key, self::TTL_SECONDS);
+    ], self::TTL_SECONDS);
 
     return [
       'token' => $token,

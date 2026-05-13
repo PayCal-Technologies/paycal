@@ -26,44 +26,118 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   padding: 3rem 1rem 1.5rem;
 }
 
+.premium_eyebrow {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-primary, #29a8e0);
+  margin: 0 0 1rem;
+}
+
 .premium_hero h1 {
   font-size: clamp(1.8rem, 4vw, 2.8rem);
   margin-bottom: 1rem;
-  color: var(--color-primary, #29a8e0);
+  color: var(--text, #e0e0e0);
   line-height: 1.2;
 }
 
-.premium_deck {
+.premium_hero_deck {
   font-size: 1.05rem;
   color: var(--text-muted, #aaa);
-  margin: 0 auto 2rem;
-  max-width: 560px;
-  line-height: 1.6;
+  margin: 0 auto 1.25rem;
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.premium_price_note {
+  font-size: 0.9rem;
+  color: var(--text-muted, #aaa);
+  margin: 0 0 1.75rem;
 }
 
 .premium_cta_group {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.75rem;
 }
 
-.premium_price_note {
-  font-size: 0.88rem;
-  color: var(--text-muted, #aaa);
-  margin: 0;
-}
-
 /* ── Section headings ── */
+.premium_who h2,
 .premium_compare h2,
 .premium_orgs h2,
-.premium_security h2,
-.premium_access h2,
+.premium_trust h2,
 .premium_faq h2,
-.premium_pricing h2 {
+.premium_final_cta h2 {
   font-size: 1.35rem;
   margin-bottom: 1.25rem;
   color: var(--color-primary, #29a8e0);
+}
+
+/* ── Who Premium Is For ── */
+.premium_who_cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.premium_who_card {
+  background: var(--surface, rgba(255,255,255,0.04));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 6px;
+  padding: 1.25rem 1.5rem;
+}
+
+.premium_who_card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.premium_who_card p {
+  color: var(--text-muted, #aaa);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── Compare intro ── */
+.premium_compare_intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: start;
+}
+
+.premium_plan_tag {
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+}
+
+.premium_plan_tag strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.premium_plan_tag_free strong {
+  color: var(--text-muted, #aaa);
+}
+
+.premium_plan_tag_premium strong {
+  color: var(--color-primary, #29a8e0);
+}
+
+.premium_plan_tag p {
+  font-size: 0.82rem;
+  color: var(--text-muted, #aaa);
+  line-height: 1.5;
+  margin: 0;
 }
 
 /* ── Comparison table ── */
@@ -110,18 +184,58 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   background: var(--hover, rgba(255,255,255,0.03));
 }
 
-/* ── Prose sections ── */
-.premium_orgs,
-.premium_security,
-.premium_access {
-  max-width: 680px;
+/* ── Organization features ── */
+.premium_org_features {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-top: 0.5rem;
 }
 
-.premium_orgs p,
-.premium_security p,
-.premium_access p {
+.premium_org_feature {
+  border-left: 3px solid var(--color-primary, #29a8e0);
+  padding: 0.5rem 0 0.5rem 1.25rem;
+}
+
+.premium_org_feature h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.45rem;
+}
+
+.premium_org_feature p {
   color: var(--text-muted, #aaa);
-  line-height: 1.75;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── Trust pillars ── */
+.premium_trust_pillars {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.premium_trust_pillar {
+  background: var(--surface, rgba(255,255,255,0.04));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 6px;
+  padding: 1.25rem 1.5rem;
+}
+
+.premium_trust_pillar h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.45rem;
+  color: var(--color-primary, #29a8e0);
+}
+
+.premium_trust_pillar p {
+  color: var(--text-muted, #aaa);
+  font-size: 0.88rem;
+  line-height: 1.65;
   margin: 0;
 }
 
@@ -145,36 +259,33 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   margin: 0;
 }
 
-/* ── Pricing ── */
-.premium_pricing {
+/* ── Final CTA ── */
+.premium_final_cta {
   text-align: center;
-  padding: 2rem 1rem 2rem;
+  padding: 2.5rem 1rem;
   border-top: 1px solid var(--border, rgba(255,255,255,0.08));
 }
 
-.premium_price_big {
-  font-size: clamp(2.5rem, 6vw, 3.5rem);
-  font-weight: 900;
-  color: var(--color-primary, #29a8e0);
-  margin: 0.5rem 0 0.25rem;
-  line-height: 1;
+.premium_final_cta h2 {
+  font-size: clamp(1.2rem, 3vw, 1.7rem);
+  line-height: 1.3;
 }
 
-.premium_price_big span {
-  font-size: 1.1rem;
-  font-weight: 400;
+.premium_final_cta p:first-of-type {
   color: var(--text-muted, #aaa);
-  vertical-align: middle;
+  max-width: 560px;
+  margin: 0 auto 1.75rem;
+  line-height: 1.7;
 }
 
 .premium_pricing_note {
   font-size: 0.9rem;
   color: var(--text-muted, #aaa);
-  margin: 0 0 1.5rem;
+  margin: 1rem 0 0;
 }
 
 .premium_stripe_note {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
   font-size: 0.82rem;
   color: var(--text-muted, #aaa);
 }
@@ -184,9 +295,17 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 /* ── Responsive ── */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .premium_compare_table th:nth-child(2),
   .premium_compare_table td:nth-child(2) {
+    display: none;
+  }
+
+  .premium_compare_intro {
+    grid-template-columns: 1fr;
+  }
+
+  .premium_plan_tag_free {
     display: none;
   }
 

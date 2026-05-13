@@ -80,7 +80,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   border: 2px solid color-mix(in srgb, var(--border, rgba(255, 255, 255, 0.22)) 82%, transparent);
   background: color-mix(in srgb, var(--surface, #1e2633) 88%, var(--bg, #0f141c) 12%);
   color: var(--text, #e7edf7);
-  font-size: 1.02rem;
+  font-size: var(--font-sm);
   font-weight: 800;
   line-height: 1;
   display: inline-flex;
@@ -396,7 +396,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .organizations_browser_name {
   font-weight: 600;
-  font-size: 1.02rem;
+  font-size: var(--font-sm);
 }
 
 .organizations_browser_location {

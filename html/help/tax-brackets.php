@@ -2,29 +2,41 @@
 
 require_once '../config.php';
 
+if (function_exists('help_tax_brackets_i18n') === false) {
+  function help_tax_brackets_i18n(string $key): string
+  {
+    static $cache = [];
+    if (array_key_exists($key, $cache) === false) {
+      $cache[$key] = \PayCal\Domain\Strings::i18n($key);
+    }
+
+    return $cache[$key];
+  }
+}
+
 $currentPage = 'PAGE_HELP';
-$pageTitle = 'Canadian Tax Brackets Help - [PayCal]';
-$pageLabel = 'Canadian Tax Brackets Help';
+$pageTitle = help_tax_brackets_i18n('HELP_TAX_BRACKETS_PAGE_TITLE') . ' - [' . help_tax_brackets_i18n('SITE_NAME') . ']';
+$pageLabel = help_tax_brackets_i18n('HELP_TAX_BRACKETS_PAGE_TITLE');
 
 require_once HTML.'/header.php';
 
 ?>
 
 <section class='w100' role="region" aria-labelledby="tax-brackets-help-title">
-  <h1 id="tax-brackets-help-title">Canadian Tax Brackets - PayCal.app</h1>
+  <h1 id="tax-brackets-help-title"><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_HEADING'), ENT_QUOTES, 'UTF-8'); ?></h1>
 </section>
 
 <section class='panel w100 mar_sm pad_md'>
-  <h2>How It Works</h2>
-  <p>PayCal.app uses progressive tax brackets from the Canada Revenue Agency (CRA). Income is taxed at increasing rates as earnings rise. We calculate federal taxes plus your province/territory's rates for accurate estimates.</p>
-  <p>Brackets are updated annually for inflation. These are 2025 estimates—always verify with official sources.</p>
+  <h2><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_HOW_IT_WORKS_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h2>
+  <p><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_HOW_IT_WORKS_TEXT_1'), ENT_QUOTES, 'UTF-8'); ?></p>
+  <p><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_HOW_IT_WORKS_TEXT_2'), ENT_QUOTES, 'UTF-8'); ?></p>
 </section>
 
 <section class='panel w100 mar_sm pad_md'>
-  <h2>Federal Tax Brackets</h2>
+  <h2><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_FEDERAL_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h2>
   <table class='tax-table'>
-    <caption class='visually_hidden'>Federal tax brackets for 2025 with income ranges and rates</caption>
-    <thead><tr><th scope='col'>Income Range</th><th scope='col'>Tax Rate</th></tr></thead>
+    <caption class='visually_hidden'><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_FEDERAL_CAPTION'), ENT_QUOTES, 'UTF-8'); ?></caption>
+    <thead><tr><th scope='col'><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_INCOME_RANGE'), ENT_QUOTES, 'UTF-8'); ?></th><th scope='col'><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_TAX_RATE'), ENT_QUOTES, 'UTF-8'); ?></th></tr></thead>
     <tbody>
       <tr><td>$0 - $54,713</td><td>15%</td></tr>
       <tr><td>$54,713 - $109,424</td><td>20.5%</td></tr>
@@ -36,8 +48,8 @@ require_once HTML.'/header.php';
 </section>
 
 <section class='data-cards'>
-  <h2>Provincial/Territorial Brackets</h2>
-  <p>Tax brackets for each province and territory:</p>
+  <h2><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_PROVINCIAL_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h2>
+  <p><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_PROVINCIAL_INTRO'), ENT_QUOTES, 'UTF-8'); ?></p>
   <div class='cards'>
     <?php
     $provinces = [
@@ -152,18 +164,18 @@ foreach ($provinces as $province => $brackets) {
 </section>
 
 <section class='panel w100 mar_sm pad_md'>
-  <h2>Example Calculation</h2>
-  <p><strong>Ontario Developer, $80,000 income:</strong><br>
-  Federal: ~$12,000 (mixed brackets)<br>
-  Provincial: ~$5,000<br>
-  <strong>Estimated net: ~$63,000</strong><br>
-  (Excludes CPP/EI; actual results vary.)</p>
+  <h2><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_EXAMPLE_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h2>
+  <p><strong><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_EXAMPLE_SUBJECT'), ENT_QUOTES, 'UTF-8'); ?></strong><br>
+  <?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_EXAMPLE_FEDERAL'), ENT_QUOTES, 'UTF-8'); ?><br>
+  <?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_EXAMPLE_PROVINCIAL'), ENT_QUOTES, 'UTF-8'); ?><br>
+  <strong><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_EXAMPLE_NET'), ENT_QUOTES, 'UTF-8'); ?></strong><br>
+  <?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_EXAMPLE_NOTE'), ENT_QUOTES, 'UTF-8'); ?></p>
 </section>
 
 <section class='panel w100 mar_sm pad_md'>
-  <h2>Disclaimers</h2>
-  <p>This is for informational purposes only. Tax brackets change yearly. We follow CRA standards but make no warranties on accuracy. Consult a tax professional. Not liable for decisions based on this info.</p>
-  <p>Official CRA info: <a href='https://www.canada.ca/en/revenue-agency/services/tax/individuals/factsheets/individuals-fs-2016-1.html' target='_blank'>CRA Tax Brackets</a></p>
+  <h2><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_DISCLAIMERS_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h2>
+  <p><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_DISCLAIMER_TEXT'), ENT_QUOTES, 'UTF-8'); ?></p>
+  <p><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_OFFICIAL_INFO_PREFIX'), ENT_QUOTES, 'UTF-8'); ?> <a href='https://www.canada.ca/en/revenue-agency/services/tax/individuals/factsheets/individuals-fs-2016-1.html' target='_blank'><?php echo htmlspecialchars(help_tax_brackets_i18n('HELP_TAX_BRACKETS_OFFICIAL_INFO_LINK'), ENT_QUOTES, 'UTF-8'); ?></a></p>
 </section>
 <?php
 

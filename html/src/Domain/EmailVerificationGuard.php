@@ -45,7 +45,6 @@ final class EmailVerificationGuard
         'Email verification required before using PayCal. Please check your email for the verification link.',
         [
             'email_verified' => false,
-            'user_email' => $user->email,
         ],
         HttpStatus::HTTP_FORBIDDEN
       );

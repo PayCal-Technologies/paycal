@@ -2,26 +2,20 @@
 1_WEEK 1 Hafta
 2_WEEKS 2 Hafta
 7_DAYS 7 Gün
-WIN95_DARK 95 Koyu
-WIN95_LIGHT 95 Açık
 ABOUT_US Hakkımızda
 ACCOUNT Hesap
 ACCOUNT_ACTIONS Hesap İşlemleri
 ACCOUNT_REGISTRATION Hesap Kaydı
 ACTIONS İşlemler
 ACTIVE Aktif
+ADD_MEMBER Üye Ekle
+ADD_NEW_ENTRY Yeni Giriş Ekle
 ADD_ROW Satır Ekle
-CREATE_SITE Site Oluştur
-EDIT_SITE Site Düzenle
 ADMIN Yönetici
+ADMIN_DASHBOARD_PLATFORM_METRICS_TITLE Platform Metrikleri
 ALL Tümü
 ALL_TIME Tüm Zamanlar
-ALT_A <kbd>ALT A</kbd>
 ALT_BACKSLASH <kbd>ALT \\</kbd>
-ALT_B <kbd>ALT B</kbd>
-ALT_C <kbd>ALT C</kbd>
-ALT_P <kbd>ALT P</kbd>
-ALT_R <kbd>Alt R</kbd>
 ANALYTICS Analitik
 ARCADE_DARK Koyu Arcade
 ARCADE_LIGHT Açık Arcade
@@ -30,35 +24,123 @@ AUDIO Ses
 AUDIO_FEEDBACK Ses Geri Bildirimi
 AUDIO_FEEDBACK_USING Ses geri bildirimi kullanılarak
 AUDIO_PREFS Ses Tercihleri
+AUTH_BETA_NOTICE PayCal zel beta srmndedir.
+AUTH_DIVIDER_OR veya
+AUTH_PAGE_HEADING Kimlik dorulama
+AUTH_PRIVACY_LINK Gizlilik Politikas
+AUTH_RECOVER_ACCOUNT Hesab kurtar
+AUTH_RECOVER_ACCOUNT_EMAIL Hesap e-postas
+AUTH_RECOVER_INTRO_LINE_2 You'll need: a code from your email and your Recovery Key.
+AUTH_REGISTER_CREATE_BUTTON Hesap olutur
+AUTH_REGISTER_DEVICE_LABEL Passkey cihaz ad
+AUTH_REGISTER_DEVICE_PLACEHOLDER ad-YYYYAAGG
+AUTH_REGISTER_EMAIL_LABEL E-posta (zorunlu)
+AUTH_REGISTER_FULL_NAME_LABEL Tam ad (zorunlu)
+AUTH_REGISTER_INVITE_LABEL Davet kodu
+AUTH_REGISTER_PANEL_ARIA Hesap oluturma paneli
+AUTH_REGISTER_PASSKEY_STATUS Hesabnz korumak iin bir passkey oluturacaksnz.
+AUTH_SIGNIN_EMAIL_ARIA E-posta zorunlu
+AUTH_SIGNIN_EMAIL_LABEL E-posta (zorunlu)
+AUTH_SIGNIN_OTHER_DEVICE Baka bir cihaz kullan
+AUTH_SIGNIN_PANEL_ARIA Giri paneli
+AUTH_SIGNIN_PASSKEY_BUTTON Passkey ile devam et
+AUTH_SIGNIN_PASSKEY_STATUS Bu cihazda bir passkey kullann veya baka bir cihazdan giri yapn.
+AUTH_TABS_ARIA Kimlik dorulama seenekleri
+AUTH_TAB_REGISTER Hesap Olutur
+AUTH_TAB_SIGNIN Giri Yap
+AUTH_TERMS_ACK_AND ve
+AUTH_TERMS_ACK_PREFIX Giri yaparak
+AUTH_TERMS_LINK Koullar kabul etmi olursunuz
+AUTH_VERIFICATION_MESSAGE Kurtarma anahtarnz size e-posta ile gnderildi. Devam etmeden nce bunu gvenli bir yerde saklayn.
+AUTH_VERIFICATION_STEP_1 Kurtarma anahtar e-postas iin gelen kutunuzu kontrol edin.
+AUTH_VERIFICATION_STEP_2 Kurtarma anahtarnz gvenli bir yerde saklayn.
+AUTH_VERIFICATION_STEP_3 Passkey'inizle giri yaparak devam edin.
+AUTH_VERIFICATION_TITLE E-posta doruland
 BASE Taban
+BLOG_ARTICLE_BODY_ARIA Makale gövdesi
+BLOG_ARTICLE_FOUND_PLURAL makale bulundu
+BLOG_ARTICLE_FOUND_SINGULAR makale bulundu
+BLOG_ARTICLE_NAV_ARIA Makale navigasyonu
+BLOG_CLEAR Temizle
+BLOG_DEFAULT_AUTHOR PayCal Editöryal
+BLOG_EMPTY_RESULTS Mevcut arama ve etiket filtrelerine uyan gönderi yok.
+BLOG_FILTER_TAG_ARIA Etikete göre filtrele
+BLOG_LIST Liste
+BLOG_NEXT Sonraki
+BLOG_NEXT_ARROW_LABEL Sonraki ->
+BLOG_NEXT_ARTICLE_ARIA Sonraki makale
+BLOG_NEXT_PAGE Sonraki Sayfa
+BLOG_OF_LABEL /
+BLOG_OVERVIEW_ARIA Blog genel bakış
+BLOG_PAGE_DECK PayCal organizasyonundan sürüm notları, bordro operasyon rehberi ve mühendislik güncellemeleri.
+BLOG_PAGE_LABEL Sayfa
+BLOG_PAGE_NAV_ARIA Blog sayfa navigasyonu
+BLOG_POST_NOT_FOUND_ARIA Blog gönderisi bulunamadı
+BLOG_POST_NOT_FOUND_DECK İstenen makale bulunamadı.
+BLOG_POST_NOT_FOUND_TITLE Gönderi Bulunamadı
+BLOG_POST_TAGS_ARIA Gönderi etiketleri
+BLOG_PREVIOUS Önceki
+BLOG_PREVIOUS_ARROW_LABEL <- Önceki
+BLOG_PREVIOUS_ARTICLE_ARIA Önceki makale
+BLOG_PREVIOUS_PAGE Önceki Sayfa
+BLOG_RETURN_TO_LIST Blog listesine dön
+BLOG_SEARCH_ARIA Blog gönderilerini ara
+BLOG_SEARCH_PLACEHOLDER Başlık, yazar, alıntı veya etiketlere göre ara
+BLOG_UNTITLED Başlıksız
+BREADCRUMB Ekmek kırıntısı
 BROWSER Tarayıcı
+CALENDAR Takvim
 CALENDAR_AUDIO_LABELS_ON Ses Etiketleri
 CALENDAR_AUTOFOCUS_ON Otomatik Odak
-CALENDAR Takvim
 CALENDAR_DAYS Günler
+CALENDAR_HELP_LINK Takvim Yardımı
 CALENDAR_PREFS_FORM Takvim Tercih Formu
-CANCEL_AND_CLOSE İptal Et & Kapat
 CANCEL İptal
+CANCEL_AND_CLOSE İptal Et & Kapat
 CAPSLOCK_ACTIVE BÜYÜK HARF KİLİDİ aktif.
 CHANGE_EMAIL E-postayı Değiştir
 CHANGE_PASSWORD Parolayı Değiştir
 CHOOSE_A_LANGUAGE Dil Seçin
 CHOOSE_A_THEME Tema Seçin
 CHOOSE_A_VOICE Ses Seçin
+CLOSE Kapat
 CLOSED_DIALOG Kapatılan Pencere
 CLOSE_DIALOG Pencereyi Kapat
 CLOSE_DIALOG_WITH ESCAPE ile Pencereyi Kapat
+COLLAPSE_SIDEBAR Kenar cubugunu daralt
 CONFIRM_NEW_EMAIL Yeni E-postayı Onayla
 CONFIRM_NEW_PASSWORD Yeni Parolayı Onayla
 CONFIRM_NO_TYPOS Yazım Hatası Yok Onayla
 CONFIRM_PASSWORD Parolayı Onayla
 CONSENT_COOKIE_POLICY Çerez politikasını kabul ediyorum.
 CONTACT İletişim
+CONTACT_CHAR_WARNING İleti sınırına yaklaşıyorsunuz
+CONTACT_CONTEXT_BROWSER Tarayıcı ayrıntılarını dahil et
+CONTACT_CONTEXT_LABEL İsteğe bağlı teknik bağlam
+CONTACT_CONTEXT_LANGUAGE Dili dahil et
+CONTACT_CONTEXT_PAGE Sayfa bilgilerini dahil et
+CONTACT_HELP_CONTEXT placeholder
+CONTACT_HELP_TIP_1 Özel olun: Tam olarak ne yapmaya çalıştığınızı ve neyin olduğunu açıklayın.
+CONTACT_HELP_TIP_2 Detayları ekleyin: Teknik bilgi paylaşmak için aşağıdaki opsiyonel bağlam seçeneklerimizi kontrol edin.
+CONTACT_HELP_TIP_3 İleti başına bir sorun: Birden fazla endişeniz varsa, ayrı iletiler gönderin.
+CONTACT_MESSAGE_LABEL İleti
+CONTACT_MESSAGE_PLACEHOLDER İletinizi buraya yazın...
+CONTACT_REASON_ACCOUNT Hesap Sorunu
+CONTACT_REASON_BILLING Faturalama Sorusu
+CONTACT_REASON_BUG Hata raporu
+CONTACT_REASON_FEATURE Özellik isteği
+CONTACT_REASON_GENERAL Genel soru
+CONTACT_REASON_OTHER Diğer
+CONTACT_REASON_SELECT Lütfen seçin
+CONTACT_SLA_LABEL Response time
+CONTACT_SLA_TEXT Typically 24–48 hours
+CONTACT_SUCCESS_NOTE Mesajınızı aldık ve kısa süre içinde sizinle iletişime geçeceğiz.
+CONTACT_SUCCESS_SENT_AT Gönderme zamanı
 COPY Kopyala
 COPY_WORK İşi Kopyala
 COPY_WORK_WITH CTRL C ile İşi Kopyala.
-CPP CPP
-CSV CSV
+CREATED Oluşturuldu
+CREATE_SITE Site Oluştur
 CTRL_C <kbd>CTRL C</kbd>
 CTRL_V <kbd>CTRL V</kbd>
 CURRENT Mevcut
@@ -71,37 +153,36 @@ DARK Koyu
 DATE Tarih
 DATE_PICKER Tarih Seçici
 DEDUCTIONS Kesintiler
+DELETE Sil
 DELETE_ACCOUNT Hesabı Sil
 DELETE_ACCOUNT_MESSAGE Gitmeni görmekten gerçekten üzgünüz! Hesabını silmek istediğini onaylamak için lütfen parolanı gir.
-DELETE Sil
-DELETE_KEY <kbd>DELETE</kbd>
 DELETE_SITE Siteyi Sil
 DELETE_WORK İşi Sil
 DELETE_WORK_WITH Delete ile İşi Sil.
+DEMOTE Demir Yap
+SPACING Boşluk
 DEVICE Cihaz
 DUTCH Hollandaca
 EARNINGS Kazanç
+EARNINGS_HELP_LINK Kazanç Yardımı
 EARNINGS_LABEL Kazanç
 EARNINGS_YEAR_SELECTOR Kazanç Yılı Seçici
-EI EI
+EDIT_SITE Site Düzenle
 EMAIL E-posta
-EMAIL_SUBJECT Subject
-END_KEY <kbd>End</kbd>
 ENGLISH İngilizce
-ENTER_KEY <kbd>ENTER</kbd>
 ENTRY_ROW Giriş Satırı
 ERROR_EMAIL_EMPTY E-posta alanı boştu. Lütfen tekrar deneyin.
 ERROR_EMAIL_MISSING E-posta eksik.
 ERROR_EMAIL_REGISTERED E-posta zaten kayıtlı.
 ERROR_EMAIL_TAKEN Üzgünüz, bu e-posta adresi zaten kayıtlı. Lütfen tekrar deneyin.
-ERROR_PASSWORD_EMPTY Parola alanı boştu. Lütfen tekrar deneyin.
-ERROR_PASSWORD_MISSING Parola eksik.
 ERROR_PASSWORDS_MISMATCHED Parolalar uyuşmuyor. Lütfen tekrar deneyin.
 ERROR_PASSWORDS_NO_MATCH Parolalar eşleşmiyor.
+ERROR_PASSWORD_EMPTY Parola alanı boştu. Lütfen tekrar deneyin.
+ERROR_PASSWORD_MISSING Parola eksik.
 ERROR_REGISTRATION_ISSUES Kayıt sırasında bazı sorunlar var gibi görünüyor. Lütfen kontrol edin ve tekrar deneyin.
 ERROR_USERNAME_EMPTY Kullanıcı adı alanı boştu. Lütfen tekrar deneyin.
 ERROR_USERNAME_TAKEN Üzgünüz, bu kullanıcı adı alınmış. Lütfen tekrar deneyin.
-ESCAPE_KEY <kbd>ESCAPE</kbd>
+EXPAND_SIDEBAR Kenar cubugunu genislet
 FAQ_A2 Elbette! Saatlik kazançlarını kaydetmek ve takip etmek isteyenler için ek özelliklerle ücretsiz bir katman sunuyoruz. Amacımız herkesin işlerini, kazançlarını yönetmesi ve hayatını kolaylaştırması için mümkün olduğunca çok araç sunmaktır.
 FAQ_A3 İlk milyonumuzu finansları üzerinde daha fazla kontrol isteyen işletmeler ve yöneticiler tarafından ödenen abonelik modeliyle kazanmayı planlıyoruz. Plan basittir. Ücretli katman sabit aylık ücrettir ve detaylar resmi yayınla birlikte duyurulacaktır.
 FAQ_A4 Kesinlikle! Takvim her iş için kaydedilen günlük saatleri gösterir. Gün üzerine tıklayarak çalışma detayları panelini açabilir ve gerektiği gibi ayarlayabilirsiniz. Kontrol paneli yılın ay, ödeme dönemi ve işe göre dağılımını gösterir.
@@ -119,7 +200,6 @@ FAQ_Q7 Geri bildirim veya öneri nasıl yapabilirim?
 FAQ_TITLE Sıkça Sorulan Sorular
 FEDERAL_TAX Federal Vergi
 FIRST İlk
-FOCUS Focus
 FRENCH Fransızca
 FRI Cuma
 FULLDATE Tam Tarih
@@ -127,22 +207,19 @@ FULL_NAME İsim
 FULL_NAME_PLACEHOLDER Lütfen tam isim.
 FUN Eğlence!
 GERMAN Almanca
-GITHUB GitHub
-GITHUB_HTML <em>G</em>itHub
 GO_TO Git
 GROSS Brüt
+HELP_TOC_TRANSPARENCY_HUB Şeffaflık Merkezi
 HINDI Hintçe
-HOME_KEY <kbd>Home</kbd>
 HOURS Saatler
 INACTIVE Pasif
 INCOME_TAX Gelir Vergisi
 INFO Bilgi
+INFO_UPDATED Bilgiler güncellendi
 IP_ADDRESS IP Adresi
 ITALIAN İtalyanca
-KEYBOARD Keyboard
-KEYBOARD_SHORTCUTS_GOT_IT Anladım!
 KEYBOARD_SHORTCUTS Klavye Kısayolları
-LANG Lang
+KEYBOARD_SHORTCUTS_GOT_IT Anladım!
 LANGUAGE Dil
 LANGUAGE_PICKER Dil Seçici
 LANGUAGE_PREFERENCES Dil Tercihleri
@@ -153,368 +230,61 @@ LENGTH Uzunluk
 LESS Daha Az
 LIGHT Açık
 LIVING_OUT_ALLOWANCE LOA
-LOA LOA
-LOG_OUT Çıkış Yap
-LOG_OUT_MESSAGE Çıkış yapmak istediğinizden emin misiniz?
-LONGDATE Uzun Tarih
 LONG Uzun
-MACOS Mac OS
-MEMORY_USAGE Bellek Kullanımı
-MESSAGE Mesaj
-META_DESCRIPTION_LONG PayCal ile çalışan maaşlarını devrimleştirin: Şeffaf kazançlar, zahmetsiz takip ve verimli bordro yönetimi. Modern, kolay ve ücretsiz.
-META_DESCRIPTION Çalışma saatlerinizi takip edin ve PayCal ile maaş kazançlarını zahmetsizce hesaplayın. Ücretsiz, kolay kullanımlı ve herkes için erişilebilir.
-META_KEYWORDS bordro takibi, çalışma saatleri yönetimi, kazanç hesaplayıcı, ücretsiz bordro aracı, erişilebilir bordro uygulaması, basit bordro platformu, ekip yönetimi, proje takibi, ödeme dönemi hesaplayıcı, çevrimiçi bordro, zaman takibi, erişilebilir araç, çalışma saatleri izleyici, maaş yönetimi, kazanç yönetimi
-META_TITLE PayCal: Herkes için Basit, Erişilebilir Bordro Takibi
-MODAL_HEADER Modal Header
-MODAL_MESSAGE Modal Message
-MODAL_TITLE Modal Title
-MON Mon
-MONTHLY_DETAILS Monthly Details
-MONTHLY Monthly
-MORE More
-NAME Name
-NAV_BAR Nav Bar
-NAVIGATE Navigate
-NAVIGATE_WITH Navigate with TAB or Arrow Keys
-NEED_TO_ENABLE_JAVASCRIPT You need to enable JavaScript to run this application.
-NET Net
-NEW_EMAIL New Email
-NEW_PASSWORD New Password
-NEXT_PREV_BRACKETS <kbd>ALT [ or ]</kbd>
-NEXT_PREV_CALENDAR_MONTH Next/Previous Month
-NEXT_PREV_CALENDAR_MONTH_WITH Next/Previous Month with ALT [ or ]
-NEXT_PREV_PAGEKEYS <kbd>PGDN or PGUP</kbd>
-NONE None
-NUMBERED <kbd>ALT 1-9</kbd>
-NUMBER Number
-OAS OAS
-OPEN_ABOUT Open About
-OPEN_ABOUT_WITH Open About with ALT B
-OPEN_ACCOUNT Open Account
-OPEN_ACCOUNT_WITH Open Account with ALT A
-OPEN_CALENDAR Open Calendar
-OPEN_CALENDAR_WITH Open Calendar with ALT C
-OPEN_DATE_PICKER Open Date Picker
-OPEN_DATE_PICKER_WITH Open Date Picker with ALT \\</kbd>
-OPEN_DIALOG Open Dialog
-OPEN_DIALOG_WITH Open Dialog With ENTER
-OPEN_EARNINGS Open Earnings
-OPEN_EARNINGS_WITH Open Earnings with ALT R
-OPENED_DIALOG Opened dialog
-OPEN_NUMBERED_TAB Open Numbered Tab
-OPEN_NUMBERED_TAB_WITH Open Numbered Tab with ALT [1-9]
-OPEN Open
-OPEN_POLICIES Open Policies
-OPEN_POLICIES_WITH Open Policies with ALT P
-OPEN_SETTINGS Open Settings
-OPEN_SETTINGS_WITH Open Settings  with ALT A
-OPEN_SHORTCUTS Open Shortcuts
-OPEN_SHORTCUTS_WITH Open Shortcuts with ALT Slash or Question Mark
-OPTIONAL_PHONE Optional phone number
-OS OS
-OVERTIME_HOURS Overtime Hours
-OVERTIME Overtime
-PASSWORD Password
-PASSWORD_REQUIRED Current password required
-PAST_1_YEAR Past 1 Year
-PAST_2_YEARS Past 2 Years
-PAST_3_MONTHS Past 3 Months
-PAST_3_YEARS Past 3 Years
-PAST_4_YEARS Past 4 Years
-PAST_5_YEARS Past 5 Years
-PAST_6_MONTHS Past 6 Months
-PASTE Paste
-PASTE_WORK Paste Work
-PASTE_WORK_WITH Paste Work with CTRL V.
-PAYCAL PayCal
-PAY Pay
-PAY_PERIOD_DETAILS Pay Period Details
-PAY_PERIOD Pay Period
-PAY_PERIODS Pay Periods
-PAY_PERIODS_RANGE Pay Periods Range
-PAY_SETTINGS_FORM Pay Settings Form
-PDF PDF
-PERSONAL_INFO_FORM Personal Information Form
-PERSONAL_INFO Personal Info
-PERSONAL Personal
-PHONE Phone
-PHONE_PLACEHOLDER xxx-xxx-xxxx
-TRANSPARENCY Şeffaflık
-POLICIES Policies
-PORTUGUESE Portuguese
-PREFERENCES Preferences
-PRIMARY Primary
-PROVINCIAL_TAX Provincial Tax
-PROVINCE Province
-QUESTION_MARK_KEY <kbd>?</kbd>
-REFRESH Refresh
-REGISTER_COOKIE_DISCLAIMER If you are not comfortable with cookies, you may not register. Sorry bout that. :(
-REGISTER_COOKIE_HEADSUP Hey, headsup! We use a cookie to store user authentication.
-REGISTER_FEATURE1_TEXT Say goodbye to paycheck mysteries! Visualize your expected earnings each pay period. Plan your finances with confidence.
-REGISTER_FEATURE1_TITLE 💡 Earnings Transparency
-REGISTER_FEATURE2_TEXT No more complicated multi-step data entry!
-REGISTER_FEATURE2_TITLE 📊 Effortless Tracking
-REGISTER_FEATURE3_TEXT For employers, powerful tools to simplify payroll management. Download the data you need. Make payroll a breeze.
-REGISTER_FEATURE3_TITLE 🔥 Empower Personnel
-REGISTER_FEATURE4_TEXT Our platform is user-friendly, mobile-responsive, and packed with the latest technology.
-REGISTER_FEATURE4_TITLE 🌟 Easy to Use
-REGISTER_HEADLINE 🚀 Supercharge Your Payroll Experience!
-REGISTER Register
-REGULAR_HOURS Regular Hours
-REGULAR Regular
-RENDER Render
-SAT Sat
-SAVE_AND_CLOSE Save & Close
-SAVE Save
-SCOPE Scope
-SEND_EMAIL Send Email
-SET_AS_DEFAULT Set as default.
-SETTINGS Settings
-SHORTDATE Short Date
-SHORT Short
-SHOW Show
-SITE_NAME PayCal
-SITES_LIST Sites List
-SITES Sites
-SKIP_PRIMARY_NAVIGATION Skip Primary Navigation
-SKIP_TO_CONTENT Skip to Content
-SKIP_TO_MAIN_CONTENT Skip to main content
-SMALLER Smaller
-SPACING Boşluk
-SPANISH Spanish
-START Start
-STATIC Static
-STATUS Status
-STICKY Fixed
-STYLE_PREFS Style Preferences
-STYLE Style
-SUN Sun
-TAB_KEY <kbd>TAB</kbd>
-TAGALOG Tagalog
-ORGANIZATION Team
-ORGANIZATIONS Takımlar
-ORGANIZATION_AUTH_LEVEL Authorization Level
-ORGANIZATION_INVITE Invite
-ORGANIZATION_PERMISSIONS Permissions
-ORGANIZATION_PHONE_PLACEHOLDER xxx-xxx-xxxx
-ORGANIZATION_ROLES Roles
-ORGANIZATION_UPDATE_USER Update User
-ORGANIZATION_USER_META_INFO User Meta Info
-ORGANIZATION_USERS Users
-TEXT Text
-THEME_PICKER Theme Picker
-THEME Theme
-THU Thu
-TILDE_KEY <kbd>` tilde</kbd>
-TOGGLE_CALENDAR_SCREENMODE Toggle Calendar Mode
-TOGGLE_CALENDAR_SCREENMODE_WITH Toggle Calendar mode with tilde.
-TOOLTIP_AUDIO Describes navigation or changes.
-TOOLTIP_CALENDAR_AUDIO_LABELS Date label type to announce via text-to-speech.
-TOOLTIP_CALENDAR_AUTOFOCUS Day to automatically select in Calendar view.
-TOOLTIP_CONFIRM_EMAIL Confirm your new email address.
-TOOLTIP_CONFIRM_PASSWORD Confirm your new password.
-TOOLTIP_CURRENT_EMAIL Current email address.
-TOOLTIP_CURRENT_PASSWORD Current password.
-TOOLTIP_LANGUAGE Preferred language.
-TOOLTIP_NAV_BAR Preferred scroll behaviour of navigation bar.
-TOOLTIP_NEW_EMAIL Provide the new email address you want to use.
-TOOLTIP_NEW_PASSWORD Provide the new password you want to use.
-TOOLTIP_PASSWORD_REQUIRED Your password is required to proceed.
-TOOLTIP_SPACING Preferred spacing of the interface.
-TOOLTIP_TEXT Preferred text size of the interface.
-TOOLTIP_THEME Look & feel of the interface.
-TRAVEL_HOURS TRAVEL
-TRAVEL Travel
-TUE Tue
-TURKISH Turkish
-TXT TXT
-UPDATE Update
-UPDATE_USER Update User
-UPDATING_AUDIO_TO Updating audio to
-UPDATING_CALENDAR_AUDIO_LABELS_TO Updating Calendar audio labels to
-UPDATING_CALENDAR_AUTOFOCUS_TO Updating Calendar autofocus to
-INFO_UPDATED Bilgiler güncellendi
-UPDATING_LANGUAGE_TO Updating language to
-UPDATING_NAME Updating Name
-NAME_UPDATED İsim güncellendi
-UPDATING_NAV_BAR_TO Updating Navigation Bar to
-UPDATING_PAY_PERIOD Updating Pay Period
-UPDATING_PHONE Updating Phone
-UPDATING_PROVINCE Updating Province...
-PROVINCE_UPDATED İl güncellendi
-UPDATING_SPACING_TO Boşluk güncelleniyor
-UPDATING_TEXT_TO Updating text to
-UPDATING_THEME_TO Updating theme to
-TIMEZONE_UPDATED Saat dilimi güncellendi
-UPDATING_WORK Updating Work
-USER_AGENT User Agent
-USERS Users
-VOICE_PICKER Voice Picker
-VOICE Voice
-WAGE Wage
-WE_ARE_HIRING We are hiring. Send resumes to resumes@paycal.app
-WED Wed
-WINDOWS Windows
-WORK_DETAILS work
-WORK_FORM Work Form
-WORK_HOURS Work Hours
-WORK Work
-YEAR_SVG_LINE_GRAPH Year SVG Line Graph
-YEAR_TO_DATE_EARNINGS Year To Date Earnings
-YEAR_TO_DATE Year To Date
-YOUR_EMAIL Email
-YOUR_NAME Name
-SECONDARY İkincil
-ADD_NEW_ENTRY Yeni Giriş Ekle
-CALENDAR_HELP_LINK Takvim Yardımı
-EARNINGS_HELP_LINK Kazanç Yardımı
-MY_ORGANIZATIONS Takımlarım
-MEMBER_OF Üyesi
-NO_ORGANIZATIONS_MANAGED Henüz herhangi bir takımı yönetmiyorsunuz
-NO_MEMBER_ORGANIZATIONS Henüz herhangi bir takımın üyesi değilsiniz
-ORGANIZATION_NAME Takım Adı
-ORGANIZATION_INFO Takım Bilgileri
-ORGANIZATION_MEMBERS Takım Üyeleri
-ORGANIZATION_DETAILS_DESC Takım ayrıntılarını görüntüleyin ve yönetin
-CREATED Oluşturuldu
-ENTER_ORGANIZATION_NAME Takım adını girin
-SEARCH_USER Eklemek için kullanıcı arayın
-NO_MEMBERS Bu takımda üye yok
-ADD_MEMBER Üye Ekle
-CONFIRM_DELETE_ORGANIZATION Silmeyi Onayla
-YES_DELETE Evet, Sil
-PROMOTE Terfi Et
-DEMOTE Demir Yap
-REMOVE_MEMBER Üye Kaldır
-REMOVE Kaldır
-VIEW Görüntüle
+LONGDATE Uzun Tarih
 MANAGERS Yöneticiler
 MEMBERS Üyeler
-CLOSE Kapat
-COLLAPSE_SIDEBAR Kenar cubugunu daralt
-EXPAND_SIDEBAR Kenar cubugunu genislet
+MEMBER_OF Üyesi
+MEMORY_USAGE Bellek Kullanımı
+MESSAGE Mesaj
+META_DESCRIPTION Çalışma saatlerinizi takip edin ve PayCal ile maaş kazançlarını zahmetsizce hesaplayın. Ücretsiz, kolay kullanımlı ve herkes için erişilebilir.
+META_DESCRIPTION_LONG PayCal ile çalışan maaşlarını devrimleştirin: Şeffaf kazançlar, zahmetsiz takip ve verimli bordro yönetimi. Modern, kolay ve ücretsiz.
+META_KEYWORDS bordro takibi, çalışma saatleri yönetimi, kazanç hesaplayıcı, ücretsiz bordro aracı, erişilebilir bordro uygulaması, basit bordro platformu, ekip yönetimi, proje takibi, ödeme dönemi hesaplayıcı, çevrimiçi bordro, zaman takibi, erişilebilir araç, çalışma saatleri izleyici, maaş yönetimi, kazanç yönetimi
+META_TITLE PayCal: Herkes için Basit, Erişilebilir Bordro Takibi
+NAME_UPDATED İsim güncellendi
+NEXT_PREV_BRACKETS <kbd>ALT [ or ]</kbd>
+NEXT_PREV_CALENDAR_MONTH_WITH Next/Previous Month with ALT [ or ]
+OPEN_ACCOUNT Open Account
+OPEN_ACCOUNT_WITH Open Account with ALT A
+OPEN_DATE_PICKER_WITH Open Date Picker with ALT \\</kbd>
+OPEN_NUMBERED_TAB_WITH Open Numbered Tab with ALT [1-9]
+OPEN_SHORTCUTS_WITH Open Shortcuts with ALT Slash or Question Mark
+ORGANIZATIONS_CREATE_FAILED Failed to create organization.
+ORGANIZATIONS_DEFAULTS_SAVE_FAILED Unable to save organization defaults.
+ORGANIZATIONS_DISCOVERY_FAILED Unable to run organization discovery.
+ORGANIZATIONS_INVITE_REVOKE_FAILED Unable to revoke invite.
+ORGANIZATIONS_INVITE_SEND_FAILED Unable to send organization invite.
+ORGANIZATIONS_LOAD_AUDIT_FAILED Unable to load audit timeline.
+ORGANIZATIONS_LOAD_DEFAULTS_FAILED Unable to load organization defaults.
+ORGANIZATIONS_LOAD_INVITES_FAILED Unable to load invites.
+ORGANIZATIONS_OWNERSHIP_TRANSFER_FAILED Unable to transfer ownership.
+ORGANIZATIONS_REMOVE_FAILED Unable to remove organization right now.
+ORGANIZATIONS_SITE_LINK_FAILED Unable to link site.
+ORGANIZATIONS_WITHDRAW_FAILED Unable to leave organization.
+PASTE_WORK_WITH Paste Work with CTRL V.
+PLEASE_SELECT placeholder
+PROMOTE Terfi Et
+PROVINCE_UPDATED İl güncellendi
+REGISTER_COOKIE_DISCLAIMER If you are not comfortable with cookies, you may not register. Sorry bout that. :(
+REGISTER_FEATURE1_TITLE 💡 Earnings Transparency
+REGISTER_FEATURE2_TITLE 📊 Effortless Tracking
+REGISTER_FEATURE3_TITLE 🔥 Empower Personnel
+REGISTER_FEATURE4_TITLE 🌟 Easy to Use
+REGISTER_HEADLINE 🚀 Supercharge Your Payroll Experience!
+REMOVE Kaldır
+REMOVE_MEMBER Üye Kaldır
+SEARCH_USER Eklemek için kullanıcı arayın
+SECONDARY İkincil
+SET_AS_DEFAULT Set as default.
 SIDEBAR_COLLAPSED Kenar cubugu daraltildi
 SIDEBAR_EXPANDED Kenar cubugu genisletildi
 SIGN_OUT_CONFIRMATION_AND_CONTROLS Oturumu kapatma onayi ve denetimleri
 SIGN_OUT_DIALOG_DESCRIPTION Bu iletisim kutusu, hesabinızdan cikis yapmanizi onaylamanizi saglar. Oturumunuzu kapatabilir veya giris yapmis kalmak icin iptal edebilirsiniz.
-ORGANIZATION_HTML <em>T</em>eam
-ORGANIZATIONS_HTML <em>O</em>rganizations
-ORGANIZATION_SVG <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="8" cy="8" r="3.5"/><path d="M 8 14 c -2.33 0 -7 1.17 -7 3.5 V 22 h 14 v -4.5 c 0 -2.33 -4.67 -3.5 -7 -3.5 Z"/><circle cx="16" cy="7.5" r="3"/><path d="M 16 13.5 c -1.67 0 -5 0.83 -5 2.5 v 3.5 h 10 v -3.5 c 0 -1.67 -3.33 -2.5 -5 -2.5 Z" opacity="0.9"/></g></svg>
-CONTACT_REASON Topic
-CONTACT_REASON_GENERAL Genel soru
-CONTACT_REASON_BUG Hata raporu
-CONTACT_REASON_FEATURE Özellik isteği
-CONTACT_REASON_OTHER Diğer
-CONTACT_REASON_SELECT Lütfen seçin
-CONTACT_MESSAGE_LABEL İleti
-CONTACT_MESSAGE_PLACEHOLDER İletinizi buraya yazın...
-CONTACT_CHAR_COUNT {count}/6000
-CONTACT_CHAR_WARNING İleti sınırına yaklaşıyorsunuz
-CONTACT_CONTEXT_LABEL İsteğe bağlı teknik bağlam
-CONTACT_CONTEXT_BROWSER Tarayıcı ayrıntılarını dahil et
-CONTACT_CONTEXT_PAGE Sayfa bilgilerini dahil et
-CONTACT_CONTEXT_LANGUAGE Dili dahil et
-CONTACT_HELP_TITLE Write a useful message
-CONTACT_HELP_TIP_1 Özel olun: Tam olarak ne yapmaya çalıştığınızı ve neyin olduğunu açıklayın.
-CONTACT_HELP_TIP_2 Detayları ekleyin: Teknik bilgi paylaşmak için aşağıdaki opsiyonel bağlam seçeneklerimizi kontrol edin.
-CONTACT_HELP_TIP_3 İleti başına bir sorun: Birden fazla endişeniz varsa, ayrı iletiler gönderin.
-CONTACT_SLA_LABEL Response time
-CONTACT_SLA_TEXT Typically 24–48 hours
-CONTACT_SUCCESS_TITLE Message sent
-CONTACT_SUCCESS_NOTE Mesajınızı aldık ve kısa süre içinde sizinle iletişime geçeceğiz.
-CONTACT_SUCCESS_SENT_AT Gönderme zamanı
-CONTACT_REASON_ACCOUNT Hesap Sorunu
-CONTACT_REASON_BILLING Faturalama Sorusu
-CONTACT_SEND_ANOTHER Send another
-PLEASE_SELECT placeholder
-CONTACT_HELP_INTRO Help us resolve this faster.
-CONTACT_HELP_CONTEXT placeholder
-
-ORGANIZATIONS Organizations
-ORGANIZATIONS_HTML <em>O</em>rganizations
-ORGANIZATIONS_INTRO Organizations connect sites and member access while keeping work entries user-owned.
-ORGANIZATIONS_OPEN_FULL Open Full Org Controls
-ORGANIZATIONS_CREATE_ORG Create Organization
-ORGANIZATIONS_NAME Organization Name
-ORGANIZATIONS_CREATE_HELP After creating, manage invites, scopes, defaults, and ownership from Settings.
-ORGANIZATIONS_YOUR_ORGANIZATIONS Your Organizations
-ORGANIZATIONS_SELECT_PLACEHOLDER Select organization...
-ORGANIZATIONS_INVITE_DELEGATES Invite Members
-ORGANIZATIONS_INVITE_PLACEHOLDER member@example.com
-ORGANIZATIONS_SEND_INVITE Send Invite
-ORGANIZATIONS_SCOPE_WORK_READ Work Read
-ORGANIZATIONS_SCOPE_SITES_READ Sites Read
-ORGANIZATIONS_SCOPE_SITES_WRITE Sites Write
-ORGANIZATIONS_SCOPE_ORG_READ Org Read
-ORGANIZATIONS_SCOPE_ORG_WRITE Org Write
-ORGANIZATIONS_SCOPE_ACCESS_MANAGE Access Manage
-ORGANIZATIONS_PENDING_INVITES Pending Invites
-ORGANIZATIONS_DISCOVERY Discovery
-ORGANIZATIONS_RUN_DISCOVERY Run Discovery
-ORGANIZATIONS_DISCOVERY_HELP Find sites that can be linked to the selected organization.
-ORGANIZATIONS_LEAVE_SELECTED Leave Selected Organization
-ORGANIZATIONS_DEFAULTS Organization Defaults
-ORGANIZATIONS_SAVE_DEFAULTS Save Defaults
-ORGANIZATIONS_PAY_PERIOD_LENGTH Pay Period Length
-ORGANIZATIONS_DEFAULT_WAGE Default Wage
-ORGANIZATIONS_TIMEZONE Timezone
-ORGANIZATIONS_CURRENCY Currency
-ORGANIZATIONS_OWNERSHIP_TRANSFER Ownership Transfer
-ORGANIZATIONS_RELOAD_MEMBERS Reload Members
-ORGANIZATIONS_TRANSFER_TARGET_PLACEHOLDER Select member UUID...
-ORGANIZATIONS_TRANSFER_OWNERSHIP Transfer Ownership
-ORGANIZATIONS_AUDIT_TIMELINE Audit Timeline
-ORGANIZATIONS_RELOAD_TIMELINE Reload Timeline
-ORGANIZATIONS_LOADING Loading organizations...
-ORGANIZATIONS_NONE No organizations yet. Create your first organization to get started.
-ORGANIZATIONS_ROLE Role
-ORGANIZATIONS_SCOPES Scopes
-ORGANIZATIONS_MANAGE_IN_SETTINGS Manage in Settings
-ORGANIZATIONS_UNKNOWN Unknown
-ORGANIZATIONS_PENDING pending
-ORGANIZATIONS_REVOKE Revoke
-ORGANIZATIONS_NO_INVITES No invites for this organization.
-ORGANIZATIONS_SELECT_FIRST Select an organization first.
-ORGANIZATIONS_INVITE_REVOKED Invite revoked.
-ORGANIZATIONS_INVITE_REVOKE_FAILED Unable to revoke invite.
-ORGANIZATIONS_LINK_SITE Link Site
-ORGANIZATIONS_SITE_WITHOUT_ORG Site without org
-ORGANIZATIONS_SITE_LINKED Site linked to organization.
-ORGANIZATIONS_SITE_LINK_FAILED Unable to link site.
-ORGANIZATIONS_NO_DISCOVERY No discovery candidates found.
-ORGANIZATIONS_DISCOVERY_RUNNING Running discovery...
-ORGANIZATIONS_DISCOVERY_COMPLETE Organization discovery completed.
-ORGANIZATIONS_DISCOVERY_FAILED Unable to run organization discovery.
-ORGANIZATIONS_LOAD_INVITES_FAILED Unable to load invites.
-ORGANIZATIONS_LOAD_DEFAULTS_FAILED Unable to load organization defaults.
-ORGANIZATIONS_DEFAULTS_SAVED Organization defaults saved.
-ORGANIZATIONS_DEFAULTS_SAVE_FAILED Unable to save organization defaults.
-ORGANIZATIONS_LOAD_ORGS_FAILED Unable to load organizations right now.
-ORGANIZATIONS_LOAD_AUDIT_FAILED Unable to load audit timeline.
-ORGANIZATIONS_NO_AUDIT No audit events yet.
-ORGANIZATIONS_NAME_MIN Organization name must be at least 2 characters.
-ORGANIZATIONS_CREATED Organization created.
-ORGANIZATIONS_CREATE_FAILED Failed to create organization.
-ORGANIZATIONS_ENTER_INVITE_EMAIL Enter an invite email.
-ORGANIZATIONS_SELECT_SCOPE Select at least one scope.
-ORGANIZATIONS_INVITE_SENT Organization invite sent.
-ORGANIZATIONS_INVITE_SEND_FAILED Unable to send organization invite.
-ORGANIZATIONS_SELECT_TRANSFER_TARGET Select a transfer target first.
-ORGANIZATIONS_OWNERSHIP_TRANSFERRED Ownership transferred.
-ORGANIZATIONS_OWNERSHIP_TRANSFER_FAILED Unable to transfer ownership.
-ORGANIZATIONS_WITHDRAWN Organization relationship withdrawn.
-ORGANIZATIONS_WITHDRAW_FAILED Unable to leave organization.
-ORGANIZATIONS_AUDIT_EVENT event
-ORGANIZATIONS_AUDIT_ACTOR actor
-
-ORGANIZATIONS_REMOVE_CONFIRM_PREFIX Remove organization
-ORGANIZATIONS_REMOVE_CONFIRM_SUFFIX from your organizations list?
-ORGANIZATIONS_REMOVE_FAILED Unable to remove organization right now.
-ADMIN_DASHBOARD_PLATFORM_METRICS_TITLE Platform Metrikleri
-BREADCRUMB Ekmek kırıntısı
-BREADCRUMB Ekmek kırıntısı
-HELP_TOC_HOME Ana sayfa
-HELP_TOC_TRANSPARENCY_HUB Şeffaflık Merkezi
+TILDE_KEY <kbd>` tilde</kbd>
+TIMEZONE_UPDATED Saat dilimi güncellendi
+TOGGLE_CALENDAR_SCREENMODE Toggle Calendar Mode
+TOGGLE_CALENDAR_SCREENMODE_WITH Toggle Calendar mode with tilde.
+TRANSPARENCY Şeffaflık
 TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_1 Rota düzeyinde WCAG taramaları, ihlaller için sıkı rota taramaları ve daha sıkı kontrast kontrolleri dahil olmak üzere ana sayfalarda gerçekleştirilir.
 TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_2 Önemli nokta yapısının, etiketlerin ve kurtarma mesajlarının sessizce kaymaması için başlık ve form regresyonları kontrol edilir.
 TRANSPARENCY_ACCESSIBILITY_ACTIVELY_VERIFY_FACT_3 Yeniden akış ve metin aralığı kapsamı, yatay taşmayı ve aralık hatalarını yakalamak için kompakt görüntü alanı genişliklerindeki çekirdek rotaları kontrol eder.
@@ -527,7 +297,6 @@ TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TEXT_2 Her döngü, izlenen kusurlarla 
 TRANSPARENCY_ACCESSIBILITY_AUDIT_CADENCE_TITLE Denetim Temposu
 TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TEXT_1 Erişilebilirlik tek seferlik bir temizleme değildir. Doğruluk, güvenlik ve güvenilirliğe nasıl önem veriyorsak, bunu da normal ürün kalitesinin bir parçası olarak ele alıyoruz.
 TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TEXT_2 Daha fazla rota denetlenip kapsandıkça, bu sayfayı gönderilen değişiklikler, açık çalışma ve doğrulama yaklaşımıyla güncellemeye devam ediyoruz, böylece genel olmaktan ziyade faydalı olmaya devam ediyor.
-TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TITLE Sürekli Uygulama
 TRANSPARENCY_ACCESSIBILITY_DECK Erişilebilirlik, PayCal'ı geliştirme şeklimizin bir parçasıdır. Bu sayfada standardımız, nelerin gönderildiği, nelerin hala açık olduğu ve engellerin nasıl bildirileceği açıklanmaktadır.
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_ACKNOWLEDGE Aynı iş günü
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P0_DEFINITION Klavye veya ekran okuyucu kullanımında engelleyiciyi serbest bırakma veya temel görev hatası.
@@ -539,13 +308,11 @@ TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_DEFINITION Önemli akışlarda bü
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_ESCALATION 7 iş günü sonunda çözümlenmezse Ön Uç Liderine iletin.
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_FIX_TARGET 10 iş günü
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_OWNER Erişilebilirlik Sahibi
-TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_SEVERITY P1
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_ACKNOWLEDGE 3 iş günü
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_DEFINITION Yerelleştirilmiş sorun, çalışmaların sıkılaştırılması veya yönetişimin iyileştirilmesi.
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_ESCALATION İki döngüden sonra ertelenmesi durumunda üç aylık denetimin kapatılması için işaret koyun.
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_FIX_TARGET Sonraki planlı döngü
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_OWNER Triyajda atanan
-TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_SEVERITY P2
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_ACKNOWLEDGE onayla
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_CAPTION Erişilebilirlik kusuru SLA modeli: önem derecesi, onay penceresi, düzeltme hedefi, sahip ve yükseltme yolu
 TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_TABLE_DEFINITION Tanım
@@ -562,10 +329,8 @@ TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_TEXT_1 Bildirilen bir engel, şu a
 TRANSPARENCY_ACCESSIBILITY_DEPRECATION_POLICY_TITLE Kullanımdan Kaldırma ve Değişiklik Politikası
 TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TEXT_1 Odaklanma güvenliği kuralları, kısayol işleyicilerinin ve komut dosyası içeren kullanıcı arayüzünün, birisi bir kipte yazarken veya çalışırken odağı çalmasını önler. Kısayollar, düzenlenebilir kontrollerin içinde etkinleşmez ve iletişim kutusu etkileşimleri, iletişim kutusu kapanana kadar odağın kapsamını korur.
 TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TEXT_2 Bu politika yanlışlıkla gezinmeyi azaltır, form girişini korur ve klavye davranışını Playwright ve Lightpanda'da çalıştırdığımız rota düzeyinde regresyon kapsamıyla tutarlı tutar.
-TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TITLE Odak Güvenliği
 TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TEXT_1 ARIA'yı anlamsal HTML'nin yerine geçecek bir araç olarak görmüyoruz. Yerel HTML'nin tek başına yeterli olmadığı durumlarda kontrol adlarını, ilişkileri, açıklamaları ve durum değişikliklerini netleştirmek için ARIA'yı kullanırız.
 TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TEXT_2 Bu, erişilebilirlik çalışmalarımızın yalnızca ARIA kullanımından daha kapsamlı olduğu anlamına gelir. Klavye davranışı, başlıklar, odak yönetimi, kontrast, yeniden akış ve hata düzeltme de aynı derecede önemlidir.
-TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TITLE ARIA'yı Nasıl Kullanıyoruz?
 TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_1 Çekirdek navigasyon, klavye kullanımını, bağlantıları atlamayı ve ana hedefler için belgelenmiş tek tuşlu kısayolları destekler.
 TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_2 Ana uygulama yolları için tek tuşlu kısayollar (C, R, S, E, A, H, N, P, ?) belgelenmiştir.
 TRANSPARENCY_ACCESSIBILITY_IN_PLACE_FACT_3 Kısayollar, giriş yazarken veya iletişim kutuları açıkken etkinleşmez.
@@ -590,7 +355,6 @@ TRANSPARENCY_ACCESSIBILITY_KEY_EXPECTATIONS_TITLE Temel Erişilebilirlik Beklent
 TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_1 Temel rotalar arasında manuel ekran okuyucu geçişi henüz rota bazında VoiceOver notları ve kusur başına izleme oluşturmadı (WCAG-015, devam ediyor).
 TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_2 Yüksek geri bildirim akışlarındaki duyuru ifadeleri (açıklık ve özlülük), canlı bölge yapısı ayrımı tamamlandıktan sonra kalan odak noktasıdır.
 TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_FACT_3 Üçüncü taraf bağımlılığı incelemesi, harici kitaplıklar büyük güncellemeleri alırken bileşene özgü kısıtlamaları veya yükseltme kısıtlamalarını tanımlayabilir.
-TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_TITLE Bilinen Sınırlamalar
 TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_TEXT_1 Bu, WCAG yürütme birikimimizdeki aktif öğedir. Tasarım belirteçleri, şeffaflık meta verileri, canlı bölge sözleşmeleri, halkla ilişkiler yönetimi ve sade dilli kopyalama çalışmaları tamamlandı ve geriye kayma riskini azaltmak için regresyon paketlerinin kapsamına alındı.
 TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_TITLE Mevcut Açık Çalışma
 TRANSPARENCY_ACCESSIBILITY_OPEN_WORK_WCAG026_TEXT Dış denetim hazırlık paketi — bir denetim kanıt paketinin bir iş günü içinde oluşturulabilmesi için ön paketleme sorun geçmişi, iyileştirme günlükleri, kanıt verileri ve politika belgeleri.
@@ -625,23 +389,18 @@ TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_PLACEHOLDER_DETAILS Ne oldu, hangi yard
 TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_PLACEHOLDER_SUMMARY Örnek: Takvimde gezinme ekran okuyucu tarafından atlanıyor
 TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TEXT_1 Kullanımı zor veya erişilemez bir şey varsa aşağıdaki formu kullanın veya doğrudan iletişim sayfasına gidin. Form, özetinizin ve ayrıntılarınızın taşındığı güvenli iletişim akışını açar.
 TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TEXT_2 Bu formdan başlamamayı tercih ederseniz <a href="/contact/">genel iletişim sayfasını</a> da kullanabilirsiniz.
-TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TITLE Erişilebilirlik Sorunlarını Bildirin
-TRANSPARENCY_ACCESSIBILITY_ROUTE_METADATA_TITLE Rota Meta Verileri
 TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_1 <strong>WCAG 2.1</strong> (W3C Web İçeriği Erişilebilirlik Yönergeleri) — Web erişilebilirliğine yönelik uluslararası standart
 TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_2 <strong>Bölüm 508</strong> (ABD Federal yasası) — WCAG 2.0 Düzey AA ile uyumludur
 TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_3 <strong>EN 301 549</strong> (Avrupa standardı) — WCAG 2.1 Düzey AA ile uyumludur
 TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_ITEM_4 <strong>AODA</strong> (Engelli Ontaryalılar için Erişilebilirlik Yasası) — Kanada'da WCAG uyumlu erişilebilirlik beklentilerine gönderme yapar
 TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_TEXT_1 Erişilebilirlik çalışmalarımız öncelikle WCAG 2.1 ve Düzey AA beklentilerini referans alan ilgili yasal standartlar tarafından yönlendirilmektedir.
-TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_TITLE Standartlar ve Yönergeler
 TRANSPARENCY_ACCESSIBILITY_STILL_IMPROVING_FACT_1 Dış denetim hazırlık paketi: bir iş günü içinde eksiksiz bir denetim paketinin oluşturulabilmesi için ön paketleme sorun geçmişi, iyileştirme günlükleri ve politika kanıtları (WCAG-026).
 TRANSPARENCY_ACCESSIBILITY_STILL_IMPROVING_TITLE Hala Geliştirdiğimiz Şeyler
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TEXT_1 Doğrudan doğruladığımız kombinasyonlara ve planlı denetimler sırasında incelediğimiz kombinasyonlara dayanarak destek beklentilerini yayınlıyoruz. Bu bir destek matrisidir; her tarayıcı ve yardımcı teknoloji eşleşmesinin aynı şekilde davrandığı iddiası değildir.
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TEXT_2 Kullanıcılar en iyi çaba kombinasyonuna ilişkin bir engel bildirdiğinde, bunu yine de araştırırız. Sorun temel anlambilimi, klavye davranışını veya paylaşılan bileşenleri etkiliyorsa, tam eşleştirme doğrulanan birincil kümede olmasa bile bunu bir ürün hatası olarak ele alırız.
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_POLICY_TITLE Yardımcı Teknoloji Desteği Politikası
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_AT Seslendirme
-TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_BROWSER Safari
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_EXPECTATION Birincil doğrulanmış kombinasyon
-TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_PLATFORM macOS
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_VERIFICATION Düzenli WCAG kontrollerinde ve üç aylık denetimlerde manuel rota incelemesi
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_AT Diğer AT veya sesli kontrol araçları
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_BROWSER Mevcut büyük tarayıcılar
@@ -651,12 +410,8 @@ TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_OTHER_VERIFICATION Erişilebilirlik kusur
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_AT ÇENELER
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_BROWSER krom
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_EXPECTATION Desteklenen denetim kombinasyonu
-TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_PLATFORM Windows
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_VERIFICATION Üç aylık denetimler sırasında planlanmış manuel doğrulama
-TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_AT NVDA
-TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_BROWSER Firefox
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_EXPECTATION Desteklenen denetim kombinasyonu
-TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_PLATFORM Windows
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_VERIFICATION Üç aylık denetimler sırasında planlanmış manuel doğrulama
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_ASSISTIVE_TECH Yardımcı teknoloji
 TRANSPARENCY_ACCESSIBILITY_SUPPORT_TABLE_BROWSER Tarayıcı
@@ -741,7 +496,6 @@ TRANSPARENCY_EMAIL_FLOW_EMAIL_CHANGE E-posta değişikliği (eski/yeni gelen kut
 TRANSPARENCY_EMAIL_FLOW_EMAIL_CHANGE_PURPOSE Hesap e-postasının değiştirilmesi için ikili gelen kutusu onayı
 TRANSPARENCY_EMAIL_FLOW_RECOVERY_EMAIL_PURPOSE Hassas kurtarma eylemlerinden önce hedefin sahipliğini kanıtlayın
 TRANSPARENCY_EMAIL_FLOW_RECOVERY_EMAIL_VERIFICATION Kurtarma e-postası doğrulaması
-TRANSPARENCY_EMAIL_FLOW_RECOVERY_KEY_DELIVERY Kurtarma Anahtarı Teslimatı
 TRANSPARENCY_EMAIL_FLOW_RECOVERY_KEY_PURPOSE Hesap kurtarma materyali sağlayın
 TRANSPARENCY_EMAIL_FLOW_VERIFICATION E-posta doğrulaması
 TRANSPARENCY_EMAIL_FLOW_VERIFICATION_PURPOSE Hesabın yaşam döngüsü etkinlikleri sırasında sahipliği doğrulayın
@@ -791,48 +545,6 @@ TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_NEXT_REVIEW_LABEL Bir sonra
 TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_PRIMARY_REFS_LABEL Birincil referanslar:
 TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_ROUTE_LABEL Rota:
 TRANSPARENCY_FRAMEWORK_BACKEND_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
-TRANSPARENCY_HUB_ACCESSIBILITY_READ_MORE Erişilebilirlik standardımızı, son çalışmalarımızı ve geri bildirim yolumuzu okuyun
-TRANSPARENCY_HUB_ACCESSIBILITY_WCAG_TITLE Erişilebilirlik ve WCAG Uyumluluğu
-TRANSPARENCY_HUB_DECK Kullanıcıların yalnızca güven beyanlarını değil, kararları da doğrulayabilmeleri için PayCal'ın nasıl çalıştığını yayınlıyoruz.
-TRANSPARENCY_HUB_DEPENDENCY_CI_READ_MORE Bağımlılık ve CI/CD yönetişim politikasını okuyun
-TRANSPARENCY_HUB_DEPENDENCY_CI_TITLE Bağımlılık ve CI/CD Yönetişimi
-TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_TITLE Kazanç Yükü Testi
-TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_READ_MORE Devamını oku
-TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_TITLE E-posta Mimarisi
-TRANSPARENCY_HUB_FRAMEWORK_BACKEND_READ_MORE Çerçeve ve arka uç değişiklik geçmişini okuyun
-TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TITLE Çerçeve ve Arka Uç Değişiklik Defteri
-TRANSPARENCY_HUB_METRICS_FACT_COLLECTION_SCOPE Koleksiyon kapsamı yalnızca topludur ve kesin sınırlarladır ve anahtarlarda kişisel tanımlayıcılar yoktur.
-TRANSPARENCY_HUB_METRICS_FACT_RETENTION Saklama, tanımlanmış bir yaşam döngüsünü takip eder: ham veriler, toplamalar ve otomatik temizleme.
-TRANSPARENCY_HUB_METRICS_FACT_TELEMETRY_KEYS İddiaların doğrulanabilmesi için telemetri anahtarları ve örnekleri yayınlanmaktadır.
-TRANSPARENCY_HUB_METRICS_PRIVACY_TITLE Platform Metrikleri ve Gizlilik
-TRANSPARENCY_HUB_METRICS_READ_MORE Devamını oku
-TRANSPARENCY_HUB_METRICS_TEXT_1 Ölçümler sayfası, güvenilirlik ve kapasite planlaması için toplanan operasyonel telemetriyi açıklar.
-TRANSPARENCY_HUB_NETWORK_CAPABILITIES_READ_MORE Ağ özelliklerini ve güvenlik başlığı politikasını okuyun
-TRANSPARENCY_HUB_NETWORK_CAPABILITIES_TEXT_1 Bu makalede, tarayıcı ve ağ davranışını güvence altına almak için kullanılan aktarım protokolleri ve yanıt başlığı denetimleri yayınlanmaktadır.
-TRANSPARENCY_HUB_NETWORK_CAPABILITIES_TITLE Ağ Yetenekleri
-TRANSPARENCY_HUB_PAGE_TITLE Şeffaflık Merkezi
-TRANSPARENCY_HUB_PANELS_ARIA Şeffaflık detay panelleri
-TRANSPARENCY_HUB_PLATFORM_OVERVIEW_STRIPE_SUPPORT_TEXT Abonelik faturalandırması Stripe tarafından işlenir. Stripe desteği support.stripe.com adresinde mevcuttur.
-TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_1 PayCal denetlenebilir işlemler üzerine kurulmuştur: formüller belgelenmiştir, telemetri sınırları açıktır ve saklama varsayılan olarak sınırlıdır.
-TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_2 İlkemiz basittir: Bir sistem maaş bordrosunu veya mahremiyeti etkiliyorsa, kullanıcılar bu sistemin nasıl çalıştığını ve nasıl yönetildiğini anlayabilmelidir.
-TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_3 Faturalandırma ve profil yönetimi akışları da dahil olmak üzere en son ürün şekillendirme güncellemeleri, çerçeve/arka uç defterimizde ve test yönetimi sayfalarımızda takip edilir.
-TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TITLE Platform Felsefesine Genel Bakış
-TRANSPARENCY_HUB_PRODUCT_BILLING_READ_MORE Ürüne yönelik platform değişikliklerini inceleyin
-TRANSPARENCY_HUB_PRODUCT_BILLING_TITLE Ürün Deneyimi ve Faturalandırma Değişiklikleri
-TRANSPARENCY_HUB_SECURITY_AUDIT_FACT_COVERAGE İş akışı kapsamı, çalışma zamanı yaşam döngüsü kontrollerini, telemetri yalıtımını, korelasyon yönetimini ve ayrıcalıklı rol sağlamlaştırmayı içerir.
-TRANSPARENCY_HUB_SECURITY_AUDIT_FACT_STATUS Mevcut döngü durumu, doğrulama tarihi ve inceleme temposu ile birlikte yayınlanır.
-TRANSPARENCY_HUB_SECURITY_AUDIT_READ_MORE Güvenlik denetimi durumumuzu ve kanıt özetimizi okuyun
-TRANSPARENCY_HUB_SECURITY_AUDIT_TEXT_1 Bu sayfada mevcut denetim durumu, kapalı kapsam, kanıt referansları ve güvenlik duruşunu koruyan sürüm engelleyici taahhütleri yayınlanır.
-TRANSPARENCY_HUB_SECURITY_AUDIT_TITLE Güvenlik Denetim Durumu
-TRANSPARENCY_HUB_SECURITY_AUDIT_VALIDATION_SNAPSHOT_FACT Doğrulama anlık görüntüsü Playwright, JS, PHPStan Seviye 9 ve arka uç test sonuçlarını içerir.
-TRANSPARENCY_HUB_SUPERHEROES_MAP_READ_MORE Devamını oku
-TRANSPARENCY_HUB_SUPERHEROES_MAP_TITLE Süper Kahramanlar Sistem Haritası
-TRANSPARENCY_HUB_TAX_METHODOLOGY_READ_MORE Devamını oku
-TRANSPARENCY_HUB_TAX_METHODOLOGY_TITLE Vergi Metodolojisi
-TRANSPARENCY_HUB_TESTING_GOVERNANCE_READ_MORE Test yönetimi ve sürüm doğrulama politikamızı okuyun
-TRANSPARENCY_HUB_TESTING_GOVERNANCE_TITLE Test ve Doğrulama Yönetişimi
-TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_READ_MORE Devamını oku
-TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_TITLE Doğrulama ve Yönetişim
 TRANSPARENCY_LOAD_TESTING_BENCHMARK_METHOD_TITLE Karşılaştırma Yöntemi
 TRANSPARENCY_LOAD_TESTING_DECK /kazanç/ için istekli görüntü oluşturma ile yavaş bölüm yüklemeyi karşılaştıran 10 çalıştırmalı A/B karşılaştırması.
 TRANSPARENCY_LOAD_TESTING_EXECUTIVE_SUMMARY_TITLE Yönetici Özeti
@@ -860,7 +572,6 @@ TRANSPARENCY_NETWORK_BROWSER_HEADERS_TITLE Tarayıcı Güvenlik Başlığı Taba
 TRANSPARENCY_NETWORK_CAPABILITIES_DECK PayCal, kullanıcıların ağ ve tarayıcı güvenlik durumunu doğrudan doğrulayabilmeleri için protokol davranışını ve yanıt başlığı kontrollerini yayınlar.
 TRANSPARENCY_NETWORK_CAPABILITIES_PAGE_TITLE Ağ Yetenekleri
 TRANSPARENCY_NETWORK_EXECUTIVE_SUMMARY_TITLE Yönetici Özeti
-TRANSPARENCY_NETWORK_HEADERS_TABLE_ARIA Güvenlik Başlıkları Tablosu
 TRANSPARENCY_NETWORK_HEADERS_TABLE_HEADER Başlık
 TRANSPARENCY_NETWORK_HEADERS_TABLE_SECURITY_EFFECT Güvenlik Etkisi
 TRANSPARENCY_NETWORK_PROTOCOL_ROUTING_TITLE Protokol ve Yönlendirme Davranışı
@@ -870,9 +581,6 @@ TRANSPARENCY_NETWORK_TABLE_CONTROL Kontrol
 TRANSPARENCY_NETWORK_TABLE_OBSERVED_VALUE Gözlemlenen Değer
 TRANSPARENCY_NETWORK_TABLE_PURPOSE Amaç
 TRANSPARENCY_NETWORK_TRANSPORT_CONTROLS_TITLE Taşıma Güvenliği Kontrolleri
-TRANSPARENCY_NETWORK_TRANSPORT_TABLE_ARIA Aktarım Protokolü Tablosu
-TRANSPARENCY_NETWORK_USE_CASE_ARIA Ağ Operasyonları Kullanım Örneği
-TRANSPARENCY_NETWORK_USE_CASE_TITLE Kullanım Örneği: Aktarım ve Başlık Regresyonlarını Tanılama
 TRANSPARENCY_NETWORK_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
 TRANSPARENCY_SECURITY_AUDIT_DECK PayCal, kod, testler ve sürüm yönetiminde uygulanan mimariye göre kontrol önlemleriyle 2026-03-24 itibarıyla PASS statüsünde kalıyor.
 TRANSPARENCY_SECURITY_AUDIT_EVIDENCE_SOURCES_TITLE Kanıt kaynakları
@@ -970,7 +678,6 @@ TRANSPARENCY_TAX_OAS_CLAWBACK_TITLE Yaşlılık Güvenliği (OAS) Pençe Gerilem
 TRANSPARENCY_TAX_ROUTE_METADATA_TITLE Meta verileri yönlendir
 TRANSPARENCY_TAX_SCOPE_COMMITMENT_TITLE Kapsam ve Taahhüt
 TRANSPARENCY_TAX_TABLE_INCOME_RANGE Gelir Aralığı
-TRANSPARENCY_TAX_TABLE_RATE Oran
 TRANSPARENCY_TAX_VERIFICATION_METADATA_TITLE Doğrulama Meta Verileri
 TRANSPARENCY_TESTING_CURRENT_SUITE_INVENTORY_VALUE 118 dosyada 1.212 listelenmiş test.
 TRANSPARENCY_TESTING_CURRENT_TEST_TOPOLOGY_TITLE Güncel Test Topolojisi
@@ -1036,118 +743,69 @@ TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFICATION_SCOPE_LABEL Doğrulama kapsam�
 TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFICATION_SCOPE_VALUE açıklanan geçit uygulamalarının mevcut kancalara, CI boru hattı kontrollerine ve çalışma zamanı kontrol yollarına göre manuel olarak incelenmesi.
 TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFY_CLAIMS_TEXT_1 Geliştiriciler doğrulama sinyallerini doğrudan bu depoda yeniden oluşturabilirler:
 TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFY_CLAIMS_TITLE Bu İddialar Nasıl Doğrulanır?
-TRANSPARENCY_HUB_ACCESSIBILITY_FACT_1 Core navigation supports keyboard use, skip links, and documented single-key shortcuts for primary destinations.
-TRANSPARENCY_HUB_ACCESSIBILITY_FACT_2 Shortcut handling is safety-guarded and does not fire while typing in editable fields or when dialogs are open.
-TRANSPARENCY_HUB_ACCESSIBILITY_FACT_3 Recent regression coverage checks headings, reflow/text spacing, navigation paths, and the accessibility feedback handoff.
-TRANSPARENCY_HUB_ACCESSIBILITY_FACT_4 Strict route-level contrast blockers on core public pages have been remediated, while broader theme-wide contrast work continues.
-TRANSPARENCY_HUB_ACCESSIBILITY_FACT_5 Users can start an accessibility report from the accessibility page and continue it through the secure contact flow.
-TRANSPARENCY_HUB_ACCESSIBILITY_FACT_6 The accessibility transparency page now publishes last-verified date, verification scope, known limitations, and next review due date.
-TRANSPARENCY_HUB_ACCESSIBILITY_TEXT_1 We use WCAG 2.1 Level AA as our working accessibility standard and publish recent accessibility work in plain language.
-TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_1 Documents lockfile-first npm policy and
-TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_2 Maps JavaScript quality gates and backend pipeline stages to workflow controls.
-TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_3 Lists known documentation limitations and planned governance improvements.
-TRANSPARENCY_HUB_DEPENDENCY_CI_TEXT_1 This article publishes how npm dependencies are controlled and how CI gates are enforced before release.
-TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_1 Includes a 10-run matrix for real and synthetic 2025/2026 datasets.
-TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_2 Reports DOMContentLoaded, section-ready timing, and API-call trade-offs.
-TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_3 Documents test method and interpretation for public review.
-TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_READ_MORE Read earnings load-testing results
-TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_TEXT_1 This article publishes reproducible A/B benchmark results for eager rendering versus lazy section loading on
-TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_1 Flow-specific template families are documented across verification, recovery, change-email, and contact support paths.
-TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_2 Delivery responsibilities are separated between EmailGarum orchestration and EmailTransport SMTP protocol handling.
-TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_3 Opt-in live tests for template sweeps and DKIM/DMARC health verification are documented.
-TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_TEXT_1 The email page explains which transactional emails PayCal sends, how templates are rendered, and how delivery reliability is verified.
-TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_1 Summarizes service/controller changes that materially affect behavior.
-TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_2 Maps release changes to security and governance controls.
-TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_3 Includes references to detailed changelog and audit artifacts.
-TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TEXT_1 This page tracks backend architecture and framework-level changes with public explanations of what changed and why.
-TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_1 Documents HTTPS enforcement, HSTS preload, and HTTP/3 (QUIC) advertisement.
-TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_2 Lists the current security header baseline including CSP, COOP, COEP, CORP, and browser hardening headers.
-TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_3 Explains protocol negotiation and fallback behavior across modern clients.
-TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_1 Tracks billing-state handling and subscription status contract changes.
-TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_2 Captures destructive-action safeguards such as explicit account deletion confirmation phrases.
-TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_3 Links product-facing updates to verification and release governance evidence.
-TRANSPARENCY_HUB_PRODUCT_BILLING_TEXT_1 Major account, billing, and profile-flow updates are explained alongside backend and testing governance so users can audit both UX and behavior changes.
-TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_1 Includes ShadowTalon, Guardian, Phantom Wing, Lens, and EmailGarum.
-TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_2 Explains where each component is used and what risk boundary it protects.
-TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_3 Provides verification anchors so implementation claims can be inspected directly in code and tests.
-TRANSPARENCY_HUB_SUPERHEROES_MAP_TEXT_1 The Superheroes page documents PayCal's themed cross-cutting components and the specific operational problem each one solves.
-TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_1 CPP, OAS, EI, federal/provincial tax, and net-pay formulas are documented with worked examples.
-TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_2 Current tax-year thresholds and rates are published and tied to CRA references.
-TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_3 Calculation quality is validated with an automated test suite and annual rate updates.
-TRANSPARENCY_HUB_TAX_METHODOLOGY_TEXT_1 The tax page documents our CRA-aligned formulas, thresholds, and examples used for estimates.
-TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_1 Shows the active PHPUnit suite inventory and category split.
-TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_2 Documents release-blocking validation commands used in
-TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_3 Explains how test evidence is synchronized into changelogs and source-of-truth notes.
-TRANSPARENCY_HUB_TESTING_GOVERNANCE_TEXT_1 This article documents how we run backend, frontend, and accessibility validation and which gates are treated as release blockers.
-TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_1 Pre-commit and pre-push hooks enforce PHPStan Level 9 and reject baseline bypasses.
-TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_2 CI runs staged validation across unit, integration, contract, random-order, and coverage jobs.
-TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_3 Runtime controls apply rate limits, TTL windows, and abuse-response blocks for sensitive flows.
-TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_TEXT_1 This page documents how PayCal enforces policy through tests, hooks, runtime limits, and security controls.
-AUTH_BETA_NOTICE PayCal zel beta srmndedir.
-AUTH_DIVIDER_OR veya
-AUTH_PAGE_HEADING Kimlik dorulama
-AUTH_PRIVACY_LINK Gizlilik Politikas
-AUTH_RECOVER_ACCOUNT Hesab kurtar
-AUTH_RECOVER_ACCOUNT_EMAIL Hesap e-postas
-AUTH_REGISTER_CREATE_BUTTON Hesap olutur
-AUTH_REGISTER_DEVICE_LABEL Passkey cihaz ad
-AUTH_REGISTER_DEVICE_PLACEHOLDER ad-YYYYAAGG
-AUTH_REGISTER_EMAIL_LABEL E-posta (zorunlu)
-AUTH_REGISTER_FULL_NAME_LABEL Tam ad (zorunlu)
-AUTH_REGISTER_INVITE_LABEL Davet kodu
-AUTH_REGISTER_PANEL_ARIA Hesap oluturma paneli
-AUTH_REGISTER_PASSKEY_STATUS Hesabnz korumak iin bir passkey oluturacaksnz.
-AUTH_SIGNIN_EMAIL_ARIA E-posta zorunlu
-AUTH_SIGNIN_EMAIL_LABEL E-posta (zorunlu)
-AUTH_SIGNIN_OTHER_DEVICE Baka bir cihaz kullan
-AUTH_SIGNIN_PANEL_ARIA Giri paneli
-AUTH_SIGNIN_PASSKEY_BUTTON Passkey ile devam et
-AUTH_SIGNIN_PASSKEY_STATUS Bu cihazda bir passkey kullann veya baka bir cihazdan giri yapn.
-AUTH_TABS_ARIA Kimlik dorulama seenekleri
-AUTH_TAB_REGISTER Hesap Olutur
-AUTH_TAB_SIGNIN Giri Yap
-AUTH_TERMS_ACK_AND ve
-AUTH_TERMS_ACK_PREFIX Giri yaparak
-AUTH_TERMS_LINK Koullar kabul etmi olursunuz
-AUTH_VERIFICATION_MESSAGE Kurtarma anahtarnz size e-posta ile gnderildi. Devam etmeden nce bunu gvenli bir yerde saklayn.
-AUTH_VERIFICATION_STEP_1 Kurtarma anahtar e-postas iin gelen kutunuzu kontrol edin.
-AUTH_VERIFICATION_STEP_2 Kurtarma anahtarnz gvenli bir yerde saklayn.
-AUTH_VERIFICATION_STEP_3 Passkey'inizle giri yaparak devam edin.
-AUTH_VERIFICATION_TITLE E-posta doruland
-BLOG_ARTICLE_BODY_ARIA Makale gövdesi
-BLOG_ARTICLE_FOUND_PLURAL makale bulundu
-BLOG_ARTICLE_FOUND_SINGULAR makale bulundu
-BLOG_ARTICLE_NAV_ARIA Makale navigasyonu
-BLOG_CLEAR Temizle
-BLOG_DEFAULT_AUTHOR PayCal Editöryal
-BLOG_EMPTY_RESULTS Mevcut arama ve etiket filtrelerine uyan gönderi yok.
-BLOG_FILTER_TAG_ARIA Etikete göre filtrele
-BLOG_LIST Liste
-BLOG_NEXT Sonraki
-BLOG_NEXT_ARROW_LABEL Sonraki ->
-BLOG_NEXT_ARTICLE_ARIA Sonraki makale
-BLOG_NEXT_PAGE Sonraki Sayfa
-BLOG_OF_LABEL /
-BLOG_OVERVIEW_ARIA Blog genel bakış
-BLOG_PAGE_DECK PayCal organizasyonundan sürüm notları, bordro operasyon rehberi ve mühendislik güncellemeleri.
-BLOG_PAGE_LABEL Sayfa
-BLOG_PAGE_NAV_ARIA Blog sayfa navigasyonu
-BLOG_PAGE_TITLE PayCal Blog
-BLOG_POST_NOT_FOUND_ARIA Blog gönderisi bulunamadı
-BLOG_POST_NOT_FOUND_DECK İstenen makale bulunamadı.
-BLOG_POST_NOT_FOUND_TITLE Gönderi Bulunamadı
-BLOG_POST_TAGS_ARIA Gönderi etiketleri
-BLOG_PREVIOUS Önceki
-BLOG_PREVIOUS_ARROW_LABEL <- Önceki
-BLOG_PREVIOUS_ARTICLE_ARIA Önceki makale
-BLOG_PREVIOUS_PAGE Önceki Sayfa
-BLOG_RETURN_TO_LIST Blog listesine dön
-BLOG_SEARCH_ARIA Blog gönderilerini ara
-BLOG_SEARCH_PLACEHOLDER Başlık, yazar, alıntı veya etiketlere göre ara
-BLOG_UNTITLED Başlıksız
+TRAVEL_HOURS TRAVEL
+UPDATING_SPACING_TO Boşluk güncelleniyor
+VIEW Görüntüle
+WIN95_DARK 95 Koyu
+WIN95_LIGHT 95 Açık
+HELP_TOC_HOME Ana sayfa
+TRANSPARENCY_HUB_PAGE_TITLE Şeffaflık Merkezi
+TRANSPARENCY_HUB_DECK Kullanıcıların yalnızca güven beyanlarını değil, kararları da doğrulayabilmeleri için PayCal'ın nasıl çalıştığını yayınlıyoruz.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TITLE Platform Felsefesine Genel Bakış
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_1 PayCal denetlenebilir işlemler üzerine kurulmuştur: formüller belgelenmiştir, telemetri sınırları açıktır ve saklama varsayılan olarak sınırlıdır.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_2 İlkemiz basittir: Bir sistem maaş bordrosunu veya mahremiyeti etkiliyorsa, kullanıcılar bu sistemin nasıl çalıştığını ve nasıl yönetildiğini anlayabilmelidir.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_STRIPE_SUPPORT_TEXT Abonelik faturalandırması Stripe tarafından işlenir. Stripe desteği support.stripe.com adresinde mevcuttur.
+TRANSPARENCY_HUB_PLATFORM_OVERVIEW_TEXT_3 Faturalandırma ve profil yönetimi akışları da dahil olmak üzere en son ürün şekillendirme güncellemeleri, çerçeve/arka uç defterimizde ve test yönetimi sayfalarımızda takip edilir.
+TRANSPARENCY_HUB_PANELS_ARIA Şeffaflık detay panelleri
+TRANSPARENCY_HUB_SECURITY_AUDIT_TITLE Güvenlik Denetim Durumu
+TRANSPARENCY_HUB_SECURITY_AUDIT_TEXT_1 Bu sayfada mevcut denetim durumu, kapalı kapsam, kanıt referansları ve güvenlik duruşunu koruyan sürüm engelleyici taahhütleri yayınlanır.
+TRANSPARENCY_HUB_SECURITY_AUDIT_FACT_STATUS Mevcut döngü durumu, doğrulama tarihi ve inceleme temposu ile birlikte yayınlanır.
+TRANSPARENCY_HUB_SECURITY_AUDIT_FACT_COVERAGE İş akışı kapsamı, çalışma zamanı yaşam döngüsü kontrollerini, telemetri yalıtımını, korelasyon yönetimini ve ayrıcalıklı rol sağlamlaştırmayı içerir.
+TRANSPARENCY_HUB_SECURITY_AUDIT_VALIDATION_SNAPSHOT_FACT Doğrulama anlık görüntüsü Playwright, JS, PHPStan Seviye 9 ve arka uç test sonuçlarını içerir.
+TRANSPARENCY_HUB_SECURITY_AUDIT_READ_MORE Güvenlik denetimi durumumuzu ve kanıt özetimizi okuyun
+TRANSPARENCY_HUB_METRICS_PRIVACY_TITLE Platform Metrikleri ve Gizlilik
+TRANSPARENCY_HUB_METRICS_TEXT_1 Ölçümler sayfası, güvenilirlik ve kapasite planlaması için toplanan operasyonel telemetriyi açıklar.
+TRANSPARENCY_HUB_METRICS_FACT_TELEMETRY_KEYS İddiaların doğrulanabilmesi için telemetri anahtarları ve örnekleri yayınlanmaktadır.
+TRANSPARENCY_HUB_METRICS_FACT_COLLECTION_SCOPE Koleksiyon kapsamı yalnızca topludur ve kesin sınırlarladır ve anahtarlarda kişisel tanımlayıcılar yoktur.
+TRANSPARENCY_HUB_METRICS_FACT_RETENTION Saklama, tanımlanmış bir yaşam döngüsünü takip eder: ham veriler, toplamalar ve otomatik temizleme.
+TRANSPARENCY_HUB_METRICS_READ_MORE Devamını oku
+TRANSPARENCY_HUB_ACCESSIBILITY_WCAG_TITLE Erişilebilirlik ve WCAG Uyumluluğu
+TRANSPARENCY_HUB_ACCESSIBILITY_READ_MORE Erişilebilirlik standardımızı, son çalışmalarımızı ve geri bildirim yolumuzu okuyun
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_TITLE Doğrulama ve Yönetişim
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_READ_MORE Devamını oku
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_TITLE Ağ Yetenekleri
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_TEXT_1 Bu makalede, tarayıcı ve ağ davranışını güvence altına almak için kullanılan aktarım protokolleri ve yanıt başlığı denetimleri yayınlanmaktadır.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_READ_MORE Ağ özelliklerini ve güvenlik başlığı politikasını okuyun
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_TITLE Test ve Doğrulama Yönetişimi
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_READ_MORE Test yönetimi ve sürüm doğrulama politikamızı okuyun
+TRANSPARENCY_HUB_DEPENDENCY_CI_TITLE Bağımlılık ve CI/CD Yönetişimi
+TRANSPARENCY_HUB_DEPENDENCY_CI_READ_MORE Bağımlılık ve CI/CD yönetişim politikasını okuyun
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TITLE Çerçeve ve Arka Uç Değişiklik Defteri
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_READ_MORE Çerçeve ve arka uç değişiklik geçmişini okuyun
+TRANSPARENCY_HUB_PRODUCT_BILLING_TITLE Ürün Deneyimi ve Faturalandırma Değişiklikleri
+TRANSPARENCY_HUB_PRODUCT_BILLING_READ_MORE Ürüne yönelik platform değişikliklerini inceleyin
+TRANSPARENCY_HUB_TAX_METHODOLOGY_TITLE Vergi Metodolojisi
+TRANSPARENCY_HUB_TAX_METHODOLOGY_READ_MORE Devamını oku
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_TITLE E-posta Mimarisi
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_READ_MORE Devamını oku
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_TITLE Kazanç Yükü Testi
+TRANSPARENCY_HUB_SUPERHEROES_MAP_TITLE Süper Kahramanlar Sistem Haritası
+TRANSPARENCY_HUB_SUPERHEROES_MAP_READ_MORE Devamını oku
+TRANSPARENCY_ACCESSIBILITY_CONTINUOUS_PRACTICE_TITLE Sürekli Uygulama
+TRANSPARENCY_ACCESSIBILITY_FOCUS_SAFETY_TITLE Odak Güvenliği
+TRANSPARENCY_ACCESSIBILITY_HOW_USE_ARIA_TITLE ARIA'yı Nasıl Kullanıyoruz?
+TRANSPARENCY_ACCESSIBILITY_KNOWN_LIMITATIONS_TITLE Bilinen Sınırlamalar
+TRANSPARENCY_ACCESSIBILITY_REPORT_ISSUES_TITLE Erişilebilirlik Sorunlarını Bildirin
+TRANSPARENCY_ACCESSIBILITY_ROUTE_METADATA_TITLE Rota Meta Verileri
+TRANSPARENCY_ACCESSIBILITY_STANDARDS_GUIDELINES_TITLE Standartlar ve Yönergeler
+TRANSPARENCY_EMAIL_FLOW_RECOVERY_KEY_DELIVERY Kurtarma Anahtarı Teslimatı
+TRANSPARENCY_NETWORK_HEADERS_TABLE_ARIA Güvenlik Başlıkları Tablosu
+TRANSPARENCY_NETWORK_TRANSPORT_TABLE_ARIA Aktarım Protokolü Tablosu
+TRANSPARENCY_NETWORK_USE_CASE_ARIA Ağ Operasyonları Kullanım Örneği
+TRANSPARENCY_NETWORK_USE_CASE_TITLE Kullanım Örneği: Aktarım ve Başlık Regresyonlarını Tanılama
+TRANSPARENCY_TAX_TABLE_RATE Oran
 ADMIN_LIMITS_RESET_ERROR Limit sıfırlanırken hata oluştu
 ADMIN_LIMITS_RESET_CATEGORY_ERROR Kategori limitleri sıfırlanırken hata oluştu
-
 WEEKDAY_MONDAY Pazartesi
 WEEKDAY_TUESDAY Salı
 WEEKDAY_WEDNESDAY Çarşamba
@@ -1156,6 +814,1796 @@ WEEKDAY_FRIDAY Cuma
 WEEKDAY_SATURDAY Cumartesi
 WEEKDAY_SUNDAY Pazar
 
+# NEEDS TRANSLATION
+ABOUT_EN_SECTION_ABOUT_PAYCAL About PayCal
+ABOUT_EN_SECTION_ACCESSIBILITY Accessibility
+ABOUT_EN_SECTION_BILLING_SUPPORT Billing and Support
+ABOUT_EN_SECTION_FREE_PREMIUM Free and Premium
+ABOUT_EN_SECTION_KEY_FEATURES Key Features
+ABOUT_EN_SECTION_SECURITY_PRIVACY Security and Privacy
+ABOUT_EN_SECTION_TRANSPARENCY Transparency
+ABOUT_EN_SECTION_WHAT_IT_HELPS_WITH What It Helps With
+ABOUT_EN_SECTION_WHAT_PAYCAL_IS What PayCal Is
+ABOUT_EN_SECTION_WHO_ITS_FOR Who It's For
+ABOUT_EN_TABLE_ARIA_FREE_PREMIUM Free and Premium plan comparison
+ABOUT_EN_TABLE_PLAN Plan
+ABOUT_EN_TABLE_WHAT_YOU_GET What you get
+ABOUT_OVERVIEW_ARIA About overview
+ABOUT_PAGE_DECK What PayCal does, who it is for, and how we try to make payroll tracking easier to understand.
+ABOUT_PAGE_TITLE About PayCal
+ABOUT_US_HTML <em>A</em>bout
+BLOG_HTML <em>B</em>log
+ACCOUNT_HTML <em>A</em>ccount
+ACTION Action
+ADDRESS Address
+ADMIN_AST_CANVAS_ARIA AST Canvas
+ADMIN_AST_CONTROLS_ARIA AST Controls
+ADMIN_AST_DATA_SOURCE Loads graph data from
+ADMIN_AST_FOCUS Focus
+ADMIN_AST_GRAPH_ARIA AST Graph
+ADMIN_AST_GRAPH_DESC Interactive dependency map showing relationships between classes and methods. Use Search plus Focus to jump to a node, click a node to inspect incoming and outgoing edges, and use Reset to clear selection and viewport pan or zoom.
+ADMIN_AST_GRAPH_LOADING AST dependency graph is loading.
+ADMIN_AST_GRAPH_TITLE AST dependency graph visualization
+ADMIN_AST_HEADING AST Dependency Graph
+ADMIN_AST_PAGE_TITLE AST Graph
+ADMIN_AST_SEARCH_PLACEHOLDER class or method
+ADMIN_AST_SELECT_NODE Select a node.
+ADMIN_CONTACT_PIPELINE_HEALTH Contact Pipeline Health
+ADMIN_DASHBOARD_ENGLISH_LANGUAGE_EDITOR English Language Editor
+ADMIN_DASHBOARD_GENERAL_HEALTH_ARIA General Health
+ADMIN_DASHBOARD_GENERAL_HEALTH_SUBTITLE Operational status for support and delivery workflows.
+ADMIN_DASHBOARD_GENERAL_HEALTH_TITLE General Health
+ADMIN_DASHBOARD_GENERATE_TEST_DATA Generate Test Data
+ADMIN_DASHBOARD_INVITE_CODE Invite Code
+ADMIN_DASHBOARD_LANGUAGES Languages
+ADMIN_DASHBOARD_LANGUAGE_EDITOR_ARIA Language Editor
+ADMIN_DASHBOARD_LANGUAGE_TEXTAREA_PLACEHOLDER Language file content will load here...
+ADMIN_DASHBOARD_METRICS_DASHBOARD_BODY View real-time platform health metrics, session analytics, Redis statistics, and business metrics.
+ADMIN_DASHBOARD_METRICS_DASHBOARD_TITLE Metrics Dashboard
+ADMIN_DASHBOARD_ORPHANED_WORK_TEST_BODY Creates 5 orphaned work entries with an invalid site ID to test the recovery workflow on the Sites page.
+ADMIN_DASHBOARD_ORPHANED_WORK_TEST_TITLE Orphaned Work Recovery Test
+ADMIN_DASHBOARD_PLATFORM_METRICS_ARIA Platform Metrics
+ADMIN_DASHBOARD_PLATFORM_METRICS_SUBTITLE Health monitoring and transparency dashboards
+ADMIN_DASHBOARD_REGISTRATION_SETTINGS Registration Settings
+ADMIN_DASHBOARD_SAVE_CHANGES Save Changes
+ADMIN_DASHBOARD_SYSTEM_SETTINGS_ARIA System Settings
+ADMIN_DASHBOARD_TESTING_TOOLS_ARIA Testing Tools
+ADMIN_DASHBOARD_TESTING_TOOLS_SUBTITLE Development and testing utilities (Admin only)
+ADMIN_DASHBOARD_TESTING_TOOLS_TITLE Testing Tools
+ADMIN_DASHBOARD_TRANSPARENCY_PAGE_BODY Public disclosure of all metrics collected, retention policies, and privacy boundaries.
+ADMIN_DASHBOARD_TRANSPARENCY_PAGE_TITLE Transparency Page
+ADMIN_DASHBOARD_USER_MANAGEMENT_ARIA User Management
+ADMIN_DASHBOARD_VIEW_DASHBOARD View Dashboard
+ADMIN_DASHBOARD_VIEW_PUBLIC_PAGE View Public Page
+ADMIN_EDIT_USER_ARIA Edit User
+ADMIN_EDIT_USER_CLOSE_ARIA Close edit user dialog
+ADMIN_EDIT_USER_MODAL_ARIA Edit user account details. Required fields are marked.
+ADMIN_EDIT_USER_MODAL_DESC Update user profile details, role settings, and account status fields before saving.
+ADMIN_EDIT_USER_MODAL_META Edit user meta information
+ADMIN_EDIT_USER_TITLE Edit User
+ADMIN_HTML Ad<em>m</em>in
+ADMIN_LANGUAGE_EDITOR Language Editor
+ADMIN_LAST_SUBMISSION Last submission
+ADMIN_LIMITS_RESET_TO_DEFAULT Reset to default
+ADMIN_METRICS_DASHBOARD_META_DESCRIPTION Real-time monitoring of platform health, capacity, and telemetry.
+ADMIN_METRICS_DASHBOARD_TITLE Platform Metrics Dashboard
+ADMIN_METRICS_DATA_DISTRIBUTION Data Distribution Across Namespaces
+ADMIN_METRICS_DEDICATED_DASHBOARD Dedicated Dashboard
+ADMIN_METRICS_LAST_UPDATED Last updated
+ADMIN_METRICS_NO_HOSTILE_NETBLOCK_ACTIVITY No hostile netblock activity recorded
+ADMIN_METRICS_REALTIME_HEALTH_ANALYTICS Real-time health monitoring and analytics
+ADMIN_METRICS_REDIS_SERVER Redis Server
+ADMIN_METRICS_SESSION_DURATION_DISTRIBUTION Session Duration Distribution
+ADMIN_METRICS_STRIPE_WEBHOOKS_TODAY Stripe Webhooks (Today)
+ADMIN_METRICS_TELEMETRY_EVENTS_TODAY Telemetry Events (Today)
+ADMIN_METRICS_TOP_NETBLOCKS Top 10 Netblocks
+ADMIN_METRICS_UNKNOWN_ERROR Unknown error
+ADMIN_OPEN_DETAILED_HEALTH Open Detailed Health
+ADMIN_OPEN_STRIPE_DASHBOARD Open Stripe Dashboard
+ADMIN_OPEN_STRIPE_EXTERNAL Open Stripe (External)
+ADMIN_PANEL Admin Panel
+ADMIN_REDIS_ACTIVE_ALERTS Active Alerts
+ADMIN_REDIS_ALERTS Redis Alerts
+ADMIN_REDIS_BREAKER Breaker
+ADMIN_REDIS_CONNECTED_CLIENTS Connected Clients
+ADMIN_REDIS_CONTROL_PLANE Control Plane
+ADMIN_REDIS_CPU_SYS CPU Sys
+ADMIN_REDIS_CPU_USER CPU User
+ADMIN_REDIS_DISABLE_FREEZE Disable Freeze
+ADMIN_REDIS_ENABLE_FREEZE Enable Freeze
+ADMIN_REDIS_EVICTED_KEYS Evicted Keys
+ADMIN_REDIS_EVICTION_RATE_MIN Eviction Rate/min
+ADMIN_REDIS_FAILURE_COUNT Failure Count
+ADMIN_REDIS_FREEZE Freeze
+ADMIN_REDIS_MAX_MEMORY Max Memory
+ADMIN_REDIS_MEMORY_PERCENT Memory %
+ADMIN_REDIS_MUTATION_STATE Mutation State
+ADMIN_REDIS_NAMESPACE_CHURN Namespace Churn
+ADMIN_REDIS_NAMESPACE_COUNTS_AND_CHURN Namespace Counts and Churn
+ADMIN_REDIS_OPEN_BREAKER Open Breaker
+ADMIN_REDIS_OPS_PER_SEC Ops/sec
+ADMIN_REDIS_OVERVIEW_TEXT Eviction safety, breaker state, mutation freeze, key churn and namespace quota visibility.
+ADMIN_REDIS_REASON_PLACEHOLDER maintenance, failover drill, incident response
+ADMIN_REDIS_RELIABILITY_DASHBOARD Redis Reliability Dashboard
+ADMIN_REDIS_RELIABILITY_SNAPSHOT Reliability Snapshot
+ADMIN_REDIS_RESET_BREAKER Reset Breaker
+ADMIN_REDIS_RUNTIME Redis Runtime
+ADMIN_REDIS_SUCCESS_COUNT Success Count
+ADMIN_REDIS_TIER0_NAMESPACE_QUOTAS Tier-0 Namespace Quotas
+ADMIN_REDIS_TIER0_QUOTAS Tier-0 Quotas
+ADMIN_REDIS_TIER0_RELIABILITY Redis Tier-0 Reliability
+ADMIN_REDIS_TIER0_RELIABILITY_DASHBOARD Redis Tier-0 Reliability Dashboard
+ADMIN_REDIS_TRAFFIC_AND_CPU Traffic and CPU
+ADMIN_REDIS_USED_MEMORY Used Memory
+ADMIN_STRIPE_30_DAY_TREND 30-Day Trend
+ADMIN_STRIPE_7_DAY_TREND 7-Day Trend
+ADMIN_STRIPE_ADMIN_OVERVIEW Admin Overview
+ADMIN_STRIPE_BACK_TO_ADMIN Back to Admin
+ADMIN_STRIPE_BILLING_DASHBOARD_ARIA Stripe billing dashboard
+ADMIN_STRIPE_DASHBOARD Stripe Dashboard
+ADMIN_STRIPE_DUPLICATES Duplicates
+ADMIN_STRIPE_DUPLICATE_LOWER duplicate
+ADMIN_STRIPE_EMPTY_PAYLOADS Empty Payloads
+ADMIN_STRIPE_MISSING_SIGNATURES Missing Signatures
+ADMIN_STRIPE_OPEN_METRICS Open Metrics
+ADMIN_STRIPE_OPEN_STRIPE_EXTERNAL Open Stripe (External)
+ADMIN_STRIPE_OVERVIEW Stripe Overview
+ADMIN_STRIPE_OVERVIEW_PREFIX Admin-only overview of webhook processing health and event coverage for
+ADMIN_STRIPE_PLATFORM_METRICS Platform Metrics
+ADMIN_STRIPE_PROCESSED Processed
+ADMIN_STRIPE_PROCESSED_LOWER processed
+ADMIN_STRIPE_RAW_TELEMETRY_API Raw Telemetry API
+ADMIN_STRIPE_REJECTED_EVENTS Rejected Events
+ADMIN_STRIPE_REJECTED_LOWER rejected
+ADMIN_STRIPE_SECRET_MISSING Stripe Secret Missing
+ADMIN_STRIPE_TOTAL_PROCESSED Total processed
+ADMIN_STRIPE_VERIFICATION_FAILED Verification Failed
+ADMIN_STRIPE_VERIFICATION_FAILED_LOWER verification failed
+ADMIN_STRIPE_VERIFY_FAIL_LOWER verify fail
+ADMIN_STRIPE_WEBHOOK_EVENT_TYPES Webhook Event Types
+ADMIN_STRIPE_WEBHOOK_SECRET_MISSING Webhook Secret Missing
+ADMIN_SYSTEM_LIMITS_LOAD_ERROR Error loading system limits. Check logs for details.
+ADMIN_TAX_BRACKETS_EDITOR_ARIA Tax Brackets Editor
+ADMIN_TAX_BRACKETS_SELECTIONS_ARIA Tax Brackets Selections
+ADMIN_TAX_COUNTRY_LABEL Country:
+ADMIN_TAX_FEDERAL_ARIA Federal Tax Brackets
+ADMIN_TAX_FEDERAL_TITLE Federal Tax Brackets
+ADMIN_TAX_MAX_INCOME Max Income
+ADMIN_TAX_MIN_INCOME Min Income
+ADMIN_TAX_PROVINCE_LABEL Province/Territory:
+ADMIN_TAX_PROVINCIAL_ARIA Provincial Tax Brackets
+ADMIN_TAX_PROVINCIAL_TITLE_PREFIX Provincial Tax Brackets
+ADMIN_TAX_RATE_PERCENT Tax Rate (%)
+ADMIN_TAX_SAVE_FEDERAL Save Federal Brackets
+ADMIN_TAX_SAVE_PROVINCIAL Save Provincial Brackets
+ADMIN_TEST_CLASSES_TITLE Test Classes
+ADMIN_TEST_CLASS_LIST_ARIA Test Class List
+ADMIN_TEST_COVERAGE Coverage
+ADMIN_TEST_DOWNLOAD_REPORT Download Report
+ADMIN_TEST_IMPLEMENTATION_PROGRESS Implementation Progress
+ADMIN_TEST_METRICS_SUMMARY_ARIA Test Metrics Summary
+ADMIN_TEST_PASS_RATE Pass Rate
+ADMIN_TEST_PHASE_PROGRESS_ARIA Phase Progress
+ADMIN_TEST_RUNNER_ARIA Test Runner
+ADMIN_TEST_RUNNING_TESTS Running tests...
+ADMIN_TEST_RUN_ALL_TESTS Run All Tests
+ADMIN_TEST_RUN_SUITE_SUBTITLE Execute the full PHPUnit test suite and view results
+ADMIN_TEST_RUN_SUITE_TITLE Run Test Suite
+ADMIN_TEST_TOTAL_ASSERTIONS Total Assertions
+ADMIN_TEST_TOTAL_TESTS Total Tests
+ADMIN_TODAY_FAILURES Today's failures
+ADMIN_TODAY_PROCESSED_WEBHOOKS Today's processed webhooks
+ADMIN_TOOLS_ARIA Admin tools
+ADMIN_TOTAL_SUBMISSIONS Total submissions
+ADMIN_TRACKED_EVENT_TYPES_WITH_ACTIVITY Tracked event types with activity
+ADMIN_USER_ACTIVITY User Activity
+ADMIN_USER_ACTIVITY_SECURITY_ARIA User activity and security dashboards
+ADMIN_USER_AUTH_LEVEL Auth Level
+ADMIN_USER_GUEST Guest
+ADMIN_USER_NOTES Notes
+ADMIN_USER_PHONE Phone
+ADMIN_USER_REGISTERED Registered
+ADMIN_USER_SECURITY_DASHBOARD Security Dashboard
+ADMIN_USER_SECURITY_DASHBOARD_ARIA Security dashboard
+ADMIN_USER_SESSION_REGISTRATION_ARIA User session and registration information
+ADMIN_USER_UNKNOWN Unknown
+ADMIN_USER_UNVERIFIED Unverified
+ADMIN_USER_VERIFIED Verified
+ADMIN_VERIFICATION_FAILURES_REJECTED_EVENTS Verification failures / rejected events
+ALT_A <kbd>ALT A</kbd>
+ALT_B <kbd>ALT B</kbd>
+ALT_C <kbd>ALT C</kbd>
+ALT_P <kbd>ALT P</kbd>
+ALT_R <kbd>Alt R</kbd>
+ARCHIVED Archived
+ARROWS Arrows
+AST AST
+AUDIO_INTRO_BTN Audio Introduction
+AUTH_RECOVER_ALREADY_HAVE_PASSKEY Already have a passkey?
+AUTH_RECOVER_BACK_TO_SIGNIN Back to sign in
+AUTH_RECOVER_BACK_TO_SIGNIN_BUTTON Back to signin
+AUTH_RECOVER_CODE_LABEL Recovery code
+AUTH_RECOVER_COMPLETE_HEADING Recovery complete
+AUTH_RECOVER_COMPLETE_MESSAGE Your data remains encrypted and unchanged.
+AUTH_RECOVER_CONTINUE_TO_PAYCAL Continue to PayCal
+AUTH_RECOVER_DEFAULT_DEVICE_NAME Recovered Passkey
+AUTH_RECOVER_HEADING Recover your account
+AUTH_RECOVER_INTRO_LINE_1 We'll help you regain access in three steps.
+AUTH_RECOVER_KEY_LABEL Recovery Key
+AUTH_RECOVER_META_TITLE Recover Account - PayCal
+AUTH_RECOVER_NEW_PASSKEY_NAME New passkey name
+AUTH_RECOVER_REGISTER_NEW_PASSKEY Register new passkey
+AUTH_RECOVER_SEND_CODE Send code
+AUTH_RECOVER_SIGN_IN_INSTEAD Sign in instead
+AUTH_RECOVER_STATUS_MAGIC_LINK Verifying recovery link...
+AUTH_RECOVER_STATUS_START Enter your account email to begin.
+AUTH_RECOVER_STEPS_ARIA_LABEL Recovery steps
+AUTH_RECOVER_STEP_PASSKEY Passkey
+AUTH_RECOVER_STEP_SUCCESS Success
+AUTH_RECOVER_STEP_VERIFY Verify
+AUTH_RECOVER_VERIFIED_REGISTER_PASSKEY Verified. Now register a new passkey for this account.
+AUTH_VERIFICATION_BANNER_ALERT_FAILED Failed to resend verification email. Please try again later.
+AUTH_VERIFICATION_BANNER_BODY Please verify your email address to start using PayCal. Check your inbox for the verification link.
+AUTH_VERIFICATION_BANNER_RESEND_BUTTON Resend Email
+AUTH_VERIFICATION_BANNER_SENDING Sending...
+AUTH_VERIFICATION_BANNER_SEND_FAILED Failed to send email
+AUTH_VERIFICATION_BANNER_SENT Email Sent!
+AUTH_VERIFICATION_BANNER_TITLE Email Verification Required
+AUTH_VERIFICATION_REMINDER_BODY Enter your code to unlock editing and saving. You can still view existing entries.
+AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER Enter verification code
+AUTH_VERIFICATION_REMINDER_RESEND_LINK Resend email
+AUTH_VERIFICATION_REMINDER_TITLE Your account is not verified.
+AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON Verify
+BLOG Blog
+BLOG_PAGE_TITLE PayCal Blog
+CALENDAR_ADJACENT_NO No
+CALENDAR_ADJACENT_YES Yes
+CALENDAR_COL_ADJACENT Adjacent
+CALENDAR_COL_DATE Date
+CALENDAR_COL_ENTRIES Entries
+CALENDAR_COL_TOTAL_HOURS Total Hours
+CALENDAR_DAY_ACTIONS_ARIA Calendar day actions
+CALENDAR_DAY_MENU_ARIA Calendar day menu
+CALENDAR_DAY_NAME_FORMAT_ON Day Name Format
+CALENDAR_GRID_CONTEXT_SUFFIX calendar view. The grid is arranged Sunday through Saturday. Some cells may belong to the previous or next month so the calendar stays aligned, and locked dates remain visible but cannot be edited.
+CALENDAR_GRID_INSTRUCTIONS Use arrow keys to move between days, Enter to open day details, and bracket keys or Page Up and Page Down to change month.
+CALENDAR_MODAL_ADD_ENTRY Add Entry
+CALENDAR_MODAL_DESC Edit or add work entries for the selected day. Use Add Entry to add rows, Save to apply changes, or Close to cancel.
+CALENDAR_MODAL_EMPTY No entries for this date.
+CALENDAR_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960"><path d="M 200 -80 q -33 0 -56.5 -23.5 T 120 -160 v -560 q 0 -33 23.5 -56.5 T 200 -800 h 40 v -40 q 0 -17 11.5 -28.5 T 280 -880 q 17 0 28.5 11.5 T 320 -840 v 40 h 320 v -40 q 0 -17 11.5 -28.5 T 680 -880 q 17 0 28.5 11.5 T 720 -840 v 40 h 40 q 33 0 56.5 23.5 T 840 -720 v 560 q 0 33 -23.5 56.5 T 760 -80 H 200 Z m 0 -80 h 560 v -400 H 200 v 400 Z m 0 -480 h 560 v -80 H 200 v 80 Z m 0 0 v -80 80 Z m 280 240 q -17 0 -28.5 -11.5 T 440 -440 q 0 -17 11.5 -28.5 T 480 -480 q 17 0 28.5 11.5 T 520 -440 q 0 17 -11.5 28.5 T 480 -400 Z m -160 0 q -17 0 -28.5 -11.5 T 280 -440 q 0 -17 11.5 -28.5 T 320 -480 q 17 0 28.5 11.5 T 360 -440 q 0 17 -11.5 28.5 T 320 -400 Z m 320 0 q -17 0 -28.5 -11.5 T 600 -440 q 0 -17 11.5 -28.5 T 640 -480 q 17 0 28.5 11.5 T 680 -440 q 0 17 -11.5 28.5 T 640 -400 Z M 480 -240 q -17 0 -28.5 -11.5 T 440 -280 q 0 -17 11.5 -28.5 T 480 -320 q 17 0 28.5 11.5 T 520 -280 q 0 17 -11.5 28.5 T 480 -240 Z m -160 0 q -17 0 -28.5 -11.5 T 280 -280 q 0 -17 11.5 -28.5 T 320 -320 q 17 0 28.5 11.5 T 360 -280 q 0 17 -11.5 28.5 T 320 -240 Z m 320 0 q -17 0 -28.5 -11.5 T 600 -280 q 0 -17 11.5 -28.5 T 640 -320 q 17 0 28.5 11.5 T 680 -280 q 0 17 -11.5 28.5 T 640 -240 Z"/></svg>
+CALENDAR_YEAR_LABEL Year
+CHOOSE_A_TIMEZONE Choose a timezone
+CLI_NETBLOCK_CGNAT CGNAT
+CLI_NETBLOCK_LOOPBACK Loopback
+CLI_NETBLOCK_PRIVATE_IPV4 Private IPv4
+CLI_NETBLOCK_PUBLIC_IPV4 Public IPv4
+CLI_NETBLOCK_PUBLIC_IPV6 Public IPv6
+CLI_NETBLOCK_UNIQUE_LOCAL_IPV6 Unique Local IPv6
+CLI_NETBLOCK_UNKNOWN Unknown Netblock
+CLI_SCRAPE_ATTEMPT_MESSAGE Thank you for attempting to scrape our website.
+CONFIRM_DELETE Confirm Delete
+CONTACT_CHAR_COUNT {count}/6000
+CONTACT_CONTEXT_HEADER Context
+CONTACT_CONTEXT_INTRO Share system context to help us investigate.
+CONTACT_DECK_INTRO We can help with questions, concerns, or issues. Prefer email?
+CONTACT_DEFAULT_STATUS Send us a message and we will get back to you soon.
+CONTACT_DETAILS_ARIA Message details
+CONTACT_DIAGNOSTICS_INTRO These can be useful.
+CONTACT_DIAGNOSTICS_TITLE Optional Diagnostics
+CONTACT_EMAIL_REPLY_INFO Support replies by email. No live chat.
+CONTACT_ERROR_COOLDOWN_WAIT Please wait %s before sending another message.
+CONTACT_ERROR_CORRECT_FIELDS Please correct the highlighted fields and try again.
+CONTACT_ERROR_EMAIL_INVALID Please enter a valid email address.
+CONTACT_ERROR_EMAIL_REQUIRED Please enter your email address.
+CONTACT_ERROR_FORM_EXPIRED Your form expired. Please try again.
+CONTACT_ERROR_MESSAGE_REQUIRED Please enter a message.
+CONTACT_ERROR_NAME_REQUIRED Please enter your name.
+CONTACT_ERROR_RAPID_SUBMIT Please take a moment to fill out the form. Rapid submissions are not allowed.
+CONTACT_ERROR_REASON_REQUIRED Please select a reason.
+CONTACT_ERROR_SEND_FAILED We could not send your message right now. Please try again shortly.
+CONTACT_ERROR_SUBJECT_REQUIRED Please enter a subject.
+CONTACT_FORM_BASICS_ARIA Contact basics
+CONTACT_FORM_NOTES_ARIA Notes and details
+CONTACT_HELP_INTRO Help us resolve this faster.
+CONTACT_HELP_TITLE Write a useful message
+CONTACT_HTML Co<em>n</em>tact
+CONTACT_PAGE_ARIA Contact support
+CONTACT_REASON Topic
+CONTACT_REASON_ACCOUNT_LABEL Account
+CONTACT_REASON_BUG_LABEL Bug Report
+CONTACT_REASON_FEATURE_LABEL Feature Request
+CONTACT_REASON_GENERAL_LABEL General
+CONTACT_SEND_ANOTHER Send another
+CONTACT_SLA_INTRO Contact support
+CONTACT_SUCCESS_COOLDOWN_MESSAGE Message sent. Thanks for contacting us. You can send another message in %s.
+CONTACT_SUCCESS_TITLE Message sent
+CONTACT_US Contact Us
+CONTINUE Continue
+CPP CPP
+CREATE Create
+CSV CSV
+CUES Cues
+DASHBOARD Dashboard
+DASHBOARD_CLOSE_ARIA Close dashboard
+DASHBOARD_HEARTBEAT_IDLE Heartbeat idle.
+DASHBOARD_LENS_METRICS Lens Metrics
+DASHBOARD_LOADING_BACKEND_METRICS Loading backend metrics...
+DASHBOARD_NO_METRICS_YET No metrics yet. Data appears here after page diagnostics complete.
+DASHBOARD_PHANTOM_WING_METRICS Phantom Wing Metrics
+DASHBOARD_WEB_STATUS Web Status
+DASHBOARD_WEB_STATUS_HEARTBEAT Web Status Heartbeat
+DASHBOARD_SESSION_IDENTITY Session Identity
+DATAGRID_CALENDAR_MONTH_NAVIGATION Calendar month navigation
+DATAGRID_DATA_GRID Data grid
+DATAGRID_NO_ENTRIES_FOUND No entries found.
+DATE_PICKER_ACTIONS_ARIA Date picker actions
+DELETE_KEY <kbd>DELETE</kbd>
+DELETE_ORGANIZATION Delete Organization
+DETAILED_GUIDES Detailed Guides
+EARNINGS_CPP CPP
+EARNINGS_DAILY_EXPORT_FORMATS Daily export formats
+EARNINGS_DAILY_GRID_CONTEXT_FOR Rows are sorted by date and include one line per recorded work day for
+EARNINGS_DAILY_GRID_CONTEXT_SUFFIX Gross and net values are shown after regular, overtime, travel, and living-out totals are calculated.
+EARNINGS_DAILY_GRID_INSTRUCTIONS_FOR Daily earnings grid for
+EARNINGS_DAILY_GRID_INSTRUCTIONS_SUFFIX Column headers describe date, site, hours, gross, and net totals.
+EARNINGS_EI EI
+EARNINGS_HTML Ea<em>r</em>nings
+EARNINGS_LOADING_MONTHLY_SUMMARY Loading monthly summary...
+EARNINGS_LOADING_PAY_PERIODS Loading pay periods...
+EARNINGS_LOADING_YEAR_TO_DATE_SUMMARY Loading year-to-date summary...
+EARNINGS_METRIC Metric
+EARNINGS_MONTH Month
+EARNINGS_MONTHLY_ARIA_PREFIX Monthly earnings
+EARNINGS_MONTHLY_EXPORT_FORMATS Monthly export formats
+EARNINGS_NO_LOGGED_HOURS_IN_YEAR_PAY_PERIODS No logged hours in this year's pay periods.
+EARNINGS_OAS OAS
+EARNINGS_PAY_PERIODS_CAROUSEL_FOR Pay periods carousel for
+EARNINGS_TOTAL_DEDUCTIONS Total Deductions
+EARNINGS_TOTAL_TAX Total Tax
+EARNINGS_TREND Earnings Trend
+EARNINGS_TREND_CHART_DESC Line chart showing gross earnings trend across
+EARNINGS_TREND_CHART_FOR Earnings trend chart for
+EARNINGS_TREND_CHART_LOADING_FOR Earnings trend chart for
+EARNINGS_VALUE Value
+EARNINGS_YEAR_TO_DATE_EXPORT_FORMATS Year-to-date export formats
+EARNINGS_YTD_ARIA_LABEL Year-to-date earnings summary
+EDITING_GRACE_DAYS Editing Grace Period
+EDITING_GRACE_DAYS_1_DAY 1 day grace period
+EDITING_GRACE_DAYS_2_DAYS 2 days grace period
+EDITING_GRACE_DAYS_3_DAYS 3 days grace period
+EDITING_GRACE_DAYS_HELP Prevents editing work entries after the grace period expires
+EDITING_GRACE_DAYS_LOCK_IMMEDIATELY Lock immediately after period ends
+EDITING_GRACE_DAYS_MAX_INFO Current maximum: {max} days
+EI EI
+EMAIL_ACCOUNT_EMAIL_WAS Your account email was
+EMAIL_ACCOUNT_LABEL Account:
+EMAIL_ACCOUNT_PROTECTION_SUFFIX account protection
+EMAIL_ACCOUNT_RECOVERY_CODE_SUBTITLE Use this to continue account recovery
+EMAIL_ACCOUNT_RECOVERY_CODE_TITLE Account Recovery Code
+EMAIL_ACCOUNT_RECOVERY_IGNORE_NOTICE If you did not request account recovery, ignore this message.
+EMAIL_ACCOUNT_SECURITY_SUFFIX account security
+EMAIL_ADDRESS_LOWER email address
+EMAIL_ADDRESS_UPDATED_TITLE Email Address Updated
+EMAIL_AFTER_VERIFY_RECOVERY_KEY_SENT After verification, your recovery key is sent to this email address.
+EMAIL_CHANGE_TIME_LABEL Change time:
+EMAIL_CHOOSE_OPTION_VERIFY_EMAIL Choose one option to verify your email:
+EMAIL_CODE_FOR_YOUR Code for your
+EMAIL_CONFIRM_EMAIL_ADDRESS_TITLE Confirm Your Email Address
+EMAIL_CONFIRM_EMAIL_CHANGE_TITLE Confirm Email Change
+EMAIL_EMAIL_LABEL Email:
+EMAIL_EXPIRES_IN Expires in
+EMAIL_FOR for
+EMAIL_FROM_LABEL From:
+EMAIL_HELLO Hello
+EMAIL_HI Hi
+EMAIL_IF_LOSE_PASSKEYS_AND_KEY_NO_RECOVERY If you lose both your passkeys and this key, your account cannot be recovered.
+EMAIL_IF_NOT_REQUESTED_IGNORE If you did not request this, you can ignore this email.
+EMAIL_IMPORTANT_LABEL Important:
+EMAIL_ISSUED_LABEL Issued:
+EMAIL_LINK_EXPIRES_24_HOURS This link expires in 24 hours.
+EMAIL_MESSAGE_LABEL Message
+EMAIL_MINUTES minutes
+EMAIL_NEW_CONTACT_MESSAGE_TITLE New Contact Message
+EMAIL_OPTION_1_ENTER_CODE Option 1: Enter this code
+EMAIL_OPTION_2_OPEN_LINK Option 2: Open this link
+EMAIL_ORG_ACCESS_INVITE_TITLE Organization Access Invite
+EMAIL_ORG_ACCESS_REQUESTED_TO A user requested access to
+EMAIL_ORG_ACCESS_REQUEST_TITLE Organization Access Request
+EMAIL_ORG_ACCESS_UNKNOWN_NOTICE If this request looks unfamiliar, ignore this email and review organization activity in the audit timeline.
+EMAIL_ORG_INVITED_TO_COLLABORATE_IN invited you to collaborate in
+EMAIL_RECOVERY_KEY_LABEL Recovery Key
+EMAIL_RECOVERY_KEY_NOUN Recovery Key
+EMAIL_REQUESTED_AT_LABEL Requested At:
+EMAIL_REQUESTED_PERMISSION_SCOPES Requested permission scopes:
+EMAIL_REQUESTER_LABEL Requester:
+EMAIL_REQUEST_ID_LABEL Request ID:
+EMAIL_REVIEW_PENDING_REQUESTS_HERE Review and act on pending requests here:
+EMAIL_SECURITY_NOTIFICATION_FROM Security notification from
+EMAIL_SIGNATURE_ORGANIZATION Organization
+EMAIL_SIGNATURE_THE The
+EMAIL_STORE_KEY_SECURE_LOCATION Store this key in a secure location
+EMAIL_SUBJECT Subject
+EMAIL_SUBJECT_LABEL Subject:
+EMAIL_SUBMITTED_FROM Submitted from
+EMAIL_SUPPORT_TOKEN_LABEL Support Token:
+EMAIL_THIS_CODE_EXPIRES_IN This code expires in
+EMAIL_TOPIC_LABEL Topic:
+EMAIL_TO_ACCEPT_INVITE_OPEN To accept this invite, open:
+EMAIL_TRANSACTION_LABEL Transaction:
+EMAIL_UNEXPECTED_INVITE_IGNORE If you were not expecting this invite, you can safely ignore this email.
+EMAIL_USE_CODE_APPROVE_EMAIL_CHANGE use this code to approve the email change request:
+EMAIL_USE_VERIFICATION_CODE_TO_CONTINUE Use this verification code to continue:
+EMAIL_VERIFIED_SAVE_KEY_NOW your email has been verified. Save this key now.
+EMAIL_VERIFY_RECOVERY_EMAIL_TITLE Verify Recovery Email
+EMAIL_VERIFY_RECOVERY_WITH_CODE verify your recovery email using this code:
+EMAIL_VERIFY_YOUR_EMAIL_TITLE Verify Your Email
+EMAIL_WELCOME_TO Welcome to
+EMAIL_YOUR_RECOVERY_KEY_PREFIX Your
+END_KEY <kbd>End</kbd>
+ENTER_KEY <kbd>ENTER</kbd>
+ENTRY_LOCKED This pay period is locked and cannot be edited
+ENTRY_LOCKED_APPROACHING This pay period will lock soon
+ENTRY_LOCKED_GRACE_REMAINING You have {days} day(s) left to edit this period
+ERROR Error
+ERROR_CAL_INVALID_HOURS That hours value isn't valid. Enter a number between 0 and 24.
+ERROR_CAL_NONCE_FETCH Couldn't load the session token. Refresh the page and try again.
+ERROR_CAL_NONCE_PASTE Couldn't prepare the paste. Refresh the page and try again.
+ERROR_CAL_NONCE_SAVE Couldn't prepare the save. Refresh the page and try again.
+ERROR_CAL_PASTE_FAILED Paste failed. Please try again or refresh the page.
+ERROR_CAL_TOTAL_HOURS_EXCEED Total hours cannot exceed 24 in a single day.
+ERROR_SIGNIN_INVALID The email or password you entered doesn't match our records. Double-check and try again, or reset your password if needed.
+ERROR_SIGNIN_MISSING_FIELDS Please enter both your email and password to sign in.
+ERR_ENTRY_LOCKED_DATE Work entry date is locked for editing
+ERR_TIMEZONE_MISMATCH Timezone mismatch between expected and provided values.
+ERR_UNHANDLED_PAY_FREQUENCY Unhandled pay frequency
+ESCAPE_KEY <kbd>ESCAPE</kbd>
+FAQ_A1 Yes. We are currently in the private beta testing phase with a public beta to be launched in 2024. Our goals are grounded in keeping things simple, offering value and above all a solid commitment to keeping your privacy and personal information safe and sound. We follow best practices to the best of our ability, such as responsive design, full accessibility, multi-language and theme support, fast and secure server management and much more.
+FAQ_LAST_UPDATED_DATE November 22nd, 2023
+FOCUS Focus
+FOOTER Footer
+FOOTER_COPYRIGHT © %s PayCal Technologies Inc. All rights reserved.
+FOOTER_TRADEMARK PayCal™ is a trademark of PayCal Technologies Inc. (registration pending).
+FOR for
+FRONT_PAGE_BETA_NOTE We are currently in Closed Beta, but keep an eye out for the opportunity to join our Public Beta soon. We are eager to share this fantastic tool with the world.
+FRONT_PAGE_CARD_1_BODY Ever wondered what your paycheck would look like before it hits your bank account? With PayCal, workers can now see their expected earnings for each pay period, putting financial planning right at your fingertips.
+FRONT_PAGE_CARD_1_TITLE Earnings Transparency
+FRONT_PAGE_CARD_2_BODY Forget the hassle of manual record-keeping. Simply enter your total hours each day, and watch as it seamlessly saves into our secure database. No more endless spreadsheets or paperwork.
+FRONT_PAGE_CARD_2_TITLE Effortless Tracking
+FRONT_PAGE_CARD_3_BODY For employers, our platform is a game-changer. Manage your workforce efficiently and take control of payroll with our powerful tools. Download or extract all the hours data you need, making payroll a breeze.
+FRONT_PAGE_CARD_3_TITLE Empower Personnel
+FRONT_PAGE_CARD_4_BODY Developed by seasoned professionals who understand the modern world, we incorporate the latest technology into an easy-to-use, mobile-friendly, and responsive design. Managing your payroll has never been this sleek and efficient.
+FRONT_PAGE_CARD_4_TITLE Easy to Use
+FRONT_PAGE_CTA_PREFIX Join us in transforming the way you handle payroll the professional, friendly, and future-forward way. Got suggestions or tweaks? We are all ears! Your feedback helps us even more.
+FRONT_PAGE_CTA_SUFFIX today and be a part of the payroll revolution.
+FRONT_PAGE_INTRO We are here to revolutionize the way you track and record worker pay. We believe that modern solutions should be easy to use, professional, and, most importantly, free (with exciting paid options on the horizon).
+FRONT_PAGE_TITLE Your Pay Calendar and Earnings Tracker
+GITHUB GitHub
+GITHUB_HTML <em>G</em>itHub
+GO Go
+HEADER Header
+HELP Help
+HELP_ACCOUNT_AUDIO_FEEDBACK_TEXT Optional audio cues for interactions. Set to Enabled for brief sounds on actions, or Muted for a silent experience. Found in the Audio section of Settings.
+HELP_ACCOUNT_AUDIO_FEEDBACK_TITLE Audio Feedback
+HELP_ACCOUNT_EMERGENCY_SIGNOUT_TEXT Press ESC three times in quick succession to trigger an immediate signout and redirect to a safe page. The response window (0.2 to 2.0 seconds) is adjustable in the Security section. Use this if you are on a shared screen or need to sign out quickly.
+HELP_ACCOUNT_EMERGENCY_SIGNOUT_TITLE Emergency Signout
+HELP_ACCOUNT_LANGUAGE_TEXT Interface text is available in ten languages: Dutch, English, French, German, Hindi, Italian, Portuguese, Spanish, Tagalog, and Turkish. Changing language updates menu labels, buttons, and field text throughout the app.
+HELP_ACCOUNT_LANGUAGE_TITLE Language
+HELP_ACCOUNT_NAV_POSITION_TEXT The primary sidebar can be placed on the Left or Right side of the screen.
+HELP_ACCOUNT_NAV_POSITION_TITLE Sidebar Position
+HELP_ACCOUNT_PASSKEYS_TEXT Passkeys are the primary way to sign in. Each enrolled passkey is tied to a device or credential manager. You can register multiple passkeys to cover different devices. To add one, go to the Passkeys section and click Add Device. Remove passkeys you no longer use.
+HELP_ACCOUNT_PASSKEYS_TITLE Passkeys
+HELP_ACCOUNT_PROFILE_TEXT Your account details live in Settings under the Account section. Email is shown for reference and cannot be changed here. Name, phone number, province, and timezone are set during registration and can be updated by clicking Edit Details.
+HELP_ACCOUNT_PROFILE_TITLE Managing Your Profile
+HELP_ACCOUNT_RECOVERY_KEY_TEXT A Recovery Key lets you regain access to your account if you lose all your passkeys. You can create one in the Account section. Creating a new key disables the previous one. Store it somewhere safe and separate from your devices.
+HELP_ACCOUNT_RECOVERY_KEY_TITLE Recovery Key
+HELP_ACCOUNT_SECURITY_LEVEL_1 Automatic Signout: how long an idle session stays active before you are signed out.
+HELP_ACCOUNT_SECURITY_LEVEL_2 Account Changes: window during which account edits are allowed without re-authentication.
+HELP_ACCOUNT_SECURITY_LEVEL_3 Calendar Editing: window during which calendar entries can be created or changed.
+HELP_ACCOUNT_SECURITY_LEVEL_INTRO The derived timeout values are shown in the table below the slider:
+HELP_ACCOUNT_SECURITY_LEVEL_TEXT The Security Level slider sets session timeout durations. Moving toward High Security shortens sessions, reducing the window of risk on shared or unattended devices. Moving toward Relaxed keeps sessions active longer for convenience.
+HELP_ACCOUNT_SECURITY_LEVEL_TITLE Security Level
+HELP_ACCOUNT_SECURITY_TEXT Security controls are in Settings under the Security and Passkeys sections.
+HELP_ACCOUNT_SECURITY_TITLE Security Settings
+HELP_ACCOUNT_SETTINGS_DECK Manage your profile, preferences, and account settings.
+HELP_ACCOUNT_SETTINGS_TITLE Account & Settings
+HELP_ACCOUNT_STORED_DISPLAYED_1 Email: read-only; registered address used for account notifications.
+HELP_ACCOUNT_STORED_DISPLAYED_2 Full Name: displayed in account areas; not shared outside your account.
+HELP_ACCOUNT_STORED_DISPLAYED_3 Phone: optional, used for identification purposes.
+HELP_ACCOUNT_STORED_DISPLAYED_4 Province: used for provincial tax bracket calculations in earnings estimates.
+HELP_ACCOUNT_STORED_DISPLAYED_5 Timezone: used for calendar and time display across the app.
+HELP_ACCOUNT_STORED_DISPLAYED_TITLE What is stored and displayed
+HELP_ACCOUNT_TEXT_SPACING_1 Text Size: Small, Medium, Large, or X-Large. Use larger sizes if default text feels too small on your screen.
+HELP_ACCOUNT_TEXT_SPACING_2 Spacing: Compact, Comfy, or Spacious. Compact shows more content at once; Spacious adds breathing room between elements.
+HELP_ACCOUNT_TEXT_SPACING_TITLE Text Size and Spacing
+HELP_ACCOUNT_THEMES_TEXT All appearance and interface settings are in Settings under the Style section. Changes apply immediately when saved.
+HELP_ACCOUNT_THEMES_TITLE Changing Themes and Preferences
+HELP_ACCOUNT_THEME_VARIANT_TEXT Choose a visual theme from a grouped set of options including OS-inspired designs (BeOS lineage, Linux families, classic Mac OS, Windows generations) and others. Each theme is available in a Light or Dark variant.
+HELP_ACCOUNT_THEME_VARIANT_TITLE Theme and Variant
+HELP_BREADCRUMB_ARIA Breadcrumb
+HELP_CENTER_DECK Guides for getting started, tracking work, payroll estimates, account settings, troubleshooting, and legal links.
+HELP_CENTER_HEADING PayCal Help Center
+HELP_CENTER_TITLE Help Center
+HELP_DETAILED_GUIDES_CALENDAR_DESC Entering work entries and managing your schedule.
+HELP_DETAILED_GUIDES_EARNINGS_DESC Viewing reports, understanding calculations, and exporting data.
+HELP_DETAILED_GUIDES_INTRO For in-depth help on specific features:
+HELP_DETAILED_GUIDES_SITES_DESC Setting up and configuring work sites.
+HELP_FAQ_INTRO_PREFIX Encountering an issue? Check out some common questions and solutions below. For a more comprehensive list, please visit our dedicated
+HELP_FAQ_INTRO_SUFFIX .
+HELP_FAQ_PAGE_LINK FAQ page
+HELP_FAQ_Q1_MIDDLE Also, confirm your pay period settings are accurate in
+HELP_FAQ_Q1_PREFIX A: Ensure your work site's wage and any allowances are correctly entered in
+HELP_FAQ_Q1_SUFFIX PayCal.app calculates regular and overtime hours based on defined thresholds (e.g., 8 hours daily, 44 hours weekly for regular pay), as per the calculate_hours function and constants.
+HELP_FAQ_Q1_TITLE Q: Why are my hours not calculating correctly?
+HELP_FAQ_Q2_TEXT A: You can reset your password through the sign in page. An email/password reset feature is a high-priority item that has already been completed in the development roadmap.
+HELP_FAQ_Q2_TITLE Q: I forgot my password, how do I reset it?
+HELP_FAQ_Q3_PREFIX A: You can change your email address in
+HELP_FAQ_Q3_SUFFIX The process involves email verification to ensure security, handled by functions like verify_new_user_email.
+HELP_FAQ_Q3_TITLE Q: How do I change my email address?
+HELP_FAQ_Q4_TEXT A: Please ensure you are logged in. If the issue persists, try clearing your browser's cache and cookies or using a different browser. Sometimes, network issues can prevent updates from reaching the server. Check your internet connection. If the problem continues, please contact support.
+HELP_FAQ_Q4_TITLE Q: My changes are not saving. What should I do?
+HELP_FAQ_SETTINGS_ACCOUNT_INFO Settings > Account Information
+HELP_FAQ_SHORT FAQ
+HELP_GETTING_STARTED_CALENDAR_HELP_PAGE Calendar Help Page
+HELP_GETTING_STARTED_CALENDAR_LINK Calendar
+HELP_GETTING_STARTED_DECK Learn the fundamentals of using PayCal.app to track your work and manage your earnings.
+HELP_GETTING_STARTED_EARNINGS_HELP_PAGE Earnings Help Page
+HELP_GETTING_STARTED_INTRO Here’s a quick guide to setting up your PayCal.app account:
+HELP_GETTING_STARTED_OUTRO_PREFIX For detailed earnings reports and calculations, see the
+HELP_GETTING_STARTED_OUTRO_SUFFIX_END or the relevant sections of this Help page.
+HELP_GETTING_STARTED_OUTRO_SUFFIX_PREFIX For more detailed information, explore your
+HELP_GETTING_STARTED_REGISTRATION_PAGE registration page
+HELP_GETTING_STARTED_SETTINGS_LINK Settings
+HELP_GETTING_STARTED_SETTINGS_PAY_PERIOD Settings > Pay Period
+HELP_GETTING_STARTED_SETTINGS_SITES Settings > Sites
+HELP_GETTING_STARTED_SITES_HELP_PAGE Sites Management Help Page
+HELP_GETTING_STARTED_STEP_1_PREFIX Visit the
+HELP_GETTING_STARTED_STEP_1_SUFFIX and sign up with your email.
+HELP_GETTING_STARTED_STEP_1_TITLE Create Your Account:
+HELP_GETTING_STARTED_STEP_2_TEXT Check your inbox for a verification code to activate your account.
+HELP_GETTING_STARTED_STEP_2_TITLE Verify Your Email:
+HELP_GETTING_STARTED_STEP_3_MIDDLE to add details like site name, wage, and any living out or travel allowances. For more on managing sites, see the
+HELP_GETTING_STARTED_STEP_3_PREFIX Go to
+HELP_GETTING_STARTED_STEP_3_TITLE Configure Your First Site:
+HELP_GETTING_STARTED_STEP_4_PREFIX In
+HELP_GETTING_STARTED_STEP_4_SUFFIX define your pay period start date and length (e.g., 7 or 14 days).
+HELP_GETTING_STARTED_STEP_4_TITLE Set Your Pay Period:
+HELP_GETTING_STARTED_STEP_5_MIDDLE and click on any day to log your work hours. For detailed instructions on entering work entries, see the
+HELP_GETTING_STARTED_STEP_5_PREFIX Navigate to the
+HELP_GETTING_STARTED_STEP_5_TITLE Start Tracking:
+HELP_GETTING_STARTED_TITLE Getting Started
+HELP_HOME_LABEL Home
+HELP_HTML <em>H</em>elp
+HELP_INTRO_PRIMARY_EMPHASIS_1 feel effortless
+HELP_INTRO_PRIMARY_EMPHASIS_2 truly respect your time
+HELP_INTRO_PRIMARY_MIDDLE We understand that logging your hours should not feel like a chore, so our platform is designed to strip away clutter, use smart defaults, and
+HELP_INTRO_PRIMARY_PREFIX Our primary goal is to make time entry
+HELP_INTRO_SECONDARY This guide provides an overview of our philosophy, key features, and how you can get the most out of it.
+HELP_KEYBOARD_SHORTCUTS_INTRO Boost your productivity and navigate PayCal.app more efficiently with these handy keyboard shortcuts:
+HELP_LEGAL_ACCESSIBILITY_LINK Read Accessibility Transparency
+HELP_LEGAL_ACCESSIBILITY_TEXT Accessibility goals, current implementation notes, and roadmap updates are published in our Transparency pages.
+HELP_LEGAL_ACCESSIBILITY_TITLE Accessibility
+HELP_LEGAL_DECK View policy and legal information relevant to using PayCal.
+HELP_LEGAL_PRIVACY_1 We collect account info, work records you enter, and technical data needed to keep the service secure.
+HELP_LEGAL_PRIVACY_2 We do not sell your personal information.
+HELP_LEGAL_PRIVACY_3 Session data is protected with authentication controls and TTL-based expiry.
+HELP_LEGAL_PRIVACY_4 You may have rights to access, correct, or request deletion of your information.
+HELP_LEGAL_PRIVACY_LINK Read the full Privacy Policy
+HELP_LEGAL_PRIVACY_TEXT Our Privacy Policy explains what information is collected when you use PayCal, how it is used, how it is protected, and how long it is kept.
+HELP_LEGAL_PRIVACY_TITLE Privacy Policy
+HELP_LEGAL_TERMS_1 Payroll calculations are estimates to help you understand your numbers - not a substitute for professional advice.
+HELP_LEGAL_TERMS_2 You are responsible for the accuracy of the information you enter.
+HELP_LEGAL_TERMS_3 Attempting to bypass, probe, or abuse security controls is prohibited.
+HELP_LEGAL_TERMS_4 Terms are governed by the laws of Alberta and applicable federal laws of Canada.
+HELP_LEGAL_TERMS_LINK Read the full Terms & Conditions
+HELP_LEGAL_TERMS_TEXT The Terms & Conditions of Use Policy covers the basic rules for using PayCal, including what you may and may not do, what we are responsible for, and how disputes are governed.
+HELP_LEGAL_TERMS_TITLE Terms of Service
+HELP_LEGAL_TITLE Policies & Legal
+HELP_LEGAL_TRANSPARENCY_LINK Open the Transparency Hub
+HELP_PAGE_TEASER Check out our <a href/__v20251116__/help/ accesskey'h'><em>H</em>elp Page</a> for videos and more!
+HELP_PAGE_TEASER_HTML Check out our <a href="/__v20251116__/help/" accesskey="h"><em>H</em>elp  Page</a> for videos and more!
+HELP_PAY_PERIODS_CHECK_1 Compare the preview to a real pay stub, company schedule, or previous payroll period.
+HELP_PAY_PERIODS_CHECK_2 Make sure the first labeled day in each period lands on the weekday you expect.
+HELP_PAY_PERIODS_CHECK_3 Make sure the last day of the period lands on the correct end day before you save.
+HELP_PAY_PERIODS_CHECK_TITLE How to check that it is correct
+HELP_PAY_PERIODS_COMMON_MISTAKES_TITLE Common mistakes
+HELP_PAY_PERIODS_COMMON_MISTAKE_1 Entering payday instead of the first workday in the pay period.
+HELP_PAY_PERIODS_COMMON_MISTAKE_2 Choosing the wrong anchor day, which shifts all later period boundaries.
+HELP_PAY_PERIODS_COMMON_MISTAKE_3 Saving before checking the preview labels against a real payroll record.
+HELP_PAY_PERIODS_FIGCAPTION Example: biweekly pay periods anchored to Monday, with the preview showing each period running through Sunday night.
+HELP_PAY_PERIODS_FULL_ALT Pay Period editor with biweekly frequency and Monday anchor day selected.
+HELP_PAY_PERIODS_GATHER_1 The first day of a real pay period from a recent pay stub or employer schedule.
+HELP_PAY_PERIODS_GATHER_2 How often you are paid: weekly, biweekly, semimonthly, or monthly.
+HELP_PAY_PERIODS_GATHER_3 The weekday your pay period starts on. Many field and shift schedules use Monday starts.
+HELP_PAY_PERIODS_GATHER_4 Whether you want a short editing grace period after a period ends.
+HELP_PAY_PERIODS_GATHER_TITLE What to gather before you start
+HELP_PAY_PERIODS_INTRO Your pay period tells PayCal where one block of work ends and the next one begins. Get this right first, because your earnings summaries, pay-period labels, and reports all use it.
+HELP_PAY_PERIODS_POPOVER_ARIA Enlarged pay period setup example
+HELP_PAY_PERIODS_POPOVER_CLOSE_ARIA Close pay period example
+HELP_PAY_PERIODS_POPOVER_OPEN_ARIA Open enlarged pay period setup example
+HELP_PAY_PERIODS_POPOVER_TITLE Pay period example
+HELP_PAY_PERIODS_RECOMMENDED_TEXT If your schedule runs Monday through Sunday night and repeats every two weeks, use a Biweekly pay frequency, choose Monday as the anchor day, and enter a start date that is the Monday when a real pay period began.
+HELP_PAY_PERIODS_RECOMMENDED_TITLE Recommended setup for a typical two-week cycle
+HELP_PAY_PERIODS_STEPS_TITLE Step by step
+HELP_PAY_PERIODS_STEP_1 Open Settings and find the Pay Period section.
+HELP_PAY_PERIODS_STEP_2 Click Edit Pay Period to open the preview editor.
+HELP_PAY_PERIODS_STEP_3 In Pay Period Start, enter the first day of a real pay period. For a Monday to Sunday biweekly cycle, this should be a Monday.
+HELP_PAY_PERIODS_STEP_4 Choose your Pay Frequency. Most workers who are paid every two weeks should pick Biweekly.
+HELP_PAY_PERIODS_STEP_5 Set Pay Anchor Day to the weekday your periods start. Use Monday if your periods begin Monday morning and finish Sunday night.
+HELP_PAY_PERIODS_STEP_6 Pick an Editing Grace Period that matches how long you want recently ended periods to stay editable.
+HELP_PAY_PERIODS_STEP_7 Review the calendar preview. The P1, P2, and later markers should line up with your real schedule before you save.
+HELP_PAY_PERIODS_STEP_8 Click Generate to apply the new pay-period layout.
+HELP_PAY_PERIODS_THUMB_ALT Pay Period editor set to biweekly frequency with Monday anchor day and Monday-to-Sunday period preview.
+HELP_PAY_PERIODS_TITLE Setting up Your Pay Periods
+HELP_PAY_PERIODS_UNSURE_DATE_TEXT Use the first day of the most recent completed pay period you can verify. Avoid using payday itself unless payday is also the first day of the work period, because many employers pay after the period has already ended.
+HELP_PAY_PERIODS_UNSURE_DATE_TITLE If you are not sure which date to use
+HELP_POLICIES_LEGAL_DECK Review the terms of service, privacy policy, and legal notices that govern your use of PayCal.
+HELP_SITES_MANAGEMENT_LINK Sites Management Help
+HELP_TAX_BRACKETS_DECK Federal and provincial bracket references used for payroll estimates.
+HELP_TAX_BRACKETS_DISCLAIMERS_TITLE Disclaimers
+HELP_TAX_BRACKETS_DISCLAIMER_TEXT This is for informational purposes only. Tax brackets change yearly. We follow CRA standards but make no warranties on accuracy. Consult a tax professional. Not liable for decisions based on this info.
+HELP_TAX_BRACKETS_EXAMPLE_FEDERAL Federal: ~$12,000 (mixed brackets)
+HELP_TAX_BRACKETS_EXAMPLE_NET Estimated net: ~$63,000
+HELP_TAX_BRACKETS_EXAMPLE_NOTE (Excludes CPP/EI; actual results vary.)
+HELP_TAX_BRACKETS_EXAMPLE_PROVINCIAL Provincial: ~$5,000
+HELP_TAX_BRACKETS_EXAMPLE_SUBJECT Ontario Developer, $80,000 income:
+HELP_TAX_BRACKETS_EXAMPLE_TITLE Example Calculation
+HELP_TAX_BRACKETS_FEDERAL_CAPTION Federal tax brackets for 2025 with income ranges and rates
+HELP_TAX_BRACKETS_FEDERAL_OVER_246752 Over $246,752
+HELP_TAX_BRACKETS_FEDERAL_TITLE Federal Tax Brackets
+HELP_TAX_BRACKETS_HEADING Canadian Tax Brackets - PayCal.app
+HELP_TAX_BRACKETS_HOW_IT_WORKS_TEXT_1 PayCal.app uses progressive tax brackets from the Canada Revenue Agency (CRA). Income is taxed at increasing rates as earnings rise. We calculate federal taxes plus your province/territory's rates for accurate estimates.
+HELP_TAX_BRACKETS_HOW_IT_WORKS_TEXT_2 Brackets are updated annually for inflation. These are 2025 estimates - always verify with official sources.
+HELP_TAX_BRACKETS_HOW_IT_WORKS_TITLE How It Works
+HELP_TAX_BRACKETS_INCOME_RANGE Income Range
+HELP_TAX_BRACKETS_OFFICIAL_INFO_LINK CRA Tax Brackets
+HELP_TAX_BRACKETS_OFFICIAL_INFO_PREFIX Official CRA info:
+HELP_TAX_BRACKETS_PAGE_TITLE Canadian Tax Brackets Help
+HELP_TAX_BRACKETS_PROVINCIAL_INTRO Tax brackets for each province and territory:
+HELP_TAX_BRACKETS_PROVINCIAL_TITLE Provincial/Territorial Brackets
+HELP_TAX_BRACKETS_TAX_RATE Tax Rate
+HELP_TAX_BRACKETS_TITLE Understanding Canadian Tax Brackets
+HELP_TOC_ACCESSIBILITY_LINK Accessibility Transparency
+HELP_TOC_ACCESSIBILITY_PREFIX For accessibility expectations, supported browser and assistive-technology combinations, and known limitations, see
+HELP_TOC_ACCOUNT_SETTINGS Account & Settings
+HELP_TOC_ARIA Help table of contents
+HELP_TOC_CHANGE_LEDGER Release and platform change ledger
+HELP_TOC_GETTING_STARTED Getting Started
+HELP_TOC_INTRO Use this table of contents to jump to the section you need.
+HELP_TOC_LOG_WORK_HOURS Log Work Hours
+HELP_TOC_POLICIES_LEGAL Policies & Legal
+HELP_TOC_SETUP_WORK_SITE Setup a Work Site
+HELP_TOC_TAX_BRACKETS Canadian Tax Brackets
+HELP_TOC_TRANSPARENCY_HUB_PREFIX For a full overview of PayCal's transparency practices, visit the
+HELP_TOC_TROUBLESHOOTING Troubleshooting
+HELP_TROUBLESHOOTING_ACCOUNT_LOCKED_PREFIX Repeated failed sign-in attempts may trigger a temporary hold on the account. Wait briefly and try again. If the problem continues, contact support at
+HELP_TROUBLESHOOTING_ACCOUNT_LOCKED_TITLE Account appears locked or shows errors
+HELP_TROUBLESHOOTING_CONTACT_EMAIL_LABEL Email:
+HELP_TROUBLESHOOTING_CONTACT_FORM_LABEL Contact form:
+HELP_TROUBLESHOOTING_CONTACT_FORM_LINK paycal.app/contact/
+HELP_TROUBLESHOOTING_CONTACT_NOTE When contacting support, include a description of what you were doing, what you expected to happen, and what happened instead. Screenshots are helpful if there is a visual problem.
+HELP_TROUBLESHOOTING_CONTACT_TEXT If you cannot find an answer in this Help Center or are experiencing a problem not covered here, reach out directly.
+HELP_TROUBLESHOOTING_CONTACT_TITLE Contact Support
+HELP_TROUBLESHOOTING_DECK Find solutions to common account and workflow issues.
+HELP_TROUBLESHOOTING_DOWNLOAD_1 Check your browser's download settings. Some browsers block automatic downloads or redirect them to a download manager.
+HELP_TROUBLESHOOTING_DOWNLOAD_2 Make sure your browser is not blocking pop-ups or file downloads for this site.
+HELP_TROUBLESHOOTING_DOWNLOAD_3 Try a different file format (for example, CSV if PDF is not working).
+HELP_TROUBLESHOOTING_DOWNLOAD_TITLE Download does not start
+HELP_TROUBLESHOOTING_EXPORT_EMPTY_1 Check that there is actual data entered for the year you are trying to export.
+HELP_TROUBLESHOOTING_EXPORT_EMPTY_2 If the file opens in the wrong application, try right-clicking the download and choosing how to open it, or import CSV into a spreadsheet application manually.
+HELP_TROUBLESHOOTING_EXPORT_EMPTY_TITLE Export file is empty or looks wrong
+HELP_TROUBLESHOOTING_EXPORT_PREFIX Work records and earnings data can be exported from the
+HELP_TROUBLESHOOTING_EXPORT_SUFFIX page. Exports are available as CSV, TXT, or PDF files covering daily, monthly, or yearly scopes.
+HELP_TROUBLESHOOTING_EXPORT_TITLE Data Export Problems
+HELP_TROUBLESHOOTING_LOGIN_TEXT PayCal uses passkeys as the primary sign-in method. If sign-in is not working, start with the steps below.
+HELP_TROUBLESHOOTING_LOGIN_TITLE Login Issues
+HELP_TROUBLESHOOTING_PASSKEY_PROMPTS_1 Make sure you are on the same device or credential manager you used when you registered the passkey.
+HELP_TROUBLESHOOTING_PASSKEY_PROMPTS_2 If you transferred devices or changed browsers, you may need to use a passkey registered on the new device, or sign in using a passkey already synced to your credential manager.
+HELP_TROUBLESHOOTING_PASSKEY_PROMPTS_3 Some browsers or OS versions require system-level authentication (fingerprint, PIN, Face ID) to be set up before passkeys work.
+HELP_TROUBLESHOOTING_PASSKEY_PROMPTS_TITLE Passkey prompts not appearing
+HELP_TROUBLESHOOTING_RECOVERY_KEY_PREFIX If you cannot use any registered passkey, use your Recovery Key at sign-in. Recovery Keys can be created in
+HELP_TROUBLESHOOTING_RECOVERY_KEY_SUFFIX under the Account section. If you do not have one, contact support early - it is much harder to recover access after all options are exhausted.
+HELP_TROUBLESHOOTING_RECOVERY_KEY_TITLE Using a Recovery Key
+HELP_TROUBLESHOOTING_STILL_NOT_WORKING_PREFIX If exports consistently fail, try refreshing the Earnings page and retrying. If the issue persists, contact support at
+HELP_TROUBLESHOOTING_STILL_NOT_WORKING_SUFFIX and describe the format and scope you were trying to export.
+HELP_TROUBLESHOOTING_STILL_NOT_WORKING_TITLE Still not working
+HELP_TROUBLESHOOTING_TITLE Troubleshooting
+HELP_VIDEO_LOGGING_FIRST_HOURS_DESC Learn how to quickly log your daily work hours on the calendar.
+HELP_VIDEO_LOGGING_FIRST_HOURS_TITLE Logging Your First Hours
+HELP_VIDEO_MANAGING_MULTIPLE_SITES_DESC Understand how to set up and track work for different sites.
+HELP_VIDEO_MANAGING_MULTIPLE_SITES_TITLE Managing Multiple Sites
+HELP_VIDEO_PLACEHOLDER_1 Placeholder for Video 1 (e.g., YouTube Embed)
+HELP_VIDEO_PLACEHOLDER_2 Placeholder for Video 2 (e.g., YouTube Embed)
+HELP_VIDEO_PLACEHOLDER_3 Placeholder for Video 3 (e.g., YouTube Embed)
+HELP_VIDEO_UNDERSTANDING_EARNINGS_DESC A detailed look at the earnings dashboard and reports.
+HELP_VIDEO_UNDERSTANDING_EARNINGS_TITLE Understanding Your Earnings
+HELP_VIDEO_VIEW_ALL_YOUTUBE View all our tutorials on YouTube
+HELP_WORK_HOURS_DECK Step-by-step guide to entering and validating daily work records.
+HELP_WORK_HOURS_FIGCAPTION Work entry edit dialog: use this window to add entries and save daily hours.
+HELP_WORK_HOURS_FILLING_TITLE Filling Out a Work Entry
+HELP_WORK_HOURS_FULL_ALT Calendar work entry dialog showing editable rows for site and hours.
+HELP_WORK_HOURS_GETTING_STARTED_TITLE Getting Started
+HELP_WORK_HOURS_HOURS_TEXT Enter the total number of hours you worked (regular time). This includes any time you worked at regular pay rates. For example, if you worked 9:00 AM to 5:00 PM with a 1-hour lunch, enter 7.5 hours.
+HELP_WORK_HOURS_HOURS_TITLE Hours
+HELP_WORK_HOURS_LIVING_OUT_TEXT If you received a living-out allowance for this day (common for traveling workers), check this box. Your hourly rate and tax calculations will be adjusted accordingly.
+HELP_WORK_HOURS_LIVING_OUT_TITLE Living Out
+HELP_WORK_HOURS_OT_TEXT If you worked overtime hours, enter them separately here. Overtime is typically any hours beyond 8 hours per day or 40 hours per week, depending on your employment agreement.
+HELP_WORK_HOURS_OT_TITLE Overtime (OT)
+HELP_WORK_HOURS_OVERVIEW_TEXT PayCal.app makes it simple to track the hours you work each day across multiple sites. Whether you work at one location or several, entering your work hours is quick and intuitive. This guide will walk you through everything you need to know.
+HELP_WORK_HOURS_OVERVIEW_TITLE Overview
+HELP_WORK_HOURS_POPOVER_ARIA Enlarged work entry edit dialog
+HELP_WORK_HOURS_POPOVER_CLOSE_ARIA Close work entry example
+HELP_WORK_HOURS_POPOVER_OPEN_ARIA Open enlarged work entry edit dialog
+HELP_WORK_HOURS_POPOVER_TITLE Work entry edit dialog
+HELP_WORK_HOURS_SAVING_TEXT_1 Once you've filled in all the details for your work entries, click the Save button at the bottom of the dialog. PayCal.app will validate your entries and save them immediately.
+HELP_WORK_HOURS_SAVING_TEXT_2 You'll see a confirmation message once your work hours are saved successfully. Your calendar will update to reflect the hours you've logged.
+HELP_WORK_HOURS_SAVING_TITLE Saving Your Work
+HELP_WORK_HOURS_SITE_SELECTION_TEXT Choose the site where you worked from the dropdown menu. This is the first field in each work row. If you only work one site, it will be automatically selected.
+HELP_WORK_HOURS_SITE_SELECTION_TITLE Site Selection
+HELP_WORK_HOURS_START_STEP_1_TEXT Your calendar is the central hub for logging work. Click on any date to begin entering work hours for that day.
+HELP_WORK_HOURS_START_STEP_1_TITLE 1. Open the Calendar
+HELP_WORK_HOURS_START_STEP_2_TEXT Once you've selected a date, you'll see a dialog to enter your work information. Click the Add Work button to add a new work entry for that day.
+HELP_WORK_HOURS_START_STEP_2_TITLE 2. Click Add Work
+HELP_WORK_HOURS_START_STEP_3_TEXT When you click Add Work, a new row will appear in the dialog with empty fields ready for your input.
+HELP_WORK_HOURS_START_STEP_3_TITLE 3. A New Row Appears
+HELP_WORK_HOURS_THUMB_ALT Work entry edit dialog with Add Entry, Save, and Close actions.
+HELP_WORK_HOURS_TIPS_TITLE Tips & Best Practices
+HELP_WORK_HOURS_TIP_1 Enter Hours in Decimal Format: Use decimal points for partial hours. For example, 7.5 for 7.5 hours, or 8.25 for 8 hours 15 minutes.
+HELP_WORK_HOURS_TIP_2 Log as You Go: If you work multiple sites in a single day, add a row for each site. You can track all sites under one calendar date.
+HELP_WORK_HOURS_TIP_3 Double-Check Your Entries: Review your hours before saving, especially if you work irregular shifts. Errors can affect your pay calculations.
+HELP_WORK_HOURS_TIP_4 Remember Special Situations: If you have living-out allowances or travel time that affects your pay, make sure to check those boxes.
+HELP_WORK_HOURS_TIP_5 Use Delete When Needed: If you accidentally enter hours or need to remove a work entry, you can delete that row. Click the delete button (often marked with an X or trash icon) to remove a row before saving.
+HELP_WORK_HOURS_TITLE How to Log Your Work Hours
+HELP_WORK_HOURS_TRAVEL_TEXT If you had to travel to get to your work site, check this box. This may affect your calculations depending on your employment terms.
+HELP_WORK_HOURS_TRAVEL_TITLE Travel
+HELP_WORK_HOURS_TROUBLESHOOTING_TITLE Troubleshooting Work Hours Issues
+HELP_WORK_HOURS_TROUBLE_1_TEXT Check that you've filled in required fields: a site selection and at least one hour value (regular Hours or OT). Make sure your hour entries are valid numbers without letters or symbols.
+HELP_WORK_HOURS_TROUBLE_1_TITLE My Work Won't Save
+HELP_WORK_HOURS_TROUBLE_2_TEXT Simply delete that entry and add it to the correct day. Click the delete button on the row, save, then navigate to the correct date and add the hours there.
+HELP_WORK_HOURS_TROUBLE_2_TITLE I Entered Hours for the Wrong Day
+HELP_WORK_HOURS_TROUBLE_3_TEXT If you deleted a row before clicking Save, you can still undo it, just cancel out of the dialog without saving, and your deleted entry will still be there. If you've already saved, you'll need to re-enter the hours.
+HELP_WORK_HOURS_TROUBLE_3_TITLE I Accidentally Deleted an Entry
+HELP_WORK_HOURS_TROUBLE_4_TEXT Try refreshing the page (Ctrl+R or Cmd+R). If the issue persists, clear your browser's cache and reload.
+HELP_WORK_HOURS_TROUBLE_4_TITLE The Fields Look Jumbled or Misaligned
+HELP_WORK_HOURS_VALIDATION_1 Site Selection Required: You must select a site for each work entry.
+HELP_WORK_HOURS_VALIDATION_2 At Least One Hour Type: Enter hours in either the regular Hours field or the OT field (or both).
+HELP_WORK_HOURS_VALIDATION_3 Valid Numbers: Hours must be valid decimal numbers (for example, 7.5 or 8, but not abc).
+HELP_WORK_HOURS_VALIDATION_4 No Negative Hours: Hours cannot be negative.
+HELP_WORK_HOURS_VALIDATION_INTRO PayCal.app checks your entries to ensure they're valid:
+HELP_WORK_HOURS_VALIDATION_NOTE If your entry won't save, check these rules. PayCal.app will show you which field needs attention.
+HELP_WORK_HOURS_VALIDATION_TITLE Validation Rules
+HELP_WORK_SITE_BEFORE_MOVING_PREFIX Confirm at least one site exists. Then open the calendar and start logging daily entries in
+HELP_WORK_SITE_BEFORE_MOVING_TITLE Before moving to Work Hours
+HELP_WORK_SITE_BEST_PRACTICES_TITLE Best practices
+HELP_WORK_SITE_BEST_PRACTICE_1 Use distinct names if you have multiple crews at similar locations.
+HELP_WORK_SITE_BEST_PRACTICE_2 Keep old sites if you still need historical reporting for past periods.
+HELP_WORK_SITE_BEST_PRACTICE_3 If one site is used most often, keep only the active sites you need to reduce selection mistakes.
+HELP_WORK_SITE_DECK Create one or more work sites before logging hours so entries are categorized correctly.
+HELP_WORK_SITE_FIGCAPTION Create Site dialog: enter site details here before logging work hours.
+HELP_WORK_SITE_FULL_ALT Create Site dialog in the Sites section with core pay and location fields visible.
+HELP_WORK_SITE_POPOVER_ARIA Enlarged Create Site dialog
+HELP_WORK_SITE_POPOVER_CLOSE_ARIA Close Create Site example
+HELP_WORK_SITE_POPOVER_OPEN_ARIA Open enlarged Create Site dialog
+HELP_WORK_SITE_POPOVER_TITLE Setup a Work Site
+HELP_WORK_SITE_STEPS_TITLE Step by step
+HELP_WORK_SITE_STEP_1 Open Sites.
+HELP_WORK_SITE_STEP_2 Click Add Site.
+HELP_WORK_SITE_STEP_3 Enter a clear site name (for example, Plant A - Night Shift or Downtown Project).
+HELP_WORK_SITE_STEP_4 Set the base hourly details used for estimates.
+HELP_WORK_SITE_STEP_5 Save the site, then repeat for each location where you work.
+HELP_WORK_SITE_THUMB_ALT Create Site dialog with fields for site name, wage, living-out allowance, travel rate, and province.
+HELP_WORK_SITE_TITLE Setup a Work Site
+HELP_WORK_SITE_WHY_TEXT Every work-hour row is tied to a site. Setting up sites first keeps your calendar entries organized and improves pay summaries, especially if you split time across multiple locations.
+HELP_WORK_SITE_WHY_TITLE Why this matters
+HOME Home
+HOME_KEY <kbd>Home</kbd>
+I_WORK_DETAILS work details
+KEYBOARD Keyboard
+KEYBOARD_SHORTCUTS_CALENDAR_ARIA Calendar shortcuts
+KEYBOARD_SHORTCUTS_MODAL_ARIA This dialog lists all available keyboard shortcuts for navigation and actions throughout the application. Use this to learn or review shortcut keys for system and calendar features.
+KEYBOARD_SHORTCUTS_MODAL_META Keyboard shortcuts help and reference
+KEYBOARD_SHORTCUTS_OPEN_SHORTCUTS_KEYS_HTML <kbd>Ctrl/Cmd + K</kbd> or <kbd>Alt + Shift + ?</kbd>
+KEYBOARD_SHORTCUTS_SAFEGUARDS_ARIA Shortcut safeguards
+KEYBOARD_SHORTCUTS_SAFEGUARDS_TEXT Single-key page shortcuts are suppressed while typing in inputs and while dialogs are open.
+KEYBOARD_SHORTCUTS_SAFEGUARDS_TITLE Shortcut Safeguards
+KEYBOARD_SHORTCUTS_SYSTEM_ARIA System shortcuts
+KEYBOARD_SHORTCUTS_SYSTEM_TITLE System
+KEYBOARD_SHORTCUTS_TOGGLE_SIDEBAR Toggle Sidebar
+KEYBOARD_SHORTCUTS_TOGGLE_SIDEBAR_ARIA Toggle sidebar with backquote.
+KEYBOARD_SHORTCUTS_TOGGLE_SIDEBAR_LABEL Sidebar Toggle
+LANG Lang
+LOA LOA
+LOADING Loading...
+MACOS Mac OS
+MAIN_CONTENT Main content
+MAKE_ACTIVE Make Active
+MAKE_INACTIVE Make Inactive
+MAX Max
+METRICS Metrics
+MIN Min
+MODAL_HEADER Modal Header
+MODAL_MESSAGE Modal Message
+MODAL_TITLE Modal Title
+MON Mon
+MONEY_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 860 860"><path d="M 481 -120 q -17 0 -28.5 -11.5 T 441 -160 v -46 q -45 -10 -79 -35 t -55 -70 q -7 -14 -0.5 -29.5 T 330 -363 q 14 -6 29 0.5 t 23 21.5 q 17 30 43 45.5 t 64 15.5 q 41 0 69.5 -18.5 T 587 -356 q 0 -35 -22 -55.5 T 463 -458 q -86 -27 -118 -64.5 T 313 -614 q 0 -65 42 -101 t 86 -41 v -44 q 0 -17 11.5 -28.5 T 481 -840 q 17 0 28.5 11.5 T 521 -800 v 44 q 38 6 66 24.5 t 46 45.5 q 9 13 3.5 29 T 614 -634 q -14 6 -29 0.5 T 557 -653 q -13 -14 -30.5 -21.5 T 483 -682 q -44 0 -67 19.5 T 393 -614 q 0 33 30 52 t 104 40 q 69 20 104.5 63.5 T 667 -358 q 0 71 -42 108 t -104 46 v 44 q 0 17 -11.5 28.5 T 481 -120 Z"/></svg>
+MONTHLY Monthly
+MONTHLY_DETAILS Monthly Details
+MONTHS_LOWER months
+MORE More
+NAME Name
+NARROW Narrow
+NAVIGATE Navigate
+NAVIGATE_WITH Navigate with TAB or Arrow Keys
+NAV_BAR Nav Bar
+NEED_TO_ENABLE_JAVASCRIPT You need to enable JavaScript to run this application.
+NET Net
+NEVER Never
+NEW_EMAIL New Email
+NEW_PASSWORD New Password
+NEXT Next
+NEXT_PREV_CALENDAR_MONTH Next/Previous Month
+NEXT_PREV_PAGEKEYS <kbd>PGDN or PGUP</kbd>
+NEXT_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -900 600 600"><path d="M 504 -480 L 348 -636 q -11 -11 -11 -28 t 11 -28 q 11 -11 28 -11 t 28 11 l 184 184 q 6 6 8.5 13 t 2.5 15 q 0 8 -2.5 15 t -8.5 13 L 404 -268 q -11 11 -28 11 t -28 -11 q -11 -11 -11 -28 t 11 -28 l 156 -156 Z"/></svg>
+NONE None
+NOT_FOUND Not Found
+NOT_FOUND_404_BODY The requested page was not found.
+NOT_FOUND_404_TITLE 404 Not Found
+NUMBER Number
+NUMBERED <kbd>ALT 1-9</kbd>
+OAS OAS
+OPEN Open
+OPENED_DIALOG Opened dialog
+OPEN_ABOUT Open About
+OPEN_ABOUT_WITH Open About with ALT B
+OPEN_CALENDAR Open Calendar
+OPEN_CALENDAR_WITH Open Calendar with ALT C
+OPEN_DATE_PICKER Open Date Picker
+OPEN_DIALOG Open Dialog
+OPEN_DIALOG_WITH Open Dialog With ENTER
+OPEN_EARNINGS Open Earnings
+OPEN_EARNINGS_WITH Open Earnings with ALT R
+OPEN_NUMBERED_TAB Open Numbered Tab
+OPEN_POLICIES Open Policies
+OPEN_POLICIES_WITH Open Policies with ALT P
+OPEN_SETTINGS Open Settings
+OPEN_SETTINGS_WITH Open Settings  with ALT A
+OPEN_SHORTCUTS Open Shortcuts
+OPTIONAL_PHONE Optional phone number
+ORGANIZATIONS Organizations
+ORGANIZATIONS_ACCESS_REQUEST_ACTION_FAILED Unable to update access request right now.
+ORGANIZATIONS_ACCESS_REQUEST_APPROVED Access request approved.
+ORGANIZATIONS_ACCESS_REQUEST_REJECTED Access request rejected.
+ORGANIZATIONS_ACCESS_REQUEST_SUBMITTED_FOR Access request submitted for %s.
+ORGANIZATIONS_ACCESS_REQUEST_SUBMITTED_TO Access request submitted to %s.
+ORGANIZATIONS_ACCESS_REVOKED_STATUS Access revoked. This profile no longer has the organization relationship.
+ORGANIZATIONS_ACCESS_SCOPES_LABEL Access Scopes
+ORGANIZATIONS_ADDRESS_CITY City
+ORGANIZATIONS_ADDRESS_CITY_PLACEHOLDER Calgary
+ORGANIZATIONS_ADDRESS_COUNTRY Country
+ORGANIZATIONS_ADDRESS_COUNTRY_PLACEHOLDER Canada
+ORGANIZATIONS_ADDRESS_LINE_1 Address Line 1
+ORGANIZATIONS_ADDRESS_LINE_1_PLACEHOLDER 100 Main St
+ORGANIZATIONS_ADDRESS_LINE_2 Address Line 2
+ORGANIZATIONS_ADDRESS_LINE_2_PLACEHOLDER Suite / Floor
+ORGANIZATIONS_ADDRESS_POSTAL Postal / ZIP
+ORGANIZATIONS_ADDRESS_POSTAL_PLACEHOLDER T2P 1J9
+ORGANIZATIONS_ADDRESS_REGION Region
+ORGANIZATIONS_ADDRESS_REGION_PLACEHOLDER Alberta
+ORGANIZATIONS_ADD_CONTACT_CARD_BTN Add Contact Card
+ORGANIZATIONS_ALLOWED_CONTACT_DOMAINS Allowed Contact Domains
+ORGANIZATIONS_ALLOWED_CONTACT_DOMAINS_PLACEHOLDER example.com, payroll.example.com
+ORGANIZATIONS_AUDIT_ACTOR actor
+ORGANIZATIONS_AUDIT_ARIA Organization audit timeline
+ORGANIZATIONS_AUDIT_CONTROL_TEST_H3 Audit Control Test
+ORGANIZATIONS_AUDIT_EVENT event
+ORGANIZATIONS_AUDIT_SR Organization audit timeline. Each row includes time, event type, actor, and details.
+ORGANIZATIONS_AUDIT_TIMELINE Audit Timeline
+ORGANIZATIONS_AUTO_SAVE_DETAILS Organization details auto-saved.
+ORGANIZATIONS_BROWSER_HELP Find organizations by owner email or name, then connect in one click.
+ORGANIZATIONS_BROWSER_MIN_CHARS Type at least 2 characters to search organizations.
+ORGANIZATIONS_BROWSER_NO_MATCHES No organizations matched your search.
+ORGANIZATIONS_BROWSER_PANEL_HELP Search organizations and connect quickly from one place.
+ORGANIZATIONS_BROWSER_RECENT Recent
+ORGANIZATIONS_BROWSER_RECENT_ARIA Recently discovered organizations
+ORGANIZATIONS_BROWSER_RECENT_EMPTY Loading latest organizations...
+ORGANIZATIONS_BROWSER_RECENT_PLACEHOLDER Recent organizations will appear here.
+ORGANIZATIONS_BROWSER_RESULTS_ARIA Organization browser results
+ORGANIZATIONS_BROWSER_SEARCH_ARIA Search organizations by name or owner email
+ORGANIZATIONS_BROWSER_SEARCH_EMPTY Search to discover organizations.
+ORGANIZATIONS_BROWSER_SEARCH_PLACEHOLDER Search organization or owner email
+ORGANIZATIONS_BROWSER_SEARCH_RESULTS Search Results
+ORGANIZATIONS_BROWSER_SELECT_VALID_CONTACT Select a valid organization contact before connecting.
+ORGANIZATIONS_BROWSER_SR Organization browser results grid. Search organizations and activate connect to send an access request.
+ORGANIZATIONS_BROWSER_TITLE Organization Browser
+ORGANIZATIONS_CARDS_ARIA Organization cards
+ORGANIZATIONS_CONTACT_ACTIONS_ARIA Contact actions
+ORGANIZATIONS_CONTACT_CARD_SAVED Contact card saved.
+ORGANIZATIONS_CONTACT_DIRECTORY_H3 Contact Directory
+ORGANIZATIONS_CONTACT_EMAIL Contact Email
+ORGANIZATIONS_CONTACT_EMAIL_PLACEHOLDER ops@organization.com
+ORGANIZATIONS_CONTACT_IMAGE_ALT Contact image
+ORGANIZATIONS_CONTACT_IMAGE_DROP Drop image here or click to choose
+ORGANIZATIONS_CONTACT_IMAGE_DROP_ARIA Drop an image or choose file
+ORGANIZATIONS_CONTACT_IMAGE_POPOVER_ARIA Update contact image
+ORGANIZATIONS_CONTACT_IMAGE_POPOVER_TITLE Upload or Replace Contact Image
+ORGANIZATIONS_CONTACT_IMAGE_REMOVE Remove Image
+ORGANIZATIONS_CONTACT_IMAGE_SAVED Contact image saved.
+ORGANIZATIONS_CONTACT_PHONE Contact Phone
+ORGANIZATIONS_CONTACT_PHONE_PLACEHOLDER (123) 456-7890
+ORGANIZATIONS_CONTACT_ROLE_PH Role / Title
+ORGANIZATIONS_CREATE Create Organization
+ORGANIZATIONS_CREATED Organization created.
+ORGANIZATIONS_CREATE_ARIA Create a new organization for collaboration and member payroll management.
+ORGANIZATIONS_CREATE_HELP After creating, manage invites, scopes, defaults, and ownership from Settings.
+ORGANIZATIONS_CREATE_NAME_PLACEHOLDER Organization Name
+ORGANIZATIONS_CREATE_ORG Create Organization
+ORGANIZATIONS_CURRENCY Currency
+ORGANIZATIONS_CURRENT_DETAILS_ARIA Review the organization relationship, contact details, and what access this profile currently has.
+ORGANIZATIONS_CURRENT_DETAILS_TITLE Current Organization Details
+ORGANIZATIONS_CURRENT_ORG_ACCESS_HELP This access allows the organization to use your assigned role and permissions to view and collaborate on your work data.
+ORGANIZATIONS_CURRENT_ORG_CALLOUT Checking your current organization relationship...
+ORGANIZATIONS_CURRENT_ORG_REVOKE_HELP Revoking access will remove your profile from the organization, stop all shared access, and may require a new request to restore access later.
+ORGANIZATIONS_CURRENT_ORG_TITLE Current Organization
+ORGANIZATIONS_CURRENT_PANEL_HELP Your current shared organization relationship and access status.
+ORGANIZATIONS_DANGER_ZONE DANGER ZONE
+ORGANIZATIONS_DEFAULTS Organization Defaults
+ORGANIZATIONS_DEFAULTS_SAVED Organization defaults saved.
+ORGANIZATIONS_DEFAULT_PAY_ANCHOR Monday
+ORGANIZATIONS_DEFAULT_WAGE Default Wage
+ORGANIZATIONS_DEFAULT_WAGE_PLACEHOLDER 32.00
+ORGANIZATIONS_DEFINITIONS_ARIA These Are The Values Shown In The Organization Details Dialog For Type, Role, And Status.
+ORGANIZATIONS_DEFINITIONS_TITLE Organization Field Definitions
+ORGANIZATIONS_DEFINITION_TYPE Type
+ORGANIZATIONS_DEF_ROLE_CONTRIBUTOR_DD Can Add And Update Organization Work Data.
+ORGANIZATIONS_DEF_ROLE_COORDINATOR_DD Operational Manager With Elevated Collaboration Permissions.
+ORGANIZATIONS_DEF_ROLE_DELEGATE_DD Invited Collaborator With Member Access.
+ORGANIZATIONS_DEF_ROLE_MEMBER_DD Self-Scoped Work Access.
+ORGANIZATIONS_DEF_ROLE_OWNER_DD Full Organization Control, Including Ownership Transfer.
+ORGANIZATIONS_DEF_ROLE_VIEWER_DD Read-Only Access.
+ORGANIZATIONS_DEF_STATUS_ACTIVE_DD Currently Active And Usable.
+ORGANIZATIONS_DEF_STATUS_PENDING_DD Awaiting Acceptance Or Approval.
+ORGANIZATIONS_DEF_TYPE_PERSONAL_DD Your Profile-Level Organization For Personal Work/Pay Settings.
+ORGANIZATIONS_DEF_TYPE_SHARED_DD A Collaborative Organization With Members, Invites, And Ownership Controls.
+ORGANIZATIONS_DELEGATE_HELP Share work data with an organization.
+ORGANIZATIONS_DELEGATE_INVITE_NEEDS_PERSONAL_ORG Profile organization record not found. Refresh and try again.
+ORGANIZATIONS_DELEGATE_INVITE_SENT Member invite sent from your profile.
+ORGANIZATIONS_DELEGATE_PANEL_HELP Grant someone access to collaborate on linked organizations and work entries.
+ORGANIZATIONS_DELEGATE_PLACEHOLDER Member email or organization name
+ORGANIZATIONS_DELEGATE_TITLE Member
+ORGANIZATIONS_MEMBER_HELP Share work data with an organization.
+ORGANIZATIONS_MEMBER_INVITE_NEEDS_PERSONAL_ORG Profile organization record not found. Refresh and try again.
+ORGANIZATIONS_MEMBER_INVITE_SENT Member invite sent from your profile.
+ORGANIZATIONS_MEMBER_PANEL_HELP Grant someone access to collaborate on linked organizations and work entries.
+ORGANIZATIONS_MEMBER_PLACEHOLDER Member email or organization name
+ORGANIZATIONS_MEMBER_TITLE Member
+ORGANIZATIONS_DISCOVERY Discovery
+ORGANIZATIONS_DISCOVERY_COMPLETE Organization discovery completed.
+ORGANIZATIONS_DISCOVERY_HELP Find sites that can be linked to the selected organization.
+ORGANIZATIONS_DISCOVERY_RESULTS_ARIA Organization discovery results
+ORGANIZATIONS_DISCOVERY_RUNNING Running discovery...
+ORGANIZATIONS_DISCOVERY_SR Discovery results list. Review suggestions and use link actions to attach sites to the selected organization.
+ORGANIZATIONS_DISCOVERY_UNAVAILABLE Discovery can still be run, but linking actions require organization management access.
+ORGANIZATIONS_EDITOR_ARIA Edit organization details, pay period settings, and member invites for the selected organization.
+ORGANIZATIONS_EDITOR_DETAILS_H3 Organization Details
+ORGANIZATIONS_EDITOR_DETAILS_NOTICE Discovery notice: all organization profile fields in this section are publicly discoverable except Notes and pay configuration fields (default wage, pay period frequency, pay period start, pay period length, and grace days).
+ORGANIZATIONS_EMPLOYEES_UNAVAILABLE Employees unavailable
+ORGANIZATIONS_EMPLOYEE_COUNT Employee Count
+ORGANIZATIONS_EMPLOYEE_COUNT_PLACEHOLDER e.g. 75
+ORGANIZATIONS_ENFORCE_CONTACT_DOMAIN Enforce Contact Domain
+ORGANIZATIONS_ENFORCE_CONTACT_DOMAIN_TEXT Require organization contact emails to match allowed/business domains.
+ORGANIZATIONS_ENTER_INVITE_EMAIL Enter an invite email.
+ORGANIZATIONS_EVENT_LOG_HELP Events include all activity tied to your profile.
+ORGANIZATIONS_EVENT_LOG_TITLE Event Log
+ORGANIZATIONS_FOUNDED_YEAR Founded Year
+ORGANIZATIONS_FOUNDED_YEAR_PLACEHOLDER e.g. 2016
+ORGANIZATIONS_FREE_AUDIT_ARIA My organization audit timeline
+ORGANIZATIONS_FREE_AUDIT_EMPTY No audit events found for this profile yet.
+ORGANIZATIONS_FREE_AUDIT_PANEL_HELP Audit events related to your profile in the current organization.
+ORGANIZATIONS_FREE_AUDIT_SR Audit timeline related to your current profile. Each row includes time, event type, actor, and details.
+ORGANIZATIONS_FREE_INTRO_HELP Search for organizations to connect with, or review your current membership below. Creating and managing organizations requires Premium.
+ORGANIZATIONS_FREE_INTRO_PANEL_HELP Organization discovery and membership overview.
+ORGANIZATIONS_FREE_INTRO_TITLE Find Your Organization
+ORGANIZATIONS_GRID_ARIA Organizations results
+ORGANIZATIONS_GRID_PANEL_HELP Browse and filter your organizations. Select a row to open organization details.
+ORGANIZATIONS_GRID_PLACEHOLDER Your organizations will appear here.
+ORGANIZATIONS_GRID_SR_CONTEXT Rows include organization name, type, role, and status. Click to open organization editor.
+ORGANIZATIONS_GRID_SR_INSTRUCTIONS Organizations grid. Use search to filter organizations and click a row to view details.
+ORGANIZATIONS_HEADER_PANEL_HELP Manage organizations and create a new organization from this header panel.
+ORGANIZATIONS_HIERARCHY_CONSEQUENCES_TITLE Consequences
+ORGANIZATIONS_HIERARCHY_OWNERSHIP_TITLE Ownership
+ORGANIZATIONS_HIERARCHY_PERMISSIONS_TITLE Permissions and Scope
+ORGANIZATIONS_HIERARCHY_ROLES_TITLE Roles
+ORGANIZATIONS_HIERARCHY_TITLE Hierarchy, Permissions, and Consequences
+ORGANIZATIONS_HTML <em>O</em>rganizations
+ORGANIZATIONS_HUB_CALLOUT_FREE Find and connect with an organization, or view your current membership.
+ORGANIZATIONS_HUB_CALLOUT_PREMIUM If you need to connect with another organization or share your own personal work data, you can do that too!
+ORGANIZATIONS_HUB_PANEL_HELP Access request and member-access tools for collaborating across organizations.
+ORGANIZATIONS_IMPORT_BTN_COMMIT 3. Send Invites
+ORGANIZATIONS_IMPORT_BTN_PARSE 1. Parse Import
+ORGANIZATIONS_IMPORT_BTN_SEND_CODE 2. Send Code
+ORGANIZATIONS_IMPORT_BTN_VERIFY 2. Verify Code
+ORGANIZATIONS_IMPORT_EMAILS_LABEL Email Addresses
+ORGANIZATIONS_IMPORT_EMAILS_PLACEHOLDER teammate1@example.com&#10;teammate2@example.com
+ORGANIZATIONS_IMPORT_H4 Mass Invite Import
+ORGANIZATIONS_IMPORT_HELP Paste emails separated by commas, spaces, or new lines. Only emails on the verified admin/owner domain are accepted.
+ORGANIZATIONS_IMPORT_INPUT_ARIA Import input
+ORGANIZATIONS_IMPORT_OUTPUT_ARIA Import output
+ORGANIZATIONS_IMPORT_OUTPUT_H5 Import Output
+ORGANIZATIONS_IMPORT_STEP_IMPORT 3 Import
+ORGANIZATIONS_IMPORT_STEP_PARSE 1 Parse
+ORGANIZATIONS_IMPORT_STEP_VERIFY 2 Verify
+ORGANIZATIONS_IMPORT_SUMMARY_ARIA Bulk import summary
+ORGANIZATIONS_IMPORT_WORKFLOW_ARIA Mass invite import workflow
+ORGANIZATIONS_INDUSTRY Industry
+ORGANIZATIONS_INDUSTRY_PLACEHOLDER Staffing, Construction, Retail...
+ORGANIZATIONS_INDUSTRY_UNAVAILABLE Industry unavailable
+ORGANIZATIONS_INTRO Organizations connect sites and member access while keeping work entries user-owned.
+ORGANIZATIONS_INVITES_HISTORY_ARIA Invite and access request history
+ORGANIZATIONS_INVITES_HISTORY_H4 Invite &amp; Access History
+ORGANIZATIONS_INVITES_HISTORY_LOADING Loading history...
+ORGANIZATIONS_INVITES_LOADING Loading invites...
+ORGANIZATIONS_INVITES_PENDING_ARIA Sent and pending invites
+ORGANIZATIONS_INVITES_PENDING_H4 Sent / Pending Invites
+ORGANIZATIONS_INVITE_ACCEPTED Organization invite accepted.
+ORGANIZATIONS_INVITE_ACCEPT_FAILED Unable to accept organization invite right now.
+ORGANIZATIONS_INVITE_DELEGATES Invite Members
+ORGANIZATIONS_INVITE_EMAIL_LABEL Invite Email Address
+ORGANIZATIONS_INVITE_EMAIL_PLACEHOLDER colleague@example.com
+ORGANIZATIONS_INVITE_PLACEHOLDER member@example.com
+ORGANIZATIONS_INVITE_REVOKED Invite revoked.
+ORGANIZATIONS_INVITE_SENT Organization invite sent.
+ORGANIZATIONS_LEAVE_SELECTED Leave Selected Organization
+ORGANIZATIONS_LEGAL_NAME Legal Name
+ORGANIZATIONS_LEGAL_NAME_PLACEHOLDER Acme Payroll Services LLC
+ORGANIZATIONS_LINK_SITE Link Site
+ORGANIZATIONS_LIVE_REQUESTS_ARIA Live pending access requests
+ORGANIZATIONS_LIVE_REQUESTS_PANEL_HELP Live pending access requests across organizations you can manage.
+ORGANIZATIONS_LIVE_REQUESTS_SR Live pending access requests for organizations you can manage. Use approve or reject to process requests.
+ORGANIZATIONS_LIVE_REQUESTS_TITLE Live Requests
+ORGANIZATIONS_LOADING Loading organizations...
+ORGANIZATIONS_LOADING_DETAILS Loading organization details...
+ORGANIZATIONS_LOAD_ORGS_FAILED Unable to load organizations right now.
+ORGANIZATIONS_LOCATION_UNAVAILABLE Location unavailable
+ORGANIZATIONS_MANAGE_ACCESS_UNAVAILABLE Invite and ownership actions require organization management access.
+ORGANIZATIONS_MEMBER_ACCESS_MANAGE_DENIED Your current role cannot manage invites, member access, or role changes. Ask an organization owner/coordinator.
+ORGANIZATIONS_MEMBERS_FILTER_ALL All Roles
+ORGANIZATIONS_MEMBERS_FILTER_ARIA Filter by role
+ORGANIZATIONS_MEMBERS_GRID_ARIA Organization members results
+ORGANIZATIONS_MEMBERS_GRID_CONTEXT Rows include name, email, role, status, and actions.
+ORGANIZATIONS_MEMBERS_GRID_SR Organization members grid. Use search to filter, sortable headers to order, and action buttons to change role or revoke.
+ORGANIZATIONS_MEMBERS_H3 Organization Members
+ORGANIZATIONS_MEMBERS_REQUESTS_ARIA Pending access requests
+ORGANIZATIONS_MEMBERS_REQUESTS_H3 Pending Access Requests
+ORGANIZATIONS_MEMBERS_REQUESTS_SR Pending member access requests for this organization. Use approve or reject to manage.
+ORGANIZATIONS_MEMBERS_ROLE_CONTRIBUTOR Contributor
+ORGANIZATIONS_MEMBERS_ROLE_COORDINATOR Manager
+ORGANIZATIONS_MEMBERS_ROLE_DELEGATE Member
+ORGANIZATIONS_MEMBERS_ROLE_OWNER Owner
+ORGANIZATIONS_MEMBERS_ROLE_VIEWER Viewer
+ORGANIZATIONS_NAME Organization Name
+ORGANIZATIONS_NAME_MIN Organization name must be at least 2 characters.
+ORGANIZATIONS_NONE No organizations yet. Create your first organization to get started.
+ORGANIZATIONS_NO_ACCESS_REQUESTS No access requests yet.
+ORGANIZATIONS_NO_AUDIT No audit events yet.
+ORGANIZATIONS_NO_CURRENT_RELATIONSHIP No current organization relationship found.
+ORGANIZATIONS_NO_CURRENT_SELECTED_AUDIT No current organization selected for profile audit timeline.
+ORGANIZATIONS_NO_DISCOVERY No discovery candidates found.
+ORGANIZATIONS_NO_EMAIL_AVAILABLE No email available
+ORGANIZATIONS_NO_INVITES No invites for this organization.
+ORGANIZATIONS_NO_PENDING_REQUESTS No pending access requests.
+ORGANIZATIONS_NO_RELATIONSHIPS No members available for ownership transfer.
+ORGANIZATIONS_OPEN_DEFINITIONS_BTN Open organization field definitions
+ORGANIZATIONS_OPEN_FULL Open Full Org Controls
+ORGANIZATIONS_ORG_NOTES Organization Notes
+ORGANIZATIONS_ORG_NOTES_PLACEHOLDER Internal details, onboarding notes, policies, etc.
+ORGANIZATIONS_OWNERSHIP_TRANSFER Ownership Transfer
+ORGANIZATIONS_OWNERSHIP_TRANSFERRED Ownership transferred.
+ORGANIZATIONS_OWNER_EMAIL_LABEL Owner Email
+ORGANIZATIONS_OWNER_NAME_LABEL Owner Name
+ORGANIZATIONS_PAY_PERIOD_LENGTH Pay Period Length
+ORGANIZATIONS_PENDING pending
+ORGANIZATIONS_PENDING_INVITES Pending Invites
+ORGANIZATIONS_PP_PREVIEW_ARIA Upcoming pay periods
+ORGANIZATIONS_PP_SR Upcoming pay periods grid. Adjust controls above to update the schedule preview.
+ORGANIZATIONS_PP_TITLE Pay Period
+ORGANIZATIONS_PREMIUM_ADMIN_LOCKED Premium is required to manage shared organizations you do not own.
+ORGANIZATIONS_PREMIUM_ADMIN_LOCKED_DETAILED Upgrade to Premium to manage shared organizations where you are not the owner. Organization owners and elevated staff can continue without Premium.
+ORGANIZATIONS_PREMIUM_NOTICE_SELECT Select an organization to manage invites, discovery, and ownership controls.
+ORGANIZATIONS_PREMIUM_NOTICE_SELF_SELECTED Self organization selected.
+ORGANIZATIONS_PREMIUM_NOTICE_SHARED_SELECTED Shared organization selected.
+ORGANIZATIONS_PREVIEW_EMPTY Choose a start date to preview the next two pay periods.
+ORGANIZATIONS_PREVIEW_LABEL Next periods
+ORGANIZATIONS_REG_NUMBER Registration #
+ORGANIZATIONS_REG_NUMBER_PLACEHOLDER Company registration number
+ORGANIZATIONS_RELATIONSHIP_STATUS_LABEL Relationship Status
+ORGANIZATIONS_RELOAD_MEMBERS Reload Members
+ORGANIZATIONS_RELOAD_TIMELINE Reload Timeline
+ORGANIZATIONS_REMOVE_CONFIRM_PREFIX Remove organization
+ORGANIZATIONS_REMOVE_CONFIRM_SUFFIX from your organizations list?
+ORGANIZATIONS_REQUEST_ACCESS_HELP Join an organization and share your work data.
+ORGANIZATIONS_REQUEST_ACCESS_TITLE Request Access
+ORGANIZATIONS_REQUEST_EMAIL_PLACEHOLDER Owner email or organization name
+ORGANIZATIONS_REQUEST_JOIN_BTN Connect Accounts
+ORGANIZATIONS_REQUEST_JOIN_FAILED Unable to submit access request right now.
+ORGANIZATIONS_REQUEST_JOIN_PENDING Access request submitted.
+ORGANIZATIONS_REQUEST_NETWORK_FAILED Network request failed. Please try again.
+ORGANIZATIONS_REQUEST_PANEL_HELP Request membership in another organization by sending a join request.
+ORGANIZATIONS_REQUEST_TIMEOUT Request timed out. Please try again.
+ORGANIZATIONS_REVOKE Revoke
+ORGANIZATIONS_REVOKE_ACCESS_BTN Revoke Access
+ORGANIZATIONS_REVOKE_CONFIRM Revoke your access to this organization? This removes the relationship from this profile and you may need a new request or invite to rejoin.
+ORGANIZATIONS_REVOKE_DETAILS_HELP Revoking access removes this profile from the organization relationship. The organization remains intact, but this profile will lose shared collaboration access until re-invited or re-approved.
+ORGANIZATIONS_ROLE Role
+ORGANIZATIONS_ROLE_CONTRIBUTOR Contributor
+ORGANIZATIONS_ROLE_COORDINATOR Manager
+ORGANIZATIONS_ROLE_DELEGATE Member
+ORGANIZATIONS_ROLE_MANAGER Manager
+ORGANIZATIONS_ROLE_MEMBER Member
+ORGANIZATIONS_ROLE_OWNER Owner
+ORGANIZATIONS_ROLE_VIEWER Viewer
+ORGANIZATIONS_RELATIONSHIP_LABEL Relationship
+ORGANIZATIONS_ROLLOUT_NOTICE_ARIA Premium feature rollout notice
+ORGANIZATIONS_ROLLOUT_NOTICE_STRONG This premium feature is a WORK IN PROGRESS.
+ORGANIZATIONS_ROLLOUT_NOTICE_SUFFIX No guarantee is provided for uninterrupted behavior while rollout and hardening continue.
+ORGANIZATIONS_ROLLOUT_NOTICE_TITLE Premium Feature Rollout Notice
+ORGANIZATIONS_RUN_DISCOVERY Run Discovery
+ORGANIZATIONS_SAVE_DEFAULTS Save Defaults
+ORGANIZATIONS_SCOPES Scopes
+ORGANIZATIONS_SCOPES_NONE_LISTED No scopes listed
+ORGANIZATIONS_SCOPE_ACCESS_MANAGE Access Manage
+ORGANIZATIONS_SCOPE_NONE_SELECTED No invite scopes selected.
+ORGANIZATIONS_SCOPE_ORG_READ Org Read
+ORGANIZATIONS_SCOPE_ORG_WRITE Org Write
+ORGANIZATIONS_SCOPE_REQUIRED Select at least one invite scope before sending an invite.
+ORGANIZATIONS_SCOPE_SITES_READ Sites Read
+ORGANIZATIONS_SCOPE_SITES_WRITE Sites Write
+ORGANIZATIONS_SCOPE_WORK_READ Work Read
+ORGANIZATIONS_SELECT_FIRST Select an organization first.
+ORGANIZATIONS_SELECT_PLACEHOLDER Select organization...
+ORGANIZATIONS_SELECT_SCOPE Select at least one scope.
+ORGANIZATIONS_SELECT_TRANSFER_TARGET Select a transfer target first.
+ORGANIZATIONS_SELF_ORG_WIP Profile-level organization access is production-ready with stable pay period controls.
+ORGANIZATIONS_SEND_INVITE Send Invite
+ORGANIZATIONS_SIGNAL_ACCESS_REQUEST_APPROVED Access request approved
+ORGANIZATIONS_SIGNAL_ACCESS_REQUEST_RECEIVED Access request received
+ORGANIZATIONS_SIGNAL_ACCESS_REQUEST_REJECTED Access request rejected
+ORGANIZATIONS_SIGNAL_ACCESS_REVOKED Access revoked
+ORGANIZATIONS_SIGNAL_INVITE_ACCEPTED Invite accepted
+ORGANIZATIONS_SIGNAL_INVITE_REVOKED Invite revoked
+ORGANIZATIONS_SIGNAL_INVITE_SENT Invite sent
+ORGANIZATIONS_SIGNAL_MEMBER_LEFT_ORGANIZATION Member left organization
+ORGANIZATIONS_SIGNAL_OWNERSHIP_TRANSFERRED Ownership transferred
+ORGANIZATIONS_SIGNAL_SETTINGS_UPDATED Organization settings updated
+ORGANIZATIONS_SIGNAL_SITE_LINKED Site linked to organization
+ORGANIZATIONS_SITE_LINKED Site linked to organization.
+ORGANIZATIONS_SITE_WITHOUT_ORG Site without org
+ORGANIZATIONS_OWNER_LABEL Owner
+ORGANIZATIONS_STATUS_LABEL Status
+ORGANIZATIONS_STATUS_ACTIVE active
+ORGANIZATIONS_SUPPORT_HOURS Support Hours
+ORGANIZATIONS_SUPPORT_HOURS_PLACEHOLDER Mon-Fri 8:00-18:00 MT
+ORGANIZATIONS_SUPPORT_HOURS_UNAVAILABLE Support hours unavailable
+ORGANIZATIONS_TAB_ARIA Organization editor tabs
+ORGANIZATIONS_TAB_DETAILS Organization Details
+ORGANIZATIONS_TAX_ID Tax ID
+ORGANIZATIONS_TAX_ID_PLACEHOLDER Business tax identifier
+ORGANIZATIONS_TIMEZONE Timezone
+ORGANIZATIONS_TRANSFER_NOTICE Transfer ownership is available only for shared organizations you own.
+ORGANIZATIONS_TRANSFER_OWNERSHIP Transfer Ownership
+ORGANIZATIONS_TRANSFER_SELECT_MEMBER Select a member to transfer ownership.
+ORGANIZATIONS_TRANSFER_TARGET_ARIA Transfer ownership target
+ORGANIZATIONS_TRANSFER_TARGET_PLACEHOLDER Select member UUID...
+ORGANIZATIONS_TYPE Type
+ORGANIZATIONS_TYPE_PERSONAL personal
+ORGANIZATIONS_TYPE_SHARED shared
+ORGANIZATIONS_UNAVAILABLE Unavailable
+ORGANIZATIONS_UNKNOWN Unknown
+ORGANIZATIONS_UNKNOWN_NAME Unknown Organization
+ORGANIZATIONS_WEBSITE Website
+ORGANIZATIONS_WEBSITE_PLACEHOLDER https://example.com
+ORGANIZATIONS_WEBSITE_UNAVAILABLE Website unavailable
+ORGANIZATIONS_WITHDRAWN Organization relationship withdrawn.
+ORGANIZATIONS_YOUR_ORGANIZATIONS Your Organizations
+OS OS
+OVERTIME Overtime
+OVERTIME_HOURS Overtime Hours
+PAGES Pages
+PASSWORD Password
+PASSWORD_REQUIRED Current password required
+PASTE Paste
+PASTE_WORK Paste Work
+PAST_1_YEAR Past 1 Year
+PAST_2_YEARS Past 2 Years
+PAST_3_MONTHS Past 3 Months
+PAST_3_YEARS Past 3 Years
+PAST_4_YEARS Past 4 Years
+PAST_5_YEARS Past 5 Years
+PAST_6_MONTHS Past 6 Months
+PAY Pay
+PAYCAL PayCal
+PAYCAL_HTML Pay<em>C</em>al
+PAYCAL_HTML_PUBLIC PayCal
+PAY_PERIOD Pay Period
+PAY_PERIODS Pay Periods
+PAY_PERIODS_RANGE Pay Periods Range
+PAY_PERIOD_DETAILS Pay Period Details
+PAY_PERIOD_PROGRESS Pay Period Progress
+PAY_SETTINGS_FORM Pay Settings Form
+PDF PDF
+PERSONAL Personal
+PERSONAL_INFO Personal Info
+PERSONAL_INFO_FORM Personal Information Form
+PHONE Phone
+PHONE_PLACEHOLDER xxx-xxx-xxxx
+POLICIES Policies
+POLICIES_ACCESSIBILITY_ARIA Accessibility Policy
+POLICIES_ACCESSIBILITY_DECK Our accessibility baseline, current conformance status, and feedback channel.
+POLICIES_ACCESSIBILITY_TITLE PayCal Accessibility Policy
+POLICIES_GOVERNANCE_ARIA Policy governance references
+POLICIES_GOVERNANCE_DECK Policy commitments are paired with test and release governance pages so behavioral changes stay traceable over time.
+POLICIES_GOVERNANCE_TITLE Policy Verification and Change Governance
+POLICIES_HTML Po<em>l</em>icies
+POLICIES_LAST_UPDATED_2026_03_20 Last updated March 20, 2026.
+POLICIES_LINK_ACCESSIBILITY Accessibility Policy
+POLICIES_LINK_FRAMEWORK_LEDGER Framework and backend change ledger
+POLICIES_LINK_PRIVACY Privacy Policy
+POLICIES_LINK_TERMS Terms & Conditions of Use Policy
+POLICIES_LINK_TESTING_GOVERNANCE Testing and validation governance
+POLICIES_LINK_VERIFICATION_GOVERNANCE Verification and governance controls
+POLICIES_OVERVIEW_ARIA Policies overview
+POLICIES_PAGE_DECK Terms of service, privacy commitments, and accessibility standards.
+POLICIES_PAGE_TITLE PayCal Policies
+POLICIES_STRIPE_BILLING_NOTE PayCal subscription billing is processed by Stripe. Stripe support is available at
+PORTUGUESE Portuguese
+PREFERENCES Preferences
+PREVIOUS Previous
+PREVIOUS_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -900 600 600" width="24"><path d="m 432 -480 l 156 156 q 11 11 11 28 t -11 28 q -11 11 -28 11 t -28 -11 L 348 -452 q -6 -6 -8.5 -13 t -2.5 -15 q 0 -8 2.5 -15 t 8.5 -13 l 184 -184 q 11 -11 28 -11 t 28 11 q 11 11 11 28 t -11 28 L 432 -480 Z"/></svg>
+PREMIUM_PAGE_COL_FEATURE Feature
+PREMIUM_PAGE_COL_FREE Free
+PREMIUM_PAGE_COL_PREMIUM Premium
+PREMIUM_PAGE_COMPARE_TITLE Free vs Premium
+PREMIUM_PAGE_CTA_COMPARE Compare Plans
+PREMIUM_PAGE_CTA_UPGRADE Create My Organization
+PREMIUM_PAGE_FAQ_A1 No. Personal payroll tracking remains free.
+PREMIUM_PAGE_FAQ_A2 Premium allows you to create and manage organizations and teams.
+PREMIUM_PAGE_FAQ_A3 No. Pricing is per organization.
+PREMIUM_PAGE_FAQ_A4 Yes.
+PREMIUM_PAGE_FAQ_A5 Yes. Workers can still track their own hours and records for free.
+PREMIUM_PAGE_FAQ_Q1 Is Premium required to use PayCal?
+PREMIUM_PAGE_FAQ_Q2 What does Premium unlock?
+PREMIUM_PAGE_FAQ_Q3 Is pricing per user?
+PREMIUM_PAGE_FAQ_Q4 Can I cancel anytime?
+PREMIUM_PAGE_FAQ_Q5 Can workers use PayCal without Premium?
+PREMIUM_PAGE_FAQ_TITLE Common questions
+PREMIUM_PAGE_FINAL_BODY Create your organization and start managing payroll records securely with PayCal.
+PREMIUM_PAGE_FINAL_TITLE Ready to organize your team payroll workflow?
+PREMIUM_PAGE_FREE_TAGLINE Track your own work hours and earnings for free.
+PREMIUM_PAGE_HERO_DECK Create an organization, invite workers, assign roles, review hours, and keep payroll records organized in one secure workspace.
+PREMIUM_PAGE_HERO_H1 Run payroll tracking for your team.
+PREMIUM_PAGE_ORG_FEATURE1_BODY View team activity and payroll records from a central workspace.
+PREMIUM_PAGE_ORG_FEATURE1_TITLE Organization Dashboard
+PREMIUM_PAGE_ORG_FEATURE2_BODY Assign owners, managers, members, and viewers with controlled permissions.
+PREMIUM_PAGE_ORG_FEATURE2_TITLE Role-Based Access
+PREMIUM_PAGE_ORG_FEATURE3_BODY Keep payroll records organized across your organization.
+PREMIUM_PAGE_ORG_FEATURE3_TITLE Shared Payroll Visibility
+PREMIUM_PAGE_ORG_FEATURE4_BODY Built with encryption-first architecture and worker privacy in mind.
+PREMIUM_PAGE_ORG_FEATURE4_TITLE Secure Team Collaboration
+PREMIUM_PAGE_ORGS_TITLE Organization Features
+PREMIUM_PAGE_PREMIUM_TAGLINE Built for managers, small businesses, contractors, and growing teams.
+PREMIUM_PAGE_PRICE_NOTE $4.99 CAD/month per organization. Cancel anytime.
+PREMIUM_PAGE_PRICING_NOTE No contracts. Cancel anytime. Full Premium access the moment you upgrade.
+PREMIUM_PAGE_PRICING_TITLE Simple pricing.
+PREMIUM_PAGE_STRIPE_LINK Contact PayCal support
+PREMIUM_PAGE_STRIPE_NOTE Secure billing powered by Stripe. Questions?
+PREMIUM_PAGE_TITLE Premium — PayCal
+PREMIUM_PAGE_TRUST_ACCESS_BODY Built to remain usable and understandable for everyone.
+PREMIUM_PAGE_TRUST_ACCESS_TITLE Accessible
+PREMIUM_PAGE_TRUST_PRIVATE_BODY Worker information is handled with privacy-focused controls.
+PREMIUM_PAGE_TRUST_PRIVATE_TITLE Private
+PREMIUM_PAGE_TRUST_SECURE_BODY Encryption-first architecture designed to protect payroll data.
+PREMIUM_PAGE_TRUST_SECURE_TITLE Secure
+PREMIUM_PAGE_TRUST_TITLE Built to be trusted.
+PREMIUM_PAGE_TRUST_TRANSPARENT_BODY Clear payroll calculations and audit-friendly record keeping.
+PREMIUM_PAGE_TRUST_TRANSPARENT_TITLE Transparent
+PREMIUM_PAGE_WHO_BOOKKEEPER_BODY Review and export payroll-ready records quickly.
+PREMIUM_PAGE_WHO_BOOKKEEPER_TITLE Bookkeepers
+PREMIUM_PAGE_WHO_BIZ_BODY Manage employee hours and payroll records in one place.
+PREMIUM_PAGE_WHO_BIZ_TITLE Small Businesses
+PREMIUM_PAGE_WHO_CONTRACTOR_BODY Organize crews, projects, and work periods with shared visibility.
+PREMIUM_PAGE_WHO_CONTRACTOR_TITLE Contractors
+PREMIUM_PAGE_WHO_TEAMS_BODY Assign roles and scale your organization as your team grows.
+PREMIUM_PAGE_WHO_TEAMS_TITLE Growing Teams
+PREMIUM_PAGE_WHO_TITLE Who Premium is for
+PRIMARY Primary
+PROFILE Profile
+PROFILE_ADDRESS_LABEL Address
+PROFILE_ACCOUNT_ACTIVITY_ACTIVE_SESSIONS_ARIA Active sessions
+PROFILE_ACCOUNT_ACTIVITY_BROWSER_ARIA Browser details
+PROFILE_ACCOUNT_ACTIVITY_H3_ACTIVE_SESSIONS Active Sessions
+PROFILE_ACCOUNT_ACTIVITY_H3_BROWSER_DETAILS Browser Details
+PROFILE_ACCOUNT_ACTIVITY_H3_CURRENT_LOGIN Current Login
+PROFILE_ACCOUNT_ACTIVITY_INTRO Current login details, browser information, and active session metadata.
+PROFILE_ACCOUNT_ACTIVITY_LOGIN_ARIA Current login details
+PROFILE_ACCOUNT_ACTIVITY_PANEL_HELP Account activity for current and active sessions.
+PROFILE_ACCOUNT_ACTIVITY_TITLE Account Activity
+PROFILE_INTERNATIONALIZATION_PANEL_HELP Language, locale, currency, and timezone preferences with live formatting preview.
+PROFILE_INTERNATIONALIZATION_TITLE Internationalization
+PROFILE_BILLING_CANCEL_DATE_DETAILS_ARIA Cancellation date and time details
+PROFILE_BILLING_CANCEL_DATE_TRIGGER Show cancellation date and time conversions
+PROFILE_BILLING_CANCEL_SCHEDULED_PREFIX Cancellation scheduled. You keep full Premium access through
+PROFILE_BILLING_CANCEL_SCHEDULED_SUFFIX After that date, your account automatically downgrades to Free.
+PROFILE_BILLING_DOWNGRADE_ARIA Type DOWNGRADE ME to confirm downgrade
+PROFILE_BILLING_DOWNGRADE_HELP If Stripe portal does not show a cancellation option, you can cancel Premium here immediately.
+PROFILE_BILLING_DOWNGRADE_PHRASE DOWNGRADE ME
+PROFILE_BILLING_DOWNGRADE_PROMPT_PREFIX Type
+PROFILE_BILLING_FREE_ARIA Current free plan details
+PROFILE_BILLING_FREE_HELP Track your own work hours, earnings, and pay periods at no cost. Upgrade to Premium to unlock team features, organization management, payroll tools, and advanced insights.
+PROFILE_BILLING_FREE_PLAN Current Plan: Free
+PROFILE_BILLING_MEMBER_SINCE Member since
+PROFILE_BILLING_ORGS_LINK Go to Organizations
+PROFILE_BILLING_PANEL_HELP View and manage your subscription and billing.
+PROFILE_BILLING_PLAN_PREMIUM Premium
+PROFILE_BILLING_PORTAL_BUTTON Manage Billing in Stripe
+PROFILE_BILLING_PREMIUM_ARIA Current premium plan details
+PROFILE_BILLING_PREMIUM_BENEFITS_ARIA Premium benefits
+PROFILE_BILLING_PREMIUM_BENEFITS_TITLE Premium includes
+PROFILE_BILLING_PREMIUM_FEATURES_ARIA Premium features
+PROFILE_BILLING_PREMIUM_FEATURE_1 Manage teams and shared organizations
+PROFILE_BILLING_PREMIUM_FEATURE_2 Invite managers and employees
+PROFILE_BILLING_PREMIUM_FEATURE_3 Import and export payroll records
+PROFILE_BILLING_PREMIUM_FEATURE_4 Role-based permissions and audit history
+PROFILE_BILLING_PREMIUM_FEATURE_5 Advanced earnings analytics
+PROFILE_BILLING_PREMIUM_FEATURE_6 Priority future features
+PROFILE_BILLING_RENEWS Renews
+PROFILE_BILLING_STRIPE_NOTE_LINK Contact PayCal support
+PROFILE_BILLING_STRIPE_NOTE_PREFIX Secure billing powered by Stripe. Questions?
+PROFILE_BILLING_TIMEZONES Timezones
+PROFILE_BILLING_TITLE Subscription
+PROFILE_BILLING_UPGRADE_BUTTON Upgrade Securely
+PROFILE_BILLING_UPGRADE_PRICE Premium — $4.99 CAD/month
+PROFILE_BILLING_EXPLORE_BUTTON Explore Premium
+PROFILE_CHANGE_EMAIL_DESC Change your account email in two steps: request verification codes, then enter both codes to confirm the update.
+PROFILE_CHANGE_EMAIL_HELP Click to securely change your email address.
+PROFILE_CITY_LABEL City
+PROFILE_COMPLETE_EMAIL_CHANGE Complete Email Change
+PROFILE_CONFIRM_BUTTON Confirm
+PROFILE_CONFIRM_EMAIL_ADDRESS Confirm Email Address
+PROFILE_CURRENCY_SEARCH_PLACEHOLDER Search currencies...
+PROFILE_DANGER_ACTIONS_ARIA Dangerous account actions
+PROFILE_DANGER_DELETE_ACCOUNT_ARIA Type DELETE MY ACCOUNT to confirm
+PROFILE_DANGER_DELETE_ACCOUNT_PHRASE DELETE MY ACCOUNT
+PROFILE_DANGER_DELETE_ACCOUNT_TEXT Permanently delete your account and all associated data. This cannot be undone.
+PROFILE_DANGER_DELETE_DATA_ARIA Type DELETE ALL DATA to confirm
+PROFILE_DANGER_DELETE_DATA_PHRASE DELETE ALL DATA
+PROFILE_DANGER_DELETE_DATA_TEXT Permanently delete your work history, sites, and earnings data while keeping your account.
+PROFILE_DANGER_INTRO Sensitive actions that permanently remove data. Review carefully before continuing.
+PROFILE_DANGER_PANEL_HELP Destructive account actions. Use with caution.
+PROFILE_DANGER_TITLE Danger Zone!
+PROFILE_DANGER_TYPE_PREFIX Type
+PROFILE_ENTER_6_DIGIT_CODE Enter 6-digit code
+PROFILE_ENTER_NEW_EMAIL_ADDRESS Enter new email address
+PROFILE_HTML Pro<em>f</em>ile
+PROFILE_NEW_EMAIL_ADDRESS New Email Address
+PROFILE_NEW_EMAIL_CODE New Email Code
+PROFILE_OLD_EMAIL_CODE Old Email Code
+PROFILE_PAY_FREQUENCY_BIWEEKLY Biweekly
+PROFILE_PAY_FREQUENCY_HELP Choose how often a new pay period starts. Changing frequency updates the calendar immediately.
+PROFILE_PAY_FREQUENCY_LABEL Frequency
+PROFILE_PAY_FREQUENCY_SEMIMONTHLY Semimonthly
+PROFILE_PAY_FREQUENCY_WEEKLY Weekly
+PROFILE_PAY_GRACE_1_DAY 1 Day
+PROFILE_PAY_GRACE_2_DAYS 2 Days
+PROFILE_PAY_GRACE_3_DAYS 3 Days
+PROFILE_PAY_GRACE_HELP Grace determines how many extra days remain editable after a pay period ends.
+PROFILE_PAY_GRACE_LABEL Grace
+PROFILE_PAY_GRACE_PICKER_HELP Pick the number of post-period days that still allow edits before entries lock.
+PROFILE_PAY_LENGTH_HELP Length is derived from the selected frequency and is shown here for quick reference.
+PROFILE_PAY_PERIOD_CONTROLS_ARIA Pay period controls
+PROFILE_PAY_PERIOD_CONTROLS_HELP These controls define the pay cycle, its fixed length, and the editing grace window allowed after a period closes.
+PROFILE_PAY_PERIOD_PANEL_HELP Configure how your pay periods are calculated, displayed, and saved.
+PROFILE_PAY_PREVIEW_HELP The calendar preview shows the first two pay periods in sequence. Click a day to set P1 to begin on that date.
+PROFILE_PERSONAL_INFO_FORM_ARIA Personal Info Form
+PROFILE_PERSONAL_INFO_PANEL_HELP Your personal info and account settings.
+PROFILE_PERSONAL_INFO_TITLE Personal Info
+PROFILE_POSTAL_LABEL Postal
+PROFILE_PROVINCE_AB Alberta
+PROFILE_PROVINCE_BC British Columbia
+PROFILE_PROVINCE_MB Manitoba
+PROFILE_PROVINCE_NB New Brunswick
+PROFILE_PROVINCE_NL Newfoundland and Labrador
+PROFILE_PROVINCE_NS Nova Scotia
+PROFILE_PROVINCE_NT Northwest Territories
+PROFILE_PROVINCE_NU Nunavut
+PROFILE_PROVINCE_ON Ontario
+PROFILE_PROVINCE_PE Prince Edward Island
+PROFILE_PROVINCE_QC Quebec
+PROFILE_PROVINCE_SK Saskatchewan
+PROFILE_PROVINCE_YT Yukon
+PROFILE_RESEND_CODES Resend Codes
+PROFILE_SEARCH_CURRENCIES_PLACEHOLDER Search currencies...
+PROFILE_SEARCH_TIMEZONES_PLACEHOLDER Search timezones...
+PROFILE_SEND_VERIFICATION_CODES Send Verification Codes
+PROFILE_TIMEZONE_SEARCH_PLACEHOLDER Search timezones...
+PROVINCE Province
+PROVINCIAL_TAX Provincial Tax
+QUESTION_MARK_KEY <kbd>?</kbd>
+RATE Rate
+READY Ready
+REASON Reason
+REDIS Redis
+REFRESH Refresh
+REFRESH_METRICS Refresh Metrics
+REGISTER Register
+REGISTER_COOKIE_HEADSUP Hey, headsup! We use a cookie to store user authentication.
+REGISTER_FEATURE1_TEXT Say goodbye to paycheck mysteries! Visualize your expected earnings each pay period. Plan your finances with confidence.
+REGISTER_FEATURE2_TEXT No more complicated multi-step data entry!
+REGISTER_FEATURE3_TEXT For employers, powerful tools to simplify payroll management. Download the data you need. Make payroll a breeze.
+REGISTER_FEATURE4_TEXT Our platform is user-friendly, mobile-responsive, and packed with the latest technology.
+REGULAR Regular
+REGULAR_HOURS Regular Hours
+RENDER Render
+RESET Reset
+RESET_ALL Reset All
+SAT Sat
+SAVE Save
+SAVE_AND_CLOSE Save & Close
+SCOPE Scope
+SCRAPER_DEFENSE Scraper Defense
+SEARCH Search
+SECURITY_CONTACT_H2 Contact
+SECURITY_CONTROLS_H2 Controls
+SECURITY_LAST_UPDATED_H2 Last Updated
+SECURITY_LAST_UPDATED_NOTE This page reflects sanitized trust-bundle outputs only; internal paths and raw logs are excluded.
+SECURITY_NARRATIVE_H2 Narrative Snapshot
+SECURITY_OVERVIEW_H2 Overview
+SECURITY_PAGE_LABEL Security
+SECURITY_PAGE_TITLE Security - [PayCal]
+SECURITY_PRACTICES_H2 Practices
+SECURITY_TABLE_CONTROL Control
+SECURITY_TABLE_STATUS Status
+SECURITY_TABLE_SYSTEM_COMPONENT System Component
+SECURITY_TRUST_HUB_DECK PayCal is aligned with SOC 2 security principles and operates a deterministic control evidence pipeline.
+SECURITY_TRUST_HUB_H1 Security Trust Hub
+SELECT_AUTHENTICATION_LEVEL Select authentication level
+SELECT_MONTH_ARIA_PREFIX Select month
+SELECT_YEAR_ARIA_PREFIX Select year
+SEND_EMAIL Send Email
+SESSIONS Sessions
+SESSION_TIMEOUT_COUNTDOWN_PREFIX Session will expire in
+SESSION_TIMEOUT_COUNTDOWN_SUFFIX seconds.
+SESSION_TIMEOUT_MODAL_ARIA This dialog warns you that your session is about to expire and allows you to extend your login session.
+SESSION_TIMEOUT_MODAL_META Session timeout warning and extension
+SESSION_TIMEOUT_STAY_LOGGED_IN Stay Logged In
+SESSION_TIMEOUT_TITLE Session Timeout
+SETTINGS Settings
+SETTINGS_ACCOUNT_DETAILS_DESC Update your profile, recovery email, and employment details. Use Save to apply changes.
+SETTINGS_ACCOUNT_DETAILS_TITLE Account Details
+SETTINGS_HTML S<em>e</em>ttings
+SETTINGS_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -1100 960 960" width="24"><path d="M 433 -80 q -27 0 -46.5 -18 T 363 -142 l -9 -66 q -13 -5 -24.5 -12 T 307 -235 l -62 26 q -25 11 -50 2 t -39 -32 l -47 -82 q -14 -23 -8 -49 t 27 -43 l 53 -40 q -1 -7 -1 -13.5 v -27 q 0 -6.5 1 -13.5 l -53 -40 q -21 -17 -27 -43 t 8 -49 l 47 -82 q 14 -23 39 -32 t 50 2 l 62 26 q 11 -8 23 -15 t 24 -12 l 9 -66 q 4 -26 23.5 -44 t 46.5 -18 h 94 q 27 0 46.5 18 t 23.5 44 l 9 66 q 13 5 24.5 12 t 22.5 15 l 62 -26 q 25 -11 50 -2 t 39 32 l 47 82 q 14 23 8 49 t -27 43 l -53 40 q 1 7 1 13.5 v 27 q 0 6.5 -2 13.5 l 53 40 q 21 17 27 43 t -8 49 l -48 82 q -14 23 -39 32 t -50 -2 l -60 -26 q -11 8 -23 15 t -24 12 l -9 66 q -4 26 -23.5 44 T 527 -80 h -94 Z m 7 -80 h 79 l 14 -106 q 31 -8 57.5 -23.5 T 639 -327 l 99 41 39 -68 l -86 -65 q 5 -14 7 -29.5 t 2 -31.5 q 0 -16 -2 -31.5 t -7 -29.5 l 86 -65 l -39 -68 l -99 42 q -22 -23 -48.5 -38.5 T 533 -694 l -13 -106 h -79 l -14 106 q -31 8 -57.5 -23.5 T 321 -633 l -99 -41 l -39 68 l 86 64 q -5 15 -7 30 t -2 32 q 0 16 2 31 t 7 30 l -86 65 l 39 68 l 99 -42 q 22 23 48.5 38.5 T 427 -266 l 13 106 Z m 42 -180 q 58 0 99 -41 t 41 -99 q 0 -58 -41 -99 t -99 -41 q -59 0 -99.5 41 T 342 -480 q 0 58 40.5 99 t 99.5 41 Z m -2 -140 Z"/></svg>
+SHADOW_TALON_CONTACT_SUPPORT Contact support
+SHADOW_TALON_MESSAGE_TRY_AGAIN Something went wrong. Please try again in a moment.
+SHADOW_TALON_REFERENCE_PREFIX Please try again in a moment. If the problem keeps happening, contact support and share this reference:
+SHADOW_TALON_REQUEST_NOT_FINISHED We could not finish this request. The issue has been logged on our side.
+SHADOW_TALON_RETURN_HOME Return home
+SHADOW_TALON_TITLE Something went wrong
+SHORT Short
+SHORTDATE Short Date
+SHOW Show
+SIGN_OUT Sign Out
+SIGN_OUT_MESSAGE Are you sure you want to Sign Out
+SITES Sites
+SITES_ACTIVE_RESULTS_ARIA Active sites results
+SITES_ACTIVE_TAB_DISCLAIMER These sites are currently in use and available for new work entries.
+SITES_ARCHIVED_DELETE_WARNING Deleting an archived site will permanently remove all associated work entries.
+SITES_ARCHIVED_RESULTS_ARIA Archived sites results
+SITES_ARCHIVED_WORK_ARIA Review archived work records for the selected site, then close to return to site management.
+SITES_ARCHIVED_WORK_TITLE Archived Work
+SITES_ARCHIVE_SITE Archive Site
+SITES_CONFIRM_ARCHIVE_ARIA Review the archive confirmation for this site. This action hides the site and keeps existing work history.
+SITES_CREATE Create
+SITES_CREATE_SITE_BIND_WORK Create Site & Bind Work
+SITES_DAILY_TRAVEL_HOURS Daily Travel Hours
+SITES_EARNINGS_HISTORY_DISCLAIMER History of your earnings per site.
+SITES_EARNINGS_REVIEW_HELP Review yearly earnings analytics grouped by site.
+SITES_EARNINGS_YEAR_HELP Choose a year to view site earnings totals and breakdowns.
+SITES_EARNINGS_YEAR_TABS_ARIA Earnings year tabs
+SITES_ENTER_SITE_NAME_PLACEHOLDER Enter site name
+SITES_FINALITY_DELETE_ARIA This confirms permanent deletion of archived work data. Continue only if you intend to remove records permanently.
+SITES_FINALITY_DELETE_BUTTON Finality Delete (Permanent)
+SITES_FINALITY_DELETE_CONFIRM Yes, Permanently Delete
+SITES_FINALITY_DELETE_TITLE PERMANENT DELETION
+SITES_GRID_ACTIVE_SR_CONTEXT Rows include site name, wage, allowances, and province. Active sites remain available for new work entries.
+SITES_GRID_ACTIVE_SR_INSTRUCTIONS Active sites grid. Use search to filter sites and activate a row to open site details.
+SITES_GRID_ARCHIVED_SR_CONTEXT Archived rows remain available for reporting and recovery actions. Deleting archived sites permanently removes linked work history.
+SITES_GRID_ARCHIVED_SR_INSTRUCTIONS Archived sites grid. Archived sites keep history but are removed from active entry flows.
+SITES_GRID_BROWSE_HELP Browse site records and open a site to edit details.
+SITES_HOURLY_WAGE Hourly Wage
+SITES_HTML <em>S</em>ites
+SITES_LIST Sites List
+SITES_LOADING_EARNINGS_DATA Loading earnings data...
+SITES_NO_EARNINGS_FOR_YEAR No earnings data for this year
+SITES_ORPHANED_FOUND_SUFFIX found (work entries with no site).
+SITES_ORPHANED_MODAL_ARIA Recover orphaned work entries by linking each orphaned site identifier to a real site.
+SITES_ORPHANED_MODAL_DESC The following work entries have no corresponding site. You can recover them by creating a site to bind the data to.
+SITES_ORPHANED_MODAL_TITLE Recover Orphaned Work Entries
+SITES_ORPHANED_RECOVER_HINT Click to recover this data.
+SITES_ORPHANED_WORK_ENTRIES orphaned work entries
+SITES_RECOVERY_INFO_PREFIX Creating a site for
+SITES_RECOVERY_INFO_SUFFIX work entries will be bound to this site.
+SITES_RECOVERY_SITE_ARIA Create a site to attach orphaned work entries and restore them to normal reporting.
+SITES_RECOVERY_SITE_TITLE Create Site for Orphaned Work
+SITES_RECOVER_DATA Recover Data
+SITES_SVG <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M 4 2.5 a 0.5 0.5 0 0 1 0.5 -0.5 h 1 a 0.5 0.5 0 0 1 0.5 0.5 v 1 a 0.5 0.5 0 0 1 -0.5 0.5 h -1 a 0.5 0.5 0 0 1 -0.5 -0.5 z m 3 0 a 0.5 0.5 0 0 1 0.5 -0.5 h 1 a 0.5 0.5 0 0 1 0.5 0.5 v 1 a 0.5 0.5 0 0 1 -0.5 0.5 h -1 a 0.5 0.5 0 0 1 -0.5 -0.5 z m 3.5 -0.5 a 0.5 0.5 0 0 0 -0.5 0.5 v 1 a 0.5 0.5 0 0 0 0.5 0.5 h 1 a 0.5 0.5 0 0 0 0.5 -0.5 v -1 a 0.5 0.5 0 0 0 -0.5 -0.5 z M 4 5.5 a 0.5 0.5 0 0 1 0.5 -0.5 h 1 a 0.5 0.5 0 0 1 0.5 0.5 v 1 a 0.5 0.5 0 0 1 -0.5 0.5 h -1 a 0.5 0.5 0 0 1 -0.5 -0.5 z M 7.5 5 a 0.5 0.5 0 0 0 -0.5 0.5 v 1 a 0.5 0.5 0 0 0 0.5 0.5 h 1 a 0.5 0.5 0 0 0 0.5 -0.5 v -1 a 0.5 0.5 0 0 0 -0.5 -0.5 z m 2.5 0.5 a 0.5 0.5 0 0 1 0.5 -0.5 h 1 a 0.5 0.5 0 0 1 0.5 0.5 v 1 a 0.5 0.5 0 0 1 -0.5 0.5 h -1 a 0.5 0.5 0 0 1 -0.5 -0.5 z M 4.5 8 a 0.5 0.5 0 0 0 -0.5 0.5 v 1 a 0.5 0.5 0 0 0 0.5 0.5 h 1 a 0.5 0.5 0 0 0 0.5 -0.5 v -1 a 0.5 0.5 0 0 0 -0.5 -0.5 z m 2.5 0.5 a 0.5 0.5 0 0 1 0.5 -0.5 h 1 a 0.5 0.5 0 0 1 0.5 0.5 v 1 a 0.5 0.5 0 0 1 -0.5 0.5 h -1 a 0.5 0.5 0 0 1 -0.5 -0.5 z m 3.5 -0.5 a 0.5 0.5 0 0 0 -0.5 0.5 v 1 a 0.5 0.5 0 0 0 0.5 0.5 h 1 a 0.5 0.5 0 0 0 0.5 -0.5 v -1 a 0.5 0.5 0 0 0 -0.5 -0.5 z M 2 1 a 1 1 0 0 1 1 -1 h 10 a 1 1 0 0 1 1 1 v 14 a 1 1 0 0 1 -1 1 H 3 a 1 1 0 0 1 -1 -1 z m 11 0 H 3 v 14 h 3 v -2.5 a 0.5 0.5 0 0 1 0.5 -0.5 h 3 a 0.5 0.5 0 0 1 0.5 0.5 V 15 h 3 z "/></svg>
+SITES_TABS_ARIA_LABEL Sites tabs
+SITES_TAB_SWITCH_HELP Switch between active and archived site lists.
+SITE_NAME PayCal
+SITE_NAME_HTML Pay<em>C</em>al
+SKIP_PRIMARY_NAVIGATION Skip Primary Navigation
+SKIP_TO_CONTENT Skip to Content
+SKIP_TO_MAIN_CONTENT Skip to main content
+SMALLER Smaller
+SPANISH Spanish
+START Start
+STATIC Static
+STATUS Status
+STICKY Fixed
+STRIPE Stripe
+STYLE Style
+STYLE_PREFS Style Preferences
+SUN Sun
+TAB_KEY <kbd>TAB</kbd>
+TAGALOG Tagalog
+TAX_BRACKETS_EDITOR Tax Brackets Editor
+TESTS Tests
+TESTS_DASHBOARD_ASSERTIONS Assertions
+TESTS_DASHBOARD_CLASS Class
+TESTS_DASHBOARD_DURATION Duration
+TESTS_DASHBOARD_FAILURES Failures
+TESTS_DASHBOARD_NO_LAST_RUN No test runs recorded yet. Click "Run Tests" to execute the test suite.
+TESTS_DASHBOARD_NO_PHASE_DATA No phase data available
+TESTS_DASHBOARD_NO_TEST_CLASSES No test classes found
+TESTS_DASHBOARD_PAGE_LABEL Test Report Dashboard
+TESTS_DASHBOARD_PHASE_PREFIX Phase
+TESTS_DASHBOARD_STATUS Status
+TESTS_DASHBOARD_TESTS Tests
+TESTS_DASHBOARD_VIEW_OUTPUT View Output
+TEXT Text
+THEME Theme
+THEME_PICKER Theme Picker
+THU Thu
+TIMEZONE Timezone
+TIMEZONE_PICKER Timezone Picker
+TO to
+TODAY Today
+TOOLTIP_AUDIO Describes navigation or changes.
+TOOLTIP_CALENDAR_AUDIO_LABELS Date label type to announce via text-to-speech.
+TOOLTIP_CALENDAR_AUTOFOCUS Day to automatically select in Calendar view.
+TOOLTIP_CONFIRM_EMAIL Confirm your new email address.
+TOOLTIP_CONFIRM_PASSWORD Confirm your new password.
+TOOLTIP_CURRENT_EMAIL Current email address.
+TOOLTIP_CURRENT_PASSWORD Current password.
+TOOLTIP_SPACING Preferred spacing of the interface.
+TOOLTIP_LANGUAGE Preferred language.
+TOOLTIP_NAV_BAR Preferred scroll behaviour of navigation bar.
+TOOLTIP_NEW_EMAIL Provide the new email address you want to use.
+TOOLTIP_NEW_PASSWORD Provide the new password you want to use.
+TOOLTIP_PASSWORD_REQUIRED Your password is required to proceed.
+TOOLTIP_TEXT Preferred text size of the interface.
+TOOLTIP_THEME Look & feel of the interface.
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P1_SEVERITY P1
+TRANSPARENCY_ACCESSIBILITY_DEFECT_RESPONSE_P2_SEVERITY P2
+TRANSPARENCY_ACCESSIBILITY_RECENT_IMPROVEMENTS_ITEM_14 <strong>2026-04-12:</strong> Added aria-label to the read-only current email input in change-email dialogs on settings and profile pages; replaced four hardcoded English labels in the Data Portability section with i18n-backed strings.
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_BROWSER Safari
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_MACOS_PLATFORM macOS
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_CHROME_PLATFORM Windows
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_AT NVDA
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_BROWSER Firefox
+TRANSPARENCY_ACCESSIBILITY_SUPPORT_ROW_WINDOWS_FIREFOX_PLATFORM Windows
+TRANSPARENCY_PHP_PACKAGES_CICD_GATE_TEXT_1 Every change must pass PHPStan Level 9 and the full PHPUnit test suite before it can be merged. Composer is locked to a deterministic dependency graph — no floating versions in production.
+TRANSPARENCY_PHP_PACKAGES_CICD_GATE_TITLE CI/CD Controls
+TRANSPARENCY_PHP_PACKAGES_CVE_TEXT_1 Periodically GitHub Dependabot alerts flag packages as vulnerable. Before removing or replacing a package, PayCal verifies the specific CVE status at the installed version using the upstream advisory and the Packagist security database. During the 2026-05 audit, four moderate Dependabot alerts were raised. Investigation confirmed all four were already patched at the installed versions — no remediation action was required.
+TRANSPARENCY_PHP_PACKAGES_CVE_TEXT_2 Separately, two packages — erusev/parsedown and yupmin/magoo — were found to have no usage anywhere in the codebase. They were removed regardless of CVE status. A package that is not loaded is a package that cannot be exploited.
+TRANSPARENCY_PHP_PACKAGES_CVE_TITLE CVE Review and the 2026-05 Audit
+TRANSPARENCY_PHP_PACKAGES_DECK This page documents every PHP package PayCal directly depends on, why each is included, and the philosophy behind our approach to third-party dependencies.
+TRANSPARENCY_PHP_PACKAGES_DEV_DEPS_TEXT_1 Dev-time dependencies are never loaded in production. The following packages are used exclusively during development and CI.
+TRANSPARENCY_PHP_PACKAGES_DEV_DEPS_TITLE Development-Only Dependencies
+TRANSPARENCY_PHP_PACKAGES_HOW_TO_VERIFY_TITLE How to Verify
+TRANSPARENCY_PHP_PACKAGES_LAST_VERIFIED_LABEL Last verified:
+TRANSPARENCY_PHP_PACKAGES_NEXT_REVIEW_LABEL Next review due:
+TRANSPARENCY_PHP_PACKAGES_PAGE_TITLE PHP Package Dependency Transparency
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_FACT_1 Every package must justify its existence by active call sites. A zero-reference dependency is removed regardless of CVE status.
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_FACT_2 When a package is only used at one or two narrow call sites, we evaluate whether a first-party implementation is practical. Fewer moving parts means a smaller attack surface.
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_FACT_3 All packages are pinned in composer.lock. No floating versions. No silent upgrades.
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_FACT_4 Transitive dependencies are reviewed as a side effect of direct dependency audits. Orphaned vendor directories are removed.
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_TEXT_1 PayCal's position on third-party dependencies is: use the minimum possible, own what is practical to own, and pin everything else. This is not a reaction to a specific incident — it is the standing default.
+TRANSPARENCY_PHP_PACKAGES_PHILOSOPHY_TITLE Our Dependency Philosophy
+TRANSPARENCY_PHP_PACKAGES_PHPDOTENV_DECISION_TEXT_1 PayCal previously loaded .env files using vlucas/phpdotenv, a widely-used library with three transitive dependencies (phpoption, graham-campbell/result-type). The library was used at exactly two call sites: one safeLoad in the bootstrap file, and one load in config.php.
+TRANSPARENCY_PHP_PACKAGES_PHPDOTENV_DECISION_TEXT_2 Rather than maintain an external dependency for 11 lines of active usage, we wrote PayCal\Infrastructure\Env\Dotenv — a 140-line first-party class that covers the full surface we actually use: KEY=VALUE parsing, blank and comment skipping, optional quote stripping, inline comment stripping, immutable mode, and a forceKeys override for specific keys (which eliminated a separate 20-line manual workaround that had existed in config.php for the SMTP password).
+TRANSPARENCY_PHP_PACKAGES_PHPDOTENV_DECISION_TEXT_3 The replacement removed 63 vendor files and three packages from the dependency graph. The public source for PayCal\Infrastructure\Env\Dotenv is available in the public repository.
+TRANSPARENCY_PHP_PACKAGES_PHPDOTENV_DECISION_TITLE Why We Replaced vlucas/phpdotenv
+TRANSPARENCY_PHP_PACKAGES_ROUTE_LABEL Route:
+TRANSPARENCY_PHP_PACKAGES_RUNTIME_DEPS_TEXT_1 These are the only PHP packages loaded in a production request. Each is justified by active usage and has no alternative that would reduce the dependency further without significant first-party engineering effort.
+TRANSPARENCY_PHP_PACKAGES_RUNTIME_DEPS_TITLE Runtime Dependencies
+TRANSPARENCY_PHP_PACKAGES_SCOPE_LABEL Verification scope:
+TRANSPARENCY_PHP_PACKAGES_SCOPE_VALUE Composer runtime and dev-time direct dependencies, transitive dependency graph, CVE status, and replacement decisions.
+TRANSPARENCY_PHP_PACKAGES_TABLE_ARIA PHP runtime dependency table
+TRANSPARENCY_PHP_PACKAGES_TABLE_DEV_ARIA PHP dev-time dependency table
+TRANSPARENCY_PHP_PACKAGES_TABLE_PACKAGE Package
+TRANSPARENCY_PHP_PACKAGES_TABLE_PURPOSE Purpose
+TRANSPARENCY_PHP_PACKAGES_TABLE_TRANSITIVE Transitive packages pulled in
+TRANSPARENCY_PHP_PACKAGES_TABLE_VERSION Version
+TRANSPARENCY_PHP_PACKAGES_VERIFICATION_METADATA_TITLE Verification Metadata
+TRANSPARENCY_HTML <em>T</em>ransparency
+TRAVEL Travel
+TRAVEL_HOURLY_RATE Travel Hourly Rate
+TUE Tue
+TURKISH Turkish
+TXT TXT
+UNVERIFIED_CODE_PLACEHOLDER 6-digit code
+UNVERIFIED_ENTER_CODE_LABEL Enter Code
+UNVERIFIED_HEADING Verify Your Email
+UNVERIFIED_LOGOUT Logout
+UNVERIFIED_LOGOUT_ARIA Log out
+UNVERIFIED_META_TITLE Verify Email - PayCal
+UNVERIFIED_PRIVACY_LINK Privacy Policy
+UNVERIFIED_PROFILE_MENU_ARIA Profile menu
+UNVERIFIED_RESEND_BUTTON Resend email
+UNVERIFIED_RESEND_PROMPT Didn't receive the code?
+UNVERIFIED_SENT_CODE_TO We sent a verification code to:
+UNVERIFIED_TERMS_LINK Terms of Service
+UNVERIFIED_VERIFY_BUTTON Verify Me
+UPDATE Update
+UPDATE_USER Update User
+UPDATING_AUDIO_TO Updating audio to
+UPDATING_CALENDAR_AUDIO_LABELS_TO Updating Calendar audio labels to
+UPDATING_CALENDAR_AUTOFOCUS_TO Updating Calendar autofocus to
+UPDATING_CALENDAR_DATE_LABEL_POSITION_TO Updating Calendar date label position to
+UPDATING_CALENDAR_DAY_NAME_FORMAT_TO Updating Calendar Day Name Format to
+UPDATING_CALENDAR_WORK_ENTRY_POSITION_TO Updating Calendar work entry position to
+UPDATING_INFO Updating Info...
+UPDATING_LANGUAGE_TO Updating language to
+UPDATING_NAME Updating Name
+UPDATING_NAV_BAR_TO Updating Navigation Bar to
+UPDATING_PAY_PERIOD Updating Pay Period
+UPDATING_PHONE Updating Phone
+UPDATING_PROVINCE Updating Province...
+UPDATING_TEXT_TO Updating text to
+UPDATING_THEME_TO Updating theme to
+UPDATING_TIMEZONE Updating Timezone...
+UPDATING_WORK Updating Work
+USERS Users
+USER_AGENT User Agent
+USER_ROLE Role
+VARIANT Variant
+VARIANT_PICKER Variant Picker
+VERIFY_ACCOUNT_HEADING Account Verification
+VERIFY_ACCOUNT_META_TITLE Verify Your Account - PayCal
+VERIFY_BACK_TO_REGISTER Back to Register
+VERIFY_BUTTON Verify
+VERIFY_CODE_INPUT_ARIA Verification code, 6 uppercase letters with a dash in the middle
+VERIFY_CODE_LABEL Enter your verification code:
+VERIFY_CODE_PLACEHOLDER XXX-XXX
+VERIFY_ERROR_INVALID_CODE_LENGTH Invalid code length.
+VERIFY_FORM_ARIA Verification Code Form
+VIDEO_TUTORIALS Video Tutorials
+VIEW_JSON View JSON
+VIEW_LOWER view
+VIEW_ORGANIZATION View Organization
+VOICE Voice
+VOICE_PICKER Voice Picker
+WAGE Wage
+WED Wed
+WE_ARE_HIRING We are hiring. Send resumes to resumes@paycal.app
+WINDOWS Windows
+WITH_SELECTED Select...
+WORK Work
+WORK_DETAILS work
+WORK_FORM Work Form
+WORK_HOURS Work Hours
+YEAR_LOWER year
+YEAR_SVG_LINE_GRAPH Year SVG Line Graph
+YEAR_TO_DATE Year To Date
+YEAR_TO_DATE_EARNINGS Year To Date Earnings
+YOUR_EMAIL Email
+YOUR_NAME Name
+TRANSPARENCY_HUB_ACCESSIBILITY_TEXT_1 We use WCAG 2.1 Level AA as our working accessibility standard and publish recent accessibility work in plain language.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_1 Core navigation supports keyboard use, skip links, and documented single-key shortcuts for primary destinations.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_2 Shortcut handling is safety-guarded and does not fire while typing in editable fields or when dialogs are open.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_3 Recent regression coverage checks headings, reflow/text spacing, navigation paths, and the accessibility feedback handoff.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_4 Strict route-level contrast blockers on core public pages have been remediated, while broader theme-wide contrast work continues.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_5 Users can start an accessibility report from the accessibility page and continue it through the secure contact flow.
+TRANSPARENCY_HUB_ACCESSIBILITY_FACT_6 The accessibility transparency page now publishes last-verified date, verification scope, known limitations, and next review due date.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_TEXT_1 This page documents how PayCal enforces policy through tests, hooks, runtime limits, and security controls.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_1 Pre-commit and pre-push hooks enforce PHPStan Level 9 and reject baseline bypasses.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_2 CI runs staged validation across unit, integration, contract, random-order, and coverage jobs.
+TRANSPARENCY_HUB_VERIFICATION_GOVERNANCE_FACT_3 Runtime controls apply rate limits, TTL windows, and abuse-response blocks for sensitive flows.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_1 Documents HTTPS enforcement, HSTS preload, and HTTP/3 (QUIC) advertisement.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_2 Lists the current security header baseline including CSP, COOP, COEP, CORP, and browser hardening headers.
+TRANSPARENCY_HUB_NETWORK_CAPABILITIES_FACT_3 Explains protocol negotiation and fallback behavior across modern clients.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_TEXT_1 This article documents how we run backend, frontend, and accessibility validation and which gates are treated as release blockers.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_1 Shows the active PHPUnit suite inventory and category split.
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_2 Documents release-blocking validation commands used in
+TRANSPARENCY_HUB_TESTING_GOVERNANCE_FACT_3 Explains how test evidence is synchronized into changelogs and source-of-truth notes.
+TRANSPARENCY_HUB_DEPENDENCY_CI_TEXT_1 This article publishes how npm dependencies are controlled and how CI gates are enforced before release.
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_1 Documents lockfile-first npm policy and
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_2 Maps JavaScript quality gates and backend pipeline stages to workflow controls.
+TRANSPARENCY_HUB_DEPENDENCY_CI_FACT_3 Lists known documentation limitations and planned governance improvements.
+TRANSPARENCY_HUB_PHP_PACKAGES_FACT_1 Documents all runtime and dev-time PHP packages with active-usage justification for each.
+TRANSPARENCY_HUB_PHP_PACKAGES_FACT_2 Explains the decision to replace vlucas/phpdotenv with a first-party implementation.
+TRANSPARENCY_HUB_PHP_PACKAGES_FACT_3 Covers the 2026-05 CVE audit outcome and our broader dependency philosophy.
+TRANSPARENCY_HUB_PHP_PACKAGES_READ_MORE Read PHP package dependency transparency
+TRANSPARENCY_HUB_PHP_PACKAGES_TEXT_1 This article documents every PHP package PayCal directly depends on, how CVEs are evaluated, and the principle that drives dependency decisions.
+TRANSPARENCY_HUB_PHP_PACKAGES_TITLE PHP Package Dependency Transparency
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_TEXT_1 This page tracks backend architecture and framework-level changes with public explanations of what changed and why.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_1 Summarizes service/controller changes that materially affect behavior.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_2 Maps release changes to security and governance controls.
+TRANSPARENCY_HUB_FRAMEWORK_BACKEND_FACT_3 Includes references to detailed changelog and audit artifacts.
+TRANSPARENCY_HUB_PRODUCT_BILLING_TEXT_1 Major account, billing, and profile-flow updates are explained alongside backend and testing governance so users can audit both UX and behavior changes.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_1 Tracks billing-state handling and subscription status contract changes.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_2 Captures destructive-action safeguards such as explicit account deletion confirmation phrases.
+TRANSPARENCY_HUB_PRODUCT_BILLING_FACT_3 Links product-facing updates to verification and release governance evidence.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_TEXT_1 The tax page documents our CRA-aligned formulas, thresholds, and examples used for estimates.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_1 CPP, OAS, EI, federal/provincial tax, and net-pay formulas are documented with worked examples.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_2 Current tax-year thresholds and rates are published and tied to CRA references.
+TRANSPARENCY_HUB_TAX_METHODOLOGY_FACT_3 Calculation quality is validated with an automated test suite and annual rate updates.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_TEXT_1 The email page explains which transactional emails PayCal sends, how templates are rendered, and how delivery reliability is verified.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_1 Flow-specific template families are documented across verification, recovery, change-email, and contact support paths.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_2 Delivery responsibilities are separated between EmailGarum orchestration and EmailTransport SMTP protocol handling.
+TRANSPARENCY_HUB_EMAIL_ARCHITECTURE_FACT_3 Opt-in live tests for template sweeps and DKIM/DMARC health verification are documented.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_TEXT_1 This article publishes reproducible A/B benchmark results for eager rendering versus lazy section loading on
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_1 Includes a 10-run matrix for real and synthetic 2025/2026 datasets.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_2 Reports DOMContentLoaded, section-ready timing, and API-call trade-offs.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_FACT_3 Documents test method and interpretation for public review.
+TRANSPARENCY_HUB_EARNINGS_LOAD_TESTING_READ_MORE Read earnings load-testing results
+TRANSPARENCY_HUB_SUPERHEROES_MAP_TEXT_1 The Superheroes page documents PayCal's themed cross-cutting components and the specific operational problem each one solves.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_1 Includes ShadowTalon, Guardian, Phantom Wing, Lens, and EmailGarum.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_2 Explains where each component is used and what risk boundary it protects.
+TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_3 Provides verification anchors so implementation claims can be inspected directly in code and tests.
+HELP_READ_MORE Read more
+HELP_TOC_REQUIREMENTS Browser & Device Requirements
+HELP_TOC_WEBAUTHN_SECURITY WebAuthn Security
+HELP_REQUIREMENTS_TITLE Browser & Device Requirements
+HELP_REQUIREMENTS_DECK What you need to use PayCal: a modern browser, a secure HTTPS connection, and a device that supports passkeys.
+HELP_REQUIREMENTS_WHY_TITLE Why These Requirements Exist
+HELP_REQUIREMENTS_WHY_TEXT PayCal encrypts your data with a key that is unlocked by your passkey. Without a WebAuthn-capable device the encryption chain cannot be completed. These requirements reflect the cryptographic model that keeps your data private.
+HELP_REQUIREMENTS_WEBAUTHN_TITLE WebAuthn Support Required
+HELP_REQUIREMENTS_WEBAUTHN_TEXT PayCal uses the Web Authentication API (WebAuthn / FIDO2) for passkey registration and login. Browsers without WebAuthn support cannot complete registration or encrypted-data unlock. This is intentional and part of the security design.
+HELP_REQUIREMENTS_HTTPS_TITLE HTTPS and Secure Context
+HELP_REQUIREMENTS_HTTPS_TEXT WebAuthn only operates over a secure HTTPS connection. Attempts to register or authenticate over plain HTTP will be blocked by your browser. This protects the integrity of the passkey exchange and prevents credential interception.
+HELP_REQUIREMENTS_PASSKEYS_TITLE Passkey-Capable Device or Platform Authenticator
+HELP_REQUIREMENTS_PASSKEYS_TEXT Your device must be able to create and verify a passkey. This is typically a built-in biometric sensor or device PIN, referred to as a platform authenticator.
+HELP_REQUIREMENTS_PASSKEYS_ITEMS_TITLE Supported authenticator types
+HELP_REQUIREMENTS_PASSKEYS_ITEM_1 Built-in biometric: Touch ID, Face ID, Windows Hello, or Android biometric prompt
+HELP_REQUIREMENTS_PASSKEYS_ITEM_2 Device PIN as a fallback when biometrics are unavailable
+HELP_REQUIREMENTS_PASSKEYS_ITEM_3 Roaming authenticator: a hardware security key such as a FIDO2-compatible YubiKey
+HELP_REQUIREMENTS_BROWSERS_TITLE Supported Browsers
+HELP_REQUIREMENTS_BROWSERS_TEXT Use a modern, actively maintained browser. The following are known to work with WebAuthn passkeys:
+HELP_REQUIREMENTS_BROWSER_1 Chrome 100 or later (desktop and Android)
+HELP_REQUIREMENTS_BROWSER_2 Safari 16 or later (macOS 13+ and iOS 16+)
+HELP_REQUIREMENTS_BROWSER_3 Firefox 119 or later (desktop)
+HELP_REQUIREMENTS_BROWSER_4 Edge 100 or later
+HELP_REQUIREMENTS_BROWSER_5 Brave (based on a recent Chromium release)
+HELP_REQUIREMENTS_BROWSER_CAVEAT Older browser versions, non-mainstream forks, and browsers with WebAuthn APIs disabled do not meet the minimum requirement.
+HELP_REQUIREMENTS_UNSUPPORTED_TITLE If You See an Unsupported Browser Warning
+HELP_REQUIREMENTS_UNSUPPORTED_TEXT Update your browser, switch to a supported browser, or use a device that meets the requirements above. PayCal will not silently downgrade to a less secure path.
+HELP_WEBAUTHN_TITLE WebAuthn Security and Privacy Controls
+HELP_WEBAUTHN_DECK How WebAuthn, passkeys, and PayCal encryption work together to keep your data private.
+HELP_WEBAUTHN_WHY_TITLE Why PayCal Requires WebAuthn
+HELP_WEBAUTHN_WHY_TEXT PayCal uses passkeys for account registration and secure unlock. If your browser does not support WebAuthn you cannot complete passkey registration or unlock encrypted entries. This is intentional and part of the security design.
+HELP_WEBAUTHN_KEK_DEK_TITLE The KEK and DEK Encryption Model
+HELP_WEBAUTHN_KEK_DEK_TEXT PayCal protects your encrypted data with two keys. The DEK locks and unlocks entry data. The KEK protects the DEK when stored. Think of it as a key inside a lockbox.
+HELP_WEBAUTHN_DEK_LABEL DEK (Data Encryption Key)
+HELP_WEBAUTHN_DEK_DESC The key that locks and unlocks your entry data.
+HELP_WEBAUTHN_KEK_LABEL KEK (Key Encryption Key)
+HELP_WEBAUTHN_KEK_DESC A second key that protects the DEK when stored.
+HELP_WEBAUTHN_PRIVACY_TITLE What This Means for Privacy
+HELP_WEBAUTHN_PRIVACY_TEXT The privacy goal is simple: reduce exposure of sensitive keys and keep encrypted data protected at rest.
+HELP_WEBAUTHN_PRIVACY_ITEM_1 The DEK is used only when needed for active encrypt or decrypt operations.
+HELP_WEBAUTHN_PRIVACY_ITEM_2 Stored DEK material remains wrapped, not saved as plaintext key bytes.
+HELP_WEBAUTHN_PRIVACY_ITEM_3 Passkey-based unlock avoids relying on reusable password secrets for primary decrypt flows.
+HELP_WEBAUTHN_PRIVACY_ITEM_4 Unsupported browsers are blocked from passkey-required paths instead of being silently downgraded.
+HELP_WEBAUTHN_UNSUPPORTED_TITLE If You See an Unsupported Browser Warning
+HELP_WEBAUTHN_UNSUPPORTED_TEXT Use a modern browser with WebAuthn support over HTTPS then retry registration or unlock.
+HELP_WEBAUTHN_REQUIREMENTS_LINK See browser and device requirements
 SETTINGS_CALENDAR_LABEL_TODAY Today
 SETTINGS_CALENDAR_LABEL_DATE Date
 SETTINGS_CALENDAR_LABEL_LABEL Label
@@ -1169,7 +2617,6 @@ SETTINGS_STYLE_LABEL_SIDEBAR Sidebar
 SETTINGS_SECURITY_TABLE_ACTION Action
 SETTINGS_SECURITY_TABLE_TTL TTL
 SETTINGS_SECURITY_TABLE_LEFT Left
-
 CHANGE_EMAIL_STATUS_ENTER_BOTH_EMAILS Enter both email addresses.
 CHANGE_EMAIL_ERROR_ENTER_NEW_EMAIL Enter a new email address.
 CHANGE_EMAIL_ERROR_CONFIRM_NEW_EMAIL Confirm your new email address.
@@ -1192,7 +2639,6 @@ RECOVERY_EMAIL_STATUS_VERIFYING Verifying...
 RECOVERY_EMAIL_STATUS_VERIFIED Recovery email verified! ✓
 RECOVERY_EMAIL_STATUS_RESENDING_CODE Resending code...
 RECOVERY_EMAIL_STATUS_NEW_CODE_SENT New code sent!
-
 ORGANIZATIONS_MEMBERSHIP_CONSENT_TITLE Membership Consent
 ORGANIZATIONS_MEMBERSHIP_CONSENT_DESC Review and confirm before activating organization membership access.
 ORGANIZATIONS_MEMBERSHIP_CONSENT_DISCLAIMER_LABEL Reason / Disclaimer (optional)
@@ -1205,15 +2651,16 @@ ORGANIZATIONS_LOADING_ACCOUNT_ACTIVITY Loading account activity...
 ORGANIZATIONS_CREATE_NAME_REQUIRED Enter an organization name.
 ORGANIZATIONS_FAILED_LOAD_MEMBERS_GRID Failed to load members grid.
 ORGANIZATIONS_FAILED_LOAD_ACCESS_REQUESTS Failed to load access requests.
-
 SETTINGS_STYLE_LABEL_TYPOGRAPHY Typography
 SETTINGS_TYPOGRAPHY_STANDARD Standard
 SETTINGS_TYPOGRAPHY_DYSLEXIA_FRIENDLY Dyslexia-friendly
 SETTINGS_AUDIO_FEEDBACK_MODE_ARIA Audio feedback mode
+SETTINGS_SECTION_DATA_PORTABILITY Data Portability
+SETTINGS_SECTION_DATA_PORTABILITY_ACTION_LOG Action Log
+SETTINGS_SECTION_DATA_PORTABILITY_EXPORT_IMPORT Account data export and import
 SETTINGS_SECTION_PASSKEYS Passkeys
 SETTINGS_SECTION_SECURITY Security
 SETTINGS_SECTION_DEBUGGING_OPTIONAL Debugging (Optional)
-
 SETTINGS_VOICE_PICKER_ENABLE_CUES Enable Cues to choose a voice.
 SETTINGS_PASSKEYS_SECURITY_NOTE Add more passkeys to improve account security.
 SETTINGS_PASSKEYS_SR_INSTRUCTIONS Passkeys list. Edit a passkey name inline and press Enter to save. Use Remove to delete a passkey when multiple devices are registered.
@@ -1223,7 +2670,6 @@ SETTINGS_SECURITY_SESSION_TIMING_HELP Session + sensitive action timing.
 SETTINGS_DEBUGGING_FORM_ARIA Debugging Preferences Form
 SETTINGS_DEBUG_OPTION_OFF_DEFAULT Off (Default)
 SETTINGS_DEBUG_OPTION_ON_MORE_DETAILS On (More details)
-
 SETTINGS_SECURITY_LEVEL Level
 SETTINGS_SECURITY_LOW Low
 SETTINGS_SECURITY_HIGH High
@@ -1233,7 +2679,6 @@ SETTINGS_SECURITY_ROW_AUTO_SIGNOUT Auto Signout
 SETTINGS_SECURITY_ROW_ACCOUNT_EDIT Account Edit
 SETTINGS_SECURITY_ROW_CALENDAR_EDIT Calendar Edit
 SETTINGS_SECURITY_EMERGENCY_SIGNOUT Emergency Signout
-
 SETTINGS_DEBUG_PANEL_HOVER_HELP Debugging adds extra information to help identify issues. You can safely leave this off unless you're troubleshooting.
 SETTINGS_DEBUG_INTRO Turn on extra diagnostics to help troubleshoot issues. Safe to leave off.
 SETTINGS_DEBUG_PERF_NOTE For troubleshooting only. Enabling extra diagnostics may impact performance.
@@ -1243,22 +2688,18 @@ SETTINGS_DEBUG_FINE_GRAINED_HELP Capture deeper system-level debugging informati
 SETTINGS_DEBUG_FINE_GRAINED_HOVER Off keeps output minimal. On includes step-by-step internal logs.
 SETTINGS_DEBUG_NETWORK_HELP Track API requests and performance details while troubleshooting.
 SETTINGS_DEBUG_NETWORK_HOVER Off keeps network debug tracking disabled. On logs request timing details for diagnostics.
-
 SETTINGS_SECURITY_LEVEL_SLIDER_ARIA Security level slider
 SETTINGS_SECURITY_DERIVED_TIMEOUTS_ARIA Derived timeout values
 SETTINGS_SECURITY_EMERGENCY_WINDOW_ARIA Emergency signout window in milliseconds
-
 SETTINGS_SECURITY_LEVEL_HOVER_HELP Higher level shortens timeouts for stronger protection on shared devices.
 SETTINGS_SECURITY_ROW_AUTO_SIGNOUT_HOVER Auto signout ends inactive sessions to reduce unauthorized access risk.
 SETTINGS_SECURITY_ROW_ACCOUNT_EDIT_HOVER Account edit timeout limits how long profile changes stay unlocked.
 SETTINGS_SECURITY_ROW_CALENDAR_EDIT_HOVER Calendar edit timeout reduces chance of unwanted timesheet changes.
 SETTINGS_SECURITY_EMERGENCY_WINDOW_HOVER Press ESC three times within this window for immediate safety signout.
-
 SETTINGS_ARIA_EDIT_ACCOUNT_DETAILS Edit Account Details
 SETTINGS_ARIA_RECOVERY_ACCOUNT_DELETION_ACTIONS Recovery and account deletion actions
 SETTINGS_ARIA_DELETE_SITE_ROW Delete site row
 SETTINGS_ARIA_CALENDAR_PREFERENCES_FORM Calendar Preferences Form
-
 SETTINGS_CHANGE_EMAIL_SEND_CODES Send Verification Codes
 SETTINGS_CHANGE_EMAIL_COMPLETE Complete Email Change
 SETTINGS_CHANGE_EMAIL_RESEND_CODES Resend Codes
@@ -1271,11 +2712,9 @@ SETTINGS_RECOVERY_KEY_TITLE Recovery Key
 SETTINGS_RECOVERY_KEY_HELP_TEXT Create a Recovery Key to regain access if you lose your passkeys. Creating a new key disables the old one.
 SETTINGS_RECOVERY_KEY_BUTTON_HOVER Recovery Key is offline backup access. New keys invalidate older keys.
 SETTINGS_RECOVERY_KEY_CREATE_BUTTON Create Recovery Key
-
 SETTINGS_RECOVERY_LABEL Recovery
 SETTINGS_RECOVERY_PENDING_VERIFICATION Pending verification
 SETTINGS_RECOVERY_NOT_VERIFIED Not verified
-
 SETTINGS_RECOVERY_EMAIL_PLACEHOLDER Enter recovery email address
 SETTINGS_RECOVERY_EMAIL_ARIA_LABEL Recovery email address
 SETTINGS_RECOVERY_EMAIL_INPUT_HOVER Backup email for account recovery and verification.
@@ -1301,6 +2740,8 @@ SETTINGS_EDIT_DETAILS_PROVINCE_HOVER Select your province for payroll and tax de
 SETTINGS_EDIT_DETAILS_TIMEZONE_HOVER Pick your local timezone for calendar and pay periods.
 SETTINGS_EDIT_DETAILS_EMPLOYMENT_LABEL Employment
 SETTINGS_EDIT_DETAILS_EMPLOYMENT_HOVER Set your employment category for profile context.
+JOB_TITLE Job Title
+LOCALE Locale
 SETTINGS_EDIT_DETAILS_JOB_TITLE_LABEL Job Title
 SETTINGS_EDIT_DETAILS_JOB_TITLE_HOVER Your current role or position title.
 SETTINGS_EDIT_DETAILS_DEPARTMENT_LABEL Department

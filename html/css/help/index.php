@@ -53,17 +53,17 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .help_article h3 {
   margin: 2.5rem 0 1.5rem 0;
-  font-size: 1.3rem;
+  font-size: var(--font-lg);
 }
 
 .help_article h4 {
   margin: 2rem 0 1rem 0;
-  font-size: 1.1rem;
+  font-size: var(--font-md);
 }
 
 .help_article h5 {
   margin: 1.5rem 0 0.8rem 0;
-  font-size: 1rem;
+  font-size: var(--font-sm);
 }
 
 .help_article p {
@@ -257,7 +257,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .cards .card .card-body .metric span {
   flex: 1;
-  font-size: 1rem;
+  font-size: var(--font-sm);
 }
 
 .cards .card .card-body .metric strong {

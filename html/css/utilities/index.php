@@ -225,6 +225,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   display: none;
 }
 
+/* TEXT UTILITIES */
+.text-muted {
+  color: var(--panel-text);
+  opacity: 0.7;
+}
+
 /* RESPONSIVE: Mobile layout adjustments */
 @media (max-width: 900px) {
   .main {

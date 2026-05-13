@@ -266,6 +266,12 @@ header('X-Robots-Tag: index, follow, noai, noimageai, noodp, noydir, maximage-pr
  * @var non-falsy-string $pageTitle
  */
 
+// Start output buffering for doc pages so ContentView::process() can inject
+// view-switcher buttons and serve ?view=text or ?view=pdf alternatives.
+if (ContentView::isDocPage($currentPage)) {
+  ob_start();
+}
+
 ?><!DOCTYPE html><!-- Hello there. -->
 <html lang="<?php echo htmlspecialchars((string) $pageLanguage, ENT_QUOTES, 'UTF-8'); ?>" dir="ltr" prefix="og: http://ogp.me/ns#" data-os="<?php echo htmlspecialchars($platformToken, ENT_QUOTES, 'UTF-8'); ?>" data-a11y-animated-images="system" data-a11y-link-underlines="true" data-a11y-dyslexia-typography="<?php echo htmlspecialchars((string) (User::current()->dyslexia_typography ?? UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY), ENT_QUOTES, 'UTF-8'); ?>">
 
@@ -423,6 +429,9 @@ header('X-Robots-Tag: index, follow, noai, noimageai, noodp, noydir, maximage-pr
   <link rel="stylesheet" href="<?php echo Environment::appURL('css/' . $pageFile . '/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
   <link rel="stylesheet" href="<?php echo Environment::appURL('css/phantomwing/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
   <link rel="stylesheet" href="<?php echo Environment::appURL('css/responsive/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
+<?php if (in_array($currentPage, ['PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_ABOUT', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA'], true)): ?>
+  <link rel="stylesheet" href="<?php echo Environment::appURL('css/content-views/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
+<?php endif; ?>
 
   <link rel="dns-prefetch"                                 href="<?php echo Environment::appBaseURL(); ?>">
   <link rel="preconnect"                                   href="<?php echo Environment::appBaseURL(); ?>">
@@ -445,6 +454,13 @@ header('X-Robots-Tag: index, follow, noai, noimageai, noodp, noydir, maximage-pr
 ?>
 
   <script src="<?php echo Environment::appURL('js/guardian.js'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
+
+<?php
+// Load the print-trigger for ?view=pdf on doc-article pages.
+// External script + nonce satisfies CSP script-src without 'unsafe-inline'.
+if (ContentView::isDocPage($currentPage) && ($_GET['view'] ?? '') === 'pdf') { ?>
+  <script src="<?php echo Environment::appURL('js/print-trigger.js'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
+<?php } ?>
 
 <?php if ($isAuthenticated) { ?>
   <script type="module" src="<?php echo Environment::appURL('js/'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>

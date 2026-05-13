@@ -607,7 +607,7 @@ final class OrganizationDiscoveryService
     }
 
     $prepareKey = Keys::organizationInviteImportPrepare($importId);
-    Database::hset($prepareKey, [
+    Database::hsetex($prepareKey, [
       'import_id' => $importId,
       'organization_id' => $orgIdClean,
       'actor_uuid' => $actorUUID,
@@ -618,8 +618,7 @@ final class OrganizationDiscoveryService
       'summary' => $summaryJson,
       'created_at' => date('c'),
       'status' => 'prepared',
-    ]);
-    Database::expire($prepareKey, self::BULK_IMPORT_PREPARE_TTL_SECONDS);
+    ], self::BULK_IMPORT_PREPARE_TTL_SECONDS);
 
     $this->appendAuditEvent($orgIdClean, 'invite.bulk_prepare', $actorUUID, [
       'import_id' => $importId,
@@ -663,7 +662,7 @@ final class OrganizationDiscoveryService
     $authorityEmail = $this->arrayStringValue($prepareData, 'authority_email');
     $challengeKey = Keys::organizationInviteImportChallenge($challengeId);
 
-    Database::hset($challengeKey, [
+    Database::hsetex($challengeKey, [
       'challenge_id' => $challengeId,
       'import_id' => $importId,
       'organization_id' => trim(InputSanitizer::sanitizeString($orgId)),
@@ -674,8 +673,7 @@ final class OrganizationDiscoveryService
       'consumed' => '0',
       'created_at' => date('c'),
       'expires_at' => (string) (time() + self::BULK_IMPORT_CHALLENGE_TTL_SECONDS),
-    ]);
-    Database::expire($challengeKey, self::BULK_IMPORT_CHALLENGE_TTL_SECONDS + 60);
+    ], self::BULK_IMPORT_CHALLENGE_TTL_SECONDS + 60);
 
     $sent = false;
     if (defined('PHPUNIT_COMPOSER_INSTALL') || !defined('PC_NAME')) {

@@ -110,7 +110,7 @@ final class EmailChangeTransaction
      */
     public function save(): void {
         $key = Keys::emailChangeTransaction($this->txnId);
-        Database::hset($key, [
+        $fields = [
             'user_uuid' => $this->userUuid,
             'old_email' => $this->oldEmail,
             'new_email' => $this->newEmail,
@@ -124,12 +124,13 @@ final class EmailChangeTransaction
             'verify_attempts' => (string) $this->verifyAttempts,
             'resend_count' => (string) $this->resendCount,
             'status' => $this->status,
-        ]);
+        ];
 
-        // Set TTL to expiry time
         $ttl = max(0, $this->expiresAt - time());
         if ($ttl > 0) {
-            Database::expire($key, $ttl + 600); // Add 10m buffer
+            Database::hsetex($key, $fields, $ttl + 600); // Add 10m buffer
+        } else {
+            Database::hset($key, $fields);
         }
     }
 

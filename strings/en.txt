@@ -245,13 +245,14 @@ AUTH_RECOVER_CONTINUE_TO_PAYCAL Continue to PayCal
 AUTH_RECOVER_DEFAULT_DEVICE_NAME Recovered Passkey
 AUTH_RECOVER_HEADING Recover your account
 AUTH_RECOVER_INTRO_LINE_1 We'll help you regain access in three steps.
-AUTH_RECOVER_INTRO_LINE_2 You'll need: a code from your email and your Recovery Key.
+AUTH_RECOVER_INTRO_LINE_2 Use either a recovery code or magic link from your email, plus your Recovery Key.
 AUTH_RECOVER_KEY_LABEL Recovery Key
 AUTH_RECOVER_META_TITLE Recover Account - PayCal
 AUTH_RECOVER_NEW_PASSKEY_NAME New passkey name
 AUTH_RECOVER_REGISTER_NEW_PASSKEY Register new passkey
 AUTH_RECOVER_SEND_CODE Send code
 AUTH_RECOVER_SIGN_IN_INSTEAD Sign in instead
+AUTH_RECOVER_STATUS_MAGIC_LINK Verifying recovery link...
 AUTH_RECOVER_STATUS_START Enter your account email to begin.
 AUTH_RECOVER_STEPS_ARIA_LABEL Recovery steps
 AUTH_RECOVER_STEP_PASSKEY Passkey
@@ -1127,6 +1128,7 @@ ORGANIZATIONS_ALLOWED_CONTACT_DOMAINS Allowed Contact Domains
 ORGANIZATIONS_ALLOWED_CONTACT_DOMAINS_PLACEHOLDER example.com, payroll.example.com
 ORGANIZATIONS_AUDIT_ACTOR actor
 ORGANIZATIONS_AUDIT_ARIA Organization audit timeline
+ORGANIZATIONS_AUDIT_CONTROL_TEST_H3 Audit Control Test
 ORGANIZATIONS_AUDIT_EVENT event
 ORGANIZATIONS_AUDIT_SR Organization audit timeline. Each row includes time, event type, actor, and details.
 ORGANIZATIONS_AUDIT_TIMELINE Audit Timeline
@@ -1178,6 +1180,7 @@ ORGANIZATIONS_CURRENT_ORG_CALLOUT Checking your current organization relationshi
 ORGANIZATIONS_CURRENT_ORG_REVOKE_HELP Revoking access will remove your profile from the organization, stop all shared access, and may require a new request to restore access later.
 ORGANIZATIONS_CURRENT_ORG_TITLE Current Organization
 ORGANIZATIONS_CURRENT_PANEL_HELP Your current shared organization relationship and access status.
+ORGANIZATIONS_DANGER_ZONE DANGER ZONE
 ORGANIZATIONS_DEFAULTS Organization Defaults
 ORGANIZATIONS_DEFAULTS_SAVED Organization defaults saved.
 ORGANIZATIONS_DEFAULTS_SAVE_FAILED Couldn't save your organization defaults. Please try again.
@@ -1243,6 +1246,11 @@ ORGANIZATIONS_GRID_PLACEHOLDER Your organizations will appear here.
 ORGANIZATIONS_GRID_SR_CONTEXT Rows include organization name, type, role, and status. Click to open organization editor.
 ORGANIZATIONS_GRID_SR_INSTRUCTIONS Organizations grid. Use search to filter organizations and click a row to view details.
 ORGANIZATIONS_HEADER_PANEL_HELP Manage organizations and create a new organization from this header panel.
+ORGANIZATIONS_HIERARCHY_CONSEQUENCES_TITLE Consequences
+ORGANIZATIONS_HIERARCHY_OWNERSHIP_TITLE Ownership
+ORGANIZATIONS_HIERARCHY_PERMISSIONS_TITLE Permissions and Scope
+ORGANIZATIONS_HIERARCHY_ROLES_TITLE Roles
+ORGANIZATIONS_HIERARCHY_TITLE Hierarchy, Permissions, and Consequences
 ORGANIZATIONS_HTML <em>O</em>rganizations
 ORGANIZATIONS_HUB_CALLOUT_FREE Find and connect with an organization, or view your current membership.
 ORGANIZATIONS_HUB_CALLOUT_PREMIUM If you need to connect with another organization or share your own personal work data, you can do that too!
@@ -1557,6 +1565,17 @@ PREMIUM_PAGE_WHO_TITLE Who Premium is for
 PRIMARY Primary
 PROFILE Profile
 PROFILE_ADDRESS_LABEL Address
+PROFILE_ACCOUNT_ACTIVITY_ACTIVE_SESSIONS_ARIA Active sessions
+PROFILE_ACCOUNT_ACTIVITY_BROWSER_ARIA Browser details
+PROFILE_ACCOUNT_ACTIVITY_H3_ACTIVE_SESSIONS Active Sessions
+PROFILE_ACCOUNT_ACTIVITY_H3_BROWSER_DETAILS Browser Details
+PROFILE_ACCOUNT_ACTIVITY_H3_CURRENT_LOGIN Current Login
+PROFILE_ACCOUNT_ACTIVITY_INTRO Current login details, browser information, and active session metadata.
+PROFILE_ACCOUNT_ACTIVITY_LOGIN_ARIA Current login details
+PROFILE_ACCOUNT_ACTIVITY_PANEL_HELP Account activity for current and active sessions.
+PROFILE_ACCOUNT_ACTIVITY_TITLE Account Activity
+PROFILE_INTERNATIONALIZATION_PANEL_HELP Language, locale, currency, and timezone preferences with live formatting preview.
+PROFILE_INTERNATIONALIZATION_TITLE Internationalization
 PROFILE_BILLING_CANCEL_DATE_DETAILS_ARIA Cancellation date and time details
 PROFILE_BILLING_CANCEL_DATE_TRIGGER Show cancellation date and time conversions
 PROFILE_BILLING_CANCEL_SCHEDULED_PREFIX Cancellation scheduled. You keep full Premium access through
@@ -1691,6 +1710,20 @@ SCRAPER_DEFENSE Scraper Defense
 SEARCH Search
 SEARCH_USER Search for user to add
 SECONDARY Secondary
+SECURITY_CONTACT_H2 Contact
+SECURITY_CONTROLS_H2 Controls
+SECURITY_LAST_UPDATED_H2 Last Updated
+SECURITY_LAST_UPDATED_NOTE This page reflects sanitized trust-bundle outputs only; internal paths and raw logs are excluded.
+SECURITY_NARRATIVE_H2 Narrative Snapshot
+SECURITY_OVERVIEW_H2 Overview
+SECURITY_PAGE_LABEL Security
+SECURITY_PAGE_TITLE Security - [PayCal]
+SECURITY_PRACTICES_H2 Practices
+SECURITY_TABLE_CONTROL Control
+SECURITY_TABLE_STATUS Status
+SECURITY_TABLE_SYSTEM_COMPONENT System Component
+SECURITY_TRUST_HUB_DECK PayCal is aligned with SOC 2 security principles and operates a deterministic control evidence pipeline.
+SECURITY_TRUST_HUB_H1 Security Trust Hub
 SELECT_AUTHENTICATION_LEVEL Select authentication level
 SELECT_MONTH_ARIA_PREFIX Select month
 SELECT_YEAR_ARIA_PREFIX Select year

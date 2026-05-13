@@ -794,7 +794,7 @@ button.cal_menu_selected:focus-visible {
   color: var(--panel-head-fore);
   text-align: center;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 0.75rem;
   border-right: 1px solid var(--panel-border);
 }
 
@@ -954,14 +954,14 @@ button.cal_menu_selected:focus-visible {
   min-width: 0;
   border-bottom: none;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 0.8rem;
   color: var(--panel-head-fore);
   transition: color 120ms ease;
 }
 
 /* Content area with metrics */
 .datagrid_month_cell_content {
-  font-size: 11px;
+  font-size: 0.65rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -983,7 +983,7 @@ button.cal_menu_selected:focus-visible {
   background: color-mix(in srgb, var(--panel-bg) 80%, transparent);
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
   color: var(--panel-text);
-  font-size: 16.5px;
+  font-size: 0.92rem;
   line-height: 1.2;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -1046,7 +1046,7 @@ button.cal_menu_selected:focus-visible {
   border-radius: 10px;
   background: rgba(0, 188, 212, 0.15);
   color: var(--color-primary);
-  font-size: 10px;
+  font-size: 0.6rem;
   font-weight: 700;
 }
 
@@ -1063,7 +1063,7 @@ button.cal_menu_selected:focus-visible {
   text-align: center;
   color: var(--panel-text);
   opacity: 0.5;
-  font-size: 14px;
+  font-size: 0.8rem;
 }
 
 /* =========================================================================
@@ -1138,7 +1138,7 @@ button.cal_menu_selected:focus-visible {
 
 .form-field label {
   font-weight: 600;
-  font-size: 13px;
+  font-size: 0.75rem;
   color: var(--panel-head-fore);
 }
 
@@ -1149,7 +1149,7 @@ button.cal_menu_selected:focus-visible {
   border-radius: 4px;
   background: var(--panel-bg);
   color: var(--panel-text);
-  font-size: 13px;
+  font-size: 0.75rem;
   font-family: inherit;
 }
 
@@ -1170,7 +1170,7 @@ button.cal_menu_selected:focus-visible {
 
 .success-message p {
   margin: 6px 0;
-  font-size: 13px;
+  font-size: 0.75rem;
 }
 
 .success-message p:first-child {
@@ -1195,7 +1195,7 @@ button.cal_menu_selected:focus-visible {
   padding: 12px 8px;
   text-align: left;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 0.75rem;
   border-bottom: 2px solid var(--panel-border);
 }
 
@@ -1218,7 +1218,7 @@ button.cal_menu_selected:focus-visible {
   color: var(--panel-text);
   border: 1px solid var(--panel-border);
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 0.75rem;
 }
 
 .work-entries-table input:focus,
@@ -1317,7 +1317,7 @@ button.cal_menu_selected:focus-visible {
     width: 90%;
   }
   .datagrid_month_cell_content {
-    font-size: 10px;
+    font-size: 0.6rem;
     gap: 4px;
   }
 }
@@ -1366,16 +1366,16 @@ button.cal_menu_selected:focus-visible {
 
   .calendar-v2-weekday-header {
     padding: 8px 4px;
-    font-size: 11px;
+    font-size: 0.65rem;
   }
 
   .datagrid_month_cell_header {
-    font-size: 12px;
+    font-size: 0.7rem;
     margin-bottom: 6px;
   }
 
   .datagrid_month_cell_content {
-    font-size: 9px;
+    font-size: 0.55rem;
     gap: 3px;
   }
 }
@@ -1405,7 +1405,7 @@ button.cal_menu_selected:focus-visible {
    ========================================================================= */
 
 .datagrid_month_cell_content .work {
-  font-size: 11px;
+  font-size: 0.65rem;
   line-height: 1.4;
   padding: 4px 0;
   margin: 4px 0 0 0;
@@ -1432,7 +1432,7 @@ button.cal_menu_selected:focus-visible {
 /* Responsive: show line breaks on smaller screens */
 @media (max-width: 1024px) {
   .datagrid_month_cell_content .work {
-    font-size: 10px;
+    font-size: 0.6rem;
   }
 }
 
@@ -1475,7 +1475,7 @@ button.cal_menu_selected:focus-visible {
   color: var(--panel-head-fore);
   text-align: center;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 0.75rem;
   border-right: 1px solid var(--panel-border);
 }
 
@@ -1524,7 +1524,7 @@ button.cal_menu_selected:focus-visible {
 /* Day number header */
 /* Content area with metrics */
 .datagrid_month_cell_content {
-  font-size: 11px;
+  font-size: 0.65rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1562,7 +1562,7 @@ button.cal_menu_selected:focus-visible {
   border-radius: 10px;
   background: rgba(0, 188, 212, 0.15);
   color: var(--color-primary);
-  font-size: 10px;
+  font-size: 0.6rem;
   font-weight: 700;
 }
 
@@ -1579,7 +1579,7 @@ button.cal_menu_selected:focus-visible {
   text-align: center;
   color: var(--panel-text);
   opacity: 0.5;
-  font-size: 14px;
+  font-size: 0.8rem;
 }
 
 /* RESPONSIVE */
@@ -1591,12 +1591,12 @@ button.cal_menu_selected:focus-visible {
   }
 
   .datagrid_month_cell_header {
-    font-size: 13px;
+    font-size: 0.75rem;
     margin-bottom: 8px;
   }
 
   .datagrid_month_cell_content {
-    font-size: 10px;
+    font-size: 0.6rem;
     gap: 4px;
   }
 }
@@ -1619,16 +1619,16 @@ button.cal_menu_selected:focus-visible {
 
   .calendar-v2-weekday-header {
     padding: 8px 4px;
-    font-size: 11px;
+    font-size: 0.65rem;
   }
 
   .datagrid_month_cell_header {
-    font-size: 12px;
+    font-size: 0.7rem;
     margin-bottom: 6px;
   }
 
   .datagrid_month_cell_content {
-    font-size: 9px;
+    font-size: 0.55rem;
     gap: 3px;
   }
 }

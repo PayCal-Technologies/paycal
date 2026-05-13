@@ -143,12 +143,11 @@ final class RecoveryEmailController
 
       // Store code hash with expiry
       $codeKey = Keys::recoveryEmailCode($user->user_uuid);
-      Database::hset($codeKey, [
+      Database::hsetex($codeKey, [
         'code_hash' => $codeHash,
         'expires_at' => (string) $expiresAt,
         'created_at' => (string) $now,
-      ]);
-      Database::expire($codeKey, $ttlMinutes * 60 + 300);
+      ], $ttlMinutes * 60 + 300);
 
       // Send code to recovery email
       $sent = EmailGarum::sendRecoveryEmailVerificationCode($recoveryEmail, $user->full_name, $code);
@@ -394,13 +393,12 @@ final class RecoveryEmailController
       $expiresAt = $now + ($ttlMinutes * 60);
 
       $codeKey = Keys::recoveryEmailCode($user->user_uuid);
-      Database::hset($codeKey, [
+      Database::hsetex($codeKey, [
         'code_hash' => $codeHash,
         'expires_at' => (string) $expiresAt,
         'created_at' => (string) $now,
         'verify_attempts' => '0',
-      ]);
-      Database::expire($codeKey, $ttlMinutes * 60 + 300);
+      ], $ttlMinutes * 60 + 300);
 
       // Send code
       $sent = EmailGarum::sendRecoveryEmailVerificationCode($recoveryEmail, $user->full_name, $code);

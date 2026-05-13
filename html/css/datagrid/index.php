@@ -19,7 +19,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 /* DATAGRID */
 .datagrid {
   font-family: var(--monospace);
-  font-size: 10px;
+  font-size: 0.6rem;
 }
 
 .datagrid_cols_1 { --datagrid_cols: 1; }
@@ -46,7 +46,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   padding: 8px 12px;
   border: 1px solid transparent;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color var(--short-transition) ease, color var(--short-transition) ease;
@@ -73,7 +73,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   padding: 8px 12px;
   border: 1px solid var(--btn-border);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 0.8rem;
 }
 
 /* Table container */
@@ -252,7 +252,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 .datagrid_empty {
   padding: 12px;
-  font-size: 10px;
+  font-size: 0.6rem;
   text-align: center;
   color: var(--panel-text);
   opacity: 0.6;

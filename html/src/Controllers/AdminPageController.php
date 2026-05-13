@@ -387,7 +387,7 @@ class AdminPageController
     $failureClass = $todayFailure > 0 ? 'danger' : 'success';
 
     $contactHealthHtml = ""
-      . "<div class='admin-card'>"
+      . "<div class='admin-card panel'>"
       . "<div class='admin-card-header'><h3>" . htmlspecialchars(self::batchI18n('ADMIN_CONTACT_PIPELINE_HEALTH'), ENT_QUOTES, 'UTF-8') . "</h3></div>"
       . "<div class='admin-card-body'>"
       . "<p>" . htmlspecialchars(self::batchI18n('ADMIN_TOTAL_SUBMISSIONS'), ENT_QUOTES, 'UTF-8') . ": <strong>" . Strings::formatLocalizedNumber($totalSubmissions, 0, 0) . "</strong></p>"
@@ -418,10 +418,9 @@ class AdminPageController
     }
     $stripeHealthClass = ($verificationFailures > 0 || $rejectedWebhooks > 0) ? 'danger' : 'success';
     $stripeHealthHtml = ""
-      . "<div class='admin-card'>"
+      . "<div class='admin-card panel'>"
       . "<div class='admin-card-header'><h3>" . htmlspecialchars(self::batchI18n('ADMIN_STRIPE_OVERVIEW'), ENT_QUOTES, 'UTF-8') . "</h3></div>"
-      . "<div class='admin-card-body'>"
-      . "<p>" . htmlspecialchars(self::batchI18n('ADMIN_TODAY_PROCESSED_WEBHOOKS'), ENT_QUOTES, 'UTF-8') . ": <strong>" . Strings::formatLocalizedNumber($processedWebhooks, 0, 0) . "</strong></p>"
+      . "<div class='admin-card-body'>" . Strings::formatLocalizedNumber($processedWebhooks, 0, 0) . "</strong></p>"
       . "<p class='" . $stripeHealthClass . "'>" . htmlspecialchars(self::batchI18n('ADMIN_VERIFICATION_FAILURES_REJECTED_EVENTS'), ENT_QUOTES, 'UTF-8') . ": <strong>"
       . Strings::formatLocalizedNumber($verificationFailures, 0, 0) . " / " . Strings::formatLocalizedNumber($rejectedWebhooks, 0, 0) . "</strong></p>"
       . "<p>" . htmlspecialchars(self::batchI18n('ADMIN_TRACKED_EVENT_TYPES_WITH_ACTIVITY'), ENT_QUOTES, 'UTF-8') . ": <strong>" . Strings::formatLocalizedNumber($trackedEventTypes, 0, 0) . "</strong></p>"
@@ -639,7 +638,7 @@ class AdminPageController
         $categoryLabelRaw = $categoryLabels[$categoryKey] ?? ucfirst($categoryKey);
         $categoryLabel = self::asString($categoryLabelRaw, ucfirst($categoryKey));
 
-        $html .= "<section class='admin_panel' data-category='{$categoryKey}'>";
+        $html .= "<section class='admin_panel panel' data-category='{$categoryKey}'>";
         $html .= "<h2 class='admin_panel_title'>".htmlspecialchars($categoryLabel).'</h2>';
 
         foreach ($limits as $key => $spec) {

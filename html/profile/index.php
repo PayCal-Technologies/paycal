@@ -236,10 +236,10 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
     </form>
   </section>
 
-  <section class="panel" id="panel-internationalization" title="Internationalization" data-hover-help="Language, locale, currency, and timezone preferences with live formatting preview.">
+  <section class="panel" id="panel-internationalization" title="<?php echo profile_index_i18n('PROFILE_INTERNATIONALIZATION_TITLE'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_INTERNATIONALIZATION_PANEL_HELP'); ?>">
     <div class="organizations_section_header">
       <div>
-        <h2>Internationalization</h2>
+        <h2><?php echo profile_index_i18n('PROFILE_INTERNATIONALIZATION_TITLE'); ?></h2>
       </div>
     </div>
 
@@ -467,29 +467,29 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
     </div>
   </section>
 
-  <section class="panel" id="panel-account-activity" data-hover-help="Account activity for current and active sessions.">
+  <section class="panel" id="panel-account-activity" data-hover-help="<?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_PANEL_HELP'); ?>">
     <div class="organizations_section_header">
       <div>
-        <h2>Account Activity</h2>
-        <p class="help_text">Current login details, browser information, and active session metadata.</p>
+        <h2><?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_TITLE'); ?></h2>
+        <p class="help_text"><?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_INTRO'); ?></p>
       </div>
     </div>
 
     <div id="account_activity_status" class="status_text compact_hint" role="status" aria-live="polite"></div>
 
     <div class="account_activity_grid">
-      <section class="account_activity_card" aria-label="Current login details">
-        <h3>Current Login</h3>
+      <section class="account_activity_card" aria-label="<?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_LOGIN_ARIA'); ?>">
+        <h3><?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_H3_CURRENT_LOGIN'); ?></h3>
         <dl id="account_activity_login_details" class="account_activity_list"></dl>
       </section>
 
-      <section class="account_activity_card" aria-label="Browser details">
-        <h3>Browser Details</h3>
+      <section class="account_activity_card" aria-label="<?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_BROWSER_ARIA'); ?>">
+        <h3><?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_H3_BROWSER_DETAILS'); ?></h3>
         <dl id="account_activity_browser_details" class="account_activity_list"></dl>
       </section>
 
-      <section class="account_activity_card account_activity_card_sessions" aria-label="Active sessions">
-        <h3>Active Sessions</h3>
+      <section class="account_activity_card account_activity_card_sessions" aria-label="<?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_ACTIVE_SESSIONS_ARIA'); ?>">
+        <h3><?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_H3_ACTIVE_SESSIONS'); ?></h3>
         <div id="account_activity_sessions" class="account_activity_sessions"></div>
       </section>
     </div>

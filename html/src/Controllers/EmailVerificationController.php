@@ -504,24 +504,23 @@ final class EmailVerificationController
     $recoveryKeyFormatted = RecoveryKey::format($recoveryKeyEncoded);
 
     // Derive recovery KEK/proof key from raw bytes.
-    RecoveryKey::deriveKEK($recoveryKeyBytes, $recoverySalt);
+    // Note: KEK is derived here only as a side-effect validation; the actual DEK wrap
+    // happens client-side when the user is logged in with the DEK in memory.
     $recoveryProofKey = base64_encode(RecoveryKey::deriveProofKey($recoveryKeyBytes, $recoverySalt));
 
-    // NOTE: In production, DEK must be retrieved from client session
-    // For now, we'll set recovery_key_generated flag and store salt
-    // Actual DEK wrapping will happen when user is logged in with DEK in memory
-
-    // Mark recovery key as generated
-    Database::hset(Keys::USER.':'.$user->user_uuid, [
-        'recovery_key_generated' => '1',
-        'recovery_proof_key' => $recoveryProofKey,
-        'recovery_proof_key_version' => '1',
-    ]);
-
-    // Send recovery key email
+    // Send recovery key email FIRST — only persist generated state after confirmed delivery.
+    // If the email fails and we had already written recovery_key_generated=1, the user
+    // would be permanently locked out of account recovery with no way to regenerate.
     $sent = EmailGarum::sendRecoveryKeyEmail($recoveryKeyFormatted, $user->email, $user->full_name);
 
     if ($sent) {
+      // Mark recovery key as generated only after successful delivery.
+      Database::hset(Keys::USER.':'.$user->user_uuid, [
+          'recovery_key_generated' => '1',
+          'recovery_proof_key' => $recoveryProofKey,
+          'recovery_proof_key_version' => '1',
+      ]);
+
       SecurityLog::log('recovery_key_sent', [
           'user_uuid' => $user->user_uuid,
           'email' => $user->email,

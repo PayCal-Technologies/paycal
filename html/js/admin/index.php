@@ -345,20 +345,22 @@ document.addEventListener("DOMContentLoaded", () => {
 let currentLang = '<?php echo \PayCal\Domain\Language::DEFAULT; ?>';
 
   // Load content when tab changes
-  const radios = document.querySelectorAll('input[name="lang_tabs"]');
-  if (radios.length > 0) {
-    radios.forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        const lang = e.target.id.replace('lang_', '');
+  const tabBtns = document.querySelectorAll('.lang-editor__tab-btn');
+  if (tabBtns.length > 0) {
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.setAttribute('aria-selected', 'false'));
+        btn.setAttribute('aria-selected', 'true');
+        const lang = btn.dataset.lang;
         currentLang = lang;
         loadLangContent(lang);
       });
     });
 
-    // Load initial content for checked tab
-    const checkedRadio = document.querySelector('input[name="lang_tabs"]:checked');
-    if (checkedRadio) {
-      currentLang = checkedRadio.id.replace('lang_', '');
+    // Load initial content for active tab
+    const activeBtn = document.querySelector('.lang-editor__tab-btn[aria-selected="true"]');
+    if (activeBtn) {
+      currentLang = activeBtn.dataset.lang;
       loadLangContent(currentLang);
     }
   }
