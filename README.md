@@ -172,31 +172,28 @@ PayCal organizes functionality into clearly scoped components.
 
 # Test Coverage
 
-Suite inventory (as of 2026-04-12):
+Suite inventory (as of 2026-05-12):
 
-- **1,509 listed tests**
-- **163 test files**
-- **77 Unit**, **54 Integration**, **30 Contract**, **2 Manual**
+- **1,574 listed tests**
+- **170 test files**
+- **80 Unit**, **57 Integration**, **31 Contract**, **2 Manual**
 
-Latest validation snapshot (2026-03-26):
+Latest validation snapshot (2026-05-12):
 
 - **0 test failures**
 - **0 test errors**
-- **26 skipped tests**
-- **1 PHPUnit runner warning**
-- **8 PHPUnit deprecations**
 - **PHPStan Level 9 clean**
 
 ### Test Categories
 
 | Type | Description |
 |------|-------------|
-| Unit tests (70 files) | Domain logic and service-layer behavior, including security, accessibility, and fault-surface safety checks |
-| Integration tests (53 files) | Full-stack workflows including encryption/passkey, auth/account lifecycle, email, and controller/API behavior |
-| Contract tests (30 files) | API and persistence boundary guarantees |
+| Unit tests (80 files) | Domain logic and service-layer behavior, including security, accessibility, and fault-surface safety checks |
+| Integration tests (57 files) | Full-stack workflows including encryption/passkey, auth/account lifecycle, email, and controller/API behavior |
+| Contract tests (31 files) | API and persistence boundary guarantees |
 | Manual tests (2 files) | Operator verification scripts for complex scenarios |
 
-Current inventory reflects the active PHPUnit suite layout in `phpunit.xml` as re-evaluated on 2026-04-12 via `./vendor/bin/phpunit --configuration phpunit.xml --list-tests`.
+Current inventory reflects the active PHPUnit suite layout in `phpunit.xml` as re-evaluated on 2026-05-12 via `./vendor/bin/phpunit --configuration phpunit.xml --list-tests`.
 
 ### Run Tests
 
