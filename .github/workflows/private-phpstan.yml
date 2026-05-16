@@ -1,0 +1,92 @@
+name: PHPStan
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+on:
+  push:
+    paths:
+      - "html/**"
+      - "scripts/check-semantic-diff.php"
+      - "scripts/test/**"
+      - ".php-cs-fixer.php"
+      - "composer.json"
+      - "composer.lock"
+      - "phpstan.neon"
+      - ".github/workflows/phpstan.yml"
+  pull_request:
+    paths:
+      - "html/**"
+      - "scripts/check-semantic-diff.php"
+      - "scripts/test/**"
+      - ".php-cs-fixer.php"
+      - "composer.json"
+      - "composer.lock"
+      - "phpstan.neon"
+      - ".github/workflows/phpstan.yml"
+
+jobs:
+  phpstan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ["8.4", "8.5"]
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f  # v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
+        with:
+          path: vendor
+          key: composer-${{ matrix.php-version }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run formatter policy check
+        run: composer run format:check
+
+      - name: Run semantic diff policy check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -e
+          if [ -n "${BASE_SHA}" ] && [ "${BASE_SHA}" != "0000000000000000000000000000000000000000" ]; then
+            php scripts/check-semantic-diff.php --base-ref "${BASE_SHA}" --head-ref "${HEAD_SHA}"
+          else
+            echo "No comparable base SHA available; skipping range semantic diff scan."
+          fi
+
+      - name: Run docblock quality gates
+        run: composer run quality:docblocks
+
+      - name: Enforce No Baseline Policy
+        run: |
+          if grep -q "baseline" phpstan.neon; then
+            echo "❌ Baselines are not allowed."
+            exit 1
+          fi
+          if [ -f phpstan-baseline.neon ]; then
+            echo "❌ phpstan-baseline.neon is not allowed."
+            exit 1
+          fi
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --level=9 --no-progress --memory-limit=512M

@@ -9,7 +9,8 @@ use PayCal\Infrastructure\Telemetry\SecurityLog;
 /**
  * ProtectedMode.php
  *
- * Purpose: Define the ProtectedMode class for PayCal\Domain.
+ * Purpose: Session-level flag that tracks password-only login state when passkeys
+ *          are enabled, used to surface security upgrade prompts.
  *
  * PHP version 8.4.16
  *

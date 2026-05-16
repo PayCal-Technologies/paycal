@@ -34,6 +34,14 @@ $startTime = -microtime(true);
 $hash = Authentication::getCookie();
 $isAuthenticated = $hash !== '';
 
+// Dev-only bypass: treat as authenticated when DEV_AUTH_BYPASS=true and APP_ENV=dev.
+if (!$isAuthenticated) {
+  $devBypassHeader = $_ENV['DEV_AUTH_BYPASS'] ?? getenv('DEV_AUTH_BYPASS');
+  if (in_array(Environment::appEnv(), ['dev', 'mac'], true) && (string) $devBypassHeader === 'true') {
+    $isAuthenticated = true;
+  }
+}
+
 /** Public pages that don't require authentication */
 $publicPages = ['PAGE_SIGNIN', 'PAGE_REGISTER', 'PAGE_CONTACT', 'PAGE_AUTH', 'PAGE_ABOUT', 'PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA', 'PAGE_PREMIUM'];
 

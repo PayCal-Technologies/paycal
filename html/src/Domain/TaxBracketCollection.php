@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * TaxBracketCollection.php
  *
- * Purpose: Define the TaxBracketCollection class for PayCal\Domain.
+ * Purpose: Ordered, iterable collection of TaxBracket value objects with JSON
+ *          serialization and cumulative bracket-level tax calculation helpers.
  *
  * PHP version 8.4.16
  *

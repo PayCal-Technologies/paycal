@@ -6,7 +6,8 @@ use PayCal\Domain\Constants\Keys;
 /**
  * KEK.php
  *
- * Purpose: Define the KEK class for PayCal\Domain.
+ * Purpose: Key Encryption Key (KEK) lifecycle model: identity, ownership, and
+ *          rotation contracts that remain independent of user identity.
  *
  * PHP version 8.4.16
  *

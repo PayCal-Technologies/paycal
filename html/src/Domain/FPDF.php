@@ -3,7 +3,7 @@
 /**
  * FPDF.php
  *
- * Purpose: Reserve the FPDF integration stub for PayCal\Domain.
+ * Purpose: Placeholder stub reserving the FPDF integration seam; no class body until a PDF generation requirement is confirmed.
  *
  * PHP version 8.4.16
  *

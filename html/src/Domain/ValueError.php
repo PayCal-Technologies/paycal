@@ -5,7 +5,7 @@ namespace PayCal\Domain;
 /**
  * ValueError.php
  *
- * Purpose: Define the ValueError class for PayCal\Domain.
+ * Purpose: Domain-layer ValueError for value validation failures inside domain logic.
  *
  * PHP version 8.4.16
  *
@@ -17,8 +17,5 @@ namespace PayCal\Domain;
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
- */
-/**
- * ValueError exception.
  */
 class ValueError extends \Exception {}

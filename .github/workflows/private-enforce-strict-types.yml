@@ -1,0 +1,35 @@
+name: EnforceStrictTypes
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+on:
+  push:
+    paths:
+      - "html/**/*.php"
+  pull_request:
+    paths:
+      - "html/**/*.php"
+  workflow_dispatch:
+
+jobs:
+  strict-types:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Ensure strict_types is declared
+        run: |
+          set -euo pipefail
+          FAIL=0
+          for file in $(find html -type f -name "*.php"); do
+            if ! grep -q "declare(strict_types=1);" "$file"; then
+              echo "::error file=$file::Missing declare(strict_types=1);"
+              FAIL=1
+            fi
+          done
+          exit $FAIL

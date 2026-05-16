@@ -814,6 +814,34 @@ echo Render::dialog([
     </div>
 
     <br>
+
+    <div class="flex f_baseline w100">
+      <label class="w25">Proximity</label>
+      <div class="w75">
+        <div class="radio_group pill_group" data-hover-help="Automatically reveal the sidebar when the mouse moves near its edge.">
+          <input class="radio" type="radio" id="nav_proximity_off" name="nav_proximity" value="off">
+          <label for="nav_proximity_off">Off</label>
+          <input class="radio" type="radio" id="nav_proximity_on" name="nav_proximity" value="on">
+          <label for="nav_proximity_on">On</label>
+        </div>
+      </div>
+    </div>
+
+    <br>
+
+    <div class="flex f_baseline w100">
+      <label class="w25">Overlay</label>
+      <div class="w75">
+        <div class="radio_group pill_group" data-hover-help="Push shifts page content aside when the sidebar is open. Overlay floats the sidebar on top of content.">
+          <input class="radio" type="radio" id="nav_overlay_push" name="nav_overlay" value="push">
+          <label for="nav_overlay_push">Off</label>
+          <input class="radio" type="radio" id="nav_overlay_overlay" name="nav_overlay" value="overlay">
+          <label for="nav_overlay_overlay">On</label>
+        </div>
+      </div>
+    </div>
+
+    <br>
   </form>
 </section>
 

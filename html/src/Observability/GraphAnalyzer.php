@@ -5,7 +5,7 @@ namespace PayCal\Observability;
 /**
  * GraphAnalyzer.php
  *
- * Purpose: Define the GraphAnalyzer class for PayCal\Observability.
+ * Purpose: Structural analysis helpers for dependency graphs produced by the internal observability tooling.
  *
  * PHP version 8.4.16
  *

@@ -1,16 +1,17 @@
-<?php
-
-declare(strict_types=1);
-
-use PayCal\Domain\Render;
-use PayCal\Domain\Strings;
-
-require_once '../config.php';
+<?php declare(strict_types=1);
 
 /**
- * About page controller.
+ * About — permanent redirect to paycaltech.com/about/.
+ *
+ * The PayCal About page has moved to the corporate site at paycaltech.com.
+ * All requests are forwarded with 301 to preserve existing bookmarks and
+ * search-engine indexing.
+ *
+ * PHP version 8.4.16
  */
-$currentPage = 'PAGE_ABOUT';
+
+header('Location: https://paycaltech.com/about/', true, 301);
+exit;
 $i18n = [];
 foreach (['ABOUT_OVERVIEW_ARIA', 'ABOUT_PAGE_TITLE', 'ABOUT_PAGE_DECK'] as $i18nKey) {
   $i18n[$i18nKey] = Strings::i18n($i18nKey);

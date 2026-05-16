@@ -5,7 +5,8 @@ namespace PayCal\Domain\Enums;
 /**
  * HttpStatus.php
  *
- * Purpose: Define the HttpStatus class for PayCal\Domain\Enums.
+ * Purpose: HTTP status code constants for controller responses, redirect handling,
+ *          and JSON API error replies.
  *
  * PHP version 8.4.16
  *
@@ -17,9 +18,6 @@ namespace PayCal\Domain\Enums;
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
- */
-/**
- * HttpStatus constants.
  */
 final class HttpStatus
 {

@@ -5,7 +5,7 @@ namespace PayCal\Domain\Encryption;
 /**
  * CryptoVersions.php
  *
- * Purpose: Define the CryptoVersions class for PayCal\Domain\Encryption.
+ * Purpose: Algorithm version registry: AES-256-GCM parameters, PBKDF2-SHA256 iteration counts, and envelope schema versioning for the Encryption namespace.
  *
  * PHP version 8.4.16
  *

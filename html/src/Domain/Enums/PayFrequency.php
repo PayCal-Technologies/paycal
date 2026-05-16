@@ -5,7 +5,8 @@ namespace PayCal\Domain\Enums;
 /**
  * PayFrequency.php
  *
- * Purpose: Define the PayFrequency enum for PayCal\Domain\Enums.
+ * Purpose: Pay-period frequency enum for the four supported scheduling cycles:
+ *          weekly, biweekly, semi-monthly, and monthly.
  *
  * PHP version 8.4.16
  *

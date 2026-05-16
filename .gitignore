@@ -34,19 +34,36 @@ html/tests/coverage
 vendor/bin/.phpunit.result.cache
 logs/
 keys/
-ssl/
 docker/certs/*.pem
 docker/certs/*-key.pem
 tmp/agent-diagnostics/
 ai-notes/knockknock-reports/
+ai-notes/soc2-evidence/
+/soc2/*
+!/soc2/legal/
+/soc2/legal/*
+!/soc2/legal/SOC2_NDA_TEMPLATE.md
+!/soc2/audit-package/
+/soc2/audit-package/*
+!/soc2/audit-package/README.md
+dump.rdb
+commit-msg-metrics.txt
+video-material/
 
 # -------------------------------------------------------------------
 # Dependency / Build Artifacts
 # -------------------------------------------------------------------
 /phpunit
 /phpunit/
+/vendor/
 /node_modules/
 html/ws/node_modules/
+
+# -------------------------------------------------------------------
+# SOC2 / Storage Artifacts (auto-generated, not for VCS)
+# -------------------------------------------------------------------
+/soc2/reports/
+/storage/soc2/
 
 # -------------------------------------------------------------------
 # VCS / Tooling Metadata
@@ -79,18 +96,18 @@ scripts/*sudoers*
 *.py
 !scripts/
 !/scripts/**
+!tools/flan-native/
+!tools/flan-native/**
 scripts/.DS_Store
 
 # Copilot operational scripts (local-only)
-/copilot-scripts/
-
-# SOC2 compliance evidence — private repo only, never promote to public
-/soc2/
-/ai-notes/soc2-evidence/
+/copilot-scripts/*
+!/copilot-scripts/GcsEvidenceUploader.php
 
 # -------------------------------------------------------------------
 # Documentation
 # -------------------------------------------------------------------
+/security
 !README.md
 !/CONTRIBUTING.md
 !docs/ARCHITECTURE.md
@@ -99,16 +116,6 @@ scripts/.DS_Store
 !docs/data-shapes/theme-research-brief-template.md
 !docs/data-shapes/theme-token-dictionary-v1.md
 !.github/sync-to-dev/SKILLS.md
-
-# Private-only workflows (local, not tracked in public repo)
-.github/workflows/private-ci-smoke.yml
-.github/workflows/private-enforce-strict-types.yml
-.github/workflows/private-javascript.yml
-.github/workflows/private-no-redis-cli.yml
-.github/workflows/private-phpstan.yml
-.github/workflows/private-phpunit.yml
-.github/workflows/private-release-policy.yml
-.github/workflows/private-security-gates.yml
 
 # Source dumps — never commit full codebase export files
 *-source-dump*.txt

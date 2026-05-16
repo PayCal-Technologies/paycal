@@ -165,9 +165,7 @@ class AccountController
 
         if ($wrappedDekPasskey !== '') {
             $decodedEnvelope = base64_decode($wrappedDekPasskey, true);
-            if (!is_string($decodedEnvelope) || $decodedEnvelope === '') {
-                // non-decodable envelope; leave meta defaults
-            } else {
+            if (is_string($decodedEnvelope) && $decodedEnvelope !== '') {
                 $wrappedDekPasskeyMeta['decodeOk'] = true;
                 $envelope = json_decode($decodedEnvelope, true);
                 if (is_array($envelope)) {

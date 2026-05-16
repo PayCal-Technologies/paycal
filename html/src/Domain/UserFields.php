@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * UserFields.php
  *
- * Purpose: Define the UserFields enum for PayCal\Domain.
+ * Purpose: Canonical Redis field name enum for all user hash keys, covering
+ *          identity, encryption, verification, and preference fields.
  *
  * PHP version 8.4.16
  *

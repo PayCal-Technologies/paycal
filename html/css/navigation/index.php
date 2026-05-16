@@ -1522,6 +1522,38 @@ body:not(.nav-collapsed) #page_header.nav_component--header [role='button'] {
   }
 }
 
+/* ---- OVERLAY MODE: sidebar floats over content instead of pushing it ---- */
+/*
+ * Applied via body.nav-overlay-mode.
+ * When pinned, the sidebar becomes a floating panel (z-index above main, no margin shift).
+ * Collapsed strip still offsets content normally so icons stay visible.
+ * Toggle at runtime via NavToggle.setOverlayMode(bool).
+ */
+body.nav-overlay-mode[data-nav-primary-position='left'] #main,
+body.nav-overlay-mode[data-nav-primary-position='left'] #page_footer {
+  margin-left: var(--nav-collapsed-strip-size);
+  width: calc(100% - var(--nav-collapsed-strip-size));
+  max-width: calc(100% - var(--nav-collapsed-strip-size));
+}
+
+body.nav-overlay-mode[data-nav-primary-position='right'] #main,
+body.nav-overlay-mode[data-nav-primary-position='right'] #page_footer {
+  margin-right: var(--nav-collapsed-strip-size);
+  width: calc(100% - var(--nav-collapsed-strip-size));
+  max-width: calc(100% - var(--nav-collapsed-strip-size));
+}
+
+/* Pinned-in-overlay: sidebar slides in on top, no layout reflow */
+body.nav-overlay-mode.nav-pinned[data-nav-primary-position='left'] #page_header.nav_component--header,
+body.nav-overlay-mode.nav-pinned[data-nav-primary-position='right'] #page_header.nav_component--header {
+  z-index: 10001;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.22);
+}
+
+body.nav-overlay-mode.nav-pinned[data-nav-primary-position='right'] #page_header.nav_component--header {
+  box-shadow: -2px 0 20px rgba(0, 0, 0, 0.22);
+}
+
 /* ---- ACCESSIBILITY: screen reader utility ---- */
 
 .sr-only {

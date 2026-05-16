@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * UserPreferenceDefaults.php
  *
- * Purpose: Define the UserPreferenceDefaults class for PayCal\Domain.
+ * Purpose: Compile-time constants for user preference defaults (theme, text size,
+ *          locale, etc.) applied on account creation.
  *
  * PHP version 8.4.16
  *

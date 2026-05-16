@@ -483,15 +483,14 @@ final class EmailVerificationController
     }
 
     // Generate account recovery salt if not exists
-    if (empty($user->account_recovery_salt)) {
+    $recoverySalt = (string) ($user->account_recovery_salt ?? '');
+    if ($recoverySalt === '') {
       $recoverySaltBytes = RecoveryKey::generateRecoverySalt();
       $recoverySalt = base64_encode($recoverySaltBytes);
 
       Database::hset(Keys::USER.':'.$user->user_uuid, [
           'account_recovery_salt' => $recoverySalt,
       ]);
-    } else {
-      $recoverySalt = $user->account_recovery_salt;
     }
 
     // Generate 256-bit recovery key
@@ -669,27 +668,21 @@ final class EmailVerificationController
       : 'unknown';
     $rateLimitKey = "rate_limit:email_verification:{$key}:{$ip}";
 
-    $count = Database::get($rateLimitKey);
+    // Use atomic INCR + expire-on-first to avoid:
+    //   (a) read-modify-write race (concurrent get+set lose counts), and
+    //   (b) sliding window bypass (Database::set with TTL resets the window
+    //       on every call, allowing unlimited requests as long as they stay
+    //       just under the interval).
+    $currentCount = Database::incr($rateLimitKey);
+    if (1 === $currentCount) {
+      Database::expire($rateLimitKey, FormTTL::ONE_HOUR->value);
+    }
+
     $ttl = Database::ttl($rateLimitKey);
-    
-    // Calculate retry time
     $retryAfter = $ttl > 0 ? $ttl : FormTTL::ONE_HOUR->value;
     $retryMinutes = (int) ceil($retryAfter / FormTTL::ONE_MIN->value);
 
-    if ($count === '') {
-      Database::set($rateLimitKey, '1', FormTTL::ONE_HOUR->value);
-
-      return [
-        'allowed' => true,
-        'retry_after' => 0,
-        'retry_minutes' => 0,
-        'current_count' => 1,
-      ];
-    }
-
-    $currentCount = (int) $count;
-
-    if ($currentCount >= $limit) {
+    if ($currentCount > $limit) {
       return [
         'allowed' => false,
         'retry_after' => $retryAfter,
@@ -698,13 +691,11 @@ final class EmailVerificationController
       ];
     }
 
-    Database::set($rateLimitKey, (string) ($currentCount + 1), FormTTL::ONE_HOUR->value);
-
     return [
       'allowed' => true,
       'retry_after' => 0,
       'retry_minutes' => 0,
-      'current_count' => $currentCount + 1,
+      'current_count' => $currentCount,
     ];
   }
 

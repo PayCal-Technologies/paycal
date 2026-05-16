@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * Page.php
  *
- * Purpose: Define the Page enum for PayCal\Domain.
+ * Purpose: Application page identifier enum for route context switching and
+ *          analytics page tracking.
  *
  * PHP version 8.4.16
  *
@@ -17,9 +18,6 @@ namespace PayCal\Domain;
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
- */
-/**
- * Page enum.
  */
 enum Page: string
 {

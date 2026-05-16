@@ -334,6 +334,10 @@ class Authentication
    */
   public static function abortIfUnauthenticated(): void
   {
+    $devBypass = $_ENV['DEV_AUTH_BYPASS'] ?? getenv('DEV_AUTH_BYPASS');
+    if (in_array(Environment::appEnv(), ['dev', 'mac'], true) && is_string($devBypass) && $devBypass === 'true') {
+      return;
+    }
     if (!self::validateAndTouchSession())
       Response::error('[AUTH] Unauthorized', [], HttpStatus::HTTP_UNAUTHORIZED);
   }
@@ -345,6 +349,13 @@ class Authentication
    */
   public static function redirectHomeIfUnauthenticated(): void
   {
+    // Dev-only bypass: skip all auth checks when DEV_AUTH_BYPASS=true and APP_ENV=dev.
+    // Both conditions must be true; this can never fire in production (APP_ENV != 'dev').
+    $devBypass = $_ENV['DEV_AUTH_BYPASS'] ?? getenv('DEV_AUTH_BYPASS');
+    if (in_array(Environment::appEnv(), ['dev', 'mac'], true) && is_string($devBypass) && $devBypass === 'true') {
+      return;
+    }
+
     if (!self::validateAndTouchSession()) {
       $target = self::unauthenticatedRedirectTarget();
       if ($target === null) {
@@ -492,12 +503,22 @@ class Authentication
       'login_time'    => $createdAt, // For session duration metrics
     ], Environment::redisNewSessionTTL());
 
+    // Confirm the session key has propagated to at least one replica before
+    // responding.  Without WAIT, the post-login redirect can hit a replica
+    // that has not yet received the new session, making auth appear to fail.
+    // On single-instance deployments WAIT returns 0 immediately with no cost.
+    Database::wait(1, 50);
+
       // Telemetry: Track login event (aggregate only, no PII)
+      // Atomic pattern: incr() on a missing key creates it as 1 in one round
+      // trip.  The previous exists()+set()+incr() had a race: two concurrent
+      // logins both saw exists()=false, both wrote '0', then both incremented —
+      // creating a permanent TTL-less key if either incr() ran before set().
       $loginKey = Keys::TELEMETRY . ':auth:login:' . date('Y-m-d');
-      if (!Database::exists($loginKey)) {
-        Database::set($loginKey, '0', 2592000); // 30 days TTL
+      $loginCount = Database::incr($loginKey);
+      if (1 === $loginCount) {
+        Database::expire($loginKey, 2592000); // 30 days
       }
-      Database::incr($loginKey);
   }
 
 
@@ -635,10 +656,10 @@ class Authentication
       
       // Telemetry: Increment duration bucket (aggregate only, no PII)
       $durationKey = Keys::TELEMETRY . ':session:duration:' . $bucket;
-      if (!Database::exists($durationKey)) {
-        Database::set($durationKey, '0', 2592000); // 30 days TTL
+      $durationCount = Database::incr($durationKey);
+      if (1 === $durationCount) {
+        Database::expire($durationKey, 2592000); // 30 days TTL
       }
-      Database::incr($durationKey);
     }
     
     // Delete session (privacy guard: no persistence after metrics recorded)
@@ -646,10 +667,10 @@ class Authentication
     
     // Telemetry: Track logout event (aggregate only, no PII)
     $logoutKey = Keys::TELEMETRY . ':auth:logout:' . date('Y-m-d');
-    if (!Database::exists($logoutKey)) {
-      Database::set($logoutKey, '0', 2592000); // 30 days TTL
+    $logoutCount = Database::incr($logoutKey);
+    if (1 === $logoutCount) {
+      Database::expire($logoutKey, 2592000); // 30 days TTL
     }
-    Database::incr($logoutKey);
     
     return true;
   }

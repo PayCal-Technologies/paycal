@@ -279,7 +279,16 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Ensure the user's personal organization exists, creating it when absent.
+   *
+   * Personal organizations are created automatically on first use. Calling this
+   * on a user that already has one is safe (idempotent).
+   *
+   * @param string $userUUID Authenticated user UUID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function ensurePersonalOrganization(string $userUUID): array
   {
     $existingOrgId = $this->findPersonalOrganizationId($userUUID);
@@ -304,7 +313,16 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * List all organizations the user belongs to, including personal and shared.
+   *
+   * Ensures the personal organization exists, resolves unread notification counts
+   * per org, and sorts results with the personal org first.
+   *
+   * @param string $userUUID Authenticated user UUID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function listForUser(string $userUUID): array
   {
     $this->ensurePersonalOrganization($userUUID);
@@ -384,7 +402,17 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Mark all unread notifications for an organization as read.
+   *
+   * Requires active or pending membership (or ownership). Returns updated
+   * total unread counts across all organizations.
+   *
+   * @param string $actorUUID Authenticated user UUID.
+   * @param string $orgId     Organization ID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function markOrganizationNotificationsRead(string $actorUUID, string $orgId): array
   {
     $orgId = trim(InputSanitizer::sanitizeString($orgId));
@@ -642,7 +670,18 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Start a bulk invite import verification challenge.
+   *
+   * Generates a short-lived one-time code and emails it to the import authority.
+   * The challenge ID must be supplied when calling verifyBulkInviteImportChallenge().
+   *
+   * @param string $actorUUID Authenticated actor UUID.
+   * @param string $orgId     Organization ID.
+   * @param string $importId  Import session ID from the prepare step.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function startBulkInviteImportChallenge(string $actorUUID, string $orgId, string $importId): array
   {
     $prepare = $this->loadBulkImportPrepare($actorUUID, $orgId, $importId);
@@ -719,7 +758,20 @@ final class OrganizationDiscoveryService
     return $this->ok('Verification code sent.', $responseData);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Verify the code submitted for a bulk invite import challenge.
+   *
+   * Enforces attempt limits and expiry. On success marks the challenge as
+   * verified so commitBulkInviteImport() can proceed.
+   *
+   * @param string $actorUUID   Authenticated actor UUID.
+   * @param string $orgId       Organization ID.
+   * @param string $importId    Import session ID.
+   * @param string $challengeId Challenge ID returned by startBulkInviteImportChallenge().
+   * @param string $code        6-character uppercase verification code.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function verifyBulkInviteImportChallenge(string $actorUUID, string $orgId, string $importId, string $challengeId, string $code): array
   {
     $prepare = $this->loadBulkImportPrepare($actorUUID, $orgId, $importId);
@@ -776,7 +828,19 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Commit a verified bulk invite import, sending all queued invitations.
+   *
+   * Requires a verified, unconsumed challenge. Marks the challenge consumed
+   * after dispatch to prevent replay.
+   *
+   * @param string $actorUUID   Authenticated actor UUID.
+   * @param string $orgId       Organization ID.
+   * @param string $importId    Import session ID.
+   * @param string $challengeId Verified challenge ID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function commitBulkInviteImport(string $actorUUID, string $orgId, string $importId, string $challengeId): array
   {
     $prepare = $this->loadBulkImportPrepare($actorUUID, $orgId, $importId);
@@ -895,7 +959,17 @@ final class OrganizationDiscoveryService
     return $code;
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Request membership access to an organization identified by its owner's email.
+   *
+   * Looks up the organization owned by the supplied email and creates a pending
+   * access request record, notifying the owner via email.
+   *
+   * @param string $requesterUUID UUID of the user requesting access.
+   * @param string $ownerEmail    Email address of the target organization's owner.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function requestAccessByOwnerEmail(string $requesterUUID, string $ownerEmail): array
   {
     $normalizedOwnerEmail = InputSanitizer::sanitizeEmail($ownerEmail);
@@ -1029,7 +1103,17 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * List active (pending) invitations for an organization.
+   *
+   * Returns only invites with status 'pending'. Requires manage-access
+   * or manage-organization permission.
+   *
+   * @param string $actorUUID Authenticated actor UUID.
+   * @param string $orgId     Organization ID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function listInvites(string $actorUUID, string $orgId): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -1071,7 +1155,17 @@ final class OrganizationDiscoveryService
     return $this->ok('Organization invites retrieved.', ['invites' => $invites]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * List resolved (accepted, revoked, or withdrawn) invite history for an organization.
+   *
+   * Excludes pending invites. Requires manage-access or manage-organization
+   * permission.
+   *
+   * @param string $actorUUID Authenticated actor UUID.
+   * @param string $orgId     Organization ID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function listInviteHistory(string $actorUUID, string $orgId): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -1117,7 +1211,17 @@ final class OrganizationDiscoveryService
     return $this->ok('Organization invite history retrieved.', ['invites' => $invites]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * List resolved (approved or rejected) access request history for an organization.
+   *
+   * Excludes pending requests. Requires manage-access or manage-organization
+   * permission.
+   *
+   * @param string $actorUUID Authenticated actor UUID.
+   * @param string $orgId     Organization ID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function listAccessRequestHistory(string $actorUUID, string $orgId): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -1165,7 +1269,17 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * List pending membership access requests for an organization.
+   *
+   * Returns only requests with status 'pending'. Requires manage-access
+   * or manage-organization permission.
+   *
+   * @param string $actorUUID Authenticated actor UUID.
+   * @param string $orgId     Organization ID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function listAccessRequests(string $actorUUID, string $orgId): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -1335,7 +1449,18 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Reject a pending membership access request.
+   *
+   * Sets the request status to 'rejected' and records the rejecting actor.
+   * Requires manage-access or manage-organization permission.
+   *
+   * @param string $actorUUID  Authenticated actor UUID.
+   * @param string $orgId      Organization ID.
+   * @param string $requestId  Access request ID to reject.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function rejectAccessRequest(string $actorUUID, string $orgId, string $requestId): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -1387,7 +1512,18 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Revoke a pending organization invite.
+   *
+   * Marks the invite as revoked and fires an audit event. Requires
+   * manage-access or manage-organization permission.
+   *
+   * @param string $actorUUID Authenticated actor UUID.
+   * @param string $orgId     Organization ID.
+   * @param string $inviteId  Invite ID to revoke.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function revokeInvite(string $actorUUID, string $orgId, string $inviteId): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -1648,7 +1784,18 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Revoke a member's active relationship, removing their access and encrypted key wraps.
+   *
+   * Owners cannot be removed via this path. Triggers DEK-wrap revocation for
+   * the target member before deleting the relationship record.
+   *
+   * @param string $actorUUID  Authenticated actor UUID performing the revocation.
+   * @param string $orgId      Organization ID.
+   * @param string $targetUUID UUID of the member being removed.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function revokeRelationship(string $actorUUID, string $orgId, string $targetUUID): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -1694,7 +1841,19 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Update a member's role and associated permission scopes.
+   *
+   * Validates the new role name, enforces actor permission, and re-evaluates
+   * any derived scopes for the role transition.
+   *
+   * @param string $actorUUID  Authenticated actor UUID.
+   * @param string $orgId      Organization ID.
+   * @param string $targetUUID UUID of the member whose role is changing.
+   * @param string $role       New role name to assign.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function updateRelationshipRole(string $actorUUID, string $orgId, string $targetUUID, string $role): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -1783,7 +1942,17 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Allow a member to voluntarily leave an organization.
+   *
+   * Owners must transfer ownership before leaving. Triggers DEK-wrap
+   * revocation for the departing member before removing the relationship.
+   *
+   * @param string $userUUID Authenticated user UUID.
+   * @param string $orgId    Organization ID to leave.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function leaveOrganization(string $userUUID, string $orgId): array
   {
     $org = Database::hgetall(Keys::ORGANIZATION . ':' . $orgId);
@@ -1822,7 +1991,19 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Link a site to an organization, associating it with the org's encryption context.
+   *
+   * Validates ownership of both the site and the organization, then persists
+   * the association record.
+   *
+   * @param string $actorUUID     Authenticated actor UUID.
+   * @param string $orgId         Organization ID.
+   * @param string $siteOwnerUUID UUID of the site owner.
+   * @param string $siteId        Site ID to link.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function linkSite(string $actorUUID, string $orgId, string $siteOwnerUUID, string $siteId): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -1957,7 +2138,16 @@ final class OrganizationDiscoveryService
     return true;
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Return organizations, sites, and match candidates for the user's discovery view.
+   *
+   * Aggregates personal org, shared org memberships, linked sites, and any
+   * discoverable organizations matching the user's verified domain.
+   *
+   * @param string $userUUID Authenticated user UUID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function discoveryForUser(string $userUUID): array
   {
     $orgIds = Database::smembers(Keys::ORGANIZATION_USER . ':' . $userUUID);
@@ -2001,7 +2191,17 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Return organization settings filtered to the actor's read permissions.
+   *
+   * Includes pay-period config, domain policy, and encryption metadata. Fields
+   * are omitted when the actor lacks the corresponding read scope.
+   *
+   * @param string $actorUUID Authenticated actor UUID.
+   * @param string $orgId     Organization ID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function getOrganizationSettings(string $actorUUID, string $orgId): array
   {
     $organization = Database::hgetall(Keys::ORGANIZATION . ':' . $orgId);
@@ -2384,14 +2584,31 @@ final class OrganizationDiscoveryService
       'fields' => implode(',', $fieldList),
     ]);
 
+    // Pipeline both hgetall calls to save one network round-trip.
+    $fetched = Database::multi(function (\Redis $r) use ($orgId): void {
+      $r->hGetAll(Keys::ORGANIZATION . ':' . $orgId);
+      $r->hGetAll(Keys::ORGANIZATION_SETTINGS . ':' . $orgId);
+    });
+
     return $this->ok('Organization settings updated.', [
       'organization_id' => $orgId,
-      'organization' => Database::hgetall(Keys::ORGANIZATION . ':' . $orgId),
-      'settings' => Database::hgetall(Keys::ORGANIZATION_SETTINGS . ':' . $orgId),
+      'organization' => is_array($fetched[0] ?? null) ? $fetched[0] : [],
+      'settings'      => is_array($fetched[1] ?? null) ? $fetched[1] : [],
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Transfer organization ownership from the current owner to an active member.
+   *
+   * Validates that the target is an active member (not already the owner), then
+   * atomically updates both the org record and relationship roles.
+   *
+   * @param string $actorUUID  Current owner UUID (or admin override).
+   * @param string $orgId      Organization ID.
+   * @param string $targetUUID UUID of the member receiving ownership.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function transferOwnership(string $actorUUID, string $orgId, string $targetUUID): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -2477,7 +2694,17 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * List all member relationships and their roles for an organization.
+   *
+   * Returns active, pending, and revoked relationships with hydrated user
+   * profile details. Requires manage-access or manage-organization permission.
+   *
+   * @param string $actorUUID Authenticated actor UUID.
+   * @param string $orgId     Organization ID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function listRelationships(string $actorUUID, string $orgId): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -2565,7 +2792,17 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * List all audit events for an organization (admin or coordinator view).
+   *
+   * Returns the full audit timeline with actor details. Requires
+   * manage-organization permission.
+   *
+   * @param string $actorUUID Authenticated actor UUID.
+   * @param string $orgId     Organization ID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function listAuditTimeline(string $actorUUID, string $orgId): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $orgId);
@@ -2609,7 +2846,17 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * List audit events scoped to the calling member's own actions.
+   *
+   * Filters the full timeline to events where the actor is the requesting user,
+   * allowing regular members to review their own history.
+   *
+   * @param string $actorUUID Authenticated member UUID.
+   * @param string $orgId     Organization ID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function listAuditTimelineForMember(string $actorUUID, string $orgId): array
   {
     $organization = Database::hgetall(Keys::ORGANIZATION . ':' . $orgId);
@@ -3820,7 +4067,17 @@ final class OrganizationDiscoveryService
     ]);
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Auto-bootstrap org DEK wraps for all active organizations on user page visit.
+   *
+   * Iterates the user's active org memberships and triggers DEK bootstrapping
+   * where the actor has manage-access permission. Uses a per-org throttle key
+   * to avoid redundant work within a short window.
+   *
+   * @param string $actorUUID Authenticated user UUID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function autoBootstrapOrgDekOnPageVisit(string $actorUUID): array
   {
     $actorUUID = trim(InputSanitizer::sanitizeString($actorUUID));
@@ -3864,12 +4121,11 @@ final class OrganizationDiscoveryService
       }
 
       $throttleKey = Keys::TELEMETRY . ':org:dek:auto_bootstrap:' . $orgId . ':' . $actorUUID;
-      if (Database::exists($throttleKey)) {
+      // setnx is atomic (SET NX EX); eliminates the exists()→set() TOCTOU race.
+      if (!Database::setnx($throttleKey, '1', $throttleSeconds)) {
         $skippedOrgs[] = ['organization_id' => $orgId, 'reason' => 'throttled'];
         continue;
       }
-
-      Database::set($throttleKey, '1', $throttleSeconds);
 
       $result = $this->bootstrapOrgDekForAllMembers(
         $actorUUID,
@@ -4155,7 +4411,12 @@ final class OrganizationDiscoveryService
     }
 
     $day = date('Y-m-d');
-    Database::incr(Keys::TELEMETRY . ':organization:access_request:' . $suffix . ':' . $day);
+    $count = Database::incr(Keys::TELEMETRY . ':organization:access_request:' . $suffix . ':' . $day);
+    // Set a 90-day TTL on first increment so daily buckets self-expire.
+    // Without this, keys accumulate indefinitely and exhaust Redis keyspace.
+    if (1 === $count) {
+      Database::expire(Keys::TELEMETRY . ':organization:access_request:' . $suffix . ':' . $day, 90 * 24 * 3600);
+    }
   }
 
   /**
@@ -4393,7 +4654,17 @@ final class OrganizationDiscoveryService
     );
   }
 
-  /** @param array<string, scalar> $details */
+  /**
+   * Append an audit event to the organization's event log.
+   *
+   * Sanitizes all inputs and delegates to appendAuditEvent(). Returns void;
+   * callers should log failures through their own error handling.
+   *
+   * @param string               $orgId     Organization ID.
+   * @param string               $eventType Dot-separated event type (e.g. 'membership.revoked').
+   * @param string               $actorUUID UUID of the actor generating the event.
+   * @param array<string, scalar> $details   Supplemental key→value event details.
+   */
   public function appendOrganizationAuditEvent(string $orgId, string $eventType, string $actorUUID, array $details = []): void
   {
     $orgId = trim(InputSanitizer::sanitizeString($orgId));
@@ -4407,6 +4678,15 @@ final class OrganizationDiscoveryService
     $this->appendAuditEvent($orgId, $eventType, $actorUUID, $details);
   }
 
+  /**
+   * Return whether the actor has permission to trigger an audit control test.
+   *
+   * Requires manage-access or manage-organization scope, and the org must not
+   * be an admin-preview org.
+   *
+   * @param string $orgId      Organization ID.
+   * @param string $actorUUID  Authenticated actor UUID.
+   */
   public function canTriggerAuditControlTest(string $orgId, string $actorUUID): bool
   {
     $orgId = trim(InputSanitizer::sanitizeString($orgId));
@@ -4423,7 +4703,16 @@ final class OrganizationDiscoveryService
     return $this->canManageAccess($orgId, $actorUUID) || $this->canManageOrganization($orgId, $actorUUID);
   }
 
-  /** @return array<string, string> */
+  /**
+   * Return the raw relationship hash for a user in an organization.
+   *
+   * Returns an empty array when no relationship record exists.
+   *
+   * @param string $orgId     Organization ID.
+   * @param string $userUUID  User UUID to look up.
+   *
+   * @return array<string, string>
+   */
   public function getRelationshipSummary(string $orgId, string $userUUID): array
   {
     $orgId = trim(InputSanitizer::sanitizeString($orgId));

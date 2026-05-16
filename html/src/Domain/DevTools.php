@@ -6,7 +6,8 @@ use PayCal\Domain\Config\Environment;
 /**
  * DevTools.php
  *
- * Purpose: Define the DevTools class for PayCal\Domain.
+ * Purpose: Development-only source inspection utility for rendering highlighted PHP
+ *          file contents in admin diagnostic views.
  *
  * PHP version 8.4.16
  *

@@ -16,7 +16,8 @@ use PayCal\Domain\Config\SystemConfig;
 /**
  * User.php
  *
- * Purpose: Define the User class for PayCal\Domain.
+ * Purpose: Core authenticated user entity: Redis-backed properties, session state,
+ *          role resolution, and preference access.
  *
  * PHP version 8.4.16
  *
@@ -659,10 +660,12 @@ final class User
   public function validateCSRFToken(string $context, string $token): bool
   {
     $key = Keys::SESSION . ':' . $this->user_uuid . ':form_nonce:' . $context;
-    $stored = (string) Database::get($key);
+    // GETDEL atomically reads and removes the nonce in one round trip.
+    // A separate get+del pair has a replay window where a concurrent request
+    // can read the same nonce before it is deleted and also pass validation.
+    $stored = Database::getdel($key);
     if ('' === $stored || $stored !== $token)
       return false;
-    Database::del($key);
     return true;
   }
 

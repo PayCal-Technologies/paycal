@@ -5,7 +5,7 @@ namespace PayCal\Domain\Constants;
 /**
  * Keys.php
  *
- * Purpose: Define the Keys class for PayCal\Domain\Constants.
+ * Purpose: Redis key namespace constants for all PayCal hash prefixes, with roadmap annotations for reserved and unused keys.
  *
  * PHP version 8.4.16
  *
@@ -20,10 +20,6 @@ namespace PayCal\Domain\Constants;
  */
 
 
-
-/**
- * Keys
- */
 final class Keys
 {
   public const SEPARATOR          = ":";

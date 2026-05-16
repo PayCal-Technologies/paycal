@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * Taxes.php
  *
- * Purpose: Define the TaxCalculatorInterface interface for PayCal\Domain.
+ * Purpose: Tax calculation contract (TaxCalculatorInterface) and bracketed
+ *          implementation for income tax estimates from configurable bracket tables.
  *
  * PHP version 8.4.16
  *

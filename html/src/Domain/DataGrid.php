@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * DataGrid.php
  *
- * Purpose: Define the DataGrid class for PayCal\Domain.
+ * Purpose: Server-side datagrid builder: manages columns, rows, pager metadata,
+ *          and serialization for grid-based UI components.
  *
  * PHP version 8.4.16
  *

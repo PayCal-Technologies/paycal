@@ -6,7 +6,8 @@ use PayCal\Domain\Enums\HttpStatus;
 /**
  * EmailVerificationGuard.php
  *
- * Purpose: Define the EmailVerificationGuard class for PayCal\Domain.
+ * Purpose: Middleware guard that blocks data-write actions for users with
+ *          unverified email addresses, returning 403 and halting execution.
  *
  * PHP version 8.4.16
  *

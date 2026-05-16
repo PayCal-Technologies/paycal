@@ -5,7 +5,7 @@ namespace PayCal\Domain\Crypto;
 /**
  * ChainVerifier.php
  *
- * Purpose: Define the ChainVerifier class for PayCal\Domain\Crypto.
+ * Purpose: Cryptographic chain verifier: validates tamper-evident hash chains over ordered period payloads using Ed25519 signatures and SHA-256 linking.
  *
  * PHP version 8.4.16
  *
@@ -20,10 +20,6 @@ namespace PayCal\Domain\Crypto;
  */
 
 
-
-/**
- * ChainVerifier
- */
 final class ChainVerifier
 {
   /**

@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * TaxBracket.php
  *
- * Purpose: Define the TaxBracket class for PayCal\Domain.
+ * Purpose: Immutable value object representing a single income tax bracket with
+ *          inclusive lower bound, exclusive upper bound, and a decimal rate.
  *
  * PHP version 8.4.16
  *

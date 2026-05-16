@@ -65,7 +65,20 @@ final class StripeBillingService
     $this->subscriptionCanceler = $subscriptionCanceler;
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Create a Stripe Checkout session for a premium subscription purchase.
+   *
+   * Looks up or creates a Stripe customer for the user, then creates a
+   * Checkout session with the configured premium price ID. Returns the
+   * hosted payment-page URL for client-side redirect.
+   *
+   * @param string $userUUID   Authenticated user UUID.
+   * @param string $userEmail  User's email address (used to create the Stripe customer).
+   * @param string $successURL URL to redirect to after successful payment.
+   * @param string $cancelURL  URL to redirect to if the user cancels checkout.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function createCheckoutSession(string $userUUID, string $userEmail, string $successURL, string $cancelURL): array
   {
     $priceId = $this->requireEnv('STRIPE_PREMIUM_PRICE_ID');
@@ -135,7 +148,17 @@ final class StripeBillingService
     }
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Create a Stripe Billing Portal session for the given user.
+   *
+   * Resolves the customer ID from the stored subscription (or fetches it from
+   * Stripe when absent), then delegates session URL creation to Stripe.
+   *
+   * @param string $userUUID  Authenticated user UUID.
+   * @param string $returnURL URL the portal redirects to after the user exits.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function createPortalSession(string $userUUID, string $returnURL): array
   {
     $secretKey = $this->requireEnv('STRIPE_SECRET_KEY');
@@ -175,7 +198,17 @@ final class StripeBillingService
     }
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Confirm a completed Stripe Checkout session and activate the user's premium subscription.
+   *
+   * Validates session ownership, asserts complete status, then persists the
+   * subscription and customer IDs via SubscriptionRepository.
+   *
+   * @param string $userUUID  Authenticated user UUID (must match session metadata).
+   * @param string $sessionId Stripe Checkout session ID from the return URL.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function confirmCheckoutSession(string $userUUID, string $sessionId): array
   {
     $secretKey = $this->requireEnv('STRIPE_SECRET_KEY');
@@ -235,7 +268,17 @@ final class StripeBillingService
     }
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Cancel the user's active Stripe subscription.
+   *
+   * Resolves the subscription ID from local storage (falling back to a Stripe
+   * customer lookup when absent) and cancels immediately. Downgrades the local
+   * subscription record to free tier after confirmation.
+   *
+   * @param string $userUUID Authenticated user UUID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function cancelSubscription(string $userUUID): array
   {
     $secretKey = $this->requireEnv('STRIPE_SECRET_KEY');
@@ -282,7 +325,17 @@ final class StripeBillingService
     }
   }
 
-  /** @return array{success: bool, message: string, data: array<string, mixed>} */
+  /**
+   * Reconcile local subscription state against Stripe's live record.
+   *
+   * Fetches the current subscription status from Stripe and syncs the local
+   * SubscriptionRepository to match, correcting drift caused by webhooks that
+   * were missed or delayed.
+   *
+   * @param string $userUUID Authenticated user UUID.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
   public function reconcileSubscriptionState(string $userUUID): array
   {
     $secretKey = $this->requireEnv('STRIPE_SECRET_KEY');
@@ -442,9 +495,26 @@ final class StripeBillingService
         ]);
       }
 
+      // Atomically claim this event ID before processing (SET NX EX).
+      // Eliminates the TOCTOU race where two concurrent Stripe deliveries of
+      // the same event both pass the exists() check above and both run
+      // applyWebhookEvent, causing a billing mutation to be applied twice.
+      // If setnx returns false the key was just set by a concurrent request —
+      // treat as duplicate to preserve exactly-once semantics.
+      if (!$this->claimWebhookEvent($eventId)) {
+        $this->recordWebhookOutcome('duplicate', $eventContext + [
+          'event_id' => $eventId,
+          'event_type' => $eventType,
+        ] + $signatureContext);
+        return $this->ok('Webhook event already processed.', [
+          'event_id' => $eventId,
+          'event_type' => $eventType,
+          'duplicate' => true,
+        ]);
+      }
+
       $result = $this->applyWebhookEvent($event);
       if ($result['success']) {
-        $this->markWebhookEventProcessed($eventId);
         $this->recordWebhookOutcome('processed', $eventContext + [
           'event_id' => $eventId,
           'event_type' => $eventType,
@@ -1058,6 +1128,22 @@ final class StripeBillingService
   private function isWebhookEventProcessed(string $eventId): bool
   {
     return Database::exists($this->webhookEventKey($eventId));
+  }
+
+  /**
+   * Atomically claims an event ID for processing (SET NX EX).
+   *
+   * Returns true if this request successfully claimed the key (proceed with
+   * processing). Returns false if the key already existed, meaning another
+   * request already claimed or completed this event (treat as duplicate).
+   *
+   * TTL matches WEBHOOK_EVENT_TTL_SECONDS so that the duplicate-detection
+   * window is the same regardless of whether the key was set by this method
+   * or by a prior successful processing run.
+   */
+  private function claimWebhookEvent(string $eventId): bool
+  {
+    return Database::setnx($this->webhookEventKey($eventId), '1', self::WEBHOOK_EVENT_TTL_SECONDS);
   }
 
   /**

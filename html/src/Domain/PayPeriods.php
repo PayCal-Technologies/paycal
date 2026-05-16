@@ -6,7 +6,8 @@ use PayCal\Domain\Enums\PayFrequency;
 /**
  * PayPeriods.php
  *
- * Purpose: Define the PayPeriods class for PayCal\Domain.
+ * Purpose: Deterministic pay period boundary calculator for all supported frequencies
+ *          with timezone-aware, exclusive end dates.
  *
  * PHP version 8.4.16
  *

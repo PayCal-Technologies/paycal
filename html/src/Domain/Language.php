@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * Language.php
  *
- * Purpose: Define the Language class for PayCal\Domain.
+ * Purpose: Supported language catalog and locale resolution helper for server-side
+ *          string loading and UI language selection.
  *
  * PHP version 8.4.16
  *

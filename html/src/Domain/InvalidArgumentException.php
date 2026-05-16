@@ -5,7 +5,7 @@ namespace PayCal\Domain;
 /**
  * InvalidArgumentException.php
  *
- * Purpose: Define the InvalidArgumentException class for PayCal\Domain.
+ * Purpose: Domain-layer InvalidArgumentException for use inside domain logic.
  *
  * PHP version 8.4.16
  *
@@ -17,8 +17,5 @@ namespace PayCal\Domain;
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
- */
-/**
- * InvalidArgumentException.
  */
 class InvalidArgumentException extends \InvalidArgumentException {}

@@ -144,15 +144,13 @@ final class BillingController
     $sigRaw  = $_GET['nxt_sig'] ?? '';
     $nextUrl = $this->verifiedRedirectTarget($nextRaw, $sigRaw);
 
-    if ($sessionId !== '') {
-      $service = new StripeBillingService();
-      $result = $service->confirmCheckoutSession($userUUID, $sessionId);
-
+    if ($sessionId === '') {
+      $nextUrl = $this->appendQueryParam($nextUrl, 'billing', 'delayed');
+    } else {
+      $result = (new StripeBillingService())->confirmCheckoutSession($userUUID, $sessionId);
       if (!$result['success']) {
         $nextUrl = $this->appendQueryParam($nextUrl, 'billing', 'delayed');
       }
-    } else {
-      $nextUrl = $this->appendQueryParam($nextUrl, 'billing', 'delayed');
     }
 
     header('Location: ' . $nextUrl, true, 302);

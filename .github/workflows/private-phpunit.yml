@@ -1,0 +1,167 @@
+name: PHPUnit
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+on:
+  pull_request:
+    paths:
+      - "html/**"
+      - "scripts/check-semantic-diff.php"
+      - "scripts/test/**"
+      - ".php-cs-fixer.php"
+      - "composer.json"
+      - "composer.lock"
+      - "phpunit.xml"
+      - "infection.json.dist"
+      - ".github/workflows/phpunit.yml"
+  push:
+    branches: [ main ]
+    paths:
+      - "html/**"
+      - "scripts/check-semantic-diff.php"
+      - "scripts/test/**"
+      - ".php-cs-fixer.php"
+      - "composer.json"
+      - "composer.lock"
+      - "phpunit.xml"
+      - "infection.json.dist"
+      - ".github/workflows/phpunit.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  fast-gate:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ["8.4"]
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f  # v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
+        with:
+          path: vendor
+          key: composer-${{ matrix.php-version }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Stage 1 Fast Gate (unit)
+        run: composer run test:unit
+
+  full-validation:
+    if: github.event_name != 'schedule'
+    needs: fast-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f  # v2
+        with:
+          php-version: '8.5'
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
+        with:
+          path: vendor
+          key: composer-8.5-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Stage 2 Full Validation (unit + integration + contract)
+        run: composer run test:all
+
+  deep-verification:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f  # v2
+        with:
+          php-version: '8.5'
+          coverage: xdebug
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
+        with:
+          path: vendor
+          key: composer-8.5-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Stage 3 Deep Verification (random order)
+        run: composer run test:random
+
+      - name: Stage 3 Deep Verification (coverage)
+        run: composer run test:coverage
+
+      - name: Generate junit.xml
+        run: composer run test:junit
+
+      - name: Stage 4 Quality (mutation)
+        run: composer run test:mutation
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: paycal-coverage-html
+          path: coverage
+          retention-days: 30
+
+      - name: Upload junit.xml
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: paycal-junit
+          path: junit.xml
+          retention-days: 30
+
+      - name: Upload infection report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: paycal-infection-report
+          path: infection-output
+          retention-days: 30

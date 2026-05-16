@@ -5,7 +5,8 @@ namespace PayCal\Domain\Enums;
 /**
  * SessionTimeout.php
  *
- * Purpose: Define the SessionTimeout enum for PayCal\Domain\Enums.
+ * Purpose: String-backed session inactivity timeout durations (in seconds)
+ *          for user-configurable auto-logout behavior.
  *
  * PHP version 8.4.16
  *

@@ -2498,6 +2498,46 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
+  /* Sidebar proximity hover toggle (localStorage only, no server round-trip) */
+  (() => {
+    const navToggle = (typeof window !== 'undefined' && window.NavToggle) ? window.NavToggle : null;
+    const onRadio  = PC.query('#nav_proximity_on');
+    const offRadio = PC.query('#nav_proximity_off');
+    if (!onRadio || !offRadio) return;
+
+    // Initialise from current NavToggle state (which reflects localStorage).
+    const proximityOn = navToggle ? navToggle.isProximityEnabled() : true;
+    (proximityOn ? onRadio : offRadio).checked = true;
+
+    [onRadio, offRadio].forEach(radio => {
+      radio.addEventListener('change', () => {
+        const enabled = onRadio.checked;
+        if (navToggle) navToggle.setProximityEnabled(enabled);
+        PC.showToast('Proximity ' + (enabled ? 'on' : 'off'), 'save', 3000, true);
+      });
+    });
+  })();
+
+  /* Sidebar overlay-vs-push toggle (localStorage only, no server round-trip) */
+  (() => {
+    const navToggle     = (typeof window !== 'undefined' && window.NavToggle) ? window.NavToggle : null;
+    const pushRadio    = PC.query('#nav_overlay_push');
+    const overlayRadio = PC.query('#nav_overlay_overlay');
+    if (!pushRadio || !overlayRadio) return;
+
+    // Initialise from current NavToggle state (which reflects localStorage).
+    const overlayOn = navToggle ? navToggle.isOverlayMode() : false;
+    (overlayOn ? overlayRadio : pushRadio).checked = true;
+
+    [pushRadio, overlayRadio].forEach(radio => {
+      radio.addEventListener('change', () => {
+        const overlay = overlayRadio.checked;
+        if (navToggle) navToggle.setOverlayMode(overlay);
+        PC.showToast('Overlay ' + (overlay ? 'on' : 'off'), 'save', 3000, true);
+      });
+    });
+  })();
+
 
   /* PAY PERIODS */
   const collectPayPeriodDebugPayload = () => ({

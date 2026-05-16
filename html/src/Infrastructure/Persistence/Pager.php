@@ -7,7 +7,7 @@ use PayCal\Domain\Database;
 /**
  * Pager.php
  *
- * Purpose: Define the Pager class for PayCal\Infrastructure\Persistence.
+ * Purpose: Redis-backed pagination engine: SCAN-based row discovery, numeric-aware sorting, field projection, and consistent paginated response contract.
  *
  * PHP version 8.4.16
  *

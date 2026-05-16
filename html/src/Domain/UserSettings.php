@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * UserSettings.php
  *
- * Purpose: Define the UserSettings class for PayCal\Domain.
+ * Purpose: User settings schema and Redis accessor: maps field names to typed
+ *          properties with grouped validation rules and feature-area scoping.
  *
  * PHP version 8.4.16
  *

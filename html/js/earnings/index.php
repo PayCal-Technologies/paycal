@@ -1538,8 +1538,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (format === 'pdf') {
-      const pdfBytes = await EarningsExport.generatePdfWithExternalUtility(report);
-      EarningsExport.downloadPdfFile(pdfBytes, `paycal-${normalizedScope}-${fileSuffix}.pdf`);
+      await EarningsExport.downloadPdfServerSide(
+        normalizedScope,
+        rows,
+        report,
+        `paycal-${normalizedScope}-${fileSuffix}.pdf`,
+        startDate,
+        endDate,
+      );
       return;
     }
 
@@ -1547,32 +1553,36 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function bindYearlyExportButtons() {
-    const buttons = PC.queryAll('[data-export-scope][data-export-format]');
-    buttons.forEach((button) => {
-      button.addEventListener('click', async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
+    // Use event delegation so dynamically-injected buttons (e.g. pay-period cards
+    // loaded via loadSection/Guardian.setHTML) are covered without re-binding.
+    document.addEventListener('click', async (event) => {
+      const button = event.target.closest('[data-export-scope][data-export-format]');
+      if (!button) {
+        return;
+      }
 
-        const scope = (button.dataset.exportScope || 'yearly').toLowerCase();
-        const format = (button.dataset.exportFormat || '').toLowerCase();
-        const year = button.dataset.exportYear || '';
-        const startDate = button.dataset.exportStart || '';
-        const endDate = button.dataset.exportEnd || '';
-        const originalText = button.textContent;
+      event.preventDefault();
+      event.stopPropagation();
 
-        try {
-          button.disabled = true;
-          button.textContent = '...';
-          const refCode = await initializeExport(scope, format, year || new Date().getFullYear());
-          await runScopedExport(scope, format, year, startDate, endDate, refCode);
-        } catch (error) {
-          PW.error(`[EXPORT] ${scope.toUpperCase()} ${format.toUpperCase()} ${year} failed: ${error.message}`);
-          PC.showToast(`Export failed: ${error.message}`);
-        } finally {
-          button.disabled = false;
-          button.textContent = originalText;
-        }
-      });
+      const scope = (button.dataset.exportScope || 'yearly').toLowerCase();
+      const format = (button.dataset.exportFormat || '').toLowerCase();
+      const year = button.dataset.exportYear || '';
+      const startDate = button.dataset.exportStart || '';
+      const endDate = button.dataset.exportEnd || '';
+      const originalText = button.textContent;
+
+      try {
+        button.disabled = true;
+        button.textContent = '...';
+        const refCode = await initializeExport(scope, format, year || new Date().getFullYear());
+        await runScopedExport(scope, format, year, startDate, endDate, refCode);
+      } catch (error) {
+        PW.error(`[EXPORT] ${scope.toUpperCase()} ${format.toUpperCase()} ${year} failed: ${error.message}`);
+        PC.showToast(`Export failed: ${error.message}`);
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     });
   }
 

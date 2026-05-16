@@ -13,7 +13,7 @@ use PayCal\Domain\User;
 /**
  * SecurityLog.php
  *
- * Purpose: Define the SecurityLog class for PayCal\Infrastructure\Telemetry.
+ * Purpose: Append-only structured security event logger: increments Redis telemetry counters and distributes audit events via the extension hook system.
  *
  * PHP version 8.4.16
  *

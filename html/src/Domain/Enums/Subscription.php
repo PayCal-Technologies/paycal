@@ -5,7 +5,8 @@ namespace PayCal\Domain\Enums;
 /**
  * Subscription.php
  *
- * Purpose: Define the Subscription tier enum for PayCal\Domain\Enums.
+ * Purpose: User subscription tier enum: FREE (member-only access) or PREMIUM
+ *          (org management, up to 1000 members per org).
  *
  * PHP version 8.4.16
  *
@@ -17,14 +18,6 @@ namespace PayCal\Domain\Enums;
  * @author     Chris Simmons <cshaiku@gmail.com>
  * @copyright  2026 PayCal Technologies Inc.
  * @license    Proprietary License - See LICENSE.txt for full terms
- */
-
-/**
- * Subscription tier enum.
- *
- * Represents the subscription level for a user.
- * - FREE: Personal organization only, no team collaboration
- * - PREMIUM: Unlimited shared organizations, up to 1000 members per org
  */
 enum Subscription: string
 {

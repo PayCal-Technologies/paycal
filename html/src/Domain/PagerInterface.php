@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * PagerInterface.php
  *
- * Purpose: Define the PagerInterface interface for PayCal\Domain.
+ * Purpose: Pagination contract: row access and metadata required by datagrid and
+ *          list views that support multi-page navigation.
  *
  * PHP version 8.4.16
  *

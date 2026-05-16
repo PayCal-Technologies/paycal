@@ -1339,9 +1339,6 @@ button.cal_menu_selected:focus-visible {
 
   .datagrid_month_grid {
     display: block;
-    border-top: 1px solid var(--panel-border);
-    border-radius: 4px;
-    overflow: visible;
   }
 
   .datagrid_month_row {
@@ -1353,30 +1350,6 @@ button.cal_menu_selected:focus-visible {
     flex-direction: column;
     width: 100%;
     max-width: 100%;
-    min-height: 0;
-    margin: 0 0 0.35rem 0;
-    padding: 0.45rem;
-    border: 1px solid var(--panel-border);
-    border-radius: 4px;
-  }
-
-  .datagrid_month_cell:last-child {
-    margin-bottom: 0;
-  }
-
-  .calendar-v2-weekday-header {
-    padding: 8px 4px;
-    font-size: 0.65rem;
-  }
-
-  .datagrid_month_cell_header {
-    font-size: 0.7rem;
-    margin-bottom: 6px;
-  }
-
-  .datagrid_month_cell_content {
-    font-size: 0.55rem;
-    gap: 3px;
   }
 }
 
@@ -1611,28 +1584,6 @@ button.cal_menu_selected:focus-visible {
   }
 }
 
-@media (max-width: 480px) {
-  .calendar-v2-weekday-headers {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-  }
-
-  .calendar-v2-weekday-header {
-    padding: 8px 4px;
-    font-size: 0.65rem;
-  }
-
-  .datagrid_month_cell_header {
-    font-size: 0.7rem;
-    margin-bottom: 6px;
-  }
-
-  .datagrid_month_cell_content {
-    font-size: 0.55rem;
-    gap: 3px;
-  }
-}
-
 /* =========================================================================
    USER POSITIONING PREFERENCES
    ========================================================================= */
@@ -1714,4 +1665,66 @@ button.cal_menu_selected:focus-visible {
     width: 100% !important;
     justify-content: center !important;
   }
+
+/* =========================================================================
+   PHONE MODE — full-width vertical day list (must be last to win cascade)
+   ========================================================================= */
+@media (max-width: 450px) {
+  .calendar-v2-weekday-headers {
+    display: none;
+  }
+
+  .datagrid_month_grid {
+    display: block;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  .datagrid_month_row {
+    display: block;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .datagrid_month_cell {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    height: calc(100dvh - 3.5rem);
+    min-height: 0;
+    margin: 0;
+    padding: 1.25rem 1rem;
+    border: none;
+    border-bottom: 1px solid var(--panel-border);
+    border-radius: 0;
+    box-sizing: border-box;
+  }
+
+  .datagrid_month_cell:last-child {
+    border-bottom: none;
+  }
+
+  .datagrid_month_cell_header {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .datagrid_month_cell_content {
+    font-size: 0.9rem;
+    gap: 6px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* Strip controls bar bottom margin */
+  .datagrid_layout_month .datagrid_controls {
+    margin-bottom: 0;
+  }
+}
 

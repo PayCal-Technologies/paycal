@@ -1,0 +1,32 @@
+name: CheckRedisCliUsage
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+on:
+  push:
+    paths:
+      - 'html/**'
+  pull_request:
+    paths:
+      - 'html/**'
+  workflow_dispatch:
+
+jobs:
+  no-redis-cli:
+    name: Check for redis-cli in /html
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - name: Scan for redis-cli in html
+        run: |
+          set -euo pipefail
+          if grep -R --line-number --exclude-dir=.git 'redis-cli' html; then
+            echo "::error ::Found redis-cli in html/ - application/tests must not use redis-cli"
+            exit 1
+          fi
+          echo "No redis-cli found in html/"

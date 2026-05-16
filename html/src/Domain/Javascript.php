@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * Javascript.php
  *
- * Purpose: Define the Javascript class for PayCal\Domain.
+ * Purpose: JavaScript asset loading helper: script tag rendering with cache-busting
+ *          version stamps and copyright docblock output.
  *
  * PHP version 8.4.16
  *

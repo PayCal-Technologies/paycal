@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * CryptoVersions.php
  *
- * Purpose: Define the CryptoVersions class for PayCal\Domain.
+ * Purpose: Static provider of supported cryptographic algorithm versions and
+ *          envelope configurations used during client crypto bootstrap.
  *
  * PHP version 8.4.16
  *

@@ -2295,6 +2295,7 @@ export default PayCalCore;
 
 if (typeof window !== 'undefined') {
   window.PayCalCore = PayCalCore;
+  window.NavToggle = NavigationToggle;
   if (!window.__PAYCAL_CORE_AUTO_INIT__) {
     window.__PAYCAL_CORE_AUTO_INIT__ = true;
 

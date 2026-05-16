@@ -5,7 +5,8 @@ namespace PayCal\Domain\Enums;
 /**
  * AuthLevel.php
  *
- * Purpose: Define the AuthLevel enum for PayCal\Domain\Enums.
+ * Purpose: Ranked authentication level enum used throughout request gating, route access,
+ *          and permission checks. Higher numeric rank = higher privilege.
  *
  * PHP version 8.4.16
  *

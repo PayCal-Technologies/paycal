@@ -5,7 +5,8 @@ namespace PayCal\Domain\Enums;
 /**
  * PayRateType.php
  *
- * Purpose: Define the PayRateType enum for PayCal\Domain\Enums.
+ * Purpose: Pay-rate classification enum: hourly, salary, or day rate.
+ *          Used in work-entry validation and earnings calculation.
  *
  * PHP version 8.4.16
  *

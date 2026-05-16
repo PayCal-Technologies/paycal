@@ -5,7 +5,8 @@ namespace PayCal\Domain\Enums;
 /**
  * FormTTL.php
  *
- * Purpose: Define the FormTTL enum for PayCal\Domain\Enums.
+ * Purpose: Named time-to-live durations (in seconds) for form tokens and transient
+ *          session-bound operations such as email challenges and rate-limit windows.
  *
  * PHP version 8.4.16
  *

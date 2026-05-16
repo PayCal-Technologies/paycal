@@ -4380,6 +4380,10 @@
     let overtimeTotal = 0;
     let grossTotal = 0;
     let netTotal = 0;
+    // Daily 8-hour regular cap — mirrors server-side Work::calculateHours().
+    // Entries may have been saved before the save-path cap was in place;
+    // applying it here ensures the display is always correct.
+    let dailyRegularUsed = 0;
 
     for (const entry of list) {
       if (!entry || typeof entry !== 'object') {
@@ -4402,12 +4406,19 @@
       const overtimeRaw = entry.overtime_hours ?? entry.overtime ?? entry.o;
       const fallbackHoursRaw = entry.hours ?? entry.h ?? 0;
 
-      const regular = parseFloat(
+      const storedRegular = parseFloat(
         (regularRaw !== undefined && regularRaw !== null)
           ? regularRaw
           : ((overtimeRaw === undefined || overtimeRaw === null) ? fallbackHoursRaw : 0)
       ) || 0;
-      const overtime = parseFloat(overtimeRaw ?? 0) || 0;
+      const storedOvertime = parseFloat(overtimeRaw ?? 0) || 0;
+
+      // Re-apply daily cap so old entries with wrong splits display correctly.
+      const entryTotal = storedRegular + storedOvertime;
+      const dailyRemaining = Math.max(0, 8 - dailyRegularUsed);
+      const regular = Math.min(entryTotal, dailyRemaining);
+      const overtime = entryTotal - regular;
+      dailyRegularUsed += regular;
 
       regularTotal += regular;
       overtimeTotal += overtime;
@@ -4587,6 +4598,10 @@
       }
     }
 
+    // Apply daily 8-hour regular cap for display — ensures old entries with wrong
+    // splits are shown correctly without needing a re-save.
+    let displayDailyRegularUsed = 0;
+
     return workEntries.map(entry => {
       const siteNameRaw = (entry.site_name || entry.n || '').toString().trim();
       const siteName = escapeText(siteNameRaw);
@@ -4608,13 +4623,21 @@
       const regularRaw = entry.regular_hours ?? entry.r;
       const overtimeRaw = entry.overtime_hours ?? entry.o;
       const fallbackHoursRaw = entry.hours ?? entry.h ?? 0;
-      const regularValue = (regularRaw !== undefined && regularRaw !== null)
-        ? regularRaw
-        : ((overtimeRaw === undefined || overtimeRaw === null) ? fallbackHoursRaw : 0);
+      const storedRegular = parseFloat(
+        (regularRaw !== undefined && regularRaw !== null)
+          ? regularRaw
+          : ((overtimeRaw === undefined || overtimeRaw === null) ? fallbackHoursRaw : 0)
+      ) || 0;
+      const storedOvertime = parseFloat(overtimeRaw ?? 0) || 0;
+      const entryTotal = storedRegular + storedOvertime;
+      const dailyRemaining = Math.max(0, 8 - displayDailyRegularUsed);
+      const regularValue = Math.min(entryTotal, dailyRemaining);
+      const overtimeValue = entryTotal - regularValue;
+      displayDailyRegularUsed += regularValue;
 
       const fields = [
         formatHourValue(regularValue),
-        formatHourValue(overtimeRaw ?? 0),
+        formatHourValue(overtimeValue),
         formatHourValue(entry.living_out_allowance ?? entry.l ?? 0),
         formatHourValue(entry.travel_hours ?? entry.t ?? 0),
       ];
@@ -4900,6 +4923,24 @@
       }
     });
     
+    // Apply daily 8-hour regular cap (mirrors server-side Work::calculateHours).
+    // Server-side recalculation is skipped in encryption mode, so we must enforce
+    // the cap here before encrypting.  Entries are processed in order; dailyRegularUsed
+    // accumulates to distribute the cap across multiple entries for the same day.
+    {
+      let dailyRegularUsed = 0;
+      for (const e of entries) {
+        const total = e.regular_hours + e.overtime_hours;
+        const remaining = Math.max(0, 8 - dailyRegularUsed);
+        const reg = Math.min(total, remaining);
+        const ot = total - reg;
+        e.regular_hours = reg;
+        e.overtime_hours = ot;
+        e.hours = total;
+        dailyRegularUsed += reg;
+      }
+    }
+
     modalLog('[Calendar Modal] Saving entries:', entries);
     const activeDateLabel = formatStatusDateLabel(activeDate);
     PayCalCore.updateStatusMessage(`Saving ${entries.length} entry/entries for ${activeDateLabel}...`, 'save', 0);

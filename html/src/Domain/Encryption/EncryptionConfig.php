@@ -5,7 +5,7 @@ namespace PayCal\Domain\Encryption;
 /**
  * EncryptionConfig.php
  *
- * Purpose: Define the EncryptionConfig class for PayCal\Domain\Encryption.
+ * Purpose: Runtime feature flag manager for encryption: controls crypto_enabled and crypto_required gates loaded from environment configuration.
  *
  * PHP version 8.4.16
  *

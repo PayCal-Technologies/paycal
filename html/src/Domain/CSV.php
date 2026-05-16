@@ -5,7 +5,8 @@ namespace PayCal\Domain;
 /**
  * CSV.php
  *
- * Purpose: Define the CSV class for PayCal\Domain.
+ * Purpose: CSV export utility for converting work-entry and earnings data arrays
+ *          into downloadable comma-separated format.
  *
  * PHP version 8.4.16
  *

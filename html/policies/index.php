@@ -1,13 +1,19 @@
 <?php declare(strict_types=1);
 
-namespace PayCal\Domain;
-
-use PayCal\Observability\Lens;
-
 /**
- * Policies page controller.
+ * Policies — permanent redirect to paycaltech.com/policies/.
+ *
+ * The PayCal Policies page has moved to the corporate site at paycaltech.com.
+ * All requests are forwarded with 301 to preserve existing bookmarks and
+ * search-engine indexing.  The anchor fragment (#accessibility, #terms,
+ * #privacy) is a client-side concern and is preserved automatically by the
+ * browser after redirect.
+ *
+ * PHP version 8.4.16
  */
-$currentPage = 'PAGE_POLICIES';
+
+header('Location: https://paycaltech.com/policies/', true, 301);
+exit;
 
 require_once '../config.php';
 

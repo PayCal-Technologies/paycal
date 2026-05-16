@@ -4,7 +4,6 @@
  */
 
 import { calculateTaxes } from '/js/earnings/taxes.js';
-import { renderPayCalPdf } from '/js/earnings/pdf/renderer.js';
 import { resolveUserLocale } from '/js/earnings/locale.js';
 
 const USER_LOCALE = resolveUserLocale();
@@ -1042,13 +1041,39 @@ export async function generatePdfWithExternalUtility(reportJson, options = {}) {
     return windowGenerator(reportJson, options);
   }
 
-  return renderPayCalPdf(reportJson);
+  throw new Error('No PDF generator available. Use downloadPdfServerSide() for server-rendered PDFs.');
 }
 
 export function downloadPdfFile(pdfData, filename = 'earnings-report.pdf') {
   const blob = pdfData instanceof Blob
     ? pdfData
     : new Blob([pdfData], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
+
+export async function downloadPdfServerSide(scope, rows, report, filename, startDate = '', endDate = '') {
+  const year = Number(report?.meta?.year) || new Date().getFullYear();
+  const body = JSON.stringify({ scope, rows, report, year, start_date: startDate, end_date: endDate });
+
+  const resp = await fetch('/api/v1/export/pdf', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  });
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`PDF export failed (${resp.status}): ${text}`);
+  }
+
+  const blob = await resp.blob();
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -1099,6 +1124,7 @@ const EarningsExport = {
   generateDailyTxt,
   generatePdfWithExternalUtility,
   downloadPdfFile,
+  downloadPdfServerSide,
   downloadTextFile,
   downloadXlsxFile,
 };

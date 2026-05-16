@@ -4,9 +4,15 @@
  *
  * collapsed : icon strip visible, blank rail toggles sidebar
  * pinned    : full sidebar, push model (content shifts), manual collapse only
+ *
+ * Proximity hover: auto-reveals sidebar when cursor nears the sidebar edge.
+ * Controlled by PROXIMITY_STORAGE_KEY ('0' = off, '1' = on, default on).
+ * Call NavToggle.setProximityEnabled(bool) to toggle at runtime (settings UI).
  */
 export default (() => {
-  const STORAGE_KEY    = 'paycal_nav_state'; // '0' = collapsed, '1' = pinned
+  const STORAGE_KEY           = 'paycal_nav_state';      // '0' = collapsed, '1' = pinned
+  const PROXIMITY_STORAGE_KEY = 'paycal_nav_proximity';  // '0' = off, '1' = on (default on)
+  const OVERLAY_STORAGE_KEY   = 'paycal_nav_overlay';    // '1' = overlay, '0' = push (default push)
   const DEFAULT_LABEL_EXPAND = '';
   const DEFAULT_LABEL_COLLAPSE = '';
   const DEFAULT_ANNOUNCE_EXPANDED = '';
@@ -16,6 +22,10 @@ export default (() => {
   let state       = 'collapsed';
   let focusOrigin = null;
   let responsiveFrame = null;
+  let hoverOpened = false;       // true only when proximity-hover opened the sidebar
+  let proximityFrame = null;     // rAF handle for mousemove throttling
+  let proximityEnabled = true;   // runtime flag; synced from localStorage on init
+  let overlayMode = false;       // runtime flag; synced from localStorage on init
 
   function syncResponsiveState() {
     document.body.setAttribute('data-nav-top-density', 'full');
@@ -118,20 +128,25 @@ export default (() => {
     syncAccessibleState();
   }
 
-  function pin() {
+  function pin(fromHover = false) {
+    if (!fromHover) hoverOpened = false;
     applyBodyClass('pinned');
     setCollapsedInteractivity(false);
     announce(getLabel('announceExpanded', DEFAULT_ANNOUNCE_EXPANDED));
-    persistState(false);
+    // Don't persist hover-only opens; the saved state should reflect the user's
+    // deliberate choice so the next page load starts collapsed as expected.
+    if (!fromHover) persistState(false);
   }
 
-  function collapse(returnFocus = false) {
+  function collapse(returnFocus = false, fromHover = false) {
+    if (!fromHover) hoverOpened = false;
     // Blur before disabling collapsed items so focus never lands on hidden links.
     if (nav.contains(document.activeElement)) document.activeElement.blur();
     applyBodyClass('collapsed');
     setCollapsedInteractivity(true);
     announce(getLabel('announceCollapsed', DEFAULT_ANNOUNCE_COLLAPSED));
-    persistState(true);
+    // Don't double-write if hover is just cleaning up its own temporary open.
+    if (!fromHover) persistState(true);
     if (returnFocus) {
       const target = focusOrigin && document.body.contains(focusOrigin)
         ? focusOrigin
@@ -273,10 +288,81 @@ export default (() => {
 
       syncAccessibleState();
 
+      // Load proximity preference ('1' = on by default).
+      proximityEnabled = (localStorage.getItem(PROXIMITY_STORAGE_KEY) ?? '1') !== '0';
+
+      // Load overlay preference ('0' = push model by default).
+      overlayMode = (localStorage.getItem(OVERLAY_STORAGE_KEY) ?? '0') === '1';
+      document.body.classList.toggle('nav-overlay-mode', overlayMode);
+
+      // Proximity hover: auto-reveal when mouse is within 200px of sidebar edge.
+      // Only collapses on mouse-leave if *this* feature opened the sidebar.
+      // Gated by proximityEnabled — toggled at runtime via setProximityEnabled().
+      const PROXIMITY_PX = 200;
+      document.addEventListener('mousemove', (e) => {
+        if (!proximityEnabled) return;
+        if (proximityFrame !== null) return; // throttle to one rAF per move batch
+        proximityFrame = requestAnimationFrame(() => {
+          proximityFrame = null;
+          if (!isSidebarMode()) return;
+
+          const rect = nav.getBoundingClientRect();
+          const pos  = document.body.getAttribute('data-nav-primary-position');
+          const near = pos === 'right'
+            ? e.clientX >= rect.left - PROXIMITY_PX
+            : e.clientX <= rect.right + PROXIMITY_PX;
+
+          if (near && state === 'collapsed') {
+            hoverOpened = true;
+            pin(true);
+          } else if (!near && state === 'pinned' && hoverOpened) {
+            hoverOpened = false;
+            collapse(false, true);
+          }
+        });
+      }, { passive: true });
+
       // Remove pre-hydration collapsed shim after persisted state is applied.
       requestAnimationFrame(() => {
         document.body.classList.add('nav-ready');
       });
-    }
+    },
+
+    /**
+     * Enable or disable proximity hover reveal.
+     * Called by the settings UI toggle; persists to localStorage.
+     * @param {boolean} enabled
+     */
+    setProximityEnabled(enabled) {
+      proximityEnabled = Boolean(enabled);
+      localStorage.setItem(PROXIMITY_STORAGE_KEY, proximityEnabled ? '1' : '0');
+      // If disabling while hover had opened the sidebar, collapse it.
+      if (!proximityEnabled && hoverOpened) {
+        hoverOpened = false;
+        collapse(false, true);
+      }
+    },
+
+    /** Returns current proximity enabled state (for settings UI to read on load). */
+    isProximityEnabled() {
+      return proximityEnabled;
+    },
+
+    /**
+     * Enable or disable overlay mode (sidebar floats over content vs. pushes it).
+     * Called by the settings UI toggle; persists to localStorage.
+     * Default: false (push model).
+     * @param {boolean} enabled
+     */
+    setOverlayMode(enabled) {
+      overlayMode = Boolean(enabled);
+      localStorage.setItem(OVERLAY_STORAGE_KEY, overlayMode ? '1' : '0');
+      document.body.classList.toggle('nav-overlay-mode', overlayMode);
+    },
+
+    /** Returns current overlay mode state (for settings UI to read on load). */
+    isOverlayMode() {
+      return overlayMode;
+    },
   };
 })();

@@ -8,7 +8,7 @@ use PayCal\Domain\Log;
 /**
  * ClientCapabilities.php
  *
- * Purpose: Define the ClientCapabilities class for PayCal\Domain\Encryption.
+ * Purpose: Redis-cached client capability store for detecting Web Crypto API support before initiating client-side encryption operations.
  *
  * PHP version 8.4.16
  *

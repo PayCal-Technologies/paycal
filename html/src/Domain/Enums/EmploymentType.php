@@ -5,7 +5,8 @@ namespace PayCal\Domain\Enums;
 /**
  * EmploymentType.php
  *
- * Purpose: Define the EmploymentType enum for PayCal\Domain\Enums.
+ * Purpose: Employment classification enum representing the working arrangement type
+ *          (full-time, part-time, contractor, or casual). Used in work-entry validation.
  *
  * PHP version 8.4.16
  *

@@ -7,7 +7,8 @@ use PayCal\Domain\Config\Environment;
 /**
  * CORS.php
  *
- * Purpose: Define the CORS class for PayCal\Domain.
+ * Purpose: Cross-origin request validator and response-header applier for the
+ *          PayCal API and page surface.
  *
  * PHP version 8.4.16
  *

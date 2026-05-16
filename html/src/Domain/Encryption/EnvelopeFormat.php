@@ -7,7 +7,7 @@ use PayCal\Domain\InvalidArgumentException;
 /**
  * EnvelopeFormat.php
  *
- * Purpose: Define the EnvelopeFormat class for PayCal\Domain\Encryption.
+ * Purpose: Static factory for versioned encrypted data envelopes, with creation, validation, and field extraction for nonce, ciphertext, and AAD.
  *
  * PHP version 8.4.16
  *

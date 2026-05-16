@@ -27,6 +27,7 @@ use PayCal\Domain\Taxes;
 use PayCal\Domain\User;
 use PayCal\Domain\Work;
 use PayCal\Domain\WorkEntry;
+use PayCal\Domain\EarningsPdf;
 use PayCal\Domain\Xlsx;
 use PayCal\Observability\Lens;
 
@@ -249,15 +250,13 @@ class EarningsController
       return self::unwrapDekFromPasskeyWrapper($wrappedDek, $credentialId, $actorUUID, $saltB64);
     }
 
-    $wrappedPasskeyMapKey = Keys::USER . ':' . $ownerUUID . ':passkey_wrapped_deks';
-    $wrappedDekPasskey = '';
-    if ($credentialId !== '') {
-      $wrappedDekPasskey = self::scalarString(Database::hget($wrappedPasskeyMapKey, $credentialId));
-    }
-
     if ($credentialId === '') {
       return null;
     }
+
+    $wrappedPasskeyMapKey = Keys::USER . ':' . $ownerUUID . ':passkey_wrapped_deks';
+    $wrappedDekPasskey = self::scalarString(Database::hget($wrappedPasskeyMapKey, $credentialId));
+
     if ($wrappedDekPasskey === '') {
       return null;
     }
@@ -1202,6 +1201,87 @@ class EarningsController
     header('Content-Disposition: attachment; filename="' . $filename . '"');
     header('Cache-Control: max-age=0');
     echo $xlsx;
+  }
+
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Export earnings as a PDF report using Tabularium.
+   *
+   * Expects a JSON body with:
+   *   scope        string  yearly|monthly|daily|payperiod
+   *   report       object  Aggregated report object (from buildXxxReportJson in JS)
+   *   year         int     Report year (used for filename)
+   *   start_date   string  ISO date (payperiod only)
+   *   end_date     string  ISO date (payperiod only)
+   */
+  #[Route('export/pdf', ['POST'])]
+  public function exportPdf(): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    $body = file_get_contents('php://input');
+    if ($body === false || $body === '') {
+      Response::error('[EC] Empty request body.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    try {
+      $postData = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+    } catch (\JsonException $e) {
+      Log::error('[EC] exportPdf: invalid JSON body: ' . $e->getMessage());
+      Response::error('[EC] Invalid JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    if (!is_array($postData)) {
+      Response::error('[EC] JSON payload must be an object.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $scope     = isset($postData['scope']) && is_string($postData['scope']) ? trim($postData['scope']) : '';
+    $report    = isset($postData['report']) && is_array($postData['report']) ? $postData['report'] : [];
+    $year      = isset($postData['year']) && is_numeric($postData['year']) ? (int) $postData['year'] : (int) date('Y');
+    $startDate = isset($postData['start_date']) && is_string($postData['start_date']) ? preg_replace('/[^0-9\-]/', '', $postData['start_date']) : '';
+    $endDate   = isset($postData['end_date']) && is_string($postData['end_date']) ? preg_replace('/[^0-9\-]/', '', $postData['end_date']) : '';
+
+    $allowedScopes = ['yearly', 'monthly', 'daily', 'payperiod'];
+    if (!in_array($scope, $allowedScopes, true)) {
+      Response::error('[EC] Invalid export scope.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $rows = isset($report['rows']) && is_array($report['rows']) ? $report['rows'] : [];
+    if (count($rows) === 0) {
+      Response::error('[EC] No rows to export.', [], HttpStatus::HTTP_UNPROCESSABLE);
+      return;
+    }
+
+    $fileSuffix = ($scope === 'payperiod' && $startDate !== '' && $endDate !== '')
+      ? "{$startDate}_to_{$endDate}"
+      : (string) $year;
+    $filename = "paycal-{$scope}-{$fileSuffix}.pdf";
+
+    try {
+      $pdf = EarningsPdf::generate($scope, $report);
+    } catch (\InvalidArgumentException $e) {
+      Log::error('[EC] exportPdf: PDF generation failed: ' . $e->getMessage());
+      Response::error('[EC] Invalid export parameters.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    \PayCal\Infrastructure\Telemetry\SecurityLog::log('earnings_export', [
+      'scope'  => $scope,
+      'format' => 'pdf',
+      'year'   => $year,
+    ]);
+
+    $encoded = rawurlencode($filename);
+    http_response_code(HttpStatus::HTTP_OK);
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: attachment; filename="' . $filename . '"; filename*=UTF-8\'\''. $encoded);
+    header('Cache-Control: max-age=0');
+    echo $pdf;
   }
 }
 
