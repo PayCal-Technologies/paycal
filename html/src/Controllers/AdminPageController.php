@@ -15,6 +15,7 @@ use PayCal\Domain\Security\CorrelationBroker;
 use PayCal\Domain\Security\CorrelationContext;
 use PayCal\Domain\Strings;
 use PayCal\Domain\Config\SystemConfig;
+use PayCal\Domain\Config\SiteColorPalette;
 use PayCal\Domain\Taxes;
 use PayCal\Domain\User;
 
@@ -431,6 +432,26 @@ class AdminPageController
       . "</div>"
       . "</div>";
 
+    // Build site color palette panel
+    $paletteSwatchesHtml = '';
+    foreach (SiteColorPalette::palette() as $idx => $sc) {
+      $hex   = htmlspecialchars($sc['hex'],   ENT_QUOTES, 'UTF-8');
+      $label = htmlspecialchars($sc['label'], ENT_QUOTES, 'UTF-8');
+      if ($idx > 0 && $idx % 8 === 0) {
+        $paletteSwatchesHtml .= '</div><div class="admin-palette-row">';
+      }
+      $paletteSwatchesHtml .= "<div class='admin-palette-swatch' style='background:{$hex}' title='{$label}'>"
+        . "<span class='admin-palette-swatch-label'>{$label}</span>"
+        . "<span class='admin-palette-swatch-hex'>{$hex}</span>"
+        . "</div>";
+    }
+    $siteColorPaletteHtml = "<section class='flex f_row panel w100 mar_sm pad_md' aria-label='Site Color Palette'>"
+      . "<section class='f_column w100 pad_md'>"
+      . "<h2>Site Color Palette</h2>"
+      . "<p class='text-muted'>32 curated colors used for site identification across the calendar, reports, dashboards, and exports. Organized as 4 rows &times; 8 colors by hue family.</p>"
+      . "<div class='admin-palette-grid'><div class='admin-palette-row'>{$paletteSwatchesHtml}</div></div>"
+      . "</section></section>";
+
     // Render the template with placeholders
     $cspNonce = self::asString($_SERVER['CSP_NONCE'] ?? '');
     $dashboardI18nKeys = [
@@ -492,6 +513,7 @@ class AdminPageController
       '__SYSTEM_LIMITS_HTML__' => $systemLimitsHtml,
       '__CONTACT_HEALTH_HTML__' => $contactHealthHtml,
       '__STRIPE_HEALTH_HTML__' => $stripeHealthHtml,
+      '__SITE_COLOR_PALETTE_HTML__' => $siteColorPaletteHtml,
       '__SITE__' => '/',
       '__CSP_NONCE__' => $cspNonce,
     ], $dashboardI18nRenders));

@@ -25,7 +25,7 @@ require_once HTML . '/header.php';
   <section class="doc-article-body">
     <section class="doc-section highlight">
       <h2>1. Overview</h2>
-      <p>PayCal operates a SOC2-aligned security program focused on verifiable enforcement and traceable evidence, not policy-only assertions.</p>
+      <p>PayCal operates a SOC2-oriented security program focused on verifiable enforcement and traceable evidence, subject to independent auditor validation.</p>
       <ul class="doc-fact-list">
         <li><strong>Controls in scope:</strong> CC1-CC9</li>
         <li><strong>Artifacts in current bundle:</strong> 37</li>
@@ -82,7 +82,7 @@ require_once HTML . '/header.php';
 
     <section class="doc-section">
       <h2>Reusable Compliance Snippets</h2>
-      <p><strong>Footer badge:</strong> SOC2 Aligned • Controls Mapped • Continuous Evidence Monitoring</p>
+      <p><strong>Footer badge:</strong> Readiness in progress • Controls Mapped • Continuous Evidence Monitoring</p>
       <p><strong>Summary block:</strong> CC1-CC9 mapped, 37 artifacts, 26 control links, ledger integrity pass, and automated full-suite test evidence.</p>
     </section>
 

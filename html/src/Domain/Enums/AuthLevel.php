@@ -28,6 +28,7 @@ enum AuthLevel: string
   case VERIFIED   = 'verified';
   case USER       = 'user';
   case MANAGER    = 'manager';
+  case AUDITOR    = 'auditor';
   case ADMIN      = 'admin';
   case SUPERADMIN = 'superadmin';
 
@@ -45,6 +46,7 @@ enum AuthLevel: string
       self::VERIFIED   => 30,
       self::USER       => 40,
       self::MANAGER    => 60,
+      self::AUDITOR    => 500,  // external auditor portal access only; below admin surface
       self::ADMIN      => 1000,
       self::SUPERADMIN => 2000, // absolute ceiling
     };

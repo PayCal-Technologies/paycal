@@ -154,8 +154,12 @@ final class ChangeEmailController
       }
 
       if ($oldSent && $newSent) {
-        Database::incr($startsKey);
-        Database::expire($startsKey, 86400); // 24 hours
+        $startsCount = Database::incr($startsKey);
+        // Set TTL only on first increment so the window is fixed (not sliding).
+        // Resetting expire() on every request allowed bypassing the daily limit.
+        if (1 === $startsCount) {
+          Database::expire($startsKey, 86400); // 24 hour fixed window
+        }
 
         SecurityLog::log('change_email_started', [
           'user_uuid' => $user->user_uuid,

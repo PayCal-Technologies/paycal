@@ -260,6 +260,30 @@ class EncryptionController
     $blobLengthRaw = $body['blobLength'] ?? null;
     $blobLength = is_scalar($blobLengthRaw) ? (int) $blobLengthRaw : 0;
 
+    // Strict input sanitisation.
+    //
+    // $type is interpolated directly into Redis keys
+    // (telemetry:encryption:{v}:client:{type}) so an unsanitised value could
+    // collide with other key namespaces (e.g. "rate:some-user-id").  Only
+    // lowercase alphanumerics, dots, hyphens and underscores are allowed; colons
+    // are explicitly excluded to prevent key-namespace injection.  Max 64 chars
+    // matches the _pw_safe_type() constraint enforced client-side.
+    if (!preg_match('/^[a-z][a-z0-9._-]{0,63}$/', $type)) {
+      \PayCal\Domain\Response::error('[EncryptionC] Invalid telemetry type.', [], \PayCal\Domain\Enums\HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    // $site and $error are stored verbatim in the Redis events list and may be
+    // rendered in the admin panel.  Strip HTML, enforce max lengths, and replace
+    // runs of whitespace to prevent stored-XSS via crafted error strings.
+    $site = substr(strip_tags(trim($site)), 0, 128);
+    $site = preg_replace('/\s+/', ' ', $site);
+    if ($site === '') {
+      $site = 'unknown';
+    }
+    $error = substr(strip_tags(trim($error)), 0, 256);
+    $error = preg_replace('/\s+/', ' ', $error);
+
     try {
       $v = SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
 

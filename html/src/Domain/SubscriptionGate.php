@@ -112,7 +112,7 @@ final class SubscriptionGate
     $subscription = SubscriptionRepository::get($userUUID);
 
     if ($subscription['tier'] === Subscription::FREE) {
-      return 'Free ◆ Personal organization only';
+      return 'Free ◆ Member access only';
     }
 
     if ($subscription['status']->grantsAccess()) {

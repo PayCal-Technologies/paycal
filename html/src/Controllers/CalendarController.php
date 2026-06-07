@@ -847,6 +847,7 @@ class CalendarController
         $workEntry = [
           'site_id' => self::scalarString($entry['site_id'] ?? $entry['s'] ?? $siteId),
           'site_name' => self::scalarString($entry['site_name'] ?? $entry['n'] ?? ''),
+          'site_color' => self::scalarString($entry['site_color'] ?? ''),
           'hours' => self::numericFloat($entry['hours'] ?? $entry['h'] ?? 0),
           'regular_hours' => self::numericFloat($entry['regular_hours'] ?? $entry['r'] ?? 0),
           'overtime_hours' => self::numericFloat($entry['overtime_hours'] ?? $entry['o'] ?? 0),
@@ -1147,6 +1148,7 @@ class CalendarController
         $workDict[$workId] = [
           'site_id' => self::scalarString($entry['site_id'] ?? ''),
           'site_name' => self::scalarString($entry['site_name'] ?? ''),
+          'site_color' => self::scalarString($entry['site_color'] ?? ''),
           'regular' => $regular,
           'r' => $regular,
           'regular_hours' => $regular,

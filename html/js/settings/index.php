@@ -1556,8 +1556,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const payRate = String(payRateInput?.value || '').trim();
-      if (payRate.length > 0 && !/^\d+(\.\d{1,2})?$/.test(payRate)) {
-        markInvalid(payRateInput, 'edit_details_pay_rate_error', 'Enter a valid pay rate (for example 25 or 25.50).');
+      if (payRate.length > 0 && (!/^\d+(\.\d{1,2})?$/.test(payRate) || parseFloat(payRate) <= 0)) {
+        markInvalid(payRateInput, 'edit_details_pay_rate_error', 'Enter a pay rate greater than zero (for example 25 or 25.50).');
       }
 
       const payRateType = String(payRateTypeInput?.value || '').trim();
@@ -2513,8 +2513,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       radio.addEventListener('change', () => {
         const enabled = onRadio.checked;
         if (navToggle) navToggle.setProximityEnabled(enabled);
+        // Disable the distance slider when proximity is off.
+        const slider = PC.query('#nav_proximity_px');
+        if (slider) slider.disabled = !enabled;
         PC.showToast('Proximity ' + (enabled ? 'on' : 'off'), 'save', 3000, true);
       });
+    });
+  })();
+
+  /* Sidebar proximity trigger-distance slider (localStorage only) */
+  (() => {
+    const navToggle = (typeof window !== 'undefined' && window.NavToggle) ? window.NavToggle : null;
+    const slider   = PC.query('#nav_proximity_px');
+    const output   = PC.query('#nav_proximity_px_output');
+    const onRadio  = PC.query('#nav_proximity_on');
+    if (!slider || !output) return;
+
+    const currentPx = navToggle ? navToggle.getProximityPx() : 200;
+    slider.value = currentPx;
+    output.value = currentPx + ' px';
+
+    // Disable slider if proximity is currently off.
+    if (slider && onRadio && !onRadio.checked) slider.disabled = true;
+
+    slider.addEventListener('input', () => {
+      const px = parseInt(slider.value, 10);
+      output.value = px + ' px';
+      if (navToggle) navToggle.setProximityPx(px);
     });
   })();
 
@@ -3263,6 +3288,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!payloadJson) {
       setDataPortabilityStatus('Paste export payload JSON before preparing import.', 'error');
       appendDataPortabilityLog('Prepare blocked', 'Import payload is empty.');
+      return;
+    }
+
+    // Guard against pathologically large pastes freezing the tab before we even hit the server.
+    const MAX_IMPORT_BYTES = 4 * 1024 * 1024; // 4 MB
+    if (payloadJson.length > MAX_IMPORT_BYTES) {
+      const sizeMB = (payloadJson.length / (1024 * 1024)).toFixed(1);
+      const message = `Payload is too large (${sizeMB} MB). Maximum allowed is 4 MB. Check that you pasted the correct export file.`;
+      setDataPortabilityStatus(message, 'error');
+      appendDataPortabilityLog('Prepare blocked', message);
       return;
     }
 

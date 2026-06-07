@@ -235,10 +235,14 @@ class Work
       $other = is_numeric($data['other'] ?? null) ? (float) $data['other'] : null;
 
       Log::debug('Work::getWorkInRange yield');
+      $siteColor = isset($data['site_color']) && preg_match('/^#[0-9A-Fa-f]{6}$/', (string) $data['site_color'])
+        ? strtoupper((string) $data['site_color'])
+        : '';
       $yieldRow = [
         'date' => $dateStr,
         'site_id' => $siteID,
         'site_name' => $siteName,
+        'site_color' => $siteColor,
         'hours' => $hours,
         'regular_hours' => $regularHours,
         'overtime_hours' => $overtimeHours,

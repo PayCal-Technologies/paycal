@@ -141,6 +141,23 @@ class Database
     self::getWriteInstance()->hmset($key, $normalized);
   }
 
+  /**
+   * Atomically increments a hash field by the given amount (HINCRBY).
+   *
+   * Use instead of hget()+hset() when incrementing integer counters stored in
+   * a hash. The increment is atomic — no read-modify-write race.
+   *
+   * @param string $key   Hash key
+   * @param string $field Hash field to increment
+   * @param int    $by    Increment amount (positive or negative)
+   * @return int  New value of the field after the increment
+   */
+  public static function hincrby(string $key, string $field, int $by = 1): int
+  {
+    $result = self::getWriteInstance()->client->hIncrBy($key, $field, $by);
+    return is_int($result) ? $result : 0;
+  }
+
 
   /**
    * Deletes one or more Database keys matching the given pattern.
@@ -151,22 +168,43 @@ class Database
    * issued. Affected callers include destroySession() (logout) and
    * validateCSRFToken() (nonce invalidation), making one-shot keys reusable.
    *
+   * Uses SCAN instead of KEYS to avoid blocking the Redis event loop on large
+   * keyspaces. KEYS is O(N) and stalls all other clients while it runs.
+   *
    * @param string $pattern Pattern to delete
    */
   public static function del(string $pattern): int|false
   {
-    $keys = self::getWriteInstance()->client->keys($pattern);
+    $redis        = self::getWriteInstance();
+    $cursor       = null;
     $deletedCount = 0;
-    if (!empty($keys)) {
+    $iterations   = 0;
+
+    do {
+      $keys = $redis->scan($cursor, $pattern, self::DEFAULT_SCAN_COUNT);
+      ++$iterations;
+
       foreach ($keys as $key) {
-        $deleted = self::getWriteInstance()->client->del($key);
+        $deleted = $redis->client->del($key);
         if ($deleted) {
           $deletedCount++;
         }
       }
-      return $deletedCount;
-    }
-    return false;
+
+      if ($iterations >= self::MAX_SCAN_ITERATIONS) {
+        if (class_exists('PayCal\\Domain\\Log')) {
+          \PayCal\Domain\Log::warn(
+            '[REDIS][DEL] Iteration guard triggered pattern=' . $pattern
+            . ' cursor=' . (string) $cursor
+            . ' iterations=' . (string) $iterations
+          );
+        }
+        break;
+      }
+
+    } while ($cursor !== 0);
+
+    return $deletedCount > 0 ? $deletedCount : false;
   }
 
 
@@ -242,6 +280,23 @@ class Database
 
 
   /**
+   * Atomically read and delete a string key (GETDEL).
+   *
+   * Use instead of get() + del() for single-use tokens (CSRF nonces, one-time
+   * codes).  A separate get+del pair exposes a replay window between the two
+   * round trips; GETDEL closes it.
+   *
+   * @param string $key the storage key
+   * @return string the value that was stored, or empty string if key was absent
+   */
+  public static function getdel(string $key): string
+  {
+    $result = self::getWriteInstance()->getdel($key);
+    return $result ?? '';
+  }
+
+
+  /**
    * Stores a value in the underlying instance by key, with optional expiry.
    * @param string   $key           the storage key
    * @param string   $value         the value to store
@@ -255,6 +310,27 @@ class Database
       return;
     }
     self::getWriteInstance()->client->set($key, $value);
+  }
+
+  /**
+   * Atomically sets key to value with TTL only if the key does not exist (SET NX EX).
+   *
+   * Returns true if the key was set (caller claimed it), false if it already
+   * existed (caller should treat this as a duplicate / throttled condition).
+   *
+   * Use this instead of exists()+set() to eliminate the TOCTOU race where two
+   * concurrent requests both observe key absent and both write.
+   *
+   * @param string $key           Storage key
+   * @param string $value         Value to store
+   * @param int    $expireSeconds TTL in seconds (required — an NX key without TTL would never expire)
+   * @return bool True if the key was newly set, false if it already existed
+   */
+  public static function setnx(string $key, string $value, int $expireSeconds): bool
+  {
+    $result = self::getWriteInstance()->client->set($key, $value, ['nx', 'ex' => $expireSeconds]);
+    // PhpRedis returns true on success, false or null when the key already exists.
+    return $result === true;
   }
 
 
@@ -273,6 +349,43 @@ class Database
     );
 
     return is_scalar($result) ? (string) $result : '';
+  }
+
+
+  /**
+   * Retrieves specific fields from a Database hash (HMGET).
+   *
+   * Use instead of hgetall() when only a subset of fields is needed — avoids
+   * transferring the full hash over the wire for a partial read.
+   *
+   * Returns an array keyed by field name; missing fields map to empty string.
+   *
+   * @param string            $key    Database hash key
+   * @param array<int,string> $fields Field names to fetch
+   * @return array<string,string> Field => value map (missing fields = '')
+   */
+  public static function hmget(string $key, array $fields): array
+  {
+    if ([] === $fields) {
+      return [];
+    }
+
+    $result = self::readWithFallback(
+      fn($redis) => $redis->hmget($key, $fields),
+      fn($redis) => $redis->hmget($key, $fields)
+    );
+
+    if (!is_array($result)) {
+      return array_fill_keys($fields, '');
+    }
+
+    $normalized = [];
+    foreach ($fields as $field) {
+      $value = $result[$field] ?? null;
+      $normalized[$field] = is_string($value) ? $value : '';
+    }
+
+    return $normalized;
   }
 
 
@@ -388,6 +501,27 @@ class Database
   public static function ttl(string $key): int
   {
     return (int) self::getReadInstance()->ttl($key);
+  }
+
+
+  /**
+   * Block until replicas acknowledge the most recent write (WAIT).
+   *
+   * Call immediately after security-critical hsetex/set writes on paths where
+   * the response redirects to a page that reads the same key.  Without WAIT,
+   * a replica that has not caught up yet can return stale/empty data, making
+   * the user appear unauthenticated immediately after login.
+   *
+   * Returns the count of replicas that acknowledged within the timeout.  On a
+   * single-instance deployment (no replicas) WAIT returns 0 immediately.
+   *
+   * @param int $numReplicas Minimum replicas to wait for
+   * @param int $timeoutMs   Max wait in milliseconds (50 is safe for LAN replication)
+   * @return int Replicas that acknowledged
+   */
+  public static function wait(int $numReplicas = 1, int $timeoutMs = 50): int
+  {
+    return self::getWriteInstance()->wait($numReplicas, $timeoutMs);
   }
 
 

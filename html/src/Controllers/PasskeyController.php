@@ -166,12 +166,11 @@ final class PasskeyController
     }
 
     $challengeKey = $this->signupChallengeKey($challengeId);
-    if (!Database::exists($challengeKey)) {
+    $challengeData = Database::hgetall($challengeKey);
+    if ([] === $challengeData) {
       Response::error('Signup failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
-
-    $challengeData = Database::hgetall($challengeKey);
     Database::unlink($challengeKey);
 
     $email = InputSanitizer::sanitizeEmail($this->scalarString($challengeData['email'] ?? ''));
@@ -371,12 +370,11 @@ final class PasskeyController
     }
 
     $challengeKey = $this->registerChallengeKey($challengeId);
-    if (!Database::exists($challengeKey)) {
+    $challengeData = Database::hgetall($challengeKey);
+    if ([] === $challengeData) {
       Response::error('Registration failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
-
-    $challengeData = Database::hgetall($challengeKey);
     Database::unlink($challengeKey);
 
     $sessionUser = User::current();
@@ -415,16 +413,17 @@ final class PasskeyController
     }
 
     $credentialKey = $this->credentialKey($credentialId);
-    if (Database::exists($credentialKey)) {
-      $existing = Database::hgetall($credentialKey);
-      if (($existing['user_uuid'] ?? '') !== $expectedUserUUID) {
+    // Only ownership fields are needed here; avoid fetching the full credential hash.
+    $existing = Database::hmget($credentialKey, ['user_uuid', 'revoked_at']);
+    if ('' !== $existing['user_uuid']) {
+      if ($existing['user_uuid'] !== $expectedUserUUID) {
         Response::error('Registration failed.', [], HttpStatus::HTTP_BAD_REQUEST);
         return;
       }
       // Reject re-registration of a revoked credential; revoking a credential (e.g. clone
       // suspected) must be permanent and cannot be cleared by re-submitting the same
       // credential_id from a compromised device that also has account access.
-      if (($existing['revoked_at'] ?? '') !== '') {
+      if ($existing['revoked_at'] !== '') {
         SecurityLog::log('passkey_revoked_reregistration_blocked', [
           'user_uuid' => $expectedUserUUID,
           'credential_id' => $credentialId,
@@ -558,12 +557,11 @@ final class PasskeyController
     }
 
     $challengeKey = $this->loginChallengeKey($challengeId);
-    if (!Database::exists($challengeKey)) {
+    $challengeData = Database::hgetall($challengeKey);
+    if ([] === $challengeData) {
       Response::error('Authentication failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
-
-    $challengeData = Database::hgetall($challengeKey);
     Database::unlink($challengeKey);
 
     $assertion = is_array($body['assertion'] ?? null) ? $body['assertion'] : $body;
@@ -581,7 +579,8 @@ final class PasskeyController
     }
 
     $credentialKey = $this->credentialKey($credentialId);
-    if (!Database::exists($credentialKey)) {
+    $credentialData = Database::hgetall($credentialKey);
+    if ([] === $credentialData) {
       \PayCal\Observability\Lens::add('[PASSKEY] Credential not found', [
         'credentialId' => $credentialId,
         'credentialKey' => $credentialKey,
@@ -589,8 +588,6 @@ final class PasskeyController
       Response::error('Authentication failed.', ['error' => 'passkey_invalid'], HttpStatus::HTTP_UNAUTHORIZED);
       return;
     }
-
-    $credentialData = Database::hgetall($credentialKey);
     $isRevoked = $this->scalarString($credentialData['revoked_at'] ?? '') !== '';
     if ($isRevoked) {
       Response::error('Authentication failed.', ['error' => 'passkey_invalid'], HttpStatus::HTTP_UNAUTHORIZED);
@@ -830,13 +827,13 @@ final class PasskeyController
 
     $userUUID = User::currentUUID();
     $credentialKey = $this->credentialKey($credentialId);
-    if (!Database::exists($credentialKey)) {
+    // Ownership check: only need user_uuid; avoid fetching the full credential hash.
+    $ownerUUID = Database::hget($credentialKey, 'user_uuid');
+    if ('' === $ownerUUID) {
       Response::error('Update failed.', [], HttpStatus::HTTP_NOT_FOUND);
       return;
     }
-
-    $data = Database::hgetall($credentialKey);
-    if (($data['user_uuid'] ?? '') !== $userUUID) {
+    if ($ownerUUID !== $userUUID) {
       Response::error('Update failed.', [], HttpStatus::HTTP_FORBIDDEN);
       return;
     }
@@ -878,13 +875,13 @@ final class PasskeyController
 
     $userUUID = User::currentUUID();
     $credentialKey = $this->credentialKey($credentialId);
-    if (!Database::exists($credentialKey)) {
+    // Ownership check: only need user_uuid; avoid fetching the full credential hash.
+    $ownerUUID = Database::hget($credentialKey, 'user_uuid');
+    if ('' === $ownerUUID) {
       Response::error('Delete failed.', [], HttpStatus::HTTP_NOT_FOUND);
       return;
     }
-
-    $data = Database::hgetall($credentialKey);
-    if (($data['user_uuid'] ?? '') !== $userUUID) {
+    if ($ownerUUID !== $userUUID) {
       Response::error('Delete failed.', [], HttpStatus::HTTP_FORBIDDEN);
       return;
     }

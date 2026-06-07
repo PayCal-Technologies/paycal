@@ -71,6 +71,7 @@ if (!isset($pageTitle) || $pageTitle === '') {
     'PAGE_AUTH' => Strings::headerI18n('AUTH_TAB_SIGNIN').' - ['.Strings::headerI18n('SITE_NAME').']',
     'PAGE_SITES' => Strings::headerI18n('SITES').' - ['.$siteName.']',
     'PAGE_ORGANIZATIONS' => Strings::headerI18n('ORGANIZATIONS').' - ['.$siteName.']',
+    'PAGE_FORECAST' => 'Crew Forecast - ['.$siteName.']',
     'PAGE_PROFILE' => Strings::headerI18n('PROFILE').' - ['.$siteName.']',
     'PAGE_PREMIUM' => Strings::headerI18n('PREMIUM_PAGE_TITLE').' - ['.$siteName.']',
     'PAGE_ADMIN' => Strings::headerI18n('ADMIN').' - ['.$siteName.']',
@@ -420,6 +421,7 @@ if (ContentView::isDocPage($currentPage)) {
     'PAGE_SETTINGS' => 'settings',
     'PAGE_SITES' => 'sites',
     'PAGE_ORGANIZATIONS' => 'organizations',
+    'PAGE_FORECAST' => 'forecast',
     'PAGE_PROFILE' => 'profile',
     'PAGE_TESTS' => 'admin',
     'PAGE_TRANSPARENCY' => 'transparency',
@@ -474,6 +476,7 @@ if (ContentView::isDocPage($currentPage) && ($_GET['view'] ?? '') === 'pdf') { ?
   <script type="module" src="<?php echo Environment::appURL('js/'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
   <script type="module" src="<?php echo Environment::appURL('js/phantomwing/'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
   <script type="module" src="<?php echo Environment::appURL('js/encryption/'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
+  <script type="module" src="<?php echo Environment::appURL('js/work-integrity/'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
 <?php } ?>
 
 </head>
@@ -598,7 +601,7 @@ $languageNavHtml = Render::languageNav($activeLanguageForNav);
 echo Render::template('keyboard-shortcuts', $renders);
 ?>
 
-<dialog id="modal_signout" aria-labelledby="modal_signout_title" aria-describedby="modal_signout_aria modal_signout_meta">
+<dialog id="modal_signout" aria-modal="true" aria-labelledby="modal_signout_title" aria-describedby="modal_signout_aria modal_signout_meta">
   <div class="modal_aria visually_hidden">
     <span id="modal_signout_aria"><?php echo Strings::headerI18n('SIGN_OUT_DIALOG_DESCRIPTION'); ?></span>
   </div>

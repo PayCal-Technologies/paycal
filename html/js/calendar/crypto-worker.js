@@ -1,29 +1,17 @@
 /**
- * PARANOID MODE CONTROLS — Crypto Compatibility
+ * HKDF KEY DERIVATION NOTE
  *
- * ALLOW_WEBKIT_HKDF_COMPAT_FALLBACK controls whether the WebKit Worker
- * HKDF deriveKey compatibility path is permitted.  When true (default),
- * the fallback to deriveBits + importKey is allowed on browsers where
- * deriveKey hangs in a Worker context (documented Safari/WebKit bug).
- * The fallback is cryptographically identical: same HKDF-SHA-256
- * parameters, same 256-bit AES-GCM key, same non-extractable flag.
- * The outer catch throws, so this is always terminal fail-closed.
+ * derivePasskeyKEK uses crypto.subtle.deriveBits + importKey rather than
+ * crypto.subtle.deriveKey directly.  These two paths are cryptographically
+ * identical (same HKDF-SHA-256 parameters, same 256-bit AES-GCM key, same
+ * non-extractable flag) — proven by tests/crypto/hkdf-equivalence.mjs.
  *
- * Set to false to force hard-fail on any deriveKey failure (no compat
- * path).  Not recommended for production unless all supported browsers
- * are verified to not exhibit the deriveKey Worker hang.
+ * deriveBits is used as the sole path because it avoids the known deriveKey
+ * Worker hang path in Safari/WebKit and is covered by parity tests.
+ * Cryptographic output is identical regardless of which call is used.
  *
- * Server-side mirror: Environment::allowWebkitHkdfCompatFallback()
  * See: soc2/security-audits/FALSE_POSITIVE_ADJUDICATION.md — CRYPTO-001
  */
-const ALLOW_WEBKIT_HKDF_COMPAT_FALLBACK = true;
-
-/**
- * Named reason constant for the WebKit HKDF compat event.
- * Emitted via postMessage when the fallback path is taken so the
- * main thread can observe it without requiring log access.
- */
-const CRYPTO_FALLBACK_REASON = 'webkit-worker-derivekey-hang';
 
 self.cryptoState = {
   dek: null,
@@ -67,15 +55,6 @@ function b64ToBytes(b64) {
 
 function bytesToB64(bytes) {
   return btoa(String.fromCharCode(...bytes));
-}
-
-function withTimeout(promise, timeoutMs, label) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(`${label} timeout`)), timeoutMs);
-    }),
-  ]);
 }
 
 function encodeCrockfordBase32(bytes) {
@@ -125,7 +104,10 @@ async function derivePasskeyKEK(credentialId, userId, saltBase64, derivationMode
     : encoder.encode(String(credentialId || ''));
   const saltBytes = b64ToBytes(saltBase64);
 
-  const ikm = await crypto.subtle.importKey('raw', ikmMaterial, 'HKDF', false, ['deriveKey']);
+  // Use deriveBits + importKey rather than deriveKey directly.
+  // Cryptographically identical to deriveKey (proven by tests/crypto/hkdf-equivalence.mjs).
+  // deriveBits avoids the known deriveKey Worker hang path in Safari/WebKit.
+  const ikm = await crypto.subtle.importKey('raw', ikmMaterial, 'HKDF', false, ['deriveBits']);
 
   const hkdfParams = {
     name: 'HKDF',
@@ -134,53 +116,8 @@ async function derivePasskeyKEK(credentialId, userId, saltBase64, derivationMode
     hash: 'SHA-256',
   };
 
-  // Some browser/worker combinations can hang on HKDF deriveKey; timeout and fall back.
-  try {
-    return await withTimeout(
-      crypto.subtle.deriveKey(
-        hkdfParams,
-        ikm,
-        { name: 'AES-GCM', length: 256 },
-        false,
-        ['encrypt', 'decrypt']
-      ),
-      3000,
-      'HKDF deriveKey'
-    );
-  } catch (deriveKeyErr) {
-    // Compatibility path: deriveKey timed out or failed.
-    // Cryptographic equivalence: same HKDF-SHA-256 params, same 256-bit AES-GCM key,
-    // same non-extractable flag.  Terminal fail-closed: inner catch rethrows.
-    // This path exists solely for a documented WebCrypto Worker bug in some Safari/WebKit
-    // builds where deriveKey hangs indefinitely while deriveBits succeeds.
-    // See: soc2/security-audits/FALSE_POSITIVE_ADJUDICATION.md — CRYPTO-001
-    if (!ALLOW_WEBKIT_HKDF_COMPAT_FALLBACK) {
-      throw new Error('Passkey KEK derivation failed and ALLOW_WEBKIT_HKDF_COMPAT_FALLBACK is disabled');
-    }
-    // Emit structured compatibility event so the main thread can observe it.
-    // This event contains no secrets: only the named reason and error message.
-    self.postMessage({
-      type: 'crypto_compat_event',
-      reason: CRYPTO_FALLBACK_REASON,
-      detail: 'HKDF deriveKey timed out or failed in Worker context; deriveBits+importKey compat path used. Cryptographically identical. Terminal fail-closed.',
-      errorMessage: deriveKeyErr?.message || 'unknown',
-    });
-    console.error('[CryptoWorker] HKDF deriveKey unavailable, using deriveBits fallback. Browser may have a known WebCrypto Worker bug:', deriveKeyErr?.message);
-    try {
-      const keyBits = await withTimeout(
-        crypto.subtle.deriveBits(hkdfParams, ikm, 256),
-        3000,
-        'HKDF deriveBits'
-      );
-      return await withTimeout(
-        crypto.subtle.importKey('raw', keyBits, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']),
-        2000,
-        'AES key import'
-      );
-    } catch {
-      throw new Error('Passkey KEK derivation unavailable in this browser context');
-    }
-  }
+  const keyBits = await crypto.subtle.deriveBits(hkdfParams, ikm, 256);
+  return crypto.subtle.importKey('raw', keyBits, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
 }
 
 /**

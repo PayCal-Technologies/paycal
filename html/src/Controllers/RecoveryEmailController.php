@@ -117,12 +117,17 @@ final class RecoveryEmailController
         return;
       }
 
-      // Rate limit: resends per hour
+      // Rate limit: resends per hour — atomic pre-incr eliminates TOCTOU.
+      // get()→check→incr() allowed two concurrent requests to both read a count
+      // below the limit and both proceed to send, firing 2× emails beyond the cap.
       $resendCountKey = 'recovery_email:resends:' . $user->user_uuid;
-      $resendCount = (int) Database::get($resendCountKey) ?: 0;
+      $resendCount = Database::incr($resendCountKey);
+      if (1 === $resendCount) {
+        Database::expire($resendCountKey, 3600); // fixed 1-hour window
+      }
       $maxResends = (int) SystemConfig::get('recovery_email_max_resends_per_hour');
 
-      if ($resendCount >= $maxResends) {
+      if ($resendCount > $maxResends) {
         Response::error(
           'Too many resend attempts. Try again in 1 hour.',
           [],
@@ -153,10 +158,8 @@ final class RecoveryEmailController
       $sent = EmailGarum::sendRecoveryEmailVerificationCode($recoveryEmail, $user->full_name, $code);
 
       if ($sent) {
-        // Update cooldown and resend counter
+        // Update cooldown timestamp (separate from the resend counter above)
         Database::set($cooldownKey, (string) $now, $cooldownSeconds);
-        Database::incr($resendCountKey);
-        Database::expire($resendCountKey, 3600); // 1 hour
 
         // Store recovery email in user session
         Database::hset(Keys::SESSION . ':' . Authentication::getSessionHashFromCookie(), [
@@ -367,12 +370,15 @@ final class RecoveryEmailController
         return;
       }
 
-      // Check max resends
+      // Check max resends — atomic pre-incr eliminates TOCTOU (same fix as start path)
       $resendCountKey = 'recovery_email:resends:' . $user->user_uuid;
-      $resendCount = (int) Database::get($resendCountKey) ?: 0;
+      $resendCount = Database::incr($resendCountKey);
+      if (1 === $resendCount) {
+        Database::expire($resendCountKey, 3600); // fixed 1-hour window
+      }
       $maxResends = (int) SystemConfig::get('recovery_email_max_resends_per_hour');
 
-      if ($resendCount >= $maxResends) {
+      if ($resendCount > $maxResends) {
         Response::error('Max resends exceeded. Try again in 1 hour.', [], HttpStatus::HTTP_TOO_MANY_REQUESTS);
         return;
       }
@@ -405,8 +411,6 @@ final class RecoveryEmailController
 
       if ($sent) {
         Database::set($cooldownKey, (string) $now, $cooldownSeconds);
-        Database::incr($resendCountKey);
-        Database::expire($resendCountKey, 3600);
 
         SecurityLog::log('recovery_email_resent', [
           'user_uuid' => $user->user_uuid,

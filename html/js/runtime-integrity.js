@@ -1,6 +1,7 @@
 const RuntimeIntegrity = (() => {
   let started = false;
   let timer = null;
+  let observer = null;
   let currentState = 'SAFE';
 
   const BASELINE = {
@@ -121,6 +122,34 @@ const RuntimeIntegrity = (() => {
     BASELINE.fullscreenElement = document.fullscreenElement || null;
   }
 
+  /**
+   * Observe DOM mutations so iframe injection and full-screen overlay insertion
+   * are caught immediately rather than waiting for the polling interval.
+   *
+   * The interval is kept for fetch/XHR monkeypatch detection which is not
+   * observable through the DOM.
+   */
+  function startMutationObserver(report) {
+    if (typeof MutationObserver === 'undefined' || !document.body) {
+      return;
+    }
+
+    observer = new MutationObserver(() => {
+      const result = buildRiskResult();
+      applyState(result.state, result.riskScore, report, result.drifts);
+      if (result.drifts.length > 0) {
+        safeReport(report, 'runtime_integrity_drift', result);
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+    });
+  }
+
   function start({ intervalMs = 10000, report } = {}) {
     if (started || typeof window === 'undefined' || typeof document === 'undefined') {
       return;
@@ -134,6 +163,12 @@ const RuntimeIntegrity = (() => {
       timestamp: new Date().toISOString(),
     });
 
+    // MutationObserver: immediate detection of DOM-based attacks (iframe injection,
+    // overlay insertion). Eliminates the 10-second blind window for these vectors.
+    startMutationObserver(report);
+
+    // Polling interval: covers non-DOM attack surfaces (fetch/XHR monkeypatching)
+    // that cannot be observed via MutationObserver.
     timer = window.setInterval(() => {
       const result = buildRiskResult();
       applyState(result.state, result.riskScore, report, result.drifts);
@@ -147,6 +182,10 @@ const RuntimeIntegrity = (() => {
     if (timer) {
       clearInterval(timer);
       timer = null;
+    }
+    if (observer) {
+      observer.disconnect();
+      observer = null;
     }
     started = false;
   }

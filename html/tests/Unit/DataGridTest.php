@@ -423,7 +423,7 @@ final class DataGridTest extends TestCase
     int $currentPage = 1,
     int $pageSize = 10
   ): PagerInterface {
-    $pager = $this->createMock(PagerInterface::class);
+    $pager = $this->createStub(PagerInterface::class);
 
     $pager->method('getRows')->willReturn($rows);
     $pager->method('hasPagination')->willReturn($hasPagination);

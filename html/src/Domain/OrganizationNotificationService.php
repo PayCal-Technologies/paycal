@@ -373,12 +373,16 @@ final class OrganizationNotificationService
     }
 
     $key = Keys::organizationNotificationUnreadByUser($userUUID);
-    $current = (int) Database::hget($key, $orgId);
-    $next = $current + 1;
-    Database::hset($key, [$orgId => (string) $next]);
+    // HINCRBY is atomic; avoids the hget+hset read-modify-write race where
+    // two concurrent notifications for the same user could both read 0 and
+    // both write 1 (losing one increment).
+    Database::hincrby($key, $orgId, 1);
 
     $totalKey = Keys::organizationNotificationTotalByUser($userUUID);
-    $total = (int) Database::get($totalKey);
-    Database::set($totalKey, (string) max(0, $total + 1), 86400);
+    // INCR is atomic; replaces the get+set race with a single round trip.
+    $totalCount = Database::incr($totalKey);
+    if (1 === $totalCount) {
+      Database::expire($totalKey, 86400);
+    }
   }
 }

@@ -81,6 +81,20 @@ $navLinks = [
         'access_key' => (string) 't',
         'icon' => (string) '',
         'extra_attrs' => "target='_blank' rel='noopener noreferrer'"],
+    ['page' => (string) 'PAGE_PRICING',
+        'name' => (string) Strings::html('PRICING'),
+        'href' => 'https://paycaltech.com/pricing/',
+        'arialabel' => 'Pricing',
+        'access_key' => (string) '',
+        'icon' => (string) '',
+        'extra_attrs' => "target='_blank' rel='noopener noreferrer'"],
+    ['page' => (string) 'PAGE_LANGUAGE_COVERAGE',
+        'name' => (string) Strings::html('LANGUAGE_COVERAGE'),
+        'href' => 'https://paycaltech.com/language-coverage/',
+        'arialabel' => 'Language Coverage',
+        'access_key' => (string) '',
+        'icon' => (string) '',
+        'extra_attrs' => "target='_blank' rel='noopener noreferrer'"],
 ];
 
 $hash = Authentication::getSessionHashFromCookie();
@@ -117,7 +131,7 @@ if ($isAuthenticated) {
     <p class="footer_copyright"><?php echo $i18n['FOOTER_TRADEMARK']; ?></p>
   </footer>
 
-  <dialog id="modal_session_timeout" aria-labelledby="modal_session_timeout_title" aria-describedby="modal_session_timeout_aria modal_session_timeout_meta">
+  <dialog id="modal_session_timeout" aria-modal="true" aria-labelledby="modal_session_timeout_title" aria-describedby="modal_session_timeout_aria modal_session_timeout_meta">
     <div class="modal_aria visually_hidden">
       <span id="modal_session_timeout_aria"><?php echo $i18n['SESSION_TIMEOUT_MODAL_ARIA']; ?></span>
     </div>

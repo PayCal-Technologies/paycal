@@ -843,14 +843,16 @@ class EarningsController
     foreach ($aData as $sKey => $aEarnings) {
       $resolved = self::decryptWorkRowIfNeeded($aEarnings, User::currentUUID());
       if (!is_array($resolved)) {
+        // Decryption unavailable — fall through to plaintext snapshot fields
+        // (gross is stored alongside the blob). Consistent with Earnings::getWorkTotalsForRange().
         $debug['decrypt_failed_rows']++;
-        self::debug('grossYear:rowSkipped', [
-          'reason' => 'decrypt_failed',
+        self::debug('grossYear:fallthrough', [
+          'reason' => 'decrypt_failed_using_plaintext',
           'work_key' => self::scalarString($sKey),
         ]);
-        continue;
+      } else {
+        $aEarnings = $resolved;
       }
-      $aEarnings = $resolved;
       $debug['rows']++;
       $sDate = self::scalarString($aEarnings['date'] ?? '');
       if ('' === $sDate) {
@@ -947,14 +949,15 @@ class EarningsController
     foreach ($aData as $sKey => $aEarnings) {
       $resolved = self::decryptWorkRowIfNeeded($aEarnings, $userUUID);
       if (!is_array($resolved)) {
+        // Decryption unavailable — fall through to plaintext snapshot fields.
         $debug['decrypt_failed_rows']++;
-        self::debug('dailyYear:rowSkipped', [
-          'reason' => 'decrypt_failed',
+        self::debug('dailyYear:fallthrough', [
+          'reason' => 'decrypt_failed_using_plaintext',
           'work_key' => self::scalarString($sKey),
         ]);
-        continue;
+      } else {
+        $aEarnings = $resolved;
       }
-      $aEarnings = $resolved;
       $debug['rows']++;
       $sDate = self::scalarString($aEarnings['date'] ?? '');
       if ('' === $sDate) {

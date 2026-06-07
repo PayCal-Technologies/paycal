@@ -493,3 +493,223 @@ ORGANIZATIONS_AUDIT_ACTOR actor
 ORGANIZATIONS_REMOVE_CONFIRM_PREFIX Remove organization
 ORGANIZATIONS_REMOVE_CONFIRM_SUFFIX from your organizations list?
 ORGANIZATIONS_REMOVE_FAILED Unable to remove organization right now.
+EARNINGS_VIEW_LABEL Vue des revenus
+EARNINGS_MY_EARNINGS Mes revenus
+EARNINGS_TEAM_EARNINGS Revenus d equipe
+EARNINGS_SELECT_ORGANIZATION Selectionner l organisation
+EARNINGS_PRINT_REPORT Imprimer le rapport
+EARNINGS_TEAM_EMPTY_PREFIX Aucune donnee de revenus trouvee pour cette organisation en
+EARNINGS_GRID_ROW_SINGULAR row
+EARNINGS_GRID_ROW_PLURAL rows
+EARNINGS_GRID_STATUS_TEMPLATE Daily earnings grid {reason} for {year}. {rows} {rowLabel} available.
+EARNINGS_TREND_NO_DATA_STATUS Earnings trend chart for {year} loaded with no data points.
+EARNINGS_TREND_NO_DATA_DESC Line chart showing gross earnings trend across {year}. No earnings data points are available yet.
+EARNINGS_TREND_NO_NUMERIC_STATUS Earnings trend chart for {year} loaded with no numeric data points.
+EARNINGS_TREND_NO_NUMERIC_DESC Line chart showing gross earnings trend across {year}. Data points were present but contained invalid numeric values.
+EARNINGS_TREND_UPDATED_STATUS Earnings trend chart updated for {year}. {points} points from {firstDate} to {lastDate}.
+EARNINGS_TREND_UPDATED_DESC Line chart showing gross earnings trend across {year}. Data spans {firstDate} to {lastDate} with {points} points. Values range from ${minValue} to ${maxValue} and overall trend is {direction}.
+EARNINGS_CHART_DATA_LOAD_FAILED Chart data could not be loaded.
+EARNINGS_TREND_LOAD_FAILED_STATUS Earnings trend chart for {year} could not be loaded. {message}
+EARNINGS_FAILED_TO_LOAD_SECTION Failed to load {section} section.
+EARNINGS_ASYNC_NO_DATA No data available.
+EARNINGS_ASYNC_SECTION_LOAD_FAILED Unable to load section: {message}.
+EARNINGS_UNKNOWN_ERROR Unknown error.
+EARNINGS_UNABLE_TO_RETRIEVE_TREND Unable to retrieve earnings trend data.
+EARNINGS_EXPORT_FAILED_PREFIX Export failed:
+EARNINGS_DAILY_LOAD_FAILED_PREFIX Error: Could not load daily earnings data.
+EARNINGS_DAILY_NO_DATA_FOR_YEAR Error: No daily earnings data available for {year}.
+EARNINGS_MEMBER_DIALOG_TITLE {name} - {year} Earnings
+EARNINGS_BREAKDOWN_NO_ENTRIES_FOR_YEAR No entries for {year}.
+EARNINGS_BREAKDOWN_REG_HRS Reg Hrs
+EARNINGS_BREAKDOWN_OT_HRS OT Hrs
+EARNINGS_BREAKDOWN_TOTAL Total
+EARNINGS_PAY_PERIOD_WARNING_INVALID_FREQUENCY Warning: Pay period frequency is invalid. Open Profile > Pay Period to fix your settings.
+EARNINGS_PAY_PERIOD_WARNING_INVALID_LENGTH Warning: Pay period length does not match frequency. Open Profile > Pay Period to fix your settings.
+EARNINGS_PAY_PERIOD_WARNING_INVALID_START Warning: Pay period start date is missing or invalid. Open Profile > Pay Period and pick a valid start date.
+EARNINGS_PAY_PERIOD_WARNING_GRACE_RANGE Warning: Grace-day setting is out of range. Open Profile > Pay Period to fix your settings.
+CALENDAR_VIEW_AS Voir en tant que
+CALENDAR_SELECT_USER_ARIA Selectionner utilisateur du calendrier
+CALENDAR_CLEAR_DELEGATED_VIEW_ARIA Effacer vue deleguee du calendrier
+CALENDAR_LOCKED_UNVERIFIED Le calendrier est verrouille jusqu a la verification de votre email. Utilisez la banniere ci-dessus pour verifier votre compte.
+CALENDAR_MONTH_UPDATED_TO Mois du calendrier mis a jour sur {month}.
+CALENDAR_NO_ENTRIES_TO_COPY_ON Aucune entree a copier pour {dateLabel}
+CALENDAR_COPIED_ENTRIES_FROM {count} entree(s) copiee(s) depuis {dateLabel}
+CALENDAR_CLIPBOARD_EMPTY_FOR Le presse-papiers est vide pour {dateLabel}
+CALENDAR_PASTING_TO Collage vers {dateLabel}...
+CALENDAR_PASTED_ENTRIES_TO {count} entree(s) collee(s) vers {dateLabel}
+CALENDAR_PASTE_FAILED_FOR Echec du collage pour {dateLabel}: {error}
+CALENDAR_DELETING_FOR Suppression de {dateLabel}...
+CALENDAR_ENTRIES_DELETED_FOR Entrees supprimees pour {dateLabel}
+CALENDAR_DELETE_FAILED_FOR Echec de suppression pour {dateLabel}: {error}
+CALENDAR_SAVING_ELLIPSIS Enregistrement...
+CALENDAR_SAVING_ENTRIES_FOR Enregistrement de {count} entree(s) pour {dateLabel}...
+CALENDAR_SAVED_ENTRIES_FOR {count} entree(s) enregistree(s) pour {dateLabel}
+CALENDAR_SAVE_FAILED_FOR Echec d enregistrement pour {dateLabel}: {error}
+CALENDAR_SAVE_FAILED_SHORT Echec d enregistrement
+CALENDAR_UNKNOWN_ERROR Erreur inconnue
+EARNINGS_ACTION Action
+EARNINGS_ACTIVE_SITES_COUNT {count} active sites
+EARNINGS_ACTIVE_WORKFORCE_DECLINED_FROM_TO Active workforce declined from {prev} to {next} workers.
+EARNINGS_ACTUAL_YTD Actual YTD
+EARNINGS_ANNUAL_BUDGET Annual Budget
+EARNINGS_AVG_PER_MEMBER Avg/Member
+EARNINGS_AVG_PER_MONTH Avg / Month
+EARNINGS_BILLING_MIX_RATE_CHANGES Billing mix or rate changes between periods.
+EARNINGS_BUDGET Budget
+EARNINGS_BUDGET_ON_TRACK Budget On Track
+EARNINGS_BUDGET_REMAINING_FMT {amount} remaining
+EARNINGS_BUDGET_STATUS_FOR Budget status for {org}
+EARNINGS_CAUSE Cause
+EARNINGS_CHECK_PROJECT_ROSTERS_FOR_GAPS Check upcoming project rosters for coverage gaps.
+EARNINGS_CONFIDENCE_HIGH High
+EARNINGS_CONFIDENCE_LOW Low
+EARNINGS_CONFIDENCE_MEDIUM Medium
+EARNINGS_CONSECUTIVE_DAYS Consecutive Days
+EARNINGS_COST_DRIVERS Cost Drivers
+EARNINGS_COST_DRIVERS_FOR Cost drivers for {org}
+EARNINGS_COST_DRIVERS_SUBTITLE Top contributors by member, site, OT premium & allowances
+EARNINGS_CRITICAL Critical
+EARNINGS_CRITICAL_ISSUES Critical Issues
+EARNINGS_CURRENT_MONTH_PROJECTED Current Month (proj.)
+EARNINGS_DECLINED declined
+EARNINGS_DIVERSIFY_PROJECT_SITES Diversify active project sites to reduce revenue concentration risk.
+EARNINGS_ENSURE_ACTIVE_ASSIGNMENTS Ensure workers have active site assignments.
+EARNINGS_ENSURE_MANDATORY_REST_DAYS Ensure mandatory rest days are scheduled before the next pay period.
+EARNINGS_EXEC_SUMMARY_ARIA Executive summary
+EARNINGS_FINANCIAL Financial
+EARNINGS_FINANCIAL_SUBTITLE Month-over-month payroll, budget &amp; earnings trends
+EARNINGS_FORECAST Forecast
+EARNINGS_FORECAST_BASIS_MONTH_AVG {months}-mo avg (${amount}/mo)
+EARNINGS_FORECAST_BASIS_RUN_RATE current-month run-rate
+EARNINGS_FORECAST_CONFIDENCE_DESC {months}-month avg - Confidence: {confidence}
+EARNINGS_FORECAST_CONFIDENCE_DESC_RUN_RATE_LOW Current-month run-rate - Confidence: Low
+EARNINGS_FORECAST_VARIANCE Forecast Variance
+EARNINGS_FORECAST_VS_BUDGET_FMT Forecast {forecast} vs {budget} budget
+EARNINGS_FORECAST_WITHIN_BUDGET Year-end payroll forecast is within the annual budget.
+EARNINGS_FORECAST_YEAR_END Forecast Year End
+EARNINGS_HEADCOUNT Headcount
+EARNINGS_HEADCOUNT_WORKERS_ARROW {prev} -> {next} workers
+EARNINGS_HEALTH_LABEL_CONCERN 🟠 Concern
+EARNINGS_HEALTH_LABEL_HEALTHY 🟢 Healthy
+EARNINGS_HEALTH_LABEL_RISK 🔴 Risk
+EARNINGS_HEALTH_LABEL_WATCH 🟡 Watch
+EARNINGS_HIGHER_RATES_OR_PROJECT_MIX Higher billing rates or improved project mix this month.
+EARNINGS_HOURS_DECLINED_VS_CAPACITY Hours worked declined relative to workforce capacity.
+EARNINGS_HOURS_DISTRIBUTION Hours Distribution
+EARNINGS_HOURS_DISTRIBUTION_FOR Hours distribution for {org}
+EARNINGS_HOURS_DISTRIBUTION_SUBTITLE Regular vs. overtime by month - OT efficiency ratio (right axis)
+EARNINGS_IMPACT_BREAKDOWN Impact Breakdown
+EARNINGS_IMPLIED_RATE Implied Rate
+EARNINGS_INCREASED increased
+EARNINGS_INSIGHTS_FOR_CATEGORY {category} insights
+EARNINGS_LOA_ALLOWANCES LOA Allowances
+EARNINGS_MEMBER Member
+EARNINGS_MEMBERS Members
+EARNINGS_MEMBER_EARNINGS Member Earnings
+EARNINGS_MEMBER_EARNINGS_RANKING Member Earnings Ranking
+EARNINGS_MEMBER_RANKING_FOR Member earnings ranking for {org}
+EARNINGS_MEMBER_RANKING_SUBTITLE YTD gross by member - highest to lowest
+EARNINGS_MONTH Month
+EARNINGS_MORE_HOURS_PER_WORKER_LAST_MONTH More hours recorded per worker compared to last month.
+EARNINGS_NORMAL Normal
+EARNINGS_NOTICE Notice
+EARNINGS_NO_CHURN No Churn
+EARNINGS_NO_CRITICAL_ACTIONS No critical actions required at this time. Continue monitoring trends.
+EARNINGS_ONE_WORKER_EXCEEDED_14D 1 worker exceeded 14 consecutive days
+EARNINGS_ONE_WORKER_EXCEEDED_60H_WEEK 1 worker exceeded 60 hours in a single week
+EARNINGS_ONE_WORKER_INACTIVE 1 worker became inactive.
+EARNINGS_ONE_WORKER_INACTIVE_HOURS_DECLINED 1 worker became inactive and total hours declined {pct}%.
+EARNINGS_ONLY_ONE_ACTIVE_REVENUE_SITE  Only 1 active revenue-generating site.
+EARNINGS_OPERATIONS Operations
+EARNINGS_OPERATIONS_SUBTITLE Overtime, site concentration &amp; efficiency signals
+EARNINGS_OT_EXCEEDS_20_PERCENT Overtime exceeds 20% of total hours
+EARNINGS_OT_EXCEEDS_40_PERCENT Overtime exceeds 40% of total hours
+EARNINGS_OT_PERCENT_OF_HOURS OT as % of Hours
+EARNINGS_OT_PREMIUM OT Premium
+EARNINGS_OT_PREMIUM_EST OT Premium (est.)
+EARNINGS_OT_REPRESENTS_PERCENT_INCREASING_PREMIUM OT represents {pct}% of all hours - increasing labour cost premium.
+EARNINGS_OT_SHARE_REDUCED_TO_PERCENT OT share reduced to {pct}% - labour cost improving.
+EARNINGS_OVERTIME_RATIO Overtime Ratio
+EARNINGS_OVER_BUDGET_DETAIL_FMT +{amount} (+{percent}%)
+EARNINGS_PAYROLL Payroll
+EARNINGS_PAYROLL_COMPOSITION Payroll Composition
+EARNINGS_PAYROLL_COMPOSITION_FOR Payroll composition for {org}
+EARNINGS_PAYROLL_COMPOSITION_SUBTITLE Where payroll dollars actually go
+EARNINGS_PAYROLL_FORECAST Payroll Forecast
+EARNINGS_PAYROLL_FORECAST_FOR Payroll forecast for {org}
+EARNINGS_PAYROLL_OVERVIEW_FOR Payroll overview for {org}
+EARNINGS_PAYROLL_OVERVIEW_SUBTITLE Monthly gross, net, avg per member & cumulative YTD spend
+EARNINGS_PAYROLL_SPREAD_ACROSS_SITES Payroll is spread across {count} sites - healthy revenue diversification.
+EARNINGS_PERCENT_CONCENTRATION {pct}% concentration
+EARNINGS_PERCENT_PAYROLL_FROM_SITE {pct}% of payroll originates from "{site}".
+EARNINGS_PER_MONTH_AVG_SUFFIX /mo avg
+EARNINGS_POSITIVE Positive
+EARNINGS_POSITIVE_TRENDS Positive Trends
+EARNINGS_PRIORITY Priority
+EARNINGS_RECOMMENDED_ACTIONS Recommended actions
+EARNINGS_RECOMMENDED_ACTIONS_SUBTITLE Auto-generated from this period\
+EARNINGS_REDUCE_OVERTIME_EXPOSURE Review schedules to reduce overtime exposure and labour cost premium.
+EARNINGS_REGULAR_PAY Regular Pay
+EARNINGS_REPORT REPORT
+EARNINGS_REVIEW_ACTIVE_ASSIGNMENTS_AVAILABILITY Review active project assignments and workforce availability.
+EARNINGS_REVIEW_STAFFING_IMMEDIATELY Review staffing levels and upcoming project assignments immediately.
+EARNINGS_REVIEW_WEEKLY_SCHEDULE_ASSIGNMENTS Review weekly schedule assignments to prevent burnout and liability.
+EARNINGS_RISK_REGISTER Risk register
+EARNINGS_ROLE Role
+EARNINGS_SEVERITY Severity
+EARNINGS_SITE Site
+EARNINGS_SITES_TOTAL_SUFFIX  {count} sites total.
+EARNINGS_SITE_DEPENDENCY_RISK Site Dependency Risk
+EARNINGS_SITE_DIVERSIFICATION Site Diversification
+EARNINGS_SITE_PAYROLL_COST Site Payroll Cost
+EARNINGS_SITE_PAYROLL_COST_FOR Site payroll cost for {org}
+EARNINGS_SITE_PAYROLL_COST_SUBTITLE YTD gross by worksite - hover for cost per hour & OT %
+EARNINGS_SOURCE Source
+EARNINGS_TEAM_FOR_ORG_YEAR Team earnings for {org} {year}
+EARNINGS_TITLE Title
+EARNINGS_TOGGLE_HOURS_SERIES Toggle hours series
+EARNINGS_TOGGLE_PAYROLL_SERIES Toggle payroll series
+EARNINGS_TOGGLE_WORKFORCE_SERIES Toggle workforce series
+EARNINGS_TOP_MEMBERS Top Members
+EARNINGS_TOP_RISK_PREFIX Top risk:
+EARNINGS_TOP_SITES Top Sites
+EARNINGS_TOP_SITE_PERCENT_PAYROLL Top site: {pct}% of payroll
+EARNINGS_TOTAL_HOURS_CHANGED_WITH_SAME_WORKFORCE Total hours {direction} {percent}% with the same workforce.
+EARNINGS_UNDER_BUDGET_FMT {amount} under budget
+EARNINGS_UNKNOWN_SITE Unknown Site
+EARNINGS_USED Used
+EARNINGS_UTILIZATION Utilization
+EARNINGS_VERDICT_ON_TRACK On Track
+EARNINGS_VERDICT_OVER_BUDGET Over Budget
+EARNINGS_VIEW_BREAKDOWN_FOR View breakdown for {name}
+EARNINGS_WARN Warn
+EARNINGS_WARNING Warning
+EARNINGS_WARNING_COUNT_FMT {count} warning(s)
+EARNINGS_WORKER worker
+EARNINGS_WORKERS workers
+EARNINGS_WORKERS_EXCEEDED_14D {count} workers exceeded 14 consecutive days
+EARNINGS_WORKERS_EXCEEDED_60H_WEEK {count} workers exceeded 60 hours in a single week
+EARNINGS_WORKERS_INACTIVE {count} workers became inactive.
+EARNINGS_WORKERS_INACTIVE_HOURS_DECLINED {count} workers became inactive and total hours declined {pct}%.
+EARNINGS_WORKERS_NO_CHANGE {count} workers - no change
+EARNINGS_WORKER_COUNT_EXCEEDED_60H_WEEK_WITH_PERIOD {count} {workerLabel} exceeded 60 hours in a single week.
+EARNINGS_WORKER_COUNT_OVER_14D {count} {workerLabel} >=14 days
+EARNINGS_WORKER_COUNT_OVER_60H_PER_WEEK {count} {workerLabel} >60h/wk
+EARNINGS_WORKER_COUNT_WORKED_14D_OR_MORE {count} {workerLabel} worked 14 or more consecutive days.
+EARNINGS_WORKER_FATIGUE Worker Fatigue
+EARNINGS_WORKFORCE Workforce
+EARNINGS_WORKFORCE_HEALTH Workforce Health
+EARNINGS_WORKFORCE_HEALTH_FOR Workforce health for {org}
+EARNINGS_WORKFORCE_MEMBER_DELTA {dir}{count} {memberLabel}
+EARNINGS_WORKFORCE_OVERVIEW_FOR Workforce overview for {org}
+EARNINGS_WORKFORCE_OVERVIEW_SUBTITLE Active headcount by month - workforce utilization rate (right axis)
+EARNINGS_WORKFORCE_STABILITY Workforce Stability
+EARNINGS_WORKFORCE_STABLE_AT Active workforce remained stable at {count} workers.
+EARNINGS_WORKFORCE_SUBTITLE Headcount, utilization &amp; availability changes
+EARNINGS_WORKFORCE_VERB_COUNT_BETWEEN_MONTHS {verb} {count} {workerLabel} between {prev} and {last}.
+EARNINGS_YTD_BURN YTD Burn
+EARNINGS_YTD_SPEND YTD Spend
+NOT_FOUND Not Found
+OTHER Other
+SITE Site
+SYSTEM System

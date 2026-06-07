@@ -44,7 +44,9 @@ final class I18n {
 	public const SITES = '<em>S</em>ites';
 	public const SITES_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/></svg>';
 	public const ORGANIZATIONS_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="8" cy="8" r="3.5"/><path d="M 8 14 c -2.33 0 -7 1.17 -7 3.5 V 22 h 14 v -4.5 c 0 -2.33 -4.67 -3.5 -7 -3.5 Z"/><circle cx="16" cy="7.5" r="3"/><path d="M 16 13.5 c -1.67 0 -5 0.83 -5 2.5 v 3.5 h 10 v -3.5 c 0 -1.67 -3.33 -2.5 -5 -2.5 Z" opacity="0.9"/></g></svg>';
+	public const LANGUAGE_COVERAGE = 'Language Coverage';
 	public const ORGANIZATIONS_HTML = '<em>O</em>rganizations';
+	public const PRICING = '<em>P</em>ricing';
 	public const PROFILE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-8 2.24-8 4v1h16v-1c0-1.76-3-4-8-4z"/></svg>';
 	public const PROFILE_HTML = 'Pro<em>f</em>ile';
 }

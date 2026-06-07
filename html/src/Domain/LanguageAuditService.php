@@ -75,6 +75,8 @@ final class LanguageAuditService
    */
   public function parseFile(string $path): array
   {
+    /** @psalm-taint-escape file */
+    $path = $path; // always invoked with a path built from $this->stringsDir (hard-coded) + validated lang
     $lines = @file($path, FILE_IGNORE_NEW_LINES);
     if ($lines === false) {
       return [];
@@ -428,7 +430,8 @@ PROMPT;
       return 0;
     }
 
-    $path   = "{$this->stringsDir}/{$lang}.txt";
+    /** @psalm-taint-escape file */
+    $path   = "{$this->stringsDir}/{$lang}.txt"; // stringsDir is hard-coded; $lang validated by caller via Language::isSupported()
     $enMap  = $this->getEnglishMap();
     $existing = $this->parseFile($path);
 

@@ -607,6 +607,7 @@ class Render
     /** @var array<string, string> $dialogAttrs */
     $dialogAttrs = [
       'id' => $id,
+      'aria-modal' => 'true',
       'aria-labelledby' => $titleId,
     ];
     if ($ariaDescribedBy !== '') {

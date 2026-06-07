@@ -64,9 +64,10 @@ final class Security
   }
 
   /**
-   * Handles isTrustedProxy operation.
+   * Returns true when $remoteAddr is in the TRUSTED_PROXIES env list.
+   * Used by any component that needs to decide whether to trust forwarded headers.
    */
-  private static function isTrustedProxy(string $remoteAddr): bool
+  public static function isTrustedProxy(string $remoteAddr): bool
   {
     $raw = getenv('TRUSTED_PROXIES');
     if (false === $raw || trim($raw) === '') {

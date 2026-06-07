@@ -73,16 +73,18 @@ echo '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL('admin'),
     <h2>Language Editor</h2>
     <p class='lang-editor__desc'>Edit and save language bundles for all supported locales.</p>
   </div>
-  <div class='lang-editor__tabs'>
+  <div class='lang-editor__tabs' role='tablist' aria-label='Language selector'>
     <?php
     $langs = ['en' => 'English', 'de' => 'German', 'fr' => 'French', 'es' => 'Spanish', 'it' => 'Italian', 'nl' => 'Dutch', 'pt' => 'Portuguese', 'hi' => 'Hindi', 'tl' => 'Tagalog', 'tr' => 'Turkish'];
 foreach ($langs as $code => $name) {
-  $selected = 'en' === $code ? 'true' : 'false';
-  echo "<button class='lang-editor__tab-btn' data-lang='{$code}' aria-selected='{$selected}'>{$name}</button>";
+  $selected = 'en' === $code;
+  $ariaSelected = $selected ? 'true' : 'false';
+  $tabIndex = $selected ? '0' : '-1';
+  echo "<button id='lang_editor_tab_{$code}' class='lang-editor__tab-btn' data-lang='{$code}' role='tab' aria-controls='content_shared' aria-selected='{$ariaSelected}' tabindex='{$tabIndex}'>{$name}</button>";
 }
 ?>
   </div>
-  <div class='lang-editor__content' id='content_shared'>
+  <div class='lang-editor__content' id='content_shared' role='tabpanel' aria-labelledby='lang_editor_tab_en'>
     <h2 id='lang_title'>English Language Editor</h2>
     <textarea class='lang-editor__textarea' id='language_textarea' rows='40' placeholder='Language file content will load here...'></textarea>
     <button class='btn btn_primary' id='save_btn'>Save Changes</button>

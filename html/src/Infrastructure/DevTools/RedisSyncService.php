@@ -13,6 +13,17 @@ use PayCal\Domain\Redis;
  * - Keep local datasets aligned with shared dev data without manual command chains.
  * - Track cadence and lock state so overlapping sync runs do not conflict.
  * - Provide an explicit online/offline mode when remote Redis is unavailable.
+ *
+ * ACL NOTE (2026-05-12):
+ * - The production Redis ACL for the app user (paycal_app) explicitly excludes
+ *   the @dangerous command category, which includes CONFIG.
+ * - This service calls `config('GET', 'dir')` on both local and dev Redis
+ *   instances to locate dump.rdb for scp-based sync.
+ * - This service is dev-only and intentionally not subject to the production ACL;
+ *   however, if the dev Redis instance is ever hardened to match prod ACL, these
+ *   CONFIG GET calls will throw NOPERM and the fallback default paths will be used.
+ * - TODO: Replace config('GET', 'dir') with a hard-coded or env-configured dump
+ *   path so this service has zero dependency on CONFIG access.
  */
 
 /**

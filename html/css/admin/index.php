@@ -670,3 +670,49 @@ header('Content-Type: text/css; charset=utf-8');
     min-height: calc(100vh - 18rem);
   }
 }
+
+/* ── Site Color Palette panel ──────────────────────────────────────────────── */
+.admin-palette-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.admin-palette-row {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.35rem;
+}
+
+.admin-palette-swatch {
+  position: relative;
+  border-radius: 6px;
+  padding: 0.6rem 0.5rem 0.45rem;
+  min-height: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.1rem;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: default;
+}
+
+.admin-palette-swatch-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.admin-palette-swatch-hex {
+  font-size: 0.65rem;
+  font-family: monospace;
+  color: rgba(255,255,255,0.7);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}

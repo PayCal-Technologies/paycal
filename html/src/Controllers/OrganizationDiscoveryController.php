@@ -1160,6 +1160,28 @@ final class OrganizationDiscoveryController
   }
 
   /**
+   * GET organizations/{organizationID}/sites
+   *
+   * Returns all sites linked to the organization, each with its org-level
+   * site settings (budget, targets, lifecycle, etc.).
+   */
+  #[Route('organizations/{organizationID}/sites', ['GET'])]
+  /**
+   * Handles listOrgSites operation.
+   */
+  public function listOrgSites(string $organizationID): void
+  {
+    $service = new OrganizationDiscoveryService();
+    $result  = $service->listOrgSites(User::currentUUID(), InputSanitizer::sanitizeString($organizationID));
+
+    if ($result['success']) {
+      Response::success('[OrgC] Org sites retrieved.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+    }
+  }
+
+  /**
    * POST organizations/{organizationID}/sites/link
    *
    * Links one of the current user's sites to the specified organization
@@ -1330,6 +1352,71 @@ final class OrganizationDiscoveryController
 
     if ($result['success']) {
       Response::success('[OrgC] Organization settings updated.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
+  }
+
+  /**
+   * GET organizations/{organizationID}/sites/{siteOwnerUUID}/{siteID}/settings
+   *
+   * Returns org-only settings for a specific linked site (budget, targets, status, tags).
+   * Caller must be the org owner or a coordinator.
+   */
+  #[Route('organizations/{organizationID}/sites/{siteOwnerUUID}/{siteID}/settings', ['GET'])]
+  public function getOrgSiteSettings(string $organizationID, string $siteOwnerUUID, string $siteID): void
+  {
+    $service = new OrganizationDiscoveryService();
+    $result  = $service->getOrgSiteSettings(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($organizationID),
+      InputSanitizer::sanitizeString($siteOwnerUUID),
+      InputSanitizer::sanitizeString($siteID)
+    );
+
+    if ($result['success']) {
+      Response::success('[OrgC] Org site settings retrieved.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+    }
+  }
+
+  /**
+   * POST organizations/{organizationID}/sites/{siteOwnerUUID}/{siteID}/settings/update
+   *
+   * Persists org-only settings for a specific linked site.
+   * Caller must be the org owner or a coordinator.
+   */
+  #[Route('organizations/{organizationID}/sites/{siteOwnerUUID}/{siteID}/settings/update', ['POST'])]
+  public function updateOrgSiteSettings(string $organizationID, string $siteOwnerUUID, string $siteID): void
+  {
+    $allowedStrings = [
+      'budget_type', 'budget_amount', 'budget_start', 'budget_end',
+      'warn_threshold', 'critical_threshold',
+      'site_status', 'primary_manager_uuid',
+      'target_headcount', 'target_utilization', 'target_ot_ratio',
+      'tags', 'client_name', 'cost_code', 'start_date', 'end_date',
+    ];
+    $droppedKeys = [];
+    $filtered    = RequestGuard::filterPost($allowedStrings, [], $droppedKeys);
+
+    if (false === $filtered) {
+      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $service = new OrganizationDiscoveryService();
+    $result  = $service->updateOrgSiteSettings(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($organizationID),
+      InputSanitizer::sanitizeString($siteOwnerUUID),
+      InputSanitizer::sanitizeString($siteID),
+      $filtered
+    );
+
+    if ($result['success']) {
+      Response::success('[OrgC] Site settings updated.', $result['data'], HttpStatus::HTTP_OK);
     } else {
       Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
@@ -1672,15 +1759,15 @@ final class OrganizationDiscoveryController
   {
     $actorUUID = User::currentUUID();
     $actorThrottleKey = Keys::TELEMETRY . ':org:dek:auto_bootstrap:user:' . $actorUUID;
-    if (Database::exists($actorThrottleKey)) {
+    // setnx is atomic (SET NX EX); eliminates the exists()→set() TOCTOU race
+    // where two concurrent requests both observe the key absent and both proceed.
+    if (!Database::setnx($actorThrottleKey, '1', 120)) {
       Response::success('[OrgC] Auto bootstrap skipped (throttled).', [
         'throttled' => true,
       ], HttpStatus::HTTP_OK);
 
       return;
     }
-
-    Database::set($actorThrottleKey, '1', 120);
 
     $service = new OrganizationDiscoveryService();
     $result = $service->autoBootstrapOrgDekOnPageVisit($actorUUID);

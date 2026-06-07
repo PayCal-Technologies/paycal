@@ -92,6 +92,7 @@ final class Keys
   public const ORGANIZATION_USER           = 'organization:user';
   public const ORGANIZATION_OWNER          = 'organization:owner';
   public const ORGANIZATION_SITE           = 'organization:site';
+  public const ORGANIZATION_SITE_SETTINGS  = 'organization:site_settings';
   public const ORGANIZATION_MEMBERS        = 'organization:members';
   public const ORGANIZATION_RELATIONSHIP   = 'organization:relationship';
   public const ORGANIZATION_INVITE         = 'organization:invite';

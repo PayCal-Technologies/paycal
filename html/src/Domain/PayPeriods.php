@@ -382,13 +382,8 @@ final class PayPeriods
     }
 
     $diff = $anchorFY->diff($currentStart);
-    $diffDays = $diff->days;
-    if (false === $diffDays) {
-      $diffDays = 0;
-    }
-
-    /** @var int $diffDays */
-    $diffDays = (int) $diffDays;
+    // $diff->days is always int when produced by DateTime::diff()
+    $diffDays = (int) $diff->days;
 
     switch ($this->frequency) {
       case PayFrequency::WEEKLY:

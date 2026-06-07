@@ -2487,6 +2487,84 @@ area:focus-visible {
   outline-offset: 2px;
 }
 
+/* ============================================================================
+   SKELETON SCREENS
+   Shared shimmer + shape primitives consumed by every page-level skeleton.
+   Usage: add .skeleton to any container, then use .sk-* shape helpers inside.
+   ============================================================================ */
+
+@keyframes sk-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+.skeleton {
+  /* Apply shimmer to direct children that carry .sk-* classes */
+}
+
+.sk-box,
+.sk-line,
+.sk-circle,
+.sk-chart-bar,
+.sk-chart-line,
+.sk-avatar {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base,   color-mix(in srgb, var(--border) 60%, var(--surface))),
+    var(--skeleton-shine,  color-mix(in srgb, var(--border) 20%, var(--surface))),
+    var(--skeleton-base,   color-mix(in srgb, var(--border) 60%, var(--surface)))
+  );
+  background-size: 800px 100%;
+  animation: sk-shimmer 1.6s infinite linear;
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* Shape helpers */
+.sk-line       { height: 0.85em; width: 100%; display: block; }
+.sk-line--sm   { width: 55%; }
+.sk-line--md   { width: 75%; }
+.sk-line--lg   { width: 90%; }
+.sk-line--xl   { width: 100%; }
+
+.sk-box        { display: block; }
+.sk-circle     { border-radius: 50%; }
+.sk-avatar     { width: 2.5rem; height: 2.5rem; border-radius: 50%; flex-shrink: 0; }
+
+/* Chart shapes */
+.sk-chart-bar  { display: inline-block; width: 100%; }
+.sk-chart-line {
+  display: block;
+  height: 2px;
+  border-radius: 1px;
+}
+
+/* Row of sk-chart-bars for a bar-chart skeleton */
+.sk-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 100%;
+}
+
+/* Spacing helpers */
+.sk-gap-xs > * + * { margin-top: 0.35rem; }
+.sk-gap-sm > * + * { margin-top: 0.6rem; }
+.sk-gap-md > * + * { margin-top: 1rem; }
+
+/* Suppress animation when user prefers reduced motion (handled globally below,
+   but explicit here so skeleton is still visible as static shapes) */
+@media (prefers-reduced-motion: reduce) {
+  .sk-box,
+  .sk-line,
+  .sk-circle,
+  .sk-chart-bar,
+  .sk-chart-line,
+  .sk-avatar {
+    animation: none;
+    background: var(--skeleton-base, color-mix(in srgb, var(--border) 55%, var(--surface)));
+  }
+}
+
 /* ---- REDUCED MOTION ---- */
 /*
  * Respect the OS-level "Reduce Motion" preference.

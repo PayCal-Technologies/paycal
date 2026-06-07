@@ -23,6 +23,11 @@ $i18nKeys = [
   'ERROR_CAL_NONCE_SAVE',
   'ERROR_CAL_PASTE_FAILED',
   'ERROR_CAL_TOTAL_HOURS_EXCEED',
+  'CALENDAR_NO_ENTRIES_TO_COPY_ON',
+  'CALENDAR_COPIED_ENTRIES_FROM',
+  'CALENDAR_PASTED_ENTRIES_TO',
+  'CALENDAR_SAVED_ENTRIES_FOR',
+  'CALENDAR_UNKNOWN_ERROR',
   'I_WORK_DETAILS',
   'LAST_UPDATED',
 ];
@@ -61,6 +66,11 @@ const MSG_CAL_NONCE_PASTE = <?php echo json_encode($i18n['ERROR_CAL_NONCE_PASTE'
 const MSG_CAL_NONCE_SAVE = <?php echo json_encode($i18n['ERROR_CAL_NONCE_SAVE']); ?>;
 const MSG_CAL_PASTE_FAILED = <?php echo json_encode($i18n['ERROR_CAL_PASTE_FAILED']); ?>;
 const MSG_CAL_TOTAL_HOURS = <?php echo json_encode($i18n['ERROR_CAL_TOTAL_HOURS_EXCEED']); ?>;
+const MSG_CAL_NO_ENTRIES_TO_COPY_ON = <?php echo json_encode($i18n['CALENDAR_NO_ENTRIES_TO_COPY_ON']); ?>;
+const MSG_CAL_COPIED_ENTRIES_FROM = <?php echo json_encode($i18n['CALENDAR_COPIED_ENTRIES_FROM']); ?>;
+const MSG_CAL_PASTED_ENTRIES_TO = <?php echo json_encode($i18n['CALENDAR_PASTED_ENTRIES_TO']); ?>;
+const MSG_CAL_SAVED_ENTRIES_FOR = <?php echo json_encode($i18n['CALENDAR_SAVED_ENTRIES_FOR']); ?>;
+const MSG_CAL_UNKNOWN_ERROR = <?php echo json_encode($i18n['CALENDAR_UNKNOWN_ERROR']); ?>;
 const MSG_CAL_ENCRYPTION_REQUIRED = 'Encryption key unavailable. Unlock your account key to view or save work entries.';
 const CAL_TOTAL_HOURS_MAX = 24;
 const LABEL_LAST_UPDATED = <?php echo json_encode($i18n['LAST_UPDATED']); ?>;
@@ -70,6 +80,10 @@ const CAL_WORK_ENTRY_FIELDS = {
   livingOut: <?php echo $user->calendar_work_entry_fields_living_out ? 'true' : 'false'; ?>,
   travel: <?php echo $user->calendar_work_entry_fields_travel ? 'true' : 'false'; ?>
 };
+
+const formatCalendarMessage = (template, values = {}) => String(template || '').replace(/\{(\w+)\}/g, (match, key) => (
+  Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : match
+));
 
 // Global calendar state
 let currentYear = null;
@@ -109,7 +123,7 @@ async function loadCalendar(year, month, pushState = true) {
     });
     const payload = await response.json();
     if (payload.status !== 'success' || !payload || !payload.weeks) {
-      PW.error(`Failed to load calendar: ${payload.message || 'Unknown error'}`);
+      PW.error(`Failed to load calendar: ${payload.message || MSG_CAL_UNKNOWN_ERROR}`);
       return;
     }
 
@@ -812,16 +826,17 @@ const day_copy = (e, day_id) => {
   e.preventDefault();
 
   const works = Array.from(PC.queryAll('.work', PC.getElement(day_id)));
+  const text = PC.query("b.day_label", PC.getElement(day_id)).textContent.trim();
   if (works.length === 0) {
-    PC.showToast(`${PC.getElement(day_id).ariaLabel} is blank. Copy aborted.`);
+    PC.showToast(formatCalendarMessage(MSG_CAL_NO_ENTRIES_TO_COPY_ON, { dateLabel: text }));
     return;
   }
 
   const allData = works.map(w => JSON.parse(w.dataset.work || "{}"));
-  localStorage.setItem("cal_work_data", JSON.stringify(allData));
+  // Session-scoped clipboard: does not survive tab close; never written to localStorage.
+  sessionStorage.setItem("cal_work_data", JSON.stringify(allData));
 
-  const text = PC.query("b.day_label", PC.getElement(day_id)).textContent.trim();
-  PC.showToast(`Copied ${allData.length} work entr${allData.length === 1 ? 'y' : 'ies'} from ${text}`);
+  PC.showToast(formatCalendarMessage(MSG_CAL_COPIED_ENTRIES_FROM, { count: allData.length, dateLabel: text }));
 };
 
 const day_paste = async (e, day_id) => {
@@ -829,7 +844,7 @@ const day_paste = async (e, day_id) => {
   e.stopPropagation();
 
   const day = PC.getElement(day_id);
-  const json = localStorage.getItem("cal_work_data");
+  const json = sessionStorage.getItem("cal_work_data");
   if (!json) return;
 
   // Fetch fresh nonce
@@ -863,7 +878,7 @@ const day_paste = async (e, day_id) => {
     const response = await PC.updateResource('calendar', form_data);
     updateCalendarWeek(response?.week);
     const text = PC.query("b.day_label", day).textContent.trim();
-    PC.showToast(`Pasted ${allData.length} work entr${allData.length === 1 ? 'y' : 'ies'} to ${text}`);
+    PC.showToast(formatCalendarMessage(MSG_CAL_PASTED_ENTRIES_TO, { count: allData.length, dateLabel: text }));
   } catch {
     PC.showToast(MSG_CAL_PASTE_FAILED);
   }
@@ -993,6 +1008,8 @@ const renderDayEntries = async (day, entries) => {
           ciphertext
         );
         const decrypted = JSON.parse(new TextDecoder().decode(decoded));
+        // Merge non-encrypted metadata from the outer entry record
+        if (entry.site_color) { decrypted.site_color = entry.site_color; }
         decryptedEntries.push(decrypted);
       } catch (e) {
         window.PayCalEncryption?.telemetry?.({ type: 'decryption-failure', error: String(e) });
@@ -1012,8 +1029,11 @@ const renderDayEntries = async (day, entries) => {
 
     const work_div = document.createElement('div');
     work_div.className = 'work';
+    const siteId = entry.site_id || entry.s || '';
+    const siteColor = (entry.site_color || '').toUpperCase();
+    if (siteColor) { work_div.setAttribute('data-site-color', siteColor); }
     work_div.dataset.work = JSON.stringify({
-      site_id: entry.site_id || entry.s || '',
+      site_id: siteId,
       site_name: siteName,
       hours: formatEntryNumber(entry.hours ?? entry.h),
       regular_hours: regularHours,
@@ -1195,7 +1215,8 @@ const save_work = async (e) => {
   }
 
   PC.closeModal('modal_cal_work', 'Work Details');
-  PC.showToast(PC.getElement('cal_work_title').getAttribute('name') + ' work updated.');
+  const dateLabel = PC.getElement('cal_work_title').getAttribute('name');
+  PC.showToast(formatCalendarMessage(MSG_CAL_SAVED_ENTRIES_FOR, { count: savedEntries.length, dateLabel }));
 }
 
 const create_work_row = (work_div, index = 0) => {

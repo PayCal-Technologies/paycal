@@ -6,7 +6,7 @@ PayCal™ is a payroll tracking platform focused on transparency, accessibility,
 
 The goal is simple: make pay easier to understand while keeping personal financial data private.
 
-Latest documented release: **v1.055.000**
+Latest documented release: **v1.056.000**
 
 [![Test
 Suite](https://img.shields.io/badge/tests-1574%20listed-blue)](html/tests/)
@@ -344,6 +344,15 @@ bash scripts/native-fix-redis-launchagent.sh
 ---
 
 # Recent Releases
+
+## v1.056.000 (2026-06-07)
+
+- Strengthened organization earnings reliability: added site-resolution diagnostics, fallback SLO warnings, unlinked-site guard rails, and contract tests to prevent silent zero-value team rows when org-site links are misconfigured.
+- Expanded organization governance surfaces: shipped `/soc` auditor portal with `SUPERADMIN` gate, introduced `AUDITOR` role, and added `/admin/user-roles/` management workflows.
+- Completed platform-wide accessibility/i18n pass for org and earnings experiences: ARIA semantics updates, modal/tab contracts, and localized status/clipboard messaging.
+- Enforced stricter frontend CSP posture: removed inline styles from sites earnings skeleton and added regression tests preventing inline style attribute reintroduction.
+- Added ownership-model consolidation policy and resolver infrastructure for user/org site linkage normalization, with diagnostics-first observability in earnings.
+- Continued security and SOC2 operational hardening: webhook security model tightening, telemetry/privacy threshold updates, and backup/reliability evidence improvements.
 
 ## v1.055.000 (2026-05-12)
 

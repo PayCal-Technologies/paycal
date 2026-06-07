@@ -322,6 +322,8 @@ class AdminController
     }
 
     // File path
+    /** @psalm-taint-escape file */
+    $lang = $lang; // validated by Language::isSupported() above
     $file = "/var/www/strings/{$lang}.txt";
 
     // Backup existing file
@@ -575,6 +577,11 @@ class AdminController
    */
   public function getSystemLimits(): void
   {
+    if (!$this->authorized) {
+      Response::error('Unauthorized.', [], HttpStatus::HTTP_UNAUTHORIZED);
+      return;
+    }
+
     $schema = SystemConfig::getSchema();
     $values = SystemConfig::getAll();
 
@@ -731,7 +738,7 @@ class AdminController
     $userUUID = $currentUser->user_uuid;
 
     // Generate unique orphaned site ID
-    $orphanedSiteId = 'Sorphaned'.substr(md5(uniqid((string) mt_rand(), true)), 0, 7);
+    $orphanedSiteId = 'Sorphaned' . substr(bin2hex(random_bytes(4)), 0, 7);
 
     // Create 5 test work entries with the orphaned site ID
     $entries = [];
@@ -802,6 +809,11 @@ class AdminController
    */
   public function getRedisReliabilityStatus(): void
   {
+    if (!$this->authorized) {
+      Response::error('Unauthorized.', [], HttpStatus::HTTP_UNAUTHORIZED);
+      return;
+    }
+
     try {
       Response::success(
         '[Admin] Redis Tier-0 reliability snapshot.',
@@ -839,6 +851,11 @@ class AdminController
    */
   public function mintCapabilityToken(string $action): void
   {
+    if (!$this->authorized) {
+      Response::error('Unauthorized.', [], HttpStatus::HTTP_UNAUTHORIZED);
+      return;
+    }
+
     $normalized = CapabilityTokenService::normalizeAction($action);
     if ($normalized === '' || !in_array($normalized, self::CAPABILITY_ACTIONS, true)) {
       Response::error('[Admin] Unsupported capability action.', ['action' => $normalized], HttpStatus::HTTP_BAD_REQUEST);
@@ -1052,6 +1069,8 @@ class AdminController
    */
   private function reloadLanguage(string $lang): void
   {
+    /** @psalm-taint-escape file */
+    $lang = $lang; // caller always validates via Language::isSupported() before calling this
     $file = "/var/www/strings/{$lang}.txt";
     if (!file_exists($file)) {
       return;

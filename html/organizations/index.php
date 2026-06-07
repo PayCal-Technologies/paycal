@@ -329,11 +329,11 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
       <p class="help_text"><?php echo organizations_index_i18n('ORGANIZATIONS_REQUEST_ACCESS_HELP'); ?></p>
       <form id="organizations_request_join_form" class="organizations_inline_form" method="dialog">
         <div class="organizations_request_access_controls">
-          <input id="organizations_request_email" type="search" maxlength="200" autocomplete="off" list="organizations_access_lookup_request" placeholder="<?php echo organizations_index_i18n('ORGANIZATIONS_REQUEST_EMAIL_PLACEHOLDER'); ?>">
+          <input id="organizations_request_email" type="search" maxlength="200" autocomplete="off" list="organizations_access_lookup_request" placeholder="<?php echo organizations_index_i18n('ORGANIZATIONS_REQUEST_EMAIL_PLACEHOLDER'); ?>" aria-label="<?php echo organizations_index_i18n('ORGANIZATIONS_REQUEST_EMAIL_PLACEHOLDER'); ?>">
           <datalist id="organizations_access_lookup_request"></datalist>
           <div class="organizations_access_level_pillbox" role="group" aria-label="Access Level">
-            <button id="organizations_request_access_readonly" type="button" class="pill pill_selected" data-access-level="readonly">Read-Only</button>
-            <button id="organizations_request_access_full" type="button" class="pill" data-access-level="full">Full Access</button>
+            <button id="organizations_request_access_readonly" type="button" class="pill pill_selected" data-access-level="readonly" aria-pressed="true">Read-Only</button>
+            <button id="organizations_request_access_full" type="button" class="pill" data-access-level="full" aria-pressed="false">Full Access</button>
           </div>
         </div>
         <button id="organizations_request_join_button" type="submit" class="btn btn_primary"><?php echo organizations_index_i18n('ORGANIZATIONS_REQUEST_JOIN_BTN'); ?></button>
@@ -345,7 +345,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
   <input type="hidden" id="organizations_csrf_token" value="<?php echo $organizationsCsrfNonce; ?>">
 
   <!-- Create Organization Dialog -->
-  <dialog id="organizations_create_dialog" class="dialog" aria-labelledby="organizations_create_title" aria-describedby="organizations_create_aria">
+  <dialog id="organizations_create_dialog" class="dialog" aria-modal="true" aria-labelledby="organizations_create_title" aria-describedby="organizations_create_aria">
     <div class="visually_hidden">
       <span id="organizations_create_aria"><?php echo organizations_index_i18n('ORGANIZATIONS_CREATE_ARIA'); ?></span>
     </div>
@@ -386,7 +386,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
     </form>
   </dialog>
 
-  <dialog id="organizations_definitions_dialog" class="dialog organizations_definitions_dialog" aria-labelledby="organizations_definitions_title" aria-describedby="organizations_definitions_aria">
+  <dialog id="organizations_definitions_dialog" class="dialog organizations_definitions_dialog" aria-modal="true" aria-labelledby="organizations_definitions_title" aria-describedby="organizations_definitions_aria">
     <form method="dialog">
       <section class="modal_header organizations_definitions_dialog_header">
         <h2 id="organizations_definitions_title" class="modal_title"><?php echo organizations_index_i18n('ORGANIZATIONS_DEFINITIONS_TITLE'); ?></h2>
@@ -435,7 +435,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
     </form>
   </dialog>
 
-  <dialog id="organizations_current_details_dialog" class="dialog organizations_current_details_dialog" aria-labelledby="organizations_current_details_title" aria-describedby="organizations_current_details_aria">
+  <dialog id="organizations_current_details_dialog" class="dialog organizations_current_details_dialog" aria-modal="true" aria-labelledby="organizations_current_details_title" aria-describedby="organizations_current_details_aria">
     <form method="dialog">
       <section class="modal_header">
         <h2 id="organizations_current_details_title" class="modal_title"><?php echo organizations_index_i18n('ORGANIZATIONS_CURRENT_DETAILS_TITLE'); ?></h2>
@@ -451,7 +451,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
     </form>
   </dialog>
 
-  <dialog id="organizations_membership_consent_dialog" class="dialog organizations_membership_consent_dialog" aria-labelledby="organizations_membership_consent_title" aria-describedby="organizations_membership_consent_desc">
+  <dialog id="organizations_membership_consent_dialog" class="dialog organizations_membership_consent_dialog" aria-modal="true" aria-labelledby="organizations_membership_consent_title" aria-describedby="organizations_membership_consent_desc">
     <form id="organizations_membership_consent_form" method="dialog">
       <section class="modal_header">
         <h2 id="organizations_membership_consent_title" class="modal_title"><?php echo organizations_index_i18n('ORGANIZATIONS_MEMBERSHIP_CONSENT_TITLE'); ?></h2>
@@ -478,7 +478,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
   </dialog>
 
   <!-- Organizations Editor Dialog -->
-  <dialog id="organizations_editor_dialog" class="dialog organizations_dialog" aria-labelledby="organizations_editor_title" aria-describedby="organizations_editor_aria">
+  <dialog id="organizations_editor_dialog" class="dialog organizations_dialog" aria-modal="true" aria-labelledby="organizations_editor_title" aria-describedby="organizations_editor_aria">
     <div class="visually_hidden">
       <span id="organizations_editor_aria"><?php echo organizations_index_i18n('ORGANIZATIONS_EDITOR_ARIA'); ?></span>
     </div>

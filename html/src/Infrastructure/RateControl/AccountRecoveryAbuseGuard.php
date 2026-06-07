@@ -113,10 +113,12 @@ final class AccountRecoveryAbuseGuard
     }
 
     $key = Keys::accountRecoveryTelemetry($metric, date('Y-m-d'));
-    if (!Database::exists($key)) {
-      Database::set($key, '0', self::METRIC_TTL_SECONDS);
+    // Atomic incr: if key is new (count===1) set the TTL; avoids the
+    // exists()+set()+incr() race that could leave a TTL-less key or lose a count.
+    $count = Database::incr($key);
+    if (1 === $count) {
+      Database::expire($key, self::METRIC_TTL_SECONDS);
     }
-    Database::incr($key);
   }
 
   /**

@@ -111,11 +111,14 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 .datagrid_heading button.datagrid_sort {
+  display: block;
+  width: 100%;
   padding: 0;
   border: none;
   background: none;
   font-size: inherit;
   font-weight: inherit;
+  text-align: inherit;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
@@ -157,6 +160,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Column text alignment */
+.datagrid_align_right  { text-align: right; }
+.datagrid_align_center { text-align: center; }
+.datagrid_align_left   { text-align: left; }
 
 /* Header actions column - empty for alignment */
 /* Shared action cell */
@@ -268,10 +276,42 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   background: transparent;
 }
 
-/* Sites-specific grid column widths */
-#sites-active .datagrid_header_content,
-#sites-active .datagrid_row_content,
-#sites-archived .datagrid_header_content,
-#sites-archived .datagrid_row_content {
-  grid-template-columns: 3fr 1fr 1fr 0.8fr 1.5fr 0.8fr auto;
+/* ==========================================================================
+   Mobile card layout  (<= 719 px)
+   Hides the column header row visually (kept for screen-reader labelledby)
+   and stacks each row's cells as labelled flex rows inside a card.
+   Page-specific ::before labels are defined in the page CSS file.
+   ========================================================================== */
+@media (max-width: 719px) {
+  /* Visually hide the header row; keep it accessible for aria-labelledby. */
+  .datagrid .datagrid_header_row {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Switch the content wrapper from grid to vertical flex. */
+  .datagrid .datagrid_row_content {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+
+  /* Each cell becomes a horizontal label / value pair. */
+  .datagrid .datagrid_item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.2rem 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
 }

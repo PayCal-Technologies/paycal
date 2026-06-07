@@ -301,11 +301,16 @@ class KekController
         return;
       }
 
-      // Store wrapped_dek and dek_version, update timestamp
+      // Store wrapped_dek, dek_version, and updated_at in a single atomic write.
+      // Three separate hset() calls would leave a TOCTOU window where a concurrent
+      // read could see the new wrapped_dek with the old dek_version (or vice versa),
+      // producing a mismatched crypto envelope and silent decryption failures.
       $now = time();
-      \PayCal\Domain\Database::hset($key, ['wrapped_dek' => $wrappedB64]);
-      \PayCal\Domain\Database::hset($key, ['dek_version' => (string) $dekVersion]);
-      \PayCal\Domain\Database::hset($key, ['updated_at' => (string) $now]);
+      \PayCal\Domain\Database::hset($key, [
+        'wrapped_dek' => $wrappedB64,
+        'dek_version' => (string) $dekVersion,
+        'updated_at'  => (string) $now,
+      ]);
 
       RedisReliabilityService::recordMutationSuccess();
       // Audit the write (no blob logging)

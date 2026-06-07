@@ -708,12 +708,13 @@ final class SitesController
     }
     $grid->enableSearch('Filter sites…');
     $grid->enableSorting();
-    $grid->addColumn('site_name', 'Name', true, '3fr');
-    $grid->addColumn('wage', 'Wg', true, '1fr');
-    $grid->addColumn('living_out_allowance', 'LOA', true, '1fr');
-    $grid->addColumn('travel_hours', 'Trv', true, '0.8fr');
-    $grid->addColumn('province', 'Prov', true, '1.5fr');
-    $grid->addColumn('entries', 'Ent', true, '0.8fr');
+    $grid->addColumn('site_name', 'Name', true, 'minmax(14rem, 3fr)');
+    $grid->addColumn('wage', 'Wage', true, 'minmax(5rem, 1fr)', 'right');
+    $grid->addColumn('living_out_allowance', 'LOA', true, 'minmax(5rem, 1fr)', 'right');
+    $grid->addColumn('travel_hours', 'Travel', true, 'minmax(5rem, 1fr)', 'right');
+    $grid->addColumn('province', 'Province', true, 'minmax(8rem, 1.5fr)', 'right');
+    $grid->addColumn('entries', 'Entries', true, 'minmax(4rem, 0.75fr)', 'right');
+    $grid->addColumn('budget_amount', 'Budget', false, 'minmax(6rem, 1fr)', 'right');
     // Use 3D box icon for active sites (archive), trash for archived (permanent delete)
     $actionIcon = SiteStatus::ACTIVE->value === $status ? '📦' : '🗑';
     $grid->addRowAction('delete', $actionIcon);
@@ -795,7 +796,11 @@ final class SitesController
       'province' => $site['province'] ?? 'unknown'
     ]);
 
-    Response::success('[Sites] Site data retrieved.', ['site' => $site], HttpStatus::HTTP_OK);
+    Lens::timeStart('OrganizationDiscoveryService::getOrgContextForSite');
+    $orgContext = (new OrganizationDiscoveryService())->getOrgContextForSite(User::currentUUID(), $id);
+    Lens::timeEnd('OrganizationDiscoveryService::getOrgContextForSite');
+
+    Response::success('[Sites] Site data retrieved.', ['site' => $site, 'org_context' => $orgContext], HttpStatus::HTTP_OK);
   }
 
   /**
@@ -1061,6 +1066,12 @@ final class SitesController
         'travel_hours' => InputSanitizer::postString('travel_hours') ?: '0',
         'province' => InputSanitizer::postString('province'),
         'status' => InputSanitizer::postString('status') ?: SiteStatus::ACTIVE->value,
+        'default_hours' => InputSanitizer::postString('default_hours'),
+        'site_color' => InputSanitizer::postString('site_color'),
+        'client_name' => InputSanitizer::postString('client_name'),
+        'cost_code' => InputSanitizer::postString('cost_code'),
+        'start_date' => InputSanitizer::postString('start_date'),
+        'end_date' => InputSanitizer::postString('end_date'),
     ];
 
     if ('' === $id) {
@@ -1073,9 +1084,21 @@ final class SitesController
     $ok = $service->updateSingle($ownerUUID, $id, $data);
 
     if ($ok) {
+      // Idempotently stamp site_color on every work entry hash for this site.
+      // This ensures the calendar can read the color directly from the entry
+      // without a secondary site lookup, and is safe to run multiple times.
+      $newColor = strtoupper((string) $data['site_color']);
+      if (preg_match('/^#[0-9A-Fa-f]{6}$/', $newColor)) {
+        $activeKeys   = Database::scanKeys(Keys::WORK . ':' . $ownerUUID . ':*:' . $id);
+        $archivedKeys = Database::scanKeys(Keys::WORK . ':archived:' . $ownerUUID . ':*:' . $id);
+        $allKeys = array_merge($activeKeys, $archivedKeys);
+        foreach ($allKeys as $wKey) {
+          Database::hset($wKey, ['site_color' => $newColor]);
+        }
+      }
       Response::success('[Sites] Updated.', [], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[Sites] Update failed.', [], HTTP_INTERNAL_SERVER_ERROR);
+      Response::error('[Sites] Update failed.', [], HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -1137,6 +1160,27 @@ final class SitesController
         'YT' => 'Yukon',
     ];
 
+    // Pre-load org budget amounts for all sites the user manages via an org.
+    // Keyed by siteId => formatted budget string (empty string if not set).
+    $siteBudgets = [];
+    $actorUUID = User::currentUUID();
+    $orgIds = Database::smembers(Keys::ORGANIZATION_USER . ':' . $actorUUID);
+    foreach ($orgIds as $orgId) {
+      $siteRefs = Database::smembers(Keys::ORGANIZATION_SITE . ':' . $orgId);
+      foreach ($siteRefs as $ref) {
+        $parts = explode(':', $ref, 2);
+        if (count($parts) !== 2 || $parts[0] !== $actorUUID) {
+          continue;
+        }
+        $refSiteId = $parts[1];
+        $stored = Database::hgetall(Keys::ORGANIZATION_SITE_SETTINGS . ':' . $orgId . ':' . $ref);
+        $amount = (float) ($stored['budget_amount'] ?? 0);
+        if ($amount > 0) {
+          $siteBudgets[$refSiteId] = '$' . number_format($amount, 0);
+        }
+      }
+    }
+
     // Convert to indexed array with id field, format province, and count work entries
     $result = [];
     foreach ($sites as $siteId => $siteData) {
@@ -1160,6 +1204,7 @@ final class SitesController
       $archivedKeys = Database::scanKeys($archivedPattern);
       Lens::timeEnd("Database::scanKeys-{$siteId}");
       $siteArray['entries'] = count($activeKeys) + count($archivedKeys);
+      $siteArray['budget_amount'] = $siteBudgets[$siteId] ?? '';
       Lens::increment('sites_processed');
 
       $result[] = $siteArray;
@@ -1207,6 +1252,15 @@ final class SitesController
       'search_applied' => !empty($search),
       'sort_applied' => !empty($sort)
     ]);
+
+    // Format currency columns for display (must be after sorting)
+    foreach ($result as &$row) {
+      foreach (['wage', 'living_out_allowance', 'travel_hours'] as $field) {
+        $val = (float)($row[$field] ?? 0);
+        $row[$field] = '$' . number_format($val, 2);
+      }
+    }
+    unset($row);
 
     return array_values($result);
   }

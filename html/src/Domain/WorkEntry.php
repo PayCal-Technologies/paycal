@@ -294,6 +294,7 @@ class WorkEntry
       'date' => ['d'],
       'site_id' => ['s'],
       'site_name' => ['n'],
+      'site_color' => [],
       'hours' => ['h'],
       'regular_hours' => ['r'],
       'overtime_hours' => ['o'],
@@ -647,10 +648,12 @@ class WorkEntry
     $livingOutAllowance = self::validateHours((float) ($workDetails['living_out_allowance'] ?? 0));
     $travelHours = self::validateHours((float) ($workDetails['travel_hours'] ?? 0));
     $wage = (float) ($workDetails['wage'] ?? 0);
+    $siteColor = self::resolveSiteColorForWorkEntry($userUUID, $siteID);
 
     $fieldsToStore = [
       'encrypted_blob' => $blob,
       'site_name' => $siteName,
+      'site_color' => $siteColor,
       'hours' => number_format($hours, 2, '.', ''),
       'regular_hours' => number_format($regularHours, 2, '.', ''),
       'overtime_hours' => number_format($overtimeHours, 2, '.', ''),
@@ -674,6 +677,55 @@ class WorkEntry
     EarningsCacheService::invalidateForUser($userUUID);
 
     return true;
+  }
+
+  /**
+   * Resolve site_color for a work-entry save.
+   * Priority: self-owned site key first, then linked organization site refs
+   * for active org memberships (cross-owner linking support).
+   */
+  private static function resolveSiteColorForWorkEntry(string $userUUID, string $siteID): string
+  {
+    $siteColor = strtoupper((string) Database::hget(
+      Keys::SITE . ":{$userUUID}:{$siteID}",
+      'site_color'
+    ));
+    if (preg_match('/^#[0-9A-Fa-f]{6}$/', $siteColor)) {
+      return $siteColor;
+    }
+
+    $memberships = OrganizationMemberRepository::forUser($userUUID);
+    foreach ($memberships as $membership) {
+      $status = (string) $membership['status'];
+      $orgId = (string) $membership['org_id'];
+      if ($status !== 'active' || $orgId === '') {
+        continue;
+      }
+
+      $siteRefs = Database::smembers(Keys::ORGANIZATION_SITE . ':' . $orgId);
+      foreach ($siteRefs as $siteRefRaw) {
+        $siteRef = (string) $siteRefRaw;
+        $parts = explode(':', $siteRef, 2);
+        if (count($parts) !== 2) {
+          continue;
+        }
+
+        [$ownerUUID, $linkedSiteID] = $parts;
+        if ($linkedSiteID !== $siteID || $ownerUUID === '') {
+          continue;
+        }
+
+        $linkedColor = strtoupper((string) Database::hget(
+          Keys::SITE . ":{$ownerUUID}:{$linkedSiteID}",
+          'site_color'
+        ));
+        if (preg_match('/^#[0-9A-Fa-f]{6}$/', $linkedColor)) {
+          return $linkedColor;
+        }
+      }
+    }
+
+    return '';
   }
 
   /**
@@ -756,6 +808,9 @@ class WorkEntry
       'date' => $isArchived ? ($parts[3] ?? '') : ($parts[2] ?? ''),
       'site_id' => $siteID,
       'site_name' => self::asString($normalized['site_name'] ?? $siteName),
+      'site_color' => (is_scalar($normalized['site_color'] ?? null) && preg_match('/^#[0-9A-Fa-f]{6}$/', (string) $normalized['site_color']))
+        ? strtoupper((string) $normalized['site_color'])
+        : '',
       'hours' => is_numeric($normalized['hours'] ?? null) ? (float) $normalized['hours'] : 0.0,
       'regular_hours' => is_numeric($normalized['regular_hours'] ?? null) ? (float) $normalized['regular_hours'] : 0.0,
       'overtime_hours' => is_numeric($normalized['overtime_hours'] ?? null) ? (float) $normalized['overtime_hours'] : 0.0,

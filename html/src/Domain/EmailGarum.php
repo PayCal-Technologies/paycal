@@ -350,9 +350,19 @@ class EmailGarum
    */
   private static function resolveVerificationBaseUrl(): string
   {
-    $forwardedHost = isset($_SERVER['HTTP_X_FORWARDED_HOST']) && is_string($_SERVER['HTTP_X_FORWARDED_HOST'])
-      ? trim($_SERVER['HTTP_X_FORWARDED_HOST'])
-      : '';
+    // Only trust X-Forwarded-Host when the request originates from a known
+    // infrastructure proxy. Accepting it unconditionally allows any attacker
+    // to inject an arbitrary hostname and redirect verification links to a
+    // phishing domain. Apply the same trusted-proxy gate used by Security and
+    // BillingController for all forwarded-header handling.
+    $remoteAddr = isset($_SERVER['REMOTE_ADDR']) && is_string($_SERVER['REMOTE_ADDR'])
+      ? $_SERVER['REMOTE_ADDR'] : '';
+    $forwardedHost = '';
+    if ($remoteAddr !== '' && Security::isTrustedProxy($remoteAddr)) {
+      $forwardedHost = isset($_SERVER['HTTP_X_FORWARDED_HOST']) && is_string($_SERVER['HTTP_X_FORWARDED_HOST'])
+        ? trim($_SERVER['HTTP_X_FORWARDED_HOST'])
+        : '';
+    }
     $httpHost = isset($_SERVER['HTTP_HOST']) && is_string($_SERVER['HTTP_HOST'])
       ? trim($_SERVER['HTTP_HOST'])
       : '';

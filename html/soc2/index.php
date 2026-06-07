@@ -90,7 +90,7 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . \PayCal\Domain\Render::cssURL('
 <article class="article doc-article">
   <header class="doc-article-header">
     <h1>PayCal SOC 2 Readiness</h1>
-    <p class="deck">PayCal is aligned with SOC 2 security principles. All Trust Services Criteria (CC1–CC9) are mapped to verifiable evidence.</p>
+    <p class="deck">PayCal is building toward SOC 2 compliance, subject to independent auditor validation. All Trust Services Criteria (CC1–CC9) are mapped to verifiable evidence.</p>
   </header>
 
   <section class="doc-article-body">

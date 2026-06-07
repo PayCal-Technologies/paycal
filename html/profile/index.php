@@ -58,7 +58,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
   <h1 class="visually_hidden"><?php echo profile_index_i18n('PROFILE'); ?></h1>
 
   <!-- MODAL CHANGE EMAIL -->
-  <dialog id="modal_change_email" aria-labelledby="modal_change_email_title" aria-describedby="modal_change_email_desc change_email_status">
+  <dialog id="modal_change_email" aria-modal="true" aria-labelledby="modal_change_email_title" aria-describedby="modal_change_email_desc change_email_status">
   <form id="change_email_form" name="change_email_form" aria-label="<?php echo profile_index_i18n('CHANGE_EMAIL'); ?>">
   <input class="visually_hidden" type="text" name="username" value="NOTUSED" autocomplete="username" hidden tabindex="-1" aria-hidden="true">
   <input type="hidden" name="csrf_token" value="<?php echo $settingsCsrfNonce; ?>">

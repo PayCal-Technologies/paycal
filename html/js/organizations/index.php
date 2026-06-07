@@ -138,6 +138,10 @@ import { initializeBillingSection } from "../core/billing.js";
     membershipConsentIntro: '<?php echo addslashes(org_js_index_i18n('ORGANIZATIONS_MEMBERSHIP_CONSENT_DESC')); ?>',
     membershipConsentAckRequired: 'You must acknowledge consent before continuing.',
     membershipConsentDefaultDisclaimer: 'Org shared encryption consent accepted.',
+    contactNameLabel: '<?php echo addslashes(org_js_index_i18n('NAME')); ?>',
+    contactEmailLabel: '<?php echo addslashes(org_js_index_i18n('EMAIL')); ?>',
+    contactPhoneLabel: '<?php echo addslashes(org_js_index_i18n('PHONE')); ?>',
+    contactRoleLabel: '<?php echo addslashes(org_js_index_i18n('ORGANIZATIONS_CONTACT_ROLE_PH')); ?>',
     orgDekBootstrapDone: 'Organization DEK bootstrap completed.',
     orgDekBootstrapFailed: 'Organization DEK bootstrap failed.',
   };
@@ -752,6 +756,42 @@ import { initializeBillingSection } from "../core/billing.js";
     }).join('');
 
     Guardian.setHTML(elements.customCardsContainer, markup);
+    applyContactInputAriaLabels(elements.customCardsContainer);
+  };
+
+  const applyContactInputAriaLabels = (root = document) => {
+    if (!(root instanceof Document || root instanceof HTMLElement)) {
+      return;
+    }
+
+    const resolveLabel = (input) => {
+      if (!(input instanceof HTMLInputElement)) {
+        return '';
+      }
+      if (input.classList.contains('organizations_contact_role_input')) {
+        return T.contactRoleLabel;
+      }
+      if (input.name === 'name') {
+        return T.contactNameLabel;
+      }
+      if (input.name === 'email') {
+        return T.contactEmailLabel;
+      }
+      if (input.name === 'phone') {
+        return T.contactPhoneLabel;
+      }
+      return '';
+    };
+
+    root.querySelectorAll('.organizations_contact_body_input, .organizations_contact_role_input').forEach((field) => {
+      if (!(field instanceof HTMLInputElement)) {
+        return;
+      }
+      const label = resolveLabel(field);
+      if (label !== '') {
+        field.setAttribute('aria-label', label);
+      }
+    });
   };
 
   const upsertCustomCardField = (cardId, fieldName, fieldValue) => {
@@ -2284,7 +2324,14 @@ import { initializeBillingSection } from "../core/billing.js";
     announceGridStatus('loaded');
   };
 
-  const setDatagridMessage = (container, message) => {
+  const buildSkeletonRows = (colCount = 4, rowCount = 4) => {
+    const colW = `repeat(${colCount}, 1fr)`;
+    const cell = `<span class="sk-line" style="display:block;height:0.8em;border-radius:3px"></span>`;
+    const row = `<div class="skeleton" style="display:grid;grid-template-columns:${colW};gap:0.5rem;padding:0.45rem 0.5rem;border-bottom:1px solid var(--border)">${cell.repeat(colCount)}</div>`;
+    return row.repeat(rowCount);
+  };
+
+  const setDatagridMessage = (container, message, isLoading = false) => {
     if (!(container instanceof HTMLElement)) {
       return;
     }
@@ -2294,7 +2341,11 @@ import { initializeBillingSection } from "../core/billing.js";
       return;
     }
 
-    Guardian.setHTML(body, `<div class="datagrid_empty">${String(message || '')}</div>`);
+    if (isLoading) {
+      Guardian.setHTML(body, buildSkeletonRows(4, 4));
+    } else {
+      Guardian.setHTML(body, `<div class="datagrid_empty">${String(message || '')}</div>`);
+    }
   };
 
   const setDiscoveryPanelStatus = (message) => {
@@ -5909,7 +5960,7 @@ import { initializeBillingSection } from "../core/billing.js";
       throw new Error('Unable to initialize free profile audit grid manager.');
     }
 
-    setDatagridMessage(elements.freeAuditGridContainer, T.loading);
+    setDatagridMessage(elements.freeAuditGridContainer, T.loading, true);
     announceFreeAuditStatus('Loading profile-related audit timeline...');
 
     try {
@@ -5944,16 +5995,16 @@ import { initializeBillingSection } from "../core/billing.js";
     announceAccessRequestsStatus('Loading access requests...');
     setStackMessage(elements.discoveryResults, T.noDiscovery);
     announceDiscoveryStatus('Discovery auto-refresh is enabled every 1 minute via live socket.');
-    setDatagridMessage(elements.auditGridContainer, T.loading);
+    setDatagridMessage(elements.auditGridContainer, T.loading, true);
     announceAuditStatus('Loading audit timeline...');
     renderRelationships([]);
-
     await loadOrganizationSettings(organizationId);
 
     const organization = findOrganization(organizationId);
     if (organization) {
       populateOrgDetails(organization);
     }
+
     if (organization && !canUsePremiumOrgFeatures(organization)) {
       setStackMessage(elements.invitesList, T.premiumAdminLockedDetailed);
       if (elements.membersInvitesList) {
@@ -7753,6 +7804,7 @@ import { initializeBillingSection } from "../core/billing.js";
         state.requestAccessLevel = accessLevel;
         document.querySelectorAll('.organizations_access_level_pillbox .pill').forEach((p) => {
           p.classList.toggle('pill_selected', p === button);
+          p.setAttribute('aria-pressed', p === button ? 'true' : 'false');
         });
       });
     });
@@ -7822,6 +7874,7 @@ import { initializeBillingSection } from "../core/billing.js";
         });
       }
     });
+
     elements.transferTarget?.addEventListener('input', () => {
       if (elements.transferTargetUUID instanceof HTMLInputElement) {
         elements.transferTargetUUID.value = '';
@@ -8177,6 +8230,7 @@ import { initializeBillingSection } from "../core/billing.js";
     });
 
     formatPhoneInputsWithin(elements.dialog ?? document);
+    applyContactInputAriaLabels(elements.dialog ?? document);
 
     document.querySelectorAll('.organizations_contact_image_input').forEach((field) => {
       if (field instanceof HTMLInputElement) {

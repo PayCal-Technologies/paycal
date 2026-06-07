@@ -618,6 +618,54 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   visibility: hidden;
 }
 
+/* =========================================================
+   Forecast Tab
+   ========================================================= */
+
+.forecast_intro {
+  margin: 0 0 0.9rem;
+  font-size: 0.9rem;
+  color: var(--text-muted, var(--color-text-muted));
+}
+
+.forecast_setup_notice {
+  margin: 0.5rem 0;
+  color: var(--text-muted, var(--color-text-muted));
+  font-style: italic;
+}
+
+.forecast_setup_notice a {
+  color: var(--primary, var(--color-primary));
+  text-decoration: underline;
+}
+
+.forecast-datagrid {
+  --datagrid_cols: 4;
+  --grid-template-columns: minmax(140px, 1.6fr) repeat(3, minmax(110px, 1fr));
+  margin: 0 0 1rem;
+}
+
+.forecast_gross {
+  font-weight: 600;
+}
+
+.forecast_net {
+  font-weight: 700;
+  color: var(--primary, var(--color-primary));
+}
+
+.forecast_tax {
+  color: var(--text-muted, var(--color-text-muted));
+}
+
+.forecast_estimate_disclaimer {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted, var(--color-text-muted));
+  font-style: italic;
+  max-width: 54rem;
+}
+
 .svg-visible {
   visibility: visible;
 }
@@ -699,4 +747,1773 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .totals_stat_value {
   font-weight: bold;
+}
+
+/* ============================================================================
+   EARNINGS VIEW TABS — My Earnings / Team Earnings toggle
+   ============================================================================ */
+
+.earnings_view_tabs {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0;
+  margin: 0 0 0.75rem;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0;
+}
+
+.earnings_view_tabs_links {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+/* Org select in tab bar */
+.earnings_tab_org_form {
+  display: flex;
+  align-items: center;
+  padding: 0 0 4px;
+  margin-bottom: -2px;
+}
+
+.earnings_tab_org_select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--surface);
+  color: var(--color-text);
+  font-size: var(--font-sm, 0.84rem);
+  cursor: pointer;
+  max-width: 22rem;
+}
+
+.earnings_view_tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 1.1rem;
+  font-size: var(--font-md, 0.9rem);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  border-radius: var(--radius-sm, 4px) var(--radius-sm, 4px) 0 0;
+  transition: color 0.12s ease, border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.earnings_view_tab:hover {
+  color: var(--color-text);
+  background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.earnings_view_tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ============================================================================
+   TEAM EARNINGS PANEL
+   ============================================================================ */
+
+.earnings_team_panel {
+  width: 100%;
+}
+
+.earnings_team_year_row {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.earnings_team_year_link {
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 4px);
+  font-size: var(--font-sm, 0.85rem);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.earnings_team_year_link:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-text);
+}
+
+.earnings_team_year_link.active {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary, #fff);
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* .earnings_team_org_selector removed — select is now in the tab bar */
+
+.earnings_team_grid {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  overflow: hidden;
+}
+
+.earnings_team_grid_header,
+.earnings_team_grid_row,
+.earnings_team_grid_totals {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 0;
+}
+
+.earnings_team_grid_header {
+  background: var(--elevated-surface, var(--surface));
+  border-bottom: 1px solid var(--border);
+}
+
+.earnings_team_grid_header span {
+  padding: 0.55rem 0.85rem;
+  font-size: var(--font-sm, 0.82rem);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.earnings_team_grid_header span:nth-child(n+3) {
+  text-align: right;
+}
+
+.earnings_team_grid_row {
+  border-bottom: 1px solid var(--border);
+}
+
+.earnings_team_grid_row:last-of-type {
+  border-bottom: none;
+}
+
+.earnings_team_grid_row:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 5%, transparent);
+}
+
+.earnings_team_grid_row span {
+  padding: 0.5rem 0.85rem;
+  font-size: var(--font-sm, 0.88rem);
+}
+
+.earnings_team_grid_totals {
+  border-top: 2px solid var(--border);
+  background: var(--elevated-surface, var(--surface));
+}
+
+.earnings_team_grid_totals span {
+  padding: 0.55rem 0.85rem;
+  font-size: var(--font-sm, 0.88rem);
+  font-weight: 600;
+}
+
+.earnings_team_num {
+  text-align: right;
+}
+
+.earnings_team_role {
+  color: var(--color-text-muted);
+  font-size: var(--font-sm, 0.83rem);
+}
+
+.earnings_team_empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: 1rem 0;
+}
+
+.earnings_site_diag {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--surface);
+  padding: 0.75rem 0.85rem;
+  margin: 0 0 0.85rem;
+}
+
+.earnings_site_diag--warning {
+  border-color: color-mix(in srgb, #f97316 50%, var(--border));
+  background: color-mix(in srgb, #f97316 6%, var(--surface));
+}
+
+.earnings_site_diag_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.earnings_site_diag_title {
+  margin: 0;
+  font-size: var(--font-md, 0.93rem);
+}
+
+.earnings_site_diag_count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: var(--font-sm, 0.78rem);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.earnings_site_diag--warning .earnings_site_diag_count {
+  border-color: color-mix(in srgb, #f97316 45%, var(--border));
+  color: #f97316;
+}
+
+.earnings_site_diag_summary {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-sm, 0.85rem);
+}
+
+.earnings_site_diag_details {
+  margin-top: 0.6rem;
+}
+
+.earnings_site_diag_details > summary {
+  cursor: pointer;
+  color: var(--color-primary);
+  font-size: var(--font-sm, 0.84rem);
+  font-weight: 600;
+}
+
+.earnings_site_diag_table_wrap {
+  margin-top: 0.55rem;
+  overflow-x: auto;
+}
+
+.earnings_site_diag_table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+}
+
+.earnings_site_diag_table th,
+.earnings_site_diag_table td {
+  border: 1px solid var(--border);
+  padding: 0.38rem 0.45rem;
+  text-align: left;
+  font-size: var(--font-sm, 0.8rem);
+  vertical-align: top;
+}
+
+.earnings_site_diag_table thead th {
+  background: var(--elevated-surface, var(--surface));
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.earnings_site_resolve_summary {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--surface);
+  padding: 0.75rem 0.85rem;
+  margin: 0 0 0.85rem;
+}
+
+.earnings_site_resolve_summary--warning {
+  border-color: color-mix(in srgb, #f97316 50%, var(--border));
+  background: color-mix(in srgb, #f97316 6%, var(--surface));
+}
+
+.earnings_site_resolve_summary_header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.earnings_site_resolve_summary_title {
+  margin: 0;
+  font-size: var(--font-md, 0.93rem);
+}
+
+.earnings_site_resolve_summary_subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-sm, 0.8rem);
+}
+
+.earnings_site_resolve_summary_grid {
+  margin: 0.6rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.earnings_site_resolve_stat {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 5px);
+  padding: 0.45rem 0.5rem;
+  background: var(--elevated-surface, var(--surface));
+}
+
+.earnings_site_resolve_stat--warning {
+  border-color: color-mix(in srgb, #f97316 45%, var(--border));
+  background: color-mix(in srgb, #f97316 6%, var(--surface));
+}
+
+.earnings_site_resolve_stat dt {
+  margin: 0;
+  font-size: var(--font-sm, 0.74rem);
+  color: var(--color-text-muted);
+}
+
+.earnings_site_resolve_stat dd {
+  margin: 0.2rem 0 0;
+  font-size: var(--font-md, 0.95rem);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.earnings_site_resolve_summary_note {
+  margin: 0.55rem 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-sm, 0.82rem);
+}
+
+.earnings_site_resolve_summary_note--warning {
+  color: #f97316;
+  font-weight: 600;
+}
+
+@media (max-width: 860px) {
+  .earnings_site_resolve_summary_grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ============================================================================
+   TEAM EARNINGS EMPTY-STATE / SKELETON
+   ============================================================================ */
+
+.et_empty_state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 2rem 1.5rem 1rem;
+  text-align: center;
+}
+
+.et_empty_guard {
+  margin: 0 auto 0.8rem;
+  max-width: 56rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.7rem 0.85rem;
+  font-size: var(--font-sm, 0.84rem);
+  line-height: 1.45;
+}
+
+.et_empty_guard--warning {
+  border-color: color-mix(in srgb, #f97316 50%, var(--border));
+  background: color-mix(in srgb, #f97316 6%, var(--surface));
+  color: #f97316;
+}
+
+.et_empty_icon {
+  font-size: 2.4rem;
+  line-height: 1;
+  opacity: 0.55;
+  margin-bottom: 0.2rem;
+  user-select: none;
+  aria-hidden: true;
+}
+
+.et_empty_title {
+  font-size: var(--font-lg, 1.05rem);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.et_empty_body {
+  font-size: var(--font-sm, 0.88rem);
+  color: var(--color-text-muted);
+  max-width: 38ch;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.et_empty_steps {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+  width: 100%;
+  max-width: 30rem;
+}
+
+.et_empty_steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: var(--font-sm, 0.84rem);
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.et_empty_steps li::before {
+  content: "→";
+  color: var(--color-primary);
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1.45;
+}
+
+/* Skeleton wrapper inside an earnings_ytd_figure */
+.et_skeleton_figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 0 var(--gap-md, 1.25rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  overflow: hidden;
+  opacity: 0.65;
+}
+
+.et_skeleton_header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--elevated-surface, var(--surface));
+}
+
+.et_skeleton_body {
+  padding: 1.25rem 1.75rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+/* Skeleton exec snapshot strip */
+.et_skeleton_exec {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  padding: 1rem 0 1.25rem;
+}
+
+.et_skeleton_exec_item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* Bar chart skeleton */
+.et_skeleton_bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 120px;
+  padding: 0 0 0.25rem;
+}
+
+/* Line chart skeleton */
+.et_skeleton_line_path {
+  display: block;
+  width: 100%;
+  height: 100px;
+  position: relative;
+}
+
+/* Skeleton member grid rows */
+.et_skeleton_grid_rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.et_skeleton_grid_row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ============================================================================
+   END TEAM EARNINGS EMPTY-STATE / SKELETON
+   ============================================================================ */
+
+/* Clickable row affordance */
+.earnings_team_grid_row--clickable {
+  cursor: pointer;
+  outline: none;
+}
+
+.earnings_team_grid_row--clickable:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.earnings_team_grid_row--clickable:focus-visible {
+  background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.earnings_team_grid_row--clickable:active {
+  background-color: color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+@media (max-width: 640px) {
+  .earnings_team_grid_header,
+  .earnings_team_grid_row,
+  .earnings_team_grid_totals {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+
+  /* Hide Role and Regular Hrs columns on small screens */
+  .earnings_team_grid_header span:nth-child(2),
+  .earnings_team_grid_row span:nth-child(2),
+  .earnings_team_grid_totals span:nth-child(2),
+  .earnings_team_grid_header span:nth-child(3),
+  .earnings_team_grid_row span:nth-child(3),
+  .earnings_team_grid_totals span:nth-child(3) {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   YTD ORG CHART
+   ============================================================================ */
+
+.earnings_ytd_figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 0 var(--gap-md, 1.25rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  box-shadow: 0 2px 8px color-mix(in srgb, black 8%, transparent),
+              0 1px 2px color-mix(in srgb, black 5%, transparent);
+  overflow: hidden;
+}
+
+.earnings_ytd_header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.85rem 1.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--elevated-surface, var(--surface));
+}
+
+.earnings_ytd_title {
+  font-size: var(--font-md, 0.95rem);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.earnings_ytd_subtitle {
+  font-size: var(--font-sm, 0.83rem);
+  color: var(--color-text-muted);
+}
+
+.earnings_ytd_body {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  padding: 1.5rem 1.75rem 1.5rem 1.5rem;
+}
+
+.earnings_ytd_svg {
+  flex: 1 1 0;
+  min-width: 0;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+/* Grid */
+.ytd_grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.ytd_grid--vert {
+  stroke-dasharray: 2 4;
+  opacity: 0.4;
+}
+
+/* Axis border lines */
+.ytd_axis_border {
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+/* Axis labels */
+.ytd_axis_label {
+  fill: var(--color-text-muted);
+  font-size: 10px;
+  font-family: inherit;
+}
+
+.ytd_axis_label--left  { text-anchor: end; }
+.ytd_axis_label--right { text-anchor: start; }
+.ytd_axis_label--x     { text-anchor: middle; dominant-baseline: hanging; }
+
+/* Series lines */
+.ytd_line {
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.ytd_line--gross    { stroke: var(--color-primary); }
+.ytd_line--net      { stroke: #22c55e; }
+.ytd_line--avg      { stroke: #06b6d4; stroke-width: 2; stroke-dasharray: 5 3; }
+.ytd_line--cum      { stroke: #0ea5e9; stroke-width: 2; stroke-dasharray: 8 4; }
+.ytd_line--reg      { stroke: #f59e0b; stroke-width: 2; }
+.ytd_line--ot       { stroke: #ef4444; stroke-width: 2; }
+.ytd_line--ot_ratio { stroke: #f97316; stroke-width: 2; stroke-dasharray: 4 3; }
+.ytd_line--util     { stroke: #22c55e; stroke-width: 2.5; }
+
+/* Data point dots */
+.ytd_dot--gross    { fill: var(--color-primary); }
+.ytd_dot--net      { fill: #22c55e; }
+.ytd_dot--avg      { fill: #06b6d4; }
+.ytd_dot--cum      { fill: #0ea5e9; }
+.ytd_dot--reg      { fill: #f59e0b; }
+.ytd_dot--ot       { fill: #ef4444; }
+.ytd_dot--ot_ratio { fill: #f97316; }
+.ytd_dot--util     { fill: #22c55e; }
+
+/* Bar fills */
+.ytd_bar--reg       { fill: #f59e0b; opacity: 0.8; }
+.ytd_bar--ot        { fill: #ef4444; opacity: 0.85; }
+.ytd_bar--headcount { fill: var(--color-primary); opacity: 0.6; }
+
+/* Horizontal rank bars */
+.ytd_rank_bar   { fill: var(--color-primary); opacity: 0.65; }
+.ytd_rank_name  { font-size: 11px; font-family: inherit; }
+.ytd_rank_value { fill: var(--color-text-muted, #6b7280); font-size: 10px; font-family: inherit; text-anchor: start; }
+
+/* Percentage right axis */
+.ytd_axis_label--pct  { fill: #94a3b8; }
+.ytd_axis_border--pct { stroke: #94a3b8; opacity: 0.4; }
+
+/* Axis tag marks ($ h # %) */
+.ytd_axis_tag { font-weight: 700; font-size: 9px; }
+
+/* Series toggle — scoped to each panel's .earnings_ytd_body */
+.earnings_ytd_body[data-hide-gross]       [data-series="gross"]       { display: none; }
+.earnings_ytd_body[data-hide-net]         [data-series="net"]         { display: none; }
+.earnings_ytd_body[data-hide-avg]         [data-series="avg"]         { display: none; }
+.earnings_ytd_body[data-hide-cum]         [data-series="cum"]         { display: none; }
+.earnings_ytd_body[data-hide-reg]         [data-series="reg"]         { display: none; }
+.earnings_ytd_body[data-hide-ot]          [data-series="ot"]          { display: none; }
+.earnings_ytd_body[data-hide-ot_ratio]    [data-series="ot_ratio"]    { display: none; }
+.earnings_ytd_body[data-hide-headcount]   [data-series="headcount"]   { display: none; }
+.earnings_ytd_body[data-hide-utilization] [data-series="utilization"] { display: none; }
+
+/* Controls / legend */
+.earnings_ytd_controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  width: 10.5rem;
+  padding-left: 1.5rem;
+  margin-left: 1.5rem;
+  border-left: 1px solid var(--border);
+  justify-content: center;
+}
+
+.ytd_legend_item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.65rem 0.28rem 0.5rem;
+  font-size: var(--font-sm, 0.83rem);
+  color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px color-mix(in srgb, black 10%, transparent),
+              0 1px 1px color-mix(in srgb, black 6%, transparent);
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.ytd_legend_item:hover {
+  background: var(--surface);
+  box-shadow: 0 2px 6px color-mix(in srgb, black 14%, transparent),
+              0 1px 2px color-mix(in srgb, black 8%, transparent);
+}
+
+/* Dim the pill when its series is hidden */
+.ytd_legend_item:has(.ytd_legend_checkbox:not(:checked)) {
+  opacity: 0.4;
+  box-shadow: none;
+}
+
+/* Visually hide the checkbox (keep accessible) */
+.ytd_legend_checkbox {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Colour swatch — filled by per-series rules below */
+.ytd_legend_swatch {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.ytd_legend_item--gross        .ytd_legend_swatch { background: var(--color-primary); }
+.ytd_legend_item--net          .ytd_legend_swatch { background: #22c55e; }
+.ytd_legend_item--avg          .ytd_legend_swatch { background: #06b6d4; }
+.ytd_legend_item--cum          .ytd_legend_swatch { background: #0ea5e9; }
+.ytd_legend_item--total        .ytd_legend_swatch { background: #8b5cf6; }
+.ytd_legend_item--reg          .ytd_legend_swatch { background: #f59e0b; }
+.ytd_legend_item--ot           .ytd_legend_swatch { background: #ef4444; }
+.ytd_legend_item--ot_ratio     .ytd_legend_swatch { background: #f97316; }
+.ytd_legend_item--headcount    .ytd_legend_swatch { background: var(--color-primary); }
+.ytd_legend_item--utilization  .ytd_legend_swatch { background: #22c55e; }
+
+.ytd_legend_item small {
+  opacity: 0.7;
+}
+
+/* Rank bar SVG fills the full body width */
+.earnings_ytd_body--rank {
+  padding-right: 1.75rem;
+}
+
+.earnings_ytd_svg--rank {
+  width: 100%;
+}
+
+/* ============================================================================
+   TEAM MEMBER BREAKDOWN DIALOG
+   ============================================================================ */
+
+.earnings_team_member_dialog {
+  width: min(calc(100vw - 2rem), 52rem);
+}
+
+.earnings_team_member_dialog_content {
+  flex-direction: column;
+  gap: 0;
+  padding: var(--pad-md);
+  overflow-y: auto;
+  max-height: calc(100dvh - 12rem);
+}
+
+.earnings_breakdown_meta {
+  margin-bottom: 0.85rem;
+}
+
+.earnings_breakdown_role {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  border-radius: var(--radius-sm, 4px);
+  font-size: var(--font-sm, 0.83rem);
+  font-weight: 600;
+}
+
+.earnings_breakdown_empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.earnings_breakdown_grid {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  overflow: hidden;
+}
+
+.earnings_breakdown_header,
+.earnings_breakdown_row,
+.earnings_breakdown_totals {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+}
+
+.earnings_breakdown_header {
+  background: var(--elevated-surface, var(--surface));
+  border-bottom: 1px solid var(--border);
+}
+
+.earnings_breakdown_header span {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--font-sm, 0.82rem);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.earnings_breakdown_header span:nth-child(n+2) {
+  text-align: right;
+}
+
+.earnings_breakdown_row {
+  border-bottom: 1px solid var(--border);
+}
+
+.earnings_breakdown_row:last-of-type {
+  border-bottom: none;
+}
+
+.earnings_breakdown_row span {
+  padding: 0.45rem 0.75rem;
+  font-size: var(--font-sm, 0.88rem);
+}
+
+.earnings_breakdown_totals {
+  border-top: 2px solid var(--border);
+  background: var(--elevated-surface, var(--surface));
+}
+
+.earnings_breakdown_totals span {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--font-sm, 0.88rem);
+  font-weight: 600;
+}
+
+.earnings_breakdown_num {
+  text-align: right;
+}
+
+/* ═══ Intelligence Row (Forecast + Workforce Health) ═══════════════════════ */
+.et_intel_row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--gap-md, 1rem);
+  margin-bottom: var(--gap-md, 1.25rem);
+}
+.et_intel_card {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--shadow, #000) 6%, transparent);
+  overflow: hidden;
+}
+.et_intel_header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.85rem 1.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--elevated-surface, var(--surface));
+}
+.et_intel_title {
+  font-size: var(--font-md, 0.95rem);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.et_intel_subtitle {
+  font-size: var(--font-sm, 0.83rem);
+  color: var(--color-text-muted);
+}
+
+/* ── Forecast card ───────────────────────────────────────────────────────── */
+
+/* Hero: Forecast Year End — most visually dominant element */
+.et_forecast_hero {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.et_forecast_hero_amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.et_forecast_hero_label {
+  font-size: var(--font-sm, 0.8rem);
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+/* Assessment verdict strip */
+.et_forecast_verdict {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.6rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.et_forecast_verdict--ok {
+  background: color-mix(in srgb, #22c55e 6%, transparent);
+}
+.et_forecast_verdict--over {
+  background: color-mix(in srgb, #ef4444 6%, transparent);
+}
+.et_forecast_verdict_label {
+  font-size: var(--font-sm, 0.87rem);
+  font-weight: 700;
+}
+.et_forecast_verdict--ok .et_forecast_verdict_label   { color: #22c55e; }
+.et_forecast_verdict--over .et_forecast_verdict_label { color: #ef4444; }
+.et_forecast_verdict_detail {
+  font-size: var(--font-sm, 0.82rem);
+  color: var(--color-text-muted);
+}
+
+.et_forecast_dl {
+  margin: 0;
+  padding: 0.75rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.et_forecast_row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+.et_forecast_row:last-child {
+  border-bottom: none;
+}
+.et_forecast_row--muted .et_forecast_label,
+.et_forecast_row--muted .et_forecast_value {
+  color: var(--color-text-muted);
+  font-size: var(--font-sm, 0.85rem);
+}
+.et_forecast_label {
+  font-size: var(--font-sm, 0.87rem);
+  color: var(--color-text-muted);
+}
+.et_forecast_value {
+  font-size: var(--font-sm, 0.87rem);
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* ── Health badge ────────────────────────────────────────────────────────── */
+.et_health_badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: var(--font-sm, 0.83rem);
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+.et_health_badge--normal, .et_health_badge--healthy {
+  background: color-mix(in srgb, #22c55e 12%, transparent);
+  color: #22c55e;
+  border-color: color-mix(in srgb, #22c55e 25%, transparent);
+}
+.et_health_badge--watch {
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+  color: #f59e0b;
+  border-color: color-mix(in srgb, #f59e0b 25%, transparent);
+}
+.et_health_badge--concern {
+  background: color-mix(in srgb, #f97316 12%, transparent);
+  color: #f97316;
+  border-color: color-mix(in srgb, #f97316 25%, transparent);
+}
+.et_health_badge--risk {
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+  color: #ef4444;
+  border-color: color-mix(in srgb, #ef4444 25%, transparent);
+}
+
+/* ── Health score row (numeric score + badge side by side) ───────────────── */
+.et_health_score_row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.1rem 1.5rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+.et_health_score_num {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.et_health_score_num--normal, .et_health_score_num--healthy { color: #22c55e; }
+.et_health_score_num--watch   { color: #f59e0b; }
+.et_health_score_num--concern { color: #f97316; }
+.et_health_score_num--risk    { color: #ef4444; }
+.et_health_score_denom {
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 0.55;
+}
+
+/* ── Health risks cause list ─────────────────────────────────────────────── */
+.et_health_risks {
+  margin: 0;
+  padding: 0.65rem 1.5rem 0.65rem 1.5rem;
+  list-style: none;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, #ef4444 4%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.et_health_risks li {
+  font-size: var(--font-sm, 0.83rem);
+  color: #ef4444;
+  padding-left: 1.1em;
+  position: relative;
+}
+.et_health_risks li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  opacity: 0.7;
+}
+
+/* ── Workforce Health metric rows ────────────────────────────────────────── */
+.et_health_dl {
+  margin: 0;
+  padding: 0.75rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.et_health_row {
+  display: grid;
+  grid-template-columns: 1.4em 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.38rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+.et_health_row:last-child {
+  border-bottom: none;
+}
+.et_health_row--meta {
+  opacity: 0.75;
+}
+.et_health_emoji {
+  font-size: 0.85rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+.et_health_label {
+  font-size: var(--font-sm, 0.85rem);
+  color: var(--color-text-muted);
+}
+.et_health_value {
+  font-size: var(--font-sm, 0.85rem);
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  text-align: right;
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+.et_health_trend {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ═══ Variance & Trend Alerts — per-category panels with side-by-side cards ═ */
+.et_alerts_figure {
+  overflow: visible;
+}
+.et_alerts_cards {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem 1.25rem;
+  align-items: stretch;
+}
+.et_alerts_group {
+  /* kept for any legacy reference; not used in current markup */
+}
+/* Individual alert card */
+.et_alert_card {
+  flex: 1 1 15rem;
+  min-width: 14rem;
+  max-width: 28rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.85rem 1rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--shadow, #000) 5%, transparent);
+}
+.et_alert_card--critical { border-left-color: #ef4444; }
+.et_alert_card--warning  { border-left-color: #f97316; }
+.et_alert_card--notice   { border-left-color: #f59e0b; }
+.et_alert_card--normal   { border-left-color: var(--border); }
+.et_alert_card--positive { border-left-color: #22c55e; }
+/* Card header */
+.et_alert_card_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.et_alert_card_title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+/* Severity badge */
+.et_alert_sev {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.et_alert_sev--critical { background: color-mix(in srgb, #ef4444 12%, transparent); color: #ef4444; border-color: color-mix(in srgb, #ef4444 30%, transparent); }
+.et_alert_sev--warning  { background: color-mix(in srgb, #f97316 12%, transparent); color: #f97316; border-color: color-mix(in srgb, #f97316 30%, transparent); }
+.et_alert_sev--notice   { background: color-mix(in srgb, #f59e0b 12%, transparent); color: #f59e0b; border-color: color-mix(in srgb, #f59e0b 30%, transparent); }
+.et_alert_sev--normal   { background: color-mix(in srgb, #22c55e 10%, transparent); color: #22c55e; border-color: color-mix(in srgb, #22c55e 25%, transparent); }
+.et_alert_sev--positive { background: color-mix(in srgb, #22c55e 10%, transparent); color: #22c55e; border-color: color-mix(in srgb, #22c55e 25%, transparent); }
+/* Change headline — the main number */
+.et_alert_card_change {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.15;
+}
+.et_alert_card--positive .et_alert_card_change {
+  font-size: 1rem;
+  color: #22c55e;
+}
+/* Before → after context line */
+.et_alert_card_context {
+  font-size: var(--font-sm, 0.82rem);
+  color: var(--color-text-muted);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+/* Cause explanation */
+.et_alert_card_cause {
+  font-size: var(--font-sm, 0.84rem);
+  color: var(--color-text);
+  margin: 0.35rem 0 0;
+  line-height: 1.45;
+}
+/* Recommended action */
+.et_alert_card_rec {
+  font-size: var(--font-sm, 0.82rem);
+  color: var(--color-primary);
+  margin: 0.45rem 0 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+  line-height: 1.35;
+}
+.et_alert_card_rec_arrow {
+  flex-shrink: 0;
+  margin-top: 0.05em;
+}
+
+/* Named worker callout */
+.et_alert_names {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.65rem;
+  background: color-mix(in srgb, var(--border) 30%, transparent);
+  border-radius: var(--radius-sm, 5px);
+  border-left: 2px solid color-mix(in srgb, var(--border) 70%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.et_alert_names_item {
+  font-size: var(--font-sm, 0.81rem);
+  color: var(--color-text-muted);
+  font-style: italic;
+  line-height: 1.35;
+}
+
+/* ═══ Cost Drivers panel ════════════════════════════════════════════════════ */
+.et_cost_figure {
+  overflow: hidden;
+}
+.et_cost_body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0;
+  padding: 0;
+}
+.et_cost_col {
+  padding: 1rem 1.5rem;
+  border-right: 1px solid var(--border);
+}
+.et_cost_col:last-child {
+  border-right: none;
+}
+.et_cost_col_title {
+  margin: 0 0 0.6rem;
+  font-size: var(--font-sm, 0.8rem);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.et_cost_row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+}
+.et_cost_row:last-child {
+  border-bottom: none;
+}
+.et_cost_name {
+  font-size: var(--font-sm, 0.85rem);
+  color: var(--color-text-muted);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.et_cost_amount {
+  font-size: var(--font-sm, 0.85rem);
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  text-align: right;
+}
+.et_cost_amount--impact {
+  color: #ef4444;
+}
+
+/* ═══ Site payroll cost chart ════════════════════════════════════════════════ */
+/* ═══ Budget Status Panel ════════════════════════════════════════════════════ */
+.et_budget_figure {
+  overflow: hidden;
+}
+.et_budget_badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+}
+.et_budget_badge--ok       { background: color-mix(in srgb, #22c55e 12%, transparent); color: #22c55e; }
+.et_budget_badge--warning  { background: color-mix(in srgb, #f97316 12%, transparent); color: #f97316; }
+.et_budget_badge--critical { background: color-mix(in srgb, #ef4444 12%, transparent); color: #ef4444; }
+.et_budget_body {
+  padding: 1rem 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.et_budget_stat_row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2.5rem;
+}
+.et_budget_stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.et_budget_stat_value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+.et_budget_stat_value--ok       { color: #22c55e; }
+.et_budget_stat_value--warning  { color: #f97316; }
+.et_budget_stat_value--critical { color: #ef4444; }
+.et_budget_stat_label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+}
+.et_budget_bar_wrap {
+  position: relative;
+}
+.et_budget_bar_svg {
+  display: block;
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.et_budget_bar_bg   { fill: color-mix(in srgb, var(--border) 60%, transparent); }
+.et_budget_bar_fill--ok       { fill: #22c55e; }
+.et_budget_bar_fill--warning  { fill: #f97316; }
+.et_budget_bar_fill--critical { fill: #ef4444; }
+.et_budget_bar_marker { fill: color-mix(in srgb, var(--color-text-muted) 40%, transparent); }
+.et_budget_bar_marker--crit   { fill: color-mix(in srgb, #ef4444 50%, transparent); }
+.et_budget_bar_labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.15rem;
+}
+.et_budget_bar_label_warn,
+.et_budget_bar_label_crit {
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+}
+.et_budget_hint {
+  margin: 0;
+  font-size: var(--font-sm, 0.82rem);
+  color: var(--color-text-muted);
+}
+
+.ytd_site_bar {
+  fill: #8b5cf6;
+  opacity: 0.65;
+}
+
+/* ═══ Executive Snapshot Bar ════════════════════════════════════════════════ */
+.et_exec_snapshot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: 0.85rem;
+  background: var(--elevated-surface, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  overflow: hidden;
+}
+.et_exec_snapshot_item {
+  flex: 1 1 10rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.9rem 1.25rem;
+  border-right: 1px solid var(--border);
+}
+.et_exec_snapshot_item:last-child {
+  border-right: none;
+}
+.et_exec_snapshot_item--primary {
+  border-left: 3px solid var(--color-primary);
+}
+.et_exec_snapshot_value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.et_exec_snapshot_value--risk     { color: #ef4444; }
+.et_exec_snapshot_value--positive { color: #22c55e; }
+.et_exec_snapshot_value--normal   { color: #22c55e; }
+.et_exec_snapshot_value--watch    { color: #f59e0b; }
+.et_exec_snapshot_value--concern  { color: #f97316; }
+.et_exec_snapshot_value_denom {
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.6;
+}
+.et_exec_snapshot_label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+}
+.et_exec_snapshot_sub {
+  font-size: var(--font-sm, 0.8rem);
+  color: var(--color-text-muted);
+}
+.et_exec_snapshot_sub--ok   { color: #22c55e; font-weight: 600; }
+.et_exec_snapshot_sub--over { color: #ef4444; font-weight: 600; }
+.et_exec_snapshot_sub--muted { opacity: 0.75; }
+
+/* ═══ Health Score Trend ════════════════════════════════════════════════════ */
+.et_health_score_meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+.et_health_score_trend {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* ═══ Payroll Composition ═══════════════════════════════════════════════════ */
+.et_composition_figure {
+  overflow: hidden;
+}
+.et_composition_body {
+  padding: 1rem 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.et_comp_bar_svg {
+  display: block;
+  width: 100%;
+  height: 18px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.et_comp_bar_rect--reg   { fill: var(--color-primary); }
+.et_comp_bar_rect--ot    { fill: #f97316; }
+.et_comp_bar_rect--loa   { fill: #8b5cf6; }
+.et_comp_bar_rect--other { fill: color-mix(in srgb, var(--border) 80%, #888); }
+.et_comp_legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+.et_comp_legend_item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.et_comp_swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.et_comp_swatch--reg   { background: var(--color-primary); }
+.et_comp_swatch--ot    { background: #f97316; }
+.et_comp_swatch--loa   { background: #8b5cf6; }
+.et_comp_swatch--other { background: color-mix(in srgb, var(--border) 80%, transparent); }
+.et_comp_legend_label {
+  font-size: var(--font-sm, 0.84rem);
+  color: var(--color-text-muted);
+}
+.et_comp_legend_pct {
+  font-size: var(--font-sm, 0.84rem);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.et_comp_legend_amt {
+  font-size: var(--font-sm, 0.82rem);
+  color: var(--color-text-muted);
+}
+
+/* ═══ Risk Register ═════════════════════════════════════════════════════════ */
+.et_risk_figure {
+  overflow: hidden;
+}
+.et_risk_body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.et_risk_item {
+  display: grid;
+  grid-template-columns: 1.8rem 1fr;
+  gap: 0.5rem;
+  align-items: start;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  border-left: 3px solid transparent;
+}
+.et_risk_item:last-child {
+  border-bottom: none;
+}
+.et_risk_item--critical { border-left-color: #ef4444; background: color-mix(in srgb, #ef4444 3%, transparent); }
+.et_risk_item--warning  { border-left-color: #f97316; background: color-mix(in srgb, #f97316 3%, transparent); }
+.et_risk_item--notice   { border-left-color: #f59e0b; }
+.et_risk_icon {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.et_risk_content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.et_risk_title_row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+.et_risk_title {
+  font-size: var(--font-sm, 0.87rem);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.et_risk_sev {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+.et_risk_sev--critical { background: color-mix(in srgb, #ef4444 12%, transparent); color: #ef4444; }
+.et_risk_sev--warning  { background: color-mix(in srgb, #f97316 12%, transparent); color: #f97316; }
+.et_risk_sev--notice   { background: color-mix(in srgb, #f59e0b 12%, transparent); color: #f59e0b; }
+.et_risk_cause {
+  margin: 0;
+  font-size: var(--font-sm, 0.84rem);
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+.et_risk_rec {
+  margin: 0.15rem 0 0;
+  font-size: var(--font-sm, 0.82rem);
+  color: var(--color-primary);
+  line-height: 1.35;
+}
+
+/* ═══ Recommendations ═══════════════════════════════════════════════════════ */
+.et_rec_figure {
+  overflow: hidden;
+}
+.et_rec_list {
+  margin: 0;
+  padding: 0.75rem 1.25rem 1rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  counter-reset: none;
+}
+.et_rec_item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-sm, 5px);
+  border-left: 3px solid var(--border);
+  background: var(--surface);
+}
+.et_rec_item--critical { border-left-color: #ef4444; }
+.et_rec_item--warning  { border-left-color: #f97316; }
+.et_rec_item--notice   { border-left-color: #f59e0b; }
+.et_rec_item--normal   { border-left-color: var(--border); }
+.et_rec_item--positive { border-left-color: #22c55e; }
+.et_rec_num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  min-width: 1.1rem;
+  flex-shrink: 0;
+}
+.et_rec_content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.et_rec_text {
+  font-size: var(--font-sm, 0.87rem);
+  color: var(--color-text);
+  line-height: 1.4;
+}
+.et_rec_source {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ── Team Export Buttons ── */
+.et_export_group {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.et_export_btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--color-primary, #4a9eff) 45%, var(--border, #333));
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-primary, #4a9eff);
+  cursor: pointer;
+  line-height: 1.4;
+  transition: background 0.15s, color 0.15s;
+}
+
+.et_export_btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary, #4a9eff) 15%, transparent);
+}
+
+.et_export_btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.et_export_btn--report {
+  font-size: 0.78rem;
+  padding: 0.25rem 0.75rem;
+  margin-left: auto;
+}
+
+/* ── Print / PDF Export Layout ── */
+@media print {
+  /* Hide all chrome */
+  #page_header,
+  #page_footer,
+  .page_nav,
+  .earnings_tab_row,
+  .earnings_tab_org_select,
+  .earnings_team_year_row,
+  .et_export_group,
+  .et_export_btn,
+  [data-team-export-format] { display: none !important; }
+
+  /* Show only the team panel */
+  body {
+    background: #fff;
+    color: #111;
+    font-family: Georgia, serif;
+    font-size: 10pt;
+  }
+
+  #main { margin: 0 !important; padding: 0 !important; }
+
+  .earnings_team_panel {
+    display: block !important;
+    padding: 1.5cm 1.5cm 2cm;
+  }
+
+  /* Page title */
+  .earnings_team_panel::before {
+    content: "Payroll Intelligence Report";
+    display: block;
+    font-size: 18pt;
+    font-weight: 700;
+    margin-bottom: 0.25cm;
+    border-bottom: 2pt solid #111;
+    padding-bottom: 0.25cm;
+  }
+
+  /* Each figure is a print section */
+  .earnings_ytd_figure {
+    break-inside: avoid;
+    border: 0.5pt solid #ccc;
+    border-radius: 0;
+    margin: 0.5cm 0;
+    padding: 0.4cm;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  .earnings_ytd_header {
+    border-bottom: 0.5pt solid #ccc;
+    margin-bottom: 0.3cm;
+    padding-bottom: 0.2cm;
+  }
+
+  .earnings_ytd_title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #111;
+  }
+
+  .earnings_ytd_subtitle {
+    font-size: 8pt;
+    color: #555;
+  }
+
+  /* SVG charts: allow, constrain width */
+  .earnings_ytd_svg { width: 100% !important; max-width: 100%; }
+
+  /* Exec snapshot: horizontal row */
+  .et_exec_snapshot {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 0.4cm;
+    background: #f8f8f8 !important;
+    border: 0.5pt solid #ccc !important;
+    padding: 0.4cm !important;
+  }
+
+  .et_exec_snapshot_value { color: #111 !important; }
+  .et_exec_snapshot_value--risk { color: #c00 !important; }
+  .et_exec_snapshot_value--positive { color: #060 !important; }
+
+  /* Risk/rec items */
+  .et_risk_item, .et_rec_item {
+    break-inside: avoid;
+    border-left-width: 2pt !important;
+    margin-bottom: 0.2cm;
+    background: #fff !important;
+  }
+
+  /* Budget figure */
+  .et_budget_bar_svg { width: 100% !important; }
+  .et_budget_stat_row { display: flex !important; flex-wrap: wrap; gap: 0.5cm; }
+
+  /* Intel row */
+  .et_intel_row { display: flex !important; flex-wrap: wrap; gap: 0.4cm; }
+  .et_intel_card { flex: 1 1 40%; border: 0.5pt solid #ccc !important; background: #fff !important; }
+
+  /* Cost drivers */
+  .et_cost_body { display: flex !important; flex-wrap: wrap; gap: 0.4cm; }
+  .et_cost_col { flex: 1 1 28%; }
+
+  /* Hide elements that don't print well */
+  .earnings_team_empty,
+  .et_intel_card--health .et_health_emoji { display: none; }
 }

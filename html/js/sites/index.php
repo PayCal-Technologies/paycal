@@ -164,8 +164,27 @@ document.addEventListener("DOMContentLoaded", async () =>
   };
 
   initializeHoverHelp();
-  
-  // Initialize both active and archived grids with status parameter
+
+  // ── Site Color Swatch Picker ─────────────────────────────────────────────
+  let colorPickSave = false;
+  const swatchesContainer = PC.getElement('edit_site_color_swatches');
+  const colorHiddenInput  = PC.getElement('edit_site_color_input');
+  const colorNameEl       = PC.getElement('edit_site_color_name');
+  if (swatchesContainer && colorHiddenInput) {
+    swatchesContainer.addEventListener('click', (e) => {
+      const sw = /** @type {Element} */ (e.target)?.closest('.site_color_swatch');
+      if (!(sw instanceof HTMLElement) || !sw.dataset.hex) { return; }
+      colorHiddenInput.value = sw.dataset.hex;
+      if (colorNameEl) { colorNameEl.textContent = sw.getAttribute('aria-label') || ''; }
+      swatchesContainer.querySelectorAll('.site_color_swatch').forEach((s) => {
+        s.classList.toggle('is-selected', s === sw);
+      });
+      const editForm = PC.getElement('edit_site_form');
+      if (editForm instanceof HTMLFormElement) { colorPickSave = true; editForm.requestSubmit(); }
+    });
+  }
+
+
   const gridManagerActive = createDataGrid({
     id: "sites-grid-active",
     endpoint: apiUrl("sites/grid?status=active"),
@@ -261,6 +280,14 @@ document.addEventListener("DOMContentLoaded", async () =>
       }
       setFormStatus(statusElementId, 'Enter both site name and wage.');
       (nameValue ? wageInput : nameInput)?.focus();
+      return false;
+    }
+
+    const wageNum = parseFloat(wageValue);
+    if (Number.isNaN(wageNum) || wageNum <= 0) {
+      setFieldError(wageInput, wageErrorId, 'Wage must be greater than zero.');
+      setFormStatus(statusElementId, 'Enter a wage greater than zero — a zero wage means earnings cannot be calculated.');
+      wageInput?.focus();
       return false;
     }
 
@@ -404,6 +431,50 @@ document.addEventListener("DOMContentLoaded", async () =>
         PC.getElement('edit_site_province_select').value = site.province || '';
         PC.getElement('edit_site_status_select').value = site.status || 'active';
 
+        // Extended site detail fields (left column)
+        PC.getElement('edit_site_default_hours_input').value = site.default_hours || '';
+        // Site color — mark the matching swatch as selected
+        const savedColor = (site.site_color || '').toLowerCase() || '#6aa6ff';
+        const colorHidden = PC.getElement('edit_site_color_input');
+        if (colorHidden instanceof HTMLInputElement) { colorHidden.value = savedColor; }
+        const matchingSwatch = document.querySelector(`.site_color_swatch[data-hex="${savedColor}"], .site_color_swatch[data-hex="${savedColor.toUpperCase()}"]`);
+        const colorName = PC.getElement('edit_site_color_name');
+        if (colorName) { colorName.textContent = matchingSwatch?.getAttribute('aria-label') || ''; }
+        document.querySelectorAll('.site_color_swatch').forEach((sw) => {
+          sw.classList.toggle('is-selected', sw.dataset.hex?.toLowerCase() === savedColor);
+        });
+        // Org planning section — show only when user manages this site via an org
+        const orgPlanningEl = PC.getElement('edit_site_org_planning');
+        const orgEmptyEl    = PC.getElement('edit_site_org_planning_empty');
+        const orgCtx = responseData.org_context;
+        if (orgPlanningEl instanceof HTMLElement) {
+          if (orgCtx && orgCtx.org_id) {
+            const s = orgCtx.settings || {};
+            PC.getElement('edit_site_plan_org_id').value     = orgCtx.org_id;
+            PC.getElement('edit_site_plan_owner_uuid').value = orgCtx.owner_uuid;
+            const orgNameEl = PC.getElement('edit_site_org_planning_org_name');
+            if (orgNameEl) { orgNameEl.textContent = orgCtx.org_name || ''; }
+            const budgetEl = PC.getElement('edit_site_plan_budget');
+            if (budgetEl instanceof HTMLInputElement) { budgetEl.value = s.budget_amount || ''; }
+            const warnEl = PC.getElement('edit_site_plan_warn');
+            if (warnEl instanceof HTMLInputElement) { warnEl.value = s.warn_threshold || '80'; }
+            const critEl = PC.getElement('edit_site_plan_critical');
+            if (critEl instanceof HTMLInputElement) { critEl.value = s.critical_threshold || '95'; }
+            const planStatusEl = PC.getElement('edit_site_plan_status_select');
+            if (planStatusEl instanceof HTMLSelectElement) { planStatusEl.value = s.site_status || 'active'; }
+            // Org-scoped site detail fields
+            PC.getElement('edit_site_client_input').value    = s.client_name   || '';
+            PC.getElement('edit_site_cost_code_input').value = s.cost_code     || '';
+            PC.getElement('edit_site_start_date_input').value = s.start_date   || '';
+            PC.getElement('edit_site_end_date_input').value  = s.end_date      || '';
+            orgPlanningEl.removeAttribute('hidden');
+            if (orgEmptyEl instanceof HTMLElement) { orgEmptyEl.hidden = true; }
+          } else {
+            orgPlanningEl.setAttribute('hidden', '');
+            if (orgEmptyEl instanceof HTMLElement) { orgEmptyEl.hidden = false; }
+          }
+        }
+
         if (!modal.open) {
           modal.showModal();
         }
@@ -451,20 +522,43 @@ document.addEventListener("DOMContentLoaded", async () =>
 
       if (responseData.status === 'success') {
         debugLog('Site updated successfully');
-        const modal = PC.getElement('modal_edit_site');
-        modal?.close();
+        if (!colorPickSave) {
+          const modal = PC.getElement('modal_edit_site');
+          modal?.close();
+        }
+        colorPickSave = false;
         setFormStatus('edit_site_form_status', '');
         setFieldError(nameInput, 'edit_site_name_error', '');
         setFieldError(wageInput, 'edit_site_wage_error', '');
 
         PC.showToast('Site updated successfully');
 
+        // If org planning section is visible, save those fields too
+        const planningEl = PC.getElement('edit_site_org_planning');
+        const planOrgId  = /** @type {HTMLInputElement} */ (PC.getElement('edit_site_plan_org_id'))?.value || '';
+        const planOwner  = /** @type {HTMLInputElement} */ (PC.getElement('edit_site_plan_owner_uuid'))?.value || '';
+        const planSiteId = /** @type {HTMLInputElement} */ (PC.getElement('edit_site_id'))?.value || '';
+        if (planningEl && !planningEl.hasAttribute('hidden') && planOrgId && planOwner && planSiteId) {
+          const planBody = new URLSearchParams({
+            budget_amount:      /** @type {HTMLInputElement} */ (PC.getElement('edit_site_plan_budget'))?.value || '',
+            budget_type:        'annual',
+            warn_threshold:     /** @type {HTMLInputElement} */ (PC.getElement('edit_site_plan_warn'))?.value || '80',
+            critical_threshold: /** @type {HTMLInputElement} */ (PC.getElement('edit_site_plan_critical'))?.value || '95',
+            site_status:        /** @type {HTMLSelectElement} */ (PC.getElement('edit_site_plan_status_select'))?.value || 'active',
+            client_name:        /** @type {HTMLInputElement} */ (PC.getElement('edit_site_client_input'))?.value || '',
+            cost_code:          /** @type {HTMLInputElement} */ (PC.getElement('edit_site_cost_code_input'))?.value || '',
+            start_date:         /** @type {HTMLInputElement} */ (PC.getElement('edit_site_start_date_input'))?.value || '',
+            end_date:           /** @type {HTMLInputElement} */ (PC.getElement('edit_site_end_date_input'))?.value || '',
+          });
+          fetch(
+            apiUrl(`organizations/${encodeURIComponent(planOrgId)}/sites/${encodeURIComponent(planOwner)}/${encodeURIComponent(planSiteId)}/settings/update`),
+            { method: 'POST', credentials: 'include', body: planBody }
+          ).catch(() => {});
+        }
+
         // Reload both grids in case status changed
         gridManagerActive.reload();
         gridManagerArchived.reload();
-        
-        // Reload earnings panel to reflect any work entry changes
-        loadEarningsPanel();
       } else {
         PW.error('Error updating site');
         setFormStatus('edit_site_form_status', responseData.message || 'Error updating site.');

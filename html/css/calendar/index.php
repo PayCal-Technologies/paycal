@@ -1728,3 +1728,16 @@ button.cal_menu_selected:focus-visible {
   }
 }
 
+/* ── Site color tinted background on work entry blocks (CSP-safe) ───────── */
+<?php
+foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
+  $h = strtoupper($pc['hex']);
+  $r = hexdec(substr($h, 1, 2));
+  $g = hexdec(substr($h, 3, 2));
+  $b = hexdec(substr($h, 5, 2));
+  $luma = ((0.299 * $r) + (0.587 * $g) + (0.114 * $b));
+  $textColor = $luma >= 155.0 ? '#111111' : '#FFFFFF';
+  echo ".work[data-site-color=\"{$h}\"] { background: color-mix(in srgb, {$h} 22%, var(--work-back, #1e2330)); border-left: 3px solid {$h}; color: {$textColor}; }\n";
+}
+?>
+

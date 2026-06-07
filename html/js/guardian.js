@@ -250,3 +250,35 @@
     init();
   }
 })();
+
+// Global fullscreen focus mode ─────────────────────────────────────────────
+// Pressing / on any page (except calendar, which manages its own screen modes)
+// toggles body.screenmode-minimal, stripping the sidebar, header, footer, and
+// main padding so the content fills the viewport. Pressing / again restores.
+// Skipped when a text input/select/contenteditable is focused or a modal is open.
+(function bootstrapPayCalScreenMode() {
+  const isTextTarget = (el) => {
+    if (!el || !(el instanceof Element)) { return false; }
+    const tag = el.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') { return true; }
+    if (el.isContentEditable) { return true; }
+    return false;
+  };
+
+  const isModalOpen = () =>
+    !!document.querySelector('[role="dialog"]:not([hidden]), [aria-modal="true"]:not([hidden])');
+
+  const isCalendarPage = () =>
+    !!document.getElementById('calendar-v2-root') && !!document.getElementById('calendar-grid');
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== '/') { return; }
+    if (event.altKey || event.metaKey || event.ctrlKey) { return; }
+    if (isTextTarget(document.activeElement)) { return; }
+    if (isModalOpen()) { return; }
+    if (isCalendarPage()) { return; }  // calendar.js owns / on that page
+
+    event.preventDefault();
+    document.body.classList.toggle('screenmode-minimal');
+  });
+})();

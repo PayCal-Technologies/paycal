@@ -31,8 +31,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
   registerForm.addEventListener('submit', (e) => {
     if (password.value !== confirmPassword.value) {
-      confirm('Passwords do not match.');
       e.preventDefault();
+      PC.showToast('Passwords do not match. Please re-enter and try again.');
     }
   });
 });

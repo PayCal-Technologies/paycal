@@ -173,12 +173,28 @@ async function testPbkdf2() {
   }
 
   /* ============================================================
+   * Telemetry Bridge
+   * Delegates encryption-event telemetry calls from non-module
+   * code (e.g. calendar/index.php) into PW.report().
+   * ============================================================ */
+
+  function telemetry(event) {
+    if (!event || typeof event !== 'object') return;
+    const type = String(event.type || 'unknown')
+      .toLowerCase()
+      .replace(/[^a-z0-9_.-]/g, '_')
+      .slice(0, 64);
+    PW.report('encryption', type, event);
+  }
+
+  /* ============================================================
    * Public API (Global Namespace + Module Export)
    * ============================================================ */
 
   window.PayCalEncryption = {
     detectAllCapabilities,
-    decryptOrFallback
+    decryptOrFallback,
+    telemetry,
   };
 
   /* ============================================================
@@ -199,6 +215,7 @@ async function testPbkdf2() {
   export default {
     detectAllCapabilities,
     decryptOrFallback,
+    telemetry,
     detectWebCrypto,
     testAesGcm,
     testPbkdf2

@@ -457,6 +457,39 @@ final class SitesService
       $status = SiteStatus::ACTIVE->value;
     }
 
+    $defaultHours = is_scalar($row['default_hours'] ?? null)
+      ? trim((string) $row['default_hours'])
+      : '';
+
+    $siteColor = is_scalar($row['site_color'] ?? null)
+      ? trim((string) $row['site_color'])
+      : '';
+    if ('' !== $siteColor && !preg_match('/^#[0-9A-Fa-f]{6}$/', $siteColor)) {
+      $siteColor = '';
+    }
+
+    $clientName = is_scalar($row['client_name'] ?? null)
+      ? trim((string) $row['client_name'])
+      : '';
+
+    $costCode = is_scalar($row['cost_code'] ?? null)
+      ? trim((string) $row['cost_code'])
+      : '';
+
+    $startDate = is_scalar($row['start_date'] ?? null)
+      ? trim((string) $row['start_date'])
+      : '';
+    if ('' !== $startDate && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate)) {
+      $startDate = '';
+    }
+
+    $endDate = is_scalar($row['end_date'] ?? null)
+      ? trim((string) $row['end_date'])
+      : '';
+    if ('' !== $endDate && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDate)) {
+      $endDate = '';
+    }
+
     return [
         'site_name' => $siteName,
         'wage' => $wage,
@@ -464,6 +497,12 @@ final class SitesService
         'travel_hours' => $travelHours,
         'province' => $province,
         'status' => $status,
+        'default_hours' => $defaultHours,
+        'site_color' => $siteColor,
+        'client_name' => $clientName,
+        'cost_code' => $costCode,
+        'start_date' => $startDate,
+        'end_date' => $endDate,
     ];
   }
 

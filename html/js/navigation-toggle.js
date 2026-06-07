@@ -7,12 +7,14 @@
  *
  * Proximity hover: auto-reveals sidebar when cursor nears the sidebar edge.
  * Controlled by PROXIMITY_STORAGE_KEY ('0' = off, '1' = on, default on).
- * Call NavToggle.setProximityEnabled(bool) to toggle at runtime (settings UI).
+ * Trigger distance controlled by PROXIMITY_PX_STORAGE_KEY (px, default 200, range 0-600).
+ * Call NavToggle.setProximityEnabled(bool) / setProximityPx(number) from the settings UI.
  */
 export default (() => {
-  const STORAGE_KEY           = 'paycal_nav_state';      // '0' = collapsed, '1' = pinned
-  const PROXIMITY_STORAGE_KEY = 'paycal_nav_proximity';  // '0' = off, '1' = on (default on)
-  const OVERLAY_STORAGE_KEY   = 'paycal_nav_overlay';    // '1' = overlay, '0' = push (default push)
+  const STORAGE_KEY              = 'paycal_nav_state';       // '0' = collapsed, '1' = pinned
+  const PROXIMITY_STORAGE_KEY    = 'paycal_nav_proximity';   // '0' = off, '1' = on (default on)
+  const PROXIMITY_PX_STORAGE_KEY = 'paycal_nav_proximity_px'; // integer px (default 200)
+  const OVERLAY_STORAGE_KEY      = 'paycal_nav_overlay';     // '1' = overlay, '0' = push (default push)
   const DEFAULT_LABEL_EXPAND = '';
   const DEFAULT_LABEL_COLLAPSE = '';
   const DEFAULT_ANNOUNCE_EXPANDED = '';
@@ -25,6 +27,7 @@ export default (() => {
   let hoverOpened = false;       // true only when proximity-hover opened the sidebar
   let proximityFrame = null;     // rAF handle for mousemove throttling
   let proximityEnabled = true;   // runtime flag; synced from localStorage on init
+  let proximityPx = 200;         // trigger distance in px; synced from localStorage on init
   let overlayMode = false;       // runtime flag; synced from localStorage on init
 
   function syncResponsiveState() {
@@ -291,14 +294,17 @@ export default (() => {
       // Load proximity preference ('1' = on by default).
       proximityEnabled = (localStorage.getItem(PROXIMITY_STORAGE_KEY) ?? '1') !== '0';
 
+      // Load proximity distance preference (default 200 px, clamped 0–600).
+      const storedPx = parseInt(localStorage.getItem(PROXIMITY_PX_STORAGE_KEY) ?? '200', 10);
+      proximityPx = Number.isFinite(storedPx) ? Math.min(600, Math.max(0, storedPx)) : 200;
+
       // Load overlay preference ('0' = push model by default).
       overlayMode = (localStorage.getItem(OVERLAY_STORAGE_KEY) ?? '0') === '1';
       document.body.classList.toggle('nav-overlay-mode', overlayMode);
 
-      // Proximity hover: auto-reveal when mouse is within 200px of sidebar edge.
+      // Proximity hover: auto-reveal when mouse is within proximityPx of sidebar edge.
       // Only collapses on mouse-leave if *this* feature opened the sidebar.
       // Gated by proximityEnabled — toggled at runtime via setProximityEnabled().
-      const PROXIMITY_PX = 200;
       document.addEventListener('mousemove', (e) => {
         if (!proximityEnabled) return;
         if (proximityFrame !== null) return; // throttle to one rAF per move batch
@@ -309,8 +315,8 @@ export default (() => {
           const rect = nav.getBoundingClientRect();
           const pos  = document.body.getAttribute('data-nav-primary-position');
           const near = pos === 'right'
-            ? e.clientX >= rect.left - PROXIMITY_PX
-            : e.clientX <= rect.right + PROXIMITY_PX;
+            ? e.clientX >= rect.left - proximityPx
+            : e.clientX <= rect.right + proximityPx;
 
           if (near && state === 'collapsed') {
             hoverOpened = true;
@@ -346,6 +352,21 @@ export default (() => {
     /** Returns current proximity enabled state (for settings UI to read on load). */
     isProximityEnabled() {
       return proximityEnabled;
+    },
+
+    /**
+     * Set proximity trigger distance in pixels.
+     * Called by the settings slider; persists to localStorage.
+     * @param {number} px  integer 0–600
+     */
+    setProximityPx(px) {
+      proximityPx = Math.min(600, Math.max(0, Math.round(Number(px) || 0)));
+      localStorage.setItem(PROXIMITY_PX_STORAGE_KEY, String(proximityPx));
+    },
+
+    /** Returns current proximity trigger distance in px (for settings UI). */
+    getProximityPx() {
+      return proximityPx;
     },
 
     /**

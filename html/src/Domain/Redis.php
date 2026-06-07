@@ -54,8 +54,15 @@ class Redis
             $connectTimeout = 2.5;
         }
 
+        // pconnect reuses an existing TCP socket within the same PHP-FPM worker
+        // process instead of opening a new one on every request.  The persistent
+        // ID encodes host:port:db so connections to different databases never
+        // share the same socket.
+        $db = Environment::redisDb();
+        $persistentId = $host . ':' . $port . ':db' . $db;
+
         $this->client = new \Redis();
-        $this->client->connect($host, $port, $connectTimeout);
+        $this->client->pconnect($host, $port, $connectTimeout, $persistentId);
         $this->client->setOption(\Redis::OPT_READ_TIMEOUT, $connectTimeout);
 
         if (Environment::redisAuthEnabled()) {
@@ -106,6 +113,28 @@ class Redis
         Lens::increment('redis_ops');
         $result = $this->client->get($key);
         if (false === $result) {
+            return null;
+        }
+
+        return is_scalar($result) ? (string) $result : null;
+    }
+
+    /**
+     * Atomically read and delete a string key (Redis GETDEL).
+     *
+     * Single-use tokens (CSRF nonces, one-time codes) must be consumed in one
+     * atomic operation.  A separate GET+DEL pair has a replay window: a second
+     * concurrent request can read the key before the first deletes it.
+     *
+     * @param string $key Redis key
+     *
+     * @return null|string Value before deletion, or null if key did not exist
+     */
+    public function getdel(string $key): ?string
+    {
+        Lens::increment('redis_ops');
+        $result = $this->client->rawCommand('GETDEL', $key);
+        if (false === $result || null === $result) {
             return null;
         }
 
@@ -286,6 +315,25 @@ class Redis
     {
         $this->client->multi(\Redis::PIPELINE);
         return $this->client;
+    }
+
+    /**
+     * Block until replicas acknowledge writes (Redis WAIT).
+     *
+     * Called after security-critical writes to confirm the primary's data has
+     * propagated to at least one replica before the response is sent.  Without
+     * this, a redirect immediately after login can hit a replica that has not
+     * yet received the new session and appear to fail authentication.
+     *
+     * @param int $numReplicas Minimum replicas to wait for (0 = fire-and-check)
+     * @param int $timeoutMs   Max wait in milliseconds; 0 = block indefinitely
+     *
+     * @return int Number of replicas that acknowledged within the timeout
+     */
+    public function wait(int $numReplicas, int $timeoutMs): int
+    {
+        $result = $this->client->rawCommand('WAIT', $numReplicas, $timeoutMs);
+        return is_int($result) ? $result : 0;
     }
 
     /**

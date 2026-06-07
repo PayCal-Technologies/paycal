@@ -212,14 +212,16 @@ function verifySignature(serialized, signatureBase64, publicKeyBase64) {
 ?>
 window.PAYROLL_SIGNING_PUBLIC_KEYS = <?php echo json_encode($publicKeys, JSON_UNESCAPED_SLASHES); ?>;
 window.PAYROLL_SIGNING_REVOKED_KEYS = <?php echo json_encode($revokedKeys, JSON_UNESCAPED_SLASHES); ?>;
-// Non-enumerable: hidden from window property enumeration by extensions and injected scripts.
-Object.defineProperty(window, 'PAYCAL_USER_UUID', { configurable: true, enumerable: false, writable: true, value: '<?php echo $userUUID; ?>' });
+// Module-private: not exposed on window. Keeping the UUID out of the global
+// object prevents injected scripts from scraping it by name, even when
+// non-enumerable. Zeroed in clearEarningsTransientGlobals on page unload.
+let _paycalUserUUID = '<?php echo $userUUID; ?>';
 Object.defineProperty(window, 'PAYCAL_EXPORT_IDENTITY', { configurable: true, enumerable: false, writable: true, value: <?php echo json_encode($exportIdentity, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?> });
 
 // Do not expose plaintext profile PII in page source.
 // Profile data must be fetched/decrypted through authenticated runtime paths only.
 // (PAYCAL_EXPORT_IDENTITY above is intentionally server-injected minimal identity
-//  for export headers only; cleared on page unload alongside PAYCAL_USER_UUID.)
+//  for export headers only; cleared on page unload alongside _paycalUserUUID.)
 const paycalEncryptedProfileState = (() => {
   let encryptedProfile = {};
 
@@ -249,9 +251,9 @@ Object.defineProperty(window, 'PAYCAL_USER_PROFILE_ENCRYPTED', {
 
 function clearEarningsTransientGlobals() {
   try {
+    _paycalUserUUID = '';
     paycalEncryptedProfileState.clear();
     delete window.PAYCAL_USER_PROFILE_ENCRYPTED;
-    delete window.PAYCAL_USER_UUID;
     delete window.PAYCAL_EXPORT_IDENTITY;
   } catch {
     // Ignore teardown failures during unload paths.
@@ -275,6 +277,15 @@ document.addEventListener("DOMContentLoaded", () => {
   function getI18nLabel(key, fallback = '') {
     const value = String(PC?.config?.[key] ?? '').trim();
     return value !== '' ? value : fallback;
+  }
+
+  function formatI18n(key, fallback, params = {}) {
+    let label = getI18nLabel(key, fallback);
+    Object.entries(params).forEach(([paramKey, paramValue]) => {
+      const token = new RegExp(`\\{${paramKey}\\}`, 'g');
+      label = label.replace(token, String(paramValue));
+    });
+    return label;
   }
 
   function initDelayedHoverHelp() {
@@ -503,7 +514,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    statusNode.textContent = `Daily earnings grid ${reason} for ${year}. ${rowCount} row${rowCount === 1 ? '' : 's'} available.`;
+    const rowLabel = rowCount === 1
+      ? getI18nLabel('EARNINGS_GRID_ROW_SINGULAR', 'row')
+      : getI18nLabel('EARNINGS_GRID_ROW_PLURAL', 'rows');
+    statusNode.textContent = formatI18n(
+      'EARNINGS_GRID_STATUS_TEMPLATE',
+      'Daily earnings grid {reason} for {year}. {rows} {rowLabel} available.',
+      { reason, year, rows: rowCount, rowLabel }
+    );
   }
 
   function announceEarningsGraphStatus(year, dates, values) {
@@ -514,8 +532,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!Array.isArray(dates) || !Array.isArray(values) || dates.length === 0 || values.length === 0) {
-      statusNode.textContent = `Earnings trend chart for ${year} loaded with no data points.`;
-      descNode.textContent = `Line chart showing gross earnings trend across ${year}. No earnings data points are available yet.`;
+      statusNode.textContent = formatI18n(
+        'EARNINGS_TREND_NO_DATA_STATUS',
+        'Earnings trend chart for {year} loaded with no data points.',
+        { year }
+      );
+      descNode.textContent = formatI18n(
+        'EARNINGS_TREND_NO_DATA_DESC',
+        'Line chart showing gross earnings trend across {year}. No earnings data points are available yet.',
+        { year }
+      );
       return;
     }
 
@@ -524,8 +550,16 @@ document.addEventListener("DOMContentLoaded", () => {
       .filter((value) => Number.isFinite(value));
 
     if (safeValues.length === 0) {
-      statusNode.textContent = `Earnings trend chart for ${year} loaded with no numeric data points.`;
-      descNode.textContent = `Line chart showing gross earnings trend across ${year}. Data points were present but contained invalid numeric values.`;
+      statusNode.textContent = formatI18n(
+        'EARNINGS_TREND_NO_NUMERIC_STATUS',
+        'Earnings trend chart for {year} loaded with no numeric data points.',
+        { year }
+      );
+      descNode.textContent = formatI18n(
+        'EARNINGS_TREND_NO_NUMERIC_DESC',
+        'Line chart showing gross earnings trend across {year}. Data points were present but contained invalid numeric values.',
+        { year }
+      );
       return;
     }
 
@@ -536,17 +570,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const deltaValue = safeValues[safeValues.length - 1] - safeValues[0];
     const direction = deltaValue > 0 ? 'increasing' : (deltaValue < 0 ? 'decreasing' : 'flat');
 
-    statusNode.textContent = `Earnings trend chart updated for ${year}. ${values.length} point${values.length === 1 ? '' : 's'} from ${firstDate} to ${lastDate}.`;
-    descNode.textContent = `Line chart showing gross earnings trend across ${year}. Data spans ${firstDate} to ${lastDate} with ${values.length} points. Values range from $${minValue.toFixed(2)} to $${maxValue.toFixed(2)} and overall trend is ${direction}.`;
+    statusNode.textContent = formatI18n(
+      'EARNINGS_TREND_UPDATED_STATUS',
+      'Earnings trend chart updated for {year}. {points} points from {firstDate} to {lastDate}.',
+      { year, points: values.length, firstDate, lastDate }
+    );
+    descNode.textContent = formatI18n(
+      'EARNINGS_TREND_UPDATED_DESC',
+      'Line chart showing gross earnings trend across {year}. Data spans {firstDate} to {lastDate} with {points} points. Values range from ${minValue} to ${maxValue} and overall trend is {direction}.',
+      {
+        year,
+        firstDate,
+        lastDate,
+        points: values.length,
+        minValue: minValue.toFixed(2),
+        maxValue: maxValue.toFixed(2),
+        direction,
+      }
+    );
   }
 
-  function announceEarningsGraphError(year, message = 'Chart data could not be loaded.') {
+  function announceEarningsGraphError(year, message = '') {
     const statusNode = PC.getElement(`earnings_line_graph_${year}_status`);
     if (!statusNode) {
       return;
     }
 
-    statusNode.textContent = `Earnings trend chart for ${year} could not be loaded. ${message}`;
+    const finalMessage = message || getI18nLabel('EARNINGS_CHART_DATA_LOAD_FAILED', 'Chart data could not be loaded.');
+    statusNode.textContent = formatI18n(
+      'EARNINGS_TREND_LOAD_FAILED_STATUS',
+      'Earnings trend chart for {year} could not be loaded. {message}',
+      { year, message: finalMessage }
+    );
   }
 
   // === Canonical Verification: Trust-Layer Hash Check ===
@@ -599,7 +654,7 @@ document.addEventListener("DOMContentLoaded", () => {
       let prevChainHash = '0'.repeat(64);
       for (const period of periods) {
         let telemetryFields = {
-          userUUID: (window.PAYCAL_USER_UUID || ''),
+          userUUID: (_paycalUserUUID || ''),
           periodStart: '',
           periodEnd: '',
           engineVersion: '',
@@ -1462,7 +1517,7 @@ document.addEventListener("DOMContentLoaded", () => {
       throw new Error('No earnings records found for this export range.');
     }
 
-    const employee = window.PAYCAL_USER_UUID || 'PayCal User';
+    const employee = _paycalUserUUID || 'PayCal User';
     const identity = resolveExportIdentityProfile();
     const reportParams = {
       year: reportYear,
@@ -1552,6 +1607,150 @@ document.addEventListener("DOMContentLoaded", () => {
     throw new Error(`Unsupported export format: ${format}`);
   }
 
+  /**
+   * Team earnings export: CSV/TXT from embedded data-team-rows JSON; PDF via print.
+   */
+  function buildTeamCsv(type, org, year, rows) {
+    const hdr = `"${org}","${type}","${year}"\n`;
+    if (type === 'members') {
+      const head = [
+        getI18nLabel('NAME', 'Name'),
+        getI18nLabel('EARNINGS_ROLE', 'Role'),
+        getI18nLabel('GROSS', 'Gross'),
+        getI18nLabel('EARNINGS_BREAKDOWN_REG_HRS', 'Reg Hours'),
+        getI18nLabel('EARNINGS_BREAKDOWN_OT_HRS', 'OT Hours'),
+        getI18nLabel('LOA', 'LOA'),
+      ].join(',') + '\n';
+      return hdr + head + rows.map(r =>
+        `"${r.name}","${r.role}",${r.gross.toFixed(2)},${r.reg_hours.toFixed(2)},${r.ot_hours.toFixed(2)},${r.loa.toFixed(2)}`
+      ).join('\n');
+    }
+    if (type === 'sites') {
+      const head = [
+        getI18nLabel('EARNINGS_SITE', 'Site'),
+        getI18nLabel('GROSS', 'Gross'),
+        getI18nLabel('MEMBERS', 'Members'),
+        getI18nLabel('EARNINGS_BREAKDOWN_REG_HRS', 'Reg Hours'),
+        getI18nLabel('EARNINGS_BREAKDOWN_OT_HRS', 'OT Hours'),
+      ].join(',') + '\n';
+      return hdr + head + rows.map(r =>
+        `"${r.site}",${r.gross.toFixed(2)},${r.members},${r.reg_hrs.toFixed(2)},${r.ot_hrs.toFixed(2)}`
+      ).join('\n');
+    }
+    if (type === 'risks') {
+      const head = [
+        getI18nLabel('EARNINGS_SEVERITY', 'Severity'),
+        getI18nLabel('EARNINGS_TITLE', 'Title'),
+        getI18nLabel('EARNINGS_CAUSE', 'Cause'),
+        getI18nLabel('EARNINGS_ACTION', 'Action'),
+      ].join(',') + '\n';
+      return hdr + head + rows.map(r =>
+        `"${r.severity}","${r.title}","${r.cause}","${r.action}"`
+      ).join('\n');
+    }
+    if (type === 'recommendations') {
+      const head = [
+        getI18nLabel('EARNINGS_PRIORITY', 'Priority'),
+        getI18nLabel('EARNINGS_ACTION', 'Action'),
+        getI18nLabel('EARNINGS_SOURCE', 'Source'),
+      ].join(',') + '\n';
+      return hdr + head + rows.map(r =>
+        `"${r.priority}","${r.text}","${r.source}"`
+      ).join('\n');
+    }
+    return '';
+  }
+
+  function buildTeamTxt(type, org, year, rows) {
+    const sep = '\u2500'.repeat(60);
+    const reportLabel = getI18nLabel('EARNINGS_REPORT', 'REPORT').toUpperCase();
+    const typeLabelByKey = {
+      members: getI18nLabel('EARNINGS_MEMBER_EARNINGS_RANKING', 'Members'),
+      sites: getI18nLabel('EARNINGS_SITE_PAYROLL_COST', 'Sites'),
+      risks: getI18nLabel('EARNINGS_RISK_REGISTER', 'Risks'),
+      recommendations: getI18nLabel('EARNINGS_RECOMMENDED_ACTIONS', 'Recommendations'),
+    };
+    const typeLabel = (typeLabelByKey[type] || type).toUpperCase();
+    const hdr = `${org.toUpperCase()} \u2014 ${typeLabel} ${reportLabel} \u2014 ${year}\n${sep}\n`;
+    if (type === 'members') {
+      const regLabel = getI18nLabel('EARNINGS_BREAKDOWN_REG_HRS', 'Reg Hrs').toLowerCase();
+      const otLabel = getI18nLabel('EARNINGS_BREAKDOWN_OT_HRS', 'OT Hrs').toLowerCase();
+      return hdr + rows.map((r, i) =>
+        `${String(i + 1).padStart(2)}. ${r.name.padEnd(28)} ${r.role.padEnd(12)} $${r.gross.toFixed(2).padStart(12)}  ${regLabel} ${r.reg_hours.toFixed(1)}h  ${otLabel} ${r.ot_hours.toFixed(1)}h`
+      ).join('\n');
+    }
+    if (type === 'sites') {
+      const membersLabel = getI18nLabel('MEMBERS', 'members').toLowerCase();
+      const regLabel = getI18nLabel('EARNINGS_BREAKDOWN_REG_HRS', 'Reg Hrs').toLowerCase();
+      const otLabel = getI18nLabel('EARNINGS_BREAKDOWN_OT_HRS', 'OT Hrs').toLowerCase();
+      return hdr + rows.map((r, i) =>
+        `${String(i + 1).padStart(2)}. ${r.site.padEnd(28)} $${r.gross.toFixed(2).padStart(12)}  ${r.members} ${membersLabel}  ${regLabel} ${r.reg_hrs.toFixed(1)}h  ${otLabel} ${r.ot_hrs.toFixed(1)}h`
+      ).join('\n');
+    }
+    if (type === 'risks') {
+      const actionPrefix = getI18nLabel('EARNINGS_ACTION', 'Action');
+      return hdr + rows.map((r, i) =>
+        `${String(i + 1).padStart(2)}. [${r.severity.toUpperCase()}] ${r.title}\n    ${r.cause}\n    \u2192 ${actionPrefix}: ${r.action}`
+      ).join('\n\n');
+    }
+    if (type === 'recommendations') {
+      const sourcePrefix = getI18nLabel('EARNINGS_SOURCE', 'Source');
+      return hdr + rows.map((r, i) =>
+        `${String(i + 1).padStart(2)}. [${r.priority.toUpperCase()}] ${r.text}\n    ${sourcePrefix}: ${r.source}`
+      ).join('\n\n');
+    }
+    return '';
+  }
+
+  function downloadTeamText(content, filename, mime) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 100);
+  }
+
+  function bindTeamExportButtons() {
+    document.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-team-export-format]');
+      if (!btn) { return; }
+      event.preventDefault();
+
+      const format = btn.dataset.teamExportFormat;
+      if (format === 'pdf') {
+        window.print();
+        return;
+      }
+
+      const figure = btn.closest('[data-team-type]');
+      if (!figure) { return; }
+      const type = figure.dataset.teamType || 'data';
+      const year = figure.dataset.teamYear || String(new Date().getFullYear());
+      const org  = figure.dataset.teamOrg || getI18nLabel('EARNINGS_TEAM_EARNINGS', 'Team Earnings');
+      const raw  = figure.dataset.teamRows;
+      if (!raw) { return; }
+
+      let rows;
+      try { rows = JSON.parse(raw); } catch { return; }
+
+      const origText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '\u2026';
+      try {
+        const fname = `paycal-team-${type}-${year}`;
+        if (format === 'csv') {
+          downloadTeamText(buildTeamCsv(type, org, year, rows), `${fname}.csv`, 'text/csv;charset=utf-8');
+        } else if (format === 'txt') {
+          downloadTeamText(buildTeamTxt(type, org, year, rows), `${fname}.txt`, 'text/plain;charset=utf-8');
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = origText;
+      }
+    });
+  }
+
   function bindYearlyExportButtons() {
     // Use event delegation so dynamically-injected buttons (e.g. pay-period cards
     // loaded via loadSection/Guardian.setHTML) are covered without re-binding.
@@ -1578,7 +1777,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await runScopedExport(scope, format, year, startDate, endDate, refCode);
       } catch (error) {
         PW.error(`[EXPORT] ${scope.toUpperCase()} ${format.toUpperCase()} ${year} failed: ${error.message}`);
-        PC.showToast(`Export failed: ${error.message}`);
+        PC.showToast(`${getI18nLabel('EARNINGS_EXPORT_FAILED_PREFIX', 'Export failed:')} ${error.message}`);
       } finally {
         button.disabled = false;
         button.textContent = originalText;
@@ -1606,18 +1805,18 @@ async function render_daily_year(year) {
     if (jsonResponse.status === "success") {
       dailyData = extractDailyPayload(jsonResponse);
     } else {
-      PC.showToast(`Error: Could not load daily earnings data. ${jsonResponse.message || "Unknown error."}`);
+      PC.showToast(`${getI18nLabel('EARNINGS_DAILY_LOAD_FAILED_PREFIX', 'Error: Could not load daily earnings data.')} ${jsonResponse.message || getI18nLabel('EARNINGS_UNKNOWN_ERROR', 'Unknown error.')}`);
 
       return;
     }
   } catch (error) {
-    PC.showToast(`Error: Could not load daily earnings data. ${error.message}`);
+    PC.showToast(`${getI18nLabel('EARNINGS_DAILY_LOAD_FAILED_PREFIX', 'Error: Could not load daily earnings data.')} ${error.message}`);
     return;
   }
 
   // Check if dailyData is valid
   if (!dailyData || typeof dailyData !== 'object') {
-    PC.showToast(`Error: No daily earnings data available for ${year}.`);
+    PC.showToast(formatI18n('EARNINGS_DAILY_NO_DATA_FOR_YEAR', 'Error: No daily earnings data available for {year}.', { year }));
     return;
   }
 
@@ -1730,7 +1929,10 @@ async function render_daily_year(year) {
     const jsonResponse = JSON.parse(responseText);
 
     if (jsonResponse.status !== 'success') {
-      throw new Error(jsonResponse.message || `Failed to load ${section} section.`);
+      throw new Error(
+        jsonResponse.message
+        || formatI18n('EARNINGS_FAILED_TO_LOAD_SECTION', 'Failed to load {section} section.', { section })
+      );
     }
 
     const payload = (jsonResponse.data && typeof jsonResponse.data === 'object')
@@ -1756,10 +1958,16 @@ async function render_daily_year(year) {
 
     try {
       const html = await fetchSectionHtml(section, year);
-      window.Guardian.setHTML(target, html || '<p class="earnings_async_status">No data available.</p>');
+      window.Guardian.setHTML(
+        target,
+        html || `<p class="earnings_async_status">${escapeHtml(getI18nLabel('EARNINGS_ASYNC_NO_DATA', 'No data available.'))}</p>`
+      );
       loadedSections.add(key);
     } catch (error) {
-      window.Guardian.setHTML(target, `<p class="earnings_async_status">Unable to load section: ${escapeHtml(error.message || 'unknown error')}.</p>`);
+      window.Guardian.setHTML(
+        target,
+        `<p class="earnings_async_status">${escapeHtml(formatI18n('EARNINGS_ASYNC_SECTION_LOAD_FAILED', 'Unable to load section: {message}.', { message: error.message || getI18nLabel('EARNINGS_UNKNOWN_ERROR', 'unknown error') }))}</p>`
+      );
       PW.error(`[EARNINGS] ${section} year ${year} failed: ${error.message}`);
     }
   }
@@ -1790,7 +1998,10 @@ async function render_daily_year(year) {
       })
       .catch(error => {
         PW.error(`[INIT] Error drawing earnings graph for ${year}: ${error.message}`);
-        announceEarningsGraphError(year, error.message || 'Unable to retrieve earnings trend data.');
+        announceEarningsGraphError(
+          year,
+          error.message || getI18nLabel('EARNINGS_UNABLE_TO_RETRIEVE_TREND', 'Unable to retrieve earnings trend data.')
+        );
       });
   }
 
@@ -1932,5 +2143,115 @@ function initializeEarningsGraphs() {
   // Initialize graphs on page load
   initializeEarningsGraphs();
   bindYearlyExportButtons();
+  bindTeamExportButtons();
+
+  // Team Earnings: org selector auto-submit (replaces inline onchange handler)
+  const teamOrgSelect = document.getElementById('earnings_team_org');
+  if (teamOrgSelect instanceof HTMLSelectElement) {
+    teamOrgSelect.addEventListener('change', () => {
+      const form = teamOrgSelect.closest('form');
+      if (form instanceof HTMLFormElement) {
+        form.submit();
+      }
+    });
+  }
+
+  // Team Earnings: row click → member breakdown dialog
+  function formatMoney(v) {
+    return '$' + Number(v).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function formatHours(v) {
+    return Number(v).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function openMemberDialog(memberData) {
+    const body = document.getElementById('earnings_team_member_dialog_body');
+    const title = document.getElementById('earnings_team_member_dialog_title');
+    if (!(body instanceof HTMLElement) || !(title instanceof HTMLElement)) return;
+
+    title.textContent = formatI18n('EARNINGS_MEMBER_DIALOG_TITLE', '{name} - {year} Earnings', {
+      name: memberData.name,
+      year: memberData.year,
+    });
+
+    const months = Array.isArray(memberData.months) ? memberData.months : [];
+
+    let html = '<div class="earnings_breakdown_meta">';
+    html += '<span class="earnings_breakdown_role">' + escapeHtml(memberData.role.charAt(0).toUpperCase() + memberData.role.slice(1)) + '</span>';
+    html += '</div>';
+
+    if (months.length === 0) {
+      html += '<p class="earnings_breakdown_empty">' + escapeHtml(formatI18n('EARNINGS_BREAKDOWN_NO_ENTRIES_FOR_YEAR', 'No entries for {year}.', { year: String(memberData.year) })) + '</p>';
+    } else {
+      html += '<div class="earnings_breakdown_grid">';
+      html += '<div class="earnings_breakdown_header">';
+      html += '<span>' + escapeHtml(getI18nLabel('EARNINGS_MONTH', 'Month')) + '</span><span>' + escapeHtml(getI18nLabel('EARNINGS_BREAKDOWN_REG_HRS', 'Reg Hrs')) + '</span><span>' + escapeHtml(getI18nLabel('EARNINGS_BREAKDOWN_OT_HRS', 'OT Hrs')) + '</span><span>' + escapeHtml(getI18nLabel('GROSS', 'Gross')) + '</span>';
+      html += '</div>';
+
+      for (const m of months) {
+        html += '<div class="earnings_breakdown_row">';
+        html += '<span>' + escapeHtml(m.label) + '</span>';
+        html += '<span class="earnings_breakdown_num">' + formatHours(m.reg_hours) + '</span>';
+        html += '<span class="earnings_breakdown_num">' + formatHours(m.ot_hours)  + '</span>';
+        html += '<span class="earnings_breakdown_num">' + formatMoney(m.gross)     + '</span>';
+        html += '</div>';
+      }
+
+      html += '<div class="earnings_breakdown_totals">';
+      html += '<span>' + escapeHtml(getI18nLabel('EARNINGS_BREAKDOWN_TOTAL', 'Total')) + '</span>';
+      html += '<span class="earnings_breakdown_num">' + formatHours(memberData.reg_hours) + '</span>';
+      html += '<span class="earnings_breakdown_num">' + formatHours(memberData.ot_hours)  + '</span>';
+      html += '<span class="earnings_breakdown_num">' + formatMoney(memberData.gross)     + '</span>';
+      html += '</div>';
+
+      html += '</div>';
+    }
+
+    PC.setHTML(body, html);
+    PC.openModal('earnings_team_member_dialog');
+  }
+
+  function bindTeamMemberRows() {
+    const rows = document.querySelectorAll('.earnings_team_grid_row--clickable');
+    rows.forEach((row) => {
+      if (!(row instanceof HTMLElement)) return;
+      if (row.dataset.memberBound === '1') return;
+      row.dataset.memberBound = '1';
+
+      const activate = () => {
+        const raw = row.getAttribute('data-member');
+        if (!raw) return;
+        try {
+          const data = JSON.parse(raw);
+          openMemberDialog(data);
+        } catch { /* malformed JSON — skip */ }
+      };
+
+      row.addEventListener('click', activate);
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          activate();
+        }
+      });
+    });
+  }
+
+  bindTeamMemberRows();
+
+  // YTD charts: per-panel series toggles (scoped to .earnings_ytd_body)
+  document.querySelectorAll('.earnings_ytd_controls').forEach((controls) => {
+    if (!(controls instanceof HTMLElement)) return;
+    controls.addEventListener('change', (e) => {
+      const cb = e.target;
+      if (!(cb instanceof HTMLInputElement) || cb.type !== 'checkbox') return;
+      const series = cb.dataset.series;
+      const body = cb.closest('.earnings_ytd_body');
+      if (series && body instanceof HTMLElement) {
+        body.toggleAttribute('data-hide-' + series, !cb.checked);
+      }
+    });
+  });
 
 });

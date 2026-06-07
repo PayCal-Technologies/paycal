@@ -51,6 +51,21 @@ class Earnings
 
     return $cache[$key];
   }
+
+  /**
+   * Build an accessible skeleton grid placeholder for async-loading earnings slots.
+   * Renders shimmer rows so the layout is visible before real content loads.
+   *
+   * @param int $cols Number of columns (matches the target grid)
+   * @param int $rows Number of skeleton rows to render
+   */
+  private static function buildAsyncSkeletonGrid(int $cols, int $rows): string
+  {
+    $colStyle = 'display:grid;grid-template-columns:repeat(' . $cols . ',1fr);gap:0.4rem;padding:0.45rem 0.5rem;border-bottom:1px solid var(--border)';
+    $cell = '<span class="sk-line" style="display:block;height:0.8em;border-radius:3px"></span>';
+    $row  = '<div class="skeleton" style="' . $colStyle . '">' . str_repeat($cell, $cols) . '</div>';
+    return '<div aria-hidden="true">' . str_repeat($row, $rows) . '</div>';
+  }
   /**
    * Emit request-scoped debug data to both Lens and debug.log.
    *
@@ -826,10 +841,13 @@ class Earnings
       ];
       $workData = self::resolveWorkRow($row, User::currentUUID());
       if (!is_array($workData)) {
-        self::lensDebug('getWorkTotalsForRange:skip', $lensDebug + [
-          'reason' => 'resolve_failed',
+        // Decryption unavailable — fall through to plaintext snapshot fields
+        // (gross, regular_hours, overtime_hours are stored alongside the blob).
+        // This is consistent with getTotalsForRange() behaviour.
+        self::lensDebug('getWorkTotalsForRange:fallthrough', $lensDebug + [
+          'reason' => 'resolve_failed_using_plaintext',
         ]);
-        continue;
+        $workData = $row;
       }
       if (
         !isset($workData['regular_hours'], $workData['overtime_hours'])
@@ -1457,15 +1475,15 @@ class Earnings
 
       $yearToDateHtml = $renderYearInline
         ? '<div id="earnings_ytd_' . $year . '" class="earnings_async_slot" data-earnings-slot="ytd" data-earnings-year="' . $year . '">' . $eagerYtdHtml . '</div>'
-        : '<div id="earnings_ytd_' . $year . '" class="earnings_async_slot" data-earnings-slot="ytd" data-earnings-year="' . $year . '"><p class="earnings_async_status">' . $loadingYtdSummary . '</p></div>';
+        : '<div id="earnings_ytd_' . $year . '" class="earnings_async_slot" data-earnings-slot="ytd" data-earnings-year="' . $year . '">' . self::buildAsyncSkeletonGrid(3, 5) . '</div>';
 
       $payPeriodsHtml = $renderYearInline
         ? '<div id="earnings_pay_periods_' . $year . '" class="earnings_async_slot" data-earnings-slot="payperiods" data-earnings-year="' . $year . '">' . $this->renderPayPeriodComparison((int) $year) . '</div>'
-        : '<div id="earnings_pay_periods_' . $year . '" class="earnings_async_slot" data-earnings-slot="payperiods" data-earnings-year="' . $year . '"><p class="earnings_async_status">' . $loadingPayPeriods . '</p></div>';
+        : '<div id="earnings_pay_periods_' . $year . '" class="earnings_async_slot" data-earnings-slot="payperiods" data-earnings-year="' . $year . '">' . self::buildAsyncSkeletonGrid(4, 4) . '</div>';
 
       $monthlyHtml = $renderYearInline
         ? '<div id="earnings_monthly_' . $year . '" class="earnings_async_slot" data-earnings-slot="monthly" data-earnings-year="' . $year . '">' . $this->renderMonthlyViewStrip((int) $year) . '</div>'
-        : '<div id="earnings_monthly_' . $year . '" class="earnings_async_slot" data-earnings-slot="monthly" data-earnings-year="' . $year . '"><p class="earnings_async_status">' . $loadingMonthlySummary . '</p></div>';
+        : '<div id="earnings_monthly_' . $year . '" class="earnings_async_slot" data-earnings-slot="monthly" data-earnings-year="' . $year . '">' . self::buildAsyncSkeletonGrid(11, 6) . '</div>';
 
       $historicalIntelligenceHtml = $this->renderHistoricalIntelligence((int) $year);
       $pieGraphsHtml = $this->renderPieGraphs((int) $year);
@@ -1536,12 +1554,132 @@ class Earnings
 HTML;
     }
 
+    // Forecast tab — always visible regardless of whether year data exists.
+    $tabs .= "<li data-tab-target='tab-forecast' class='tab' role='tab' aria-selected='false' tabindex='-1'>Forecast</li>\n";
+    $forecastContent = $this->renderForecastSection(User::current());
+    $contents .= '<div id="tab-forecast" data-tab-content="tab-forecast" class="f_column" aria-label="Future earnings forecast">'
+      . '<section class="panel w100 earnings_panel">'
+      . '<h2 class="earnings_panel_title">Future Net Pay</h2>'
+      . '<p class="forecast_intro">Projected earnings based on your current profile settings. All figures are <strong>ESTIMATES</strong> only — not CRA-authoritative payroll calculations.</p>'
+      . $forecastContent
+      . '</section>'
+      . '</div>';
+
     $tabs .= "</ul>\n";
     $contents .= "</section>\n";
 
     $mode = $lazyMode ? 'lazy' : 'eager';
 
     return "<section class=\"w100\" data-earnings-mode=\"{$mode}\">{$tabs}</section>{$contents}";
+  }
+
+  /**
+   * Render a projected earnings forecast table for the authenticated worker.
+   *
+   * Derives a WorkerRateCard and RotationTemplate from the user's profile fields
+   * (pay_rate, province, pay_frequency, pay_period_start, default_hours,
+   * default_living_out_allowance) and runs CrewForecastEngine across three
+   * standard windows: next pay period, next 30 days, and next quarter.
+   *
+   * All monetary figures are labelled ESTIMATE — not CRA-authoritative.
+   * Returns a "configure rate" notice when pay_rate is absent.
+   */
+  private function renderForecastSection(User $user): string
+  {
+    $rateRaw = is_numeric($user->pay_rate) ? (float) $user->pay_rate : 0.0;
+    if ($rateRaw <= 0.0) {
+      return '<p class="forecast_setup_notice">Set your hourly rate in <a href="/profile/">Profile → Pay Period</a> to see your earnings forecast.</p>';
+    }
+
+    $wageRateCents = (int) round($rateRaw * 100);
+    $province = strtoupper(trim((string) $user->province !== '' ? (string) $user->province : 'AB'));
+
+    $loaRaw = is_numeric($user->default_living_out_allowance) ? (float) $user->default_living_out_allowance : 0.0;
+    $perDiemCents = (int) round($loaRaw * 100);
+
+    $card = new WorkerRateCard(
+      wageRateCents:          $wageRateCents,
+      rateType:               RateType::Hourly,
+      otRule:                 OtRule::Both,
+      otThresholdDailyHours:  8.0,
+      otThresholdWeeklyHours: 44.0,
+      otMultiplierBasisPoints: 15000,
+      perDiemCents:           $perDiemCents,
+      sitePremiumCents:       0,
+      taxRegion:              $province
+    );
+
+    // Derive rotation anchor from pay_period_start, fall back to this Monday.
+    $anchorRaw = trim((string) $user->pay_period_start);
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $anchorRaw)) {
+      $anchorDate = new \DateTimeImmutable($anchorRaw);
+    } else {
+      $anchorDate = new \DateTimeImmutable('monday this week');
+    }
+
+    $hoursRaw = is_numeric($user->default_hours) ? (float) $user->default_hours : 8.0;
+    $hoursPerDay = ($hoursRaw > 0.0 && $hoursRaw <= 24.0) ? $hoursRaw : 8.0;
+
+    // Standard 5-on/2-off schedule for most workers. Industrial users with
+    // custom rotations will be configurable in a future Profile update.
+    $rotation = new RotationTemplate(5, 2, $hoursPerDay, $anchorDate, '5/2');
+
+    $payFrequency = strtolower(trim((string) ($user->pay_frequency ?? 'biweekly')));
+    $payPeriodDays = match ($payFrequency) {
+      'weekly'      => 7,
+      'biweekly'    => 14,
+      'semimonthly' => 15,
+      'monthly'     => 30,
+      default       => 14,
+    };
+
+    $today = new \DateTimeImmutable('today');
+
+    /** @var array<string, ForecastWindow> $windows */
+    $windows = [
+      'Next Paycheck'  => ForecastWindow::nextPayPeriod($today, $payPeriodDays),
+      'Next 30 Days'   => ForecastWindow::next30Days($today),
+      'YTD Projection' => ForecastWindow::quarter($today),
+    ];
+
+    $rows = '';
+    foreach ($windows as $windowLabel => $window) {
+      $result    = CrewForecastEngine::forecastWorker($card, $rotation, $window);
+      $gross     = '$' . self::formatNumberLocalized($result->estimatedGrossDollars(), 2);
+      $taxAmount = '$' . self::formatNumberLocalized($result->estimatedTaxCents / 100, 2);
+      $net       = '$' . self::formatNumberLocalized($result->estimatedNetDollars(), 2);
+      $safeLabel = htmlspecialchars($windowLabel, ENT_QUOTES, 'UTF-8');
+      $safeGross = htmlspecialchars($gross, ENT_QUOTES, 'UTF-8');
+      $safeTax   = htmlspecialchars($taxAmount, ENT_QUOTES, 'UTF-8');
+      $safeNet   = htmlspecialchars($net, ENT_QUOTES, 'UTF-8');
+
+      $rows .= '<div class="datagrid_row" role="row"><div class="datagrid_row_content" role="presentation">'
+        . '<div class="datagrid_item" role="gridcell">' . $safeLabel . '</div>'
+        . '<div class="datagrid_item forecast_gross" role="gridcell">' . $safeGross . '</div>'
+        . '<div class="datagrid_item forecast_tax" role="gridcell">' . $safeTax . '</div>'
+        . '<div class="datagrid_item forecast_net" role="gridcell">' . $safeNet . '</div>'
+        . '</div></div>';
+    }
+
+    $disclaimer = htmlspecialchars(
+      'Figures are projections based on your profile rate, province, and a standard 5-day work schedule. '
+      . 'Actual deductions depend on YTD income, benefit elections, and other factors. Not CRA-authoritative.',
+      ENT_QUOTES,
+      'UTF-8'
+    );
+
+    return '<div class="datagrid datagrid_cols_4 datagrid_layout_auto forecast-datagrid" '
+      . 'role="region" aria-label="Future earnings forecast">'
+      . '<div class="datagrid_table" role="grid" aria-colcount="4" aria-rowcount="3">'
+      . '<div class="datagrid_header_row" role="rowgroup"><div class="datagrid_header_content" role="row">'
+      . '<div class="datagrid_heading" role="columnheader">Timeframe</div>'
+      . '<div class="datagrid_heading" role="columnheader">Est. Gross</div>'
+      . '<div class="datagrid_heading" role="columnheader">Est. Tax</div>'
+      . '<div class="datagrid_heading" role="columnheader">Est. Net</div>'
+      . '</div></div>'
+      . '<div class="datagrid_body" role="rowgroup">' . $rows . '</div>'
+      . '</div></div>'
+      . '<p class="forecast_estimate_disclaimer">' . $disclaimer . '</p>';
   }
 
   /**

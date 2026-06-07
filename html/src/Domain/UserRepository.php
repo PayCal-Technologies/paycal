@@ -236,7 +236,25 @@ final class UserRepository
     }
   }
 
-    /**
+  /**
+   * Update only the auth_level field for an existing user.
+   * Used by the SUPERADMIN user-role management page to grant or revoke
+   * the AUDITOR role (and similar targeted promotions/demotions).
+   *
+   * @param string    $userUUID Target user UUID (must already exist)
+   * @param AuthLevel $newLevel New auth level to assign
+   * @throws \InvalidArgumentException When userUUID is empty
+   */
+  public static function setAuthLevel(string $userUUID, AuthLevel $newLevel): void
+  {
+    if ('' === $userUUID) {
+      throw new \InvalidArgumentException('User UUID cannot be empty.');
+    }
+
+    Database::hset(Keys::USER . ':' . $userUUID, ['auth_level' => $newLevel->value]);
+  }
+
+  /**
    * Retrieve the user UUID associated with a given email address.
    * Returns an empty string when the email is empty or no mapping exists.
    * @param string $email Raw email address
@@ -346,8 +364,7 @@ final class UserRepository
     $ip  = (string) Security::getClientIPAddress();
     $key = Keys::USER . ":{$userUUID}";
 
-    Database::hset($key, ['last_signin' => $ts]);
-    Database::hset($key, ['last_signin_ip' => $ip]);
+    Database::hset($key, ['last_signin' => $ts, 'last_signin_ip' => $ip]);
   }
 
 
@@ -646,6 +663,7 @@ final class UserRepository
 
       if ($rank >= AuthLevel::SUPERADMIN->rank()) return AuthLevel::SUPERADMIN;
       if ($rank >= AuthLevel::ADMIN->rank()) return AuthLevel::ADMIN;
+      if ($rank >= AuthLevel::AUDITOR->rank()) return AuthLevel::AUDITOR;
       if ($rank >= AuthLevel::MANAGER->rank()) return AuthLevel::MANAGER;
       if ($rank >= AuthLevel::USER->rank()) return AuthLevel::USER;
       if ($rank >= AuthLevel::VERIFIED->rank()) return AuthLevel::VERIFIED;

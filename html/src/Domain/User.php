@@ -498,6 +498,17 @@ final class User
     return AuthLevel::SUPERADMIN === $user->auth_level;
   }
 
+  /**
+   * True if the current user holds the AUDITOR role.
+   * Auditors may access the /soc evidence portal but cannot access admin pages.
+   */
+  public static function isAuditor(): bool
+  {
+    $user = self::current();
+
+    return AuthLevel::AUDITOR === $user->auth_level;
+  }
+
 
   /**
    * Check if current user has manager privileges or higher.

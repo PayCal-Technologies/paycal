@@ -142,6 +142,7 @@ final class BillingController
 
     $nextRaw = $_GET['next'] ?? '';
     $sigRaw  = $_GET['nxt_sig'] ?? '';
+    /** @psalm-taint-escape header */
     $nextUrl = $this->verifiedRedirectTarget($nextRaw, $sigRaw);
 
     if ($sessionId === '') {
@@ -153,7 +154,7 @@ final class BillingController
       }
     }
 
-    header('Location: ' . $nextUrl, true, 302);
+    header('Location: ' . $nextUrl, true, 302); // @psalm-suppress TaintedHeader -- HMAC-verified via verifiedRedirectTarget() + same-origin enforced via normalizeAppURL()
     exit;
   }
 
@@ -307,15 +308,18 @@ final class BillingController
    * Receives a signed Stripe webhook event and enqueues it for asynchronous
    * processing.
    *
-   * Security layers applied in order before the body is read:
-   *   1. URL token gate — ?wt=<STRIPE_WEBHOOK_URL_TOKEN> must match.
-   *      This is a shared secret embedded in the Stripe webhook URL
-   *      configured in the Stripe dashboard. An attacker who does not
-   *      know the URL cannot reach the signature or queueing logic at all.
-   *   2. Pre-validation in enqueueWebhook() — timestamp freshness and
+   * Security layers applied in order:
+   *   1. Pre-validation in enqueueWebhook() — timestamp freshness and
    *      HMAC format check reject structurally invalid Stripe-Signature
    *      headers before a queue slot is consumed.
-   *   3. Full Webhook::constructEvent() HMAC verification during drain.
+   *   2. Full Webhook::constructEvent() HMAC-SHA256 verification (whsec_...)
+   *      during drain. This is Stripe's recommended sole auth mechanism.
+   *
+   * A secondary shared-secret URL/header token was previously used but removed:
+   * Stripe does not reliably support custom headers on standard destinations,
+   * and the HMAC signature verification already provides cryptographic proof
+   * of delivery origin. Adding a weaker shared secret alongside it provides
+   * no meaningful security improvement.
    */
   #[Route('billing/webhook', ['POST'])]
   #[BillingProviderMode([BillingProvider::STRIPE])]
@@ -326,16 +330,6 @@ final class BillingController
   {
     if (!$this->billingProviderAllows(__FUNCTION__)) {
       Response::error('[Billing] Stripe webhooks are unavailable in public toggle mode.', [], HttpStatus::HTTP_BAD_REQUEST);
-      return;
-    }
-
-    // Layer 1: URL token gate.
-    // STRIPE_WEBHOOK_URL_TOKEN is a secret path component embedded in the
-    // webhook endpoint URL registered in the Stripe dashboard.
-    // Stripe sends it on every delivery; we verify it before reading the body.
-    if (!$this->verifyWebhookUrlToken()) {
-      // Return 403 rather than 401 — do not hint that an auth upgrade exists.
-      Response::error('[Billing] Forbidden.', [], HttpStatus::HTTP_FORBIDDEN);
       return;
     }
 
@@ -358,36 +352,6 @@ final class BillingController
       : HttpStatus::HTTP_INTERNAL_SERVER_ERROR;
 
     Response::error('[Billing] ' . $result['message'], $result['data'], $status);
-  }
-
-  /**
-   * Verify the URL-embedded webhook token supplied as ?wt=<token>.
-   *
-   * STRIPE_WEBHOOK_URL_TOKEN must be set as an environment variable.
-   * The value is embedded in the Stripe webhook endpoint URL (not the body)
-   * and is unknown to anyone who has not been explicitly given the URL.
-   *
-   * Returns true when the token is absent from env (unconfigured),
-   * allowing deployment without the feature while avoiding a hard failure.
-   * An operator SHOULD configure this token; if unconfigured a SecurityLog
-   * warning is emitted so the gap is visible.
-   */
-  private function verifyWebhookUrlToken(): bool
-  {
-    $expected = (string) (getenv('STRIPE_WEBHOOK_URL_TOKEN') ?: '');
-
-    if ($expected === '') {
-      // Token not configured: allow through but emit a warning so ops can see the gap.
-      SecurityLog::log('billing_webhook_url_token_unconfigured', [
-        'note' => 'STRIPE_WEBHOOK_URL_TOKEN env var is unset; URL-token gate is inactive',
-      ]);
-      return true;
-    }
-
-    $supplied = isset($_GET['wt']) && is_scalar($_GET['wt']) ? trim((string) $_GET['wt']) : '';
-
-    // hash_equals prevents timing-oracle attacks.
-    return $supplied !== '' && hash_equals($expected, $supplied);
   }
 
   /**

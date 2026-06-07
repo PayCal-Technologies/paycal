@@ -114,6 +114,20 @@
     }
   }
 
+  function calendarI18n(key, fallback = '') {
+    const value = String(window.PC?.config?.[key] ?? '').trim();
+    return value !== '' ? value : fallback;
+  }
+
+  function calendarI18nFormat(key, fallback, params = {}) {
+    let label = calendarI18n(key, fallback);
+    Object.entries(params).forEach(([paramKey, paramValue]) => {
+      const token = new RegExp(`\\{${paramKey}\\}`, 'g');
+      label = label.replace(token, String(paramValue));
+    });
+    return label;
+  }
+
   function isDelegatedCalendarViewActive() {
     const root = document.getElementById('calendar-v2-root');
     if (!root) {
@@ -500,7 +514,10 @@
     if (!root.querySelector('.calendar_verification_lock_message')) {
       const lock = document.createElement('div');
       lock.className = 'calendar_verification_lock_message';
-      lock.textContent = 'Calendar is locked until your email is verified. Use the banner above to verify your account.';
+      lock.textContent = calendarI18n(
+        'CALENDAR_LOCKED_UNVERIFIED',
+        'Calendar is locked until your email is verified. Use the banner above to verify your account.'
+      );
       root.appendChild(lock);
     }
 
@@ -1348,6 +1365,18 @@
         }
 
         decrypted = batchCellResults.length > 0 ? batchCellResults : explicitEntries;
+
+        // Merge site_color from outer entry metadata (unencrypted) into each decrypted entry.
+        // The encrypted blob doesn't carry site_color; it lives on the outer work entry hash.
+        const outerEncrypted = parsedEntries.filter(e => e && e.encrypted_blob);
+        decrypted = decrypted.map((dec, idx) => {
+          const outer = outerEncrypted[idx];
+          const mergedColor = (outer && outer.site_color) ? outer.site_color : null;
+          if (mergedColor && !dec.site_color) {
+            return Object.assign({}, dec, { site_color: mergedColor });
+          }
+          return dec;
+        });
       } else {
         // Cell has only plaintext entries or is empty
         decrypted = parsedEntries;
@@ -2564,13 +2593,20 @@
     const entries = normalizeEntriesForSave(getDayEntriesFromCell(dateId));
     if (entries.length === 0) {
       coreLog('[Calendar Context Menu] Copy aborted - day is blank', { dateId });
-      PayCalCore.updateStatusMessage(`No entries to copy on ${dateLabel}`, 'info', 2000);
+      PayCalCore.updateStatusMessage(calendarI18nFormat('CALENDAR_NO_ENTRIES_TO_COPY_ON', 'No entries to copy on {dateLabel}', { dateLabel }), 'info', 2000);
       return;
     }
 
     calendarClipboard = entries;
     coreLog('[Calendar Context Menu] Copied day entries', { dateId, count: entries.length });
-    PayCalCore.updateStatusMessage(`Copied ${entries.length} entry/entries from ${dateLabel}`, 'copy', 3000);
+    PayCalCore.updateStatusMessage(
+      calendarI18nFormat('CALENDAR_COPIED_ENTRIES_FROM', 'Copied {count} entry/entries from {dateLabel}', {
+        count: entries.length,
+        dateLabel,
+      }),
+      'copy',
+      3000
+    );
   }
 
   async function pasteDayEntries(dateId) {
@@ -2586,18 +2622,32 @@
     const entries = calendarClipboard ? [...calendarClipboard] : [];
     if (entries.length === 0) {
       coreLog('[Calendar Context Menu] Paste skipped - clipboard empty');
-      PayCalCore.updateStatusMessage(`Clipboard is empty for ${dateLabel}`, 'info', 2000);
+      PayCalCore.updateStatusMessage(calendarI18nFormat('CALENDAR_CLIPBOARD_EMPTY_FOR', 'Clipboard is empty for {dateLabel}', { dateLabel }), 'info', 2000);
       return;
     }
 
     try {
-      PayCalCore.updateStatusMessage(`Pasting to ${dateLabel}...`, 'paste', 0);
+      PayCalCore.updateStatusMessage(calendarI18nFormat('CALENDAR_PASTING_TO', 'Pasting to {dateLabel}...', { dateLabel }), 'paste', 0);
       await saveEntriesForDate(dateId, entries);
       coreLog('[Calendar Context Menu] Pasted day entries', { dateId, count: entries.length });
-      PayCalCore.updateStatusMessage(`Pasted ${entries.length} entry/entries to ${dateLabel}`, 'paste', 3000);
+      PayCalCore.updateStatusMessage(
+        calendarI18nFormat('CALENDAR_PASTED_ENTRIES_TO', 'Pasted {count} entry/entries to {dateLabel}', {
+          count: entries.length,
+          dateLabel,
+        }),
+        'paste',
+        3000
+      );
     } catch (error) {
       console.error('[Calendar Context Menu] Paste failed during save', { dateId, error });
-      PayCalCore.updateStatusMessage(`Paste failed for ${dateLabel}: ` + (error.message || 'Unknown error'), 'error', 4000);
+      PayCalCore.updateStatusMessage(
+        calendarI18nFormat('CALENDAR_PASTE_FAILED_FOR', 'Paste failed for {dateLabel}: {error}', {
+          dateLabel,
+          error: error.message || calendarI18n('CALENDAR_UNKNOWN_ERROR', 'Unknown error'),
+        }),
+        'error',
+        4000
+      );
       throw error;
     }
   }
@@ -2611,13 +2661,20 @@
       return;
     }
 
-    PayCalCore.updateStatusMessage(`Deleting ${dateLabel}...`, 'delete', 0);
+    PayCalCore.updateStatusMessage(calendarI18nFormat('CALENDAR_DELETING_FOR', 'Deleting {dateLabel}...', { dateLabel }), 'delete', 0);
     try {
       await saveEntriesForDate(dateId, []);
-      PayCalCore.updateStatusMessage(`Entries deleted for ${dateLabel}`, 'delete', 3000);
+      PayCalCore.updateStatusMessage(calendarI18nFormat('CALENDAR_ENTRIES_DELETED_FOR', 'Entries deleted for {dateLabel}', { dateLabel }), 'delete', 3000);
     } catch (error) {
       console.error('[Calendar Delete] Delete failed', { dateId, error });
-      PayCalCore.updateStatusMessage(`Delete failed for ${dateLabel}: ` + (error.message || 'Unknown error'), 'error', 4000);
+      PayCalCore.updateStatusMessage(
+        calendarI18nFormat('CALENDAR_DELETE_FAILED_FOR', 'Delete failed for {dateLabel}: {error}', {
+          dateLabel,
+          error: error.message || calendarI18n('CALENDAR_UNKNOWN_ERROR', 'Unknown error'),
+        }),
+        'error',
+        4000
+      );
       throw error;
     }
   }
@@ -3298,7 +3355,11 @@
 
       const monthLabel = (pickerBtn.textContent || '').trim();
       if (monthLabel !== '') {
-        statusEl.textContent = `Calendar month updated to ${monthLabel}.`;
+        statusEl.textContent = calendarI18nFormat(
+          'CALENDAR_MONTH_UPDATED_TO',
+          'Calendar month updated to {month}.',
+          { month: monthLabel }
+        );
       }
     };
 
@@ -3425,13 +3486,13 @@
 
       const selectedMonthBtn = getSelectedMonthButton();
       if (!selectedMonthBtn) {
-        datePickerGoBtn.textContent = 'View';
+        datePickerGoBtn.textContent = calendarI18n('VIEW', 'View');
         return;
       }
 
       const year = String(getSelectedYearValue());
       const monthLabel = (selectedMonthBtn.textContent || '').trim();
-      datePickerGoBtn.textContent = `View ${year}-${monthLabel}`;
+      datePickerGoBtn.textContent = `${calendarI18n('VIEW', 'View')} ${year}-${monthLabel}`;
     };
 
     const selectPickerButton = (button, buttons) => {
@@ -4156,8 +4217,8 @@
     if (!footer) return;
     
     Guardian.setHTML(footer, `
-      <button type="button" class="btn btn_primary calendar_modal_action calendar_modal_action_save" data-action="save">Save</button>
-      <button type="button" class="btn btn_cancel calendar_modal_action calendar_modal_action_close" data-action="close">Close</button>
+      <button type="button" class="btn btn_primary calendar_modal_action calendar_modal_action_save" data-action="save">${escapeText(calendarI18n('SAVE', 'Save'))}</button>
+      <button type="button" class="btn btn_cancel calendar_modal_action calendar_modal_action_close" data-action="close">${escapeText(calendarI18n('CLOSE', 'Close'))}</button>
     `);
     
     // Attach handlers
@@ -4653,7 +4714,11 @@
       const lead = spokenDate ? `${spokenSiteName} on ${spokenDate}` : spokenSiteName;
       const entryAriaLabel = escapeText(window.PayCalAriaEcho.cadence(spokenSummary ? `${lead}. ${spokenSummary}.` : `${lead}.`));
 
-      return `<div class="work work_${posClass}" aria-label="${entryAriaLabel}"><strong>${siteName}</strong><br />${fields.join('&nbsp;/&nbsp;')}</div>`;
+      const siteColorRaw = entry.site_color ? String(entry.site_color).toUpperCase() : '';
+      const siteColorValid = /^#[0-9A-Fa-f]{6}$/i.test(siteColorRaw);
+      const siteColorAttr = siteColorValid ? ` data-site-color="${escapeText(siteColorRaw)}"` : '';
+      return `<div class="work work_${posClass}"${siteColorAttr} aria-label="${entryAriaLabel}"><strong>${siteName}</strong><br />${fields.join('&nbsp;/&nbsp;')}</div>`;
+
     }).join('');
   }
 
@@ -4689,6 +4754,12 @@
           throw new Error(`Week payload decrypt returned empty data for ${dateId}.`);
         }
 
+        // Merge site_color from outer entry metadata into decrypted result
+        if (entry.site_color && !decrypted.site_color) {
+          decrypted.site_color = entry.site_color;
+        }
+
+        window.PayCalWorkIntegrity?.check(decrypted, { context: 'decrypt', date: dateId });
         decryptedEntries.push(decrypted);
       }
 
@@ -4772,6 +4843,7 @@
 
       const encryptedEntries = [];
       for (const entry of entries) {
+        window.PayCalWorkIntegrity?.check(entry, { context: 'save', date: activeDate });
         encryptedEntries.push(await encryptEntry(entry));
       }
 
@@ -4886,7 +4958,7 @@
     const saveBtn = modal.querySelector('[data-action="save"]');
     if (saveBtn) {
       saveBtn.disabled = true;
-      saveBtn.textContent = 'Saving...';
+      saveBtn.textContent = calendarI18n('CALENDAR_SAVING_ELLIPSIS', 'Saving...');
     }
     
     const rows = tbody.querySelectorAll('.work-entry-row');
@@ -4943,7 +5015,14 @@
 
     modalLog('[Calendar Modal] Saving entries:', entries);
     const activeDateLabel = formatStatusDateLabel(activeDate);
-    PayCalCore.updateStatusMessage(`Saving ${entries.length} entry/entries for ${activeDateLabel}...`, 'save', 0);
+    PayCalCore.updateStatusMessage(
+      calendarI18nFormat('CALENDAR_SAVING_ENTRIES_FOR', 'Saving {count} entry/entries for {dateLabel}...', {
+        count: entries.length,
+        dateLabel: activeDateLabel,
+      }),
+      'save',
+      0
+    );
 
     try {
       const savePayload = await saveEntriesForDate(activeDate, entries);
@@ -4953,20 +5032,34 @@
         modalLog('[Calendar Modal] Diagnostic info:', savePayload.diagnostic);
       }
 
-      PayCalCore.updateStatusMessage(`Saved ${entries.length} entry/entries for ${activeDateLabel}`, 'save', 3000);
+      PayCalCore.updateStatusMessage(
+        calendarI18nFormat('CALENDAR_SAVED_ENTRIES_FOR', 'Saved {count} entry/entries for {dateLabel}', {
+          count: entries.length,
+          dateLabel: activeDateLabel,
+        }),
+        'save',
+        3000
+      );
       modalLog('[Calendar Modal] Save successful, closing modal');
       closeModal();
     } catch (error) {
       console.error('[Calendar Modal] Save API failed:', error);
       // Re-enable elements on error so user can retry
       setModalElementsDisabled(false);
-      const errorMessage = error && error.message ? error.message : 'Unknown save error';
-      PayCalCore.updateStatusMessage(`Save failed for ${activeDateLabel}: ` + errorMessage, 'error', 4000);
+      const errorMessage = error && error.message ? error.message : calendarI18n('CALENDAR_UNKNOWN_ERROR', 'Unknown save error');
+      PayCalCore.updateStatusMessage(
+        calendarI18nFormat('CALENDAR_SAVE_FAILED_FOR', 'Save failed for {dateLabel}: {error}', {
+          dateLabel: activeDateLabel,
+          error: errorMessage,
+        }),
+        'error',
+        4000
+      );
       const content = modal.querySelector('#calendar-modal-content');
       if (content) {
         Guardian.insertHTML(content, 'afterbegin', `
           <div class="success-message calendar-save-error">
-            <p><strong>Save failed</strong></p>
+            <p><strong>${escapeText(calendarI18n('CALENDAR_SAVE_FAILED_SHORT', 'Save failed'))}</strong></p>
             <p>${escapeText(errorMessage)}</p>
           </div>
         `);
@@ -4974,7 +5067,7 @@
     } finally {
       if (saveBtn) {
         saveBtn.disabled = false;
-        saveBtn.textContent = 'Save';
+        saveBtn.textContent = calendarI18n('SAVE', 'Save');
       }
     }
   }

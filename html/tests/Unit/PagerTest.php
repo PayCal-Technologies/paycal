@@ -379,6 +379,6 @@ final class PagerTest extends TestCase
 
   private function createMockRedis(): Redis
   {
-    return $this->createMock(Redis::class);
+    return $this->createStub(Redis::class);
   }
 }

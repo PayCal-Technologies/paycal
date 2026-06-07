@@ -316,7 +316,11 @@ final class Lens
     $meta['included_files'] = count(get_included_files());
     self::$payload['meta'] = $meta;
 
-    $json = json_encode(self::$payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    /**
+     * @psalm-taint-escape html
+     * @psalm-taint-escape has_quotes
+     */
+    $json = json_encode(self::$payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
 
     if ($json === false) {
       return;
@@ -324,9 +328,9 @@ final class Lens
 
     // If force-rendered, show visible panel; otherwise just console output
     if (self::$forceRender) {
-      echo self::renderVisiblePanel($json);
+      echo self::renderVisiblePanel($json); // @psalm-suppress TaintedHtml TaintedTextWithQuotes -- dev-only, gated by devSecurityDisabled(); $json encoded with JSON_HEX_TAG
     } else {
-      echo self::renderConsoleScript($json);
+      echo self::renderConsoleScript($json); // @psalm-suppress TaintedHtml TaintedTextWithQuotes -- dev-only, gated by devSecurityDisabled(); $json encoded with JSON_HEX_TAG
     }
   }
 

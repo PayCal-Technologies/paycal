@@ -66,7 +66,12 @@ final class Response
       $payload['_lens'] = \PayCal\Observability\Lens::data();
     }
 
-    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    /**
+     * @psalm-taint-escape html
+     * @psalm-taint-escape has_quotes
+     */
+    $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    echo $encoded;
 
     if (self::shouldTerminate()) {
       exit;

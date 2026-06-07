@@ -338,10 +338,12 @@ foreach ($cells as $cell) {
 		$travelHoursValue = $work['travel_hours'] ?? $work['travel'] ?? $work['t'] ?? 0;
 		$hoursValue = $work['hours'] ?? $work['h'] ?? 0;
 		$wageValue = $work['wage'] ?? $work['w'] ?? 0;
+		$siteColorValue = $work['site_color'] ?? '';
 		
 		$workEntries[] = [
 			'site_id' => is_scalar($siteIdValue) ? (string) $siteIdValue : '',
 			'site_name' => is_scalar($siteNameValue) ? (string) $siteNameValue : '',
+			'site_color' => is_scalar($siteColorValue) ? strtoupper((string) $siteColorValue) : '',
 			'hours' => is_numeric($hoursValue) ? (float) $hoursValue : 0.0,
 			'regular_hours' => is_numeric($regularHoursValue) ? (float) $regularHoursValue : 0.0,
 			'overtime_hours' => is_numeric($overtimeHoursValue) ? (float) $overtimeHoursValue : 0.0,
@@ -392,6 +394,8 @@ if (empty($rows)) {
 								$entry['site_id'] = is_string($sid) ? $sid : '';
 								$sn = $entry['site_name'] ?? $entry['n'] ?? null;
 								$entry['site_name'] = is_string($sn) ? $sn : '';
+								$sc = $entry['site_color'] ?? null;
+								$entry['site_color'] = is_string($sc) ? strtoupper($sc) : '';
 								$rh = $entry['regular_hours'] ?? $entry['r'] ?? null;
 								$entry['regular_hours'] = is_numeric($rh) ? (float) $rh : 0.0;
 								$oh = $entry['overtime_hours'] ?? $entry['o'] ?? null;
@@ -526,14 +530,14 @@ if (count($viewableMembers) > 1) {
 	ob_start();
 	?>
 	<div class="calendar_user_selector calendar_user_selector--toolbar f_row f_center_y gap8">
-		<label for="calendar_user_lookup">View as</label>
+		<label for="calendar_user_lookup"><?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_VIEW_AS'), ENT_QUOTES, 'UTF-8'); ?></label>
 		<form id="calendar_user_view_form" method="GET" action="/" class="calendar_user_selector_form" data-self-label="<?php echo htmlspecialchars(calendar_member_label($viewableMembers[$actorUUID] ?? $selectedCalendarUser), ENT_QUOTES, 'UTF-8'); ?>">
 			<input type="hidden" name="month" value="<?php echo htmlspecialchars($monthParam, ENT_QUOTES, 'UTF-8'); ?>">
 			<input type="hidden" id="calendar_user_uuid_hidden" name="user_uuid" value="<?php echo htmlspecialchars($selectedCalendarUserUUID, ENT_QUOTES, 'UTF-8'); ?>">
 			<div class="calendar_user_lookup_wrap<?php echo $isDelegatedCalendarView ? ' has-clear' : ''; ?>">
-				<input id="calendar_user_lookup" type="text" list="calendar_user_lookup_list" autocomplete="off" value="<?php echo htmlspecialchars($selectedCalendarUserLabel, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Select calendar user">
+				<input id="calendar_user_lookup" type="text" list="calendar_user_lookup_list" autocomplete="off" value="<?php echo htmlspecialchars($selectedCalendarUserLabel, ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_SELECT_USER_ARIA'), ENT_QUOTES, 'UTF-8'); ?>">
 				<?php if ($isDelegatedCalendarView) { ?>
-				<button id="calendar_user_clear_btn" type="submit" name="clear_user_view" value="1" class="btn btn_secondary calendar_user_clear calendar_user_clear_inline" aria-label="Clear delegated calendar view" formnovalidate>
+				<button id="calendar_user_clear_btn" type="submit" name="clear_user_view" value="1" class="btn btn_secondary calendar_user_clear calendar_user_clear_inline" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_CLEAR_DELEGATED_VIEW_ARIA'), ENT_QUOTES, 'UTF-8'); ?>" formnovalidate>
 					<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">
 						<path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
 					</svg>
@@ -598,7 +602,7 @@ $grid = new DataGrid([
 
 
 $message = '&nbsp;';
-$pageTitle = 'Calendar - [PayCal]';
+$pageTitle = (string) html_index_i18n('CALENDAR') . ' - [PayCal]';
 $pageLabel = 'CALENDAR';
 $pageLanguage = User::current()->language ?? 'en';
 $isEmailVerified = User::current()->email_verified ?? false;
@@ -648,7 +652,7 @@ require_once Environment::appHome().'html/header.php';
 </div>
 
 <!-- Calendar Entry Modal Dialog -->
-<dialog id="calendar-modal" class="calendar_modal" data-dialog-close-on-backdrop="true" aria-labelledby="calendar-modal-date" aria-describedby="calendar-modal-desc">
+<dialog id="calendar-modal" class="calendar_modal" data-dialog-close-on-backdrop="true" aria-modal="true" aria-labelledby="calendar-modal-date" aria-describedby="calendar-modal-desc">
 	<p id="calendar-modal-desc" class="visually_hidden"><?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_MODAL_DESC'), ENT_QUOTES, 'UTF-8'); ?></p>
 	<section class="modal_header calendar_modal_header">
 		<button type="button" class="btn btn_close calendar_modal_close" data-dialog-close="calendar-modal" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('CLOSE'), ENT_QUOTES, 'UTF-8'); ?>">&times;</button>

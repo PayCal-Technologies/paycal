@@ -10,6 +10,7 @@ use PayCal\Domain\Enums\Subscription;
 use PayCal\Domain\Enums\Timezone;
 use PayCal\Infrastructure\Audit\SystemAuditRepository;
 use PayCal\Infrastructure\Organization\OrganizationEncryptionService;
+use PayCal\Observability\Lens;
 
 /**
  * OrganizationDiscoveryService.php
@@ -1997,6 +1998,49 @@ final class OrganizationDiscoveryService
    * Validates ownership of both the site and the organization, then persists
    * the association record.
    *
+  /**
+   * Returns all sites linked to an organization, with their org-level site settings.
+   *
+   * Access: any org member with sites.read scope.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
+  public function listOrgSites(string $actorUUID, string $orgId): array
+  {
+    if (!$this->canReadOrganizationSettings($orgId, $actorUUID)) {
+      return $this->fail('You do not have permission to view sites for this organization.');
+    }
+
+    $siteRefs = Database::smembers(Keys::ORGANIZATION_SITE . ':' . $orgId);
+    $sites    = [];
+    foreach ($siteRefs as $ref) {
+      $parts = explode(':', $ref, 2);
+      if (count($parts) !== 2) {
+        continue;
+      }
+      [$ownerUUID, $siteId] = $parts;
+      $siteHash = Database::hgetall(Keys::SITE . ':' . $ownerUUID . ':' . $siteId);
+      $settingsKey  = Keys::ORGANIZATION_SITE_SETTINGS . ':' . $orgId . ':' . $ref;
+      $siteSettings = Database::hgetall($settingsKey);
+      $defaults = [
+        'budget_type' => 'annual', 'budget_amount' => '', 'budget_start' => '',
+        'budget_end' => '', 'warn_threshold' => '80', 'critical_threshold' => '95',
+        'site_status' => 'active', 'primary_manager_uuid' => '',
+        'target_headcount' => '', 'target_utilization' => '', 'target_ot_ratio' => '', 'tags' => '',
+      ];
+      $sites[] = [
+        'site_owner_uuid' => $ownerUUID,
+        'site_id'         => $siteId,
+        'site_name'       => (string) ($siteHash['site_name'] ?? ''),
+        'site_color'      => (string) ($siteHash['site_color'] ?? ''),
+        'settings'        => array_merge($defaults, $siteSettings),
+      ];
+    }
+
+    return $this->ok('Org sites retrieved.', ['sites' => $sites, 'organization_id' => $orgId]);
+  }
+
+  /**
    * @param string $actorUUID     Authenticated actor UUID.
    * @param string $orgId         Organization ID.
    * @param string $siteOwnerUUID UUID of the site owner.
@@ -2034,6 +2078,222 @@ final class OrganizationDiscoveryService
       'site_owner_uuid' => $siteOwnerUUID,
       'site_id' => $siteId,
     ]);
+  }
+
+  /**
+   * Returns org planning context for a site owned by the current user.
+   *
+   * Searches all orgs the actor belongs to for one where (a) this site is
+   * registered and (b) the actor has owner or admin privileges.
+   * Used by the Sites page to surface per-site org planning controls.
+   *
+   * @return array{org_id: string, org_name: string, owner_uuid: string, settings: array<string, mixed>}|null
+   */
+  public function getOrgContextForSite(string $actorUUID, string $siteId): ?array
+  {
+    $siteRef = $actorUUID . ':' . $siteId;
+    $orgIds  = Database::smembers(Keys::ORGANIZATION_USER . ':' . $actorUUID);
+
+    Lens::add('getOrgContextForSite', [
+      'actor_uuid' => $actorUUID,
+      'site_id'    => $siteId,
+      'site_ref'   => $siteRef,
+      'org_count'  => count($orgIds),
+      'org_ids'    => $orgIds,
+    ]);
+
+    foreach ($orgIds as $orgId) {
+      $isMember = Database::sismember(Keys::ORGANIZATION_SITE . ':' . $orgId, $siteRef);
+      Lens::add('getOrgContextForSite:check', [
+        'org_id'    => $orgId,
+        'site_ref'  => $siteRef,
+        'is_member' => $isMember,
+      ]);
+      if ($isMember === 0) {
+        continue;
+      }
+
+      $org  = Database::hgetall(Keys::ORGANIZATION . ':' . $orgId);
+      $isOrgOwner = (string) ($org['owner_uuid'] ?? '') === $actorUUID;
+      $relationship = $isOrgOwner ? ['role' => 'owner'] : $this->relationship($orgId, $actorUUID);
+      $role = strtolower(trim((string) ($relationship['role'] ?? '')));
+
+      Lens::add('getOrgContextForSite:role', [
+        'org_id'      => $orgId,
+        'is_org_owner' => $isOrgOwner,
+        'role'        => $role,
+      ]);
+
+      if (!$isOrgOwner && !in_array($role, ['owner', 'admin', 'coordinator'], true)) {
+        continue;
+      }
+
+      $defaults = [
+        'budget_type'        => 'annual',
+        'budget_amount'      => '',
+        'budget_start'       => '',
+        'budget_end'         => '',
+        'warn_threshold'     => '80',
+        'critical_threshold' => '95',
+        'site_status'        => 'active',
+        'target_headcount'   => '',
+        'target_utilization' => '',
+        'target_ot_ratio'    => '',
+        'manager_uuid'       => '',
+        'tags'               => '',
+      ];
+      $stored   = Database::hgetall(Keys::ORGANIZATION_SITE_SETTINGS . ':' . $orgId . ':' . $actorUUID . ':' . $siteId);
+      $settings = array_merge($defaults, array_map('strval', $stored));
+
+      Lens::add('getOrgContextForSite:found', [
+        'org_id'   => $orgId,
+        'org_name' => (string) ($org['name'] ?? ''),
+        'settings' => $settings,
+      ]);
+
+      return [
+        'org_id'     => $orgId,
+        'org_name'   => (string) ($org['name'] ?? ''),
+        'owner_uuid' => $actorUUID,
+        'settings'   => $settings,
+      ];
+    }
+
+    Lens::add('getOrgContextForSite:not_found', ['actor_uuid' => $actorUUID, 'site_id' => $siteId]);
+    return null;
+  }
+
+  /**
+   * Returns org-only site settings for a specific site within an organization.
+   *
+   * Key: organization:site_settings:{orgId}:{siteOwnerUUID}:{siteId}
+   * Access: org owner or coordinator only.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
+  public function getOrgSiteSettings(string $actorUUID, string $orgId, string $siteOwnerUUID, string $siteId): array
+  {
+    if (!$this->canManageOrganization($orgId, $actorUUID)) {
+      return $this->fail('You do not have permission to view site settings for this organization.');
+    }
+
+    $siteRef = InputSanitizer::sanitizeString($siteOwnerUUID) . ':' . InputSanitizer::sanitizeString($siteId);
+    if (!Database::sismember(Keys::ORGANIZATION_SITE . ':' . $orgId, $siteRef)) {
+      return $this->fail('Site is not linked to this organization.');
+    }
+
+    $key      = Keys::ORGANIZATION_SITE_SETTINGS . ':' . $orgId . ':' . $siteRef;
+    $settings = Database::hgetall($key);
+    $defaults = [
+      'budget_type'         => 'annual',
+      'budget_amount'       => '',
+      'budget_start'        => '',
+      'budget_end'          => '',
+      'warn_threshold'      => '80',
+      'critical_threshold'  => '95',
+      'site_status'         => 'active',
+      'primary_manager_uuid' => '',
+      'target_headcount'    => '',
+      'target_utilization'  => '',
+      'target_ot_ratio'     => '',
+      'tags'                => '',
+    ];
+
+    return $this->ok('Org site settings retrieved.', ['settings' => array_merge($defaults, $settings)]);
+  }
+
+  /**
+   * Persists org-only site settings for a specific site within an organization.
+   *
+   * Only org owners and coordinators may call this. The site must already be
+   * linked to the organization. All values are strings; numeric fields are
+   * range-clamped server-side.
+   *
+   * @param  array<string, mixed> $input
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
+  public function updateOrgSiteSettings(string $actorUUID, string $orgId, string $siteOwnerUUID, string $siteId, array $input): array
+  {
+    if (!$this->canManageOrganization($orgId, $actorUUID)) {
+      return $this->fail('You do not have permission to update site settings for this organization.');
+    }
+
+    $siteRef = InputSanitizer::sanitizeString($siteOwnerUUID) . ':' . InputSanitizer::sanitizeString($siteId);
+    if (!Database::sismember(Keys::ORGANIZATION_SITE . ':' . $orgId, $siteRef)) {
+      return $this->fail('Site is not linked to this organization.');
+    }
+
+    $normalized = [];
+
+    // Budget amount: non-negative float
+    if (array_key_exists('budget_amount', $input)) {
+      $v = is_scalar($input['budget_amount']) ? (float) $input['budget_amount'] : 0.0;
+      $normalized['budget_amount'] = $v > 0 ? (string) round($v, 2) : '';
+    }
+
+    // Budget type
+    if (array_key_exists('budget_type', $input)) {
+      $v = is_scalar($input['budget_type']) ? strtolower(trim((string) $input['budget_type'])) : 'annual';
+      $normalized['budget_type'] = in_array($v, ['monthly', 'quarterly', 'annual'], true) ? $v : 'annual';
+    }
+
+    // Date fields: YYYY-MM-DD format
+    foreach (['budget_start', 'budget_end'] as $df) {
+      if (array_key_exists($df, $input)) {
+        $v = is_scalar($input[$df]) ? trim((string) $input[$df]) : '';
+        $normalized[$df] = preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : '';
+      }
+    }
+
+    // Threshold percentages: 1–100
+    foreach (['warn_threshold', 'critical_threshold'] as $tf) {
+      if (array_key_exists($tf, $input)) {
+        $v = is_scalar($input[$tf]) ? (int) $input[$tf] : 0;
+        $normalized[$tf] = (string) max(1, min(100, $v));
+      }
+    }
+
+    // Site status
+    if (array_key_exists('site_status', $input)) {
+      $v = is_scalar($input['site_status']) ? strtolower(trim((string) $input['site_status'])) : 'active';
+      $valid = ['planning', 'active', 'maintenance', 'complete', 'archived'];
+      $normalized['site_status'] = in_array($v, $valid, true) ? $v : 'active';
+    }
+
+    // Primary manager UUID (must be an org member)
+    if (array_key_exists('primary_manager_uuid', $input)) {
+      $v = is_scalar($input['primary_manager_uuid']) ? trim((string) $input['primary_manager_uuid']) : '';
+      $normalized['primary_manager_uuid'] = $v;
+    }
+
+    // Numeric targets
+    foreach (['target_headcount' => [0, 9999], 'target_utilization' => [0, 100], 'target_ot_ratio' => [0, 100]] as $field => [$min, $max]) {
+      if (array_key_exists($field, $input)) {
+        $v = is_scalar($input[$field]) ? (float) $input[$field] : 0.0;
+        $normalized[$field] = $v > 0 ? (string) round(max($min, min($max, $v)), 2) : '';
+      }
+    }
+
+    // Tags: CSV, max 200 chars
+    if (array_key_exists('tags', $input)) {
+      $v = is_scalar($input['tags']) ? substr(trim((string) $input['tags']), 0, 200) : '';
+      $normalized['tags'] = $v;
+    }
+
+    if ([] === $normalized) {
+      return $this->fail('No valid fields provided.');
+    }
+
+    $key = Keys::ORGANIZATION_SITE_SETTINGS . ':' . $orgId . ':' . $siteRef;
+    Database::hset($key, $normalized);
+
+    $this->appendAuditEvent($orgId, 'site_settings.updated', $actorUUID, [
+      'site_owner_uuid' => $siteOwnerUUID,
+      'site_id'         => $siteId,
+      'fields_updated'  => array_keys($normalized),
+    ]);
+
+    return $this->ok('Site settings updated.', ['settings' => $normalized]);
   }
 
   /**
@@ -4592,7 +4852,7 @@ final class OrganizationDiscoveryService
     return 'ORG' . substr(hash('sha256', $ownerUUID . '|' . $name . '|' . bin2hex(random_bytes(16))), 0, 18);
   }
 
-  /** @param array<string, scalar> $details */
+  /** @param array<string, scalar|array<mixed>> $details */
   private function appendAuditEvent(string $orgId, string $eventType, string $actorUUID, array $details = []): void
   {
     $eventID = 'OAE' . substr(hash('sha256', $orgId . '|' . $eventType . '|' . bin2hex(random_bytes(16))), 0, 20);
@@ -4600,7 +4860,17 @@ final class OrganizationDiscoveryService
 
     $normalizedDetails = [];
     foreach ($details as $key => $value) {
-      $normalizedDetails[$key] = (string) $value;
+      if (is_array($value)) {
+        $flat = [];
+        foreach ($value as $item) {
+          if (is_scalar($item) || $item === null) {
+            $flat[] = (string) $item;
+          }
+        }
+        $normalizedDetails[$key] = implode(',', $flat);
+      } else {
+        $normalizedDetails[$key] = (string) $value;
+      }
     }
 
     Database::hset(Keys::ORGANIZATION_AUDIT_EVENT . ':' . $eventID, [

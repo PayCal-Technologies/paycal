@@ -105,7 +105,7 @@ require_once Environment::appHome().'html/header.php';
   <h1 class="visually_hidden"><?php echo settings_index_i18n('SETTINGS'); ?></h1>
 
   <!-- MODAL CHANGE EMAIL -->
-  <dialog id="modal_change_email" aria-labelledby="modal_change_email_title" aria-describedby="modal_change_email_desc change_email_status">
+  <dialog id="modal_change_email" aria-modal="true" aria-labelledby="modal_change_email_title" aria-describedby="modal_change_email_desc change_email_status">
   <form id="change_email_form" name="change_email_form" aria-label="<?php echo settings_index_i18n('CHANGE_EMAIL'); ?>">
   <input class="visually_hidden" type="text" name="username" value="NOTUSED" autocomplete="username" hidden tabindex="-1" aria-hidden="true">
   <input type="hidden" name="csrf_token" value="<?php echo $csrfNonce; ?>">
@@ -191,7 +191,7 @@ require_once Environment::appHome().'html/header.php';
   </dialog>
 
   <!-- MODAL EDIT DETAILS -->
-  <dialog id="modal_edit_details" aria-labelledby="modal_edit_details_title" aria-describedby="modal_edit_details_desc">
+  <dialog id="modal_edit_details" aria-modal="true" aria-labelledby="modal_edit_details_title" aria-describedby="modal_edit_details_desc">
   <form method="POST" action="<?php echo Environment::appURL('api/v1/account/info/update/'); ?>" id="edit_details_form" name="edit_details_form" aria-label="<?php echo settings_index_i18n('SETTINGS_ARIA_EDIT_ACCOUNT_DETAILS'); ?>">
   <input type="hidden" name="csrf_token" value="<?php echo $csrfNonce; ?>">
 
@@ -829,6 +829,28 @@ echo Render::dialog([
 
     <br>
 
+    <div class="flex f_baseline w100" id="nav_proximity_px_row">
+      <label class="w25" for="nav_proximity_px">Distance</label>
+      <div class="w75">
+        <div class="proximity_slider_wrap" data-hover-help="How close the mouse must get to the sidebar edge before it reveals. 0 = edge only, 600 = most of the screen.">
+          <input
+            type="range"
+            id="nav_proximity_px"
+            name="nav_proximity_px"
+            min="0"
+            max="600"
+            step="10"
+            value="200"
+            aria-valuemin="0"
+            aria-valuemax="600"
+          >
+          <output for="nav_proximity_px" id="nav_proximity_px_output">200 px</output>
+        </div>
+      </div>
+    </div>
+
+    <br>
+
     <div class="flex f_baseline w100">
       <label class="w25">Overlay</label>
       <div class="w75">
@@ -979,7 +1001,7 @@ echo Render::dialog([
 </section>
 
 <!-- IMPORT CONFIRM DIALOG -->
-<dialog id="modal_import_confirm" aria-labelledby="modal_import_confirm_title" aria-describedby="modal_import_confirm_desc">
+<dialog id="modal_import_confirm" aria-modal="true" aria-labelledby="modal_import_confirm_title" aria-describedby="modal_import_confirm_desc">
   <section class="modal_header">
     <button type="button" class="btn btn_close" data-dialog-close="modal_import_confirm" aria-label="<?php echo settings_index_i18n('CLOSE'); ?>">&times;</button>
     <h2 id="modal_import_confirm_title" class="modal_title centered">Confirm Import</h2>

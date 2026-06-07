@@ -81,9 +81,6 @@ final class Environment
   private static bool   $devAllowInlineScripts = false;
   private static bool   $encryptionEnabled = false;
   private static bool   $devSecurityDisabled = false;
-  /** Allows the WebKit Worker HKDF deriveKey compatibility fallback in crypto-worker.js. */
-  private static bool   $allowWebkitHkdfCompatFallback = true;
-
   /**
    * @param array<string, string> $env
    */
@@ -131,7 +128,6 @@ final class Environment
     }
     // When DEV_SECURITY_DISABLED is true, force encryption off
     self::$encryptionEnabled              = self::$devSecurityDisabled ? false : (isset($env["ENCRYPTION_ENABLED"]) ? self::toBool($env["ENCRYPTION_ENABLED"]) : false);
-    self::$allowWebkitHkdfCompatFallback  = isset($env["ALLOW_WEBKIT_HKDF_COMPAT_FALLBACK"]) ? self::toBool($env["ALLOW_WEBKIT_HKDF_COMPAT_FALLBACK"]) : true;
   }
 
   /**
@@ -295,12 +291,6 @@ final class Environment
    * Handles devSecurityDisabled operation.
    */
   public static function devSecurityDisabled()  : bool   { return self::$devSecurityDisabled; }
-  /**
-   * Whether the WebKit Worker HKDF compat fallback is permitted.
-   * See: soc2/security-audits/FALSE_POSITIVE_ADJUDICATION.md — CRYPTO-001
-   */
-  public static function allowWebkitHkdfCompatFallback(): bool { return self::$allowWebkitHkdfCompatFallback; }
-
   /**
    * Convert environment variable string to boolean.
    *

@@ -1107,6 +1107,29 @@ body.calendar-screenmode-minimal #calendar-v2-root.panel {
   padding: 0;
 }
 
+/* Global fullscreen focus mode: / key on any non-calendar page. */
+body.screenmode-minimal #page_header.nav_component--header,
+body.screenmode-minimal #page_footer {
+  display: none;
+}
+
+body.screenmode-minimal #main,
+body.screenmode-minimal[data-nav-primary-position='left'] #main,
+body.screenmode-minimal[data-nav-primary-position='right'] #main {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+body.screenmode-minimal .panel {
+  margin-left: 0;
+  margin-right: 0;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
 /* ============================================================================
    SIDEBAR STATE SYSTEM: collapsed | peek | pinned
    Motion: transform-based, GPU-accelerated, no layout thrash

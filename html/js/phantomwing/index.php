@@ -30,7 +30,11 @@ const _pw_bucket_salt = (() => {
 })();
 // Minimum k-anonymity threshold: grouped telemetry events with fewer than this
 // count are not sent, preventing unique-session fingerprinting via rare events.
-const _PW_K_ANON_MIN = 3;
+// Raised to 50: a threshold of 10 is susceptible to sybil-based saturation
+// (an attacker controlling 10 accounts can force a flush of a specific event);
+// 50 sessions producing the same grouped event type is a meaningful population
+// and is not achievable by a small coordinated set of low-privilege accounts.
+const _PW_K_ANON_MIN = 50;
 /**
  * ============================================================================
  * PHANTOM WING - JavaScript Error Reporting Daemon
@@ -224,12 +228,38 @@ function _pw_redact_text(input) {
     .replace(/\b(user_uuid|org_uuid|organization_uuid|site_uuid|user_id|org_id|organization_id|site_id)\s*[=:]\s*[^\s,;]+/gi, '$1=[REDACTED]');
 }
 
+/**
+ * Strip file-system paths and memory addresses from stack trace strings.
+ *
+ * Why: backend error messages and JS stack frames can carry absolute server
+ * paths (e.g. /var/www/paycal/...) and hex memory addresses.  These are
+ * never useful to a browser-side diagnostic consumer but do expose internal
+ * server layout to anyone who can read the Phantom Wing diagnostic state
+ * (PW.getState(), exportErrorData(), or the in-browser error panel).
+ *
+ * Applied to any value stored under the keys `stack` or `rawError`.
+ */
+function _pw_redact_stack_trace(str) {
+  if (typeof str !== 'string') {
+    return typeof str === 'undefined' ? undefined : String(str);
+  }
+  return str
+    // Absolute Unix paths: /var/www/..., /private/..., /home/..., /usr/..., etc.
+    .replace(/\/(?:private\/)?(?:var|home|usr|etc|opt|srv|tmp)\/[^\s"'`,()\]\[]+/g, '[path]')
+    // Memory addresses (e.g. 0x7f3a4b5c)
+    .replace(/\b0x[0-9a-fA-F]{4,}\b/g, '[addr]');
+}
+
 function _pw_redact_value(value, key = '', seen = new WeakSet()) {
   if (_pw_sensitive_key_pattern.test(String(key || ''))) {
     return '[REDACTED]';
   }
 
   if (typeof value === 'string') {
+    // Stack traces and raw error messages may carry internal server paths.
+    if (key === 'stack' || key === 'rawError') {
+      return _pw_redact_stack_trace(_pw_redact_text(value));
+    }
     return _pw_redact_text(value);
   }
 

@@ -347,21 +347,50 @@ let currentLang = '<?php echo \PayCal\Domain\Language::DEFAULT; ?>';
   // Load content when tab changes
   const tabBtns = document.querySelectorAll('.lang-editor__tab-btn');
   if (tabBtns.length > 0) {
+    const tabPanel = PC.getElement('content_shared');
+
+    const activateLangTab = (btn) => {
+      tabBtns.forEach((b) => {
+        b.setAttribute('aria-selected', 'false');
+        b.setAttribute('tabindex', '-1');
+      });
+      btn.setAttribute('aria-selected', 'true');
+      btn.setAttribute('tabindex', '0');
+      if (tabPanel) {
+        tabPanel.setAttribute('aria-labelledby', btn.id);
+      }
+      currentLang = btn.dataset.lang;
+      loadLangContent(currentLang);
+    };
+
     tabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        tabBtns.forEach(b => b.setAttribute('aria-selected', 'false'));
-        btn.setAttribute('aria-selected', 'true');
-        const lang = btn.dataset.lang;
-        currentLang = lang;
-        loadLangContent(lang);
+        activateLangTab(btn);
+      });
+
+      btn.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+          return;
+        }
+
+        event.preventDefault();
+        const currentIndex = Array.from(tabBtns).indexOf(btn);
+        const delta = event.key === 'ArrowRight' ? 1 : -1;
+        const nextIndex = (currentIndex + delta + tabBtns.length) % tabBtns.length;
+        const nextBtn = tabBtns[nextIndex];
+        if (!(nextBtn instanceof HTMLElement)) {
+          return;
+        }
+
+        activateLangTab(nextBtn);
+        nextBtn.focus();
       });
     });
 
     // Load initial content for active tab
     const activeBtn = document.querySelector('.lang-editor__tab-btn[aria-selected="true"]');
     if (activeBtn) {
-      currentLang = activeBtn.dataset.lang;
-      loadLangContent(currentLang);
+      activateLangTab(activeBtn);
     }
   }
 

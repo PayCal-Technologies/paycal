@@ -202,7 +202,7 @@ class DataGrid
     $totalColumnCount = $columnCount + (!empty($rowActions) ? 1 : 0);
     $rowCount = count($rows);
     $columnClass = 'datagrid_cols_'.max(1, min(self::MAX_COLUMN_CLASS_COUNT, $totalColumnCount));
-    
+
     // Use layout class instead of inline styles
     $layout = self::toString($this->meta['layout'] ?? 'auto', 'auto');
     $layoutClass = 'datagrid_layout_'.$layout;
@@ -266,8 +266,16 @@ class DataGrid
               $columnKey = self::toString($column['key'] ?? '');
               $columnLabel = self::toString($column['label'] ?? '');
               $columnHeaderId = $this->id.'_col_'.($columnIndex + 1);
+              $columnAlign = self::toString($column['align'] ?? '');
+              $headingClass = 'datagrid_heading';
+              if ('' !== $columnKey) {
+                $headingClass .= ' datagrid_col_' . preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey));
+              }
+              if ('' !== $columnAlign) {
+                $headingClass .= ' datagrid_align_' . $columnAlign;
+              }
             ?>
-              <div class="datagrid_heading" role="columnheader" id="<?php echo $this->escape($columnHeaderId); ?>">
+              <div class="<?php echo $this->escape($headingClass); ?>" role="columnheader" id="<?php echo $this->escape($columnHeaderId); ?>">
                 <?php if ($isSortable) { ?>
                   <button type="button" class="datagrid_sort" data-column="<?php echo $this->escape($columnKey); ?>">
                     <?php echo $this->escape($columnLabel); ?>
@@ -278,7 +286,7 @@ class DataGrid
               </div>
             <?php } ?>
             <?php if (!empty($rowActions)) { ?>
-              <div class="datagrid_heading datagrid_heading_actions" role="columnheader" id="<?php echo $this->escape($this->id.'_col_actions'); ?>"><?php echo $this->escape($rowActionsHeaderLabel); ?></div>
+              <div class="datagrid_heading datagrid_heading_actions datagrid_col_actions" role="columnheader" id="<?php echo $this->escape($this->id.'_col_actions'); ?>"><?php echo $this->escape($rowActionsHeaderLabel); ?></div>
             <?php } ?>
           </div>
         </div>
@@ -294,21 +302,35 @@ class DataGrid
             </div>
           <?php } ?>
 
-          <?php foreach ($rows as $row) { ?>
-            <div class="datagrid_row" role="row" tabindex="0" data-id="<?php echo $this->escape(self::toString($row['id'] ?? '')); ?>">
+          <?php foreach ($rows as $row) {
+            $rowColorRaw = self::toString($row['site_color'] ?? '');
+            $rowColor = strtoupper($rowColorRaw);
+            $rowColorAttr = ('' !== $rowColor && preg_match('/^#[0-9A-Fa-f]{6}$/', $rowColor))
+              ? ' data-color="' . $this->escape($rowColor) . '"'
+              : '';
+          ?>
+            <div class="datagrid_row" role="row" tabindex="0" data-id="<?php echo $this->escape(self::toString($row['id'] ?? '')); ?>"<?php echo $rowColorAttr; ?>>
               <div class="datagrid_row_content">
                 <?php foreach ($this->columns as $columnIndex => $column) {
                   $columnKey = self::toString($column['key'] ?? '');
                   $value = ('' !== $columnKey) ? ($row[$columnKey] ?? '') : '';
                   $columnHeaderId = $this->id.'_col_'.($columnIndex + 1);
-                  
+                  $columnAlign = self::toString($column['align'] ?? '');
+                  $itemClass = 'datagrid_item';
+                  if ('' !== $columnKey) {
+                    $itemClass .= ' datagrid_col_' . preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey));
+                  }
+                  if ('' !== $columnAlign) {
+                    $itemClass .= ' datagrid_align_' . $columnAlign;
+                  }
+
                   // Apply compute function if provided
                   $compute = $column['compute'] ?? null;
                   if (is_callable($compute)) {
                     $value = $compute($row, $column);
                   }
                 ?>
-                  <div class="datagrid_item" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>">
+                  <div class="<?php echo $this->escape($itemClass); ?>" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>">
                     <?php echo $this->escape(self::toString($value)); ?>
                   </div>
                 <?php } ?>
@@ -647,7 +669,7 @@ class DataGrid
    * Add a column to the grid.
 
    */
-  public function addColumn(string $key, string $label, bool $sortable = false, ?string $width = null): void
+  public function addColumn(string $key, string $label, bool $sortable = false, ?string $width = null, ?string $align = null): void
   {
     $column = [
         'key' => $key,
@@ -656,6 +678,9 @@ class DataGrid
     ];
     if (null !== $width) {
       $column['width'] = $width;
+    }
+    if (null !== $align) {
+      $column['align'] = $align;
     }
     $this->columns[] = $column;
   }
