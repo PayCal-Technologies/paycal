@@ -2,25 +2,9 @@
 
 header('Content-Type: application/javascript');
 ?>
+import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '/js/core/binary-codec.js';
+
 // Passkey-only auth helpers for /auth
-
-const b64urlToBuffer = (b64url) => {
-  const padding = '='.repeat((4 - (b64url.length % 4)) % 4);
-  const base64 = (b64url + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes.buffer;
-};
-
-const bufferToB64url = (input) => {
-  const bytes = input instanceof ArrayBuffer ? new Uint8Array(input) : new Uint8Array(input.buffer);
-  let binary = '';
-  bytes.forEach((b) => { binary += String.fromCharCode(b); });
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-};
 
 const WEB_AUTHN_UNSUPPORTED_MESSAGE = 'This browser cannot use passkeys. Use a WebAuthn-capable browser on a secure connection (HTTPS).';
 const WEB_AUTHN_HELP_URL = '/help/webauthn-security.php';

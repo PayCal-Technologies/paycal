@@ -23,6 +23,7 @@ Javascript::renderDocBlock();
 ?>
 
 import PW from '/js/phantomwing/';
+import { fromBase64, latin1FromBase64 } from '/js/core/binary-codec.js';
 
 /**
  * PayCal Encryption - ES6 Module
@@ -129,21 +130,15 @@ async function testPbkdf2() {
       }
 
       try {
-        const envelope = JSON.parse(atob(entry.encrypted_blob));
+        const envelope = JSON.parse(latin1FromBase64(entry.encrypted_blob));
 
         if (!envelope.ciphertext || !envelope.nonce) {
           throw new Error("Malformed envelope");
         }
 
-        const ciphertext = Uint8Array.from(
-          atob(envelope.ciphertext),
-          c => c.charCodeAt(0)
-        );
+        const ciphertext = fromBase64(envelope.ciphertext);
 
-        const nonce = Uint8Array.from(
-          atob(envelope.nonce),
-          c => c.charCodeAt(0)
-        );
+        const nonce = fromBase64(envelope.nonce);
 
         const aad = envelope.aad
           ? new TextEncoder().encode(envelope.aad)

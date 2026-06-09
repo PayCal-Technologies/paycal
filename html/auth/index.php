@@ -216,6 +216,6 @@ require_once __DIR__ . '/../header.php';
   </div>
   </div>
 
-  <script src="<?php echo Environment::appURL('js/signin/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo User::nonce(); ?>"></script>
+  <script type="module" src="<?php echo Environment::appURL('js/signin/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo User::nonce(); ?>"></script>
 
 <?php require_once __DIR__ . '/../footer.php'; ?>

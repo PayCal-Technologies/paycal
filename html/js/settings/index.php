@@ -42,6 +42,7 @@ Javascript::renderDocBlock();
 import PC from "<?php echo Environment::appURL('js/'); ?>";
 import PW from "<?php echo Environment::appURL('js/phantomwing/'); ?>";
 import { initializeBillingSection } from "../core/billing.js";
+import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from "../core/binary-codec.js";
 
 const isDebugEnabled = () => window.PAYCAL_DEBUG === true;
 const debugLog = (...args) => {
@@ -222,24 +223,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const createRecoveryKeyButtonEl = document.getElementById('create_recovery_key_btn');
   const createRecoveryKeyStatusEl = document.getElementById('create_recovery_key_status');
 
-  const b64urlToBuffer = (b64url) => {
-    const padding = '='.repeat((4 - (b64url.length % 4)) % 4);
-    const base64 = (b64url + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes.buffer;
-  };
-
-  const bufferToB64url = (input) => {
-    const bytes = input instanceof ArrayBuffer ? new Uint8Array(input) : new Uint8Array(input.buffer);
-    let binary = '';
-    bytes.forEach((b) => { binary += String.fromCharCode(b); });
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-  };
-
   const WEB_AUTHN_UNSUPPORTED_MESSAGE = 'This browser cannot use passkeys. Use a WebAuthn-capable browser on a secure connection (HTTPS).';
   let passkeyActionHardDisabled = false;
   const isWebAuthnCapableBrowser = () => {
@@ -277,7 +260,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         workerUrl.searchParams.set('v', version);
       }
 
-      worker = new Worker(workerUrl.toString());
+      worker = new Worker(workerUrl.toString(), { type: 'module' });
       return worker;
     };
 

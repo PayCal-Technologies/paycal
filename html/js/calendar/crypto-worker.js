@@ -1,3 +1,5 @@
+import { fromBase64, latin1FromBase64, latin1ToBase64, toBase64 } from '/js/core/binary-codec.js';
+
 /**
  * HKDF KEY DERIVATION NOTE
  *
@@ -49,13 +51,8 @@ function safeFingerprint(value) {
   return `fp_${Math.abs(hash).toString(16)}`;
 }
 
-function b64ToBytes(b64) {
-  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-}
-
-function bytesToB64(bytes) {
-  return btoa(String.fromCharCode(...bytes));
-}
+const b64ToBytes = fromBase64;
+const bytesToB64 = toBase64;
 
 function encodeCrockfordBase32(bytes) {
   const alphabet = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -85,7 +82,7 @@ function formatRecoveryKey(encodedKey) {
 }
 
 function decodeEnvelope(base64Envelope) {
-  const envelope = JSON.parse(atob(base64Envelope));
+  const envelope = JSON.parse(latin1FromBase64(base64Envelope));
   const ivB64 = envelope.nonce || envelope.iv;
   const ctB64 = envelope.ciphertext || envelope.ct;
   if (!ivB64 || !ctB64) {
@@ -232,7 +229,7 @@ async function generateRecoveryMaterial(payload) {
     recoveryKey: formatRecoveryKey(encodedRecoveryKey),
     accountRecoverySalt: bytesToB64(saltBytes),
     recoveryProofKey: bytesToB64(new Uint8Array(proofKeyBits)),
-    wrappedDekRecovery: btoa(JSON.stringify({
+    wrappedDekRecovery: latin1ToBase64(JSON.stringify({
       version: 1,
       nonce: bytesToB64(wrapIv),
       ciphertext: bytesToB64(wrappedCt),
@@ -354,7 +351,7 @@ async function wrapCurrentDekWithPasskeyCredential(payload) {
   ));
 
   return {
-    wrappedDekPasskey: btoa(JSON.stringify({
+    wrappedDekPasskey: latin1ToBase64(JSON.stringify({
       version: 1,
       nonce: bytesToB64(wrapIv),
       ciphertext: bytesToB64(wrappedCt),
@@ -382,7 +379,7 @@ async function generateAndWrapWithPasskeyCredential(payload) {
   ));
 
   return {
-    wrappedDekPasskey: btoa(JSON.stringify({
+    wrappedDekPasskey: latin1ToBase64(JSON.stringify({
       version: 1,
       nonce: bytesToB64(wrapIv),
       ciphertext: bytesToB64(wrappedCt),
@@ -417,7 +414,7 @@ async function encryptEntry(payload) {
     living_out_allowance: Number(entry.living_out_allowance || 0),
     travel_hours: Number(entry.travel_hours || 0),
     wage: Number(entry.wage || 0),
-    encrypted_blob: btoa(JSON.stringify({
+    encrypted_blob: latin1ToBase64(JSON.stringify({
       dek_version: self.cryptoState.dekVersion || 1,
       ciphertext: bytesToB64(new Uint8Array(ciphertext)),
       nonce: bytesToB64(nonce),
@@ -436,7 +433,7 @@ async function decryptEntry(payload) {
     return null;
   }
 
-  const blob = JSON.parse(atob(entry.encrypted_blob));
+  const blob = JSON.parse(latin1FromBase64(entry.encrypted_blob));
   const entryDekVersion = blob.dek_version || 1;
   const currentDekVersion = self.cryptoState.dekVersion || 1;
 
@@ -514,7 +511,7 @@ async function encryptProfile(payload) {
   );
 
   return {
-    encrypted_blob: btoa(JSON.stringify({
+    encrypted_blob: latin1ToBase64(JSON.stringify({
       dek_version: self.cryptoState.dekVersion || 1,
       ciphertext: bytesToB64(new Uint8Array(ciphertext)),
       nonce: bytesToB64(nonce),

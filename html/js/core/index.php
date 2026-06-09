@@ -166,6 +166,10 @@ import PW from '/js/phantomwing/';
 import NavigationToggle from '/js/navigation-toggle.js';
 import RuntimeIntegrity from '/js/runtime-integrity.js';
 import A11yModule from '/js/core/a11y.js';
+import BinaryCodec from '/js/core/binary-codec.js';
+import { escapePattern } from '/js/core/regex.js';
+import SetUtils from '/js/core/set-utils.js';
+import BrowserCapabilities from '/js/core/capabilities.js';
 
 const PayCalCore = (() => {
 
@@ -2287,7 +2291,11 @@ const PayCalCore = (() => {
     togglePasswordVisibility,
     updateResource,
     getBrowserVendor,
-    init
+    init,
+    binaryCodec: BinaryCodec,
+    escapePattern,
+    setUtils: SetUtils,
+    capabilities: BrowserCapabilities,
   };
 })();
 

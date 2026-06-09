@@ -28,6 +28,7 @@ import PC from "<?php echo \PayCal\Domain\Config\Environment::appURL('js/'); ?>"
 import PW from "<?php echo \PayCal\Domain\Config\Environment::appURL('js/phantomwing/'); ?>";
 import { createDataGrid } from "/js/datagrid/";
 import { initializeBillingSection } from "../core/billing.js";
+import { uniqueNonEmptyStrings } from "../core/set-utils.js";
 
 (() => {
   'use strict';
@@ -1193,10 +1194,9 @@ import { initializeBillingSection } from "../core/billing.js";
       ? String(elements.allowedContactDomains.value || '')
       : '';
 
-    const domains = raw
+    const domains = uniqueNonEmptyStrings(raw
       .split(/[\s,;]+/)
-      .map((item) => item.trim().toLowerCase())
-      .filter((item, index, arr) => item !== '' && arr.indexOf(item) === index);
+      .map((item) => item.trim().toLowerCase()));
 
     if (!enforceEnabled) {
       elements.domainPolicyStatus.textContent = 'Contact domain enforcement is off.';

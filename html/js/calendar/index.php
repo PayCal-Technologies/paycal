@@ -58,6 +58,7 @@ switch ($user->calendar_autofocus) {
 
 import PC from '<?php echo Environment::appURL('js/'); ?>';
 import PW from '<?php echo Environment::appURL('js/phantomwing/'); ?>';
+import { fromBase64, latin1FromBase64, latin1ToBase64, toBase64 } from '<?php echo Environment::appURL('js/core/binary-codec.js'); ?>';
 
 let sites = <?php echo Sites::getSitesAsJson($user->user_uuid); ?>;
 const MSG_CAL_INVALID_HOURS = <?php echo json_encode($i18n['ERROR_CAL_INVALID_HOURS']); ?>;
@@ -998,10 +999,10 @@ const renderDayEntries = async (day, entries) => {
   for (const entry of safeEntries) {
     if (entry.encrypted_blob && PayCalCryptoState.dek) {
       try {
-        const blob = JSON.parse(atob(entry.encrypted_blob));
-        const iv = Uint8Array.from(atob(blob.nonce), c => c.charCodeAt(0));
+        const blob = JSON.parse(latin1FromBase64(entry.encrypted_blob));
+        const iv = fromBase64(blob.nonce);
         const aad = new TextEncoder().encode(blob.aad);
-        const ciphertext = Uint8Array.from(atob(blob.ciphertext), c => c.charCodeAt(0));
+        const ciphertext = fromBase64(blob.ciphertext);
         const decoded = await window.crypto.subtle.decrypt(
           { name: 'AES-GCM', iv, additionalData: aad },
           PayCalCryptoState.dek,
@@ -1153,9 +1154,9 @@ const save_work = async (e) => {
         PayCalCryptoState.dek,
         encoded
       );
-      const encrypted_blob = btoa(JSON.stringify({
-        ciphertext: btoa(String.fromCharCode(...new Uint8Array(ciphertext))),
-        nonce: btoa(String.fromCharCode(...nonce)),
+      const encrypted_blob = latin1ToBase64(JSON.stringify({
+        ciphertext: toBase64(new Uint8Array(ciphertext)),
+        nonce: toBase64(nonce),
         aad
       }));
 

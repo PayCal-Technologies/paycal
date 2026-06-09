@@ -16,6 +16,7 @@ $user = User::current();
 import PW from '/js/phantomwing/';
 import nacl from '/js/vendor/tweetnacl.js';
 import EarningsExport from '/js/earnings/earnings-export.js';
+import { fromBase64 as decodeBase64 } from '/js/core/binary-codec.js';
 
 // === Canonical Verification Payload Utilities ===
 // Fixed key order, no whitespace, locale-independent, v1
@@ -66,9 +67,7 @@ function serializeCanonicalVerificationPayload(payload) {
 }
 
 
-// use our own decodeBase64
-const decodeBase64 = (b64) =>
-  Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+// Canonical verification payload uses shared binary codec helpers.
 
 // Pure JS SHA-256 (works in HTTP contexts without crypto.subtle)
 function sha256(str) {

@@ -674,7 +674,6 @@ require_once Environment::appHome().'html/header.php';
 // Load core module for PayCalCore global functions
 echo Render::jsScript('core');
 
-// Load monolithic calendar.js directly (not the PHP-backed folder which includes PhantomWing)
 $cacheVersion = Environment::appVersion();
 if ($cacheVersion === '' || $cacheVersion === 'unknown') {
 	$calendarJsPath = Environment::appHome() . 'html/js/calendar/calendar.js';
@@ -685,6 +684,11 @@ if ($cacheVersion === '' || $cacheVersion === 'unknown') {
 }
 $cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
 $cspNonce = (is_string($cspNonceRaw) && $cspNonceRaw !== '') ? $cspNonceRaw : User::nonce();
+
+echo '    <script type="module" src="' . Environment::appURL('js/core/binary-codec.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"></script>' . PHP_EOL;
+echo '    <script type="module" src="' . Environment::appURL('js/core/set-utils.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"></script>' . PHP_EOL;
+
+// Load monolithic calendar.js directly (not the PHP-backed folder which includes PhantomWing)
 $calendarSriAttribute = Environment::appEnv() === 'prod'
 	? Render::sriAttribute('js/calendar/calendar.js')
 	: '';

@@ -2,6 +2,8 @@
 
 header('Content-Type: application/javascript; charset=utf-8');
 ?>
+import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '/js/core/binary-codec.js';
+
 (function () {
   const RECOVERY_PREFILL_SESSION_KEY = 'paycal.recovery.prefill';
   const state = {
@@ -138,7 +140,7 @@ header('Content-Type: application/javascript; charset=utf-8');
       return worker;
     }
 
-    worker = new Worker(`/js/calendar/crypto-worker.js?v=${encodeURIComponent(workerVersion)}`);
+    worker = new Worker(`/js/calendar/crypto-worker.js?v=${encodeURIComponent(workerVersion)}`, { type: 'module' });
     worker.onmessage = (event) => {
       const payload = event.data || {};
       const pending = workerPending.get(payload.id);
@@ -203,24 +205,6 @@ header('Content-Type: application/javascript; charset=utf-8');
       throw new Error(String(payload?.message || fallback));
     }
     return payload;
-  }
-
-  function b64urlToBuffer(b64url) {
-    const padding = '='.repeat((4 - (b64url.length % 4)) % 4);
-    const base64 = (b64url + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes.buffer;
-  }
-
-  function bufferToB64url(input) {
-    const bytes = input instanceof ArrayBuffer ? new Uint8Array(input) : new Uint8Array(input.buffer);
-    let binary = '';
-    bytes.forEach((b) => { binary += String.fromCharCode(b); });
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
   }
 
   async function startRecovery(event) {

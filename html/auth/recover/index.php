@@ -112,6 +112,6 @@ foreach ($i18nKeys as $i18nKey) {
       </section>
     </section>
   </main>
-  <script src="/js/auth-recovery/?v=<?php echo $assetVersion; ?>" defer></script>
+  <script type="module" src="/js/auth-recovery/?v=<?php echo $assetVersion; ?>" defer></script>
 </body>
 </html>

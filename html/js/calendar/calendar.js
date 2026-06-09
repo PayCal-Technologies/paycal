@@ -10,6 +10,14 @@
 (function() {
   'use strict';
 
+  const latin1FromBase64 = (value) => (
+    window.PayCalBinaryCodec?.latin1FromBase64?.(value) ?? atob(String(value ?? ''))
+  );
+  const uniqueTruthy = (values) => (
+    window.PayCalSetUtils?.uniqueTruthy?.(values)
+      ?? values.filter((value, index, arr) => value && arr.indexOf(value) === index)
+  );
+
   // Immediate check that script loaded
   window.CALENDAR_SCRIPT_LOADED = true;
   
@@ -462,7 +470,7 @@
     }
 
     try {
-      const parsed = JSON.parse(atob(base64Envelope));
+      const parsed = JSON.parse(latin1FromBase64(base64Envelope));
       const nonce = parsed.nonce || parsed.iv || '';
       const ciphertext = parsed.ciphertext || parsed.ct || '';
       const aadSiteId = (parsed?.aad?.site_id ?? parsed?.site_id ?? parsed?.s ?? '').toString().trim();
@@ -579,7 +587,7 @@
     }
 
     cryptoLog('[CRYPTO] Creating worker', { workerUrl, workerVersion });
-    payCalCryptoWorker = new Worker(workerScriptUrl);
+    payCalCryptoWorker = new Worker(workerScriptUrl, { type: 'module' });
     payCalCryptoWorker.onmessage = (event) => {
       const payload = event.data || {};
       const pending = payCalCryptoWorkerPending.get(payload.id);
@@ -697,7 +705,7 @@
             bootstrapData.credentialId,
           ];
 
-        const dedupedCandidates = credentialCandidates.filter((value, index, arr) => value && arr.indexOf(value) === index);
+        const dedupedCandidates = uniqueTruthy(credentialCandidates);
         PayCalCryptoState.credentialId = dedupedCandidates[0] || null;
 
         if (PayCalCryptoState.credentialId) {
@@ -1092,7 +1100,7 @@
       // Try to decode blob to extract DEK version for debugging
       let blobMeta = null;
       try {
-        const blob = JSON.parse(atob(entry.encrypted_blob));
+        const blob = JSON.parse(latin1FromBase64(entry.encrypted_blob));
         blobMeta = {
           dekVersion: blob.dek_version || 'unknown',
           hasNonce: !!blob.nonce,
