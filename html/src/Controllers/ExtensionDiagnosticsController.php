@@ -46,6 +46,9 @@ use PayCal\Domain\User;
 final class ExtensionDiagnosticsController
 {
   #[Route('extensions/runtime', ['GET'])]
+  /**
+   * TODO: Document runtimeSnapshot.
+   */
   #[ExtensionDiagnostics('runtime-manifests')]
   public function runtimeSnapshot(): void
   {

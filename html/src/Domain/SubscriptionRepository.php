@@ -214,6 +214,9 @@ final class SubscriptionRepository
       && $subscription['status']->grantsAccess();
   }
 
+  /**
+   * TODO: Document isBusinessActive.
+   */
   public static function isBusinessActive(string $userUUID): bool
   {
     $subscription = self::get($userUUID);

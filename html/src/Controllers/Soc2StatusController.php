@@ -19,6 +19,9 @@ use PayCal\Domain\User;
  */
 final class Soc2StatusController
 {
+  /**
+   * TODO: Document getSoc2Status.
+   */
   #[Route('internal/soc2/status', ['GET'])]
   public function getSoc2Status(): void
   {
@@ -73,11 +76,17 @@ final class Soc2StatusController
     return is_array($decoded) ? $decoded : [];
   }
 
+  /**
+   * TODO: Document stringValue.
+   */
   private function stringValue(mixed $value, string $fallback = ''): string
   {
     return is_scalar($value) ? (string) $value : $fallback;
   }
 
+  /**
+   * TODO: Document intValue.
+   */
   private function intValue(mixed $value, int $fallback = 0): int
   {
     return is_int($value)

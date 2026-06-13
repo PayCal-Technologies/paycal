@@ -2163,6 +2163,9 @@ final class BusinessDiscoveryController
     }
   }
 
+  /**
+   * TODO: Document generateAuditControlTest.
+   */
   #[Route('businesses/{businessId}/audit/control-test', ['POST'])]
   public function generateAuditControlTest(string $businessId): void
   {

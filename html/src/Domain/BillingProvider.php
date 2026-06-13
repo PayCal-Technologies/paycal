@@ -41,6 +41,9 @@ final class BillingProvider
   public const PUBLIC_TOGGLE = 'public-toggle';
   public const STRIPE = 'stripe';
 
+  /**
+   * TODO: Document current.
+   */
   #[ExtensionCapability('billing.provider')]
   public static function current(): string
   {
@@ -50,6 +53,9 @@ final class BillingProvider
     return $normalized === self::STRIPE ? self::STRIPE : self::PUBLIC_TOGGLE;
   }
 
+  /**
+   * TODO: Document isStripe.
+   */
   public static function isStripe(): bool
   {
     return self::current() === self::STRIPE;

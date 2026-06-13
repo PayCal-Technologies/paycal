@@ -693,11 +693,17 @@ class SettingsController
     return $write;
   }
 
+  /**
+   * TODO: Document scalarString.
+   */
   private function scalarString(mixed $value): string
   {
     return is_scalar($value) ? (string) $value : '';
   }
 
+  /**
+   * TODO: Document scalarInt.
+   */
   private function scalarInt(mixed $value, int $default = 0): int
   {
     if (is_int($value)) {
@@ -711,11 +717,17 @@ class SettingsController
     return $default;
   }
 
+  /**
+   * TODO: Document generateReferenceCode.
+   */
   private function generateReferenceCode(string $prefix): string
   {
     return $prefix . substr(hash('sha256', User::currentUUID() . '|' . microtime(true) . '|' . random_int(1000, 9999)), 0, 24);
   }
 
+  /**
+   * TODO: Document importSessionKey.
+   */
   private function importSessionKey(string $importId): string
   {
     return 'user:data_import:prepare:' . $importId;

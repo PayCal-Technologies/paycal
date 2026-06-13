@@ -49,6 +49,9 @@ final class BusinessTrustPolicy
     };
   }
 
+  /**
+   * TODO: Document resolveTrustLevel.
+   */
   public static function resolveTrustLevel(string $userUUID): string
   {
     $user = UserRepository::getByUUID($userUUID);

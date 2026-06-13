@@ -12,11 +12,17 @@ use PayCal\Domain\UserRepository;
  */
 final class BusinessSearchIndex
 {
+  /**
+   * TODO: Document entryKey.
+   */
   public static function entryKey(string $businessId): string
   {
     return Keys::BUSINESS_SEARCH_ENTRY . ':' . $businessId;
   }
 
+  /**
+   * TODO: Document sync.
+   */
   public static function sync(string $businessId): void
   {
     $businessId = trim($businessId);
@@ -56,6 +62,9 @@ final class BusinessSearchIndex
     Database::sadd(Keys::BUSINESS_SEARCH_INDEX, $businessId);
   }
 
+  /**
+   * TODO: Document remove.
+   */
   public static function remove(string $businessId): void
   {
     $businessId = trim($businessId);

@@ -41,6 +41,9 @@ final class PageHeadRenderer
     'PAGE_AUTH' => 'auth',
   ];
 
+  /**
+   * TODO: Document pageFileFor.
+   */
   public static function pageFileFor(string $currentPage): string
   {
     return self::PAGE_FILE_MAP[$currentPage] ?? 'content';

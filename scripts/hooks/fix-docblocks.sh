@@ -12,6 +12,8 @@ source "${REPO_ROOT}/scripts/lib/common.sh"
 repo_root="${REPO_ROOT}"
 cd "${repo_root}"
 
+rm -f "${repo_root}/tmp/fix-docblocks-paths."*.txt "${repo_root}/tmp/missing-docblocks."*.json "${repo_root}/tmp/changed-docblocks."*.txt 2>/dev/null || true
+
 paths_file="${1:-}"
 if [[ -z "${paths_file}" ]]; then
   paths_file="$(mktemp "${repo_root}/tmp/fix-docblocks-paths.XXXXXX.txt")"

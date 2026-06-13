@@ -34,6 +34,9 @@ namespace PayCal\Infrastructure\Env;
  */
 final class Dotenv
 {
+    /**
+     * TODO: Document __construct.
+     */
     private function __construct(
         private readonly string $path,
         private readonly bool $immutable,

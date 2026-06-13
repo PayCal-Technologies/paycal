@@ -222,6 +222,9 @@ final class BusinessWorkspaceWarmer
     return $results;
   }
 
+  /**
+   * TODO: Document dispatchWarmInBackground.
+   */
   private static function dispatchWarmInBackground(string $businessId, string $actorUUID, int $year): bool
   {
     if (defined('PHPUNIT_COMPOSER_INSTALL')) {
@@ -240,6 +243,9 @@ final class BusinessWorkspaceWarmer
     );
   }
 
+  /**
+   * TODO: Document dispatchUserWarmInBackground.
+   */
   private static function dispatchUserWarmInBackground(string $actorUUID, int $year): bool
   {
     if (defined('PHPUNIT_COMPOSER_INSTALL')) {
@@ -267,6 +273,9 @@ final class BusinessWorkspaceWarmer
     return function_exists('pcntl_fork') && PHP_SAPI === 'cli';
   }
 
+  /**
+   * TODO: Document forkSingleBusinessWarm.
+   */
   private static function forkSingleBusinessWarm(string $businessId, string $actorUUID, int $year): bool
   {
     if (!self::canForkSafely()) {
@@ -290,6 +299,9 @@ final class BusinessWorkspaceWarmer
     exit(0);
   }
 
+  /**
+   * TODO: Document forkUserWarm.
+   */
   private static function forkUserWarm(string $actorUUID, int $year): bool
   {
     if (!self::canForkSafely()) {
@@ -313,6 +325,9 @@ final class BusinessWorkspaceWarmer
     exit(0);
   }
 
+  /**
+   * TODO: Document spawnDetachedCliWarm.
+   */
   private static function spawnDetachedCliWarm(string ...$args): bool
   {
     $command = array_values(array_merge([self::resolveCliPhpBinary()], $args));
@@ -334,11 +349,17 @@ final class BusinessWorkspaceWarmer
     return is_resource($process);
   }
 
+  /**
+   * TODO: Document warmScriptPath.
+   */
   private static function warmScriptPath(): string
   {
     return rtrim(Environment::appHome(), '/') . '/tools/warm_business_workspace_cache.php';
   }
 
+  /**
+   * TODO: Document resolveCliPhpBinary.
+   */
   private static function resolveCliPhpBinary(): string
   {
     $phpBinary = PHP_BINARY;
@@ -502,6 +523,9 @@ final class BusinessWorkspaceWarmer
     ];
   }
 
+  /**
+   * TODO: Document normalizeYear.
+   */
   private static function normalizeYear(?int $year): int
   {
     $year = $year ?? (int) date('Y');

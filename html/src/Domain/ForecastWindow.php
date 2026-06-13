@@ -48,6 +48,9 @@ final class ForecastWindow
   public readonly \DateTimeImmutable $start;
   public readonly \DateTimeImmutable $end;
 
+  /**
+   * TODO: Document __construct.
+   */
   private function __construct(
     ForecastWindowType $type,
     \DateTimeImmutable $start,

@@ -362,11 +362,17 @@ final class BusinessMembersFinancialSummary
     ];
   }
 
+  /**
+   * TODO: Document formatCurrency.
+   */
   public function formatCurrency(float $amount): string
   {
     return '$' . number_format($amount, 2, '.', ',');
   }
 
+  /**
+   * TODO: Document formatHours.
+   */
   public function formatHours(float $hours): string
   {
     return number_format($hours, 2, '.', ',');

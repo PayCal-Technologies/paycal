@@ -109,6 +109,9 @@ final class OrgLockedPeriodSnapshot
     ];
   }
 
+  /**
+   * TODO: Document yearHasLockedDates.
+   */
   private static function yearHasLockedDates(string $memberUuid, int $year): bool
   {
     $lockBoundary = WorkEntryLockService::getLockBoundaryDate($memberUuid);
@@ -251,6 +254,9 @@ final class OrgLockedPeriodSnapshot
     ];
   }
 
+  /**
+   * TODO: Document resolveBusinessOwnerUuid.
+   */
   public static function resolveBusinessOwnerUuid(string $businessId): string
   {
     $businessId = trim($businessId);

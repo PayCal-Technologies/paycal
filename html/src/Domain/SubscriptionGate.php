@@ -9,6 +9,9 @@ namespace PayCal\Domain;
  */
 final class SubscriptionGate
 {
+  /**
+   * TODO: Document canCreateSharedBusinesses.
+   */
   public static function canCreateSharedBusinesses(string $userUUID): bool
   {
     if (User::isAdmin()) {

@@ -61,6 +61,9 @@ final class OrganizationAuditControlTestService
   /** @var \Closure(array<string, scalar>, array<string, scalar>, string, array{object_path: string, object_hash: string}): array{uploaded: bool, object_path: string, object_hash: string, http_code: int, error: string, attempts: int} */
   private \Closure $alertArtifactUploader;
 
+  /**
+   * TODO: Document __construct.
+   */
   public function __construct(
     ?OrganizationDiscoveryService $organizationService = null,
     ?\Closure $alertArtifactUploader = null,

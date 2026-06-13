@@ -46,6 +46,9 @@ final class BusinessNav
     ];
   }
 
+  /**
+   * TODO: Document pageTitleKeyFor.
+   */
   public static function pageTitleKeyFor(string $currentPage): string
   {
     return match ($currentPage) {
@@ -155,6 +158,9 @@ final class BusinessNav
     return substr($letters, 0, 3);
   }
 
+  /**
+   * TODO: Document roleDisplayLabel.
+   */
   public static function roleDisplayLabel(string $role): string
   {
     $role = strtolower(trim($role));

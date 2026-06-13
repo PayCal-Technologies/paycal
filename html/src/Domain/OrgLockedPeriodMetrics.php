@@ -83,6 +83,9 @@ final class OrgLockedPeriodMetrics
     Database::hset(Keys::orgLockedPeriodMetrics($businessId, $year), [$memberUuid => $encoded]);
   }
 
+  /**
+   * TODO: Document has.
+   */
   public static function has(string $businessId, string $memberUuid, int $year): bool
   {
     return self::get($businessId, $memberUuid, $year) !== null;

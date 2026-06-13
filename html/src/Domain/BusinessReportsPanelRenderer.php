@@ -7,6 +7,9 @@ namespace PayCal\Domain;
  */
 final class BusinessReportsPanelRenderer
 {
+  /**
+   * TODO: Document loadingSkeleton.
+   */
   public function loadingSkeleton(int $year = 0): string
   {
     $yearLabel = $year > 0 ? (string) $year : '';
@@ -24,6 +27,9 @@ final class BusinessReportsPanelRenderer
       . '</div>';
   }
 
+  /**
+   * TODO: Document buildYearRowSkeleton.
+   */
   private function buildYearRowSkeleton(): string
   {
     return '<div class="earnings_team_year_row business_reports_skeleton_year_row" aria-hidden="true">'
@@ -33,6 +39,9 @@ final class BusinessReportsPanelRenderer
       . '</div>';
   }
 
+  /**
+   * TODO: Document buildExecSnapshotSkeleton.
+   */
   private function buildExecSnapshotSkeleton(): string
   {
     $items = '';
@@ -69,6 +78,9 @@ final class BusinessReportsPanelRenderer
       . '</div>';
   }
 
+  /**
+   * TODO: Document buildMemberGridSkeleton.
+   */
   private function buildMemberGridSkeleton(): string
   {
     $header = '<div class="earnings_team_grid_header">'

@@ -61,26 +61,41 @@ final class BusinessDashboardMetrics
     return $metrics;
   }
 
+  /**
+   * TODO: Document recordPendingInviteCreated.
+   */
   public static function recordPendingInviteCreated(string $businessId): void
   {
     self::adjustCachedCounter(Keys::businessMetricsPendingInvites($businessId), 1);
   }
 
+  /**
+   * TODO: Document recordPendingInviteResolved.
+   */
   public static function recordPendingInviteResolved(string $businessId): void
   {
     self::adjustCachedCounter(Keys::businessMetricsPendingInvites($businessId), -1);
   }
 
+  /**
+   * TODO: Document recordPendingRequestCreated.
+   */
   public static function recordPendingRequestCreated(string $businessId): void
   {
     self::adjustCachedCounter(Keys::businessMetricsPendingRequests($businessId), 1);
   }
 
+  /**
+   * TODO: Document recordPendingRequestResolved.
+   */
   public static function recordPendingRequestResolved(string $businessId): void
   {
     self::adjustCachedCounter(Keys::businessMetricsPendingRequests($businessId), -1);
   }
 
+  /**
+   * TODO: Document touchLastActivity.
+   */
   public static function touchLastActivity(string $businessId, ?string $timestamp = null): void
   {
     $businessId = trim($businessId);
@@ -116,11 +131,17 @@ final class BusinessDashboardMetrics
     }
   }
 
+  /**
+   * TODO: Document formatIntegerCount.
+   */
   public static function formatIntegerCount(int $count): string
   {
     return (string) max(0, $count);
   }
 
+  /**
+   * TODO: Document formatOptionalCount.
+   */
   public static function formatOptionalCount(?int $count): string
   {
     if ($count === null) {
@@ -130,6 +151,9 @@ final class BusinessDashboardMetrics
     return $count > 0 ? (string) $count : '';
   }
 
+  /**
+   * TODO: Document formatTimestampLabel.
+   */
   public static function formatTimestampLabel(string $iso8601): string
   {
     $formatted = TimestampFormatter::formatAuditTimestamp($iso8601);
@@ -163,6 +187,9 @@ final class BusinessDashboardMetrics
     ];
   }
 
+  /**
+   * TODO: Document setSize.
+   */
   private static function setSize(string $key): int
   {
     $size = Database::scard($key);
@@ -170,6 +197,9 @@ final class BusinessDashboardMetrics
     return $size !== null ? max(0, $size) : max(0, count(Database::smembers($key)));
   }
 
+  /**
+   * TODO: Document pendingInviteCount.
+   */
   private static function pendingInviteCount(string $businessId): int
   {
     return self::readOrRebuildPendingCounter(
@@ -179,6 +209,9 @@ final class BusinessDashboardMetrics
     );
   }
 
+  /**
+   * TODO: Document pendingRequestCount.
+   */
   private static function pendingRequestCount(string $businessId): int
   {
     return self::readOrRebuildPendingCounter(
@@ -188,6 +221,9 @@ final class BusinessDashboardMetrics
     );
   }
 
+  /**
+   * TODO: Document readOrRebuildPendingCounter.
+   */
   private static function readOrRebuildPendingCounter(
     string $counterKey,
     string $orgSetKey,
@@ -204,6 +240,9 @@ final class BusinessDashboardMetrics
     return $count;
   }
 
+  /**
+   * TODO: Document countPendingStatusesFromOrgSet.
+   */
   private static function countPendingStatusesFromOrgSet(string $orgSetKey, string $recordKeyPrefix): int
   {
     $recordIds = Database::smembers($orgSetKey);
@@ -227,6 +266,9 @@ final class BusinessDashboardMetrics
     return $pending;
   }
 
+  /**
+   * TODO: Document workEntryCountForDate.
+   */
   private static function workEntryCountForDate(string $businessId, string $dateYmd): int
   {
     $raw = Database::get(Keys::businessMetricsWorkDay($businessId, $dateYmd));
@@ -234,6 +276,9 @@ final class BusinessDashboardMetrics
     return $raw !== '' ? max(0, (int) $raw) : 0;
   }
 
+  /**
+   * TODO: Document workEntryCountForWeek.
+   */
   private static function workEntryCountForWeek(
     string $businessId,
     string $todayYmd,
@@ -289,6 +334,9 @@ final class BusinessDashboardMetrics
     return $settingsUpdated;
   }
 
+  /**
+   * TODO: Document resolveBusinessTimezone.
+   */
   private static function resolveBusinessTimezone(string $businessId): \DateTimeZone
   {
     $timezoneRaw = trim((string) Database::hget(Keys::BUSINESS_SETTINGS . ':' . $businessId, 'timezone'));
@@ -303,6 +351,9 @@ final class BusinessDashboardMetrics
     }
   }
 
+  /**
+   * TODO: Document adjustCachedCounter.
+   */
   private static function adjustCachedCounter(string $counterKey, int $delta): void
   {
     if ($delta === 0) {

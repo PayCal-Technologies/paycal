@@ -1563,6 +1563,9 @@ final class StripeBillingService
     return null;
   }
 
+  /**
+   * TODO: Document applyActiveSubscriptionUpgrade.
+   */
   private function applyActiveSubscriptionUpgrade(
     string $userUUID,
     ?string $subscriptionId,

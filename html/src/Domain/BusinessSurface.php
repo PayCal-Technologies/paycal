@@ -14,12 +14,18 @@ final class BusinessSurface
   private const CAPABILITY_PAGE_PATHS = 'business.page.paths';
   private const CAPABILITY_NAV_TABS = 'business.nav.tabs';
 
+  /**
+   * TODO: Document isEnabled.
+   */
   #[ExtensionCapability(self::CAPABILITY_ENABLED)]
   public static function isEnabled(): bool
   {
     return ExtensionCapabilityBridge::enabled(self::CAPABILITY_ENABLED, false);
   }
 
+  /**
+   * TODO: Document redirectHomeIfPageUnavailable.
+   */
   public static function redirectHomeIfPageUnavailable(string $requestPath): void
   {
     if (self::isEnabled() && self::pagePathIsEnabled($requestPath)) {
@@ -89,6 +95,9 @@ final class BusinessSurface
     ];
   }
 
+  /**
+   * TODO: Document pageTitleKeyFor.
+   */
   public static function pageTitleKeyFor(string $currentPage): string
   {
     foreach (self::navTabs() as $tab) {
@@ -103,6 +112,9 @@ final class BusinessSurface
     };
   }
 
+  /**
+   * TODO: Document pagePathIsEnabled.
+   */
   public static function pagePathIsEnabled(string $requestPath): bool
   {
     if (!self::isEnabled()) {
@@ -161,6 +173,9 @@ final class BusinessSurface
     return array_values($paths);
   }
 
+  /**
+   * TODO: Document pathMatches.
+   */
   private static function pathMatches(string $matchPrefix, string $requestPath): bool
   {
     $normalizedMatch = self::normalizePath($matchPrefix);
@@ -171,6 +186,9 @@ final class BusinessSurface
     return $requestPath === $normalizedMatch || str_starts_with($requestPath, $normalizedMatch . '/');
   }
 
+  /**
+   * TODO: Document normalizePath.
+   */
   private static function normalizePath(string $path): string
   {
     $pathOnly = parse_url(trim($path), PHP_URL_PATH);

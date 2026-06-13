@@ -1823,6 +1823,9 @@ final class OrganizationDiscoveryController
     }
   }
 
+  /**
+   * TODO: Document generateAuditControlTest.
+   */
   #[Route('organizations/{organizationID}/audit/control-test', ['POST'])]
   public function generateAuditControlTest(string $organizationID): void
   {

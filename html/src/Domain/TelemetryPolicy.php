@@ -76,6 +76,9 @@ final class TelemetryPolicy
     ];
   }
 
+  /**
+   * TODO: Document canAccess.
+   */
   public static function canAccess(string $stream, string $role): bool
   {
     $streamMeta = self::describeStream($stream);

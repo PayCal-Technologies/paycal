@@ -563,26 +563,41 @@ final class Keys
     return self::SYSTEM_AUDIT_PUBSUB;
   }
 
+  /**
+   * TODO: Document businessMetricsPendingInvites.
+   */
   public static function businessMetricsPendingInvites(string $businessId): string
   {
     return self::BUSINESS_METRICS . self::SEPARATOR . 'pending_invites' . self::SEPARATOR . $businessId;
   }
 
+  /**
+   * TODO: Document businessMetricsPendingRequests.
+   */
   public static function businessMetricsPendingRequests(string $businessId): string
   {
     return self::BUSINESS_METRICS . self::SEPARATOR . 'pending_requests' . self::SEPARATOR . $businessId;
   }
 
+  /**
+   * TODO: Document businessMetricsWorkDay.
+   */
   public static function businessMetricsWorkDay(string $businessId, string $dateYmd): string
   {
     return self::BUSINESS_METRICS . self::SEPARATOR . 'work' . self::SEPARATOR . $businessId . self::SEPARATOR . $dateYmd;
   }
 
+  /**
+   * TODO: Document businessSnapshot.
+   */
   public static function businessSnapshot(string $businessId): string
   {
     return self::BUSINESS_SNAPSHOT . self::SEPARATOR . $businessId;
   }
 
+  /**
+   * TODO: Document orgLockedPeriodMetrics.
+   */
   public static function orgLockedPeriodMetrics(string $businessId, int $year): string
   {
     return self::ORG_LOCKED_PERIOD_METRICS . self::SEPARATOR . $businessId . self::SEPARATOR . (string) $year;
@@ -609,41 +624,65 @@ final class Keys
   public const ORGANIZATION_ACCESS_REQUEST_ACTIVE = self::BUSINESS_ACCESS_REQUEST_ACTIVE;
   public const ORGANIZATION_DEK_WRAP = self::BUSINESS_DEK_WRAP;
 
+  /**
+   * TODO: Document organizationInviteImportPrepare.
+   */
   public static function organizationInviteImportPrepare(string $importId): string
   {
     return self::businessInviteImportPrepare($importId);
   }
 
+  /**
+   * TODO: Document organizationInviteImportChallenge.
+   */
   public static function organizationInviteImportChallenge(string $challengeId): string
   {
     return self::businessInviteImportChallenge($challengeId);
   }
 
+  /**
+   * TODO: Document organizationConsent.
+   */
   public static function organizationConsent(string $consentId): string
   {
     return self::businessConsent($consentId);
   }
 
+  /**
+   * TODO: Document organizationConsentsByOrg.
+   */
   public static function organizationConsentsByOrg(string $orgId): string
   {
     return self::businessConsentsByOrg($orgId);
   }
 
+  /**
+   * TODO: Document organizationConsentsByUser.
+   */
   public static function organizationConsentsByUser(string $userUUID): string
   {
     return self::businessConsentsByUser($userUUID);
   }
 
+  /**
+   * TODO: Document organizationDekRegistry.
+   */
   public static function organizationDekRegistry(string $orgId, string $segment): string
   {
     return self::businessDekRegistry($orgId, $segment);
   }
 
+  /**
+   * TODO: Document organizationDekVersion.
+   */
   public static function organizationDekVersion(string $orgId, string $segment, string $version): string
   {
     return self::businessDekVersion($orgId, $segment, $version);
   }
 
+  /**
+   * TODO: Document organizationDekWrap.
+   */
   public static function organizationDekWrap(
     string $orgId,
     string $segment,
@@ -654,46 +693,73 @@ final class Keys
     return self::businessDekWrap($orgId, $segment, $version, $userUUID, $credentialId);
   }
 
+  /**
+   * TODO: Document organizationAuditControlTest.
+   */
   public static function organizationAuditControlTest(string $testId): string
   {
     return self::businessAuditControlTest($testId);
   }
 
+  /**
+   * TODO: Document organizationAuditControlTestIndex.
+   */
   public static function organizationAuditControlTestIndex(string $orgId): string
   {
     return self::businessAuditControlTestIndex($orgId);
   }
 
+  /**
+   * TODO: Document organizationNotificationUnreadByUser.
+   */
   public static function organizationNotificationUnreadByUser(string $userUUID): string
   {
     return self::businessNotificationUnreadByUser($userUUID);
   }
 
+  /**
+   * TODO: Document organizationNotificationTotalByUser.
+   */
   public static function organizationNotificationTotalByUser(string $userUUID): string
   {
     return self::businessNotificationTotalByUser($userUUID);
   }
 
+  /**
+   * TODO: Document organizationNotificationLastRead.
+   */
   public static function organizationNotificationLastRead(string $orgId, string $userUUID): string
   {
     return self::businessNotificationLastRead($orgId, $userUUID);
   }
 
+  /**
+   * TODO: Document organizationNotificationEventsByOrg.
+   */
   public static function organizationNotificationEventsByOrg(string $orgId): string
   {
     return self::businessNotificationEventsByOrg($orgId);
   }
 
+  /**
+   * TODO: Document organizationNotificationChannelOrg.
+   */
   public static function organizationNotificationChannelOrg(string $orgId): string
   {
     return self::businessNotificationChannelOrg($orgId);
   }
 
+  /**
+   * TODO: Document organizationNotificationChannelRole.
+   */
   public static function organizationNotificationChannelRole(string $orgId, string $role): string
   {
     return self::businessNotificationChannelRole($orgId, $role);
   }
 
+  /**
+   * TODO: Document organizationNotificationChannelUser.
+   */
   public static function organizationNotificationChannelUser(string $userUUID): string
   {
     return self::businessNotificationChannelUser($userUUID);

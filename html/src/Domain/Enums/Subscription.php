@@ -13,6 +13,9 @@ enum Subscription: string
   case PREMIUM = 'premium';
   case BUSINESS = 'business';
 
+  /**
+   * TODO: Document priceInCents.
+   */
   public function priceInCents(): int
   {
     return match ($this) {
@@ -22,6 +25,9 @@ enum Subscription: string
     };
   }
 
+  /**
+   * TODO: Document annualPriceInCents.
+   */
   public function annualPriceInCents(): int
   {
     return match ($this) {
@@ -31,6 +37,9 @@ enum Subscription: string
     };
   }
 
+  /**
+   * TODO: Document maxMembersPerOrg.
+   */
   public function maxMembersPerOrg(): int
   {
     return match ($this) {
@@ -40,21 +49,33 @@ enum Subscription: string
     };
   }
 
+  /**
+   * TODO: Document canCreateSharedOrgs.
+   */
   public function canCreateSharedOrgs(): bool
   {
     return $this === self::BUSINESS;
   }
 
+  /**
+   * TODO: Document includesPremiumReporting.
+   */
   public function includesPremiumReporting(): bool
   {
     return $this === self::PREMIUM || $this === self::BUSINESS;
   }
 
+  /**
+   * TODO: Document includesBusinessFeatures.
+   */
   public function includesBusinessFeatures(): bool
   {
     return $this === self::BUSINESS;
   }
 
+  /**
+   * TODO: Document displayLabel.
+   */
   public function displayLabel(): string
   {
     return match ($this) {

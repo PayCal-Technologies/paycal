@@ -211,6 +211,9 @@ class DataGrid
     return $class;
   }
 
+  /**
+   * TODO: Document resolvePager.
+   */
   private function resolvePager(mixed $pager): ?PagerInterface
   {
     return $pager instanceof PagerInterface ? $pager : null;

@@ -60,6 +60,9 @@ final class LanguageAuditService
   /** @var string Absolute path to the strings/ directory. */
   private string $stringsDir;
 
+  /**
+   * TODO: Document __construct.
+   */
   public function __construct(string $stringsDir)
   {
     $this->stringsDir = rtrim($stringsDir, '/');

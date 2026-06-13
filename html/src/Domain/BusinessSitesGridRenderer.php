@@ -277,6 +277,9 @@ final class BusinessSitesGridRenderer
     return (string) preg_replace($pattern, $replacement, $html, 1);
   }
 
+  /**
+   * TODO: Document loadingSkeleton.
+   */
   public function loadingSkeleton(): string
   {
     $cell = '<span class="sk-line businesses_datagrid_skeleton_cell"></span>';
@@ -285,11 +288,17 @@ final class BusinessSitesGridRenderer
     return str_repeat($row, 4);
   }
 
+  /**
+   * TODO: Document emptyMessage.
+   */
   public function emptyMessage(string $message): string
   {
     return '<div class="datagrid_empty">' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</div>';
   }
 
+  /**
+   * TODO: Document ownershipStatusTagLabel.
+   */
   private function ownershipStatusTagLabel(string $ownershipScope): string
   {
     return match ($ownershipScope) {
@@ -299,6 +308,9 @@ final class BusinessSitesGridRenderer
     };
   }
 
+  /**
+   * TODO: Document formatOwnershipSymbolHtml.
+   */
   private function formatOwnershipSymbolHtml(string $ownershipScope): string
   {
     $class = match ($ownershipScope) {
@@ -310,6 +322,9 @@ final class BusinessSitesGridRenderer
     return '<span class="business_sites_ownership_symbol ' . $class . '" aria-hidden="true"></span>';
   }
 
+  /**
+   * TODO: Document formatOwnershipStatusPillHtml.
+   */
   private function formatOwnershipStatusPillHtml(string $ownershipScope): string
   {
     $symbolClass = match ($ownershipScope) {
@@ -324,6 +339,9 @@ final class BusinessSitesGridRenderer
       . '</span>';
   }
 
+  /**
+   * TODO: Document formatBudgetUsedHtml.
+   */
   private function formatBudgetUsedHtml(float $workGross, float $budgetAmount): string
   {
     if ($budgetAmount <= 0) {
@@ -360,6 +378,9 @@ final class BusinessSitesGridRenderer
     return ('' !== $color && preg_match('/^#[0-9A-F]{6}$/', $color)) ? $color : '';
   }
 
+  /**
+   * TODO: Document formatSiteNameCellHtml.
+   */
   private function formatSiteNameCellHtml(string $siteName, string $ownershipScope, bool $isBusinessManaged): string
   {
     $displayName = $isBusinessManaged ? '[EIC] ' . $siteName : $siteName;

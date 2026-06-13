@@ -84,6 +84,9 @@ final class BusinessDiscoveryService
   private const BULK_IMPORT_CHALLENGE_TTL_SECONDS = 600;
   private const BULK_IMPORT_CHALLENGE_MAX_ATTEMPTS = 5;
 
+  /**
+   * TODO: Document isDelegatedWorkMode.
+   */
   public static function isDelegatedWorkMode(string $mode): bool
   {
     $mode = strtolower(trim($mode));
@@ -91,6 +94,9 @@ final class BusinessDiscoveryService
     return in_array($mode, [self::ENCRYPTION_MODE_BUSINESS, 'organization'], true);
   }
 
+  /**
+   * TODO: Document isBusinessEncryptionMode.
+   */
   public static function isBusinessEncryptionMode(string $mode): bool
   {
     return self::isDelegatedWorkMode($mode);
@@ -113,6 +119,9 @@ final class BusinessDiscoveryService
     return in_array($businessManaged, ['1', 'true', 'yes'], true);
   }
 
+  /**
+   * TODO: Document resolvePostedBusinessId.
+   */
   public static function resolvePostedBusinessId(string ...$candidates): string
   {
     foreach ($candidates as $candidate) {
@@ -2172,6 +2181,9 @@ final class BusinessDiscoveryService
     return self::BUSINESS_SITE_OWNERSHIP_LINKED;
   }
 
+  /**
+   * TODO: Document businessSiteOwnershipLabel.
+   */
   public function businessSiteOwnershipLabel(string $ownershipScope): string
   {
     return match ($ownershipScope) {

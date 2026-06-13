@@ -288,6 +288,9 @@ final class BusinessModerationService
     return $rows;
   }
 
+  /**
+   * TODO: Document approveListing.
+   */
   public static function approveListing(string $businessId, string $adminUUID): bool
   {
     return self::adminAction($businessId, $adminUUID, 'approve_listing', function (array $business) use ($adminUUID): array {
@@ -315,6 +318,9 @@ final class BusinessModerationService
     }, BusinessAuditLedger::EVENT_LISTING_ENABLED);
   }
 
+  /**
+   * TODO: Document rejectName.
+   */
   public static function rejectName(string $businessId, string $adminUUID, string $reason = 'manual_admin_decision'): bool
   {
     return self::adminAction($businessId, $adminUUID, 'reject_name', function (array $business) use ($reason): array {
@@ -342,6 +348,9 @@ final class BusinessModerationService
     }, BusinessAuditLedger::EVENT_NAME_REJECTED);
   }
 
+  /**
+   * TODO: Document hideListing.
+   */
   public static function hideListing(string $businessId, string $adminUUID): bool
   {
     return self::adminAction($businessId, $adminUUID, 'hide_listing', function (): array {
@@ -352,6 +361,9 @@ final class BusinessModerationService
     }, BusinessAuditLedger::EVENT_LISTING_HIDDEN);
   }
 
+  /**
+   * TODO: Document suspendBusiness.
+   */
   public static function suspendBusiness(string $businessId, string $adminUUID, string $reason): bool
   {
     return self::adminAction($businessId, $adminUUID, 'suspend_business', function () use ($reason): array {
@@ -362,6 +374,9 @@ final class BusinessModerationService
     }, BusinessAuditLedger::EVENT_SUSPENDED);
   }
 
+  /**
+   * TODO: Document restoreBusiness.
+   */
   public static function restoreBusiness(string $businessId, string $adminUUID): bool
   {
     return self::adminAction($businessId, $adminUUID, 'restore_business', function (): array {
@@ -374,6 +389,9 @@ final class BusinessModerationService
     }, BusinessAuditLedger::EVENT_RESTORED);
   }
 
+  /**
+   * TODO: Document markOwnerTrusted.
+   */
   public static function markOwnerTrusted(string $businessId, string $adminUUID): bool
   {
     $business = Database::hgetall(Keys::BUSINESS . ':' . $businessId);
@@ -410,6 +428,9 @@ final class BusinessModerationService
     return true;
   }
 
+  /**
+   * TODO: Document enqueue.
+   */
   public static function enqueue(string $businessId): void
   {
     if ($businessId !== '') {
@@ -417,6 +438,9 @@ final class BusinessModerationService
     }
   }
 
+  /**
+   * TODO: Document dequeue.
+   */
   public static function dequeue(string $businessId): void
   {
     if ($businessId !== '') {
@@ -665,6 +689,9 @@ final class BusinessModerationService
     return $policyLine . ' ' . $remainingLine . '.';
   }
 
+  /**
+   * TODO: Document formatDuration.
+   */
   private static function formatDuration(int $seconds): string
   {
     if ($seconds <= 0) {
@@ -705,6 +732,9 @@ final class BusinessModerationService
     return $config;
   }
 
+  /**
+   * TODO: Document trustConfigInt.
+   */
   private static function trustConfigInt(string $key, int $default): int
   {
     $config = self::trustConfig();
@@ -713,6 +743,9 @@ final class BusinessModerationService
     return is_numeric($value) ? (int) $value : $default;
   }
 
+  /**
+   * TODO: Document rejectPublicMaxScore.
+   */
   private static function rejectPublicMaxScore(): int
   {
     $config = self::trustConfig();

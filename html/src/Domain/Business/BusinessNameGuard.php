@@ -168,6 +168,9 @@ final class BusinessNameGuard
     return self::DECISION_APPROVED;
   }
 
+  /**
+   * TODO: Document normalizeUnicode.
+   */
   private static function normalizeUnicode(string $value): string
   {
     if (class_exists(\Normalizer::class)) {
@@ -179,11 +182,17 @@ final class BusinessNameGuard
     return $value;
   }
 
+  /**
+   * TODO: Document stripInvisibleControls.
+   */
   private static function stripInvisibleControls(string $value): string
   {
     return preg_replace('/[\x{00}-\x{1F}\x{7F}\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{206F}\x{FEFF}]/u', '', $value) ?? $value;
   }
 
+  /**
+   * TODO: Document skeleton.
+   */
   private static function skeleton(string $searchName): string
   {
     $map = [
@@ -200,6 +209,9 @@ final class BusinessNameGuard
     return preg_replace('/[^a-z0-9]+/', '', $skeleton) ?? $skeleton;
   }
 
+  /**
+   * TODO: Document matchesReserved.
+   */
   private static function matchesReserved(string $searchName, string $skeleton): bool
   {
     foreach (self::reservedNames() as $reserved) {
@@ -215,11 +227,17 @@ final class BusinessNameGuard
     return false;
   }
 
+  /**
+   * TODO: Document isExactReservedPaycal.
+   */
   private static function isExactReservedPaycal(string $searchName): bool
   {
     return $searchName === 'paycal';
   }
 
+  /**
+   * TODO: Document hasMixedScript.
+   */
   private static function hasMixedScript(string $value): bool
   {
     $hasLatin = preg_match('/\p{Latin}/u', $value) === 1;
@@ -276,6 +294,9 @@ final class BusinessNameGuard
     return $out;
   }
 
+  /**
+   * TODO: Document nameMinLength.
+   */
   private static function nameMinLength(): int
   {
     $config = self::config();
@@ -284,6 +305,9 @@ final class BusinessNameGuard
     return is_numeric($name['min_length'] ?? null) ? (int) $name['min_length'] : 2;
   }
 
+  /**
+   * TODO: Document nameMaxLength.
+   */
   private static function nameMaxLength(): int
   {
     $config = self::config();
@@ -292,6 +316,9 @@ final class BusinessNameGuard
     return is_numeric($name['max_length'] ?? null) ? (int) $name['max_length'] : 80;
   }
 
+  /**
+   * TODO: Document autoApproveMaxScore.
+   */
   private static function autoApproveMaxScore(): int
   {
     $config = self::config();
@@ -300,6 +327,9 @@ final class BusinessNameGuard
     return is_numeric($name['auto_approve_max_score'] ?? null) ? (int) $name['auto_approve_max_score'] : 20;
   }
 
+  /**
+   * TODO: Document needsReviewMaxScore.
+   */
   private static function needsReviewMaxScore(): int
   {
     $config = self::config();

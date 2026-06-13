@@ -50,6 +50,9 @@ final class TelemetryRepository
     return self::authorize($token, $left);
   }
 
+  /**
+   * TODO: Document incrementEventCounter.
+   */
   public static function incrementEventCounter(string $eventType): void
   {
     $counterKey = Keys::TELEMETRY . ':' . $eventType;

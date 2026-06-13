@@ -439,11 +439,17 @@ final class BusinessWorkspaceCache
     self::dropSegmentKeys(self::SEGMENT_SITE_SETTINGS, $businessId);
   }
 
+  /**
+   * TODO: Document dropSegment.
+   */
   private static function dropSegment(string $segment, string $businessId, ?int $year = null): void
   {
     Database::unlink(Keys::businessWorkspaceCache($segment, $businessId, $year));
   }
 
+  /**
+   * TODO: Document dropSegmentKeys.
+   */
   private static function dropSegmentKeys(string $segment, string $businessId): void
   {
     $needle = ':' . $segment . ':' . $businessId;
@@ -508,6 +514,9 @@ final class BusinessWorkspaceCache
 
     Database::set(Keys::businessWorkspaceCache($segment, $businessId, $year), $encoded, self::TTL_SECONDS);
   }
+  /**
+   * TODO: Document scalarString.
+   */
   private static function scalarString(mixed $value): string
   {
     return is_scalar($value) ? (string) $value : '';

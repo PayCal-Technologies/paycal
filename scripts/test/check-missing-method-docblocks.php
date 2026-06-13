@@ -34,6 +34,9 @@ $hasDocblockBefore = static function (array $tokens, int $index): bool {
       if ($id === T_DOC_COMMENT) {
         return true;
       }
+      if (defined('T_ATTRIBUTE') && $id === T_ATTRIBUTE) {
+        continue;
+      }
       if (in_array($id, [T_PUBLIC, T_PROTECTED, T_PRIVATE, T_ABSTRACT, T_FINAL, T_STATIC, T_READONLY], true)) {
         continue;
       }
@@ -44,21 +47,13 @@ $hasDocblockBefore = static function (array $tokens, int $index): bool {
       continue;
     }
 
-    // Skip attribute groups #[...]
+    // Skip attribute groups #[...] (may tokenize as T_ATTRIBUTE and/or bracket runs).
     if ($token === ']') {
-      $depth = 1;
       for ($k = $j - 1; $k >= 0; $k--) {
-        if (!is_string($tokens[$k])) {
-          continue;
-        }
-        if ($tokens[$k] === ']') {
-          $depth++;
-        } elseif ($tokens[$k] === '[') {
-          $depth--;
-          if ($depth === 0) {
-            $j = $k;
-            break;
-          }
+        $inner = $tokens[$k];
+        if (is_array($inner) && defined('T_ATTRIBUTE') && $inner[0] === T_ATTRIBUTE) {
+          $j = $k;
+          break;
         }
       }
       continue;

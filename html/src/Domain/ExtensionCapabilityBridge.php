@@ -18,11 +18,17 @@ final class ExtensionCapabilityBridge
 {
   private const RUNTIME_CLASS = 'PayCal\\Domain\\Extensions\\ExtensionRuntime';
 
+  /**
+   * TODO: Document runtimeAvailable.
+   */
   public static function runtimeAvailable(): bool
   {
     return class_exists(self::RUNTIME_CLASS);
   }
 
+  /**
+   * TODO: Document enabled.
+   */
   #[ExtensionCapability('dynamic')]
   public static function enabled(string $capability, bool $default = false): bool
   {
@@ -38,6 +44,9 @@ final class ExtensionCapabilityBridge
     }
   }
 
+  /**
+   * TODO: Document value.
+   */
   #[ExtensionCapability('dynamic')]
   public static function value(string $capability, mixed $default = null): mixed
   {

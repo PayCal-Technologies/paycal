@@ -11,6 +11,9 @@ final class BusinessSnapshotCache
 {
   public const TTL_SECONDS = BusinessWorkspaceCache::TTL_SECONDS;
 
+  /**
+   * TODO: Document get.
+   */
   public static function get(string $businessId): ?BusinessSnapshot
   {
     $businessId = trim($businessId);
@@ -39,6 +42,9 @@ final class BusinessSnapshotCache
     return BusinessSnapshot::fromArray($snapshotData);
   }
 
+  /**
+   * TODO: Document put.
+   */
   public static function put(BusinessSnapshot $snapshot): void
   {
     $businessId = trim($snapshot->business_id);
@@ -59,6 +65,9 @@ final class BusinessSnapshotCache
     Database::expire(Keys::businessSnapshot($businessId), self::TTL_SECONDS);
   }
 
+  /**
+   * TODO: Document invalidate.
+   */
   public static function invalidate(string $businessId): void
   {
     $businessId = trim($businessId);

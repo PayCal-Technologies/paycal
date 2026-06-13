@@ -349,6 +349,9 @@ final class BusinessMembersGridRenderer
     return (string) preg_replace($pattern, $replacement, $html, 1);
   }
 
+  /**
+   * TODO: Document loadingSkeleton.
+   */
   public function loadingSkeleton(): string
   {
     $cell = '<span class="sk-line businesses_datagrid_skeleton_cell"></span>';
@@ -357,11 +360,17 @@ final class BusinessMembersGridRenderer
     return str_repeat($row, 4);
   }
 
+  /**
+   * TODO: Document emptyMessage.
+   */
   public function emptyMessage(string $message): string
   {
     return '<div class="datagrid_empty">' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</div>';
   }
 
+  /**
+   * TODO: Document formatJoinedDateLabel.
+   */
   private function formatJoinedDateLabel(string $raw): string
   {
     $raw = trim($raw);
@@ -399,6 +408,9 @@ final class BusinessMembersGridRenderer
     return $this->formatLocalizedJoinDate($joinedDay, true);
   }
 
+  /**
+   * TODO: Document resolveUserLocale.
+   */
   private function resolveUserLocale(): string
   {
     if (defined('USER_LOCALE')) {
@@ -411,6 +423,9 @@ final class BusinessMembersGridRenderer
     return 'en-CA';
   }
 
+  /**
+   * TODO: Document formatLocalizedJoinDate.
+   */
   private function formatLocalizedJoinDate(\DateTimeImmutable $date, bool $includeYear): string
   {
     if (!class_exists('\IntlDateFormatter')) {
@@ -434,6 +449,9 @@ final class BusinessMembersGridRenderer
     return $includeYear ? $date->format('M j, Y') : $date->format('M j');
   }
 
+  /**
+   * TODO: Document parseJoinedTimestamp.
+   */
   private function parseJoinedTimestamp(string $raw): ?\DateTimeImmutable
   {
     $raw = trim($raw);
@@ -464,11 +482,17 @@ final class BusinessMembersGridRenderer
     return null;
   }
 
+  /**
+   * TODO: Document formatHoursPrimaryLine.
+   */
   private function formatHoursPrimaryLine(float $totalHours): string
   {
     return $this->formatHoursCompact($totalHours);
   }
 
+  /**
+   * TODO: Document formatHoursCompact.
+   */
   private function formatHoursCompact(float $hours): string
   {
     if (abs($hours - round($hours)) < 0.01) {
@@ -478,6 +502,9 @@ final class BusinessMembersGridRenderer
     return rtrim(rtrim(number_format($hours, 1, '.', ''), '0'), '.') . 'h';
   }
 
+  /**
+   * TODO: Document formatHoursSubline.
+   */
   private function formatHoursSubline(float $regHours, float $otHours): string
   {
     $reg = abs($regHours - round($regHours)) < 0.01
@@ -490,6 +517,9 @@ final class BusinessMembersGridRenderer
     return sprintf(Strings::i18n('BUSINESSES_MEMBERS_HOURS_OT_SUBLINE'), $reg, $ot);
   }
 
+  /**
+   * TODO: Document formatEarningsCompact.
+   */
   private function formatEarningsCompact(float $amount): string
   {
     if ($amount >= 1000000) {
@@ -507,6 +537,9 @@ final class BusinessMembersGridRenderer
     return '$' . number_format($amount, 2, '.', ',');
   }
 
+  /**
+   * TODO: Document formatEarningsTrend.
+   */
   private function formatEarningsTrend(float $ytdGross, float $trailingBaseline): string
   {
     if ($trailingBaseline <= 0.0) {
@@ -519,6 +552,9 @@ final class BusinessMembersGridRenderer
     return $arrow . ' ' . rtrim(rtrim(number_format(abs($deltaPct), 1, '.', ''), '0'), '.') . '%';
   }
 
+  /**
+   * TODO: Document formatStatusLabel.
+   */
   private function formatStatusLabel(string $status): string
   {
     $status = trim($status);
@@ -529,6 +565,9 @@ final class BusinessMembersGridRenderer
     return ucfirst(strtolower($status));
   }
 
+  /**
+   * TODO: Document truncateEmail.
+   */
   private function truncateEmail(string $email, int $maxLength = 28): string
   {
     $email = trim($email);
@@ -587,6 +626,9 @@ final class BusinessMembersGridRenderer
     return $html;
   }
 
+  /**
+   * TODO: Document injectColumnGearMenu.
+   */
   private function injectColumnGearMenu(string $html): string
   {
     $menuLabel = htmlspecialchars(Strings::i18n('BUSINESSES_MEMBERS_COLUMNS_GEAR'), ENT_QUOTES, 'UTF-8');
@@ -607,6 +649,9 @@ final class BusinessMembersGridRenderer
     return (string) preg_replace($pattern, $replacement, $html, 1);
   }
 
+  /**
+   * TODO: Document injectMemberSelectionHeaderColumn.
+   */
   private function injectMemberSelectionHeaderColumn(string $html): string
   {
     $selectLabel = htmlspecialchars(Strings::i18n('BUSINESSES_MEMBERS_SELECT_MEMBER'), ENT_QUOTES, 'UTF-8');

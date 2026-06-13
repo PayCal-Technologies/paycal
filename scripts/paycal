@@ -45,8 +45,12 @@ Categories:
   migrate:redis-field-names
   sync:redis-dev
   tests:affected [base-ref] [head-ref]
+  workflow:local [--both] [--yes] [--commit] [--push]
 
 Examples:
+  scripts/paycal workflow:local
+  scripts/paycal workflow:local --both
+  scripts/paycal workflow:local --yes --push
   scripts/paycal hooks:install
   scripts/paycal checks:composer-state
   scripts/paycal checks:dependency-security
@@ -167,6 +171,9 @@ case "${cmd}" in
     ;;
   tests:affected)
     exec php "${SCRIPT_DIR}/test/affected-tests.php" "$@"
+    ;;
+  workflow:local)
+    exec "${SCRIPT_DIR}/local-workflow.sh" "$@"
     ;;
   help|-h|--help|list)
     usage

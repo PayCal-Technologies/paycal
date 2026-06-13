@@ -16,6 +16,9 @@ final class ExtensionI18nManifestBridge
 {
   private const RUNTIME_CLASS = 'PayCal\\Domain\\Extensions\\ExtensionRuntime';
 
+  /**
+   * TODO: Document runtimeAvailable.
+   */
   public static function runtimeAvailable(): bool
   {
     return class_exists(self::RUNTIME_CLASS);

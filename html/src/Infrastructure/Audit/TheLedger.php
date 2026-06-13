@@ -263,6 +263,9 @@ final class TheLedger
     return json_encode($payload, JSON_UNESCAPED_SLASHES) ?: '{}';
   }
 
+  /**
+   * TODO: Document previousHashForSequence.
+   */
   private static function previousHashForSequence(int $sequence): string
   {
     if ($sequence <= 1) {
@@ -314,6 +317,9 @@ final class TheLedger
     ];
   }
 
+  /**
+   * TODO: Document resolveBlockchainGateway.
+   */
   private static function resolveBlockchainGateway(): SystemAuditBlockchainGateway
   {
     $mode = strtolower(trim((string) (getenv('SYSTEM_AUDIT_BLOCKCHAIN_MODE') ?: 'queue')));
@@ -323,6 +329,9 @@ final class TheLedger
     }
 
     return new class implements SystemAuditBlockchainGateway {
+      /**
+       * TODO: Document publish.
+       */
       public function publish(string $anchorId, string $blockHash, int $sequence): array
       {
         return [
@@ -333,6 +342,9 @@ final class TheLedger
         ];
       }
 
+      /**
+       * TODO: Document provider.
+       */
       public function provider(): string
       {
         return 'disabled';
