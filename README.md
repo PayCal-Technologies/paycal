@@ -6,7 +6,7 @@ PayCal™ is a payroll tracking platform focused on transparency, accessibility,
 
 The goal is simple: make pay easier to understand while keeping personal financial data private.
 
-Latest documented release: **v1.056.000**
+Latest documented release: **v1.058.000**
 
 [![Test
 Suite](https://img.shields.io/badge/tests-1574%20listed-blue)](html/tests/)
@@ -344,6 +344,16 @@ bash scripts/native-fix-redis-launchagent.sh
 ---
 
 # Recent Releases
+
+## v1.058.000 (2026-06-13)
+
+**Release Focus:** Public business extension shell, v1.057 core promotion, and README version gate
+
+- Added `business-surface` extension with minimal `/business/*` IA stub pages and shared extension disclaimers on business and admin surfaces.
+- Promoted v1.057 core features, A11y/i18n sweep, page-edge spacing, and reports consolidation while keeping private moat tools out of the public tree (SOC2 admin, Argus, full workspace UI).
+- Enforced README release documentation on pre-commit (when `VERSION`/`README.md` change) and on every pre-push via `scripts/hooks/check-readme-version.sh`.
+
+See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
 
 ## v1.056.000 (2026-06-07)
 

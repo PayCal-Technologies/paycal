@@ -38,6 +38,9 @@ else
 	paycal_log "pre-push" "Skipping public promotion scope guard for remote: ${remote_name:-unknown}"
 fi
 
+paycal_log "pre-push" "Verifying README release docs match VERSION"
+"${repo_root}/scripts/hooks/check-readme-version.sh"
+
 paycal_log "pre-push" "Verifying PHPStan baseline policy"
 if grep -q "baseline" "phpstan.neon"; then
 	paycal_log "fatal" "Baselines are not allowed (found baseline reference in phpstan.neon)"

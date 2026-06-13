@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Purpose: versioned pre-commit entrypoint used by core.hooksPath or copied hooks.
+# Usage: invoked automatically by git before commit creation.
+# Why here: keeps the checked-in hook thin while the real logic lives in scripts/hooks.
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+exec "${repo_root}/scripts/paycal" hooks:pre-commit "$@"
