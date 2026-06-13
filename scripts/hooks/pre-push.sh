@@ -38,8 +38,8 @@ else
 	paycal_log "pre-push" "Skipping public promotion scope guard for remote: ${remote_name:-unknown}"
 fi
 
-paycal_log "pre-push" "Verifying README release docs match VERSION"
-"${repo_root}/scripts/hooks/check-readme-version.sh"
+paycal_log "pre-push" "Syncing and committing README release docs with VERSION"
+"${repo_root}/scripts/hooks/readme-version-hook.sh" commit
 
 paycal_log "pre-push" "Verifying PHPStan baseline policy"
 if grep -q "baseline" "phpstan.neon"; then

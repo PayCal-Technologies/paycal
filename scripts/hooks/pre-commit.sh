@@ -18,11 +18,8 @@ paycal_log "pre-commit" "Scanning staged changes for secrets and sensitive local
 paycal_log "pre-commit" "Checking Composer validity and direct dependency freshness"
 "${repo_root}/scripts/hooks/check-composer-state.sh"
 
-staged_version_or_readme="$(git diff --cached --name-only --diff-filter=ACM | grep -E '^(VERSION|README\.md)$' || true)"
-if [[ -n "${staged_version_or_readme}" ]]; then
-  paycal_log "pre-commit" "Verifying README release docs match VERSION"
-  "${repo_root}/scripts/hooks/check-readme-version.sh"
-fi
+paycal_log "pre-commit" "Syncing README release docs with VERSION (stage into commit)"
+"${repo_root}/scripts/hooks/readme-version-hook.sh" stage
 
 staged_php_files="$(git diff --cached --name-only --diff-filter=ACM | grep -E '\\.php$' || true)"
 

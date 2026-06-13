@@ -21,14 +21,23 @@ final class ReadmeVersionHookContractTest extends TestCase
   }
 
   #[Test]
-  public function gitHooksInvokeReadmeVersionPolicy(): void
+  public function readmeVersionSyncScriptExists(): void
+  {
+    $script = $this->projectRoot() . '/scripts/hooks/sync-readme-version.sh';
+    $this->assertFileExists($script);
+    $this->assertGreaterThan(0, filesize($script));
+  }
+
+  #[Test]
+  public function gitHooksSyncStageAndCommitReadmeChanges(): void
   {
     $preCommit = (string) file_get_contents($this->projectRoot() . '/scripts/hooks/pre-commit.sh');
     $prePush = (string) file_get_contents($this->projectRoot() . '/scripts/hooks/pre-push.sh');
 
-    $this->assertStringContainsString('check-readme-version.sh', $preCommit);
-    $this->assertStringContainsString('check-readme-version.sh', $prePush);
-    $this->assertStringContainsString('VERSION|README.md', $preCommit);
+    $this->assertStringContainsString('readme-version-hook.sh', $preCommit);
+    $this->assertStringContainsString('readme-version-hook.sh', $prePush);
+    $this->assertStringContainsString('readme-version-hook.sh" stage', $preCommit);
+    $this->assertStringContainsString('readme-version-hook.sh" commit', $prePush);
   }
 
   #[Test]
