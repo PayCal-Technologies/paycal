@@ -1,4 +1,3 @@
-
 14_DAYS 14 Days
 1_WEEK 1 Week
 2_WEEKS 2 Weeks
@@ -472,6 +471,8 @@ DASHBOARD_SESSION_IDENTITY Session Identity
 DATAGRID_CALENDAR_MONTH_NAVIGATION Calendar month navigation
 DATAGRID_DATA_GRID Data grid
 DATAGRID_NO_ENTRIES_FOUND No entries found.
+DATAGRID_FULLSCREEN_ENTER Expand grid to fullscreen
+DATAGRID_FULLSCREEN_EXIT Exit grid fullscreen
 DATE Date
 DATE_PICKER Date Picker
 DATE_PICKER_ACTIONS_ARIA Date picker actions
@@ -2439,8 +2440,6 @@ YEAR_TO_DATE Year To Date
 YEAR_TO_DATE_EARNINGS Year To Date Earnings
 YOUR_EMAIL Email
 YOUR_NAME Name
-
-# Transparency hub catalog recovery (local)
 BREADCRUMB Breadcrumb
 HELP_TOC_HOME Home
 TRANSPARENCY_HUB_PAGE_TITLE Transparency Hub
@@ -2599,7 +2598,6 @@ HELP_WEBAUTHN_PRIVACY_ITEM_4 Unsupported browsers are blocked from passkey-requi
 HELP_WEBAUTHN_UNSUPPORTED_TITLE If You See an Unsupported Browser Warning
 HELP_WEBAUTHN_UNSUPPORTED_TEXT Use a modern browser with WebAuthn support over HTTPS then retry registration or unlock.
 HELP_WEBAUTHN_REQUIREMENTS_LINK See browser and device requirements
-
 WEEKDAY_MONDAY Monday
 WEEKDAY_TUESDAY Tuesday
 WEEKDAY_WEDNESDAY Wednesday
@@ -2607,7 +2605,6 @@ WEEKDAY_THURSDAY Thursday
 WEEKDAY_FRIDAY Friday
 WEEKDAY_SATURDAY Saturday
 WEEKDAY_SUNDAY Sunday
-
 SETTINGS_CALENDAR_LABEL_TODAY Today
 SETTINGS_CALENDAR_LABEL_DATE Date
 SETTINGS_CALENDAR_LABEL_LABEL Label
@@ -2621,7 +2618,6 @@ SETTINGS_STYLE_LABEL_SIDEBAR Sidebar
 SETTINGS_SECURITY_TABLE_ACTION Action
 SETTINGS_SECURITY_TABLE_TTL TTL
 SETTINGS_SECURITY_TABLE_LEFT Left
-
 CHANGE_EMAIL_STATUS_ENTER_BOTH_EMAILS Enter both email addresses.
 CHANGE_EMAIL_ERROR_ENTER_NEW_EMAIL Enter a new email address.
 CHANGE_EMAIL_ERROR_CONFIRM_NEW_EMAIL Confirm your new email address.
@@ -2644,7 +2640,6 @@ RECOVERY_EMAIL_STATUS_VERIFYING Verifying...
 RECOVERY_EMAIL_STATUS_VERIFIED Recovery email verified! ✓
 RECOVERY_EMAIL_STATUS_RESENDING_CODE Resending code...
 RECOVERY_EMAIL_STATUS_NEW_CODE_SENT New code sent!
-
 ORGANIZATIONS_MEMBERSHIP_CONSENT_TITLE Membership Consent
 ORGANIZATIONS_MEMBERSHIP_CONSENT_DESC Review and confirm before activating organization membership access.
 ORGANIZATIONS_MEMBERSHIP_CONSENT_DISCLAIMER_LABEL Reason / Disclaimer (optional)
@@ -2657,7 +2652,6 @@ ORGANIZATIONS_LOADING_ACCOUNT_ACTIVITY Loading account activity...
 ORGANIZATIONS_CREATE_NAME_REQUIRED Enter an organization name.
 ORGANIZATIONS_FAILED_LOAD_MEMBERS_GRID Failed to load members grid.
 ORGANIZATIONS_FAILED_LOAD_ACCESS_REQUESTS Failed to load access requests.
-
 SETTINGS_STYLE_LABEL_TYPOGRAPHY Typography
 SETTINGS_TYPOGRAPHY_STANDARD Standard
 SETTINGS_TYPOGRAPHY_DYSLEXIA_FRIENDLY Dyslexia-friendly
@@ -2668,7 +2662,6 @@ SETTINGS_SECTION_DATA_PORTABILITY_EXPORT_IMPORT Account data export and import
 SETTINGS_SECTION_PASSKEYS Passkeys
 SETTINGS_SECTION_SECURITY Security
 SETTINGS_SECTION_DEBUGGING_OPTIONAL Debugging (Optional)
-
 SETTINGS_VOICE_PICKER_ENABLE_CUES Enable Cues to choose a voice.
 SETTINGS_PASSKEYS_SECURITY_NOTE Add more passkeys to improve account security.
 SETTINGS_PASSKEYS_SR_INSTRUCTIONS Passkeys list. Edit a passkey name inline and press Enter to save. Use Remove to delete a passkey when multiple devices are registered.
@@ -2678,7 +2671,6 @@ SETTINGS_SECURITY_SESSION_TIMING_HELP Session + sensitive action timing.
 SETTINGS_DEBUGGING_FORM_ARIA Debugging Preferences Form
 SETTINGS_DEBUG_OPTION_OFF_DEFAULT Off (Default)
 SETTINGS_DEBUG_OPTION_ON_MORE_DETAILS On (More details)
-
 SETTINGS_SECURITY_LEVEL Level
 SETTINGS_SECURITY_LOW Low
 SETTINGS_SECURITY_HIGH High
@@ -2688,7 +2680,6 @@ SETTINGS_SECURITY_ROW_AUTO_SIGNOUT Auto Signout
 SETTINGS_SECURITY_ROW_ACCOUNT_EDIT Account Edit
 SETTINGS_SECURITY_ROW_CALENDAR_EDIT Calendar Edit
 SETTINGS_SECURITY_EMERGENCY_SIGNOUT Emergency Signout
-
 SETTINGS_DEBUG_PANEL_HOVER_HELP Debugging adds extra information to help identify issues. You can safely leave this off unless you're troubleshooting.
 SETTINGS_DEBUG_INTRO Turn on extra diagnostics to help troubleshoot issues. Safe to leave off.
 SETTINGS_DEBUG_PERF_NOTE For troubleshooting only. Enabling extra diagnostics may impact performance.
@@ -2698,22 +2689,18 @@ SETTINGS_DEBUG_FINE_GRAINED_HELP Capture deeper system-level debugging informati
 SETTINGS_DEBUG_FINE_GRAINED_HOVER Off keeps output minimal. On includes step-by-step internal logs.
 SETTINGS_DEBUG_NETWORK_HELP Track API requests and performance details while troubleshooting.
 SETTINGS_DEBUG_NETWORK_HOVER Off keeps network debug tracking disabled. On logs request timing details for diagnostics.
-
 SETTINGS_SECURITY_LEVEL_SLIDER_ARIA Security level slider
 SETTINGS_SECURITY_DERIVED_TIMEOUTS_ARIA Derived timeout values
 SETTINGS_SECURITY_EMERGENCY_WINDOW_ARIA Emergency signout window in milliseconds
-
 SETTINGS_SECURITY_LEVEL_HOVER_HELP Higher level shortens timeouts for stronger protection on shared devices.
 SETTINGS_SECURITY_ROW_AUTO_SIGNOUT_HOVER Auto signout ends inactive sessions to reduce unauthorized access risk.
 SETTINGS_SECURITY_ROW_ACCOUNT_EDIT_HOVER Account edit timeout limits how long profile changes stay unlocked.
 SETTINGS_SECURITY_ROW_CALENDAR_EDIT_HOVER Calendar edit timeout reduces chance of unwanted timesheet changes.
 SETTINGS_SECURITY_EMERGENCY_WINDOW_HOVER Press ESC three times within this window for immediate safety signout.
-
 SETTINGS_ARIA_EDIT_ACCOUNT_DETAILS Edit Account Details
 SETTINGS_ARIA_RECOVERY_ACCOUNT_DELETION_ACTIONS Recovery and account deletion actions
 SETTINGS_ARIA_DELETE_SITE_ROW Delete site row
 SETTINGS_ARIA_CALENDAR_PREFERENCES_FORM Calendar Preferences Form
-
 SETTINGS_CHANGE_EMAIL_SEND_CODES Send Verification Codes
 SETTINGS_CHANGE_EMAIL_COMPLETE Complete Email Change
 SETTINGS_CHANGE_EMAIL_RESEND_CODES Resend Codes
@@ -2726,11 +2713,9 @@ SETTINGS_RECOVERY_KEY_TITLE Recovery Key
 SETTINGS_RECOVERY_KEY_HELP_TEXT Create a Recovery Key to regain access if you lose your passkeys. Creating a new key disables the old one.
 SETTINGS_RECOVERY_KEY_BUTTON_HOVER Recovery Key is offline backup access. New keys invalidate older keys.
 SETTINGS_RECOVERY_KEY_CREATE_BUTTON Create Recovery Key
-
 SETTINGS_RECOVERY_LABEL Recovery
 SETTINGS_RECOVERY_PENDING_VERIFICATION Pending verification
 SETTINGS_RECOVERY_NOT_VERIFIED Not verified
-
 SETTINGS_RECOVERY_EMAIL_PLACEHOLDER Enter recovery email address
 SETTINGS_RECOVERY_EMAIL_ARIA_LABEL Recovery email address
 SETTINGS_RECOVERY_EMAIL_INPUT_HOVER Backup email for account recovery and verification.
@@ -3026,3 +3011,1411 @@ EARNINGS_YTD_SPEND YTD Spend
 OTHER Other
 SITE Site
 SYSTEM System
+PUBLIC_EXTENSION_DISCLAIMER This page generated using the public repo extension.
+BUSINESS_CONTEXT_HEADER_ARIA Business workspace context
+BUSINESS_SUBNAV_ARIA Business workspace pages
+BUSINESS_NAV_AUDIT Audit
+BUSINESS_NAV_DASHBOARD Dashboard
+BUSINESS_NAV_DETAILS Details
+BUSINESS_NAV_MEMBERS Members
+BUSINESS_NAV_PAYROLL Payroll
+BUSINESS_NAV_REPORTS Reports
+BUSINESS_NAV_SITES Sites
+BUSINESS_PUBLIC_PREVIEW_NAME Public extension preview
+BUSINESS_PUBLIC_PREVIEW_LEAD Business workspace — public extension preview. Full business features are available in private deployments.
+BUSINESS_PUBLIC_PREVIEW_DETAILS Organization details preview shell.
+BUSINESS_PUBLIC_PREVIEW_MEMBERS Members preview shell.
+BUSINESS_PUBLIC_PREVIEW_SITES Sites preview shell.
+BUSINESS_PUBLIC_PREVIEW_PAYROLL Payroll preview shell.
+BUSINESS_PUBLIC_PREVIEW_REPORTS Reports preview shell.
+BUSINESS_PUBLIC_PREVIEW_AUDIT Audit preview shell.
+ADMIN_BUSINESS_MODERATION_TITLE Business Moderation
+BUSINESS_MODERATION Business Moderation
+ADMIN_DASHBOARD_TITLE Admin Dashboard
+ADMIN_LANGUAGE_DASHBOARD_COVERAGE_SUMMARY Coverage Summary
+ADMIN_LANGUAGE_DASHBOARD_DESC Audit and AI-translate all non-English language files. Translations are applied in batches via OpenAI GPT-4o.
+ADMIN_LANGUAGE_DASHBOARD_LANGUAGE_DETAILS Language Details
+ADMIN_LANGUAGE_DASHBOARD_TITLE Language Translation Dashboard
+ADMIN_LANGUAGE_EDITOR_TABLIST_ARIA Language selector
+ADMIN_OPERATIONS_DOCUMENTATION Operations Documentation
+ADMIN_SITE_COLOR_PALETTE Site Color Palette
+ADMIN_SITE_COLOR_PALETTE_DESC 32 curated colors used for site identification across the calendar, reports, dashboards, and exports. Organized as 4 rows × 8 colors by hue family.
+ADMIN_TAX_BRACKETS_TITLE Admin Tax Brackets
+ADMIN_USER_ROLES_TITLE Auditor Role Management
+ARGUS Argus
+ARGUS_CONSOLE Argus Console
+ARGUS_MASTER_DISABLED Argus disabled
+ARGUS_MASTER_ENABLED Argus enabled
+ARGUS_PACKAGES Trace Packages
+ARGUS_PACKAGE_DISABLED Disabled
+ARGUS_PACKAGE_ENABLED Enabled
+AUTH_JS_CONFIRM_DEVICE Confirm on your device…
+AUTH_JS_EMAIL_ALREADY_REGISTERED This email is already registered. Sign in instead.
+AUTH_JS_EMAIL_REQUIRED Email is required.
+AUTH_JS_ENTER_FULL_NAME Please enter your full name.
+AUTH_JS_ENTER_VALID_EMAIL Please enter a valid email address.
+AUTH_JS_INVALID_INVITE_CODE Invite code is invalid. Please check it and try again.
+AUTH_JS_NETWORK_ERROR Network issue. Please try again.
+AUTH_JS_NO_ACCOUNT No account found. Create an account instead.
+AUTH_JS_RECOVERY_SEND_FAILED Unable to send recovery code. Try again.
+AUTH_JS_RECOVERY_START_FAILED Unable to start account recovery.
+AUTH_JS_RECOVER_CANCEL_FAILED Unable to cancel recovery.
+AUTH_JS_RECOVER_SEND_CODE_FMT Send code ({time})
+AUTH_JS_REGISTER_CHECK_EMAIL Success. Check your email to verify your account.
+AUTH_JS_REGISTER_FAILED Registration failed. Try again.
+AUTH_JS_REGISTER_UNSUPPORTED This browser cannot create a passkey. Use a modern WebAuthn browser on HTTPS to create your account.
+AUTH_JS_REGISTER_UNSUPPORTED_HELP Why passkeys are required and how your encrypted data is protected
+AUTH_JS_REQUEST_TIMEOUT Request timed out. Please try again.
+AUTH_JS_SIGNIN_FAILED Sign-in failed. Try again.
+AUTH_JS_SIGNIN_RECOVERY_CODE Send recovery code
+AUTH_JS_SUCCESS_REDIRECTING Success. Redirecting…
+AUTH_JS_WEBAUTHN_UNSUPPORTED This browser cannot use passkeys. Use a WebAuthn-capable browser on a secure connection (HTTPS).
+AUTH_REGISTER_PASSWORDS_NO_MATCH Passwords do not match. Please re-enter and try again.
+AUTH_VERIFICATION_REMINDER_COOLDOWN_FMT Please wait {time} before resending.
+AUTH_VERIFICATION_REMINDER_SENDING Resend verification email (sending...)
+AUTH_VERIFICATION_REMINDER_SIGNOUT_FAILED Unable to sign out right now. Try again.
+AVERAGE Average
+BILLING_JS_CONFIRMING Confirming your Premium status...
+BILLING_JS_DOWNGRADE_HELP_DEFAULT Use Stripe to manage renewal timing. Use this action only if you want to cancel now and switch to Free immediately.
+BILLING_JS_DOWNGRADE_HELP_SCHEDULED Cancellation is already scheduled. Premium remains active until the end date shown above. Use the action below only to end Premium immediately.
+BILLING_JS_LOADING_STATUS Checking billing status...
+BILLING_JS_PREMIUM_ACTIVE Premium is now active.
+BILLING_JS_PREMIUM_DISABLED Premium is disabled.
+BUSINESSES Business
+BUSINESSES_ACCESS_REQUESTS_LOADED_COUNT Access requests loaded. %d request%s shown.
+BUSINESSES_ACCESS_REQUESTS_LOADED_NONE Access requests loaded. No requests found.
+BUSINESSES_ACCESS_REQUESTS_LOAD_FAILED Access requests list failed to load.
+BUSINESSES_ACCESS_REQUESTS_PREMIUM_LOCKED Access requests are locked behind Premium Admin preview for this business.
+BUSINESSES_ACCESS_REQUEST_ACTION_FAILED Unable to update access request right now.
+BUSINESSES_ACCESS_REQUEST_APPROVED Access request approved.
+BUSINESSES_ACCESS_REQUEST_REJECTED Access request rejected.
+BUSINESSES_ACCESS_REQUEST_SUBMITTED_FOR Access request submitted for %s.
+BUSINESSES_ACCESS_REQUEST_SUBMITTED_ID Access request submitted (%s).
+BUSINESSES_ACCESS_REQUEST_SUBMITTED_TO Access request submitted to %s.
+BUSINESSES_ACCESS_REVOKED_STATUS Access revoked. This profile no longer has the business relationship.
+BUSINESSES_ACCESS_SCOPES_LABEL Access Scopes
+BUSINESSES_ACCOUNT_ACTIVITY_AUTH Auth
+BUSINESSES_ACCOUNT_ACTIVITY_AUTH_METHOD Authentication Method
+BUSINESSES_ACCOUNT_ACTIVITY_AUTH_STRENGTH Authentication Strength
+BUSINESSES_ACCOUNT_ACTIVITY_BROWSER Browser
+BUSINESSES_ACCOUNT_ACTIVITY_CURRENT_SESSION Current session (%s)
+BUSINESSES_ACCOUNT_ACTIVITY_DEVICE_TYPE Device Type
+BUSINESSES_ACCOUNT_ACTIVITY_IP IP
+BUSINESSES_ACCOUNT_ACTIVITY_IP_ADDRESS IP Address
+BUSINESSES_ACCOUNT_ACTIVITY_LANGUAGE Language
+BUSINESSES_ACCOUNT_ACTIVITY_LAST_ACTIVITY Last Activity
+BUSINESSES_ACCOUNT_ACTIVITY_LOADED Loaded %d active session%s.
+BUSINESSES_ACCOUNT_ACTIVITY_LOAD_FAILED Unable to load account activity right now.
+BUSINESSES_ACCOUNT_ACTIVITY_OPERATING_SYSTEM Operating System
+BUSINESSES_ACCOUNT_ACTIVITY_PLATFORM Platform
+BUSINESSES_ACCOUNT_ACTIVITY_SESSION Session %s
+BUSINESSES_ACCOUNT_ACTIVITY_SESSION_FINGERPRINT Session Fingerprint
+BUSINESSES_ACCOUNT_ACTIVITY_SIGNED_IN Signed In
+BUSINESSES_ACCOUNT_ACTIVITY_TTL TTL
+BUSINESSES_ACCOUNT_ACTIVITY_USER_AGENT User Agent
+BUSINESSES_ADDRESS_CITY City
+BUSINESSES_ADDRESS_CITY_PLACEHOLDER Calgary
+BUSINESSES_ADDRESS_COUNTRY Country
+BUSINESSES_ADDRESS_COUNTRY_PLACEHOLDER Canada
+BUSINESSES_ADDRESS_LINE_1 Address Line 1
+BUSINESSES_ADDRESS_LINE_1_PLACEHOLDER 100 Main St
+BUSINESSES_ADDRESS_LINE_2 Address Line 2
+BUSINESSES_ADDRESS_LINE_2_PLACEHOLDER Suite / Floor
+BUSINESSES_ADDRESS_POSTAL Postal / ZIP
+BUSINESSES_ADDRESS_POSTAL_PLACEHOLDER T2P 1J9
+BUSINESSES_ADDRESS_REGION Region
+BUSINESSES_ADDRESS_REGION_PLACEHOLDER Alberta
+BUSINESSES_ADD_CONTACT_CARD_BTN Add Contact Card
+BUSINESSES_ALLOWED_CONTACT_DOMAINS Allowed Contact Domains
+BUSINESSES_ALLOWED_CONTACT_DOMAINS_PLACEHOLDER example.com, payroll.example.com
+BUSINESSES_API_ACCESS_REQUEST_DOES_NOT_BELONG_TO_CURRENT_USER Access request does not belong to current user.
+BUSINESSES_API_ACCESS_REQUEST_DOES_NOT_BELONG_TO_THIS_BUSINESS Access request does not belong to this business.
+BUSINESSES_API_ACCESS_REQUEST_NOT_FOUND Access request not found.
+BUSINESSES_API_ACTIVATION_REQUIRES_A_VALID_ACTIVE_CONSENT_RECORD Activation requires a valid active consent record.
+BUSINESSES_API_ACTIVATION_REQUIRES_A_VALID_CONSENT_ID_FOR_DEK_WRAP_BIND Activation requires a valid consent_id for DEK wrap binding.
+BUSINESSES_API_ACTIVATION_REQUIRES_EXPLICIT_CONSENT_ACKNOWLEDGMENT Activation requires explicit consent acknowledgment.
+BUSINESSES_API_ACTOR_ACCOUNT_NOT_FOUND Actor account not found.
+BUSINESSES_API_ACTOR_BUSINESS_SEGMENT_AND_VERSION_ARE_REQUIRED Actor, business, segment, and version are required.
+BUSINESSES_API_ACTOR_IS_REQUIRED Actor is required.
+BUSINESSES_API_A_VALID_BUSINESS_OWNER_EMAIL_IS_REQUIRED A valid business owner email is required.
+BUSINESSES_API_A_VERIFIED_AUTHORITY_EMAIL_IS_REQUIRED_FOR_BULK_IMPORT_V A verified authority email is required for bulk import verification.
+BUSINESSES_API_BULK_IMPORT_SESSION_DOES_NOT_BELONG_TO_THIS_BUSINESS Bulk import session does not belong to this business.
+BUSINESSES_API_BULK_IMPORT_SESSION_DOES_NOT_BELONG_TO_THIS_USER Bulk import session does not belong to this user.
+BUSINESSES_API_BULK_IMPORT_SESSION_NOT_FOUND_OR_EXPIRED Bulk import session not found or expired.
+BUSINESSES_API_BUSINESS_ALREADY_EXISTS Business already exists.
+BUSINESSES_API_BUSINESS_HAS_REACHED_THE_MAXIMUM_MEMBER_LIMIT_OF_1_000_P Business has reached the maximum member limit of 1,000. Please remove members or contact us for enterprise limits.
+BUSINESSES_API_BUSINESS_ID_IS_REQUIRED Business id is required.
+BUSINESSES_API_BUSINESS_NOT_FOUND Business not found.
+BUSINESSES_API_BUSINESS_NOT_FOUND_FOR_INVITE Business not found for invite.
+BUSINESSES_API_BUSINESS_OWNER_MUST_TRANSFER_OWNERSHIP_BEFORE_LEAVING Business owner must transfer ownership before leaving.
+BUSINESSES_API_BUSINESS_OWNER_NOT_FOUND Business owner not found.
+BUSINESSES_API_BUSINESS_SITE_OWNER_AND_SITE_ARE_REQUIRED Business, site owner, and site are required.
+BUSINESSES_API_BUSINESS_TYPE_FIELD_INVALID business_type is invalid.
+BUSINESSES_API_BUSINESS_TYPE_IS_INVALID Business type is invalid.
+BUSINESSES_API_CANNOT_CHANGE_OWNER_ROLE Cannot change the business owner role.
+BUSINESSES_API_CANNOT_CREATE_ORG_DEK_WRAP_INVALID_DEK_IDENTIFIER_CONTEX Cannot create org DEK wrap: invalid DEK identifier context.
+BUSINESSES_API_CANNOT_CREATE_ORG_DEK_WRAP_MISSING_BOOTSTRAP_IDENTIFIERS Cannot create org DEK wrap: missing bootstrap identifiers.
+BUSINESSES_API_CANNOT_CREATE_ORG_DEK_WRAP_MISSING_CREDENTIAL_WRAPPER_MA Cannot create org DEK wrap: missing credential wrapper material.
+BUSINESSES_API_CANNOT_CREATE_PERSONAL_BUSINESS_FOR_UNKNOWN_USER Cannot create personal business for unknown user.
+BUSINESSES_API_CANNOT_RECORD_CONSENT_FOR_MISSING_BUSINESS Cannot record consent for missing business.
+BUSINESSES_API_CANNOT_RESOLVE_PASSKEY_WRAPPER_USER_ID_IS_REQUIRED Cannot resolve passkey wrapper: user id is required.
+BUSINESSES_API_CANNOT_REVOKE_THE_BUSINESS_OWNER Cannot revoke the business owner.
+BUSINESSES_API_CHALLENGE_DOES_NOT_BELONG_TO_THIS_BUSINESS Challenge does not belong to this business.
+BUSINESSES_API_CHALLENGE_DOES_NOT_BELONG_TO_THIS_USER Challenge does not belong to this user.
+BUSINESSES_API_CHALLENGE_DOES_NOT_MATCH_THIS_IMPORT_SESSION Challenge does not match this import session.
+BUSINESSES_API_CHALLENGE_ID_IS_REQUIRED Challenge id is required.
+BUSINESSES_API_CHALLENGE_NOT_FOUND_OR_EXPIRED Challenge not found or expired.
+BUSINESSES_API_CONSENT_REQUIRES_VALID_BUSINESS_AND_USER_IDENTIFIERS Consent requires valid business and user identifiers.
+BUSINESSES_API_CONTACT_DOMAINS_INVALID allowed_contact_domains contains invalid domains.
+BUSINESSES_API_CONTACT_DOMAINS_TOO_LONG allowed_contact_domains exceeds the maximum length.
+BUSINESSES_API_CONTACT_DOMAIN_ENFORCEMENT_IS_ENABLED_BUT_NO_ALLOWED_DOM Contact domain enforcement is enabled but no allowed domains are configured.
+BUSINESSES_API_CURRENCY_MUST_BE_A_VALID_ISO_4217_CODE currency must be a valid ISO 4217 code.
+BUSINESSES_API_EDITING_GRACE_DAYS_IS_OUTSIDE_THE_ALLOWED_RANGE editing_grace_days is outside the allowed range.
+BUSINESSES_API_EMAIL_DOMAIN_IS_BLOCKED_BY_BUSINESS_CONTACT_DOMAIN_POLIC Email domain is blocked by business contact-domain policy.
+BUSINESSES_API_FAILED_TO_CREATE_BUSINESS_SITE Failed to create business site.
+BUSINESSES_API_IMPORT_ID_IS_REQUIRED Import id is required.
+BUSINESSES_API_IMPORT_SCOPES_ARE_MISSING_PLEASE_PREPARE_AGAIN Import scopes are missing. Please prepare again.
+BUSINESSES_API_INVALID_BUSINESS_ROLE Invalid business role.
+BUSINESSES_API_INVALID_ORG_DEK_SEGMENT Invalid org DEK segment.
+BUSINESSES_API_INVALID_USER_CONTEXT Invalid user context.
+BUSINESSES_API_INVALID_VERIFICATION_CODE Invalid verification code.
+BUSINESSES_API_INVITE_BUSINESS_DOES_NOT_MATCH_REQUESTED_BUSINESS_CONTEX Invite business does not match requested business context.
+BUSINESSES_API_INVITE_DOES_NOT_BELONG_TO_THIS_BUSINESS Invite does not belong to this business.
+BUSINESSES_API_INVITE_DOES_NOT_BELONG_TO_THIS_USER Invite does not belong to this user.
+BUSINESSES_API_INVITE_EMAIL_REQUIRED A valid invite email is required.
+BUSINESSES_API_INVITE_HAS_EXPIRED Invite has expired.
+BUSINESSES_API_INVITE_IS_NO_LONGER_ACTIVE Invite is no longer active.
+BUSINESSES_API_INVITE_MANAGERS_ONLY Only authorized business managers can invite users.
+BUSINESSES_API_INVITE_NOT_FOUND Invite not found.
+BUSINESSES_API_INVITE_TOKEN_IS_INVALID_OR_EXPIRED Invite token is invalid or expired.
+BUSINESSES_API_INVITE_TOKEN_IS_REQUIRED Invite token is required.
+BUSINESSES_API_MANAGERS_CANNOT_ASSIGN_ROLES_ABOVE_THEIR_OWN_LEVEL Managers cannot assign roles above their own level.
+BUSINESSES_API_MANAGERS_CANNOT_DOWNGRADE_OR_CHANGE_THEIR_OWN_ROLE Managers cannot downgrade or change their own role.
+BUSINESSES_API_MANAGERS_CANNOT_MODIFY_THE_BUSINESS_OWNER Managers cannot modify the business owner.
+BUSINESSES_API_MANAGERS_CANNOT_PROMOTE_MEMBERS_TO_OWNER Managers cannot promote members to Owner.
+BUSINESSES_API_MEMBERSHIP_RELATIONSHIP_NOT_FOUND_FOR_CURRENT_USER Membership relationship not found for current user.
+BUSINESSES_API_NO_ACTIVE_BUSINESS_WAS_FOUND_FOR_THAT_OWNER No active business was found for that owner.
+BUSINESSES_API_NO_ACTIVE_MEMBERS_WERE_ELIGIBLE_FOR_WORK_SITE_ASSIGNMENT No active members were eligible for work-site assignment.
+BUSINESSES_API_NO_ACTIVE_RELATIONSHIP_FOUND No active relationship found.
+BUSINESSES_API_NO_BUSINESS_MEMBERS_WERE_FOUND_TO_BOOTSTRAP No business members were found to bootstrap.
+BUSINESSES_API_NO_BUSINESS_MEMBER_DEK_WRAPS_WERE_BOOTSTRAPPED No business member DEK wraps were bootstrapped.
+BUSINESSES_API_NO_BUSINESS_OWNER_ACCOUNT_WAS_FOUND_FOR_THAT_EMAIL No business owner account was found for that email.
+BUSINESSES_API_NO_ELIGIBLE_EMAILS_ARE_AVAILABLE_TO_IMPORT No eligible emails are available to import.
+BUSINESSES_API_NO_ELIGIBLE_EMAILS_FOUND_FOR_IMPORT No eligible emails found for import.
+BUSINESSES_API_NO_PASSKEY_WRAPPED_DEK_IS_AVAILABLE_FOR_THIS_MEMBER No passkey-wrapped DEK is available for this member.
+BUSINESSES_API_NO_VALID_FIELDS_PROVIDED No valid fields provided.
+BUSINESSES_API_NO_VALID_SETTINGS_WERE_PROVIDED No valid settings were provided.
+BUSINESSES_API_ONE_OR_MORE_CONTACT_EMAILS_DO_NOT_MATCH_ALLOWED_DOMAINS One or more contact emails do not match allowed domains.
+BUSINESSES_API_ONLY_ACTIVE_OR_PENDING_MEMBERSHIPS_CAN_BE_UPDATED Only active or pending memberships can be updated.
+BUSINESSES_API_ONLY_AUTHORIZED_BUSINESS_MANAGERS_CAN_IMPORT_INVITES Only authorized business managers can import invites.
+BUSINESSES_API_ONLY_BUSINESS_OWNERS_ADMINS_CAN_PERFORM_BULK_IMPORTS Only business owners/admins can perform bulk imports.
+BUSINESSES_API_ONLY_OWNERS_AND_MANAGERS_CAN_BOOTSTRAP_ORG_DEKS_FOR_MEMB Only owners and managers can bootstrap org DEKs for members.
+BUSINESSES_API_ONLY_PENDING_ACCESS_REQUESTS_CAN_BE_APPROVED Only pending access requests can be approved.
+BUSINESSES_API_ONLY_PENDING_ACCESS_REQUESTS_CAN_BE_REJECTED Only pending access requests can be rejected.
+BUSINESSES_API_ONLY_PENDING_ACCESS_REQUESTS_CAN_CAPTURE_CONSENT Only pending access requests can capture consent.
+BUSINESSES_API_ONLY_PENDING_INVITES_CAN_BE_REVOKED Only pending invites can be revoked.
+BUSINESSES_API_ONLY_THE_CURRENT_OWNER_CAN_TRANSFER_OWNERSHIP Only the current owner can transfer ownership.
+BUSINESSES_API_OWNERSHIP_CAN_ONLY_BE_TRANSFERRED_TO_AN_EXISTING_ACTIVE Ownership can only be transferred to an existing active member of the business.
+BUSINESSES_API_PAYCAL_BUSINESS_SUBSCRIPTION_REQUIRED_UPGRADE_TO_PAYCAL PayCal Business subscription required. Upgrade to PayCal Business to create and manage shared businesses linked to your profile.
+BUSINESSES_API_PAY_ANCHOR_INVALID pay_anchor is invalid.
+BUSINESSES_API_PAY_FREQUENCY_INVALID pay_frequency is invalid.
+BUSINESSES_API_PAY_PERIOD_LENGTH_MUST_BE_BETWEEN_7_AND_31_DAYS pay_period_length must be between 7 and 31 days.
+BUSINESSES_API_PAY_PERIOD_START_MUST_BE_A_VALID_YYYY_MM_DD_DATE pay_period_start must be a valid YYYY-MM-DD date.
+BUSINESSES_API_PERSONAL_BUSINESSES_CANNOT_BE_DELETED_OR_LEFT Personal businesses cannot be deleted or left.
+BUSINESSES_API_PERSONAL_BUSINESSES_CANNOT_TRANSFER_OWNERSHIP Personal businesses cannot transfer ownership.
+BUSINESSES_API_PROVIDE_INVITE_TOKEN_OR_REQUEST_ID Provide invite_token or request_id.
+BUSINESSES_API_RELATIONSHIP_NOT_FOUND Relationship not found.
+BUSINESSES_API_REQUESTING_USER_ACCOUNT_WAS_NOT_FOUND Requesting user account was not found.
+BUSINESSES_API_ROLE_FIELD_INVALID role is invalid.
+BUSINESSES_API_SCOPE_REQUIRED At least one valid scope is required.
+BUSINESSES_API_SELECT_AT_LEAST_ONE_MEMBER Select at least one member.
+BUSINESSES_API_SHARED_ORG_EXISTS Shared business already exists for this account. Use the existing business hub to manage members, controls, and governance.
+BUSINESSES_API_SITE_IS_NOT_LINKED_TO_THIS_BUSINESS Site is not linked to this business.
+BUSINESSES_API_SITE_NAME_IS_REQUIRED Site name is required.
+BUSINESSES_API_SITE_NOT_FOUND Site not found.
+BUSINESSES_API_SITE_REFERENCE_IS_REQUIRED Site reference is required.
+BUSINESSES_API_STATUS_FIELD_INVALID status is invalid.
+BUSINESSES_API_TARGET_OWNER_MUST_BE_A_DIFFERENT_USER Target owner must be a different user.
+BUSINESSES_API_TARGET_SITE_WAS_NOT_FOUND Target site was not found.
+BUSINESSES_API_TARGET_USER_NOT_FOUND Target user not found.
+BUSINESSES_API_TARGET_USER_UUID_IS_REQUIRED Target user UUID is required.
+BUSINESSES_API_THIS_IMPORT_CHALLENGE_HAS_ALREADY_BEEN_USED This import challenge has already been used.
+BUSINESSES_API_TIMEZONE_INVALID timezone is invalid.
+BUSINESSES_API_TOO_MANY_EMAIL_ENTRIES_MAXIMUM_INPUT_IS_500_ADDRESSES_PE Too many email entries. Maximum input is 500 addresses per import.
+BUSINESSES_API_TOO_MANY_FAILED_VERIFICATION_ATTEMPTS Too many failed verification attempts.
+BUSINESSES_API_UNABLE_TO_DETERMINE_AUTHORITY_EMAIL_DOMAIN_FOR_BULK_IMPO Unable to determine authority email domain for bulk import enforcement.
+BUSINESSES_API_UNABLE_TO_RESOLVE_ROLE_PRESET_SCOPES Unable to resolve role preset scopes.
+BUSINESSES_API_UNABLE_TO_SEND_VERIFICATION_CODE_RIGHT_NOW Unable to send verification code right now.
+BUSINESSES_API_VERIFICATION_CODE_HAS_EXPIRED Verification code has expired.
+BUSINESSES_API_VERIFICATION_CODE_MUST_BE_EXACTLY_6_CHARACTERS Verification code must be exactly 6 characters.
+BUSINESSES_API_VERIFICATION_IS_REQUIRED_BEFORE_IMPORTING Verification is required before importing.
+BUSINESSES_API_YOUR_ACCOUNT_EMAIL_MUST_BE_VERIFIED_BEFORE_BULK_IMPORTIN Your account email must be verified before bulk importing member invites.
+BUSINESSES_API_YOU_ALREADY_HAVE_ACTIVE_ACCESS_TO_THIS_BUSINESS You already have active access to this business.
+BUSINESSES_API_YOU_ALREADY_HAVE_A_PENDING_INVITE_FOR_THIS_BUSINESS_CHEC You already have a pending invite for this business. Check your email to accept it.
+BUSINESSES_API_YOU_CANNOT_REQUEST_ACCESS_TO_YOUR_OWN_BUSINESS You cannot request access to your own business.
+BUSINESSES_API_YOU_DO_NOT_HAVE_AN_BUSINESS_RELATIONSHIP You do not have an business relationship.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_APPLY_WORK_SITES_FOR_THIS You do not have permission to apply work sites for this business.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_APPROVE_ACCESS_REQUESTS You do not have permission to approve access requests.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_CHANGE_MEMBER_ROLES You do not have permission to change member roles.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_CREATE_SITES_FOR_THIS_BUSI You do not have permission to create sites for this business.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_LINK_SITES_FOR_THIS_BUSINE You do not have permission to link sites for this business.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_REJECT_ACCESS_REQUESTS You do not have permission to reject access requests.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_REVOKE_ACCESS You do not have permission to revoke access.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_REVOKE_INVITES You do not have permission to revoke invites.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UNLINK_SITES_FOR_THIS_BUSI You do not have permission to unlink sites for this business.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_BUSINESS_NOTIFICATI You do not have permission to update business notifications.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_BUSINESS_SETTINGS You do not have permission to update business settings.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_SITE_SETTINGS_FOR_T You do not have permission to update site settings for this business.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_ACCESS_REQUESTS You do not have permission to view access requests.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_ACCESS_REQUEST_HISTOR You do not have permission to view access request history.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_BUSINESS_AUDIT_TIMELI You do not have permission to view business audit timeline.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_BUSINESS_RELATIONSHIP You do not have permission to view business relationships.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_BUSINESS_SETTINGS You do not have permission to view business settings.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_INVITES You do not have permission to view invites.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_INVITE_HISTORY You do not have permission to view invite history.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_SITES_FOR_THIS_BUSINE You do not have permission to view sites for this business.
+BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_SITE_SETTINGS_FOR_THI You do not have permission to view site settings for this business.
+BUSINESSES_AUDIT_ACTOR actor
+BUSINESSES_AUDIT_ARIA Business audit timeline
+BUSINESSES_AUDIT_CONTROL_TEST_DENIED Audit control tests require dev admin access and manage-access permission for this business.
+BUSINESSES_AUDIT_CONTROL_TEST_FAILED Unable to generate audit control test error.
+BUSINESSES_AUDIT_CONTROL_TEST_GENERATE_BTN Generate Test Error
+BUSINESSES_AUDIT_CONTROL_TEST_GENERATING Generating controlled audit error and GCS alert artifact...
+BUSINESSES_AUDIT_CONTROL_TEST_H3 Audit Control Test
+BUSINESSES_AUDIT_CONTROL_TEST_HELP Use this once to generate a controlled business error event. It records the test in Redis, appends it to The Watcher, and uploads a chained GCS alert artifact. Restricted to owners and authorized managers.
+BUSINESSES_AUDIT_CONTROL_TEST_PANEL_HELP Generate one controlled audit failure for Redis, The Watcher, and GCS alert-evidence validation.
+BUSINESSES_AUDIT_CONTROL_TEST_RECORDED Audit control test recorded.
+BUSINESSES_AUDIT_CONTROL_TEST_RECORDED_UPLOADED Audit control test recorded and alert artifact uploaded: %s
+BUSINESSES_AUDIT_CONTROL_TEST_SUMMARY_DEFAULT Manual business audit control test
+BUSINESSES_AUDIT_CONTROL_TEST_SUMMARY_LABEL Test summary
+BUSINESSES_AUDIT_CONTROL_TEST_SUMMARY_PLACEHOLDER Describe why this controlled error was generated
+BUSINESSES_AUDIT_EVENT event
+BUSINESSES_AUDIT_GRID_UPDATED Audit grid updated. %d event%s shown.
+BUSINESSES_AUDIT_LOADING Loading audit timeline...
+BUSINESSES_AUDIT_LOAD_FAILED Audit timeline failed to load.
+BUSINESSES_AUDIT_NO_WORKSPACE No business workspace is available for audit review.
+BUSINESSES_AUDIT_SR Audit timeline: time, event, actor, and details per row.
+BUSINESSES_AUDIT_TIMELINE Audit Timeline
+BUSINESSES_AUDIT_TIMELINE_PANEL_HELP Complete history of business-level changes and access events.
+BUSINESSES_AUDIT_TIMELINE_SETTINGS_HELP Complete record of all changes made to business settings.
+BUSINESSES_AUTO_SAVE_DETAILS Business details auto-saved.
+BUSINESSES_BROWSER_FOUND_COUNT Found %d business result%s for "%s".
+BUSINESSES_BROWSER_HELP Find businesses by owner email or name, then connect in one click.
+BUSINESSES_BROWSER_MIN_CHARS Type at least 2 characters to search businesses.
+BUSINESSES_BROWSER_NO_MATCHES No businesses matched your search.
+BUSINESSES_BROWSER_NO_MATCH_QUERY No businesses matched "%s".
+BUSINESSES_BROWSER_PANEL_HELP Search businesses and connect quickly from one place.
+BUSINESSES_BROWSER_RECENT Recent
+BUSINESSES_BROWSER_RECENT_ARIA Recently discovered businesses
+BUSINESSES_BROWSER_RECENT_EMPTY Loading latest businesses...
+BUSINESSES_BROWSER_RECENT_PLACEHOLDER Recent businesses will appear here.
+BUSINESSES_BROWSER_RESULTS_ARIA Business browser results
+BUSINESSES_BROWSER_SEARCH_ARIA Search businesses by name or owner email
+BUSINESSES_BROWSER_SEARCH_EMPTY Search to discover businesses.
+BUSINESSES_BROWSER_SEARCH_PLACEHOLDER Search business or owner email
+BUSINESSES_BROWSER_SEARCH_RESULTS Search Results
+BUSINESSES_BROWSER_SELECT_VALID_CONTACT Select a valid business contact before connecting.
+BUSINESSES_BROWSER_SR Business browser results grid. Search businesses and activate connect to send an access request.
+BUSINESSES_BROWSER_TITLE Business Browser
+BUSINESSES_BUSINESS_MEMBER Business member
+BUSINESSES_CARDS_ARIA Business cards
+BUSINESSES_CHANGE_CANCELED Change canceled. Previous value restored.
+BUSINESSES_CONFIRM_ROLE Change your role from %s to %s? This may remove business capabilities (settings, invites, or access controls).
+BUSINESSES_CONFIRM_STATUS_ACTIVE_PENDING Move status from active to pending? Pending status can interrupt active business workflows and access expectations.
+BUSINESSES_CONFIRM_STATUS_GENERIC Change status from %s to %s? Status changes can affect business access and workflow behavior.
+BUSINESSES_CONFIRM_TYPE_GENERIC Change Type for %s from %s to %s? This can affect how access and membership behave.
+BUSINESSES_CONFIRM_TYPE_MEMBER_WARNING_MANY  There are %d active linked members in the transfer list.
+BUSINESSES_CONFIRM_TYPE_MEMBER_WARNING_ONE  There is 1 active linked member in the transfer list.
+BUSINESSES_CONFIRM_TYPE_SHARED_TO_PERSONAL Change Type for %s from shared to personal? This can sever collaboration and member relationship paths.%s
+BUSINESSES_CONTACT_ACTIONS_ARIA Contact actions
+BUSINESSES_CONTACT_ALREADY_EMPTY Contact card is already empty.
+BUSINESSES_CONTACT_CARD_SAVED Contact card saved.
+BUSINESSES_CONTACT_CLEAR Clear
+BUSINESSES_CONTACT_CLEARED Contact card cleared.
+BUSINESSES_CONTACT_CONFIRM_CLEAR Confirm clear
+BUSINESSES_CONTACT_DIRECTORY_H3 Contact Directory
+BUSINESSES_CONTACT_DIRECTORY_HELP Key contacts for business operations, HR, payroll, and support.
+BUSINESSES_CONTACT_EMAIL Contact Email
+BUSINESSES_CONTACT_EMAIL_PLACEHOLDER ops@organization.com
+BUSINESSES_CONTACT_IMAGE_ALT Contact image
+BUSINESSES_CONTACT_IMAGE_DROP Drop image here or click to choose
+BUSINESSES_CONTACT_IMAGE_DROP_ARIA Drop an image or choose file
+BUSINESSES_CONTACT_IMAGE_POPOVER_ARIA Update contact image
+BUSINESSES_CONTACT_IMAGE_POPOVER_TITLE Upload or Replace Contact Image
+BUSINESSES_CONTACT_IMAGE_PROCESS_FAILED Could not process that image. Try a different file.
+BUSINESSES_CONTACT_IMAGE_REMOVE Remove Image
+BUSINESSES_CONTACT_IMAGE_SAVED Contact image saved.
+BUSINESSES_CONTACT_IMAGE_SAVING Saving contact image...
+BUSINESSES_CONTACT_IMAGE_TOO_LONG Image value is too long (max %d characters).
+BUSINESSES_CONTACT_IMAGE_UNCHANGED Contact image unchanged.
+BUSINESSES_CONTACT_PHONE Contact Phone
+BUSINESSES_CONTACT_PHONE_PLACEHOLDER (123) 456-7890
+BUSINESSES_CONTACT_ROLE_PH Role / Title
+BUSINESSES_CONTROL_CENTER_HELP Business identity, legal details, and address for your workspace.
+BUSINESSES_CONTROL_CENTER_TITLE Workspace Settings
+BUSINESSES_CORRECT_HIGHLIGHTED_FIELDS Please correct the highlighted fields and try again.
+BUSINESSES_CREATE Create Business
+BUSINESSES_CREATED Business created.
+BUSINESSES_CREATE_ARIA Create a new business for collaboration and member payroll management.
+BUSINESSES_CREATE_FAILED Couldn't create the business. Please try again.
+BUSINESSES_CREATE_HELP After creating, manage invites, scopes, defaults, and ownership from Settings.
+BUSINESSES_CREATE_NAME_PLACEHOLDER Business Name
+BUSINESSES_CREATE_NAME_REQUIRED Enter an business name.
+BUSINESSES_CREATE_ORG Create Business
+BUSINESSES_CURRENCY Currency
+BUSINESSES_CURRENT_DETAILS_ARIA Review the business relationship, contact details, and what access this profile currently has.
+BUSINESSES_CURRENT_DETAILS_TITLE Current Business Details
+BUSINESSES_CURRENT_ORG_ACCESS_HELP This access allows the business to use your assigned role and permissions to view and collaborate on your work data.
+BUSINESSES_CURRENT_ORG_CALLOUT Checking your current business relationship...
+BUSINESSES_CURRENT_ORG_REVOKE_HELP Revoking access will remove your profile from the business, stop all shared access, and may require a new request to restore access later.
+BUSINESSES_CURRENT_ORG_TITLE Current Business
+BUSINESSES_CURRENT_OWNER_TITLE Current Owner
+BUSINESSES_CURRENT_PANEL_HELP Your current shared business relationship and access status.
+BUSINESSES_DANGER_ZONE DANGER ZONE
+BUSINESSES_DATAGRID_ORDER_DEFAULT default order
+BUSINESSES_DATAGRID_SEARCH_NONE no search filter
+BUSINESSES_DATAGRID_SEARCH_QUERY search %s
+BUSINESSES_DEFAULTS Business Defaults
+BUSINESSES_DEFAULTS_SAVED Business defaults saved.
+BUSINESSES_DEFAULTS_SAVE_FAILED Couldn't save your business defaults. Please try again.
+BUSINESSES_DEFAULT_PAY_ANCHOR Monday
+BUSINESSES_DEFAULT_WAGE Default Wage
+BUSINESSES_DEFAULT_WAGE_PLACEHOLDER 32.00
+BUSINESSES_DEFINITIONS_ARIA Field definitions for business type, role, and status.
+BUSINESSES_DEFINITIONS_TITLE Business field definitions
+BUSINESSES_DEFINITION_TYPE Type
+BUSINESSES_DEF_ROLE_CONTRIBUTOR_DD Can add and update business work data.
+BUSINESSES_DEF_ROLE_COORDINATOR_DD Operational manager with elevated collaboration permissions.
+BUSINESSES_DEF_ROLE_DELEGATE_DD Invited collaborator with member access.
+BUSINESSES_DEF_ROLE_MEMBER_DD Self-scoped work access.
+BUSINESSES_DEF_ROLE_OWNER_DD Full business control, including ownership transfer.
+BUSINESSES_DEF_ROLE_VIEWER_DD Read-only access.
+BUSINESSES_DEF_STATUS_ACTIVE_DD Currently active and usable.
+BUSINESSES_DEF_STATUS_PENDING_DD Awaiting acceptance or approval.
+BUSINESSES_DEF_TYPE_PERSONAL_DD Profile-level business for personal work and pay settings.
+BUSINESSES_DEF_TYPE_SHARED_DD Collaborative business with members, invites, and ownership controls.
+BUSINESSES_DELEGATE_HELP Share work data with an business.
+BUSINESSES_DELEGATE_INVITE_NEEDS_PERSONAL_ORG Profile business record not found. Refresh and try again.
+BUSINESSES_DELEGATE_INVITE_SENT Member invite sent from your profile.
+BUSINESSES_DELEGATE_PANEL_HELP Grant someone access to collaborate on linked businesses and work entries.
+BUSINESSES_DELEGATE_PLACEHOLDER Member email or business name
+BUSINESSES_DELEGATE_TITLE Member
+BUSINESSES_DELETE_DATA_FAILED Unable to delete data right now.
+BUSINESSES_DISCOVERY Discovery
+BUSINESSES_DISCOVERY_AUTO_REFRESH Discovery auto-refresh is enabled every 1 minute via live socket.
+BUSINESSES_DISCOVERY_COMPLETE Business discovery completed.
+BUSINESSES_DISCOVERY_FAILED Couldn't search for businesses right now. Please try again.
+BUSINESSES_DISCOVERY_HELP Find sites that can be linked to the selected business.
+BUSINESSES_DISCOVERY_LOAD_FAILED Discovery failed to load results.
+BUSINESSES_DISCOVERY_PREMIUM_LOCKED Discovery is locked behind Premium Admin preview for this business.
+BUSINESSES_DISCOVERY_RESULTS_ARIA Business discovery results
+BUSINESSES_DISCOVERY_RESULTS_COUNT Discovery results loaded. %d item%s shown.
+BUSINESSES_DISCOVERY_RESULTS_NONE Discovery results loaded. No recommendations found.
+BUSINESSES_DISCOVERY_RUNNING Running discovery...
+BUSINESSES_DISCOVERY_SEARCH_APPLIED Search applied: %s
+BUSINESSES_DISCOVERY_SEARCH_CLEARED Search cleared.
+BUSINESSES_DISCOVERY_SR Discovery results list. Review suggestions and use link actions to attach sites to the selected business.
+BUSINESSES_DISCOVERY_UNAVAILABLE Discovery can still be run, but linking actions require business management access.
+BUSINESSES_EDITOR_ARIA Edit business details, pay period settings, and member invites for the selected business.
+BUSINESSES_EDITOR_DETAILS_H3 Business Details
+BUSINESSES_EDITOR_DETAILS_NOTICE Discovery notice: all business profile fields in this section are publicly discoverable except Notes and pay configuration fields (default wage, pay period frequency, pay period start, pay period length, and grace days).
+BUSINESSES_EDITOR_INLINE_HELP Manage members, pending access requests, invites, and roles.
+BUSINESSES_EDITOR_INLINE_TITLE People & Access
+BUSINESSES_EDITOR_MEMBERSHIP_H3 Membership & defaults
+BUSINESSES_EDITOR_SUBTITLE %s %s | %s | %s
+BUSINESSES_EMPLOYEES_UNAVAILABLE Employees unavailable
+BUSINESSES_EMPLOYEE_COUNT Employee Count
+BUSINESSES_EMPLOYEE_COUNT_PLACEHOLDER e.g. 75
+BUSINESSES_ENFORCE_CONTACT_DOMAIN Enforce Contact Domain
+BUSINESSES_ENFORCE_CONTACT_DOMAIN_TEXT Require business contact emails to match allowed/business domains.
+BUSINESSES_ENTER_INVITE_EMAIL Enter an invite email.
+BUSINESSES_EVENT_LOG_HELP Events include all activity tied to your profile.
+BUSINESSES_EVENT_LOG_TITLE Event Log
+BUSINESSES_EXEC_INDUSTRY Industry
+BUSINESSES_EXEC_NONE None
+BUSINESSES_EXEC_NOTICES Notices
+BUSINESSES_EXEC_PENDING_REQUESTS Pending
+BUSINESSES_EXEC_ROLE Role
+BUSINESSES_EXEC_STATUS Status
+BUSINESSES_EXEC_SUMMARY_KICKER Overview
+BUSINESSES_EXEC_SUMMARY_LEDE Workspace snapshot.
+BUSINESSES_FAILED_LOAD_ACCESS_REQUESTS Failed to load access requests.
+BUSINESSES_FAILED_LOAD_MEMBERS_GRID Failed to load members grid.
+BUSINESSES_FOUNDED_YEAR Founded Year
+BUSINESSES_FOUNDED_YEAR_PLACEHOLDER e.g. 2016
+BUSINESSES_FREE_AUDIT_ARIA My business audit timeline
+BUSINESSES_FREE_AUDIT_EMPTY No audit events found for this profile yet.
+BUSINESSES_FREE_AUDIT_LOADED Profile audit timeline loaded.
+BUSINESSES_FREE_AUDIT_LOADING Loading profile-related audit timeline...
+BUSINESSES_FREE_AUDIT_LOAD_FAILED Profile audit timeline failed to load.
+BUSINESSES_FREE_AUDIT_PANEL_HELP Audit events related to your profile in the current business.
+BUSINESSES_FREE_AUDIT_SR Audit timeline related to your current profile. Each row includes time, event type, actor, and details.
+BUSINESSES_FREE_INTRO_HELP Search for a business to connect with, or review your current membership below. Creating and managing your business requires the Business tier.
+BUSINESSES_FREE_INTRO_PANEL_HELP Business discovery and membership overview.
+BUSINESSES_FREE_INTRO_TITLE Find Your Business
+BUSINESSES_GRID_ARIA Business overview
+BUSINESSES_GRID_PANEL_HELP Overview of your business workspace with launch points to members, sites, team earnings, and settings.
+BUSINESSES_GRID_PLACEHOLDER Loading your business overview...
+BUSINESSES_GRID_REASON_FAILED failed to load
+BUSINESSES_GRID_REASON_LOADED loaded
+BUSINESSES_GRID_REASON_PAGE updated after page change
+BUSINESSES_GRID_REASON_SEARCH updated after search
+BUSINESSES_GRID_REASON_SORT updated after sorting
+BUSINESSES_GRID_SR_CONTEXT Your business overview shows name, role, and status. Use launch points below to manage members, sites, and settings.
+BUSINESSES_GRID_SR_INSTRUCTIONS Business overview. Use launch points to open members, sites, team earnings, or business settings.
+BUSINESSES_GRID_STATUS_DETAIL Businesses grid %s. %d result%s. %s. %s. Page %d.
+BUSINESSES_GRID_STATUS_NONE Businesses grid %s. No results.
+BUSINESSES_HEADER_PANEL_HELP Your business control center — manage the workspace and open members, sites, earnings, and settings.
+BUSINESSES_HIERARCHY_CONSEQUENCES_TITLE Consequences
+BUSINESSES_HIERARCHY_INTRO Permission matrix, ownership rules, and audit expectations for your business workspace.
+BUSINESSES_HIERARCHY_OWNERSHIP_NOTE Ownership transfer is immediate and exclusive. Only the current owner can transfer ownership, and the previous owner is demoted to manager.
+BUSINESSES_HIERARCHY_OWNERSHIP_TITLE Ownership
+BUSINESSES_HIERARCHY_PERMISSIONS_TITLE Permissions and Scope
+BUSINESSES_HIERARCHY_ROLES_TITLE Roles
+BUSINESSES_HIERARCHY_TITLE Governance
+BUSINESSES_HTML <em>B</em>usiness
+BUSINESSES_HUB_CALLOUT_FREE Find and connect with a business, or view your current membership.
+BUSINESSES_HUB_CALLOUT_PREMIUM If you need to connect with another business or share your own personal work data, you can do that too!
+BUSINESSES_HUB_PANEL_HELP Access request and member-access tools for your business.
+BUSINESSES_IMPORT_BTN_COMMIT 3. Send Invites
+BUSINESSES_IMPORT_BTN_PARSE 1. Parse Import
+BUSINESSES_IMPORT_BTN_SEND_CODE 2. Send Code
+BUSINESSES_IMPORT_BTN_VERIFY 2. Verify Code
+BUSINESSES_IMPORT_EMAILS_LABEL Email Addresses
+BUSINESSES_IMPORT_EMAILS_PLACEHOLDER teammate1@example.com&#10;teammate2@example.com
+BUSINESSES_IMPORT_H4 Mass Invite Import
+BUSINESSES_IMPORT_HELP Paste emails separated by commas, spaces, or new lines. Only emails on the verified admin/owner domain are accepted.
+BUSINESSES_IMPORT_INPUT_ARIA Import input
+BUSINESSES_IMPORT_OUTPUT_ARIA Import output
+BUSINESSES_IMPORT_OUTPUT_H5 Import Output
+BUSINESSES_IMPORT_STEP_IMPORT 3 Import
+BUSINESSES_IMPORT_STEP_PARSE 1 Parse
+BUSINESSES_IMPORT_STEP_VERIFY 2 Verify
+BUSINESSES_IMPORT_SUMMARY_ARIA Bulk import summary
+BUSINESSES_IMPORT_WORKFLOW_ARIA Mass invite import workflow
+BUSINESSES_INDUSTRY Industry
+BUSINESSES_INDUSTRY_PLACEHOLDER Staffing, Construction, Retail...
+BUSINESSES_INDUSTRY_UNAVAILABLE Industry unavailable
+BUSINESSES_INTRO Your business connects sites and member access while keeping work entries user-owned.
+BUSINESSES_INVALID_ROLE_SELECTED Invalid role selected.
+BUSINESSES_INVITES_HISTORY_ARIA Invite and access request history
+BUSINESSES_INVITES_HISTORY_H4 Invite &amp; Access History
+BUSINESSES_INVITES_HISTORY_LOADING Loading history...
+BUSINESSES_INVITES_LOADED_COUNT Invites list loaded. %d invite%s shown.
+BUSINESSES_INVITES_LOADED_NONE Invites list loaded. No invites found.
+BUSINESSES_INVITES_LOADING Loading invites...
+BUSINESSES_INVITES_LOAD_FAILED Invites list failed to load.
+BUSINESSES_INVITES_PENDING_ARIA Sent and pending invites
+BUSINESSES_INVITES_PENDING_H4 Sent / Pending Invites
+BUSINESSES_INVITES_PREMIUM_LOCKED Invites are locked behind Premium Admin preview for this business.
+BUSINESSES_INVITE_ACCEPTED Business invite accepted.
+BUSINESSES_INVITE_ACCEPT_FAILED Unable to accept business invite right now.
+BUSINESSES_INVITE_DELEGATES Invite Members
+BUSINESSES_INVITE_EMAIL_LABEL Invite Email Address
+BUSINESSES_INVITE_EMAIL_OR_RESULT Provide a valid email or select a business result.
+BUSINESSES_INVITE_EMAIL_PLACEHOLDER colleague@example.com
+BUSINESSES_INVITE_PLACEHOLDER member@example.com
+BUSINESSES_INVITE_REVOKED Invite revoked.
+BUSINESSES_INVITE_REVOKE_FAILED Couldn't remove that invite. Please try again.
+BUSINESSES_INVITE_SEND_FAILED Couldn't send that invite. Please try again.
+BUSINESSES_INVITE_SENT Business invite sent.
+BUSINESSES_LAUNCH_EARNINGS Team Earnings
+BUSINESSES_LAUNCH_EARNINGS_HELP View team payroll in Earnings
+BUSINESSES_LAUNCH_MEMBERS Members
+BUSINESSES_LAUNCH_MEMBERS_HELP Manage members, invites, and roles
+BUSINESSES_LAUNCH_SETTINGS Business Settings
+BUSINESSES_LAUNCH_SETTINGS_HELP Profile, billing, and account settings
+BUSINESSES_LAUNCH_SITES Sites
+BUSINESSES_LAUNCH_SITES_HELP Manage business sites
+BUSINESSES_LEAVE_SELECTED Leave Selected Business
+BUSINESSES_LEGAL_NAME Legal Name
+BUSINESSES_LEGAL_NAME_PLACEHOLDER Acme Payroll Services LLC
+BUSINESSES_LINK_SITE Link Site
+BUSINESSES_LIVE_REQUESTS_ARIA Live pending access requests
+BUSINESSES_LIVE_REQUESTS_PANEL_HELP Live pending access requests for your business.
+BUSINESSES_LIVE_REQUESTS_SR Live pending access requests for your business. Use approve or reject to process requests.
+BUSINESSES_LIVE_REQUESTS_TITLE Live Requests
+BUSINESSES_LOADING Loading your business...
+BUSINESSES_LOADING_ACCOUNT_ACTIVITY Loading account activity...
+BUSINESSES_LOADING_DETAILS Loading business details...
+BUSINESSES_LOAD_AUDIT_FAILED Couldn't load the activity timeline. Please try again.
+BUSINESSES_LOAD_DEFAULTS_FAILED Couldn't load business defaults. Please try again.
+BUSINESSES_LOAD_INVITES_FAILED Couldn't load your invites right now. Please try again.
+BUSINESSES_LOAD_ORGS_FAILED Unable to load your business right now.
+BUSINESSES_LOCATION_UNAVAILABLE Location unavailable
+BUSINESSES_MANAGE_ACCESS_UNAVAILABLE Invite and ownership actions require business management access.
+BUSINESSES_MEMBERSHIP_CONSENT_ACK_REQUIRED You must acknowledge consent before continuing.
+BUSINESSES_MEMBERSHIP_CONSENT_ACK_TEXT I acknowledge and consent to business membership activation.
+BUSINESSES_MEMBERSHIP_CONSENT_DEFAULT_DISCLAIMER Org shared encryption consent accepted.
+BUSINESSES_MEMBERSHIP_CONSENT_DESC Review and confirm before activating business membership access.
+BUSINESSES_MEMBERSHIP_CONSENT_DISCLAIMER_LABEL Reason / Disclaimer (optional)
+BUSINESSES_MEMBERSHIP_CONSENT_DISCLAIMER_PLACEHOLDER Optional note for consent record
+BUSINESSES_MEMBERSHIP_CONSENT_TITLE Membership Consent
+BUSINESSES_MEMBERS_ACTION_ASSIGN_SITE Assign Site
+BUSINESSES_MEMBERS_ACTION_EDIT_ROLE Edit Role
+BUSINESSES_MEMBERS_ACTION_SUSPEND Suspend
+BUSINESSES_MEMBERS_APPLY_SITE_ARIA Choose a business-linked work site
+BUSINESSES_MEMBERS_APPLY_SITE_LABEL Work site
+BUSINESSES_MEMBERS_APPLY_SITE_PLACEHOLDER Choose a site…
+BUSINESSES_MEMBERS_APPLY_WORK_SITE Apply work site
+BUSINESSES_MEMBERS_APPLY_WORK_SITE_CONFIRM Apply the selected work site to work entries for %d member(s)? Entries on sites already linked to this business are skipped.
+BUSINESSES_MEMBERS_APPLY_WORK_SITE_FAILED Unable to apply work site to member entries right now.
+BUSINESSES_MEMBERS_APPLY_WORK_SITE_NO_SELECTION Select at least one member first.
+BUSINESSES_MEMBERS_APPLY_WORK_SITE_NO_SITE Choose a work site first.
+BUSINESSES_MEMBERS_APPLY_WORK_SITE_PROGRESS Applying work site to members %d of %d…
+BUSINESSES_MEMBERS_APPLY_WORK_SITE_SUCCESS Updated work entries for %d member(s). %d entries reassigned.
+BUSINESSES_MEMBERS_BULK_TOOLBAR_ARIA Bulk member work-site assignment
+BUSINESSES_MEMBERS_CHANGE_ROLE_ARIA Change role, currently %s
+BUSINESSES_MEMBERS_CLEAR_SELECTION Clear selection
+BUSINESSES_MEMBERS_COLUMNS_GEAR Columns ⚙
+BUSINESSES_MEMBERS_COL_EARNINGS Earnings
+BUSINESSES_MEMBERS_COL_HOURS Hours
+BUSINESSES_MEMBERS_COL_JOINED Joined
+BUSINESSES_MEMBERS_COL_NAME_DETAILS Name & Details
+BUSINESSES_MEMBERS_COL_OT_HOURS OT Hours
+BUSINESSES_MEMBERS_COL_REG_HOURS Reg Hours
+BUSINESSES_MEMBERS_COL_TOTAL_HOURS Total Hours
+BUSINESSES_MEMBERS_COL_TRAILING_BASELINE Trailing Baseline
+BUSINESSES_MEMBERS_COL_YTD_GROSS YTD Gross
+BUSINESSES_MEMBERS_FILTER_ALL All Roles
+BUSINESSES_MEMBERS_FILTER_ARIA Filter by role
+BUSINESSES_MEMBERS_FILTER_PLACEHOLDER Filter members...
+BUSINESSES_MEMBERS_GRID_ARIA Business members results
+BUSINESSES_MEMBERS_GRID_CONTEXT Rows show member name with email, role, and status, plus joined date, hours, earnings, and row actions. Use the Columns menu to show or hide optional columns.
+BUSINESSES_MEMBERS_GRID_INIT_FAILED Unable to initialize members grid.
+BUSINESSES_MEMBERS_GRID_LOADED Members grid loaded. %d result%s.
+BUSINESSES_MEMBERS_GRID_READY Members grid ready. %d result%s.
+BUSINESSES_MEMBERS_GRID_SR Business members grid. Use search to filter, sortable headers to order, click a row to open member reports, click role in the name cell to change role, or use the row menu for more actions.
+BUSINESSES_MEMBERS_GRID_STATUS_DETAIL Members grid updated. %d result%s. %s. %s. Page %d.
+BUSINESSES_MEMBERS_H3 Business Members
+BUSINESSES_MEMBERS_HOURS_OT_SUBLINE %s / %s OT
+BUSINESSES_MEMBERS_ITEM_LABEL members
+BUSINESSES_MEMBERS_JOINED_DAYS_AGO %d days ago
+BUSINESSES_MEMBERS_JOINED_YESTERDAY Yesterday
+BUSINESSES_MEMBERS_LOADING Loading members...
+BUSINESSES_MEMBERS_METRICS_ARIA Business members summary metrics
+BUSINESSES_MEMBERS_METRIC_MANAGERS Managers
+BUSINESSES_MEMBERS_METRIC_MEMBERS Members
+BUSINESSES_MEMBERS_METRIC_PENDING Pending
+BUSINESSES_MEMBERS_METRIC_SELECTED Selected
+BUSINESSES_MEMBERS_METRIC_SITES Sites
+BUSINESSES_MEMBERS_OWNER_ROLE_LOCKED Cannot change the business owner role.
+BUSINESSES_MEMBERS_PENDING_APPROVE Approve
+BUSINESSES_MEMBERS_PENDING_ARIA Pending invites and access requests
+BUSINESSES_MEMBERS_PENDING_LOADED Pending members loaded. %d item%s.
+BUSINESSES_MEMBERS_PENDING_LOADING Loading pending members...
+BUSINESSES_MEMBERS_PENDING_LOAD_FAILED Unable to load pending members.
+BUSINESSES_MEMBERS_PENDING_METRIC_ARIA Show %d pending member%s
+BUSINESSES_MEMBERS_PENDING_REJECT Reject
+BUSINESSES_MEMBERS_PENDING_SUMMARY Pending members (%d)
+BUSINESSES_MEMBERS_PENDING_TYPE_INVITE Invite
+BUSINESSES_MEMBERS_PENDING_TYPE_REQUEST Access request
+BUSINESSES_MEMBERS_REQUESTS_ARIA Pending access requests
+BUSINESSES_MEMBERS_REQUESTS_H3 Pending Access Requests
+BUSINESSES_MEMBERS_REQUESTS_SR Pending member access requests for this business. Use approve or reject to manage.
+BUSINESSES_MEMBERS_ROLE_CONTRIBUTOR Contributor
+BUSINESSES_MEMBERS_ROLE_COORDINATOR Manager
+BUSINESSES_MEMBERS_ROLE_DELEGATE Member
+BUSINESSES_MEMBERS_ROLE_OWNER Owner
+BUSINESSES_MEMBERS_ROLE_UPDATED %s is now %s
+BUSINESSES_MEMBERS_ROLE_UPDATE_FAILED Unable to update %s's role right now.
+BUSINESSES_MEMBERS_ROLE_UPDATE_FAILED_GENERIC Unable to update member role right now.
+BUSINESSES_MEMBERS_ROLE_VIEWER Viewer
+BUSINESSES_MEMBERS_ROW_MENU_ARIA Actions for %s
+BUSINESSES_MEMBERS_ROW_MENU_ARIA_GENERIC Member row actions
+BUSINESSES_MEMBERS_SELECTION_BADGE_LABEL selected
+BUSINESSES_MEMBERS_SELECTION_COUNT %d members selected
+BUSINESSES_MEMBERS_SELECTION_COUNT_NONE 0 members selected
+BUSINESSES_MEMBERS_SELECT_ALL Select all members
+BUSINESSES_MEMBERS_SELECT_MEMBER Select member
+BUSINESSES_MEMBERS_SELECT_NAMED Select %s
+BUSINESSES_MEMBERS_VIEW_REPORTS_ARIA View reports for %s
+BUSINESSES_MEMBER_ACCESS_MANAGE_DENIED Your current role cannot manage invites, member access, or role changes. Ask an business owner/coordinator.
+BUSINESSES_MEMBER_HELP Share work data with an business.
+BUSINESSES_MEMBER_INVITE_NEEDS_PERSONAL_ORG Profile business record not found. Refresh and try again.
+BUSINESSES_MEMBER_INVITE_SENT Member invite sent from your profile.
+BUSINESSES_MEMBER_PANEL_HELP Grant someone access to collaborate on linked businesses and work entries.
+BUSINESSES_MEMBER_PLACEHOLDER Member email or business name
+BUSINESSES_MEMBER_REPORTS_DENIED Your current role cannot view member reports.
+BUSINESSES_MEMBER_REPORTS_DIALOG_TITLE Reports
+BUSINESSES_MEMBER_REPORTS_DIALOG_TITLE_NAMED %s — Reports
+BUSINESSES_MEMBER_REPORTS_LOADED_FOR Reports loaded for %s.
+BUSINESSES_MEMBER_REPORTS_LOADING Loading reports for %s...
+BUSINESSES_MEMBER_REPORTS_LOAD_FAILED Unable to load reports for %s right now.
+BUSINESSES_MEMBER_REVOKE_CONFIRM Revoke access for %s?
+BUSINESSES_MEMBER_REVOKE_DIALOG_TITLE Revoke access
+BUSINESSES_MEMBER_REVOKE_FAILED Unable to revoke access for %s right now.
+BUSINESSES_MEMBER_REVOKE_SUCCESS Access revoked for %s.
+BUSINESSES_MEMBER_TITLE Member
+BUSINESSES_NAME Business Name
+BUSINESSES_NAME_MIN Business name must be at least 2 characters.
+BUSINESSES_NONE No business workspace yet. Upgrade to the Business tier to get started.
+BUSINESSES_NOUN_BUSINESS business
+BUSINESSES_NO_ACCESS_REQUESTS No access requests yet.
+BUSINESSES_NO_ACTIVE_SESSIONS No active sessions found.
+BUSINESSES_NO_AUDIT No audit events yet.
+BUSINESSES_NO_BUSINESS_SELECTED No business selected.
+BUSINESSES_NO_CHANGES_TO_UPDATE No changes to update.
+BUSINESSES_NO_CURRENT_RELATIONSHIP No current business relationship found.
+BUSINESSES_NO_CURRENT_SELECTED_AUDIT No current business selected for profile audit timeline.
+BUSINESSES_NO_DISCOVERY No discovery candidates found.
+BUSINESSES_NO_EMAIL_AVAILABLE No email available
+BUSINESSES_NO_INVITES No invites for this business.
+BUSINESSES_NO_PENDING_REQUESTS No pending access requests.
+BUSINESSES_NO_RELATIONSHIPS No members available for ownership transfer.
+BUSINESSES_OPEN_DEFINITIONS_BTN Open business field definitions
+BUSINESSES_OPEN_FULL Open Full Org Controls
+BUSINESSES_ORG_DEK_BOOTSTRAP_DONE Business DEK bootstrap completed.
+BUSINESSES_ORG_DEK_BOOTSTRAP_FAILED Business DEK bootstrap failed.
+BUSINESSES_ORG_NOTES Business Notes
+BUSINESSES_ORG_NOTES_PLACEHOLDER Internal details, onboarding notes, policies, etc.
+BUSINESSES_OVERVIEW_HELP Overview of your business workspace and quick launch points.
+BUSINESSES_OVERVIEW_TITLE Your Business
+BUSINESSES_OWNERSHIP_TRANSFER Ownership Transfer
+BUSINESSES_OWNERSHIP_TRANSFERRED Ownership transferred.
+BUSINESSES_OWNERSHIP_TRANSFER_FAILED Couldn't transfer ownership right now. Please try again.
+BUSINESSES_OWNER_EMAIL_LABEL Owner Email
+BUSINESSES_OWNER_LABEL Owner
+BUSINESSES_OWNER_NAME_LABEL Owner Name
+BUSINESSES_OWNER_SINCE_LABEL Since
+BUSINESSES_PAY_PERIOD_LENGTH Pay Period Length
+BUSINESSES_PAY_PERIOD_SAVING Saving pay period settings...
+BUSINESSES_PAY_PERIOD_SAVING_START Saving pay period start...
+BUSINESSES_PAY_PERIOD_START_UPDATED Pay period start and anchor updated.
+BUSINESSES_PENDING pending
+BUSINESSES_PENDING_INVITES Pending Invites
+BUSINESSES_PERM_ACCESS_MANAGEMENT Access management
+BUSINESSES_PERM_AUDIT_READ Audit timeline read
+BUSINESSES_PERM_FEATURE_COL Permission / Feature
+BUSINESSES_PERM_ORG_DETAILS_READ Org Details read
+BUSINESSES_PERM_ORG_SETTINGS_READ Org settings read
+BUSINESSES_PERM_ORG_SETTINGS_WRITE Org settings write
+BUSINESSES_PERM_OWNERSHIP_TRANSFER Ownership transfer
+BUSINESSES_PERM_PAY_PERIOD_READ Pay period read
+BUSINESSES_PERM_PAY_PERIOD_WRITE Pay period write
+BUSINESSES_PERM_SCOPE_ORG Org
+BUSINESSES_PERM_SCOPE_SELF Self
+BUSINESSES_PERM_SITES_READ Sites read
+BUSINESSES_PERM_SITES_WRITE Sites write
+BUSINESSES_PERM_WAGE_READ Wage read
+BUSINESSES_PERM_WAGE_WRITE Wage write
+BUSINESSES_PERM_WORK_READ Work read
+BUSINESSES_PERM_WORK_SCOPE Work scope
+BUSINESSES_PERM_WORK_WRITE Work write
+BUSINESSES_PP_INVALID_ANCHOR Invalid pay period anchor day selected.
+BUSINESSES_PP_INVALID_FREQUENCY Invalid pay period frequency selected.
+BUSINESSES_PP_INVALID_GRACE Invalid grace-day selection. Choose between %d and %d days.
+BUSINESSES_PP_INVALID_LENGTH Invalid pay period length for %s. Expected %s days.
+BUSINESSES_PP_INVALID_START_DATE Invalid pay period start date. Use a valid YYYY-MM-DD date.
+BUSINESSES_PP_PANEL_HELP Configure pay frequency, period length, grace window, and preview schedule.
+BUSINESSES_PP_PREVIEW_ARIA Upcoming pay periods
+BUSINESSES_PP_PREVIEW_STATUS Pay period preview updated. P1 %s to %s. P2 %s to %s.
+BUSINESSES_PP_SELECT_START_DATE Select a calendar day in the preview to set your pay period start date.
+BUSINESSES_PP_SETTINGS_HELP Configure pay frequency, grace period, and pay dates.
+BUSINESSES_PP_SR Upcoming pay periods grid. Adjust controls above to update the schedule preview.
+BUSINESSES_PP_TITLE Pay Period
+BUSINESSES_PREMIUM_ADMIN_LOCKED Business tier is required to manage shared businesses you do not own.
+BUSINESSES_PREMIUM_ADMIN_LOCKED_DETAILED Upgrade to the Business tier to manage shared businesses where you are not the owner. Business owners and elevated staff can continue without Business tier billing.
+BUSINESSES_PREMIUM_LOCKED Premium locked
+BUSINESSES_PREMIUM_NOTICE_SELECT Select your business to manage invites, discovery, and ownership controls.
+BUSINESSES_PREMIUM_NOTICE_SELF_SELECTED Self business selected.
+BUSINESSES_PREMIUM_NOTICE_SHARED_SELECTED Shared business selected.
+BUSINESSES_PREMIUM_NOTICE_TYPE_SELECTED %s %s selected.
+BUSINESSES_PREVIEW_EMPTY Choose a start date to preview the next two pay periods.
+BUSINESSES_PREVIEW_LABEL Next periods
+BUSINESSES_PROFILE_SETTINGS_SAVED Profile settings saved.
+BUSINESSES_PROFILE_SETTINGS_SAVING Saving profile settings...
+BUSINESSES_REG_NUMBER Registration #
+BUSINESSES_REG_NUMBER_PLACEHOLDER Company registration number
+BUSINESSES_RELATIONSHIPS_LOADED_COUNT Relationships loaded. %d relationship%s shown.
+BUSINESSES_RELATIONSHIPS_LOADED_NONE Relationships loaded. No relationships found.
+BUSINESSES_RELATIONSHIP_LABEL Relationship
+BUSINESSES_RELATIONSHIP_STATUS_LABEL Relationship Status
+BUSINESSES_RELOAD_MEMBERS Reload Members
+BUSINESSES_RELOAD_TIMELINE Reload Timeline
+BUSINESSES_REMOVE_CONFIRM_PREFIX Remove business
+BUSINESSES_REMOVE_CONFIRM_SUFFIX from your business workspace?
+BUSINESSES_REMOVE_FAILED Couldn't remove that business right now. Please try again.
+BUSINESSES_REQUEST_ACCESS_HELP Join an business and share your work data.
+BUSINESSES_REQUEST_ACCESS_TITLE Request Access
+BUSINESSES_REQUEST_EMAIL_PLACEHOLDER Owner email or business name
+BUSINESSES_REQUEST_JOIN_BTN Connect Accounts
+BUSINESSES_REQUEST_JOIN_FAILED Unable to submit access request right now.
+BUSINESSES_REQUEST_JOIN_PENDING Access request submitted.
+BUSINESSES_REQUEST_NETWORK_FAILED Network request failed. Please try again.
+BUSINESSES_REQUEST_PANEL_HELP Request membership in another business by sending a join request.
+BUSINESSES_REQUEST_TIMEOUT Request timed out. Please try again.
+BUSINESSES_REVOKE Revoke
+BUSINESSES_REVOKE_ACCESS_BTN Revoke Access
+BUSINESSES_REVOKE_CONFIRM Revoke your access to this business? This removes the relationship from this profile and you may need a new request or invite to rejoin.
+BUSINESSES_REVOKE_DETAILS_HELP Revoking access removes this profile from the business relationship. The business remains intact, but this profile will lose shared collaboration access until re-invited or re-approved.
+BUSINESSES_ROLE Role
+BUSINESSES_ROLE_CONTRIBUTOR Contributor
+BUSINESSES_ROLE_COORDINATOR Manager
+BUSINESSES_ROLE_DELEGATE Member
+BUSINESSES_ROLE_MANAGER Manager
+BUSINESSES_ROLE_MEMBER Member
+BUSINESSES_ROLE_OWNER Owner
+BUSINESSES_ROLE_VIEWER Viewer
+BUSINESSES_ROLLOUT_NOTICE_ARIA Premium feature rollout notice
+BUSINESSES_ROLLOUT_NOTICE_STRONG This premium feature is a WORK IN PROGRESS.
+BUSINESSES_ROLLOUT_NOTICE_SUFFIX No guarantee is provided for uninterrupted behavior while rollout and hardening continue.
+BUSINESSES_ROLLOUT_NOTICE_TITLE Premium Feature Rollout Notice
+BUSINESSES_RUN_DISCOVERY Run Discovery
+BUSINESSES_SAVE_ACCOUNT_DETAILS_FAILED Unable to save account details right now. Please try again.
+BUSINESSES_SAVE_DEFAULTS Save Defaults
+BUSINESSES_SAVE_SETTINGS Save Business Settings
+BUSINESSES_SCOPES Scopes
+BUSINESSES_SCOPES_NONE_LISTED No scopes listed
+BUSINESSES_SCOPE_ACCESS_MANAGE Access Manage
+BUSINESSES_SCOPE_NONE_SELECTED No invite scopes selected.
+BUSINESSES_SCOPE_ORG_READ Org Read
+BUSINESSES_SCOPE_ORG_WRITE Org Write
+BUSINESSES_SCOPE_REQUIRED Select at least one invite scope before sending an invite.
+BUSINESSES_SCOPE_SITES_READ Sites Read
+BUSINESSES_SCOPE_SITES_WRITE Sites Write
+BUSINESSES_SCOPE_STATUS_CLEARED Invite scopes cleared. %d scope%s selected.
+BUSINESSES_SCOPE_STATUS_LOADED Invite scopes loaded. %d scope%s selected.
+BUSINESSES_SCOPE_STATUS_UPDATED Invite scopes updated. %d scope%s selected.
+BUSINESSES_SCOPE_WORK_READ Work Read
+BUSINESSES_SELECT_FIRST Select an business first.
+BUSINESSES_SELECT_PLACEHOLDER Select business...
+BUSINESSES_SELECT_SCOPE Select at least one scope.
+BUSINESSES_SELECT_TRANSFER_TARGET Select a transfer target first.
+BUSINESSES_SELF_ORG_WIP Profile-level business access is production-ready with stable pay period controls.
+BUSINESSES_SEND_INVITE Send Invite
+BUSINESSES_SHARED_ORG_SINGLETON Shared business already exists for this account. Open your business hub to manage members, controls, and governance.
+BUSINESSES_SIGNAL_ACCESS_REQUEST_APPROVED Access request approved
+BUSINESSES_SIGNAL_ACCESS_REQUEST_RECEIVED Access request received
+BUSINESSES_SIGNAL_ACCESS_REQUEST_REJECTED Access request rejected
+BUSINESSES_SIGNAL_ACCESS_REVOKED Access revoked
+BUSINESSES_SIGNAL_INVITE_ACCEPTED Invite accepted
+BUSINESSES_SIGNAL_INVITE_REVOKED Invite revoked
+BUSINESSES_SIGNAL_INVITE_SENT Invite sent
+BUSINESSES_SIGNAL_MEMBER_LEFT_ORGANIZATION Member left business
+BUSINESSES_SIGNAL_OWNERSHIP_TRANSFERRED Ownership transferred
+BUSINESSES_SIGNAL_SETTINGS_UPDATED Business settings updated
+BUSINESSES_SIGNAL_SITE_LINKED Site linked to business
+BUSINESSES_SITE_LINKED Site linked to business.
+BUSINESSES_SITE_LINK_FAILED Couldn't link that site. Please try again.
+BUSINESSES_SITE_WITHOUT_ORG Site without org
+BUSINESSES_STATUS_ACTIVE active
+BUSINESSES_STATUS_LABEL Status
+BUSINESSES_SUPPORT_HOURS Support Hours
+BUSINESSES_SUPPORT_HOURS_PLACEHOLDER Mon-Fri 8:00-18:00 MT
+BUSINESSES_SUPPORT_HOURS_UNAVAILABLE Support hours unavailable
+BUSINESSES_TAB_ARIA Business editor tabs
+BUSINESSES_TAB_DETAILS Business Details
+BUSINESSES_TAX_ID Tax ID
+BUSINESSES_TAX_ID_PLACEHOLDER Business tax identifier
+BUSINESSES_TIMESTAMP_DETAILS_ARIA Timestamp details
+BUSINESSES_TIMESTAMP_JOINED_ARIA Joined timestamp details
+BUSINESSES_TIMESTAMP_LOCAL Local
+BUSINESSES_TIMESTAMP_SERVER Server
+BUSINESSES_TIMESTAMP_UTC UTC
+BUSINESSES_TIMEZONE Timezone
+BUSINESSES_TRANSFER_CONFIRM_ACCEPTED Confirmation accepted. You can transfer ownership now.
+BUSINESSES_TRANSFER_CONFIRM_MISMATCH Confirmation must match "TRANSFER BUSINESS".
+BUSINESSES_TRANSFER_CONFIRM_TYPE Type "TRANSFER BUSINESS" to reveal the transfer button.
+BUSINESSES_TRANSFER_MEMBER_CHOSEN Member %s chosen.
+BUSINESSES_TRANSFER_NOTICE Transfer ownership is available only for shared businesses you own.
+BUSINESSES_TRANSFER_OWNERSHIP Transfer Ownership
+BUSINESSES_TRANSFER_SELECT_FROM_LIST Select a current member from the list to transfer ownership.
+BUSINESSES_TRANSFER_SELECT_MEMBER Select a member to transfer ownership.
+BUSINESSES_TRANSFER_TARGET_ARIA Transfer ownership target
+BUSINESSES_TRANSFER_TARGET_PLACEHOLDER Select member UUID...
+BUSINESSES_TYPE Type
+BUSINESSES_TYPE_PERSONAL personal
+BUSINESSES_TYPE_SHARED shared
+BUSINESSES_UNAVAILABLE Unavailable
+BUSINESSES_UNKNOWN Unknown
+BUSINESSES_UNKNOWN_ERROR Unknown error
+BUSINESSES_UNKNOWN_NAME Unknown Business
+BUSINESSES_UPDATE_IN_PROGRESS Update already in progress. Please wait.
+BUSINESSES_VALUE_UNKNOWN unknown
+BUSINESSES_WEBSITE Website
+BUSINESSES_WEBSITE_PLACEHOLDER https://example.com
+BUSINESSES_WEBSITE_UNAVAILABLE Website unavailable
+BUSINESSES_WITHDRAWN Business relationship withdrawn.
+BUSINESSES_WITHDRAW_FAILED Couldn't remove you from the business right now. Please try again.
+BUSINESSES_YOU You
+BUSINESSES_YOUR_ORGANIZATIONS Your Businesses
+BUSINESS_AUDIT_HELP Roles and permissions, access policy, and complete audit timeline for this business workspace. Coordinators and owners can review who can do what, what has changed, and SOC 2 control evidence.
+BUSINESS_AUDIT_TITLE Audit
+BUSINESS_COMPLIANCE_HELP Complete audit timeline for business settings, access events, and security signals. Coordinators and owners can review all workspace changes; viewers have read-only access to the timeline.
+BUSINESS_COMPLIANCE_SOC_HEADING SOC 2 controls
+BUSINESS_COMPLIANCE_SOC_HELP PayCal maps Trust Services Criteria to verifiable evidence. This workspace audit timeline supports change-management and access monitoring controls.
+BUSINESS_COMPLIANCE_SOC_LINK View SOC 2 overview
+BUSINESS_COMPLIANCE_TITLE Compliance
+BUSINESS_CONTEXT_MEMBERS Members
+BUSINESS_CONTEXT_SITES Sites
+BUSINESS_DASHBOARD_EDIT_DETAILS Details
+BUSINESS_DASHBOARD_HELP Key counts for your business workspace at a glance.
+BUSINESS_DASHBOARD_MANAGE_MEMBERS Manage members
+BUSINESS_DASHBOARD_METRICS_ARIA Business dashboard metrics
+BUSINESS_DASHBOARD_METRIC_CREATED Created
+BUSINESS_DASHBOARD_METRIC_LAST_ACTIVITY Last activity
+BUSINESS_DASHBOARD_METRIC_MEMBERS Members
+BUSINESS_DASHBOARD_METRIC_PENDING_INVITES Pending invites
+BUSINESS_DASHBOARD_METRIC_PENDING_REQUESTS Pending requests
+BUSINESS_DASHBOARD_METRIC_SITES Sites
+BUSINESS_DASHBOARD_METRIC_WORK_TODAY Work entries today
+BUSINESS_DASHBOARD_METRIC_WORK_WEEK Work entries this week
+BUSINESS_DASHBOARD_RECENT_AUDIT Recent activity
+BUSINESS_DASHBOARD_RECENT_AUDIT_ARIA Recent audit events
+BUSINESS_DASHBOARD_RECENT_AUDIT_HELP Latest audit events.
+BUSINESS_DASHBOARD_TITLE Dashboard
+BUSINESS_DASHBOARD_VIEW_ALL_AUDIT All activity
+BUSINESS_DETAILS_HELP Business identity, legal details, contacts, timezone, currency, and domain policy for your workspace.
+BUSINESS_DETAILS_NO_BUSINESS No editable business workspace is available yet.
+BUSINESS_DETAILS_SAVE Save details
+BUSINESS_DETAILS_SAVED Details saved.
+BUSINESS_DETAILS_SAVE_FAILED Unable to save details right now.
+BUSINESS_DETAILS_TITLE Details
+BUSINESS_GOVERNANCE_ACCESS_REQUESTS_ARIA Inbound business access requests
+BUSINESS_GOVERNANCE_ACCESS_REQUESTS_HELP Review and approve or reject requests from people who want to connect with this business.
+BUSINESS_GOVERNANCE_ACCESS_REQUESTS_PANEL_HELP Inbound access requests for this business workspace.
+BUSINESS_GOVERNANCE_ACCESS_REQUESTS_SR Inbound access requests. Each row includes requester contact, status, and available actions.
+BUSINESS_GOVERNANCE_ACCESS_REQUESTS_TITLE Inbound access requests
+BUSINESS_GOVERNANCE_ACTIVE_MEMBERS Active members
+BUSINESS_GOVERNANCE_AUDIT_ARIA Governance audit activity
+BUSINESS_GOVERNANCE_AUDIT_COL_DETAILS Details
+BUSINESS_GOVERNANCE_AUDIT_COL_EVENT Event
+BUSINESS_GOVERNANCE_AUDIT_COL_WHEN When
+BUSINESS_GOVERNANCE_AUDIT_COL_WHO Who
+BUSINESS_GOVERNANCE_AUDIT_HELP Recent business-level changes and access events: who did what, and when.
+BUSINESS_GOVERNANCE_AUDIT_TITLE Audit activity
+BUSINESS_GOVERNANCE_AUDIT_VIEW_ALL Open the full compliance audit timeline
+BUSINESS_GOVERNANCE_COORDINATORS Owners and coordinators
+BUSINESS_GOVERNANCE_HELP Roles and permissions, access policy, and audit activity for this business workspace. Coordinators and owners use this page to review who can do what and what has changed.
+BUSINESS_GOVERNANCE_MATRIX_TITLE Roles and permissions
+BUSINESS_GOVERNANCE_PENDING_MEMBERS Pending members
+BUSINESS_GOVERNANCE_RELATIONSHIPS_ARIA Business relationships
+BUSINESS_GOVERNANCE_RELATIONSHIPS_EMPTY No relationships found for this business yet.
+BUSINESS_GOVERNANCE_RELATIONSHIPS_HELP Active, pending, and revoked member relationships for this business workspace.
+BUSINESS_GOVERNANCE_RELATIONSHIPS_PANEL_HELP Cross-org member relationships for this business.
+BUSINESS_GOVERNANCE_RELATIONSHIPS_RELOAD Reload relationships
+BUSINESS_GOVERNANCE_RELATIONSHIPS_SR Relationship list. Each row includes member identity, role, and relationship status.
+BUSINESS_GOVERNANCE_RELATIONSHIPS_TITLE Relationships
+BUSINESS_GOVERNANCE_REVOKED_RELATIONSHIPS Revoked relationships
+BUSINESS_GOVERNANCE_SUMMARY_HELP Current membership, coordinator coverage, and pending access decisions for this workspace.
+BUSINESS_GOVERNANCE_SUMMARY_TITLE Access policy summary
+BUSINESS_GOVERNANCE_TITLE Governance
+BUSINESS_MEMBERS_GRID_EMPTY No members linked to this business yet.
+BUSINESS_MEMBERS_HELP View members linked to this business.
+BUSINESS_MEMBERS_TITLE Members
+BUSINESS_PAGE_COMING_SOON This section is being split out from the business dashboard. Content will move here in a later phase.
+BUSINESS_PAYROLL_DEFAULT_WAGE_HELP Default hourly wage applied to new earnings entries for this business unless overridden per entry.
+BUSINESS_PAYROLL_FORECAST_LINK Crew Forecasting
+BUSINESS_PAYROLL_HELP Configure pay frequency, period length, grace window, default wage, and preview the schedule for this business workspace.
+BUSINESS_PAYROLL_NO_BUSINESS No editable business workspace is available yet.
+BUSINESS_PAYROLL_SAVE Save payroll settings
+BUSINESS_PAYROLL_SAVED Payroll settings saved.
+BUSINESS_PAYROLL_SAVE_FAILED Unable to save payroll settings right now.
+BUSINESS_PAYROLL_TITLE Payroll
+BUSINESS_REPORTS_ANALYTICS_HEADING Payroll analytics
+BUSINESS_REPORTS_ANALYTICS_LOADED Reports analytics loaded. %d member%s with payroll data.
+BUSINESS_REPORTS_ANALYTICS_LOADED_STATUS Reports analytics loaded.
+BUSINESS_REPORTS_HELP Coordinator view of payroll rollups, analytics, and workforce intelligence for your business workspace.
+BUSINESS_REPORTS_LOADED_NO_ROWS Reports loaded for %d. No payroll rows yet.
+BUSINESS_REPORTS_LOADING_ANALYTICS Loading reports analytics.
+BUSINESS_REPORTS_LOADING_ANALYTICS_YEAR Loading reports analytics for %s.
+BUSINESS_REPORTS_NO_ACCESS You need an active business membership with financial access to view reports.
+BUSINESS_REPORTS_NO_ANALYTICS_YEAR No payroll analytics for %d.
+BUSINESS_REPORTS_TITLE Reports
+BUSINESS_ROUTE_GATE_BILLING_BTN View billing options
+BUSINESS_ROUTE_GATE_HELP Business workspace pages require the Business tier. Upgrade from billing below, or connect to an existing business from your profile.
+BUSINESS_ROUTE_GATE_TITLE Business tier required
+BUSINESS_SITES_ASSIGNED_HELP All sites linked to this business workspace. Business sites were created here; Linked (your account) sites are personal sites you connected to this workspace.
+BUSINESS_SITES_ASSIGNED_SR Linked sites list. Each row shows the site name and ownership scope within this business.
+BUSINESS_SITES_ASSIGNED_TITLE Workspace sites
+BUSINESS_SITES_CREATED Business site created and linked.
+BUSINESS_SITES_CREATE_HELP Create a site owned by you and link it to this business workspace.
+BUSINESS_SITES_CREATE_NAME_REQUIRED Site name is required.
+BUSINESS_SITES_CREATE_PROMPT Enter a name for the new business site
+BUSINESS_SITES_CREATE_TITLE Create business site
+BUSINESS_SITES_CREATE_WAGE Hourly wage
+BUSINESS_SITES_FILTER_PLACEHOLDER Filter sites…
+BUSINESS_SITES_GRID_ARIA Business linked sites data grid
+BUSINESS_SITES_GRID_COLUMN_BUDGET Budget
+BUSINESS_SITES_GRID_COLUMN_ENTRIES Entries
+BUSINESS_SITES_GRID_COLUMN_USED Used
+BUSINESS_SITES_GRID_COLUMN_WORK_GROSS Work gross
+BUSINESS_SITES_GRID_CONTEXT Linked business sites grid with search, sort, pagination, and unlink actions.
+BUSINESS_SITES_GRID_INIT_FAILED Unable to initialize business sites grid.
+BUSINESS_SITES_GRID_LOADED Business sites grid loaded. %d result%s.
+BUSINESS_SITES_GRID_OWNERSHIP Ownership
+BUSINESS_SITES_GRID_SR_CONTEXT Rows include site name with ownership symbol and status tag, entry counts, work gross, budget, and budget used for sites linked to this business.
+BUSINESS_SITES_GRID_TABS_ARIA Business sites status tabs
+BUSINESS_SITES_ITEM_LABEL sites
+BUSINESS_SITES_LINKED_LOADED %d linked site%s loaded.
+BUSINESS_SITES_LOADING Loading business sites...
+BUSINESS_SITES_LOADING_LINKED Loading linked sites...
+BUSINESS_SITES_LOAD_FAILED Unable to load business sites right now.
+BUSINESS_SITES_NO_BUSINESS No business workspace is available yet.
+BUSINESS_SITES_NO_SITES No sites are linked to this business yet.
+BUSINESS_SITES_OWNERSHIP_BUSINESS Business
+BUSINESS_SITES_OWNERSHIP_LEGEND_ARIA Site ownership legend
+BUSINESS_SITES_OWNERSHIP_LEGEND_HINT Teal circle = business owned. Teal square = personal linked. Diamond = shared member site.
+BUSINESS_SITES_OWNERSHIP_PERSONAL Linked (your account)
+BUSINESS_SITES_OWNERSHIP_SHARED Shared
+BUSINESS_SITES_PERSONAL_LINK Manage personal sites
+BUSINESS_SITES_PLANNING_SCOPE_NOTE Business planning settings apply to this linked site within the current business workspace.
+BUSINESS_SITES_PREMIUM_LOCKED Business sites are locked behind Premium Admin preview for this business.
+BUSINESS_SITES_SCOPE_NOTE Manage sites linked to this business workspace. Personal site records you own are managed separately on your Sites page.
+BUSINESS_SITES_STATUS_ARCHIVED Archived
+BUSINESS_SITES_STATUS_TABS_ARIA Business sites status tabs
+BUSINESS_SITES_STATUS_TAG_BUSINESS Business owned
+BUSINESS_SITES_STATUS_TAG_PERSONAL Personal linked
+BUSINESS_SITES_STATUS_TAG_SHARED Shared
+BUSINESS_SITES_TAB_ACTIVE Active
+BUSINESS_SITES_TAB_ACTIVE_NOTE Active sites in this workspace. Ownership symbols and status tags appear under each site name.
+BUSINESS_SITES_TAB_ARCHIVED Archived
+BUSINESS_SITES_TAB_ARCHIVED_NOTE Deleting an archived site will permanently remove all associated work entries.
+BUSINESS_SITES_TITLE Business sites
+BUSINESS_SITES_UNLINK Unlink
+BUSINESS_SITES_UNLINKED Site unlinked from business.
+BUSINESS_SITES_UNLINK_CONFIRM Unlink this site from the business workspace?
+BUSINESS_SITES_UNLINK_CONFIRM_NAMED Unlink {name} from this business workspace?
+CALENDAR_DAY_SINGULAR day
+CALENDAR_EMAIL_VERIFICATION_REQUIRED Email verification required. Use the banner above to enter your code or resend verification email.
+CALENDAR_ENCRYPTED_DETAILS_UNAVAILABLE Encrypted work details are unavailable in this view.
+CALENDAR_ENCRYPTION_REQUIRED Encryption key unavailable. Unlock your account key to view or save work entries.
+CALENDAR_LOCKED_CANNOT_EDIT Cannot edit {date} - this period is locked
+CALENDAR_LOCKED_CANNOT_EDIT_GRACE Cannot edit {date} - this period is locked. You can edit entries for {days} more {unit}.
+CALENDAR_MODAL_SELECT_SITE Select site...
+CALENDAR_UNLOCK_REQUIRED_EDIT Secure unlock is required before editing. Sign in with your passkey again and retry.
+CALENDAR_UNLOCK_REQUIRED_SAVE Unlock required before save. Use passkey unlock and then save again.
+CALENDAR_WEB_AUTHN_UNSUPPORTED This browser cannot use passkeys, so encrypted entries cannot be unlocked here. Use a WebAuthn-capable browser on a secure connection (HTTPS).
+CALENDAR_WORK_ENTRY_LABEL Work entry
+CHANGE_EMAIL_STATUS_CODES_EXPIRE_MINUTES Codes expire in %d minutes.
+CHANGE_EMAIL_STATUS_RESEND_FAILED Failed to resend codes. %s
+CHANGE_EMAIL_STATUS_SEND_FAILED Failed to send codes. %s
+CHANGE_EMAIL_STATUS_VERIFY_FAILED Verification failed. %s
+CONTACT_JS_COOLDOWN_HINT_FMT Please wait {time} before sending another message.
+CONTACT_JS_SEND_FAILED Unable to send your message right now.
+CONTACT_JS_SUCCESS_COOLDOWN_FMT Send another available in {time}.
+CONTENT_VIEW_CLOSE ✕ Close
+CONTENT_VIEW_TEXT_TITLE Text View
+DASHBOARD_RESIZE_GRIP_ARIA Resize dashboard
+DATAGRID_COLUMN_HIDDEN %s column hidden.
+DATAGRID_COLUMN_SHOWN %s column shown.
+DATAGRID_COLUMN_VISIBILITY_ARIA Toggle visible columns
+DATAGRID_INVALID_RESPONSE Invalid DataGrid response.
+DATAGRID_ITEM_LABEL_ENTRIES entries
+DATAGRID_NEXT_MONTH_ARIA Next month (] or Page Down)
+DATAGRID_PAGINATION_RANGE Showing %d–%d of %d %s
+DATAGRID_PREVIOUS_MONTH_ARIA Previous month ([ or Page Up)
+DATAGRID_RELOAD_FAILED DataGrid reload failed.
+DATAGRID_SEARCH_PLACEHOLDER Search…
+DAYS Days
+DELETE_BUSINESS Delete Business
+EARNINGS_BREAKDOWN_OT_HOURS_LABEL OT Hours
+EARNINGS_BUDGET_DRAWN_FROM_FMT Budget drawn from {count} configured site(s).
+EARNINGS_BUDGET_NONE_CONFIGURED No site-level budgets configured.
+EARNINGS_BUDGET_SETUP_LINK Set up budgets in Business Site Controls →
+EARNINGS_COMPOSITION_PANEL_TITLE Earnings Composition
+EARNINGS_COMPOSITION_SEGMENT_HOVER {label}: {pct}%
+EARNINGS_DAILY_EXPORT_FORMATS_FOR Daily export formats for {year}
+EARNINGS_DAILY_LOAD_FAILED_FMT Could not load daily earnings: {message}
+EARNINGS_EXPORT_FAILED_FMT Export failed: {message}
+EARNINGS_FORECAST_ASSUMPTIONS_EMPTY No assumptions available.
+EARNINGS_FORECAST_ASSUMPTIONS_TITLE Assumptions
+EARNINGS_FORECAST_ASSUMP_ANCHOR Rotation anchor
+EARNINGS_FORECAST_ASSUMP_FIELD Field
+EARNINGS_FORECAST_ASSUMP_LOA LOA / day
+EARNINGS_FORECAST_ASSUMP_OT_HRS OT hrs/week
+EARNINGS_FORECAST_ASSUMP_PAY_FREQ Pay frequency
+EARNINGS_FORECAST_ASSUMP_PROVINCE Province
+EARNINGS_FORECAST_ASSUMP_REG_HRS Regular hrs/week
+EARNINGS_FORECAST_ASSUMP_SOURCE Source
+EARNINGS_FORECAST_ASSUMP_TRAVEL Travel hrs/week
+EARNINGS_FORECAST_ASSUMP_VALUE Value
+EARNINGS_FORECAST_ASSUMP_WAGE Hourly wage
+EARNINGS_FORECAST_ASSUMP_YTD_GROSS YTD gross
+EARNINGS_FORECAST_BADGE_ESTIMATE Estimate only
+EARNINGS_FORECAST_BADGE_NOT_CRA Not CRA-authoritative
+EARNINGS_FORECAST_CALC_ANCHOR Rotation anchor
+EARNINGS_FORECAST_CALC_LOA LOA / day ($)
+EARNINGS_FORECAST_CALC_OT_HRS OT hrs/week
+EARNINGS_FORECAST_CALC_PAY_FREQ Pay frequency
+EARNINGS_FORECAST_CALC_PROVINCE Province
+EARNINGS_FORECAST_CALC_REG_HRS Regular hrs/week
+EARNINGS_FORECAST_CALC_TITLE Forecast Calculator
+EARNINGS_FORECAST_CALC_TRAVEL Travel hrs/week
+EARNINGS_FORECAST_CALC_WAGE Hourly wage ($)
+EARNINGS_FORECAST_CALC_YTD_GROSS YTD gross ($)
+EARNINGS_FORECAST_CARD_CONFIDENCE Confidence
+EARNINGS_FORECAST_CARD_GROSS Gross
+EARNINGS_FORECAST_CARD_HOURS Hours
+EARNINGS_FORECAST_CONFIDENCE_HIGH High
+EARNINGS_FORECAST_CONFIDENCE_LOW Low
+EARNINGS_FORECAST_CONFIDENCE_MEDIUM Medium
+EARNINGS_FORECAST_DISCLAIMER Figures are projections based on your profile rate, province, and a standard 5-day work schedule. Actual deductions depend on YTD income, benefit elections, and other factors. Not CRA-authoritative.
+EARNINGS_FORECAST_EST_GROSS Est. Gross
+EARNINGS_FORECAST_EST_NET Est. Net
+EARNINGS_FORECAST_EST_TAX Est. Tax
+EARNINGS_FORECAST_GRID_ARIA Future earnings forecast
+EARNINGS_FORECAST_INTRO Projected earnings based on the member's profile settings. All figures are ESTIMATES only — not CRA-authoritative payroll calculations.
+EARNINGS_FORECAST_INTRO_SELF Projected earnings based on your current profile settings. All figures are ESTIMATES only — not CRA-authoritative payroll calculations.
+EARNINGS_FORECAST_LOADING Loading forecast…
+EARNINGS_FORECAST_LOAD_FAILED Unable to load forecast.
+EARNINGS_FORECAST_NEXT_30_DAYS Next 30 Days
+EARNINGS_FORECAST_NEXT_PAYCHECK Next Paycheck
+EARNINGS_FORECAST_NO_DATA No forecast available.
+EARNINGS_FORECAST_PAY_FREQ_BIWEEKLY Biweekly
+EARNINGS_FORECAST_PAY_FREQ_MONTHLY Monthly
+EARNINGS_FORECAST_PAY_FREQ_SEMIMONTHLY Semi-monthly
+EARNINGS_FORECAST_PAY_FREQ_WEEKLY Weekly
+EARNINGS_FORECAST_PREVIEW_FAILED Unable to calculate forecast preview.
+EARNINGS_FORECAST_RESET_PROFILE Reset to Profile
+EARNINGS_FORECAST_RESET_SCHEDULED Reset to Scheduled Work
+EARNINGS_FORECAST_SCENARIOS_TITLE Scenario Comparison
+EARNINGS_FORECAST_SCENARIO_CONSERVATIVE Conservative
+EARNINGS_FORECAST_SCENARIO_CUSTOM Custom
+EARNINGS_FORECAST_SCENARIO_NORMAL Normal
+EARNINGS_FORECAST_SCENARIO_OVERTIME Overtime
+EARNINGS_FORECAST_SETUP_LINK Profile → Pay Period
+EARNINGS_FORECAST_SETUP_NOTICE Set your hourly rate in {link} to see your earnings forecast.
+EARNINGS_FORECAST_SOURCE_ESTIMATED Estimated
+EARNINGS_FORECAST_SOURCE_MISSING Missing
+EARNINGS_FORECAST_SOURCE_SAVED Saved
+EARNINGS_FORECAST_SOURCE_SCHEDULED Scheduled
+EARNINGS_FORECAST_SOURCE_TEMPORARY Temporary
+EARNINGS_FORECAST_SUMMARY_UPDATED_FMT Next paycheck estimate updated: {net}
+EARNINGS_FORECAST_TIMEFRAME Timeframe
+EARNINGS_FORECAST_TIMELINE_SR_FMT {label}: {net} ({range})
+EARNINGS_FORECAST_TIMELINE_TITLE Forecast Timeline
+EARNINGS_FORECAST_TITLE Personal Earnings Forecast
+EARNINGS_FORECAST_VALUE_MISSING —
+EARNINGS_FORECAST_WORKSPACE_ARIA Personal earnings forecast workspace
+EARNINGS_FORECAST_YEAR_PROJECTION Year Projection
+EARNINGS_FORECAST_YTD_PROJECTION YTD Projection
+EARNINGS_FUTURE_NET_PAY Future Net Pay
+EARNINGS_HEALTH_AVG_WEEKLY_HRS Avg Weekly Hrs / Worker
+EARNINGS_HEALTH_OVERTIME_PERCENT Overtime %
+EARNINGS_HEALTH_SCORE_TREND_FMT {dir} {pts} pts vs last month
+EARNINGS_HEALTH_TOTAL_MEMBERS Total Members
+EARNINGS_HEALTH_WORKERS_OVER_14D Workers > 14 Consecutive Days
+EARNINGS_HEALTH_WORKERS_OVER_60H_WEEK Workers > 60h / Week
+EARNINGS_HI_ACTIVE_MONTHS Active Months
+EARNINGS_HI_ARIA_EARNINGS Historical intelligence for {year} earnings
+EARNINGS_HI_ARIA_MEMBER Historical intelligence for {year} member earnings
+EARNINGS_HI_NOTE Signals derive from available yearly earnings history and should be used as directional guidance.
+EARNINGS_HI_NOTE_BUSINESS Signals derive from business-linked yearly earnings history and should be used as directional guidance.
+EARNINGS_HI_NOT_AVAILABLE n/a
+EARNINGS_HI_PEAK_YEAR Peak Year
+EARNINGS_HI_REGIME Regime
+EARNINGS_HI_REGIME_ABOVE Above trailing baseline
+EARNINGS_HI_REGIME_BELOW Below trailing baseline
+EARNINGS_HI_SECTION_HELP Historical Intelligence for {year}
+EARNINGS_HI_STABILITY_INDEX Stability Index
+EARNINGS_HI_STABILITY_OF / 100
+EARNINGS_HI_SUBTITLE_BUSINESS Business-linked earnings snapshot for {year}
+EARNINGS_HI_SUBTITLE_PRIVATE Private extension snapshot for {year}
+EARNINGS_HI_TITLE Historical Intelligence
+EARNINGS_HI_TRAILING_BASELINE Trailing Baseline
+EARNINGS_HI_YEARS_OBSERVED Years Observed
+EARNINGS_HI_YOY_SIGNAL YoY Signal
+EARNINGS_MEMBER_EARNINGS_FORECAST_ARIA Member earnings forecast
+EARNINGS_MEMBER_EARNINGS_FOR_YEAR Member earnings for {year}
+EARNINGS_MONTHLY_COMPOSITION Monthly Composition
+EARNINGS_MONTHLY_EXPORT_FORMATS_FOR Monthly export formats for {year}
+EARNINGS_MONTHLY_GRID_ARIA_FOR Monthly earnings grid for {year}
+EARNINGS_PAYROLL_COMPOSITION_BAR_ARIA Payroll composition bar
+EARNINGS_PAY_PERIOD_ARIA_FMT Pay period {start} to {end}
+EARNINGS_PIEGRAPHS_NO_VALUES No values available.
+EARNINGS_RISK_REGISTER_SUBTITLE_FMT {count} active risk(s) requiring attention
+EARNINGS_SELECT_BUSINESS Select business
+EARNINGS_SITE_BAR_HOVER {site}: {amount} | {count} {memberLabel} | {rate}/hr | {otPct}% OT
+EARNINGS_TEAM_SITE_LINK_DIAG_ARIA Team site link diagnostics
+EARNINGS_TEAM_SITE_LINK_DIAG_COL_MEMBER Member
+EARNINGS_TEAM_SITE_LINK_DIAG_COL_SITE_ID Site ID
+EARNINGS_TEAM_SITE_LINK_DIAG_COL_SITE_NAME Site Name
+EARNINGS_TEAM_SITE_LINK_DIAG_COL_SITE_OWNER Site Owner
+EARNINGS_TEAM_SITE_LINK_DIAG_DROPPED_FMT {count} dropped
+EARNINGS_TEAM_SITE_LINK_DIAG_SHOW_SAMPLES_FMT Show sampled dropped rows ({count})
+EARNINGS_TEAM_SITE_LINK_DIAG_SUMMARY Some rows were excluded because their site ownership reference did not match business-linked sites.
+EARNINGS_TEAM_SITE_LINK_DIAG_TITLE Team site-link diagnostics
+EARNINGS_TEAM_SITE_LINK_DIAG_WARN_FMT Warning: dropped rows exceeded threshold ({threshold}). Team totals may be under-counted.
+EARNINGS_TEAM_SITE_RESOLVE_DROPPED_UNLINKED Dropped unlinked
+EARNINGS_TEAM_SITE_RESOLVE_EXACT_OWNER_SITE Exact owner+site
+EARNINGS_TEAM_SITE_RESOLVE_FALLBACK_RATIO_FMT Fallback ratio: {ratio}%
+EARNINGS_TEAM_SITE_RESOLVE_ROWS_EVALUATED_FMT {count} rows evaluated
+EARNINGS_TEAM_SITE_RESOLVE_SITE_NAME Site name fallback
+EARNINGS_TEAM_SITE_RESOLVE_SUMMARY_ARIA Team site resolution summary
+EARNINGS_TEAM_SITE_RESOLVE_TITLE Team site resolution summary
+EARNINGS_TEAM_SITE_RESOLVE_UNIQUE_SITE_ID Unique site ID fallback
+EARNINGS_TEAM_SITE_RESOLVE_WARNING_THRESHOLD_FMT (warning threshold: {threshold}%)
+EARNINGS_TEAM_UNLINKED_ONLY_GUARD Detected {count} work entries that were excluded because their sites are not linked to this business. Link the missing site(s) in Businesses to restore team totals.
+EARNINGS_TOTAL_HOURS_LABEL Total Hours
+EARNINGS_TREND_DIRECTION_DECREASING decreasing
+EARNINGS_TREND_DIRECTION_FLAT flat
+EARNINGS_TREND_DIRECTION_INCREASING increasing
+EARNINGS_TREND_HOVER_TOOLTIP {date}: {amount}
+EARNINGS_TREND_Y_AXIS_LABEL {amount} ({pct})
+EARNINGS_YTD_COMPOSITION YTD Composition
+EARNINGS_YTD_EXPORT_FORMATS_FOR Year-to-date export formats for {year}
+EARNINGS_YTD_HOVER_ACTIVE_MEMBERS {label}: {count} active members
+EARNINGS_YTD_HOVER_AVG_MEMBER {label}: Avg/Member {amount}
+EARNINGS_YTD_HOVER_GROSS {label}: Gross {amount}
+EARNINGS_YTD_HOVER_NET {label}: Net {amount}
+EARNINGS_YTD_HOVER_OT_HRS {label}: OT {hours} hrs
+EARNINGS_YTD_HOVER_OT_RATIO {label}: OT Ratio {pct}
+EARNINGS_YTD_HOVER_REG_HRS {label}: Reg {hours} hrs
+EARNINGS_YTD_HOVER_UTILIZATION {label}: Utilization {pct}
+EARNINGS_YTD_HOVER_YTD_BURN {label}: YTD Burn {amount}
+EMAIL_BUSINESS_ACCESS_INVITE_TITLE Business Access Invite
+EMAIL_BUSINESS_ACCESS_REQUESTED_TO A user requested access to
+EMAIL_BUSINESS_ACCESS_REQUEST_TITLE Business Access Request
+EMAIL_BUSINESS_ACCESS_UNKNOWN_NOTICE If this request looks unfamiliar, ignore this email and review business activity in the audit timeline.
+EMAIL_SIGNATURE_BUSINESS Business
+FOOTER_SOC2_BADGE_ARIA SOC 2 Audit-Ready — view compliance details
+FORECAST_ANCHOR_DATE Rotation Anchor Date
+FORECAST_ANCHOR_DATE_HINT First day of the first work block
+FORECAST_COL_WINDOW Window
+FORECAST_COL_WORK_DAYS Work Days
+FORECAST_CREW_FORM_ARIA Crew forecast parameters
+FORECAST_CREW_PARAMETERS Crew Parameters
+FORECAST_CREW_PARAMETERS_ARIA Crew parameters
+FORECAST_CREW_PARAMETERS_INTRO_LEDE Configure your crew below to project labor costs. All figures are
+FORECAST_CREW_PARAMETERS_INTRO_TAIL — not CRA-authoritative payroll calculations.
+FORECAST_CREW_SUMMARY_PLURAL_FMT {count} workers, {rotation} rotation, ${rate}/hr
+FORECAST_CREW_SUMMARY_SINGULAR_FMT {count} worker, {rotation} rotation, ${rate}/hr
+FORECAST_CREW_TITLE Crew Forecast
+FORECAST_DISCLAIMER_FMT All figures are projections based on the parameters above. Actual deductions depend on year-to-date income, benefit elections, and other factors. Not CRA-authoritative. Tax estimates use annualised marginal-rate approximations for {province}.
+FORECAST_ESTIMATE_BADGE ESTIMATES
+FORECAST_HOURLY_RATE Hourly Rate ($)
+FORECAST_HOURLY_RATE_HINT Base hourly wage in dollars
+FORECAST_OPTIONAL (optional)
+FORECAST_OT_RULE OT Rule
+FORECAST_OT_RULE_BOTH Both
+FORECAST_OT_RULE_DAILY Daily
+FORECAST_OT_RULE_NONE None
+FORECAST_OT_RULE_WEEKLY Weekly
+FORECAST_PER_DIEM Per Diem ($/day)
+FORECAST_PER_DIEM_HINT Daily living-out allowance per worker
+FORECAST_PROJECTED_LABOR_COST Projected Labor Cost
+FORECAST_ROTATION Rotation
+FORECAST_ROTATION_HINT Work/rest days per cycle
+FORECAST_SHUTDOWN_END_DATE Shutdown End Date
+FORECAST_SHUTDOWN_END_HINT Adds a Shutdown Total window
+FORECAST_UPDATE_BUTTON Update Forecast
+FORECAST_UPGRADE_LEDE_SUFFIX is included in PayCal Premium.
+FORECAST_UPGRADE_LINK Upgrade to unlock
+FORECAST_UPGRADE_LINK_SUFFIX full crew management, multi-site analytics, and PDF export.
+FORECAST_UPGRADE_SECTION_ARIA Upgrade notice
+FORECAST_UPGRADE_TITLE Crew Forecasting
+FORECAST_WINDOWS_GRID_ARIA Forecast windows
+FORECAST_WINDOWS_SECTION_ARIA Crew cost forecast windows
+FORECAST_WINDOW_NEXT_30_DAYS Next 30 Days
+FORECAST_WINDOW_NEXT_PAY_PERIOD Next Pay Period
+FORECAST_WINDOW_QUARTER Quarter
+FORECAST_WINDOW_SHUTDOWN_TOTAL Shutdown Total
+FORECAST_WORKERS Workers
+FORECAST_WORKERS_HINT Number of workers with these parameters
+MEDIA_PAGE_TITLE Media
+MEMBER_REPORTS_YEAR_TABS_ARIA Member earnings year tabs
+NAV_LANGUAGE_CURRENT_ARIA Language: {language}
+NAV_LANGUAGE_MENU_ARIA Languages
+NAV_LANGUAGE_SWITCHER_ARIA Language switcher
+NAV_SECTION_ACCOUNT Account
+NAV_SECTION_BUSINESS Business
+NAV_SECTION_PAYCAL PayCal
+NAV_SECTION_PERSONAL Personal
+PAY_PERIOD_NUMBER_FMT Pay Period #{number}
+PAY_PERIOD_PROGRESS_ARIA_FMT Pay period progress: {elapsed} of {total} calendar days
+PROFILE_BILLING_BUSINESS_BENEFITS_TITLE Business includes
+PROFILE_BILLING_BUSINESS_FEATURE_LISTING Public Business Browser listing eligibility
+PROFILE_BILLING_CONNECT_LINK Connect to a business
+PROFILE_BILLING_CURRENT_PLAN Current plan
+PROFILE_BILLING_DISABLE_PREMIUM Disable Premium
+PROFILE_BILLING_ENABLE_BUSINESS Enable Business
+PROFILE_BILLING_ENABLE_PREMIUM Enable Premium
+PROFILE_BILLING_FREE_HELP_LOCAL You are on Free. Enable Premium to try businesses and collaboration features locally.
+PROFILE_BILLING_MATRIX_ARIA Compare PayCal subscription tiers
+PROFILE_BILLING_MATRIX_INTRO Choose the plan that fits how you use PayCal.
+PROFILE_BILLING_PLAN_BUSINESS Business
+PROFILE_BILLING_PREMIUM_MODE_TITLE Premium mode
+PROFILE_BILLING_PREMIUM_REPORTING_FEATURE Advanced earnings analytics and reporting
+PROFILE_BILLING_PUBLIC_CORE_NOTE Public Core ships with a local Premium toggle for experimenting with businesses and shared features.
+PROFILE_BILLING_PUBLIC_FEATURE_1 Track your own hours and earnings
+PROFILE_BILLING_PUBLIC_FEATURE_2 Personal pay periods and calendar
+PROFILE_BILLING_PUBLIC_FEATURE_3 Connect to businesses that invite you
+PROFILE_BILLING_TIER_BUSINESS PayCal Business
+PROFILE_BILLING_TIER_BUSINESS_PRICE $29.99 CAD/month
+PROFILE_BILLING_TIER_PREMIUM PayCal Premium
+PROFILE_BILLING_TIER_PREMIUM_PRICE $4.99 CAD/month
+PROFILE_BILLING_TIER_PUBLIC PayCal Public
+PROFILE_BILLING_TIER_PUBLIC_PRICE Free
+PROFILE_BILLING_UPGRADE_BUSINESS_BUTTON Upgrade to Business
+PROFILE_BILLING_UPGRADE_PREMIUM_BUTTON Upgrade to Premium
+PROFILE_BILLING_UPGRADE_TO_BUSINESS_HELP Need shared businesses and public listing? Upgrade to PayCal Business.
+PROFILE_LOCALE_DE_DE German (Germany)
+PROFILE_LOCALE_EN_CA English (Canada)
+PROFILE_LOCALE_EN_GB English (United Kingdom)
+PROFILE_LOCALE_EN_US English (United States)
+PROFILE_LOCALE_ES_ES Spanish (Spain)
+PROFILE_LOCALE_FR_CA French (Canada)
+PROFILE_LOCALE_FR_FR French (France)
+PROFILE_LOCALE_PT_BR Portuguese (Brazil)
+PROFILE_PAY_PERIOD_MANAGED_BANNER Pay periods are managed by %s.
+PROFILE_PAY_PERIOD_MANAGED_HELP Edit frequency, grace, and schedule on the Business Payroll page.
+PROFILE_PAY_PERIOD_MANAGED_LINK Manage on Payroll
+REPORTS Reports
+REPORTS_HTML <em>R</em>eports
+REPORTS_LINK_EARNINGS Open Earnings
+REPORTS_LINK_PERSONAL_EXPORT Personal earnings export view
+REPORTS_STUB_INTRO Reports is your export and summary hub. Earnings remains the primary day-to-day view; use the links below for exports today.
+REPORTS_SVG <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2 5 5h-5V4zM8 13h8v2H8v-2zm0 4h8v2H8v-2zm0-8h4v2H8V9z"/></svg>
+SETTINGS_CURRENCY_UPDATED_LABEL Currency updated: %s.
+SETTINGS_HELP_POPUP_TIMEOUT_HINT How long toast notifications and contextual help popups stay visible before automatically hiding.
+SETTINGS_HELP_POPUP_TIMEOUT_HOVER Controls how long toasts and hover help popups remain on screen.
+SETTINGS_HELP_POPUP_TIMEOUT_LABEL Toasts
+SETTINGS_HELP_POPUP_TIMEOUT_NEVER Never auto-dismiss
+SETTINGS_HELP_POPUP_TIMEOUT_SECONDS_FMT {n} seconds
+SETTINGS_JS_AUDIO_ENABLED enabled
+SETTINGS_JS_AUDIO_ENABLED_SPEECH Audio enabled
+SETTINGS_JS_AUDIO_MUTED muted
+SETTINGS_JS_AUDIO_TOAST_FMT Audio {mode}
+SETTINGS_JS_CODES_EXPIRE_MINUTES_FMT Codes expire in {minutes} minutes
+SETTINGS_JS_CODE_EXPIRED Code has expired. Please request a new one.
+SETTINGS_JS_CODE_EXPIRES_FMT Code expires in {time}
+SETTINGS_JS_DATA_PORTABILITY_CONSUMED Consumed
+SETTINGS_JS_DATA_PORTABILITY_COPY_FAILED Unable to copy payload automatically. Copy manually from the text area.
+SETTINGS_JS_DELETE_ACCOUNT_TYPE_PHRASE Type DELETE MY ACCOUNT exactly to confirm account deletion.
+SETTINGS_JS_DELETE_DATA_COMPLETE All account data has been deleted.
+SETTINGS_JS_DELETE_DATA_IN_PROGRESS Deleting all data...
+SETTINGS_JS_DELETE_DATA_TYPE_PHRASE Type DELETE ALL DATA exactly to confirm data deletion.
+SETTINGS_JS_HELP_POPUP_TIMEOUT_UPDATED Toast duration updated
+SETTINGS_JS_LANGUAGE_UPDATED Language updated
+SETTINGS_JS_MODAL_CONFIRM_IMPORT Confirm Import
+SETTINGS_JS_OVERLAY_COLLAPSE_UPDATED Collapse delay updated
+SETTINGS_JS_OVERLAY_FMT Overlay {state}
+SETTINGS_JS_PASSKEYS_CHECKING Passkeys list loaded. Checking passkeys...
+SETTINGS_JS_PASSKEYS_LOADED_COUNT Passkeys list loaded. {count} passkey(s) available.
+SETTINGS_JS_PASSKEYS_LOADED_NONE Passkeys list loaded. No passkeys registered yet.
+SETTINGS_JS_PASSKEYS_LOAD_FAILED Unable to load passkeys. Try again.
+SETTINGS_JS_PASSKEYS_NONE No passkeys registered yet.
+SETTINGS_JS_PASSKEYS_REMOVED Passkey removed.
+SETTINGS_JS_PASSKEYS_REMOVING Removing passkey...
+SETTINGS_JS_PASSKEYS_UPDATE_FAILED Unable to update passkeys. Try again.
+SETTINGS_JS_PASSKEYS_UPDATE_NAME_FAILED Unable to update passkey name.
+SETTINGS_JS_PASSKEYS_UPDATE_NAME_PROGRESS Updating passkey name...
+SETTINGS_JS_PASSKEYS_UPDATE_NAME_SUCCESS Passkey name updated.
+SETTINGS_JS_PROXIMITY_FMT Proximity {state}
+SETTINGS_JS_SECURITY_CUSTOM Custom
+SETTINGS_JS_SECURITY_CUSTOM_HINT Custom values are active. Shorter sessions increase protection on shared devices.
+SETTINGS_JS_SECURITY_EXPIRED Expired
+SETTINGS_JS_SECURITY_HINT_SUFFIX Shorter sessions increase protection on shared devices.
+SETTINGS_JS_SECURITY_REMAINING_FMT {time} remaining
+SETTINGS_JS_THEME_UPDATED_FMT Theme updated to {theme} ({variant})
+SETTINGS_JS_TOGGLE_OFF off
+SETTINGS_JS_TOGGLE_ON on
+SETTINGS_JS_TYPOGRAPHY_UPDATED Typography preference updated
+SETTINGS_JS_VOICE_UPDATED_FMT Voice updated to {voice}
+SETTINGS_JS_WORK_ENTRY_FIELDS_UPDATED Work entry fields updated
+SETTINGS_OVERLAY_COLLAPSE_HOVER How long the expanded overlay sidebar stays open without pointer activity before collapsing to slim mode. 0 = never.
+SETTINGS_OVERLAY_COLLAPSE_LABEL Collapse
+SETTINGS_TIMEZONE_UPDATED_LABEL Timezone updated: %s.
+SITES_ANNUAL_BUDGET_LABEL Annual Budget ($)
+SITES_ARCHIVED_BADGE (Archived)
+SITES_ARCHIVED_ENTRIES_HEADING Archived Entries
+SITES_ARCHIVED_SHORT Site archived.
+SITES_ARCHIVED_SUCCESS Site archived. {count} work {entriesLabel} preserved.
+SITES_ARCHIVED_SUCCESS_NO_ENTRIES Site archived (no work entries found).
+SITES_ARCHIVED_WORK_TITLE_NAMED Archived Work: {name}
+SITES_ARCHIVE_CONFIRM_BODY Archive "{name}"? Work entries will be kept.<br><br>You can restore or permanently delete it from the Archived tab.
+SITES_BUSINESS_PLANNING_HEADING Business Planning
+SITES_CLIENT_LABEL Client
+SITES_CLIENT_PLACEHOLDER e.g. Imperial Oil
+SITES_CONFIRM_ARCHIVE_TITLE Archive site?
+SITES_COST_CODE_LABEL Cost Code
+SITES_COST_CODE_PLACEHOLDER e.g. EDM-001
+SITES_CREATED_SUCCESS Site created successfully
+SITES_CREATING Creating...
+SITES_CRITICAL_THRESHOLD_LABEL Critical Threshold (%)
+SITES_DATE_RANGE Date Range:
+SITES_DAYS_PERCENT {days} days ◆ {percent}%
+SITES_DEFAULT_HOURS_LABEL Default Hours / Day
+SITES_DELETE_PERMANENT_BODY <strong class="delete_message_danger">⚠️ PERMANENT DELETION</strong><br><br>You are about to <strong>permanently delete</strong> "{name}" and all its archived work entries.<br><br><strong>This action cannot be undone. All historical data will be lost forever.</strong>
+SITES_EARNINGS_FAILED_LOAD Failed to load earnings data
+SITES_EARNINGS_TOTALS_ARIA Site earnings totals summary
+SITES_EDITOR_SETTINGS_HEADING Site Settings
+SITES_END_DATE_LABEL End Date
+SITES_ENTRY_PLURAL entries
+SITES_ENTRY_SINGULAR entry
+SITES_ERROR_CREATE_RETRY Unable to create site right now. Please try again.
+SITES_ERROR_CREATING Error creating site
+SITES_ERROR_DELETING Error deleting site
+SITES_ERROR_ENTER_HOURLY_WAGE Enter an hourly wage.
+SITES_ERROR_ENTER_NAME_AND_WAGE Enter both site name and wage.
+SITES_ERROR_ENTER_SITE_NAME Enter a site name.
+SITES_ERROR_LOADING Error loading site data
+SITES_ERROR_LOADING_ARCHIVED Error loading archived data.
+SITES_ERROR_ORPHANED_LOAD Failed to load orphaned work data. Please try again.
+SITES_ERROR_PERMANENT_DELETE Error performing finality delete
+SITES_ERROR_RECOVERY Failed to recover orphaned work.
+SITES_ERROR_RECOVERY_RETRY Failed to recover orphaned work. Please try again.
+SITES_ERROR_UPDATE_RETRY Unable to update site right now. Please try again.
+SITES_ERROR_UPDATING Error updating site
+SITES_ERROR_WAGE_MUST_BE_POSITIVE Wage must be greater than zero.
+SITES_ERROR_WAGE_ZERO_EXPLANATION Enter a wage greater than zero — a zero wage means earnings cannot be calculated.
+SITES_FINALITY_DELETE_BODY <strong class="warning-strong">⚠️ PERMANENT DELETION WARNING</strong><br><br>You are about to <strong>permanently delete</strong> all archived work entries for:<br><strong>"{name}"</strong><br><br><strong>This action cannot be undone. All historical data will be lost forever.</strong><br><br>Are you absolutely sure you want to proceed?
+SITES_FINALITY_DELETE_SUCCESS Permanently deleted {count} archived work {entriesLabel}.
+SITES_GRID_ACTIVE_LABEL Active sites
+SITES_GRID_ARCHIVED_LABEL Archived sites
+SITES_GRID_STATUS {label} grid {reason}. {count} {resultsLabel}. {order}. {search}. Page {page}.
+SITES_HELP_BUDGET Total payroll budget allocated to this site for the year. Used to track spending against plan and trigger threshold alerts.
+SITES_HELP_CLIENT The client or customer this site is being worked for. Used for future invoicing and client-level reporting.
+SITES_HELP_COST_CODE Internal or client-assigned cost code for this site. Typically used for accounting, ERP integration, or purchase orders.
+SITES_HELP_CRITICAL A critical alert appears when cumulative spending reaches this percentage of the annual budget. Default: 95%.
+SITES_HELP_DEFAULT_HOURS Pre-fills the hours field when adding a new work entry for this site. Saves time for sites with a consistent shift length.
+SITES_HELP_END_DATE The projected or actual completion date for this site. Sites past their end date can be flagged for archival.
+SITES_HELP_LOA Daily tax-free allowance paid when working away from home. Added to your gross earnings per day worked.
+SITES_HELP_PLANNING_STATUS Tracks the lifecycle stage of this site within the business. Used for filtering and reporting.
+SITES_HELP_PROVINCE Province where this site is located. Used to apply the correct provincial tax rates to your earnings.
+SITES_HELP_SITE_NAME The display name for this site. Used in reports, the calendar, and payroll summaries.
+SITES_HELP_START_DATE The date this site becomes active. Used for forecasting, reporting windows, and automatic status transitions.
+SITES_HELP_STATUS Active sites appear in the calendar and reports. Archiving a site hides it and preserves all work history.
+SITES_HELP_TRAVEL Hourly rate paid for travel time to and from this site. Calculated separately from regular hours.
+SITES_HELP_WAGE Base hourly rate used to calculate gross earnings for all work entries at this site.
+SITES_HELP_WARN A warning indicator appears when cumulative spending reaches this percentage of the annual budget. Default: 80%.
+SITES_HOURS_REG_OT {hours} hours ({regular} reg, {overtime} OT)
+SITES_LOADING_ARCHIVED_DATA Loading archived data...
+SITES_NO_ARCHIVED_ENTRIES No archived work entries found.
+SITES_ORPHANED_COUNT {count} orphaned work {entriesLabel}
+SITES_ORPHANED_EMPTY No orphaned work entries found.
+SITES_ORPHANED_SITES_SUFFIX ({groupCount} different sites)
+SITES_PERMANENTLY_DELETED_SHORT Site permanently deleted.
+SITES_PERMANENTLY_DELETED_SUCCESS Site permanently deleted. {count} archived work {entriesLabel} removed.
+SITES_PERSONAL_PLANNING_EMPTY This site is not linked to a business. Link it from the Businesses page to unlock planning tools.
+SITES_PERSONAL_SCOPE_NOTE Business-created sites are managed in your Business workspace, not here.
+SITES_PLANNING_STATUS_COMPLETE Complete
+SITES_PLANNING_STATUS_LABEL Planning Status
+SITES_PLANNING_STATUS_MAINTENANCE Maintenance
+SITES_PLANNING_STATUS_PLANNING Planning
+SITES_READ_ONLY_ACCESS You have read-only access to this site.
+SITES_RECOVER_BUTTON Recover
+SITES_RESULT_PLURAL results
+SITES_RESULT_SINGULAR result
+SITES_SAVE_SITE Save Site
+SITES_SITE_COLOR_LABEL Site Color
+SITES_SITE_NAME_LABEL Site Name
+SITES_START_DATE_LABEL Start Date
+SITES_THIS_SITE this site
+SITES_TOTAL_ARCHIVED_ENTRIES Total Archived Entries:
+SITES_TOTAL_EARNINGS Total Earnings:
+SITES_TOTAL_HOURS Total Hours:
+SITES_UPDATED_SUCCESS Site updated successfully
+SITES_WARN_THRESHOLD_LABEL Warn Threshold (%)
+SITES_WORK_ENTRY_PLURAL work entries
+SITES_WORK_ENTRY_SINGULAR work entry
+SOC2 SOC 2
+TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE Auth, Passkey & Redis Hardening — May 2026
+TRANSPARENCY_BUSINESS_MEMBERSHIP_PAGE_TITLE Business Membership and Role Philosophy
+TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE Opt-in Diagnostics & Phantom Wing
+TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE Error Handling & Message Normalization
+TRANSPARENCY_EXTENSIONS_PAGE_TITLE Extensions Paradigm
+TRANSPARENCY_MEMBERS_PERFORMANCE_2026_06_PAGE_TITLE How We Made the Business Members Page ~100x Faster
+TRANSPARENCY_SOC2_PAGE_TITLE PayCal SOC2 Readiness & Security Model

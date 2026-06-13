@@ -191,6 +191,23 @@ $navBarStickiness = "static";
   --gap-sm:                              var(--pad-sm);
   --gap-md:                              var(--pad-md);
   --gap-lg:                              var(--pad-lg);
+
+  /*
+   * Page edge inset — horizontal padding for all user-facing #main content.
+   * Fluid scale: 2rem floor (2× former 1rem min), 2.5vw preferred, 4rem cap (2× former 2rem max).
+   * Apply on #main padding-inline; do not zero out margins on full-bleed subpages without this inset.
+   * Inner panels (charts, datagrids): --page-edge-inner-inline inside dense figures.
+   * See ai-notes/page-edge-spacing-2026-06-13.md and .cursor/rules/page-edge-spacing.mdc
+   */
+  --page-edge-inline-min:                2rem;
+  --page-edge-inline-fluid:              2.5vw;
+  --page-edge-inline-max:                4rem;
+  --page-edge-inline:                    clamp(var(--page-edge-inline-min), var(--page-edge-inline-fluid), var(--page-edge-inline-max));
+  --page-edge-inner-inline-min:          2rem;
+  --page-edge-inner-inline-fluid:        2vw;
+  --page-edge-inner-inline-max:          3.5rem;
+  --page-edge-inner-inline:              clamp(var(--page-edge-inner-inline-min), var(--page-edge-inner-inline-fluid), var(--page-edge-inner-inline-max));
+
   --chrome-height:                       4rem;
   --profile-menu-width:                  8rem;
   --blur-size:                           2px;
@@ -398,15 +415,28 @@ footer, header, main, nav { display: block; }
 
 #main {
   width: 100%;
-  padding: var(--pad-lg);
+  padding-block: var(--pad-lg);
+  padding-inline: var(--page-edge-inline);
   margin: 3rem 0 0 0;
   background-color: var(--color-bg);
   color: var(--color-text);
+  box-sizing: border-box;
 }
 
 #page_footer {
   margin: 0;
-  padding: clamp(0.6rem, 1.3vw, 1rem);
+  padding-block: clamp(0.6rem, 1.3vw, 1rem);
+  padding-inline: var(--page-edge-inline);
+  box-sizing: border-box;
+}
+
+.public_extension_disclaimer {
+  margin: 1.5rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text-muted, inherit);
+  opacity: 0.85;
 }
 
 .ledge {
@@ -1833,6 +1863,32 @@ details summary:hover {
   display: none;
 }
 
+/* HOVER HELP POPUPS */
+.hover_help_tooltip {
+  position: fixed;
+  z-index: 1400;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  max-width: min(32rem, calc(100vw - 2rem));
+  padding: 1.25rem 1.75rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: var(--back, #101010);
+  color: var(--fore, #f5f5f5);
+  box-shadow: var(--shadow-lg);
+  font-size: 1.125rem;
+  line-height: 1.5;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.hover_help_tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* TOOLTIPS */
 .tooltip {
   position: relative;
@@ -2550,6 +2606,29 @@ area:focus-visible {
 .sk-gap-xs > * + * { margin-top: 0.35rem; }
 .sk-gap-sm > * + * { margin-top: 0.6rem; }
 .sk-gap-md > * + * { margin-top: 1rem; }
+
+/* Async skeleton grid rows (earnings / member reports placeholders).
+   CSP forbids inline styles, so column counts are expressed as modifier
+   classes consumed by buildAsyncSkeletonGrid() on the PHP side. */
+.sk-grid {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sk-grid > .sk-line { height: 0.8em; border-radius: 3px; }
+.sk-grid--cols-1  { grid-template-columns: repeat(1, 1fr); }
+.sk-grid--cols-2  { grid-template-columns: repeat(2, 1fr); }
+.sk-grid--cols-3  { grid-template-columns: repeat(3, 1fr); }
+.sk-grid--cols-4  { grid-template-columns: repeat(4, 1fr); }
+.sk-grid--cols-5  { grid-template-columns: repeat(5, 1fr); }
+.sk-grid--cols-6  { grid-template-columns: repeat(6, 1fr); }
+.sk-grid--cols-7  { grid-template-columns: repeat(7, 1fr); }
+.sk-grid--cols-8  { grid-template-columns: repeat(8, 1fr); }
+.sk-grid--cols-9  { grid-template-columns: repeat(9, 1fr); }
+.sk-grid--cols-10 { grid-template-columns: repeat(10, 1fr); }
+.sk-grid--cols-11 { grid-template-columns: repeat(11, 1fr); }
+.sk-grid--cols-12 { grid-template-columns: repeat(12, 1fr); }
 
 /* Suppress animation when user prefers reduced motion (handled globally below,
    but explicit here so skeleton is still visible as static shapes) */

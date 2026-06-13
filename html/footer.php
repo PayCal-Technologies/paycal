@@ -30,6 +30,7 @@ $i18nKeys = [
   'SESSION_TIMEOUT_COUNTDOWN_PREFIX',
   'SESSION_TIMEOUT_COUNTDOWN_SUFFIX',
   'SESSION_TIMEOUT_STAY_LOGGED_IN',
+  'FOOTER_SOC2_BADGE_ARIA',
 ];
 foreach ($i18nKeys as $key) {
   $i18n[$key] = Strings::i18n($key);
@@ -106,6 +107,26 @@ if ($isAuthenticated) {
   echo Render::jsScript('org-dek-auto-bootstrap');
 }
 
+$extensionDisclaimerPath = __DIR__ . '/extensions/_partials/extension_disclaimer.php';
+if (is_file($extensionDisclaimerPath)) {
+  $requestUriRaw = $_SERVER['REQUEST_URI'] ?? '';
+  $requestPathOnly = parse_url(is_scalar($requestUriRaw) ? (string) $requestUriRaw : '', PHP_URL_PATH);
+  $normalizedRequestPath = rtrim(is_string($requestPathOnly) ? $requestPathOnly : '', '/');
+  if ($normalizedRequestPath === '') {
+    $normalizedRequestPath = '/';
+  }
+
+  if (
+    AdminSurface::isEnabled()
+    && (
+      str_starts_with($normalizedRequestPath, '/admin')
+      || str_starts_with($normalizedRequestPath, '/tests')
+    )
+  ) {
+    require $extensionDisclaimerPath;
+  }
+}
+
 
 
 ?>
@@ -123,8 +144,8 @@ if ($isAuthenticated) {
       <a
         class="footer_soc2_badge"
         href="/soc2/"
-        title="SOC 2 Audit-Ready — view compliance details"
-        aria-label="SOC 2 Audit-Ready — view compliance details"
+        title="<?php echo htmlspecialchars($i18n['FOOTER_SOC2_BADGE_ARIA'], ENT_QUOTES, 'UTF-8'); ?>"
+        aria-label="<?php echo htmlspecialchars($i18n['FOOTER_SOC2_BADGE_ARIA'], ENT_QUOTES, 'UTF-8'); ?>"
       ><svg class="footer_soc2_badge_icon" width="11" height="13" viewBox="0 0 12 14" fill="none" aria-hidden="true" focusable="false"><path d="M6 1 L1 3 V7 C1 10.2 3.4 12.9 6 13.5 C8.6 12.9 11 10.2 11 7 V3 Z" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="0.9" stroke-linejoin="round"/><polyline points="3.5,7.5 5.5,9.5 8.5,5.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>SOC 2 Audit-Ready
       </a>
     </div>
@@ -223,7 +244,15 @@ $lensPageMap = [
   'PAGE_INDEX' => 'calendar',
   'PAGE_EARNINGS' => 'earnings',
   'PAGE_SITES' => 'sites',
-  'PAGE_ORGANIZATIONS' => 'organizations',
+  'PAGE_BUSINESSES' => 'business',
+  'PAGE_BUSINESS_DASHBOARD' => 'business',
+  'PAGE_BUSINESS_DETAILS' => 'business',
+  'PAGE_BUSINESS_MEMBERS' => 'business',
+  'PAGE_BUSINESS_SITES' => 'business',
+  'PAGE_BUSINESS_PAYROLL' => 'business',
+  'PAGE_BUSINESS_AUDIT' => 'business',
+  'PAGE_BUSINESS_REPORTS' => 'business',
+  'PAGE_REPORTS' => 'reports',
   'PAGE_SETTINGS' => 'settings',
   'PAGE_ADMIN' => 'admin',
   'PAGE_HELP' => 'help',

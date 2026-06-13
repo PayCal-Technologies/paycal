@@ -40,4 +40,23 @@ final class AdminSurfaceManifestContractTest extends TestCase
     $this->assertIsArray($manifest['capabilities']['admin.page.paths'] ?? null);
     $this->assertIsArray($manifest['capabilities']['admin.nav.links'] ?? null);
   }
+
+  public function testPublicAdminSurfaceManifestExcludesPrivateOnlyRoutes(): void
+  {
+    /** @var array<string, mixed> $manifest */
+    $manifest = require __DIR__ . '/../../extensions/overrides/admin-surface/manifest.php';
+
+    $pagePaths = $manifest['capabilities']['admin.page.paths'] ?? [];
+    $this->assertIsArray($pagePaths);
+    $this->assertNotContains('/admin/soc2/', $pagePaths);
+    $this->assertNotContains('/admin/argus/', $pagePaths);
+    $this->assertNotContains('/admin/business-moderation/', $pagePaths);
+
+    $navLinks = $manifest['capabilities']['admin.nav.links'] ?? [];
+    $this->assertIsArray($navLinks);
+    $hrefs = array_map(static fn(array $link): string => (string) ($link['href'] ?? ''), $navLinks);
+    $this->assertNotContains('/admin/soc2/', $hrefs);
+    $this->assertNotContains('/admin/argus/', $hrefs);
+    $this->assertNotContains('/admin/business-moderation/', $hrefs);
+  }
 }
