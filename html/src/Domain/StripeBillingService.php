@@ -79,11 +79,20 @@ final class StripeBillingService
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
-  public function createCheckoutSession(string $userUUID, string $userEmail, string $successURL, string $cancelURL): array
-  {
-    $priceId = $this->requireEnv('STRIPE_PREMIUM_PRICE_ID');
+  public function createCheckoutSession(
+    string $userUUID,
+    string $userEmail,
+    string $successURL,
+    string $cancelURL,
+    string $plan = 'premium',
+  ): array {
+    $plan = strtolower(trim($plan)) === 'business' ? 'business' : 'premium';
+    $priceEnvKey = $plan === 'business' ? 'STRIPE_BUSINESS_PRICE_ID' : 'STRIPE_PREMIUM_PRICE_ID';
+    $paycalPlan = $plan === 'business' ? 'business_flat' : 'premium_flat';
+
+    $priceId = $this->requireEnv($priceEnvKey);
     if ($priceId === '') {
-      return $this->fail('Stripe Premium price ID is not configured.');
+      return $this->fail('Stripe ' . ucfirst($plan) . ' price ID is not configured.');
     }
 
     $secretKey = $this->requireEnv('STRIPE_SECRET_KEY');
@@ -119,12 +128,12 @@ final class StripeBillingService
         'cancel_url' => $cancelURL,
         'metadata' => [
           'user_uuid' => $userUUID,
-          'paycal_plan' => 'premium_flat',
+          'paycal_plan' => $paycalPlan,
         ],
         'subscription_data' => [
           'metadata' => [
             'user_uuid' => $userUUID,
-            'paycal_plan' => 'premium_flat',
+            'paycal_plan' => $paycalPlan,
           ],
         ],
       ];
@@ -140,6 +149,7 @@ final class StripeBillingService
       return $this->ok('Stripe checkout session created.', [
         'checkout_url' => (string) ($session->url ?? ''),
         'session_id' => (string) ($session->id ?? ''),
+        'plan' => $plan,
       ]);
     } catch (\Throwable $e) {
       return $this->fail('Failed to create Stripe checkout session.', [
@@ -254,7 +264,8 @@ final class StripeBillingService
 
       $subscriptionId = is_scalar($session->subscription ?? null) ? trim((string) $session->subscription) : null;
       $customerId = $this->extractCustomerId($session);
-      SubscriptionRepository::upgradeToPremium($userUUID, $subscriptionId, $customerId);
+      $plan = $this->resolvePlanFromMetadata($session);
+      $this->applyActiveSubscriptionUpgrade($userUUID, $subscriptionId, $customerId, null, $plan);
 
       return $this->ok('Subscription activated from checkout confirmation.', [
         'user_uuid' => $userUUID,
@@ -408,11 +419,13 @@ final class StripeBillingService
             $stripeCustomerId !== '' ? $stripeCustomerId : null
           );
         } else {
-          SubscriptionRepository::upgradeToPremium(
+          $plan = $this->resolvePlanFromStripeSubscription($stripeSubscription);
+          $this->applyActiveSubscriptionUpgrade(
             $userUUID,
             $resolvedSubscriptionId !== '' ? $resolvedSubscriptionId : null,
             $stripeCustomerId !== '' ? $stripeCustomerId : null,
-            $periodEnd > 0 ? $periodEnd : null
+            $periodEnd > 0 ? $periodEnd : null,
+            $plan,
           );
         }
       } elseif ($status === 'past_due' || $status === 'unpaid' || $status === 'incomplete_expired') {
@@ -948,7 +961,8 @@ final class StripeBillingService
 
     $subscriptionId = is_scalar($object->subscription ?? null) ? (string) $object->subscription : null;
     $customerId = $this->extractCustomerId($object);
-    SubscriptionRepository::upgradeToPremium($userUUID, $subscriptionId, $customerId);
+    $plan = $this->resolvePlanFromMetadata($object);
+    $this->applyActiveSubscriptionUpgrade($userUUID, $subscriptionId, $customerId, null, $plan);
 
     return $this->ok('Subscription activated from checkout.session.completed.', [
       'user_uuid' => $userUUID,
@@ -976,7 +990,8 @@ final class StripeBillingService
     if ($status === 'active' || $status === 'trialing') {
       $subscriptionId = is_scalar($object->id ?? null) ? (string) $object->id : null;
       $periodEnd = $this->extractPeriodEndUnixTime($object);
-      SubscriptionRepository::upgradeToPremium($userUUID, $subscriptionId, $customerId, $periodEnd);
+      $plan = $this->resolvePlanFromStripeSubscription($object);
+      $this->applyActiveSubscriptionUpgrade($userUUID, $subscriptionId, $customerId, $periodEnd, $plan);
     } elseif ($status === 'past_due' || $status === 'unpaid' || $status === 'incomplete_expired') {
       SubscriptionRepository::markPastDue($userUUID);
       if ($customerId !== null) {
@@ -1057,7 +1072,8 @@ final class StripeBillingService
     $subscription = SubscriptionRepository::get($userUUID);
     $subscriptionId = is_scalar($subscription['id'] ?? null) ? (string) $subscription['id'] : null;
     $customerId = $this->extractCustomerId($object);
-    SubscriptionRepository::upgradeToPremium($userUUID, $subscriptionId, $customerId);
+    $plan = $subscription['tier'] === \PayCal\Domain\Enums\Subscription::BUSINESS ? 'business' : 'premium';
+    $this->applyActiveSubscriptionUpgrade($userUUID, $subscriptionId, $customerId, null, $plan);
 
     return $this->ok('Subscription restored active from paid invoice.', [
       'user_uuid' => $userUUID,
@@ -1476,7 +1492,6 @@ final class StripeBillingService
       $this->incrementWebhookTelemetry($metric . ':' . $this->normalizeMetricLabel($eventType));
     }
 
-    SecurityLog::log('billing_webhook_' . $metric, $this->normalizeLogContext($context));
   }
 
   /** @param array<string, mixed> $context */
@@ -1546,6 +1561,77 @@ final class StripeBillingService
     }
 
     return null;
+  }
+
+  private function applyActiveSubscriptionUpgrade(
+    string $userUUID,
+    ?string $subscriptionId,
+    ?string $customerId,
+    ?int $periodEnd,
+    string $plan,
+  ): void {
+    if ($plan === 'business') {
+      SubscriptionRepository::upgradeToBusiness($userUUID, $subscriptionId, $customerId, $periodEnd);
+
+      return;
+    }
+
+    SubscriptionRepository::upgradeToPremium($userUUID, $subscriptionId, $customerId, $periodEnd);
+  }
+
+  /** @param object $object */
+  private function resolvePlanFromMetadata(object $object): string
+  {
+    if (isset($object->metadata) && is_object($object->metadata)) {
+      $rawPlan = $object->metadata->paycal_plan ?? '';
+      if (is_scalar($rawPlan) && str_contains(strtolower(trim((string) $rawPlan)), 'business')) {
+        return 'business';
+      }
+    }
+
+    return 'premium';
+  }
+
+  /** @param object $subscription */
+  private function resolvePlanFromStripeSubscription(object $subscription): string
+  {
+    $fromMetadata = $this->resolvePlanFromMetadata($subscription);
+    if ($fromMetadata === 'business') {
+      return 'business';
+    }
+
+    $priceId = $this->extractPrimaryPriceId($subscription);
+    $businessPriceId = trim($this->requireEnv('STRIPE_BUSINESS_PRICE_ID'));
+    if ($businessPriceId !== '' && $priceId !== '' && hash_equals($businessPriceId, $priceId)) {
+      return 'business';
+    }
+
+    return 'premium';
+  }
+
+  /** @param object $subscription */
+  private function extractPrimaryPriceId(object $subscription): string
+  {
+    if (!isset($subscription->items) || !is_object($subscription->items)) {
+      return '';
+    }
+
+    $data = $subscription->items->data ?? null;
+    if (!is_array($data) || $data === []) {
+      return '';
+    }
+
+    $first = $data[0];
+    if (!is_object($first) || !isset($first->price)) {
+      return '';
+    }
+
+    $price = $first->price;
+    if (is_object($price) && is_scalar($price->id ?? null)) {
+      return trim((string) $price->id);
+    }
+
+    return is_scalar($price) ? trim((string) $price) : '';
   }
 
   /**

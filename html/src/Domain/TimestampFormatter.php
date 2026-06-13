@@ -37,17 +37,4 @@ class TimestampFormatter
     $formatted = preg_replace('/\+.*$/', '', str_replace('T0', ' ', $trimmed)) ?: $trimmed;
     return trim($formatted);
   }
-
-  /**
-   * Format timestamp for API response with raw value for JS processing
-   * Returns array with both formatted display and raw value for client-side parsing
-   * @return array<string, string>
-   */
-  public static function formatAuditTimestampWithRaw(string $iso8601): array
-  {
-    return [
-      'display' => self::formatAuditTimestamp($iso8601),
-      'raw' => $iso8601,
-    ];
-  }
 }

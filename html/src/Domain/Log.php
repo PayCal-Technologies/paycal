@@ -38,9 +38,6 @@ final class Log
 {
   private const MAX_LOG_PATH_LENGTH = 255;
 
-  /** @var array<array{timestamp: string, key: string, value: string}> */
-  private static array $buffer = [];
-
   // Log file path accessors (from Environment)
   /**
    * Handles debugLogPath operation.
@@ -50,10 +47,6 @@ final class Log
    * Handles errorLogPath operation.
    */
   private static function errorLogPath(): string { return \PayCal\Domain\Config\Environment::appHome() . 'logs/error.log'; }
-  /**
-   * Handles traceLogPath operation.
-   */
-  private static function traceLogPath(): string { return \PayCal\Domain\Config\Environment::appHome() . 'logs/trace.log'; }
   /**
    * Handles accessLogPath operation.
    */
@@ -85,28 +78,6 @@ final class Log
   {
     $fullMessage = '' !== $context ? "{$message} {$context}" : $message;
     self::write(self::errorLogPath(), $fullMessage);
-  }
-
-  /**
-   * Log a trace message.
-   * Writes trace-level messages for entry/exit paths and fine-grained flow tracking.
-   *
-   * @param string $message Trace message to write to trace log file
-   */
-  public static function trace(string $message = ''): void
-  {
-    self::write(self::traceLogPath(), $message);
-  }
-
-  /**
-   * Log an access message.
-   * Writes access-level messages for request/response envelope tracking. Auto-fills common fields.
-   *
-   * @param string $message Access message to write to access log file
-   */
-  public static function access(string $message = ''): void
-  {
-    self::write(self::accessLogPath(), $message);
   }
 
   /**
@@ -142,78 +113,6 @@ final class Log
   public static function warning(string $message = ''): void
   {
     self::warn($message);
-  }
-
-  /**
-   * @param array<string, string> $pairs Array pairs
-   */
-  public static function kv(array $pairs, string $prefix = ''): void
-  {
-    $flat = [];
-    foreach ($pairs as $key => $value) {
-      @$flat[] = (string) $key.'='.(string) $value;
-    }
-
-    $message = '' !== $prefix ? ($prefix.' ['.implode(', ', $flat).']') : ('['.implode(', ', $flat).']');
-    self::write(self::debugLogPath(), $message);
-  }
-
-  /**
-   * Add name-value pairs to buffer with timestamps.
-   *
-   * @param array<string, string> $pairs
-   */
-  public static function add(array $pairs): void
-  {
-    foreach ($pairs as $key => $value) {
-      self::$buffer[] = [
-          'timestamp' => self::now(),
-          'key' => (string) $key,
-          'value' => (string) $value,
-      ];
-    }
-  }
-
-  /**
-   * timer: returns now or elapsed microseconds. If elapsed, logs it.
-   *
-   * @return float microtime(true) when start is null, else elapsed µs
-   */
-  public static function timer(string $label, ?float $start = null): float
-  {
-    $now = (float) self::now();
-    if (null === $start) {
-      return $now;
-    }
-
-    $elapsedUs = ($now - $start) * 1_000_000.0;
-    self::write(self::debugLogPath(), "timer: {$label}, {$elapsedUs}");
-
-    return $elapsedUs;
-  }
-
-  /**
-   * Finalize and write all buffered log entries to disk.
-   * Flushes the internal buffer containing timestamped key-value pairs to storage.
-   */
-  public static function finalize(): void
-  {
-    if (empty(self::$buffer)) {
-      return;
-    }
-
-    $userUuid = User::currentUUID();
-    $messages = [];
-    foreach (self::$buffer as $entry) {
-      $messages[] = $entry['timestamp'].' '.Security::getClientIPAddress().' '.$userUuid.' '.$entry['key'].'='.$entry['value'];
-    }
-
-    $content = implode(PHP_EOL, $messages).PHP_EOL;
-    $debugLogPath = self::debugLogPath();
-    @mkdir(dirname($debugLogPath), 0o755, true);
-    @file_put_contents($debugLogPath, $content, FILE_APPEND);
-
-    self::$buffer = [];
   }
 
   /**

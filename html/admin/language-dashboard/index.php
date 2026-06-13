@@ -30,9 +30,21 @@ use PayCal\Domain\User;
 
 require_once '../../config.php';
 
+if (function_exists('language_dashboard_i18n') === false) {
+  function language_dashboard_i18n(string $key): string
+  {
+    static $cache = [];
+    if (array_key_exists($key, $cache) === false) {
+      $cache[$key] = Strings::i18n($key);
+    }
+
+    return $cache[$key];
+  }
+}
+
 $currentPage = 'PAGE_ADMIN';
-$pageTitle   = 'Language Translation Dashboard - [PayCal]';
-$pageLabel   = 'Language Translation Dashboard';
+$pageTitle   = language_dashboard_i18n('ADMIN_LANGUAGE_DASHBOARD_TITLE') . ' - [PayCal]';
+$pageLabel   = language_dashboard_i18n('ADMIN_LANGUAGE_DASHBOARD_TITLE');
 
 Authentication::redirectHomeIfUnauthenticated();
 AdminSurface::redirectHomeIfPageUnavailable('/admin/language-dashboard/');
@@ -64,8 +76,8 @@ require_once HTML . '/header.php';
 
   <header class="lang-dash__header panel w100 pad_md mar_sm">
     <div>
-      <h1>Language Translation Dashboard</h1>
-      <p class="help_text" style="margin:0">Audit and AI-translate all non-English language files. Translations are applied in batches via OpenAI GPT-4o.</p>
+      <h1><?= htmlspecialchars(language_dashboard_i18n('ADMIN_LANGUAGE_DASHBOARD_TITLE'), ENT_QUOTES, 'UTF-8') ?></h1>
+      <p class="help_text"><?= htmlspecialchars(language_dashboard_i18n('ADMIN_LANGUAGE_DASHBOARD_DESC'), ENT_QUOTES, 'UTF-8') ?></p>
     </div>
     <div class="lang-dash__header-actions">
       <a class="btn btn_secondary" href="/admin/">Back to Admin</a>
@@ -88,10 +100,10 @@ require_once HTML . '/header.php';
 
   <!-- Summary stats bar -->
   <section class="panel w100 pad_md mar_sm" aria-label="Language coverage summary">
-    <h2 style="margin-top:0">Coverage Summary</h2>
-    <div id="lang-dash-stats" style="font-size:0.9rem;color:var(--text-muted)">Loading…</div>
+    <h2 class="lang-dash__section-title"><?= htmlspecialchars(language_dashboard_i18n('ADMIN_LANGUAGE_DASHBOARD_COVERAGE_SUMMARY'), ENT_QUOTES, 'UTF-8') ?></h2>
+    <div id="lang-dash-stats" class="lang-dash__stats">Loading…</div>
 
-    <div style="overflow-x:auto;margin-top:1rem">
+    <div class="lang-dash__table-wrap">
       <table class="lang-dash__summary-table" aria-label="Language audit table">
         <thead>
           <tr>
@@ -104,7 +116,7 @@ require_once HTML . '/header.php';
           </tr>
         </thead>
         <tbody id="lang-dash-table-body">
-          <tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Loading…</td></tr>
+          <tr><td colspan="6" class="lang-dash__loading-cell">Loading…</td></tr>
         </tbody>
       </table>
     </div>
@@ -112,9 +124,9 @@ require_once HTML . '/header.php';
 
   <!-- Per-language detail cards -->
   <section class="panel w100 pad_md mar_sm" aria-label="Per-language translation cards">
-    <h2 style="margin-top:0">Language Details</h2>
+    <h2 class="lang-dash__section-title"><?= htmlspecialchars(language_dashboard_i18n('ADMIN_LANGUAGE_DASHBOARD_LANGUAGE_DETAILS'), ENT_QUOTES, 'UTF-8') ?></h2>
     <div id="lang-dash-cards" class="lang-dash__cards">
-      <p style="color:var(--text-muted)">Loading…</p>
+      <p class="lang-dash__placeholder">Loading…</p>
     </div>
   </section>
 

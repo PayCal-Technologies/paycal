@@ -6,6 +6,8 @@ $currentPage = 'PAGE_AUTH';
 
 require_once __DIR__ . '/../config.php';
 
+\PayCal\Observability\Lens::boot('auth');
+
 $requestUriRaw = $_SERVER['REQUEST_URI'] ?? '/auth/';
 $requestUri = is_scalar($requestUriRaw) ? (string) $requestUriRaw : '/auth/';
 $requestQueryRaw = parse_url($requestUri, PHP_URL_QUERY);

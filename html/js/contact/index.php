@@ -9,7 +9,28 @@ CORS::renderContentType('application/javascript');
 
 Javascript::renderDocBlock();
 
+$contactI18nKeys = [
+  'CONTACT_JS_COOLDOWN_HINT_FMT',
+  'CONTACT_JS_SUCCESS_COOLDOWN_FMT',
+  'CONTACT_JS_SEND_FAILED',
+  'CONTACT_ERROR_COOLDOWN_WAIT',
+];
+$contactI18n = [];
+foreach ($contactI18nKeys as $contactI18nKey) {
+  $contactI18n[$contactI18nKey] = Strings::i18n($contactI18nKey);
+}
+
 ?>
+const CONTACT_T = <?php echo json_encode($contactI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+const formatContactMessage = (template, replacements = {}) => {
+  let message = String(template || '');
+  Object.entries(replacements).forEach(([key, value]) => {
+    message = message.split(`{${key}}`).join(String(value ?? ''));
+    message = message.split('%s').join(String(value ?? ''));
+  });
+  return message;
+};
+
 
 const form = document.getElementById('contact_form');
 const statusEl = document.getElementById('contact_status');
@@ -71,7 +92,7 @@ function renderCooldownState() {
   if (cooldownHintEl) {
     if (isCoolingDown) {
       cooldownHintEl.hidden = false;
-      cooldownHintEl.textContent = `Please wait ${countdownText} before sending another message.`;
+      cooldownHintEl.textContent = formatContactMessage(CONTACT_T.CONTACT_JS_COOLDOWN_HINT_FMT, { time: countdownText });
     } else {
       cooldownHintEl.hidden = true;
       cooldownHintEl.textContent = '';
@@ -81,7 +102,7 @@ function renderCooldownState() {
   if (successCooldownEl) {
     if (isCoolingDown) {
       successCooldownEl.hidden = false;
-      successCooldownEl.textContent = `Send another available in ${countdownText}.`;
+      successCooldownEl.textContent = formatContactMessage(CONTACT_T.CONTACT_JS_SUCCESS_COOLDOWN_FMT, { time: countdownText });
     } else {
       successCooldownEl.hidden = true;
       successCooldownEl.textContent = '';
@@ -289,7 +310,7 @@ if (form) {
     clearAllFieldErrors();
 
     if (cooldownRemainingSeconds > 0) {
-      setStatus(`Please wait ${formatCooldownTime(cooldownRemainingSeconds)} before sending another message.`, 'error');
+      setStatus(formatContactMessage(CONTACT_T.CONTACT_ERROR_COOLDOWN_WAIT, { time: formatCooldownTime(cooldownRemainingSeconds) }), 'error');
       if (statusEl) statusEl.focus();
       return;
     }
@@ -346,7 +367,7 @@ if (form) {
 
         const errorMessage = typeof payload.message === 'string' && payload.message !== ''
           ? payload.message
-          : 'Unable to send your message right now.';
+          : CONTACT_T.CONTACT_JS_SEND_FAILED;
         setStatus(errorMessage, 'error');
 
         if (typeof payload.cooldownRemaining === 'number' && payload.cooldownRemaining > 0) {

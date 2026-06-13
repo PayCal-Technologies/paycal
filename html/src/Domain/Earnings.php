@@ -3,7 +3,7 @@
 namespace PayCal\Domain;
 
 use PayCal\Domain\Constants\Keys;
-use PayCal\Infrastructure\Organization\OrganizationEncryptionService;
+use PayCal\Infrastructure\Business\BusinessEncryptionService;
 
 /**
  * Earnings.php
@@ -61,9 +61,11 @@ class Earnings
    */
   private static function buildAsyncSkeletonGrid(int $cols, int $rows): string
   {
-    $colStyle = 'display:grid;grid-template-columns:repeat(' . $cols . ',1fr);gap:0.4rem;padding:0.45rem 0.5rem;border-bottom:1px solid var(--border)';
-    $cell = '<span class="sk-line" style="display:block;height:0.8em;border-radius:3px"></span>';
-    $row  = '<div class="skeleton" style="' . $colStyle . '">' . str_repeat($cell, $cols) . '</div>';
+    // CSP forbids inline styles: layout comes from .sk-grid / .sk-grid--cols-N
+    // utility classes defined in css/common (supports 1-12 columns).
+    $cols = max(1, min(12, $cols));
+    $cell = '<span class="sk-line"></span>';
+    $row  = '<div class="skeleton sk-grid sk-grid--cols-' . $cols . '">' . str_repeat($cell, $cols) . '</div>';
     return '<div aria-hidden="true">' . str_repeat($row, $rows) . '</div>';
   }
   /**
@@ -98,8 +100,11 @@ class Earnings
    */
   private static function numberLocale(): string
   {
-    if (defined('USER_LOCALE') && is_string(USER_LOCALE) && USER_LOCALE !== '') {
-      return USER_LOCALE;
+    if (defined('USER_LOCALE')) {
+      $locale = trim((string) USER_LOCALE);
+      if ($locale !== '') {
+        return $locale;
+      }
     }
 
     return 'en_US';
@@ -140,6 +145,19 @@ class Earnings
     $sign = $value > 0 ? '+' : ($value < 0 ? '-' : '');
 
     return $sign . self::formatNumberLocalized(abs($value), $fractionDigits) . '%';
+  }
+
+  /**
+   * @param array<string, scalar|null> $params
+   */
+  private static function formatI18nPlain(string $key, array $params = []): string
+  {
+    $label = self::batchI18n($key);
+    foreach ($params as $paramKey => $paramValue) {
+      $label = str_replace('{' . $paramKey . '}', (string) $paramValue, $label);
+    }
+
+    return $label;
   }
 
   /**
@@ -312,7 +330,7 @@ class Earnings
         return null;
       }
 
-      $wrap = (new OrganizationEncryptionService())->resolveActiveWrapForUnwrap(
+      $wrap = (new BusinessEncryptionService())->resolveActiveWrapForUnwrap(
         $orgMeta['org_id'],
         $orgMeta['segment'],
         $orgMeta['key_version'],
@@ -366,7 +384,7 @@ class Earnings
     $meta = is_array($metaRaw) ? $metaRaw : [];
     $modeRaw = $meta['encryption_mode'] ?? ($envelope['encryption_mode'] ?? '');
     $mode = is_scalar($modeRaw) ? trim((string) $modeRaw) : '';
-    if ($mode !== 'organization') {
+    if (!BusinessDiscoveryService::isBusinessEncryptionMode($mode)) {
       return null;
     }
 
@@ -1163,7 +1181,7 @@ class Earnings
     $grossLabel = htmlspecialchars(self::batchI18n('GROSS'), ENT_QUOTES, 'UTF-8');
     $deductionsLabel = htmlspecialchars(self::batchI18n('EARNINGS_TOTAL_DEDUCTIONS'), ENT_QUOTES, 'UTF-8');
     $netLabel = htmlspecialchars(self::batchI18n('NET'), ENT_QUOTES, 'UTF-8');
-    $ariaLabel = htmlspecialchars(self::batchI18n('EARNINGS_MONTHLY_ARIA_PREFIX') . ' ' . $year, ENT_QUOTES, 'UTF-8');
+    $ariaLabel = self::formatI18nPlain('EARNINGS_MONTHLY_GRID_ARIA_FOR', ['year' => (string) $year]);
 
     $rowsHtml = '';
     for ($month = 1; $month <= 12; ++$month) {
@@ -1171,7 +1189,7 @@ class Earnings
       $endDate = (clone $startDate)->modify('last day of this month');
       $totals = self::getTotalsForRange($startDate, $endDate, User::currentUUID());
 
-      $monthName = htmlspecialchars((string) date('M', (int) mktime(0, 0, 0, $month, 1)), ENT_QUOTES, 'UTF-8');
+      $monthName = htmlspecialchars(Strings::formatLocalizedShortMonth($year, $month), ENT_QUOTES, 'UTF-8');
       $gross = htmlspecialchars(self::formatNumberLocalized($totals['totals']['grossCents'] / 100, 2), ENT_QUOTES, 'UTF-8');
       $deductions = htmlspecialchars(self::formatNumberLocalized($totals['totals']['taxCents'] / 100, 2), ENT_QUOTES, 'UTF-8');
       $net = htmlspecialchars(self::formatNumberLocalized($totals['totals']['netCents'] / 100, 2), ENT_QUOTES, 'UTF-8');
@@ -1308,10 +1326,10 @@ class Earnings
   {
     $payload = [
       'year' => $year,
-      'panel_title' => 'Earnings Pie Graphs',
-      'ytd_title' => 'YTD Composition',
-      'monthly_title' => 'Monthly Composition',
-      'month_label' => 'Month',
+      'panel_title' => self::batchI18n('EARNINGS_COMPOSITION_PANEL_TITLE'),
+      'ytd_title' => self::batchI18n('EARNINGS_YTD_COMPOSITION'),
+      'monthly_title' => self::batchI18n('EARNINGS_MONTHLY_COMPOSITION'),
+      'month_label' => self::batchI18n('EARNINGS_MONTH'),
     ];
 
     $privateRendered = EarningsPieGraphsExtensionBridge::render($year, $payload);
@@ -1395,23 +1413,34 @@ class Earnings
     }
 
     $regime = $trailingAverageCents > 0 && $currentGrossCents >= $trailingAverageCents
-      ? 'Above trailing baseline'
-      : 'Below trailing baseline';
+      ? self::batchI18n('EARNINGS_HI_REGIME_ABOVE')
+      : self::batchI18n('EARNINGS_HI_REGIME_BELOW');
+    $notAvailable = self::batchI18n('EARNINGS_HI_NOT_AVAILABLE');
+    $stabilityOf = self::batchI18n('EARNINGS_HI_STABILITY_OF');
 
     return [
       '__HI_ID__' => sprintf('earnings-hi-%d', $year),
-      '__HI_ARIA_LABEL__' => sprintf('Historical intelligence for %d earnings', $year),
-      '__HI_TITLE__' => 'Historical Intelligence',
-      '__HI_SUBTITLE__' => sprintf('Private extension snapshot for %d', $year),
+      '__HI_ARIA_LABEL__' => self::formatI18nPlain('EARNINGS_HI_ARIA_EARNINGS', ['year' => (string) $year]),
+      '__HI_TITLE__' => self::batchI18n('EARNINGS_HI_TITLE'),
+      '__HI_SUBTITLE__' => self::formatI18nPlain('EARNINGS_HI_SUBTITLE_PRIVATE', ['year' => (string) $year]),
+      '__HI_LABEL_YEARS_OBSERVED__' => self::batchI18n('EARNINGS_HI_YEARS_OBSERVED'),
+      '__HI_LABEL_ACTIVE_MONTHS__' => self::batchI18n('EARNINGS_HI_ACTIVE_MONTHS'),
+      '__HI_LABEL_TRAILING_BASELINE__' => self::batchI18n('EARNINGS_HI_TRAILING_BASELINE'),
+      '__HI_LABEL_YOY_SIGNAL__' => self::batchI18n('EARNINGS_HI_YOY_SIGNAL'),
+      '__HI_LABEL_REGIME__' => self::batchI18n('EARNINGS_HI_REGIME'),
+      '__HI_LABEL_PEAK_YEAR__' => self::batchI18n('EARNINGS_HI_PEAK_YEAR'),
+      '__HI_LABEL_STABILITY_INDEX__' => self::batchI18n('EARNINGS_HI_STABILITY_INDEX'),
       '__HI_YEARS_OBSERVED__' => self::formatNumberLocalized(count($grossByYear), 0),
       '__HI_ACTIVE_MONTHS__' => self::formatNumberLocalized(count($activeMonths), 0),
       '__HI_TRAILING_BASELINE__' => self::formatCurrencyCentsLocalized($trailingAverageCents),
-      '__HI_YOY_SIGNAL__' => $yoyPercent === null ? 'n/a' : self::formatSignedPercentLocalized($yoyPercent, 1),
+      '__HI_YOY_SIGNAL__' => $yoyPercent === null ? $notAvailable : self::formatSignedPercentLocalized($yoyPercent, 1),
       '__HI_REGIME__' => $regime,
       '__HI_PEAK_YEAR__' => (string) $peakYear,
       '__HI_PEAK_GROSS__' => self::formatCurrencyCentsLocalized($peakGrossCents),
-      '__HI_STABILITY_INDEX__' => $stabilityIndex === null ? 'n/a' : self::formatNumberLocalized($stabilityIndex, 1) . ' / 100',
-      '__HI_NOTE__' => 'Signals derive from available yearly earnings history and should be used as directional guidance.',
+      '__HI_STABILITY_INDEX__' => $stabilityIndex === null
+        ? $notAvailable
+        : self::formatNumberLocalized($stabilityIndex, 1) . $stabilityOf,
+      '__HI_NOTE__' => self::batchI18n('EARNINGS_HI_NOTE'),
     ];
   }
 
@@ -1428,7 +1457,8 @@ class Earnings
     // Reverse year order: older years on left, newer on right
     $years = array_reverse($years);
 
-    $tabs = "<ul class='tabs' role='tablist'>\n";
+    $yearTabsAria = htmlspecialchars(self::batchI18n('EARNINGS_YEAR_SELECTOR'), ENT_QUOTES, 'UTF-8');
+    $tabs = "<ul class='tabs' role='tablist' aria-label='{$yearTabsAria}'>\n";
     $contents = "<section class='f_column w100 tab-content'>\n";
 
     foreach ($years as $i => $year) {
@@ -1437,7 +1467,9 @@ class Earnings
       $isActive      = $currentYear === (int)$year;
       $ariaSelected  = $isActive ? "aria-selected='true'" : "aria-selected='false'";
       $tabIndex      = $isActive ? "0" : "-1";
-      $tabs         .= "<li data-tab-target='tab-{$year}' class='tab{$active}' role='tab' {$ariaSelected} tabindex='{$tabIndex}'>{$year}</li>\n";
+      $tabBtnId = "tab-btn-{$year}";
+      $panelId = "tab-{$year}";
+      $tabs         .= "<li id='{$tabBtnId}' data-tab-target='{$panelId}' class='tab{$active}' role='tab' {$ariaSelected} tabindex='{$tabIndex}' aria-controls='{$panelId}'>{$year}</li>\n";
 
       $yearToDate    = self::batchI18n('YEAR_TO_DATE');
       $payPeriods = self::batchI18n('PAY_PERIODS');
@@ -1461,7 +1493,7 @@ class Earnings
       $loadingPayPeriods = self::batchI18n('EARNINGS_LOADING_PAY_PERIODS');
       $loadingMonthlySummary = self::batchI18n('EARNINGS_LOADING_MONTHLY_SUMMARY');
       $trendHelp = htmlspecialchars($earningsTrend . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
-      $historicalHelp = htmlspecialchars('Historical Intelligence ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
+      $historicalHelp = htmlspecialchars(self::formatI18nPlain('EARNINGS_HI_SECTION_HELP', ['year' => (string) $year]) . '.', ENT_QUOTES, 'UTF-8');
       $yearToDateHelp = htmlspecialchars($yearToDate . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
       $payPeriodsHelp = htmlspecialchars($payPeriods . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
       $monthlyHelp = htmlspecialchars($monthly . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
@@ -1489,7 +1521,7 @@ class Earnings
       $pieGraphsHtml = $this->renderPieGraphs((int) $year);
 
       $contents .= <<<HTML
-<div id="tab-{$year}" data-tab-content="tab-{$year}" class="f_column{$activeClass}" aria-label="{$earningsAriaLabel}">
+<div id="tab-{$year}" data-tab-content="tab-{$year}" class="f_column{$activeClass}" role="tabpanel" aria-labelledby="tab-btn-{$year}" aria-label="{$earningsAriaLabel}">
   <section class="panel w100 earnings_panel" data-hover-help="{$trendHelp}">
     <h2 class="earnings_panel_title">{$earningsTrend}</h2>
     <div class="earnings-graph-container">
@@ -1555,12 +1587,12 @@ HTML;
     }
 
     // Forecast tab — always visible regardless of whether year data exists.
-    $tabs .= "<li data-tab-target='tab-forecast' class='tab' role='tab' aria-selected='false' tabindex='-1'>Forecast</li>\n";
+    $forecastLabel = htmlspecialchars(self::batchI18n('EARNINGS_FORECAST'), ENT_QUOTES, 'UTF-8');
+    $forecastAria = htmlspecialchars(self::batchI18n('EARNINGS_FORECAST_WORKSPACE_ARIA'), ENT_QUOTES, 'UTF-8');
     $forecastContent = $this->renderForecastSection(User::current());
-    $contents .= '<div id="tab-forecast" data-tab-content="tab-forecast" class="f_column" aria-label="Future earnings forecast">'
-      . '<section class="panel w100 earnings_panel">'
-      . '<h2 class="earnings_panel_title">Future Net Pay</h2>'
-      . '<p class="forecast_intro">Projected earnings based on your current profile settings. All figures are <strong>ESTIMATES</strong> only — not CRA-authoritative payroll calculations.</p>'
+    $tabs .= "<li id='tab-btn-forecast' data-tab-target='tab-forecast' class='tab' role='tab' aria-selected='false' tabindex='-1' aria-controls='tab-forecast'>{$forecastLabel}</li>\n";
+    $contents .= '<div id="tab-forecast" data-tab-content="tab-forecast" class="f_column" role="tabpanel" aria-labelledby="tab-btn-forecast" aria-label="' . $forecastAria . '">'
+      . '<section class="panel w100 earnings_panel forecast-panel-shell">'
       . $forecastContent
       . '</section>'
       . '</div>';
@@ -1584,102 +1616,27 @@ HTML;
    * All monetary figures are labelled ESTIMATE — not CRA-authoritative.
    * Returns a "configure rate" notice when pay_rate is absent.
    */
+  /**
+   * Render projected earnings forecast for any worker profile.
+   */
+  public function renderForecastForUser(User $user): string
+  {
+    return $this->renderForecastSection($user);
+  }
+
+  /**
+   * @return array<string, mixed>
+   */
+  public function buildForecastStateForUser(User $user, ForecastScenario $scenario = ForecastScenario::Normal): array
+  {
+    return (new ForecastProjectionService())->buildState($user, $scenario);
+  }
+
   private function renderForecastSection(User $user): string
   {
-    $rateRaw = is_numeric($user->pay_rate) ? (float) $user->pay_rate : 0.0;
-    if ($rateRaw <= 0.0) {
-      return '<p class="forecast_setup_notice">Set your hourly rate in <a href="/profile/">Profile → Pay Period</a> to see your earnings forecast.</p>';
-    }
+    $state = $this->buildForecastStateForUser($user);
 
-    $wageRateCents = (int) round($rateRaw * 100);
-    $province = strtoupper(trim((string) $user->province !== '' ? (string) $user->province : 'AB'));
-
-    $loaRaw = is_numeric($user->default_living_out_allowance) ? (float) $user->default_living_out_allowance : 0.0;
-    $perDiemCents = (int) round($loaRaw * 100);
-
-    $card = new WorkerRateCard(
-      wageRateCents:          $wageRateCents,
-      rateType:               RateType::Hourly,
-      otRule:                 OtRule::Both,
-      otThresholdDailyHours:  8.0,
-      otThresholdWeeklyHours: 44.0,
-      otMultiplierBasisPoints: 15000,
-      perDiemCents:           $perDiemCents,
-      sitePremiumCents:       0,
-      taxRegion:              $province
-    );
-
-    // Derive rotation anchor from pay_period_start, fall back to this Monday.
-    $anchorRaw = trim((string) $user->pay_period_start);
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $anchorRaw)) {
-      $anchorDate = new \DateTimeImmutable($anchorRaw);
-    } else {
-      $anchorDate = new \DateTimeImmutable('monday this week');
-    }
-
-    $hoursRaw = is_numeric($user->default_hours) ? (float) $user->default_hours : 8.0;
-    $hoursPerDay = ($hoursRaw > 0.0 && $hoursRaw <= 24.0) ? $hoursRaw : 8.0;
-
-    // Standard 5-on/2-off schedule for most workers. Industrial users with
-    // custom rotations will be configurable in a future Profile update.
-    $rotation = new RotationTemplate(5, 2, $hoursPerDay, $anchorDate, '5/2');
-
-    $payFrequency = strtolower(trim((string) ($user->pay_frequency ?? 'biweekly')));
-    $payPeriodDays = match ($payFrequency) {
-      'weekly'      => 7,
-      'biweekly'    => 14,
-      'semimonthly' => 15,
-      'monthly'     => 30,
-      default       => 14,
-    };
-
-    $today = new \DateTimeImmutable('today');
-
-    /** @var array<string, ForecastWindow> $windows */
-    $windows = [
-      'Next Paycheck'  => ForecastWindow::nextPayPeriod($today, $payPeriodDays),
-      'Next 30 Days'   => ForecastWindow::next30Days($today),
-      'YTD Projection' => ForecastWindow::quarter($today),
-    ];
-
-    $rows = '';
-    foreach ($windows as $windowLabel => $window) {
-      $result    = CrewForecastEngine::forecastWorker($card, $rotation, $window);
-      $gross     = '$' . self::formatNumberLocalized($result->estimatedGrossDollars(), 2);
-      $taxAmount = '$' . self::formatNumberLocalized($result->estimatedTaxCents / 100, 2);
-      $net       = '$' . self::formatNumberLocalized($result->estimatedNetDollars(), 2);
-      $safeLabel = htmlspecialchars($windowLabel, ENT_QUOTES, 'UTF-8');
-      $safeGross = htmlspecialchars($gross, ENT_QUOTES, 'UTF-8');
-      $safeTax   = htmlspecialchars($taxAmount, ENT_QUOTES, 'UTF-8');
-      $safeNet   = htmlspecialchars($net, ENT_QUOTES, 'UTF-8');
-
-      $rows .= '<div class="datagrid_row" role="row"><div class="datagrid_row_content" role="presentation">'
-        . '<div class="datagrid_item" role="gridcell">' . $safeLabel . '</div>'
-        . '<div class="datagrid_item forecast_gross" role="gridcell">' . $safeGross . '</div>'
-        . '<div class="datagrid_item forecast_tax" role="gridcell">' . $safeTax . '</div>'
-        . '<div class="datagrid_item forecast_net" role="gridcell">' . $safeNet . '</div>'
-        . '</div></div>';
-    }
-
-    $disclaimer = htmlspecialchars(
-      'Figures are projections based on your profile rate, province, and a standard 5-day work schedule. '
-      . 'Actual deductions depend on YTD income, benefit elections, and other factors. Not CRA-authoritative.',
-      ENT_QUOTES,
-      'UTF-8'
-    );
-
-    return '<div class="datagrid datagrid_cols_4 datagrid_layout_auto forecast-datagrid" '
-      . 'role="region" aria-label="Future earnings forecast">'
-      . '<div class="datagrid_table" role="grid" aria-colcount="4" aria-rowcount="3">'
-      . '<div class="datagrid_header_row" role="rowgroup"><div class="datagrid_header_content" role="row">'
-      . '<div class="datagrid_heading" role="columnheader">Timeframe</div>'
-      . '<div class="datagrid_heading" role="columnheader">Est. Gross</div>'
-      . '<div class="datagrid_heading" role="columnheader">Est. Tax</div>'
-      . '<div class="datagrid_heading" role="columnheader">Est. Net</div>'
-      . '</div></div>'
-      . '<div class="datagrid_body" role="rowgroup">' . $rows . '</div>'
-      . '</div></div>'
-      . '<p class="forecast_estimate_disclaimer">' . $disclaimer . '</p>';
+    return ForecastWorkspaceRenderer::renderShell($state, 'forecast_workspace', false);
   }
 
   /**
@@ -1971,8 +1928,8 @@ HTML;
    */
   private function renderPayPeriodCard(PayPeriods $pp, array $totals): string
   {
-    $startDate = $pp->start()->format('M j, Y');
-    $endDate = $pp->endInclusive()->format('M j, Y');
+    $startDate = Strings::formatLocalizedMediumDate($pp->start());
+    $endDate = Strings::formatLocalizedMediumDate($pp->endInclusive());
     $startDateIso = htmlspecialchars((string) $totals['range']['start'], ENT_QUOTES, 'UTF-8');
     $endDateIso = htmlspecialchars((string) $totals['range']['end'], ENT_QUOTES, 'UTF-8');
 

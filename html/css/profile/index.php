@@ -24,7 +24,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 /* Billing first-paint guardrails */
-#panel-billing[data-billing-hint="premium"] #billing_free_view {
+#panel-billing[data-billing-hint="premium"] #billing_free_view,
+#panel-billing[data-billing-hint="business"] #billing_free_view {
   display: none;
 }
 
@@ -96,7 +97,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   pointer-events: none;
 }
 
-#panel-personal-info .personal_wage_input_shell #organizations_personal_default_wage {
+#panel-personal-info .personal_wage_input_shell #businesses_personal_default_wage {
   padding-left: 1.8rem;
 }
 
@@ -240,14 +241,46 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   grid-column: 1 / -1;
 }
 
+.profile_pay_period_managed_banner {
+  margin-bottom: 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--color-info, #4f8cff) 55%, var(--border, #444));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-info, #4f8cff) 12%, transparent);
+}
+
+.profile_pay_period_managed_banner_lede {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.profile_pay_period_managed_banner_help {
+  margin: 0 0 0.65rem;
+}
+
+.profile_pay_period_managed_banner_action {
+  margin: 0;
+}
+
+#panel-pay-period.is-managed-by-business .businesses_pp_control select,
+#panel-pay-period.is-managed-by-business .businesses_pp_control input,
+#panel-pay-period.is-managed-by-business .businesses_grace_radio_group .radio + label {
+  opacity: 0.72;
+}
+
+#panel-pay-period.is-managed-by-business #businesses_personal_preview.is-read-only .pp_day_cell {
+  cursor: default;
+}
+
 /* Pay period control strip */
-#panel-pay-period .organizations_pp_control_strip {
+#panel-pay-period .businesses_pp_control_strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
 }
 
-#panel-pay-period .organizations_pp_control {
+#panel-pay-period .businesses_pp_control {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -256,31 +289,31 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   background: var(--back-light, rgba(255, 255, 255, 0.04));
 }
 
-#panel-pay-period .organizations_pp_control:first-child {
+#panel-pay-period .businesses_pp_control:first-child {
   border-left: 0;
 }
 
-#panel-pay-period .organizations_pp_control label,
-#panel-pay-period .organizations_pp_control_label {
+#panel-pay-period .businesses_pp_control label,
+#panel-pay-period .businesses_pp_control_label {
   display: block;
   text-align: center;
   font-size: var(--font-sm);
   font-weight: 700;
 }
 
-#panel-pay-period .organizations_pp_control select,
-#panel-pay-period .organizations_pp_control input {
+#panel-pay-period .businesses_pp_control select,
+#panel-pay-period .businesses_pp_control input {
   width: 100%;
 }
 
-#panel-pay-period .organizations_grace_radio_group {
+#panel-pay-period .businesses_grace_radio_group {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 0.35rem;
 }
 
-#panel-pay-period .organizations_grace_radio_group .radio + label {
+#panel-pay-period .businesses_grace_radio_group .radio + label {
   flex: 1 1 5.5rem;
   padding: 0.45rem 0.35rem;
   border-left: 0;
@@ -288,11 +321,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   white-space: nowrap;
 }
 
-#panel-pay-period #organizations_personal_form .pay_period_preview_compact {
+#panel-pay-period #businesses_personal_form .pay_period_preview_compact {
   margin-top: var(--mar-sm, 0.8rem);
 }
 
-#panel-pay-period #organizations_personal_form .organizations_payperiod_warning {
+#panel-pay-period #businesses_personal_form .businesses_payperiod_warning {
   display: none;
   margin-top: 0.65rem;
   padding: 0.65rem 0.8rem;
@@ -304,18 +337,18 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   line-height: 1.35;
 }
 
-#panel-pay-period #organizations_personal_form .organizations_payperiod_warning.is-visible {
+#panel-pay-period #businesses_personal_form .businesses_payperiod_warning.is-visible {
   display: block;
 }
 
-#panel-pay-period #organizations_personal_preview.organizations_preview_box {
+#panel-pay-period #businesses_personal_preview.businesses_preview_box {
   border: 0;
   background: transparent;
   padding: 0;
   min-height: 0;
 }
 
-#panel-pay-period #organizations_personal_form .pp_three_week {
+#panel-pay-period #businesses_personal_form .pp_three_week {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
@@ -323,14 +356,14 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   font-size: 0.74rem;
 }
 
-#panel-pay-period #organizations_personal_form .pp_stripbar {
+#panel-pay-period #businesses_personal_form .pp_stripbar {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0;
   margin-bottom: 0.4rem;
 }
 
-#panel-pay-period #organizations_personal_form .pp_day_head {
+#panel-pay-period #businesses_personal_form .pp_day_head {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -342,12 +375,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   padding: 0.3rem 0.15rem;
 }
 
-#panel-pay-period #organizations_personal_form .pp_day_head:first-child {
+#panel-pay-period #businesses_personal_form .pp_day_head:first-child {
   border-left-width: 1px;
 }
 
-#panel-pay-period #organizations_personal_form .pp_three_week th,
-#panel-pay-period #organizations_personal_form .pp_three_week td {
+#panel-pay-period #businesses_personal_form .pp_three_week th,
+#panel-pay-period #businesses_personal_form .pp_three_week td {
   border: 1px solid var(--fore-dark, #2a2a2a);
   text-align: center;
   vertical-align: middle;
@@ -355,7 +388,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   position: relative;
 }
 
-#panel-pay-period #organizations_personal_form .pp_month_label {
+#panel-pay-period #businesses_personal_form .pp_month_label {
   text-align: center;
   font-size: var(--font-lg, 1.2rem);
   font-weight: 700;
@@ -363,7 +396,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   padding: 0.3rem 0;
 }
 
-#panel-pay-period #organizations_personal_form .pp_preview_summary {
+#panel-pay-period #businesses_personal_form .pp_preview_summary {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -375,13 +408,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   padding: 0.35rem 0;
 }
 
-#panel-pay-period #organizations_personal_form .pp_preview_summary_item {
+#panel-pay-period #businesses_personal_form .pp_preview_summary_item {
   white-space: nowrap;
   padding: 0.15rem 0.4rem;
 }
 
 /* Subscription layout */
-#panel-billing .organizations_section_header h2 {
+#panel-billing .businesses_section_header h2 {
   margin: 0;
 }
 
@@ -392,6 +425,65 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 #panel-billing .billing_shell {
   margin-top: 0.75rem;
+}
+
+#panel-billing .billing_tier_matrix {
+  display: grid;
+  gap: 0.85rem;
+}
+
+#panel-billing .billing_matrix_intro {
+  text-align: center;
+  margin: 0;
+}
+
+#panel-billing .billing_tier_grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  align-items: stretch;
+}
+
+#panel-billing .billing_tier_card {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+  padding: clamp(0.85rem, 1.4vw, 1.1rem);
+  border-radius: var(--radius-dialog, 10px);
+  border: 1px solid color-mix(in srgb, var(--color-border, #2a2a2a) 82%, transparent);
+  background: color-mix(in srgb, var(--color-surface, #151515) 94%, transparent);
+}
+
+#panel-billing .billing_tier_card_featured {
+  border-color: color-mix(in srgb, var(--theme-signature-color, #3fa8ff) 55%, var(--color-border, #2a2a2a));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--theme-signature-color, #3fa8ff) 24%, transparent);
+}
+
+#panel-billing .billing_tier_card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+#panel-billing .billing_tier_price {
+  margin: 0;
+  font-weight: 700;
+}
+
+#panel-billing .billing_tier_features {
+  grid-template-columns: 1fr;
+}
+
+#panel-billing .billing_tier_current_label {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted, #b6c2ca);
+}
+
+#panel-billing .billing_business_upgrade_zone {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.45rem;
 }
 
 #panel-billing .billing_columns {
@@ -548,11 +640,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 /* CTA link */
-#panel-billing .billing_organizations_link {
+#panel-billing .billing_businesses_link {
   margin: 0.6rem 0 0;
 }
 
-#panel-billing .billing_organizations_link a {
+#panel-billing .billing_businesses_link a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -566,15 +658,15 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
 }
 
-#panel-billing .billing_organizations_link a:hover,
-#panel-billing .billing_organizations_link a:focus-visible {
+#panel-billing .billing_businesses_link a:hover,
+#panel-billing .billing_businesses_link a:focus-visible {
   background: color-mix(in srgb, var(--theme-signature-color, #3fa8ff) 24%, var(--panel-bg, #151515));
   border-color: color-mix(in srgb, var(--theme-signature-color, #3fa8ff) 72%, #9ccc65);
   box-shadow: 0 8px 18px color-mix(in srgb, var(--theme-signature-color, #3fa8ff) 20%, transparent);
   transform: translateY(-1px);
 }
 
-#panel-billing .billing_organizations_link a:focus-visible {
+#panel-billing .billing_businesses_link a:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--theme-signature-color, #3fa8ff) 52%, #ffffff);
   outline-offset: 2px;
 }
@@ -705,7 +797,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   border-color: #ff7a7a;
 }
 
-/* Mobile: full-width panels and one-column benefits */
+/* Tablet: single-column grids */
 @media (max-width: 900px) {
   #main:has(#panel-billing) > section.panel {
     width: 100%;
@@ -715,30 +807,15 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
   #panel-personal-info .profile_personal_info_grid {
     grid-template-columns: 1fr;
+  }
 
   #panel-internationalization .profile_i18n_grid,
   #panel-internationalization .profile_i18n_preview_rows {
     grid-template-columns: 1fr;
   }
-  }
 
-  #panel-personal-info .item_pair {
-    display: grid;
+  #panel-billing .billing_tier_grid {
     grid-template-columns: 1fr;
-    gap: 0.35rem;
-    align-items: start;
-    justify-content: initial;
-  }
-
-  #panel-personal-info .item_value {
-    width: 100%;
-    flex: 0 0 auto;
-  }
-
-  #panel-personal-info .item_label {
-    padding-top: 0;
-    text-align: left;
-    white-space: normal;
   }
 
   #panel-billing .billing_columns {
@@ -749,16 +826,258 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     grid-template-columns: 1fr;
   }
 
-  #panel-pay-period .organizations_pp_control_strip {
+  #panel-pay-period .businesses_pp_control_strip {
     grid-template-columns: 1fr;
   }
 
-  #panel-pay-period .organizations_pp_control {
+  #panel-pay-period .businesses_pp_control {
     border-left: 0;
     border-top: 1px solid var(--fore-dark, #2a2a2a);
   }
 
-  #panel-pay-period .organizations_pp_control:first-child {
+  #panel-pay-period .businesses_pp_control:first-child {
     border-top: 0;
+  }
+}
+
+/* Mobile: compact profile layout — tight rows, full-width inputs, clear nav strip */
+@media (max-width: 768px) {
+  #main:has(#panel-personal-info) {
+    gap: 5px !important;
+  }
+
+  #main:has(#panel-personal-info) > section.panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 5px !important;
+    overflow-wrap: anywhere;
+    box-sizing: border-box;
+  }
+
+  #main:has(#panel-personal-info) > section.panel .flex,
+  #main:has(#panel-personal-info) > section.panel .row,
+  #main:has(#panel-personal-info) > section.panel form {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #main:has(#panel-personal-info) .businesses_section_header {
+    margin-bottom: 0.35rem;
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  #main:has(#panel-personal-info) .businesses_section_header h2 {
+    font-size: 1rem;
+    line-height: 1.2;
+    text-align: left;
+  }
+
+  #main:has(#panel-personal-info) .businesses_section_header .help_text {
+    margin-top: 0.15rem;
+    font-size: 0.82rem;
+    line-height: 1.3;
+    text-align: left;
+  }
+
+  #panel-personal-info .profile_personal_info_grid,
+  #panel-internationalization .profile_i18n_grid {
+    gap: 0.25rem;
+  }
+
+  #main:has(#panel-personal-info) #panel-personal-info .item_pair,
+  #main:has(#panel-personal-info) #panel-internationalization .item_pair {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.12rem;
+    align-items: start;
+    justify-content: initial;
+    margin: 0 0 0.3rem;
+    padding: 0;
+  }
+
+  #main:has(#panel-personal-info) .item_pair .item_label,
+  #main:has(#panel-personal-info) .item_pair .item_value {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #main:has(#panel-personal-info) .item_pair .item_label {
+    min-height: 0;
+    flex: none;
+    font-size: 0.84rem;
+    line-height: 1.2;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  #main:has(#panel-personal-info) .item_pair .item_value {
+    width: 100% !important;
+    max-width: none !important;
+    flex: none;
+  }
+
+  #main:has(#panel-personal-info) .item_value input,
+  #main:has(#panel-personal-info) .item_value select,
+  #main:has(#panel-personal-info) .item_value textarea,
+  #main:has(#panel-personal-info) .currency_finder_search,
+  #main:has(#panel-personal-info) .timezone_finder_search {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0.32rem 0.45rem !important;
+    min-height: 2rem;
+    text-align: left;
+    box-sizing: border-box;
+  }
+
+  #main:has(#panel-personal-info) .currency_finder,
+  #main:has(#panel-personal-info) .timezone_finder {
+    width: 100%;
+    max-width: none;
+  }
+
+  #panel-internationalization .profile_i18n_preview {
+    margin-top: 0.35rem;
+    padding: 0.4rem 0.45rem;
+  }
+
+  #panel-internationalization .profile_i18n_preview_rows {
+    gap: 0.25rem;
+  }
+
+  #panel-pay-period .businesses_pp_control {
+    padding: 0.35rem 0.4rem 0.4rem;
+    gap: 0.25rem;
+  }
+
+  #panel-pay-period .businesses_pp_control label,
+  #panel-pay-period .businesses_pp_control_label {
+    text-align: left;
+    font-size: 0.82rem;
+  }
+
+  #panel-pay-period .businesses_grace_radio_group {
+    gap: 0.2rem;
+  }
+
+  #panel-pay-period .businesses_grace_radio_group .radio + label {
+    flex: 1 1 auto;
+    padding: 0.3rem 0.25rem;
+    font-size: 0.78rem;
+  }
+
+  #panel-pay-period #businesses_personal_form .pp_month_label {
+    margin: 0.35rem 0 0.45rem;
+    font-size: 1rem;
+  }
+
+  #panel-pay-period #businesses_personal_form .pp_preview_summary {
+    gap: 0.65rem;
+    margin-top: 0.45rem;
+    font-size: 0.82rem;
+  }
+
+  .profile_pay_period_managed_banner {
+    margin-bottom: 0.4rem;
+    padding: 0.45rem 0.5rem;
+  }
+
+  .profile_pay_period_managed_banner_lede {
+    margin-bottom: 0.2rem;
+    font-size: 0.88rem;
+  }
+
+  .profile_pay_period_managed_banner_help {
+    margin-bottom: 0.35rem;
+    font-size: 0.82rem;
+  }
+
+  #panel-billing {
+    gap: 0.45rem;
+  }
+
+  #panel-billing > .help_text {
+    margin: 0 0 0.35rem;
+    text-align: left;
+    font-size: 0.82rem;
+  }
+
+  #panel-billing .billing_shell {
+    margin-top: 0.35rem;
+  }
+
+  #panel-billing .billing_columns {
+    gap: 0.45rem;
+  }
+
+  #panel-billing .billing_column {
+    gap: 0.35rem;
+  }
+
+  #panel-billing .billing_value_list {
+    gap: 0.35rem;
+  }
+
+  #billing_downgrade_zone {
+    margin-top: 0.55rem;
+    padding-top: 0.45rem;
+    gap: 0.35rem;
+  }
+
+  #main:has(#panel-personal-info) .account_activity_grid {
+    gap: 0.35rem;
+  }
+
+  #main:has(#panel-personal-info) .account_activity_card {
+    padding: 0.4rem 0.45rem;
+    border-radius: 8px;
+  }
+
+  #main:has(#panel-personal-info) .account_activity_card h3 {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+  }
+
+  #main:has(#panel-personal-info) .account_activity_list {
+    row-gap: 0.2rem;
+    column-gap: 0.35rem;
+  }
+
+  #main:has(#panel-personal-info) .account_activity_session_item {
+    padding: 0.4rem 0.45rem;
+  }
+
+  #panel-danger-zone .danger_zone_actions {
+    gap: 0.45rem;
+    margin-top: 0.35rem;
+  }
+
+  #panel-danger-zone .danger_zone_row {
+    padding-top: 0.45rem;
+    gap: 0.3rem;
+  }
+
+  #panel-danger-zone .danger_zone_text .help_text,
+  #panel-danger-zone .danger_zone_intro {
+    text-align: left;
+    font-size: 0.82rem;
+  }
+
+  #panel-danger-zone .danger_confirm_pill,
+  #billing_downgrade_zone .danger_confirm_pill {
+    gap: 0.35rem;
+    justify-content: flex-start;
+  }
+
+  #panel-danger-zone .danger_confirm_pill input[type="text"],
+  #billing_downgrade_zone .danger_confirm_pill input[type="text"] {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: none;
+    text-align: left;
   }
 }

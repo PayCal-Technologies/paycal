@@ -707,8 +707,10 @@ final class SitesController
       ]);
     }
     $grid->enableSearch('Filter sites…');
+    $grid->setSearchValue($search);
     $grid->enableSorting();
-    $grid->addColumn('site_name', 'Name', true, 'minmax(14rem, 3fr)');
+    $grid->enableColumnResize();
+    $grid->addColumn('site_name', 'Name', true, 'minmax(14rem, 3fr)', null, true);
     $grid->addColumn('wage', 'Wage', true, 'minmax(5rem, 1fr)', 'right');
     $grid->addColumn('living_out_allowance', 'LOA', true, 'minmax(5rem, 1fr)', 'right');
     $grid->addColumn('travel_hours', 'Travel', true, 'minmax(5rem, 1fr)', 'right');

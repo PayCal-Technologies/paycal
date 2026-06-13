@@ -14,26 +14,16 @@ use PayCal\Domain\User;
 final class Hooks
 {
   /**
-   * @param float|int $value
+   * @param array<string, scalar|null> $params
    */
-  private static function formatAmount(float|int $value): string
+  private static function formatI18n(string $key, array $params = []): string
   {
-    $locale = 'en_US';
-    if (defined('USER_LOCALE') && is_string(USER_LOCALE) && USER_LOCALE !== '') {
-      $locale = USER_LOCALE;
+    $label = Strings::i18n($key);
+    foreach ($params as $paramKey => $paramValue) {
+      $label = str_replace('{' . $paramKey . '}', (string) $paramValue, $label);
     }
 
-    if (class_exists('\\NumberFormatter')) {
-      $formatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
-      $formatter->setAttribute(\NumberFormatter::GROUPING_USED, 1);
-      $formatter->setAttribute(\NumberFormatter::FRACTION_DIGITS, 2);
-      $formatted = $formatter->format((float) $value);
-      if (is_string($formatted) && $formatted !== '') {
-        return $formatted;
-      }
-    }
-
-    return number_format((float) $value, 2, '.', ',');
+    return $label;
   }
 
   /**
@@ -103,18 +93,18 @@ final class Hooks
 
       $renderMonth = [
         '__MONTH_ID__' => sprintf('%04d-%02d', $year, $month),
-        '__MONTH_NAME__' => date('M', (int) mktime(0, 0, 0, $month, 1)),
-        '__REGULAR_HOURS__' => number_format($monthRegularHours, 2, '.', ''),
-        '__OVERTIME_HOURS__' => number_format($monthOvertimeHours, 2, '.', ''),
-        '__GROSS__' => self::formatAmount($monthGrossCents / 100),
-        '__FEDERAL_TAX__' => self::formatAmount($monthFederalCents / 100),
-        '__PROVINCIAL_TAX__' => self::formatAmount($monthProvincialCents / 100),
-        '__TOTAL_TAX__' => self::formatAmount(($monthFederalCents + $monthProvincialCents) / 100),
-        '__EI__' => self::formatAmount($monthEICents / 100),
-        '__CPP__' => self::formatAmount($monthCPPCents / 100),
-        '__OAS__' => self::formatAmount($monthOASCents / 100),
-        '__TOTAL_DEDUCTIONS__' => self::formatAmount($monthTotalTaxCents / 100),
-        '__NET__' => self::formatAmount($monthNetCents / 100),
+        '__MONTH_NAME__' => Strings::formatLocalizedShortMonth($year, $month),
+        '__REGULAR_HOURS__' => Strings::formatLocalizedNumber($monthRegularHours, 2, 2),
+        '__OVERTIME_HOURS__' => Strings::formatLocalizedNumber($monthOvertimeHours, 2, 2),
+        '__GROSS__' => Strings::formatLocalizedNumber($monthGrossCents / 100, 2, 2),
+        '__FEDERAL_TAX__' => Strings::formatLocalizedNumber($monthFederalCents / 100, 2, 2),
+        '__PROVINCIAL_TAX__' => Strings::formatLocalizedNumber($monthProvincialCents / 100, 2, 2),
+        '__TOTAL_TAX__' => Strings::formatLocalizedNumber(($monthFederalCents + $monthProvincialCents) / 100, 2, 2),
+        '__EI__' => Strings::formatLocalizedNumber($monthEICents / 100, 2, 2),
+        '__CPP__' => Strings::formatLocalizedNumber($monthCPPCents / 100, 2, 2),
+        '__OAS__' => Strings::formatLocalizedNumber($monthOASCents / 100, 2, 2),
+        '__TOTAL_DEDUCTIONS__' => Strings::formatLocalizedNumber($monthTotalTaxCents / 100, 2, 2),
+        '__NET__' => Strings::formatLocalizedNumber($monthNetCents / 100, 2, 2),
       ];
 
       $monthsHTML[] = Render::template('earnings-month', $renderMonth);
@@ -131,7 +121,12 @@ final class Hooks
 
     return Render::template('earnings-monthly-viewstrip', [
       '__YEAR__' => (string) $year,
-      '__EARNINGS_MONTHLY_ARIA_PREFIX__' => Strings::i18n('EARNINGS_MONTHLY_ARIA_PREFIX'),
+      '__DATA_GRID__' => 'earnings-monthly-' . $year,
+      '__EARNINGS_MONTHLY_ARIA__' => htmlspecialchars(
+        self::formatI18n('EARNINGS_MONTHLY_GRID_ARIA_FOR', ['year' => (string) $year]),
+        ENT_QUOTES,
+        'UTF-8',
+      ),
       '__EARNINGS_MONTH__' => Strings::i18n('EARNINGS_MONTH'),
       '__REGULAR_LABEL__' => Strings::i18n('REGULAR'),
       '__OT_LABEL__' => Strings::i18n('OVERTIME'),

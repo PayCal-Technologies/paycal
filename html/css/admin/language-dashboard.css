@@ -43,6 +43,33 @@
   flex-wrap: wrap;
 }
 
+.lang-dash__header .help_text {
+  margin: 0;
+}
+
+.lang-dash__section-title {
+  margin-top: 0;
+}
+
+.lang-dash__stats {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.lang-dash__table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.lang-dash__loading-cell {
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.lang-dash__placeholder {
+  color: var(--text-muted);
+}
+
 /* ─── Summary Table ───────────────────────────────────────────────────── */
 
 .lang-dash__summary-table {
@@ -107,6 +134,48 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.lang-dash__progress-native {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 10px;
+  border: 0;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--border);
+  appearance: none;
+}
+
+.lang-dash__progress-native::-webkit-progress-bar {
+  background: var(--border);
+  border-radius: 5px;
+}
+
+.lang-dash__progress-native::-webkit-progress-value {
+  background: var(--primary);
+  border-radius: 5px;
+}
+
+.lang-dash__progress-native::-moz-progress-bar {
+  background: var(--primary);
+  border-radius: 5px;
+}
+
+.lang-dash__lang-code {
+  color: var(--text-muted);
+}
+
+.lang-dash__card-summary {
+  margin: 0 0 0.5rem;
+}
+
+.lang-dash__key-list {
+  font-size: 0.82rem;
+  max-height: 10rem;
+  overflow: auto;
+  padding-left: 1.2em;
+  margin: 0 0 0.75rem;
 }
 
 .lang-dash__progress-bar-track {

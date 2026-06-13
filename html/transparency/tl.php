@@ -19,6 +19,7 @@ if (!function_exists('transparency_href')) {
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_HUB_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_HOME',
 ];
@@ -29,8 +30,8 @@ foreach ($i18nKeys as $key) {
 $readMoreLabel = 'Magbasa pa';
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Sentro ng Transparency - [PayCal]';
-$pageLabel = 'Sentro ng Transparency';
+$pageTitle = $i18n['TRANSPARENCY_HUB_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_HUB_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -41,7 +42,7 @@ require_once HTML.'/header.php';
     </nav>
 
     <header class="doc-article-header">
-      <h1>Sentro ng Transparency</h1>
+      <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_HUB_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
       <p class="deck">Inilalathala namin kung paano gumagana ang PayCal para mapatunayan ng mga gumagamit ang mga desisyon — hindi lamang magtiwala sa mga pahayag.</p>
     </header>
 

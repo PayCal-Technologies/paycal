@@ -69,8 +69,10 @@ enum UserFields: string
   case TEXT = 'text';
   case SPACING = 'spacing';
   case DYSLEXIA_TYPOGRAPHY = 'dyslexia_typography';
+  case HELP_POPUP_TIMEOUT_SECONDS = 'help_popup_timeout_seconds';
   case NAV_POSITION_PRIMARY = 'nav_position_primary';
   case NAV_STATE_PRIMARY = 'nav_state_primary';
+  case OVERLAY_SIDEBAR_TIMEOUT_SECONDS = 'overlay_sidebar_timeout_seconds';
 
   case CALENDAR_AUTOFOCUS = 'calendar_autofocus';
   case CALENDAR_AUDIO_LABELS = 'calendar_audio_labels';

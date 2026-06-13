@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -21,8 +22,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Auth, Passkey ve Redis Güçlendirme — Mayıs 2026 - [PayCal]';
-$pageLabel = 'Auth, Passkey & Redis Güçlendirme — Mayıs 2026';
+$pageTitle = $i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -33,7 +34,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Auth, Passkey &amp; Redis Güçlendirme — Mayıs 2026</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       12 Mayıs 2026&apos;da kimlik doğrulama, passkey ve Redis altyapımızın dahili denetimini
       gerçekleştirdik. On bir sorun bulduk — hepsi kendi yazdığımız kodda. Bu makale ne

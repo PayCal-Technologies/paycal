@@ -39,7 +39,7 @@ use PayCal\Domain\Config\SystemConfig;
  * - Current user instance and authentication state
  * - User properties (name, email, preferences, settings)
  * - User permissions and role management
- * - User-related data access (work, earnings, sites, organizations)
+ * - User-related data access (work, earnings, sites, businesses)
  * - User preferences and configuration management
  */
 
@@ -116,8 +116,10 @@ final class User
   public string $text                                = UserPreferenceDefaults::DEFAULT_TEXT;
   public string $spacing                             = UserPreferenceDefaults::DEFAULT_SPACING;
   public string $dyslexia_typography                 = UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY;
+  public string $help_popup_timeout_seconds          = UserPreferenceDefaults::DEFAULT_HELP_POPUP_TIMEOUT_SECONDS;
   public string $nav_position_primary                = UserPreferenceDefaults::DEFAULT_NAV_POSITION_PRIMARY;
   public string $nav_state_primary                   = UserPreferenceDefaults::DEFAULT_NAV_STATE_PRIMARY;
+  public string $overlay_sidebar_timeout_seconds     = UserPreferenceDefaults::DEFAULT_OVERLAY_SIDEBAR_TIMEOUT_SECONDS;
   public string $calendar_autofocus                  = UserPreferenceDefaults::DEFAULT_CALENDAR_AUTOFOCUS;
   public string $calendar_audio_labels               = UserPreferenceDefaults::DEFAULT_CALENDAR_AUDIO_LABELS;
   public string $calendar_day_name_format            = UserPreferenceDefaults::DEFAULT_CALENDAR_DAY_NAME_FORMAT;
@@ -296,40 +298,6 @@ final class User
   }
 
   /**
-   * Set user information in the database.
-   * @param string $userUUID User UUID
-   * @param string $passwordHash Password hash
-   * @param string $email User email
-   * @param AuthLevel $authLevel User authorization level
-   * @param string $fullName Full name
-   * @param string $lastSessionHash Last session hash
-   * @param string $phone Phone number
-   */
-  public static function setUser(
-    string $userUUID,
-    string $passwordHash,
-    string $email,
-    AuthLevel $authLevel,
-    string $fullName,
-    string $lastSessionHash,
-    string $phone
-  ): void
-  {
-    UserRepository::setUser($userUUID, $passwordHash, $email, $authLevel, $fullName, $lastSessionHash, $phone);
-  }
-
-  /**
-   * Get user UUID by email address.
-   * @param string $email Email address to look up
-   * @return string The user UUID if found, empty string otherwise
-   */
-  public static function getUUIDFromEmail(string $email): string
-  {
-    return UserRepository::getUUIDFromEmail($email);
-  }
-
-
-  /**
    * Updates user preferences.
    * @param array<string, null|scalar> $newSettings
    */
@@ -354,74 +322,6 @@ final class User
   }
 
   /**
-   * Render a paginated HTML list of users from Redis.
-   * Iterates over user:* keys, hydrates basic fields, and feeds them into row templates.
-   * Falls back to an “empty” template when no users exist.
-   * @param int $start Zero-based index of first user to display
-   * @param int $count Maximum number of users to include
-   * @return string Rendered HTML table/list output
-   */
-  public static function listUsers(int $start = 0, int $count = SystemLimits::DEFAULT_PAGE_SIZE): string
-  {
-    $keys = Database::scanKeys('user:*');
-    if (empty($keys))
-      return Render::template('user-list-empty', ['__MESSAGE__' => 'No users found.']);
-
-    $total    = count($keys);
-    $end      = min($start + $count, $total);
-    $rowsHTML = '';
-    $i18n = [];
-    $i18nKeys = ['DELETE', 'NAME', 'EMAIL', 'PHONE', 'USER_ROLE', 'ACTION'];
-    foreach ($i18nKeys as $key) {
-      $i18n[$key] = Strings::i18n($key);
-    }
-
-    for ($i = $start; $i < $end; ++$i) {
-      $key      = $keys[$i];
-      $data     = Database::hgetall($key);
-      $userUUID = str_replace(SystemConfig::USER_ID_PREFIX, '', $key);
-
-      $row = [
-        '__USER_UUID__'  => htmlspecialchars($userUUID),
-        '__FULL_NAME__'  => htmlspecialchars((string) ($data['full_name'] ?? 'N/A')),
-        '__EMAIL__'      => htmlspecialchars((string) ($data['email'] ?? 'N/A')),
-        '__PHONE__'      => htmlspecialchars((string) ($data['phone'] ?? 'N/A')),
-        '__AUTH_LEVEL__' => htmlspecialchars((string) ($data['auth_level'] ?? 'N/A')),
-        '__DELETE__'     => $i18n['DELETE'],
-      ];
-      $rowsHTML .= Render::template('user-list-row', $row);
-    }
-
-    return Render::template('user-list', [
-      '__USER_ROWS_HTML__' => $rowsHTML,
-      '__NAME__' => $i18n['NAME'],
-      '__EMAIL__' => $i18n['EMAIL'],
-      '__PHONE__' => $i18n['PHONE'],
-      '__USER_ROLE__' => $i18n['USER_ROLE'],
-      '__ACTION__' => $i18n['ACTION'],
-    ]);
-  }
-
-
-  /**
-   * Update last-signin metadata for a session.
-   * Stores the current timestamp and visitor IP in the session hash.
-   * No update is performed when the session hash is empty.
-   * @param string $sessionHash Session identifier
-   */
-  public static function setLastSignin(string $sessionHash): void
-  {
-    if (empty($sessionHash))
-      return;
-
-    $timestamp = strval(time());
-    $ip        = Security::getClientIPAddress();
-    Database::hset(Keys::SESSION . ":" . $sessionHash, ['last_signin' => $timestamp]);
-    Database::hset(Keys::SESSION . ":" . $sessionHash, ['last_ip' => $ip]);
-  }
-
-
-  /**
    * Store a time-stamped verification code for a user.
    * Codes are kept in a Redis hash keyed by user UUID and expire after one hour.
    * No action is taken when code or UUID is empty.
@@ -436,40 +336,6 @@ final class User
     $created = strval(time());
     $key     = Keys::VERIFICATION_CODES . ":" . InputSanitizer::sanitizeString($userUUID);
     Database::hsetex($key, [InputSanitizer::sanitizeString($code) => $created], FormTTL::ONE_HOUR->value);
-  }
-
-
-  /**
-   * Returns verification codes for a given user UUID.
-   * @param string $userUUID The user UUID
-   * @return array<string, string> // code => timestamp
-   */
-  public static function getVerificationCodes(string $userUUID): array
-  {
-    if (empty($userUUID))
-      return [];
-
-    $codes = Database::hgetall(Keys::VERIFICATION_CODES . ":" . InputSanitizer::sanitizeString($userUUID));
-
-    return $codes ?: [];
-  }
-
-
-
-
-  /**
-   * Retrieve available authentication level options.
-   * @return array<string,string> Associative array of auth level keys to labels
-   */
-  public static function getAuthLevelOptions(): array
-  {
-    $options = [];
-
-    foreach (AuthLevel::cases() as $case) {
-      $options[$case->value] = ucfirst($case->name);
-    }
-
-    return $options;
   }
 
 
@@ -710,6 +576,34 @@ final class User
     return $window;
   }
 
+
+  /**
+   * Get help popup auto-dismiss timeout in seconds.
+   * @return int timeout in seconds, or 0 for no auto-dismiss
+   */
+  public function getHelpPopupTimeoutSeconds(): int
+  {
+    $value = (int) $this->help_popup_timeout_seconds;
+    if ($value < 0 || $value > 30) {
+      return (int) UserPreferenceDefaults::DEFAULT_HELP_POPUP_TIMEOUT_SECONDS;
+    }
+
+    return $value;
+  }
+
+  /**
+   * Get overlay sidebar auto-collapse timeout in seconds.
+   * @return int timeout in seconds, or 0 for no auto-collapse
+   */
+  public function getOverlaySidebarTimeoutSeconds(): int
+  {
+    $value = (int) $this->overlay_sidebar_timeout_seconds;
+    if ($value < 0 || $value > 30) {
+      return (int) UserPreferenceDefaults::DEFAULT_OVERLAY_SIDEBAR_TIMEOUT_SECONDS;
+    }
+
+    return $value;
+  }
 
   /**
    * Get the form TTL for settings in seconds based on user's setting.

@@ -10,8 +10,8 @@ use PayCal\Domain\Strings;
 require_once '../../config.php';
 
 $currentPage = 'PAGE_ADMIN';
-$pageTitle = 'Stripe Dashboard - [PayCal]';
-$pageLabel = 'Stripe Dashboard';
+$pageTitle = Strings::i18n('ADMIN_STRIPE_DASHBOARD') . ' - [PayCal]';
+$pageLabel = Strings::i18n('ADMIN_STRIPE_DASHBOARD');
 
 Authentication::redirectHomeIfUnauthenticated();
 AdminSurface::redirectHomeIfPageUnavailable('/admin/stripe/');
@@ -142,7 +142,7 @@ echo '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL('admin/me
 ?>
 <section class="metrics-dashboard" aria-label="Stripe billing dashboard">
   <div class="metric-card">
-    <h1>Stripe Dashboard</h1>
+    <h1><?= htmlspecialchars(Strings::i18n('ADMIN_STRIPE_DASHBOARD'), ENT_QUOTES, 'UTF-8') ?></h1>
     <p>Admin-only overview of webhook processing health and event coverage for <?= htmlspecialchars($summaryDate, ENT_QUOTES, 'UTF-8') ?>.</p>
     <div class="metric-row">
       <span class="metric-label">Processed</span>

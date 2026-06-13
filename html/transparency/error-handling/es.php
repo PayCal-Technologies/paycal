@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Manejo de errores y normalización de mensajes - [PayCal]';
-$pageLabel = 'Manejo de errores y normalización de mensajes';
+$pageTitle = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Manejo de errores y normalización de mensajes</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       Cómo PayCal estandariza la presentación de errores en todos los módulos frontend para garantizar
       que los usuarios reciban comentarios significativos, seguros y consistentes sin exponer detalles sensibles.
@@ -141,7 +142,7 @@ try {
       </div>
       <p><strong>Módulos de alto valor (10+ puntos catch):</strong></p>
       <ul class="doc-list">
-        <li><code>html/js/organizations/index.php</code> — Gestión de org, accesos, auditorías (19+ catches)</li>
+        <li><code>html/js/businesses/index.php</code> — Gestión de org, accesos, auditorías (19+ catches)</li>
         <li><code>html/js/sites/index.php</code> — CRUD de sitio, ganancias, recuperación de trabajo huérfano (10+ catches)</li>
         <li><code>html/js/calendar/calendar.js</code> — Operaciones de entrada de día, copiar/pegar/eliminar (2 catches)</li>
       </ul>
@@ -331,7 +332,7 @@ PW.error('La carga falló', {
         <li>Los equipos de depuración y soporte conservan contexto de error completo via Phantom Wing</li>
         <li>El código es mantenible, comprobable y accesible</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Este compromiso con la seguridad, claridad y consistencia refleja la dedicación de PayCal
         a la confianza del usuario y al intercambio de información transparente.
       </p>

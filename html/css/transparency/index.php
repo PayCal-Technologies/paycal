@@ -235,6 +235,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   color: var(--text-color);
 }
 
+.doc-section-footer-note {
+  margin-top: 1.5rem;
+}
+
 .doc-section {
   margin: 2.5rem 0;
   padding: 2rem;

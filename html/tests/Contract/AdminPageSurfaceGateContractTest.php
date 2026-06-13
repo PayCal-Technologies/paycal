@@ -21,6 +21,7 @@ final class AdminPageSurfaceGateContractTest extends TestCase
       ['path' => 'admin/ast/index.php', 'gate' => "AdminSurface::redirectHomeIfPageUnavailable('/admin/ast/');"],
       ['path' => 'admin/documentation/index.php', 'gate' => "AdminSurface::redirectHomeIfPageUnavailable('/admin/documentation/');"],
       ['path' => 'admin/tax-brackets.php', 'gate' => "AdminSurface::redirectHomeIfPageUnavailable('/admin/tax-brackets/');"],
+      ['path' => 'admin/argus/index.php', 'gate' => "AdminSurface::redirectHomeIfPageUnavailable('/admin/argus/');"],
     ];
   }
 

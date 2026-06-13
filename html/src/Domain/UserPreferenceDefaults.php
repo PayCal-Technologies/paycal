@@ -53,6 +53,14 @@ final class UserPreferenceDefaults
   public const DEFAULT_DYSLEXIA_TYPOGRAPHY = 'on';
 
   /**
+   * Default help popup auto-dismiss timeout in seconds.
+   *
+   * Options: '0' (never), '3', '5', '8', '12', '15', '20', '30'
+   * Controls how long hover help popups stay visible before hiding.
+   */
+  public const DEFAULT_HELP_POPUP_TIMEOUT_SECONDS = '8';
+
+  /**
    * Default primary navigation position.
    *
     * Options: 'left', 'right'.
@@ -65,6 +73,14 @@ final class UserPreferenceDefaults
    * Options: 'collapsed', 'pinned'.
    */
   public const DEFAULT_NAV_STATE_PRIMARY = 'collapsed';
+
+  /**
+   * Default overlay sidebar auto-collapse timeout in seconds.
+   *
+   * Options: '0' (never), '1'–'30'
+   * Controls how long the expanded overlay sidebar stays open without pointer activity.
+   */
+  public const DEFAULT_OVERLAY_SIDEBAR_TIMEOUT_SECONDS = '5';
 
   /**
    * Default calendar auto-focus preference.

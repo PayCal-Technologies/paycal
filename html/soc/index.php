@@ -531,7 +531,7 @@ echo '<link rel="stylesheet" href="' . Render::cssURL('soc') . '">' . "\n";
               <tr>
                 <td class="soc-ctrl-id">
                   <strong><?php echo socH($row['id']); ?></strong><br>
-                  <span style="font-family:inherit;font-size:0.78rem;opacity:0.75"><?php echo socH($row['title']); ?></span>
+                  <span class="soc-ctrl-title"><?php echo socH($row['title']); ?></span>
                 </td>
                 <td>
                   <span class="soc-badge <?php echo $row['status'] === 'pass' ? 'soc-badge--pass' : 'soc-badge--warn'; ?>">
@@ -637,7 +637,7 @@ echo '<link rel="stylesheet" href="' . Render::cssURL('soc') . '">' . "\n";
 
         <div class="soc-backup-kpi">
           <div class="soc-backup-kpi__label">Last File</div>
-          <div class="soc-backup-kpi__value" style="font-size:0.75rem;word-break:break-all">
+          <div class="soc-backup-kpi__value soc-backup-kpi__value--filename">
             <?php echo socH($backupFile); ?>
           </div>
         </div>
@@ -692,7 +692,7 @@ echo '<link rel="stylesheet" href="' . Render::cssURL('soc') . '">' . "\n";
           <span class="soc-badge soc-badge--neutral">No Anchors</span>
         <?php endif; ?>
       </div>
-      <p style="font-size:0.8rem;margin-bottom:0.75rem;opacity:0.75">
+      <p class="soc-anchor-intro">
         Anchors are queued via <code>SystemAuditBlockchainQueueGateway</code> for asynchronous submission
         to Bitcoin (6 confirmations) and Ethereum (64 confirmations) by an external relayer.
         Status transitions from <strong>queued</strong> → <strong>confirmed</strong> once the relayer writes back transaction IDs.
@@ -738,14 +738,14 @@ echo '<link rel="stylesheet" href="' . Render::cssURL('soc') . '">' . "\n";
                   <?php if ($txBtc !== null): ?>
                     <code title="<?php echo socH($txBtc); ?>"><?php echo socH(substr($txBtc, 0, 16) . '…'); ?></code>
                   <?php else: ?>
-                    <span style="opacity:0.45">pending</span>
+                    <span class="soc-tx-pending">pending</span>
                   <?php endif; ?>
                 </td>
                 <td>
                   <?php if ($txEth !== null): ?>
                     <code title="<?php echo socH($txEth); ?>"><?php echo socH(substr($txEth, 0, 16) . '…'); ?></code>
                   <?php else: ?>
-                    <span style="opacity:0.45">pending</span>
+                    <span class="soc-tx-pending">pending</span>
                   <?php endif; ?>
                 </td>
                 <td class="soc-artifact-updated">

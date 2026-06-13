@@ -3,12 +3,13 @@
 use PayCal\Domain\Authentication;
 use PayCal\Domain\AdminSurface;
 use PayCal\Domain\Render;
+use PayCal\Domain\Strings;
 
 require_once '../../config.php';
 
 $currentPage = 'PAGE_ADMIN';
-$pageTitle = 'Operations Documentation - [PayCal]';
-$pageLabel = 'Operations Documentation';
+$pageTitle = Strings::i18n('ADMIN_OPERATIONS_DOCUMENTATION') . ' - [PayCal]';
+$pageLabel = Strings::i18n('ADMIN_OPERATIONS_DOCUMENTATION');
 
 Authentication::redirectHomeIfUnauthenticated();
 AdminSurface::redirectHomeIfPageUnavailable('/admin/documentation/');

@@ -16,7 +16,7 @@
     const body = new URLSearchParams();
     body.set('trigger', 'page_visit');
 
-    fetch('/api/v1/organizations/encryption/auto-bootstrap', {
+    fetch('/api/v1/businesses/encryption/auto-bootstrap', {
       method: 'POST',
       credentials: 'same-origin',
       keepalive: true,

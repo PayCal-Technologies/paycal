@@ -44,11 +44,12 @@ body[data-nav-initial-state='static'] {
 
 #main {
   width: 100%;
-  padding-inline: var(--pad-md);
+  padding-inline: var(--page-edge-inline);
   padding-block-start: var(--pad-md);
   margin: calc(var(--nav-block-size) - var(--pad-xs)) 0 0 0;
   background-color: var(--color-bg);
   color: var(--color-text);
+  box-sizing: border-box;
 }
 
 #page_header.nav_component--header {
@@ -76,6 +77,63 @@ body[data-nav-initial-state='static'] {
 }
 
 #page_header.nav_component--header .nav_menu--primary ul li.pages { flex: 0 1 auto; }
+
+#page_header.nav_component--header .nav_menu--primary li.nav_section {
+  flex: 0 0 100%;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  padding: 0.35rem 0.75rem 0.15rem;
+  pointer-events: none;
+}
+
+#page_header.nav_component--header .nav_menu--primary .nav_section_label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  line-height: 1.2;
+}
+
+#page_header.nav_component--header .nav_menu--primary li.nav_group_heading {
+  margin-top: 0.35rem;
+}
+
+#page_header.nav_component--header .nav_menu--primary li.nav_group_heading:first-child {
+  margin-top: 0;
+}
+
+#page_header.nav_component--header .nav_menu--primary li.nav_group_heading .nav_label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+#page_header.nav_component--header .nav_menu--primary li.nav_sublink a {
+  padding-inline-start: 1.75rem;
+}
+
+body[data-nav-primary-position='left'] #page_header.nav_component--header .nav_menu--primary li.nav_sublink a,
+body[data-nav-primary-position='right'] #page_header.nav_component--header .nav_menu--primary li.nav_sublink a {
+  padding-inline-start: 2rem;
+}
+
+body.nav-collapsed #page_header.nav_component--header .nav_menu--primary li.nav_section,
+body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header .nav_menu--primary li.nav_section,
+body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header .nav_menu--primary li.nav_section {
+  display: none;
+}
+
+body.nav-collapsed #page_header.nav_component--header .nav_menu--primary li.nav_sublink a,
+body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header .nav_menu--primary li.nav_sublink a,
+body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header .nav_menu--primary li.nav_sublink a {
+  padding-inline-start: 0;
+}
+
 #speaker_icon, [data-help-trigger="true"] { border: none; }
 
 .nav_component--footer {
@@ -1217,23 +1275,23 @@ body[data-nav-primary-position='right'] #main {
 }
 
 /* Pre-hydration: apply server-provided sidebar state before JS boot. */
-body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header {
+body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header:not(.nav_component--public) {
   transform: translateX(calc(-100% + var(--nav-collapsed-strip-size)));
 }
 
-body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header {
+body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header:not(.nav_component--public) {
   transform: translateX(calc(100% - var(--nav-collapsed-strip-size)));
 }
 
-body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #main,
-body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_footer {
+body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal):not(:has(#page_header.nav_component--public)) #main,
+body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal):not(:has(#page_header.nav_component--public)) #page_footer {
   margin-left: var(--nav-collapsed-strip-size);
   width: calc(100% - var(--nav-collapsed-strip-size));
   max-width: calc(100% - var(--nav-collapsed-strip-size));
 }
 
-body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #main,
-body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_footer {
+body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal):not(:has(#page_header.nav_component--public)) #main,
+body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal):not(:has(#page_header.nav_component--public)) #page_footer {
   margin-right: var(--nav-collapsed-strip-size);
   width: calc(100% - var(--nav-collapsed-strip-size));
   max-width: calc(100% - var(--nav-collapsed-strip-size));
@@ -1279,12 +1337,12 @@ body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(
 
 /* ---- COLLAPSED: slide to thin icon strip ---- */
 
-body.nav-collapsed[data-nav-primary-position='left']  #page_header.nav_component--header {
+body.nav-collapsed[data-nav-primary-position='left']  #page_header.nav_component--header:not(.nav_component--public) {
   transform: translateX(calc(-100% + var(--nav-collapsed-strip-size)));
   cursor: e-resize;
 }
 
-body.nav-collapsed[data-nav-primary-position='right'] #page_header.nav_component--header {
+body.nav-collapsed[data-nav-primary-position='right'] #page_header.nav_component--header:not(.nav_component--public) {
   transform: translateX(calc(100% - var(--nav-collapsed-strip-size)));
   cursor: e-resize;
 }
@@ -1397,16 +1455,16 @@ body.nav-collapsed[data-nav-primary-position='right'] #page_header.nav_component
   margin-right: 0;
 }
 
-/* Push content to clear the icon strip */
-body.nav-collapsed[data-nav-primary-position='left'] #main,
-body.nav-collapsed[data-nav-primary-position='left'] #page_footer {
+/* Push content to clear the icon strip (authenticated side-nav only) */
+body.nav-collapsed[data-nav-primary-position='left']:not(:has(#page_header.nav_component--public)) #main,
+body.nav-collapsed[data-nav-primary-position='left']:not(:has(#page_header.nav_component--public)) #page_footer {
   margin-left: var(--nav-collapsed-strip-size);
   width: calc(100% - var(--nav-collapsed-strip-size));
   max-width: calc(100% - var(--nav-collapsed-strip-size));
 }
 
-body.nav-collapsed[data-nav-primary-position='right'] #main,
-body.nav-collapsed[data-nav-primary-position='right'] #page_footer {
+body.nav-collapsed[data-nav-primary-position='right']:not(:has(#page_header.nav_component--public)) #main,
+body.nav-collapsed[data-nav-primary-position='right']:not(:has(#page_header.nav_component--public)) #page_footer {
   margin-right: var(--nav-collapsed-strip-size);
   width: calc(100% - var(--nav-collapsed-strip-size));
   max-width: calc(100% - var(--nav-collapsed-strip-size));
@@ -1457,6 +1515,129 @@ body:not(.nav-collapsed) #page_header.nav_component--header [role='button'] {
 }
 
 @media (max-width: 768px) {
+  /*
+   * Mobile drawer (Reddit-like): no persistent icon strip — sidebar is fully
+   * off-screen when collapsed and overlays content when open. Main uses 100%
+   * viewport width; hamburger toggle is the only nav affordance.
+   */
+  body[data-nav-primary-position='left'],
+  body[data-nav-primary-position='right'] {
+    --nav-collapsed-strip-size: 0px;
+  }
+
+  /* Full-width content in every sidebar state (collapsed, pinned, overlay).
+     Authenticated side-nav only — public pages use the top-bar rules in responsive CSS. */
+  body[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) #main,
+  body[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) #page_footer,
+  body[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) #main,
+  body[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) #page_footer,
+  body.nav-collapsed[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) #main,
+  body.nav-collapsed[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) #page_footer,
+  body.nav-collapsed[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) #main,
+  body.nav-collapsed[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) #page_footer,
+  body.nav-overlay-mode[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) #main,
+  body.nav-overlay-mode[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) #page_footer,
+  body.nav-overlay-mode[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) #main,
+  body.nav-overlay-mode[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) #page_footer,
+  body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal):has(#page_header.nav_component--header:not(.nav_component--public)) #main,
+  body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal):has(#page_header.nav_component--header:not(.nav_component--public)) #page_footer,
+  body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal):has(#page_header.nav_component--header:not(.nav_component--public)) #main,
+  body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal):has(#page_header.nav_component--header:not(.nav_component--public)) #page_footer {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Collapsed: tuck sidebar fully off-screen (no visible strip). */
+  body.nav-collapsed[data-nav-primary-position='left'] #page_header.nav_component--header:not(.nav_component--public),
+  body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header:not(.nav_component--public) {
+    transform: translateX(-100%);
+    cursor: default;
+  }
+
+  body.nav-collapsed[data-nav-primary-position='right'] #page_header.nav_component--header:not(.nav_component--public),
+  body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header:not(.nav_component--public) {
+    transform: translateX(100%);
+    cursor: default;
+  }
+
+  /* Pinned: drawer overlay — content stays full width underneath. */
+  body.nav-pinned[data-nav-primary-position='left'] #page_header.nav_component--header:not(.nav_component--public),
+  body.nav-pinned[data-nav-primary-position='right'] #page_header.nav_component--header:not(.nav_component--public),
+  body:not(.nav-collapsed)[data-nav-primary-position='left'] #page_header.nav_component--header:not(.nav_component--public),
+  body:not(.nav-collapsed)[data-nav-primary-position='right'] #page_header.nav_component--header:not(.nav_component--public) {
+    transform: translateX(0);
+    z-index: 10001;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.22);
+    cursor: default;
+  }
+
+  body.nav-pinned[data-nav-primary-position='right'] #page_header.nav_component--header:not(.nav_component--public),
+  body:not(.nav-collapsed)[data-nav-primary-position='right'] #page_header.nav_component--header:not(.nav_component--public) {
+    box-shadow: -2px 0 20px rgba(0, 0, 0, 0.22);
+  }
+
+  /* Visible hamburger control (replaces persistent strip). */
+  body[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible,
+  body[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible {
+    position: fixed;
+    top: 5px;
+    z-index: 10002;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: nowrap;
+    border: 1px solid var(--panel-border);
+    border-radius: 0.375rem;
+    background-color: var(--panel-head-bg, var(--panel-bg));
+    color: var(--panel-head-text, var(--color-text));
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--panel-head-text, #000) 18%, transparent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    line-height: 0;
+    cursor: pointer;
+  }
+
+  body[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible {
+    left: 5px;
+    right: auto;
+  }
+
+  body[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible {
+    right: 5px;
+    left: auto;
+  }
+
+  body[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible::before,
+  body[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible::before {
+    content: '';
+    display: block;
+    width: 1.1rem;
+    height: 2px;
+    background-color: currentColor;
+    box-shadow: 0 -5px 0 currentColor, 0 5px 0 currentColor;
+  }
+
+  body[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) #main,
+  body[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) #main {
+    padding-top: calc(2.5rem + 10px);
+  }
+
+  body[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible:focus,
+  body[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible:focus-visible,
+  body[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible:focus,
+  body[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible:focus-visible {
+    outline: 2px solid var(--color-focus-ring, var(--color-text));
+    outline-offset: 2px;
+  }
+
   .nav_component--footer {
     min-block-size: 0;
     align-content: start;
@@ -1469,6 +1650,40 @@ body:not(.nav-collapsed) #page_header.nav_component--header [role='button'] {
 
   .nav_component--footer .footer_soc2_badge_wrap {
     justify-content: center;
+  }
+
+}
+
+@media (max-width: 900px) {
+  /* Public (unauthenticated) pages: top bar only — no side drawer or hamburger. */
+  body:has(#page_header.nav_component--public) #page_header.nav_component--header.nav_component--public {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: var(--nav-block-size);
+    min-height: var(--nav-block-size);
+    transform: none !important;
+    margin: 0;
+  }
+
+  body:has(#page_header.nav_component--public) .sidebar_toggle_accessible {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap;
+    border: 0;
+    font-size: inherit;
+    display: block;
+  }
+
+  body:has(#page_header.nav_component--public) .sidebar_toggle_accessible::before {
+    content: none;
+    box-shadow: none;
   }
 }
 
@@ -1523,26 +1738,6 @@ body:not(.nav-collapsed) #page_header.nav_component--header [role='button'] {
     max-width: 30ch;
   }
 
-  /* On narrow screens, reserve only the icon strip so content never sits under the rail. */
-  body[data-nav-primary-position='left'] #main,
-  body[data-nav-primary-position='left'] #page_footer,
-  body.nav-collapsed[data-nav-primary-position='left'] #main,
-  body.nav-collapsed[data-nav-primary-position='left'] #page_footer {
-    margin-left: var(--nav-collapsed-strip-size) !important;
-    margin-right: 0 !important;
-    width: calc(100% - var(--nav-collapsed-strip-size)) !important;
-    max-width: calc(100% - var(--nav-collapsed-strip-size)) !important;
-  }
-
-  body[data-nav-primary-position='right'] #main,
-  body[data-nav-primary-position='right'] #page_footer,
-  body.nav-collapsed[data-nav-primary-position='right'] #main,
-  body.nav-collapsed[data-nav-primary-position='right'] #page_footer {
-    margin-right: var(--nav-collapsed-strip-size) !important;
-    margin-left: 0 !important;
-    width: calc(100% - var(--nav-collapsed-strip-size)) !important;
-    max-width: calc(100% - var(--nav-collapsed-strip-size)) !important;
-  }
 }
 
 /* ---- OVERLAY MODE: sidebar floats over content instead of pushing it ---- */

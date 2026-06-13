@@ -1,5 +1,11 @@
 ?php declare(strict_types=1);
-header('Content-Type: text/css; charset=utf-8');
+
+namespace PayCal\Domain;
+
+require_once __DIR__ . '/../../config.php';
+if (headers_sent() === false) {
+  header('Content-Type: text/css; charset=utf-8');
+}
 
 // Admin dashboard styles
 ?>
@@ -716,3 +722,23 @@ header('Content-Type: text/css; charset=utf-8');
   color: rgba(255,255,255,0.7);
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
+
+.admin-flash {
+  border-left: 4px solid var(--border);
+}
+
+.admin-flash--success {
+  border-left-color: var(--color-success, #2da44e);
+}
+
+.admin-flash--danger {
+  border-left-color: var(--color-danger, #cf222e);
+}
+
+<?php
+/* ── Admin palette swatch colors (CSP-safe: no inline styles) ────────────── */
+foreach (\PayCal\Domain\Config\SiteColorPalette::palette() as $swColor) {
+  $swHex = $swColor['hex'];
+  echo ".admin-palette-swatch[data-hex=\"{$swHex}\"] { background: {$swHex}; }\n";
+}
+?>

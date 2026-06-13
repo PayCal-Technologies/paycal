@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Opt-in Diagnostics at Phantom Wing - [PayCal]';
-$pageLabel = 'Opt-in Diagnostics at Phantom Wing';
+$pageTitle = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Opt-in Diagnostics &amp; Phantom Wing</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       Ang PayCal ay may kasamang opsyonal na diagnostic layer na ikaw ang namamahala. Narito
       ang eksaktong kinukuha nito, kung ano ang nananatili sa iyong device, at kung paano ito
@@ -242,7 +243,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         <li>Ang telemetry ay ganap na pinipigilan sa lahat ng pahina ng authentication</li>
         <li>Ang rate limiting at awtomatikong client back-off ay pumipigil sa anumang aksidenteng labis na pag-uulat</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Ang Phantom Wing ay dinisenyo upang maaari mong iwan nang hindi pinagana ang lahat ng
         diagnostics nang walang katiyakan. Ang mga opt-in control ay umiiral upang bigyan kayo
         ng support team ng isang shared na wika kapag may nangyaring mali — hindi para mangolekta

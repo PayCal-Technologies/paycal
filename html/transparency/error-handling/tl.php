@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Pamamahala ng Error at Normalisasyon ng Mensahe - [PayCal]';
-$pageLabel = 'Pamamahala ng Error at Normalisasyon ng Mensahe';
+$pageTitle = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Pamamahala ng Error at Normalisasyon ng Mensahe</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       Paano ni-standardize ng PayCal ang pag-uulat ng error sa lahat ng frontend module upang
       matiyak na makatanggap ang mga gumagamit ng makabuluhan, ligtas, at konsistenteng feedback
@@ -141,7 +142,7 @@ try {
       </div>
       <p><strong>Mga module na may mataas na halaga (10+ catch point):</strong></p>
       <ul class="doc-list">
-        <li><code>html/js/organizations/index.php</code> — Pamamahala ng organisasyon, mga kahilingan sa access, mga audit trail (19+ catches)</li>
+        <li><code>html/js/businesses/index.php</code> — Pamamahala ng organisasyon, mga kahilingan sa access, mga audit trail (19+ catches)</li>
         <li><code>html/js/sites/index.php</code> — Site CRUD, kita, pagbawi ng nag-iisang trabaho (10+ catches)</li>
         <li><code>html/js/calendar/calendar.js</code> — Mga operasyon sa pagpasok ng araw, kopya/i-paste/tanggalin (2 catches)</li>
       </ul>
@@ -331,7 +332,7 @@ PW.error('Nabigo ang pag-upload', {
         <li>Pinapanatili ng mga koponan ng pag-debug at suporta ang kumpletong konteksto ng error sa pamamagitan ng Phantom Wing</li>
         <li>Ang code ay mapapanatili, maaaring masuri, at accessible</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Ang pangakong ito sa seguridad, kalinawan, at konsistensya ay sumasalamin sa dedikasyon ng PayCal
         sa tiwala ng gumagamit at transparent na pagbabahagi ng impormasyon.
       </p>

@@ -284,8 +284,9 @@ final class OrganizationDiscoveryController
 
     $grid = \PayCal\Domain\DataGrid::create('organizations', 'Organizations');
     $grid->enableSearch('Filter organizations…');
+    $grid->setSearchValue($search);
     $grid->enableSorting();
-    $grid->addColumn('name', 'Name', true);
+    $grid->addColumn('name', 'Name', true, null, null, true);
     $grid->addColumn('organization_type', 'Type', true);
     $grid->addColumn('role', 'Role', true);
     $grid->addColumn('status', 'Status', true);
@@ -442,8 +443,9 @@ final class OrganizationDiscoveryController
 
     $grid = DataGrid::create('organization-members', 'Organization Members');
     $grid->enableSearch('Filter members...');
+    $grid->setSearchValue($search);
     $grid->enableSorting();
-    $grid->addColumn('full_name', 'Name', true);
+    $grid->addColumn('full_name', 'Name', true, null, null, true);
     $grid->addColumn('email', 'Email', true);
     $grid->addColumn('role', 'Role', true);
     $grid->addColumn('status', 'Status', true);
@@ -2227,6 +2229,7 @@ final class OrganizationDiscoveryController
 
     $grid = DataGrid::create('organizations-invite-history-grid', 'Invite & Access Request History');
     $grid->enableSearch('Filter invite/request history...');
+    $grid->setSearchValue($search);
     $grid->enableSorting();
     $grid->addColumn('invitee_email', 'Email', true);
     $grid->addColumn('role', 'Role', true);

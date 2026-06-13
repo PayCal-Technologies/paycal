@@ -95,6 +95,8 @@ class Sites
       return;
     }
 
+    $siteDataByKey = Database::pipelineHgetall($siteKeys);
+
     // Directly fetch each site's hash data instead of using Pager
     $yielded_count = 0;
     foreach ($siteKeys as $key) {
@@ -105,8 +107,7 @@ class Sites
       if (!$siteID)
         continue;
 
-      // Get all fields from the site hash
-      $siteData = Database::hgetall($key);
+      $siteData = $siteDataByKey[$key] ?? [];
       
       if (empty($siteData))
         continue;

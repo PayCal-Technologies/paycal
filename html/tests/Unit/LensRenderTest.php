@@ -266,6 +266,86 @@ final class LensRenderTest extends TestCase
   }
 
   /**
+   * Page-scoped console debug emits a prefixed script in dev HTML responses.
+   */
+  public function testRenderPageConsoleDebugEmitsScopedScript(): void
+  {
+    $_SERVER['REQUEST_METHOD'] = 'GET';
+    $_SERVER['HTTP_ACCEPT'] = 'text/html';
+
+    Lens::boot('/business/reports');
+    Lens::add('Business Reports: page snapshot', ['member_count' => 0]);
+
+    $output = Lens::pageConsoleDebugScript('business/reports', [
+      'has_org_membership' => true,
+      'member_count' => 0,
+    ]);
+
+    $this->assertStringContainsString('[PayCal Lens][business/reports]', $output);
+    $this->assertStringContainsString('page debug', $output);
+    $this->assertStringContainsString('member_count', $output);
+  }
+
+  /**
+   * Page-scoped performance boot emits PayCalLensPerformance factory.
+   */
+  public function testPagePerformanceClientScriptEmitsFactory(): void
+  {
+    $output = Lens::pagePerformanceClientScript('business/members', [
+      'fetch_url_pattern' => '/members/grid',
+    ]);
+
+    $this->assertStringContainsString('PayCalLensPerformance', $output);
+    $this->assertStringContainsString('"[PayCal Lens][" + scope + "]"', $output);
+    $this->assertStringContainsString('"business/members"', $output);
+    $this->assertStringContainsString('Performance Summary', $output);
+    $this->assertStringContainsString('Top 3 slowest paths', $output);
+    $this->assertStringContainsString('fetch_url_pattern', $output);
+  }
+
+  /**
+   * Workspace data attributes carry CSP-safe Lens boot/debug payloads on mac dev.
+   */
+  public function testWorkspaceLensDataAttributesEmitBootAndDebugPayloads(): void
+  {
+    Lens::boot('business/members');
+    Lens::add('Business Members: page snapshot', ['member_count' => 2]);
+
+    $attrs = Lens::workspaceLensDataAttributes('business/members', [
+      'member_count' => 2,
+    ], [
+      'fetch_url_pattern' => '/members/grid',
+    ]);
+
+    $this->assertStringContainsString('data-lens-perf-boot=', $attrs);
+    $this->assertStringContainsString('data-lens-page-debug=', $attrs);
+    $this->assertStringContainsString('fetch_url_pattern', $attrs);
+    $this->assertStringContainsString('member_count', $attrs);
+    $this->assertStringContainsString('ranked', $attrs);
+  }
+
+  /**
+   * External lens performance factory ships as a CSP-safe module on mac dev.
+   */
+  public function testLensPerformanceExternalFactoryModuleExists(): void
+  {
+    $factoryPath = dirname(__DIR__, 2) . '/js/lens/performance.js';
+    $factoryJs = (string) file_get_contents($factoryPath);
+
+    $bootOptions = Lens::pagePerformanceBootOptions('business/members', [
+      'fetch_url_pattern' => '/members/grid',
+    ]);
+
+    $this->assertStringContainsString('PayCalLensPerformance', $factoryJs);
+    $this->assertStringContainsString('Performance Summary', $factoryJs);
+    $this->assertStringContainsString('Top 3 slowest paths', $factoryJs);
+    $this->assertSame('business/members', $bootOptions['scope'] ?? null);
+    $this->assertTrue($bootOptions['enabled'] ?? false);
+    $this->assertTrue($bootOptions['ranked'] ?? false);
+    $this->assertSame('/members/grid', $bootOptions['fetch_url_pattern'] ?? null);
+  }
+
+  /**
    * Test data() method returns payload structure when enabled.
    */
   public function testDataReturnsPayloadWhenEnabled(): void

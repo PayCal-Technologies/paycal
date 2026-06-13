@@ -4,6 +4,8 @@ namespace PayCal\Observability;
 
 use PayCal\Domain\Config\Environment;
 use PayCal\Domain\InputSanitizer;
+use PayCal\Domain\Render;
+use PayCal\Domain\User;
 
 /**
  * Lens.php
@@ -384,6 +386,382 @@ final class Lens
     $html .= self::renderConsoleScript($json);
     
     return $html;
+  }
+
+  /**
+   * Emit scoped page diagnostics to the browser console (dev only).
+   *
+   * Unlike render(), this does not require ?lens=1 and is intended for
+   * page-specific troubleshooting (e.g. /business/reports/).
+   *
+   * @param string $scope Short route label used in the console prefix.
+   * @param array<string, mixed> $snapshot Request-scoped values to log.
+   */
+  /**
+   * @param array<string, mixed> $snapshot
+   */
+  public static function pageConsoleDebugScript(string $scope, array $snapshot): string
+  {
+    $prefix = '[PayCal Lens][' . $scope . ']';
+    $payload = [
+      'scope' => $scope,
+      'snapshot' => self::normalize($snapshot),
+      'lens_enabled' => self::$enabled,
+      'lens_requested' => self::isLensRequested(),
+    ];
+
+    if (self::$enabled) {
+      $payload['lens_meta'] = self::normalize(self::$payload['meta']);
+      $payload['lens_events'] = self::normalize(self::$payload['events']);
+      $payload['lens_counters'] = self::normalize(self::$payload['counters']);
+    }
+
+    /**
+     * @psalm-taint-escape html
+     * @psalm-taint-escape has_quotes
+     */
+    $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+    if ($json === false) {
+      return '';
+    }
+
+    $escapedPrefix = json_encode($prefix, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+
+    return <<<HTML
+<script>
+(function(){
+  const prefix = {$escapedPrefix};
+  const debug = {$json};
+  console.groupCollapsed(prefix + " page debug");
+  console.log(prefix, "Lens mode requested:", debug.lens_requested);
+  console.log(prefix, "Lens enabled:", debug.lens_enabled);
+  console.dir(debug.snapshot);
+  if (debug.lens_meta && Object.keys(debug.lens_meta).length) {
+    console.log(prefix, "Lens meta:", debug.lens_meta);
+  }
+  if (Array.isArray(debug.lens_events) && debug.lens_events.length) {
+    console.group(prefix + " Lens events");
+    debug.lens_events.forEach((event) => {
+      console.group((event.label || "event") + " (" + (event.type || "data") + ")");
+      console.dir(event.payload);
+      console.groupEnd();
+    });
+    console.groupEnd();
+  }
+  if (debug.lens_counters && Object.keys(debug.lens_counters).length) {
+    console.log(prefix, "Lens counters:", debug.lens_counters);
+  }
+  console.groupEnd();
+})();
+</script>
+HTML;
+  }
+
+  /**
+   * @param array<string, mixed> $snapshot
+   */
+  public static function renderPageConsoleDebug(string $scope, array $snapshot): void
+  {
+    if (!self::isDev()) {
+      return;
+    }
+
+    if (headers_sent()) {
+      return;
+    }
+
+    if (!self::isHtmlResponse()) {
+      return;
+    }
+
+    $script = self::pageConsoleDebugScript($scope, $snapshot);
+    if ($script !== '') {
+      echo $script; // @psalm-suppress TaintedHtml -- dev-only scoped console debug
+    }
+  }
+
+  /**
+   * Build page-scoped Lens boot options for client performance tracking.
+   *
+   * @param array<string, mixed> $options
+   * @return array<string, mixed>
+   */
+  public static function pagePerformanceBootOptions(string $scope, array $options = []): array
+  {
+    if (!Environment::isLocalMac()) {
+      return [];
+    }
+
+    $bootOptions = self::normalize([
+      'scope' => $scope,
+      'enabled' => true,
+      'ranked' => true,
+      'page_load_origin_ms' => round(microtime(true) * 1000, 3),
+      ...$options,
+    ]);
+
+    return is_array($bootOptions) ? $bootOptions : [];
+  }
+
+  /**
+   * Emit data-* attributes with Lens perf boot + page debug payloads (mac dev, CSP-safe).
+   *
+   * @param array<string, mixed> $snapshot
+   * @param array<string, mixed> $perfOptions
+   */
+  public static function workspaceLensDataAttributes(string $scope, array $snapshot, array $perfOptions = []): string
+  {
+    if (!Environment::isLocalMac()) {
+      return '';
+    }
+
+    $attrs = '';
+    $perfPayload = self::pagePerformanceBootOptions($scope, $perfOptions);
+    if ($perfPayload !== []) {
+      $perfJson = json_encode($perfPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+      if ($perfJson !== false) {
+        $attrs .= ' data-lens-perf-boot="' . htmlspecialchars($perfJson, ENT_QUOTES, 'UTF-8') . '"';
+      }
+    }
+
+    $debugPayload = [
+      'scope' => $scope,
+      'snapshot' => self::normalize($snapshot),
+      'lens_enabled' => self::$enabled,
+      'lens_requested' => self::isLensRequested(),
+    ];
+
+    if (self::$enabled) {
+      $debugPayload['lens_meta'] = self::normalize(self::$payload['meta']);
+      $debugPayload['lens_events'] = self::normalize(self::$payload['events']);
+      $debugPayload['lens_counters'] = self::normalize(self::$payload['counters']);
+    }
+
+    $debugJson = json_encode($debugPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    if ($debugJson !== false) {
+      $attrs .= ' data-lens-page-debug="' . htmlspecialchars($debugJson, ENT_QUOTES, 'UTF-8') . '"';
+    }
+
+    return $attrs;
+  }
+
+  /**
+   * Emit a reusable client-side performance helper for page load instrumentation.
+   *
+   * @param string $scope Short route label used in the console prefix.
+   * @param array<string, mixed> $options Page-scoped boot options (SSR hints, fetch patterns).
+   */
+  public static function pagePerformanceClientScript(string $scope, array $options = []): string
+  {
+    if (!self::isDev()) {
+      return '';
+    }
+
+    $payload = self::normalize([
+      'scope' => $scope,
+      'enabled' => true,
+      'page_load_origin_ms' => round(microtime(true) * 1000, 3),
+      ...$options,
+    ]);
+
+    /**
+     * @psalm-taint-escape html
+     * @psalm-taint-escape has_quotes
+     */
+    $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+    if ($json === false) {
+      return '';
+    }
+
+    $escapedScope = json_encode($scope, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+
+    return <<<HTML
+<script>
+(function(){
+  if (typeof window.PayCalLensPerformance === "undefined") {
+    window.PayCalLensPerformance = {
+      create(scope, options) {
+        const opts = options || {};
+        const enabled = opts.enabled !== false;
+        const prefix = "[PayCal Lens][" + scope + "]";
+        const records = [];
+        const active = new Map();
+        const pageOriginMs = typeof opts.page_load_origin_ms === "number" ? opts.page_load_origin_ms : null;
+        const moduleStartMs = performance.now();
+
+        const now = () => performance.now();
+
+        const pushRecord = (label, durationMs, meta) => {
+          records.push({
+            label: String(label || "unknown"),
+            duration_ms: Math.max(0, durationMs),
+            type: "timer",
+            ranked: !(meta && meta.ranked === false),
+            meta: meta || null,
+          });
+        };
+
+        const api = {
+          prefix,
+          isEnabled() {
+            return enabled;
+          },
+          mark(label, meta) {
+            if (!enabled) {
+              return;
+            }
+            pushRecord(label, 0, meta);
+          },
+          start(label) {
+            if (!enabled) {
+              return;
+            }
+            active.set(String(label), now());
+          },
+          end(label, meta) {
+            if (!enabled) {
+              return;
+            }
+            const key = String(label);
+            const started = active.get(key);
+            if (typeof started !== "number") {
+              return;
+            }
+            pushRecord(key, now() - started, meta);
+            active.delete(key);
+          },
+          async measure(label, fn, meta) {
+            if (!enabled) {
+              return fn();
+            }
+            api.start(label);
+            try {
+              return await fn();
+            } finally {
+              api.end(label, meta);
+            }
+          },
+          measureSync(label, fn, meta) {
+            if (!enabled) {
+              return fn();
+            }
+            api.start(label);
+            try {
+              return fn();
+            } finally {
+              api.end(label, meta);
+            }
+          },
+          markSsrPainted() {
+            if (!enabled) {
+              return;
+            }
+            pushRecord("SSR DOM painted", moduleStartMs, {
+              grid_present: !!document.getElementById("businesses-members-grid"),
+              ranked: false,
+            });
+          },
+          markHydrationComplete() {
+            if (!enabled) {
+              return;
+            }
+            const hydrationMs = now() - moduleStartMs;
+            pushRecord("initialize (total)", hydrationMs, {
+              page_origin_ms: pageOriginMs,
+            });
+            pushRecord("SSR painted → JS hydration complete", hydrationMs, {
+              page_origin_ms: pageOriginMs,
+              ranked: false,
+            });
+          },
+          summarize(title) {
+            if (!enabled) {
+              return [];
+            }
+
+            const timers = records
+              .filter((record) => record.type === "timer" && record.duration_ms > 0 && record.ranked !== false)
+              .sort((a, b) => b.duration_ms - a.duration_ms);
+            const top3 = timers.slice(0, 3);
+            const heading = prefix + " " + (title || "Performance Summary");
+
+            console.groupCollapsed(heading);
+            if (top3.length === 0) {
+              console.log(prefix, "No ranked timings recorded yet.");
+            } else {
+              top3.forEach((record, index) => {
+                console.log("  " + (index + 1) + ". " + record.label + " — " + Math.round(record.duration_ms) + "ms");
+              });
+            }
+            console.log(
+              "Top 3 slowest paths:",
+              top3.map((record) => record.label + " (" + Math.round(record.duration_ms) + "ms)").join(", ") || "n/a",
+            );
+            if (timers.length) {
+              console.table(timers.map((record) => ({
+                path: record.label,
+                ms: Math.round(record.duration_ms),
+              })));
+            }
+            console.groupEnd();
+
+            return top3;
+          },
+          records() {
+            return records.slice();
+          },
+        };
+
+        return api;
+      },
+    };
+  }
+
+  window.__PAYCAL_LENS_PERF__ = window.__PAYCAL_LENS_PERF__ || {};
+  window.__PAYCAL_LENS_PERF__[{$escapedScope}] = {$json};
+})();
+</script>
+HTML;
+  }
+
+  /**
+   * @param array<string, mixed> $options
+   */
+  public static function renderPagePerformanceBoot(string $scope, array $options = []): void
+  {
+    if (!Environment::isLocalMac()) {
+      return;
+    }
+
+    if (headers_sent()) {
+      return;
+    }
+
+    if (!self::isHtmlResponse()) {
+      return;
+    }
+
+    // CSP-safe factory — classic (non-module) script so PayCalLensPerformance exists before business JS modules run.
+    $cacheVersion = \PayCal\Domain\Config\Environment::appVersion();
+    $cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
+    $cspNonceCandidate = is_string($cspNonceRaw) ? trim($cspNonceRaw) : '';
+    $isValidNonce = $cspNonceCandidate !== ''
+      && strlen($cspNonceCandidate) >= 16
+      && preg_match('/^[A-Za-z0-9+\/_\-]+=*$/', $cspNonceCandidate) === 1;
+    $cspNonce = $isValidNonce ? $cspNonceCandidate : User::nonce();
+    echo '    <script src="'
+      . \PayCal\Domain\Config\Environment::appURL('js/lens/performance.js')
+      . '?v=' . $cacheVersion
+      . '" nonce="' . $cspNonce . '"></script>' . PHP_EOL; // @psalm-suppress TaintedHtml -- dev-only external script
+
+    if (!self::isDev()) {
+      return;
+    }
+
+    $script = self::pagePerformanceClientScript($scope, $options);
+    if ($script !== '') {
+      echo $script; // @psalm-suppress TaintedHtml -- dev-only scoped performance boot
+    }
   }
 
   /**

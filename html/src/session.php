@@ -76,9 +76,12 @@ if ($isAuthenticated) {
     : 'hidden';
 }
 
-// Derived Locale
+// Derived Locale — prefer stored BCP-47 locale (matches js/core USER_LOCALE).
 
-$userLocale = strtolower($userLang).'_'.strtoupper($userLang);
+$userLocale = Language::resolveDateLocale(
+  $isAuthenticated ? trim($user->locale) : '',
+  (string) $userLang,
+);
 
 if (!defined('USER_THEME')) {
   define('USER_THEME', $userTheme);
@@ -124,5 +127,9 @@ if ($isAuthenticated) {
 
 // Locale Activation
 
-setlocale(LC_ALL, USER_LOCALE.'.UTF-8');
+$setlocaleTag = str_replace('-', '_', USER_LOCALE);
+if (!str_contains($setlocaleTag, '_')) {
+  $setlocaleTag = strtolower($setlocaleTag) . '_' . strtoupper($setlocaleTag);
+}
+setlocale(LC_ALL, $setlocaleTag . '.UTF-8');
 $pageLanguage = USER_LANGUAGE;

@@ -3,9 +3,20 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../config.php';
 
+$i18n = [];
+$i18nKeys = [
+  'BREADCRUMB',
+  'HELP_TOC_TRANSPARENCY_HUB',
+  'TRANSPARENCY_SOC2_PAGE_TITLE',
+];
+foreach ($i18nKeys as $key) {
+  $i18n[$key] = \PayCal\Domain\Strings::i18n($key);
+}
+
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'PayCal mein SOC 2 Anupalana - [PayCal]';
-$pageLabel = 'PayCal mein SOC 2 Anupalana';
+$pageTitle = $i18n['TRANSPARENCY_SOC2_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_SOC2_PAGE_TITLE'];
+
 
 require_once HTML . '/header.php';
 ?>
@@ -13,11 +24,11 @@ require_once HTML . '/header.php';
   <nav class="doc-breadcrumb" aria-label="ब्रेडक्रम्ब">
     <a href="<?php echo transparency_href('/transparency/'); ?>">पारदर्शिता केंद्र</a>
     <span class="separator">/</span>
-    <span class="current">PayCal में SOC 2 अनुपालन</span>
+    <span class="current"><?php echo htmlspecialchars($i18n['TRANSPARENCY_SOC2_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></span>
   </nav>
 
   <header class="doc-article-header">
-    <h1>PayCal की SOC 2 तैयारी और सुरक्षा मॉडल</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_SOC2_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">PayCal किस प्रकार SOC 2 नियंत्रणों को प्रवर्तित सिस्टम व्यवहार और निरंतर उत्पन्न साक्ष्यों से जोड़ता है, इसका एक तकनीकी दृष्टिकोण।</p>
     <p class="doc-article-meta">Published: <time datetime="2026-04-15">2026-04-15</time></p>
   </header>

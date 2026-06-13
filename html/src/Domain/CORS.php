@@ -75,18 +75,4 @@ class CORS
   {
     header("Content-Type: {$type}");
   }
-
-  /**
-   * Sends the HTTP Content-Disposition header for file responses.
-   * Defines whether content should be displayed inline or downloaded.
-   *
-   * @param string $disposition either "inline" or "attachment"
-   * @param string $filename    suggested filename for the browser
-   * @return void
-   */
-  public static function renderContentDisposition(string $disposition, string $filename): void
-  {
-    $safeFilename = preg_replace('/[^a-zA-Z0-9._\-]/', '_', basename($filename));
-    header("Content-Disposition: {$disposition}; filename=\"{$safeFilename}\"");
-  }
 }

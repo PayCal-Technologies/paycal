@@ -28,23 +28,10 @@ use PayCal\Domain\Enums\FormTTL;
 final class RateLimiter
 {
   // Rate limit constants (requests per minute)
-  private const LIMIT_LOGIN = 10;
   private const LIMIT_CALENDAR = 120;
-  private const LIMIT_GENERAL = 300;
   private const LIMIT_TELEMETRY = 90;
   private const LIMIT_IP_CALENDAR = 240;
-  private const LIMIT_IP_GENERAL = 600;
   private const WINDOW_TTL_SECONDS = 70;
-
-  /**
-   * Check if user has exceeded login rate limit.
-   *
-   * @return array{allowed: bool, remaining: int}
-   */
-  public static function checkLoginLimit(string $userUUID): array
-  {
-    return self::checkLimit($userUUID, 'login', self::LIMIT_LOGIN);
-  }
 
   /**
    * Check if user has exceeded calendar mutation rate limit.
@@ -54,16 +41,6 @@ final class RateLimiter
   public static function checkCalendarLimit(string $userUUID): array
   {
     return self::checkLimit($userUUID, 'calendar', self::LIMIT_CALENDAR);
-  }
-
-  /**
-   * Check if user has exceeded general API rate limit.
-   *
-   * @return array{allowed: bool, remaining: int}
-   */
-  public static function checkGeneralLimit(string $userUUID): array
-  {
-    return self::checkLimit($userUUID, 'general', self::LIMIT_GENERAL);
   }
 
   /**
@@ -128,16 +105,6 @@ final class RateLimiter
   public static function checkIPCalendarLimit(string $clientIP): array
   {
     return self::checkLimit('ip:' . hash('sha256', $clientIP), 'calendar', self::LIMIT_IP_CALENDAR);
-  }
-
-  /**
-   * Check if client IP has exceeded general API limit.
-   *
-   * @return array{allowed: bool, remaining: int}
-   */
-  public static function checkIPGeneralLimit(string $clientIP): array
-  {
-    return self::checkLimit('ip:' . hash('sha256', $clientIP), 'general', self::LIMIT_IP_GENERAL);
   }
 
   /**

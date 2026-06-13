@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-use PayCal\Domain\OrganizationSiteLinkResolver;
+use PayCal\Domain\BusinessSiteLinkResolver;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +17,7 @@ final class EarningsSiteResolutionDiagnosticsContractTest extends TestCase
       'normalized_name_set' => [],
     ];
 
-    $strategy = OrganizationSiteLinkResolver::resolveMatchStrategy($context, 'S001', 'U123', 'Example Site');
+    $strategy = BusinessSiteLinkResolver::resolveMatchStrategy($context, 'S001', 'U123', 'Example Site');
     $this->assertSame('owner_and_site', $strategy);
   }
 
@@ -30,7 +30,7 @@ final class EarningsSiteResolutionDiagnosticsContractTest extends TestCase
       'normalized_name_set' => [],
     ];
 
-    $strategy = OrganizationSiteLinkResolver::resolveMatchStrategy($context, 'S002', 'U123', 'Other Site');
+    $strategy = BusinessSiteLinkResolver::resolveMatchStrategy($context, 'S002', 'U123', 'Other Site');
     $this->assertSame('unique_site_id', $strategy);
   }
 
@@ -43,7 +43,7 @@ final class EarningsSiteResolutionDiagnosticsContractTest extends TestCase
       'normalized_name_set' => ['edmontonindustrialconsultantshq' => true],
     ];
 
-    $strategy = OrganizationSiteLinkResolver::resolveMatchStrategy($context, 'S003', 'U555', 'Edmonton Industrial Consultants HQ');
+    $strategy = BusinessSiteLinkResolver::resolveMatchStrategy($context, 'S003', 'U555', 'Edmonton Industrial Consultants HQ');
     $this->assertSame('site_name', $strategy);
   }
 
@@ -56,14 +56,14 @@ final class EarningsSiteResolutionDiagnosticsContractTest extends TestCase
       'normalized_name_set' => [],
     ];
 
-    $strategy = OrganizationSiteLinkResolver::resolveMatchStrategy($context, 'S404', 'U404', 'Unknown');
+    $strategy = BusinessSiteLinkResolver::resolveMatchStrategy($context, 'S404', 'U404', 'Unknown');
     $this->assertSame('no_match', $strategy);
   }
 
   #[Test]
   public function resolverNormalizesSiteNamesConservatively(): void
   {
-    $normalized = OrganizationSiteLinkResolver::normalizeSiteName('  EIC-HQ / North  ');
+    $normalized = BusinessSiteLinkResolver::normalizeSiteName('  EIC-HQ / North  ');
     $this->assertSame('eichqnorth', $normalized);
   }
 
@@ -71,11 +71,12 @@ final class EarningsSiteResolutionDiagnosticsContractTest extends TestCase
   public function earningsPageContainsFallbackWarningLensSignalContract(): void
   {
     $projectRoot = dirname(__DIR__, 3);
-    $page = (string) file_get_contents($projectRoot . '/html/earnings/index.php');
+    $builder = (string) file_get_contents($projectRoot . '/html/src/Domain/TeamEarningsSnapshotBuilder.php');
+    $page = (string) file_get_contents($projectRoot . '/html/reports/_partials/team_earnings_data.php');
 
-    $this->assertStringContainsString('earnings.team.site_resolution.fallback_ratio_warn', $page);
-    $this->assertStringContainsString('Team Earnings: fallback ratio warning', $page);
-    $this->assertStringContainsString("'warning'", $page);
+    $this->assertStringContainsString('earnings.team.site_resolution.fallback_ratio_warn', $builder);
+    $this->assertStringContainsString('Team Earnings: fallback ratio warning', $builder);
+    $this->assertStringContainsString("'warning'", $builder);
     $this->assertStringContainsString('$teamSiteFallbackWarnThreshold = 15.0;', $page);
   }
 
@@ -83,14 +84,18 @@ final class EarningsSiteResolutionDiagnosticsContractTest extends TestCase
   public function earningsPageContainsUnlinkedOnlyGuardContract(): void
   {
     $projectRoot = dirname(__DIR__, 3);
-    $page = (string) file_get_contents($projectRoot . '/html/earnings/index.php');
+    $builder = (string) file_get_contents($projectRoot . '/html/src/Domain/TeamEarningsSnapshotBuilder.php');
+    $page = (string) file_get_contents($projectRoot . '/html/reports/_partials/team_earnings_data.php');
     $css = (string) file_get_contents($projectRoot . '/html/css/earnings/index.php');
 
-    $this->assertStringContainsString('earnings.team.site_resolution.unlinked_only_warn', $page);
-    $this->assertStringContainsString('Team Earnings: unlinked-only guard', $page);
-    $this->assertStringContainsString('$teamUnlinkedOnlyWarn = $teamUnlinkedOnlyCount > 0 && $teamMatchedTotalForSignal === 0;', $page);
-    $this->assertStringContainsString('EARNINGS_TEAM_UNLINKED_ONLY_GUARD', $page);
-    $this->assertStringContainsString('et_empty_guard et_empty_guard--warning', $page);
+    $panel = (string) file_get_contents($projectRoot . '/html/reports/_partials/team_earnings_panel.php');
+
+    $this->assertStringContainsString('earnings.team.site_resolution.unlinked_only_warn', $builder);
+    $this->assertStringContainsString('Team Earnings: unlinked-only guard', $builder);
+    $this->assertStringContainsString('included_unlinked', $page);
+    $this->assertStringContainsString('$teamUnlinkedOnlyWarn = false;', $page);
+    $this->assertStringContainsString('EARNINGS_TEAM_UNLINKED_ONLY_GUARD', $panel);
+    $this->assertStringContainsString('et_empty_guard et_empty_guard--warning', $panel);
 
     $this->assertStringContainsString('.et_empty_guard', $css);
     $this->assertStringContainsString('.et_empty_guard--warning', $css);

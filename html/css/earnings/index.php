@@ -666,6 +666,291 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   max-width: 54rem;
 }
 
+.forecast-workspace__header {
+  margin-bottom: 1rem;
+}
+
+.forecast-workspace__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.forecast-workspace__subtitle {
+  margin: 0 0 0.75rem;
+  color: var(--text-muted, var(--color-text-muted));
+  font-size: 0.9rem;
+  max-width: 52rem;
+}
+
+.forecast-workspace__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.forecast-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.forecast-badge--estimate {
+  background: color-mix(in srgb, var(--primary, #3b82f6) 18%, transparent);
+  color: var(--primary, #3b82f6);
+}
+
+.forecast-badge--caution {
+  background: color-mix(in srgb, var(--warning, #f59e0b) 16%, transparent);
+  color: var(--warning, #d97706);
+}
+
+.forecast-workspace__grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.forecast-workspace__summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.forecast-summary-card {
+  border: 1px solid var(--border-muted, rgba(255, 255, 255, 0.08));
+  border-radius: 0.65rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-elevated, rgba(255, 255, 255, 0.03));
+}
+
+.forecast-summary-card__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-muted, var(--color-text-muted));
+  font-weight: 600;
+}
+
+.forecast-summary-card__net {
+  margin: 0 0 0.5rem;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--primary, #3b82f6);
+}
+
+.forecast-summary-card__meta {
+  margin: 0;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.forecast-summary-card__meta div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.forecast-summary-card__meta dt {
+  color: var(--text-muted, var(--color-text-muted));
+}
+
+.forecast-summary-card__meta dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.forecast-workspace__main,
+.forecast-workspace__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 960px) {
+  .forecast-workspace__grid {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    grid-template-areas:
+      "summary summary"
+      "main aside";
+  }
+
+  .forecast-workspace__summary { grid-area: summary; }
+  .forecast-workspace__main { grid-area: main; }
+  .forecast-workspace__aside { grid-area: aside; }
+  .forecast_estimate_disclaimer { grid-column: 1 / -1; }
+}
+
+@media (max-width: 959px) {
+  .forecast-workspace__summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+.forecast-panel__heading {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.forecast-calculator,
+.forecast-scenarios,
+.forecast-assumptions,
+.forecast-timeline {
+  border: 1px solid var(--border-muted, rgba(255, 255, 255, 0.08));
+  border-radius: 0.65rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-elevated, rgba(255, 255, 255, 0.02));
+}
+
+.forecast-calc__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 0.85rem;
+}
+
+.forecast-calc__field label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-muted, var(--color-text-muted));
+}
+
+.forecast-calc__field input,
+.forecast-calc__field select {
+  width: 100%;
+}
+
+.forecast-calc__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.forecast-scenarios__cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.forecast-scenario-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-muted, rgba(255, 255, 255, 0.1));
+  border-radius: 0.55rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.forecast-scenario-card:focus-visible {
+  outline: 2px solid var(--primary, #3b82f6);
+  outline-offset: 2px;
+}
+
+.forecast-scenario-card--active {
+  border-color: var(--primary, #3b82f6);
+  background: color-mix(in srgb, var(--primary, #3b82f6) 12%, transparent);
+}
+
+.forecast-scenario-card__label {
+  font-size: 0.8rem;
+  color: var(--text-muted, var(--color-text-muted));
+}
+
+.forecast-scenario-card__net {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary, #3b82f6);
+}
+
+.forecast-assumptions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.forecast-assumptions-table th,
+.forecast-assumptions-table td {
+  padding: 0.35rem 0.4rem;
+  border-bottom: 1px solid var(--border-muted, rgba(255, 255, 255, 0.06));
+  text-align: left;
+  vertical-align: top;
+}
+
+.forecast-source-badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.forecast-source-badge--saved { color: #22c55e; background: rgba(34, 197, 94, 0.12); }
+.forecast-source-badge--scheduled { color: #38bdf8; background: rgba(56, 189, 248, 0.12); }
+.forecast-source-badge--temporary { color: #f59e0b; background: rgba(245, 158, 11, 0.12); }
+.forecast-source-badge--estimated { color: #a78bfa; background: rgba(167, 139, 250, 0.12); }
+.forecast-source-badge--missing { color: #94a3b8; background: rgba(148, 163, 184, 0.12); }
+
+.forecast-timeline__segment {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.forecast-timeline__bar-wrap {
+  grid-column: 1 / -1;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--bg-muted, rgba(255, 255, 255, 0.06));
+  overflow: hidden;
+}
+
+.forecast-timeline__bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary, #3b82f6);
+}
+
+.forecast-timeline__bar--w-1 { width: 8.33%; }
+.forecast-timeline__bar--w-2 { width: 16.66%; }
+.forecast-timeline__bar--w-3 { width: 25%; }
+.forecast-timeline__bar--w-4 { width: 33.33%; }
+.forecast-timeline__bar--w-5 { width: 41.66%; }
+.forecast-timeline__bar--w-6 { width: 50%; }
+.forecast-timeline__bar--w-7 { width: 58.33%; }
+.forecast-timeline__bar--w-8 { width: 66.66%; }
+.forecast-timeline__bar--w-9 { width: 75%; }
+.forecast-timeline__bar--w-10 { width: 83.33%; }
+.forecast-timeline__bar--w-11 { width: 91.66%; }
+.forecast-timeline__bar--w-12 { width: 100%; }
+
+.forecast-timeline__label {
+  font-size: 0.82rem;
+}
+
+.forecast-timeline__value {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--primary, #3b82f6);
+}
+
+@media (max-width: 640px) {
+  .forecast-calc__form,
+  .forecast-scenarios__cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 .svg-visible {
   visibility: visible;
 }
@@ -1253,6 +1538,99 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   border-bottom: 1px solid var(--border);
 }
 
+/* Business reports loading skeleton (SSR shell before analytics render) */
+.business_reports_panel_skeleton {
+  opacity: 0.85;
+}
+
+.business_reports_skeleton_year_row {
+  align-items: center;
+}
+
+.reports_sk_year_chip {
+  height: 1.85rem;
+  width: 3.25rem;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.reports_sk_export_btn {
+  height: 1.85rem;
+  width: 7.5rem;
+  margin-left: auto;
+}
+
+.reports_sk_bar {
+  flex: 1;
+  opacity: 0.55;
+}
+
+.reports_sk_exec_value {
+  height: 1.8rem;
+  margin-bottom: 0.15rem;
+}
+
+.reports_sk_exec_sub {
+  height: 0.6em;
+}
+
+.reports_sk_figure_title {
+  height: 1em;
+  width: 9rem;
+}
+
+.reports_sk_figure_title_wide {
+  width: 11rem;
+}
+
+.reports_sk_figure_title_narrow {
+  width: 8rem;
+}
+
+.reports_sk_figure_subtitle {
+  height: 0.75em;
+  flex: 1;
+}
+
+.reports_sk_caption_line {
+  height: 0.65em;
+  margin-top: 0.4rem;
+}
+
+.reports_sk_bar_primary {
+  opacity: 0.6;
+}
+
+.reports_sk_bar_secondary {
+  opacity: 0.5;
+}
+
+.reports_sk_bar {
+  flex: 1;
+  opacity: 0.55;
+}
+
+.reports_sk_bar_h_30 { height: 30%; }
+.reports_sk_bar_h_35 { height: 35%; }
+.reports_sk_bar_h_40 { height: 40%; }
+.reports_sk_bar_h_45 { height: 45%; }
+.reports_sk_bar_h_50 { height: 50%; }
+.reports_sk_bar_h_55 { height: 55%; }
+.reports_sk_bar_h_60 { height: 60%; }
+.reports_sk_bar_h_65 { height: 65%; }
+.reports_sk_bar_h_70 { height: 70%; }
+.reports_sk_bar_h_75 { height: 75%; }
+.reports_sk_bar_h_80 { height: 80%; }
+.reports_sk_bar_h_85 { height: 85%; }
+.reports_sk_bar_h_88 { height: 88%; }
+.reports_sk_bar_h_90 { height: 90%; }
+.reports_sk_bar_h_95 { height: 95%; }
+
+.reports_sk_grid_head_cell {
+  height: 0.75em;
+  display: inline-block;
+  width: 60%;
+}
+
 /* ============================================================================
    END TEAM EARNINGS EMPTY-STATE / SKELETON
    ============================================================================ */
@@ -1337,7 +1715,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   flex-direction: row;
   align-items: stretch;
   gap: 0;
-  padding: 1.5rem 1.75rem 1.5rem 1.5rem;
+  padding-block: 1.5rem;
+  padding-inline: var(--page-edge-inner-inline);
 }
 
 .earnings_ytd_svg {

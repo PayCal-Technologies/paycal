@@ -40,7 +40,7 @@ class Layout
    * - No authentication required
   * - Minimal footer navigation (About, Help, Contact, Transparency, Policies)
    * - No encryption scripts or session management UI
-  * - No authenticated navigation items (Calendar, Earnings, Sites, Organizations)
+  * - No authenticated navigation items (Calendar, Earnings, Sites, Business)
    * 
    * @param string $content Main page content HTML
    * @param string $pageTitle Browser tab title
@@ -212,10 +212,13 @@ class Layout
         $dyslexiaTypography = $dyslexiaTypographyRaw;
       }
     }
+
+    $pageLanguageRaw = defined('USER_LANGUAGE') ? (string) USER_LANGUAGE : Language::DEFAULT;
+    $pageLanguage = htmlspecialchars(str_replace('_', '-', $pageLanguageRaw), ENT_QUOTES, 'UTF-8');
     
     $html = <<<HTML
 <!DOCTYPE html>
-<html lang="en" dir="ltr" prefix="og: http://ogp.me/ns#" data-a11y-animated-images="system" data-a11y-link-underlines="true" data-a11y-dyslexia-typography="{$dyslexiaTypography}">
+<html lang="{$pageLanguage}" dir="ltr" prefix="og: http://ogp.me/ns#" data-a11y-animated-images="system" data-a11y-link-underlines="true" data-a11y-dyslexia-typography="{$dyslexiaTypography}">
 <head>
   <base href="{$origin}/">
   <meta charset="UTF-8">
@@ -297,7 +300,7 @@ HTML;
     }
 
     if ($isAuthenticated) {
-      $pages = [Page::INDEX, Page::EARNINGS, Page::SITES];
+      $pages = [Page::INDEX, Page::REPORTS, Page::SITES];
       $userUUID = User::currentUUID();
       $hasPremiumSubscription = $userUUID !== '' && SubscriptionGate::hasActivePremium($userUUID);
 
@@ -357,7 +360,7 @@ HTML;
    * Render a page with authenticated layout (existing header.php/footer.php).
    * 
    * Authenticated layout characteristics:
-  * - Full navigation (Calendar, Earnings, Sites, Organizations, Admin)
+  * - Full navigation (Calendar, Earnings, Sites, Business, Admin)
    * - Encryption scripts and session management
    * - Session timeout warnings
    * - Full CSP with TrustedHTML policies

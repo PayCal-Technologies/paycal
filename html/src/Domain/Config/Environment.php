@@ -76,8 +76,6 @@ final class Environment
   private static string $emailReplyTo = '';
   private static string $emailPassword = '';
   private static string $inviteCode = '';
-  private static string $payrollPrivateKey = '';
-  private static string $payrollPublicKey = '';
   private static bool   $devAllowInlineScripts = false;
   private static bool   $encryptionEnabled = false;
   private static bool   $devSecurityDisabled = false;
@@ -110,8 +108,6 @@ final class Environment
     self::$emailReplyTo      = $env["PC_EMAIL_REPLYTO"] ?? self::logMissingString("PC_EMAIL_REPLYTO", "");
     self::$emailPassword     = $env["PC_EMAIL_PASSWORD"] ?? self::logMissingString("PC_EMAIL_PASSWORD", "");
     self::$inviteCode             = $env["PC_INVITE_CODE"] ?? self::logMissingString("PC_INVITE_CODE", "");
-    self::$payrollPrivateKey      = $env["PAYROLL_SIGNING_PRIVATE_KEY"] ?? "";
-    self::$payrollPublicKey       = $env["PAYROLL_SIGNING_PUBLIC_KEY"] ?? "";
     self::$devAllowInlineScripts  = isset($env["DEV_ALLOW_INLINE_SCRIPTS"]) ? self::toBool($env["DEV_ALLOW_INLINE_SCRIPTS"]) : false;
     self::$devSecurityDisabled    = isset($env["DEV_SECURITY_DISABLED"]) ? self::toBool($env["DEV_SECURITY_DISABLED"]) : false;
     // Guard: DEV_* overrides are only honored in non-production environments
@@ -190,6 +186,30 @@ final class Environment
 
     return $base . '/' . ltrim($path, '/');
   }
+
+  /**
+   * Canonical public host used for SEO, social, and schema metadata.
+   */
+  public static function publicMetadataBaseURL(): string
+  {
+    return 'https://paycal.app';
+  }
+
+  /**
+   * Build a production-canonical URL for metadata even on dev hosts.
+   */
+  public static function publicMetadataURL(string $path = ''): string
+  {
+    $base = rtrim(self::publicMetadataBaseURL(), '/');
+    $normalized = ltrim(trim($path), '/');
+
+    if ($normalized === '' || $normalized === '/') {
+      return $base . '/';
+    }
+
+    return $base . '/' . $normalized;
+  }
+
   /**
    * Handles appHome operation.
    */
@@ -271,14 +291,6 @@ final class Environment
    * Handles inviteCode operation.
    */
   public static function inviteCode()           : string { return self::$inviteCode; }
-  /**
-   * Handles payrollPrivateKey operation.
-   */
-  public static function payrollPrivateKey()    : string { return self::$payrollPrivateKey; }
-  /**
-   * Handles payrollPublicKey operation.
-   */
-  public static function payrollPublicKey()     : string { return self::$payrollPublicKey; }
   /**
    * Handles devAllowInlineScripts operation.
    */

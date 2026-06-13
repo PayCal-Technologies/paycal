@@ -105,28 +105,6 @@ class WorkEntry
   }
 
   /**
-   * Validate living out allowance field.
-   *
-   * @param float $allowance Allowance value
-   * @return float Valid allowance (non-negative)
-   */
-  public static function validateAllowance(float $allowance): float
-  {
-    return max(self::MIN_DAILY_HOURS, $allowance);
-  }
-
-  /**
-   * Validate travel hours field.
-   *
-   * @param float $travelHours Travel hours value
-   * @return float Valid travel hours (non-negative, max 24)
-   */
-  public static function validateTravelHours(float $travelHours): float
-  {
-    return max(self::MIN_DAILY_HOURS, min(self::MAX_DAILY_HOURS, $travelHours));
-  }
-
-  /**
    * Validate an encrypted blob field.
    *
    * @param string $blob Base64-encoded encrypted blob
@@ -206,7 +184,7 @@ class WorkEntry
     $meta = is_array($metaRaw) ? $metaRaw : [];
     $modeRaw = $meta['encryption_mode'] ?? ($envelope['encryption_mode'] ?? null);
     $mode = is_scalar($modeRaw) ? trim((string) $modeRaw) : '';
-    if ($mode !== 'organization') {
+    if (!BusinessDiscoveryService::isBusinessEncryptionMode($mode)) {
       return ['valid' => false, 'error' => 'org_mode_required'];
     }
 
@@ -254,7 +232,7 @@ class WorkEntry
       return ['valid' => true, 'error' => ''];
     }
 
-    if ($mode !== 'organization') {
+    if (!BusinessDiscoveryService::isBusinessEncryptionMode($mode)) {
       return ['valid' => false, 'error' => 'invalid_encryption_mode'];
     }
 
@@ -662,7 +640,12 @@ class WorkEntry
       'wage' => number_format($wage, 2, '.', ''),
     ];
     Log::debug('WorkEntry::updateWorkEntry storing');
+    $isNewEntry = !Database::exists($workEntryKey);
     Database::hset($workEntryKey, $fieldsToStore);
+
+    if ($isNewEntry) {
+      BusinessDashboardMetrics::recordWorkEntryCreated($userUUID, $workDate);
+    }
 
     // Telemetry & logging for stored blob
     try {
@@ -675,6 +658,11 @@ class WorkEntry
     // Recalculate only the affected week to avoid O(year) scans on each save.
     Work::processWorkWeekContainingDate($userUUID, $workDate);
     EarningsCacheService::invalidateForUser($userUUID);
+    $workYear = (int) substr($workDate, 0, 4);
+    if ($workYear < 2000 || $workYear > 2100) {
+      $workYear = null;
+    }
+    BusinessWorkspaceCache::invalidateFinancialDataForMember($userUUID, $workYear);
 
     return true;
   }
@@ -694,7 +682,7 @@ class WorkEntry
       return $siteColor;
     }
 
-    $memberships = OrganizationMemberRepository::forUser($userUUID);
+    $memberships = BusinessMemberRepository::forUser($userUUID);
     foreach ($memberships as $membership) {
       $status = (string) $membership['status'];
       $orgId = (string) $membership['org_id'];
@@ -702,7 +690,7 @@ class WorkEntry
         continue;
       }
 
-      $siteRefs = Database::smembers(Keys::ORGANIZATION_SITE . ':' . $orgId);
+      $siteRefs = Database::smembers(Keys::BUSINESS_SITE . ':' . $orgId);
       foreach ($siteRefs as $siteRefRaw) {
         $siteRef = (string) $siteRefRaw;
         $parts = explode(':', $siteRef, 2);

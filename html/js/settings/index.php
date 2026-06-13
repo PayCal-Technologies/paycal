@@ -16,6 +16,67 @@ $i18nKeys = [
   'UPDATING_CALENDAR_WORK_ENTRY_POSITION_TO',
   'UPDATING_INFO',
   'UPDATING_PAY_PERIOD',
+  'CANCEL',
+  'PREVIOUS',
+  'DELETE_ACCOUNT',
+  'SETTINGS_ACCOUNT_DETAILS_TITLE',
+  'CHANGE_EMAIL',
+  'BUSINESSES_CORRECT_HIGHLIGHTED_FIELDS',
+  'BUSINESSES_SAVE_ACCOUNT_DETAILS_FAILED',
+  'BUSINESSES_UNKNOWN_ERROR',
+  'SETTINGS_JS_PASSKEYS_NONE',
+  'SETTINGS_JS_PASSKEYS_LOADED_NONE',
+  'SETTINGS_JS_PASSKEYS_LOADED_COUNT',
+  'SETTINGS_JS_PASSKEYS_CHECKING',
+  'SETTINGS_JS_PASSKEYS_LOAD_FAILED',
+  'SETTINGS_JS_PASSKEYS_UPDATE_NAME_PROGRESS',
+  'SETTINGS_JS_PASSKEYS_UPDATE_NAME_FAILED',
+  'SETTINGS_JS_PASSKEYS_UPDATE_NAME_SUCCESS',
+  'SETTINGS_JS_PASSKEYS_REMOVING',
+  'SETTINGS_JS_PASSKEYS_REMOVED',
+  'SETTINGS_JS_PASSKEYS_UPDATE_FAILED',
+  'SETTINGS_JS_WORK_ENTRY_FIELDS_UPDATED',
+  'SETTINGS_JS_AUDIO_MUTED',
+  'SETTINGS_JS_AUDIO_ENABLED',
+  'SETTINGS_JS_AUDIO_ENABLED_SPEECH',
+  'SETTINGS_JS_AUDIO_TOAST_FMT',
+  'SETTINGS_JS_VOICE_UPDATED_FMT',
+  'SETTINGS_JS_THEME_UPDATED_FMT',
+  'SETTINGS_JS_LANGUAGE_UPDATED',
+  'SETTINGS_JS_TYPOGRAPHY_UPDATED',
+  'SETTINGS_JS_HELP_POPUP_TIMEOUT_UPDATED',
+  'SETTINGS_JS_TOGGLE_ON',
+  'SETTINGS_JS_TOGGLE_OFF',
+  'SETTINGS_JS_PROXIMITY_FMT',
+  'SETTINGS_JS_OVERLAY_FMT',
+  'SETTINGS_JS_OVERLAY_COLLAPSE_UPDATED',
+  'SETTINGS_OVERLAY_COLLAPSE_LABEL',
+  'SETTINGS_JS_DELETE_ACCOUNT_TYPE_PHRASE',
+  'SETTINGS_JS_DELETE_DATA_TYPE_PHRASE',
+  'SETTINGS_JS_DELETE_DATA_IN_PROGRESS',
+  'SETTINGS_JS_DELETE_DATA_COMPLETE',
+  'SETTINGS_JS_SECURITY_CUSTOM',
+  'SETTINGS_JS_SECURITY_CUSTOM_HINT',
+  'SETTINGS_JS_SECURITY_HINT_SUFFIX',
+  'SETTINGS_JS_DATA_PORTABILITY_CONSUMED',
+  'SETTINGS_JS_DATA_PORTABILITY_COPY_FAILED',
+  'SETTINGS_JS_CODE_EXPIRES_FMT',
+  'SETTINGS_JS_CODE_EXPIRED',
+  'SETTINGS_JS_CODES_EXPIRE_MINUTES_FMT',
+  'SETTINGS_JS_MODAL_CONFIRM_IMPORT',
+  'SETTINGS_JS_SECURITY_REMAINING_FMT',
+  'SETTINGS_JS_SECURITY_EXPIRED',
+  'SETTINGS_RECOVERY_SEND_BUTTON',
+  'SETTINGS_SECURITY_BALANCED',
+  'SETTINGS_SECURITY_LOW',
+  'SETTINGS_SECURITY_HIGH',
+  'BILLING_JS_PREMIUM_ACTIVE',
+  'BILLING_JS_PREMIUM_DISABLED',
+  'BILLING_JS_CONFIRMING',
+  'BILLING_JS_LOADING_STATUS',
+  'BILLING_JS_DOWNGRADE_HELP_SCHEDULED',
+  'BILLING_JS_DOWNGRADE_HELP_DEFAULT',
+  'AUTH_JS_WEBAUTHN_UNSUPPORTED',
 ];
 $i18n = [];
 foreach ($i18nKeys as $i18nKey) {
@@ -43,6 +104,16 @@ import PC from "<?php echo Environment::appURL('js/'); ?>";
 import PW from "<?php echo Environment::appURL('js/phantomwing/'); ?>";
 import { initializeBillingSection } from "../core/billing.js";
 import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from "../core/binary-codec.js";
+
+const SETTINGS_T = <?php echo json_encode($i18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+const formatSettingsMessage = (template, replacements = {}) => {
+  let message = String(template || '');
+  Object.entries(replacements).forEach(([key, value]) => {
+    message = message.split(`{${key}}`).join(String(value ?? ''));
+  });
+  return message;
+};
 
 const isDebugEnabled = () => window.PAYCAL_DEBUG === true;
 const debugLog = (...args) => {
@@ -121,90 +192,6 @@ const broadcastDebugSettingsUpdate = () => {
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  const initDelayedHoverHelp = () => {
-    const targets = Array.from(document.querySelectorAll('[data-hover-help]'));
-    if (targets.length === 0) {
-      return;
-    }
-
-    const tooltipEl = document.createElement('div');
-    tooltipEl.className = 'hover_help_tooltip';
-    tooltipEl.setAttribute('role', 'tooltip');
-    tooltipEl.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(tooltipEl);
-
-    let showTimer = null;
-    let activeTarget = null;
-
-    const clearShowTimer = () => {
-      if (showTimer !== null) {
-        window.clearTimeout(showTimer);
-        showTimer = null;
-      }
-    };
-
-    const hideTooltip = () => {
-      clearShowTimer();
-      activeTarget = null;
-      tooltipEl.classList.remove('is-visible');
-      tooltipEl.setAttribute('aria-hidden', 'true');
-    };
-
-    const positionTooltip = (targetEl) => {
-      if (!targetEl) {
-        return;
-      }
-      const margin = '1.5rem';
-      tooltipEl.style.bottom = margin;
-      tooltipEl.style.right = margin;
-      tooltipEl.style.top = 'auto';
-      tooltipEl.style.left = 'auto';
-    };
-
-    const showTooltip = (targetEl) => {
-      const helpText = (targetEl?.getAttribute('data-hover-help') || '').trim();
-      if (!helpText) {
-        return;
-      }
-
-      activeTarget = targetEl;
-      tooltipEl.textContent = helpText;
-      tooltipEl.classList.add('is-visible');
-      tooltipEl.setAttribute('aria-hidden', 'false');
-      positionTooltip(targetEl);
-    };
-
-    const scheduleShow = (targetEl) => {
-      clearShowTimer();
-      showTimer = window.setTimeout(() => {
-        showTimer = null;
-        showTooltip(targetEl);
-      }, 250);
-    };
-
-    targets.forEach((targetEl) => {
-      targetEl.addEventListener('mouseenter', () => scheduleShow(targetEl));
-      targetEl.addEventListener('mouseleave', hideTooltip);
-      targetEl.addEventListener('focus', () => scheduleShow(targetEl));
-      targetEl.addEventListener('blur', hideTooltip);
-      targetEl.addEventListener('mousedown', hideTooltip);
-    });
-
-    window.addEventListener('scroll', () => {
-      if (activeTarget && tooltipEl.classList.contains('is-visible')) {
-        positionTooltip(activeTarget);
-      }
-    }, true);
-
-    window.addEventListener('resize', () => {
-      if (activeTarget && tooltipEl.classList.contains('is-visible')) {
-        positionTooltip(activeTarget);
-      }
-    });
-  };
-
-  initDelayedHoverHelp();
-
   const params = new URLSearchParams(window.location.search);
 
   if (params.get('passkey_onboarding') === '1') {
@@ -223,7 +210,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const createRecoveryKeyButtonEl = document.getElementById('create_recovery_key_btn');
   const createRecoveryKeyStatusEl = document.getElementById('create_recovery_key_status');
 
-  const WEB_AUTHN_UNSUPPORTED_MESSAGE = 'This browser cannot use passkeys. Use a WebAuthn-capable browser on a secure connection (HTTPS).';
+  const WEB_AUTHN_UNSUPPORTED_MESSAGE = SETTINGS_T.AUTH_JS_WEBAUTHN_UNSUPPORTED;
   let passkeyActionHardDisabled = false;
   const isWebAuthnCapableBrowser = () => {
     const hasPublicKeyCredential = typeof window.PublicKeyCredential !== 'undefined';
@@ -531,9 +518,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!Array.isArray(credentials) || credentials.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'passkey_credential_detail';
-      empty.textContent = 'No passkeys registered yet.';
+      empty.textContent = SETTINGS_T.SETTINGS_JS_PASSKEYS_NONE;
       passkeyCredentialsListEl.appendChild(empty);
-      setPasskeyGridStatus('Passkeys list loaded. No passkeys registered yet.');
+      setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_LOADED_NONE);
       return;
     }
 
@@ -620,11 +607,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     passkeyCredentialsListEl.appendChild(table);
-    setPasskeyGridStatus(`Passkeys list loaded. ${credentials.length} passkey${credentials.length === 1 ? '' : 's'} available.`);
+    setPasskeyGridStatus(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_PASSKEYS_LOADED_COUNT, { count: credentials.length }));
   };
 
   const refreshPasskeyCredentials = async () => {
-    setPasskeyGridStatus('Passkeys list loaded. Checking passkeys...');
+    setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_CHECKING);
 
     try {
       const listResponse = await fetch('/api/v1/auth/passkey/list', {
@@ -646,8 +633,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       renderPasskeyCredentials(listPayload.credentials || []);
     } catch (error) {
-      setPasskeyStatus('Unable to load passkeys. Try again.', 'error');
-      setPasskeyGridStatus('Unable to load passkeys. Try again.');
+      setPasskeyStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_LOAD_FAILED, 'error');
+      setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_LOAD_FAILED);
       PW.error(error);
     }
   };
@@ -658,7 +645,7 @@ document.addEventListener("DOMContentLoaded", async () => {
    */
   const updatePasskeyName = async (credentialId, newName) => {
     try {
-      setPasskeyGridStatus('Updating passkey name...');
+      setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_UPDATE_NAME_PROGRESS);
       
       const response = await fetch('/api/v1/auth/passkey/update', {
         method: 'POST',
@@ -668,20 +655,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       if (!response.ok) {
-        setPasskeyGridStatus('Unable to update passkey name.');
+        setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_UPDATE_NAME_FAILED);
         PW.error(`[PASSKEY] Update failed: ${response.status}`);
         return;
       }
 
       const result = await response.json();
       if (result.status !== 'success') {
-        setPasskeyGridStatus('Unable to update passkey name.');
+        setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_UPDATE_NAME_FAILED);
         PW.error(`[PASSKEY] Update failed: ${result.message || 'unknown error'}`);
       } else {
-        setPasskeyGridStatus('Passkey name updated.');
+        setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_UPDATE_NAME_SUCCESS);
       }
     } catch (err) {
-      setPasskeyGridStatus('Unable to update passkey name.');
+      setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_UPDATE_NAME_FAILED);
       PW.error(err);
     }
   };
@@ -692,8 +679,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      setPasskeyStatus('Removing passkey...', 'info');
-      setPasskeyGridStatus('Removing passkey...');
+      setPasskeyStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_REMOVING, 'info');
+      setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_REMOVING);
       const response = await fetch('/api/v1/auth/passkey/delete', {
         method: 'POST',
         credentials: 'include',
@@ -706,11 +693,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error(payload.message || 'Unable to remove passkey.');
       }
 
-      setPasskeyStatus('Passkey removed.', 'success');
+      setPasskeyStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_REMOVED, 'success');
       await refreshPasskeyCredentials();
     } catch (error) {
-      setPasskeyStatus(simplifyPasskeyStatusMessage(error, 'Unable to update passkeys. Try again.'), 'error');
-      setPasskeyGridStatus('Unable to update passkeys. Try again.');
+      setPasskeyStatus(simplifyPasskeyStatusMessage(error, SETTINGS_T.SETTINGS_JS_PASSKEYS_UPDATE_FAILED), 'error');
+      setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_UPDATE_FAILED);
       PW.error(error);
     }
   };
@@ -1076,7 +1063,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       resendBtn.hidden = !showStep2;
     }
     if (prevBtn) {
-      prevBtn.textContent = showStep2 ? 'Previous' : 'Cancel';
+      prevBtn.textContent = showStep2 ? SETTINGS_T.PREVIOUS : SETTINGS_T.CANCEL;
     }
 
     updateChangeEmailVerifyState();
@@ -1210,13 +1197,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     resetChangeEmailModal();
-    PC.closeModal('modal_change_email', 'Change Email');
+    PC.closeModal('modal_change_email', SETTINGS_T.CHANGE_EMAIL);
   });
 
   if (document.getElementById('call_edit_details_modal')) {
-    PC.addClickAndEnterListener('call_edit_details_modal', (e) => { e.preventDefault(); PC.openModal('modal_edit_details', 'Account Details'); });
+    PC.addClickAndEnterListener('call_edit_details_modal', (e) => { e.preventDefault(); PC.openModal('modal_edit_details', SETTINGS_T.SETTINGS_ACCOUNT_DETAILS_TITLE); });
   }
-  PC.addClickAndEnterListener('edit_details_cancel_btn', (e) => { e.preventDefault(); PC.closeModal('modal_edit_details', 'Account Details'); });
+  PC.addClickAndEnterListener('edit_details_cancel_btn', (e) => { e.preventDefault(); PC.closeModal('modal_edit_details', SETTINGS_T.SETTINGS_ACCOUNT_DETAILS_TITLE); });
   const CHANGE_EMAIL_I18N = {
     enterBothEmails: <?php echo json_encode(Strings::i18n('CHANGE_EMAIL_STATUS_ENTER_BOTH_EMAILS'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>,
     enterNewEmail: <?php echo json_encode(Strings::i18n('CHANGE_EMAIL_ERROR_ENTER_NEW_EMAIL'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>,
@@ -1248,8 +1235,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     PC.addClickAndEnterListener('edit_details_change_email_link', (e) => {
       e.preventDefault();
       resetChangeEmailModal();
-      PC.closeModal('modal_edit_details', 'Account Details');
-      PC.openModal('modal_change_email', 'Change Email');
+      PC.closeModal('modal_edit_details', SETTINGS_T.SETTINGS_ACCOUNT_DETAILS_TITLE);
+      PC.openModal('modal_change_email', SETTINGS_T.CHANGE_EMAIL);
     });
   }
 
@@ -1304,7 +1291,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (txn) txn.value = data.txn_id || '';
         if (oldHint) oldHint.textContent = data.old_email_hint || '';
         if (newHint) newHint.textContent = data.new_email_hint || '';
-        if (expiry) expiry.textContent = `Codes expire in ${data.expires_in_minutes} minutes`;
+        if (expiry) expiry.textContent = formatSettingsMessage(SETTINGS_T.SETTINGS_JS_CODES_EXPIRE_MINUTES_FMT, { minutes: data.expires_in_minutes });
         if (statusEl) statusEl.textContent = CHANGE_EMAIL_I18N.codesSent;
 
         toggleChangeEmailStep(true);
@@ -1315,7 +1302,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (statusEl) statusEl.textContent = apiMessage || `Failed to send codes. ${fallback}`;
       }
     } catch (error) {
-      if (statusEl) statusEl.textContent = `${CHANGE_EMAIL_I18N.requestFailedPrefix} ${String(error?.message || 'unknown error')}`;
+      if (statusEl) statusEl.textContent = `${CHANGE_EMAIL_I18N.requestFailedPrefix} ${String(error?.message || SETTINGS_T.BUSINESSES_UNKNOWN_ERROR)}`;
       PW.error(error);
     }
   });
@@ -1359,7 +1346,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         setFieldErrorState(newCodeInput, 'change_email_new_code_error', '');
         if (statusEl) statusEl.textContent = CHANGE_EMAIL_I18N.emailUpdated;
         setTimeout(() => {
-          PC.closeModal('modal_change_email', 'Change Email');
+          PC.closeModal('modal_change_email', SETTINGS_T.CHANGE_EMAIL);
           location.reload();
         }, 1000);
       } else if (statusEl) {
@@ -1371,7 +1358,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         setFieldErrorState(newCodeInput, 'change_email_new_code_error', errorText);
       }
     } catch (error) {
-      if (statusEl) statusEl.textContent = `${CHANGE_EMAIL_I18N.requestFailedPrefix} ${String(error?.message || 'unknown error')}`;
+      if (statusEl) statusEl.textContent = `${CHANGE_EMAIL_I18N.requestFailedPrefix} ${String(error?.message || SETTINGS_T.BUSINESSES_UNKNOWN_ERROR)}`;
       PW.error(error);
     }
   });
@@ -1402,7 +1389,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         statusEl.textContent = apiMessage || `Failed to resend codes. ${fallback}`;
       }
     } catch (error) {
-      if (statusEl) statusEl.textContent = `${CHANGE_EMAIL_I18N.requestFailedPrefix} ${String(error?.message || 'unknown error')}`;
+      if (statusEl) statusEl.textContent = `${CHANGE_EMAIL_I18N.requestFailedPrefix} ${String(error?.message || SETTINGS_T.BUSINESSES_UNKNOWN_ERROR)}`;
       PW.error(error);
     }
   });
@@ -1413,10 +1400,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (editDetailsModal?.open) {
       PC.closeModal('modal_edit_details', 'Account Details');
     }
-    PC.openModal('modal_delete_account', 'Delete Account');
+    PC.openModal('modal_delete_account', SETTINGS_T.DELETE_ACCOUNT);
     PC.getElement('delete_account_confirm_phrase').focus();
   });
-  PC.addClickAndEnterListener('delete_account_cancel_btn', (e) => { e.preventDefault(); PC.closeModal('modal_delete_account', 'Delete Account'); });
+  PC.addClickAndEnterListener('delete_account_cancel_btn', (e) => { e.preventDefault(); PC.closeModal('modal_delete_account', SETTINGS_T.DELETE_ACCOUNT); });
 
 
   const deleteAccountForm = PC.getElement('delete_account_form');
@@ -1434,9 +1421,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (phrase !== 'DELETE MY ACCOUNT') {
         event.preventDefault();
         if (deleteStatus) {
-          deleteStatus.textContent = 'Type DELETE MY ACCOUNT exactly to confirm account deletion.';
+          deleteStatus.textContent = SETTINGS_T.SETTINGS_JS_DELETE_ACCOUNT_TYPE_PHRASE;
         }
-        setFieldErrorState(deleteConfirmInput, 'delete_account_confirm_error', 'Type DELETE MY ACCOUNT exactly to confirm account deletion.');
+        setFieldErrorState(deleteConfirmInput, 'delete_account_confirm_error', SETTINGS_T.SETTINGS_JS_DELETE_ACCOUNT_TYPE_PHRASE);
         deleteConfirmInput.focus();
         deleteConfirmInput.select();
       } else {
@@ -1550,7 +1537,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (firstInvalidField) {
         if (editDetailsStatus) {
-          editDetailsStatus.textContent = 'Please correct the highlighted fields and try again.';
+          editDetailsStatus.textContent = SETTINGS_T.BUSINESSES_CORRECT_HIGHLIGHTED_FIELDS;
         }
         firstInvalidField.focus();
         return false;
@@ -1611,7 +1598,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         PC.closeModal('modal_edit_details', 'Account Details');
       }).catch(error => {
         if (editDetailsStatus) {
-          editDetailsStatus.textContent = 'Unable to save account details right now. Please try again.';
+          editDetailsStatus.textContent = SETTINGS_T.BUSINESSES_SAVE_ACCOUNT_DETAILS_FAILED;
         }
         PW.error(error);
       });
@@ -1674,7 +1661,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       sendBtn.dataset.hoverHelp = 'Request a new recovery email verification code.';
       sendBtn.disabled = isCoolingDown || recoveryEmailState.isRequestInFlight;
     } else {
-      sendBtn.textContent = 'Send';
+      sendBtn.textContent = SETTINGS_T.SETTINGS_RECOVERY_SEND_BUTTON;
       sendBtn.setAttribute('aria-label', 'Send Verification Code');
       sendBtn.dataset.hoverHelp = 'Send a one-time code to verify this recovery email.';
       sendBtn.disabled = recoveryEmailState.isRequestInFlight;
@@ -1754,11 +1741,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (timeRemaining > 0) {
       const minutes = Math.floor(timeRemaining / 60000);
       const seconds = Math.floor((timeRemaining % 60000) / 1000);
-      expiryEl.textContent = `Code expires in ${minutes}:${String(seconds).padStart(2, '0')}`;
+      expiryEl.textContent = formatSettingsMessage(SETTINGS_T.SETTINGS_JS_CODE_EXPIRES_FMT, { time: `${minutes}:${String(seconds).padStart(2, '0')}` });
       
       setTimeout(updateExpiryDisplay, 1000);
     } else {
-      expiryEl.textContent = 'Code has expired. Please request a new one.';
+      expiryEl.textContent = SETTINGS_T.SETTINGS_JS_CODE_EXPIRED;
       recoveryEmailState.codeExpiresAt = null;
       const codeInput = PC.getElement('recovery_email_code_input');
       if (codeInput) codeInput.disabled = true;
@@ -2131,7 +2118,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const submitPromise = PC.updateResource('settings/calendar', formData);
 
       submitPromise.then(() => {
-        PC.showToast('Work entry fields updated', 'save');
+        PC.showToast(SETTINGS_T.SETTINGS_JS_WORK_ENTRY_FIELDS_UPDATED, 'save');
       }).catch(error => PW.error(error));
     });
   });
@@ -2189,10 +2176,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         formData.append('csrf_token', csrfToken);
       }
       PC.updateResource('settings/audio', formData).then(() => {
-        const modeLabel = PC.state.audio_feedback === 'none' ? 'Muted' : 'Enabled';
-        PC.showToast(`Audio ${modeLabel.toLowerCase()}`, 'save', 3000, true);
+        const modeLabel = PC.state.audio_feedback === 'none'
+          ? SETTINGS_T.SETTINGS_JS_AUDIO_MUTED
+          : SETTINGS_T.SETTINGS_JS_AUDIO_ENABLED;
+        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_AUDIO_TOAST_FMT, { mode: modeLabel }), 'save', 3000, true);
         if (previousAudioFeedback !== 'all' && PC.state.audio_feedback === 'all') {
-          PC.textToSpeech('Audio enabled');
+          PC.textToSpeech(SETTINGS_T.SETTINGS_JS_AUDIO_ENABLED_SPEECH);
         }
       }).catch(error=> PW.error(error));
     });
@@ -2241,7 +2230,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     PC.updateResource('settings/audio', formData).then(() => {
-      PC.showToast(`Voice updated to ${voiceLabel}`, 'save', 3000, true);
+      PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_VOICE_UPDATED_FMT, { voice: voiceLabel }), 'save', 3000, true);
       if (PC.state.audio_feedback === 'all') {
         PC.textToSpeech(voiceLabel);
       }
@@ -2339,7 +2328,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const csrf = styleForm.querySelector('input[name="csrf_token"]');
       if (csrf) formData.append('csrf_token', csrf.value);
       PC.updateResource('settings/style', formData).then(() => {
-        PC.showToast(`Theme updated to ${theme} (${variant})`, 'save', 3000, true);
+        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_THEME_UPDATED_FMT, { theme, variant }), 'save', 3000, true);
         if (PC.state.audio_feedback === 'all') {
           PC.textToSpeech(`${theme} ${variant}`);
         }
@@ -2362,7 +2351,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (csrf) formData.append('csrf_token', csrf.value);
         PC.updateResource('settings/style', formData).then(() => {
           const langName = PC.getLanguageName(language);
-          PC.showToast(`Language updated`, 'save', 3000, true);
+          PC.showToast(SETTINGS_T.SETTINGS_JS_LANGUAGE_UPDATED, 'save', 3000, true);
           if (PC.state.audio_feedback === 'all') {
             PC.textToSpeech(langName);
           }
@@ -2442,7 +2431,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const csrf = document.querySelector('#account_style_form input[name="csrf_token"]');
       if (csrf) formData.append('csrf_token', csrf.value);
       PC.updateResource('settings/style', formData).then(() => {
-        PC.showToast('Typography preference updated', 'save', 3000, true);
+        PC.showToast(SETTINGS_T.SETTINGS_JS_TYPOGRAPHY_UPDATED, 'save', 3000, true);
         if (PC.state.audio_feedback === 'all') {
           PC.textToSpeech(spokenLabel);
         }
@@ -2450,6 +2439,40 @@ document.addEventListener("DOMContentLoaded", async () => {
       }).catch(error=> PW.error(error));
     });
   });
+
+  const helpPopupTimeoutSlider = PC.getElement('help_popup_timeout_seconds');
+  const helpPopupTimeoutOutput = PC.getElement('help_popup_timeout_seconds_output');
+  const formatHelpPopupTimeoutLabel = (seconds) => `${Number(seconds) || 0}s`;
+
+  if (helpPopupTimeoutSlider instanceof HTMLInputElement) {
+    const updateHelpPopupTimeoutDisplay = () => {
+      const timeoutSeconds = parseInt(helpPopupTimeoutSlider.value, 10) || 0;
+      if (helpPopupTimeoutOutput) {
+        helpPopupTimeoutOutput.value = formatHelpPopupTimeoutLabel(timeoutSeconds);
+      }
+      helpPopupTimeoutSlider.setAttribute('aria-valuenow', String(timeoutSeconds));
+    };
+
+    updateHelpPopupTimeoutDisplay();
+
+    helpPopupTimeoutSlider.addEventListener('input', updateHelpPopupTimeoutDisplay);
+
+    helpPopupTimeoutSlider.addEventListener('change', () => {
+      const timeoutSeconds = helpPopupTimeoutSlider.value;
+      const formData = new FormData();
+      formData.append('help_popup_timeout_seconds', timeoutSeconds);
+      const csrf = document.querySelector('#account_style_form input[name="csrf_token"]');
+      if (csrf) formData.append('csrf_token', csrf.value);
+      PC.updateResource('settings/style', formData).then(() => {
+        PC.config.help_popup_timeout_seconds = Number(timeoutSeconds) || 0;
+        PC.showToast(SETTINGS_T.SETTINGS_JS_HELP_POPUP_TIMEOUT_UPDATED, 'save', 3000, true);
+        if (PC.state.audio_feedback === 'all') {
+          PC.textToSpeech(formatHelpPopupTimeoutLabel(timeoutSeconds));
+        }
+      }).catch(error => PW.error(error));
+    });
+  }
+
   const submitNavPositionPreference = (fieldName, attributeName, statusLabel) => {
     const checked = PC.query(`input[name="${fieldName}"]:checked`);
     if (!checked) {
@@ -2499,7 +2522,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Disable the distance slider when proximity is off.
         const slider = PC.query('#nav_proximity_px');
         if (slider) slider.disabled = !enabled;
-        PC.showToast('Proximity ' + (enabled ? 'on' : 'off'), 'save', 3000, true);
+        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_PROXIMITY_FMT, { state: enabled ? SETTINGS_T.SETTINGS_JS_TOGGLE_ON : SETTINGS_T.SETTINGS_JS_TOGGLE_OFF }), 'save', 3000, true);
       });
     });
   })();
@@ -2528,23 +2551,69 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   /* Sidebar overlay-vs-push toggle (localStorage only, no server round-trip) */
   (() => {
-    const navToggle     = (typeof window !== 'undefined' && window.NavToggle) ? window.NavToggle : null;
-    const pushRadio    = PC.query('#nav_overlay_push');
-    const overlayRadio = PC.query('#nav_overlay_overlay');
+    const navToggle      = (typeof window !== 'undefined' && window.NavToggle) ? window.NavToggle : null;
+    const pushRadio      = PC.query('#nav_overlay_push');
+    const overlayRadio   = PC.query('#nav_overlay_overlay');
+    const collapseSlider = PC.query('#overlay_sidebar_timeout_seconds');
     if (!pushRadio || !overlayRadio) return;
+
+    const syncOverlayCollapseEnabled = (overlayOn) => {
+      if (collapseSlider instanceof HTMLInputElement) {
+        collapseSlider.disabled = !overlayOn;
+      }
+    };
 
     // Initialise from current NavToggle state (which reflects localStorage).
     const overlayOn = navToggle ? navToggle.isOverlayMode() : false;
     (overlayOn ? overlayRadio : pushRadio).checked = true;
+    syncOverlayCollapseEnabled(overlayOn);
 
     [pushRadio, overlayRadio].forEach(radio => {
       radio.addEventListener('change', () => {
         const overlay = overlayRadio.checked;
         if (navToggle) navToggle.setOverlayMode(overlay);
-        PC.showToast('Overlay ' + (overlay ? 'on' : 'off'), 'save', 3000, true);
+        syncOverlayCollapseEnabled(overlay);
+        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_OVERLAY_FMT, { state: overlay ? SETTINGS_T.SETTINGS_JS_TOGGLE_ON : SETTINGS_T.SETTINGS_JS_TOGGLE_OFF }), 'save', 3000, true);
       });
     });
   })();
+
+  const overlaySidebarTimeoutSlider = PC.getElement('overlay_sidebar_timeout_seconds');
+  const overlaySidebarTimeoutOutput = PC.getElement('overlay_sidebar_timeout_seconds_output');
+  const formatOverlaySidebarTimeoutLabel = (seconds) => `${Number(seconds) || 0}s`;
+
+  if (overlaySidebarTimeoutSlider instanceof HTMLInputElement) {
+    const navToggle = (typeof window !== 'undefined' && window.NavToggle) ? window.NavToggle : null;
+
+    const updateOverlaySidebarTimeoutDisplay = () => {
+      const timeoutSeconds = parseInt(overlaySidebarTimeoutSlider.value, 10) || 0;
+      if (overlaySidebarTimeoutOutput) {
+        overlaySidebarTimeoutOutput.value = formatOverlaySidebarTimeoutLabel(timeoutSeconds);
+      }
+      overlaySidebarTimeoutSlider.setAttribute('aria-valuenow', String(timeoutSeconds));
+    };
+
+    updateOverlaySidebarTimeoutDisplay();
+
+    overlaySidebarTimeoutSlider.addEventListener('input', updateOverlaySidebarTimeoutDisplay);
+
+    overlaySidebarTimeoutSlider.addEventListener('change', () => {
+      const timeoutSeconds = overlaySidebarTimeoutSlider.value;
+      const formData = new FormData();
+      formData.append('overlay_sidebar_timeout_seconds', timeoutSeconds);
+      const csrf = document.querySelector('#account_style_form input[name="csrf_token"]');
+      if (csrf) formData.append('csrf_token', csrf.value);
+      PC.updateResource('settings/style', formData).then(() => {
+        const numericTimeout = Number(timeoutSeconds) || 0;
+        PC.config.overlay_sidebar_timeout_seconds = numericTimeout;
+        if (navToggle) navToggle.setOverlaySidebarTimeout(numericTimeout);
+        PC.showToast(SETTINGS_T.SETTINGS_JS_OVERLAY_COLLAPSE_UPDATED, 'save', 3000, true);
+        if (PC.state.audio_feedback === 'all') {
+          PC.textToSpeech(formatOverlaySidebarTimeoutLabel(timeoutSeconds));
+        }
+      }).catch(error => PW.error(error));
+    });
+  }
 
 
   /* PAY PERIODS */
@@ -2579,6 +2648,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const payPeriodCurrentCalendar = document.getElementById('pay_period_current_calendar');
   const payPeriodPreviewSummary = document.getElementById('pay_period_preview_summary');
   const payPeriodPreviewCalendar = document.getElementById('pay_period_preview_calendar');
+  const payPeriodLocale = PC?.config?.USER_LOCALE || document.documentElement.lang || undefined;
   const canonicalWeekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const weekdayFullNames = <?php echo json_encode([
     Strings::i18n('WEEKDAY_SUNDAY'),
@@ -2591,8 +2661,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>;
   const dayNames = (() => {
     try {
-      const locale = document.documentElement.lang || undefined;
-      const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+      const formatter = new Intl.DateTimeFormat(payPeriodLocale, { weekday: 'short' });
       const sunday = new Date(Date.UTC(2026, 0, 4));
 
       return canonicalWeekdayNames.map((_, index) => formatter.format(new Date(sunday.getTime() + (index * 86400000))));
@@ -2673,7 +2742,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
   const startOfWeek = (d) => addDays(d, -d.getDay());
   const inRange = (d, start, endExclusive) => d >= start && d < endExclusive;
-  const monthLabel = (d) => d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const monthLabel = (d) => d.toLocaleDateString(payPeriodLocale, { month: 'long', year: 'numeric' });
   const buildRibbonCalendar = (periods, graceDays, today) => {
     const header = dayNames.map((d) => `<th class="pp_day_head">${d}</th>`).join('');
     const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -2940,11 +3009,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (presetName in securityPresets) {
       const preset = securityPresets[presetName];
       securityLevelValueEl.textContent = preset.label;
-      securityLevelHintEl.textContent = `${preset.hint} Shorter sessions increase protection on shared devices.`;
+      securityLevelHintEl.textContent = `${preset.hint} ${SETTINGS_T.SETTINGS_JS_SECURITY_HINT_SUFFIX}`;
       securitySliderEl.value = String(preset.slider);
     } else {
-      securityLevelValueEl.textContent = 'Custom';
-      securityLevelHintEl.textContent = 'Custom values are active. Shorter sessions increase protection on shared devices.';
+      securityLevelValueEl.textContent = SETTINGS_T.SETTINGS_JS_SECURITY_CUSTOM;
+      securityLevelHintEl.textContent = SETTINGS_T.SETTINGS_JS_SECURITY_CUSTOM_HINT;
     }
   };
 
@@ -2989,7 +3058,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const remaining = Math.max(0, total - elapsed);
       const el = PC.getElement(remainingIds[key]);
       if (el) {
-        el.textContent = remaining > 0 ? `${formatSeconds(remaining)} remaining` : 'Expired';
+        el.textContent = remaining > 0
+          ? formatSettingsMessage(SETTINGS_T.SETTINGS_JS_SECURITY_REMAINING_FMT, { time: formatSeconds(remaining) })
+          : SETTINGS_T.SETTINGS_JS_SECURITY_EXPIRED;
       }
     });
   };
@@ -3385,7 +3456,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       appendDataPortabilityLog('Commit completed', summary);
       dataPortabilityState.preparedImportId = '';
       if (dataPortabilityEls.importExpires) {
-        dataPortabilityEls.importExpires.textContent = 'Consumed';
+        dataPortabilityEls.importExpires.textContent = SETTINGS_T.SETTINGS_JS_DATA_PORTABILITY_CONSUMED;
       }
     } catch (error) {
       const message = `Commit request failed: ${String(error?.message || 'unknown error')}`;
@@ -3419,7 +3490,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         setDataPortabilityStatus('Payload copied to clipboard.', 'info');
       } catch (error) {
         appendDataPortabilityLog('Copy failed', 'Clipboard access was denied.');
-        setDataPortabilityStatus('Unable to copy payload automatically. Copy manually from the text area.', 'error');
+        setDataPortabilityStatus(SETTINGS_T.SETTINGS_JS_DATA_PORTABILITY_COPY_FAILED, 'error');
         PW.error(error);
       }
     });
@@ -3465,7 +3536,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         summaryEl.textContent = counts ? `Staged: ${counts}` : '';
       }
       if (confirmDialog) {
-        PC.openModal('modal_import_confirm', 'Confirm Import');
+        PC.openModal('modal_import_confirm', SETTINGS_T.SETTINGS_JS_MODAL_CONFIRM_IMPORT);
       } else {
         commitAccountDataImport();
       }
@@ -3475,7 +3546,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const importConfirmProceedBtn = PC.getElement('import_confirm_proceed_btn');
   if (importConfirmProceedBtn) {
     importConfirmProceedBtn.addEventListener('click', () => {
-      PC.closeModal('modal_import_confirm', 'Confirm Import');
+      PC.closeModal('modal_import_confirm', SETTINGS_T.SETTINGS_JS_MODAL_CONFIRM_IMPORT);
       commitAccountDataImport();
     });
   }
@@ -3483,7 +3554,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const importConfirmCancelBtn = PC.getElement('import_confirm_cancel_btn');
   if (importConfirmCancelBtn) {
     importConfirmCancelBtn.addEventListener('click', () => {
-      PC.closeModal('modal_import_confirm', 'Confirm Import');
+      PC.closeModal('modal_import_confirm', SETTINGS_T.SETTINGS_JS_MODAL_CONFIRM_IMPORT);
       appendDataPortabilityLog('Commit cancelled', 'Import was not applied.');
     });
   }
@@ -3513,5 +3584,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     successUrl: '/api/v1/billing/checkout-return',
     cancelUrl: '/profile/?billing=cancel',
     returnUrl: '/profile/#panel-billing',
+    messages: {
+      success: SETTINGS_T.BILLING_JS_PREMIUM_ACTIVE,
+      cancel: SETTINGS_T.BILLING_JS_PREMIUM_DISABLED,
+      confirming: SETTINGS_T.BILLING_JS_CONFIRMING,
+      loadingStatus: SETTINGS_T.BILLING_JS_LOADING_STATUS,
+      downgradeHelpScheduled: SETTINGS_T.BILLING_JS_DOWNGRADE_HELP_SCHEDULED,
+      downgradeHelpDefault: SETTINGS_T.BILLING_JS_DOWNGRADE_HELP_DEFAULT,
+    },
   });
 });

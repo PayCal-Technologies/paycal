@@ -33,6 +33,7 @@ enum ForecastWindowType: string
   case NextPayPeriod  = 'next_pay_period';
   case Next30Days     = 'next_30_days';
   case Quarter        = 'quarter';
+  case YearProjection = 'year_projection';
   case ProjectTotal   = 'project_total';
 }
 
@@ -109,6 +110,20 @@ final class ForecastWindow
   }
 
   /**
+   * Window from anchor through the end of the calendar year (exclusive end).
+   */
+  public static function yearProjection(\DateTimeImmutable $anchor): self
+  {
+    $yearEnd = new \DateTimeImmutable($anchor->format('Y') . '-12-31');
+    $end = $yearEnd->modify('+1 day');
+    if ($end <= $anchor) {
+      $end = $anchor->modify('+1 day');
+    }
+
+    return new self(ForecastWindowType::YearProjection, $anchor, $end);
+  }
+
+  /**
    * Custom project window with an explicit end date (e.g. shutdown completion).
    *
    * @param \DateTimeImmutable $start Project start date.
@@ -138,6 +153,7 @@ final class ForecastWindow
       ForecastWindowType::NextPayPeriod => 'Next Pay Period',
       ForecastWindowType::Next30Days    => 'Next 30 Days',
       ForecastWindowType::Quarter       => 'Quarter',
+      ForecastWindowType::YearProjection => 'Year Projection',
       ForecastWindowType::ProjectTotal  => 'Project Total',
     };
   }

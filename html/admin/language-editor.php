@@ -5,18 +5,19 @@ use PayCal\Domain\AdminSurface;
 use PayCal\Domain\Config\Environment;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Render;
+use PayCal\Domain\Strings;
 
 require_once __DIR__ . '/../config.php';
 
 $currentPage = 'PAGE_ADMIN';
-$pageTitle = 'Language Editor - [PayCal]';
+$pageTitle = Strings::i18n('ADMIN_LANGUAGE_EDITOR') . ' - [PayCal]';
 $message = '&nbsp;';
 
 
 Authentication::redirectHomeIfUnauthenticated();
 AdminSurface::redirectHomeIfPageUnavailable('/admin/language-editor/');
 
-$pageLabel = 'Language Editor';
+$pageLabel = Strings::i18n('ADMIN_LANGUAGE_EDITOR');
 $pageLanguage = USER_LANGUAGE;
 
 $supportedLanguages = ['en', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'hi', 'tl', 'tr'];
@@ -73,7 +74,7 @@ echo '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL('admin'),
     <h2>Language Editor</h2>
     <p class='lang-editor__desc'>Edit and save language bundles for all supported locales.</p>
   </div>
-  <div class='lang-editor__tabs' role='tablist' aria-label='Language selector'>
+  <div class='lang-editor__tabs' role='tablist' aria-label='<?= htmlspecialchars(Strings::i18n('ADMIN_LANGUAGE_EDITOR_TABLIST_ARIA'), ENT_QUOTES, 'UTF-8') ?>'>
     <?php
     $langs = ['en' => 'English', 'de' => 'German', 'fr' => 'French', 'es' => 'Spanish', 'it' => 'Italian', 'nl' => 'Dutch', 'pt' => 'Portuguese', 'hi' => 'Hindi', 'tl' => 'Tagalog', 'tr' => 'Turkish'];
 foreach ($langs as $code => $name) {

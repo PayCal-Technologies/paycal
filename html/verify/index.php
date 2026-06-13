@@ -7,6 +7,7 @@ use PayCal\Domain\Strings;
 require_once '../config.php';
 
 $i18nKeys = [
+  'SKIP_TO_CONTENT',
   'VERIFY_ACCOUNT_HEADING',
   'VERIFY_ACCOUNT_META_TITLE',
   'VERIFY_BACK_TO_REGISTER',
@@ -33,17 +34,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 }
+$pageLanguage = defined('USER_LANGUAGE') ? (string) USER_LANGUAGE : 'en';
+$cssVersion = \PayCal\Domain\Environment::appVersion();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo htmlspecialchars(str_replace('_', '-', $pageLanguage), ENT_QUOTES, 'UTF-8'); ?>">
 <head>
   <meta charset="UTF-8">
   <title><?php echo htmlspecialchars($i18n['VERIFY_ACCOUNT_META_TITLE'], ENT_QUOTES, 'UTF-8'); ?></title>
-  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/utilities/?v=<?php echo htmlspecialchars($cssVersion, ENT_QUOTES, 'UTF-8'); ?>">
   <link rel="stylesheet" href="/css/auth/verify/">
 </head>
 <body>
-  <div class="container">
+  <a id="skip_to_content" class="skip_link" href="#main" accesskey="0" aria-keyshortcuts="Alt+0"><?php echo htmlspecialchars($i18n['SKIP_TO_CONTENT'], ENT_QUOTES, 'UTF-8'); ?></a>
+  <main id="main" tabindex="-1" class="container">
     <h1><?php echo htmlspecialchars($i18n['VERIFY_ACCOUNT_HEADING'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <?php if ($error) { ?>
       <p class="error" role="alert"><?php echo htmlspecialchars($error); ?></p>
@@ -54,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <button type="submit"><?php echo htmlspecialchars($i18n['VERIFY_BUTTON'], ENT_QUOTES, 'UTF-8'); ?></button>
     </form>
     <p><a href="/auth/?auth_tab=register"><?php echo htmlspecialchars($i18n['VERIFY_BACK_TO_REGISTER'], ENT_QUOTES, 'UTF-8'); ?></a></p>
-  </div>
+  </main>
   <?php $verifyCodeInputSriAttribute = \PayCal\Domain\Render::sriAttribute('js/signin/verify-code-input.js'); ?>
   <script src="/js/signin/verify-code-input.js"<?php echo $verifyCodeInputSriAttribute; ?>></script>
 </body>

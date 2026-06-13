@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Foutafhandeling en berichtnormalisatie - [PayCal]';
-$pageLabel = 'Foutafhandeling en berichtnormalisatie';
+$pageTitle = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Foutafhandeling en berichtnormalisatie</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       Hoe PayCal foutrapportage standaardiseert voor alle frontend-modules om te garanderen
       dat gebruikers zinvolle, veilige en consistente foutmeldingen ontvangen zonder gevoelige details bloot te stellen.
@@ -140,7 +141,7 @@ try {
       </div>
       <p><strong>Modules met hoge waarde (10+ catch-punten):</strong></p>
       <ul class="doc-list">
-        <li><code>html/js/organizations/index.php</code> — Organisatiebeheer, toegangsverzoeken, auditsporen (19+ catches)</li>
+        <li><code>html/js/businesses/index.php</code> — Organisatiebeheer, toegangsverzoeken, auditsporen (19+ catches)</li>
         <li><code>html/js/sites/index.php</code> — Site-CRUD, verdiensten, herstel van zwevend werk (10+ catches)</li>
         <li><code>html/js/calendar/calendar.js</code> — Dagboekinvoerbewerkingen, kopiëren/plakken/verwijderen (2 catches)</li>
       </ul>
@@ -330,7 +331,7 @@ PW.error('Upload mislukt', {
         <li>Foutopsporings- en ondersteuningsteams volledige foutcontext behouden via Phantom Wing</li>
         <li>Code onderhoudbaar, testbaar en toegankelijk is</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Deze toewijding aan beveiliging, duidelijkheid en consistentie weerspiegelt PayCal's toewijding
         aan gebruikersvertrouwen en transparante informatiedeling.
       </p>

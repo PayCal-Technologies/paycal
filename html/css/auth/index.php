@@ -571,11 +571,24 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
   @media (max-width: 900px) {
     .auth-container {
-      padding: 1rem;
+      padding: 5px;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    .auth-shell,
+    .auth-layout,
+    .auth-hero,
+    .auth-card,
+    .auth-viewport {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .auth-layout {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .auth-hero {

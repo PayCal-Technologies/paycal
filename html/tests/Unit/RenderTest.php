@@ -191,7 +191,7 @@ final class RenderTest extends TestCase
       \PayCal\Domain\Page::INDEX,
       \PayCal\Domain\Page::EARNINGS,
       \PayCal\Domain\Page::SITES,
-      \PayCal\Domain\Page::ORGANIZATIONS,
+      \PayCal\Domain\Page::BUSINESSES,
       \PayCal\Domain\Page::PROFILE,
     ];
     $links = Render::buildNavLinks($corePages);

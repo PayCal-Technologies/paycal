@@ -70,7 +70,15 @@ if (!isset($pageTitle) || $pageTitle === '') {
     'PAGE_REGISTER' => Strings::headerI18n('REGISTER').' - ['.Strings::headerI18n('SITE_NAME').']',
     'PAGE_AUTH' => Strings::headerI18n('AUTH_TAB_SIGNIN').' - ['.Strings::headerI18n('SITE_NAME').']',
     'PAGE_SITES' => Strings::headerI18n('SITES').' - ['.$siteName.']',
-    'PAGE_ORGANIZATIONS' => Strings::headerI18n('ORGANIZATIONS').' - ['.$siteName.']',
+    'PAGE_REPORTS' => Strings::headerI18n('REPORTS').' - ['.$siteName.']',
+    'PAGE_BUSINESSES' => Strings::headerI18n('BUSINESS_NAV_DASHBOARD').' - ['.$siteName.']',
+    'PAGE_BUSINESS_DASHBOARD' => Strings::headerI18n('BUSINESS_NAV_DASHBOARD').' - ['.$siteName.']',
+    'PAGE_BUSINESS_DETAILS' => Strings::headerI18n('BUSINESS_NAV_DETAILS').' - ['.$siteName.']',
+    'PAGE_BUSINESS_MEMBERS' => Strings::headerI18n('BUSINESS_NAV_MEMBERS').' - ['.$siteName.']',
+    'PAGE_BUSINESS_SITES' => Strings::headerI18n('BUSINESS_NAV_SITES').' - ['.$siteName.']',
+    'PAGE_BUSINESS_PAYROLL' => Strings::headerI18n('BUSINESS_NAV_PAYROLL').' - ['.$siteName.']',
+    'PAGE_BUSINESS_AUDIT' => Strings::headerI18n('BUSINESS_NAV_AUDIT').' - ['.$siteName.']',
+    'PAGE_BUSINESS_REPORTS' => Strings::headerI18n('BUSINESS_NAV_REPORTS').' - ['.$siteName.']',
     'PAGE_FORECAST' => 'Crew Forecast - ['.$siteName.']',
     'PAGE_PROFILE' => Strings::headerI18n('PROFILE').' - ['.$siteName.']',
     'PAGE_PREMIUM' => Strings::headerI18n('PREMIUM_PAGE_TITLE').' - ['.$siteName.']',
@@ -91,8 +99,8 @@ if ($requestPathForStructuredData === '') {
   $requestPathForStructuredData = '/';
 }
 
-$pageStructuredDataUrl = Environment::appURL(
-  $requestPathForStructuredData === '/' ? '/' : ltrim($requestPathForStructuredData, '/')
+$pageStructuredDataUrl = Environment::publicMetadataURL(
+  $requestPathForStructuredData === '/' ? '' : ltrim($requestPathForStructuredData, '/')
 );
 $pageLanguageTag = str_replace('_', '-', $pageLanguage);
 $structuredDataLanguageTag = match ($pageLanguageTag) {
@@ -100,9 +108,9 @@ $structuredDataLanguageTag = match ($pageLanguageTag) {
   'fr' => 'fr-CA',
   default => $pageLanguageTag,
 };
-$websiteStructuredDataId = Environment::appURL('/') . '#website';
-$organizationStructuredDataId = Environment::appURL('/') . '#organization';
-$softwareStructuredDataId = Environment::appURL('/') . '#software';
+$websiteStructuredDataId = Environment::publicMetadataURL('/') . '#website';
+$businessStructuredDataId = Environment::publicMetadataURL('/') . '#business';
+$softwareStructuredDataId = Environment::publicMetadataURL('/') . '#software';
 $webPageStructuredDataId = $pageStructuredDataUrl . '#webpage';
 $isAuthStructuredDataPage = in_array($currentPage, ['PAGE_AUTH', 'PAGE_SIGNIN', 'PAGE_REGISTER'], true);
 $authStructuredDataDescription = match ($currentPage) {
@@ -113,21 +121,21 @@ $authStructuredDataDescription = match ($currentPage) {
 $websiteStructuredData = [
   '@type' => 'WebSite',
   '@id' => $websiteStructuredDataId,
-  'url' => Environment::appURL('/'),
+  'url' => Environment::publicMetadataURL('/'),
   'name' => $siteName,
   'description' => $metaDescription,
   'inLanguage' => $structuredDataLanguageTag,
-  'publisher' => ['@id' => $organizationStructuredDataId],
+  'publisher' => ['@id' => $businessStructuredDataId],
 ];
 
-$organizationStructuredData = [
-  '@type' => 'Organization',
-  '@id' => $organizationStructuredDataId,
+$businessStructuredData = [
+  '@type' => 'Business',
+  '@id' => $businessStructuredDataId,
   'name' => 'PayCal Technologies Inc.',
-  'url' => Environment::appURL('/'),
+  'url' => Environment::publicMetadataURL('/'),
   'logo' => [
     '@type' => 'ImageObject',
-    'url' => Environment::appURL('apple-touch-icon.png'),
+    'url' => Environment::publicMetadataURL('apple-touch-icon.png'),
   ],
   'email' => 'info@paycal.app',
   'foundingDate' => '2023-09-01',
@@ -135,7 +143,7 @@ $organizationStructuredData = [
     '@type' => 'ContactPoint',
     'contactType' => 'customer support',
     'email' => 'info@paycal.app',
-    'url' => Environment::appURL('contact/'),
+    'url' => Environment::publicMetadataURL('contact/'),
   ]],
   'sameAs' => [
     'https://github.com/PayCal-Technologies/paycal',
@@ -150,13 +158,13 @@ $webPageStructuredData = [
   'name' => $pageTitle,
   'description' => $isAuthStructuredDataPage ? $authStructuredDataDescription : $metaDescription,
   'isPartOf' => ['@id' => $websiteStructuredDataId],
-  'about' => ['@id' => $organizationStructuredDataId],
+  'about' => ['@id' => $businessStructuredDataId],
   'inLanguage' => $structuredDataLanguageTag,
 ];
 
 $structuredDataGraph = [
   $websiteStructuredData,
-  $organizationStructuredData,
+  $businessStructuredData,
   $webPageStructuredData,
 ];
 
@@ -165,13 +173,13 @@ if (!$isAuthStructuredDataPage) {
     '@type' => 'SoftwareApplication',
     '@id' => $softwareStructuredDataId,
     'name' => $siteName,
-    'url' => Environment::appURL('/'),
+    'url' => Environment::publicMetadataURL('/'),
     'applicationCategory' => 'BusinessApplication',
     'operatingSystem' => 'Web',
     'browserRequirements' => 'Requires JavaScript and a modern web browser.',
     'description' => $metaDescriptionLong,
     'inLanguage' => $structuredDataLanguageTag,
-    'publisher' => ['@id' => $organizationStructuredDataId],
+    'publisher' => ['@id' => $businessStructuredDataId],
     'offers' => [
       '@type' => 'Offer',
       'price' => '0.00',
@@ -299,185 +307,40 @@ if (ContentView::isDocPage($currentPage)) {
 <head>
 
   <!-- Identity -->
-  <base href="<?php echo Environment::appURL('/'); ?>">
-  <meta charset="UTF-8">
-  <meta name="contentType"                                 content="text/html; charset=utf-8">
-  <meta name="viewport"                                    content="width=device-width, initial-scale=1">
-  <meta name="description"                                 content="<?php echo Strings::headerI18n('META_DESCRIPTION'); ?>">
-  <meta name="keywords"                                    content="<?php echo Strings::headerI18n('META_KEYWORDS'); ?>">
-  <meta name="page-subject"                                content="<?php echo Strings::headerI18n('META_KEYWORDS'); ?>">
-  <meta name="subjects"                                    content="<?php echo Strings::headerI18n('META_KEYWORDS'); ?>">
-  <meta name="topics"                                      content="<?php echo Strings::headerI18n('META_KEYWORDS'); ?>">
-  <meta name="taxonomyTerms"                               content="<?php echo Strings::headerI18n('META_KEYWORDS'); ?>">
-  <meta name="rating"                                      content="general">
-  <meta name="copyright"                                   content="Copyright (C) <?php echo date('Y'); ?> PayCal Technologies Inc. All rights reserved.">
-  <meta name="generator"                                   content="Our heart, soul and love">
-  <meta name="authors"                                     content="PayCal Technologies Inc.">
-  <meta name="publisher"                                   content="PayCal Technologies Inc.">
-  <meta name="date"                                        content="<?php echo date('Y-m-d'); ?>">
-  <meta name="unix_date"                                   content="<?php echo time(); ?>">
-  <meta name="expected-hostname"                           content="paycal.app">
-  <meta name="ISOCODE"                                     content="CAN">
-  <meta name="applicable-device"                           content="pc, mobile">
-  <meta name="MobileOptimized"                             content="320">
-  <meta name="HandheldFriendly"                            content="true">
-  <meta name="distribution"                                content="Global">
-  <meta name="coverage"                                    content="Worldwide">
-  <meta name="referrer"                                      content="strict-origin-when-cross-origin">
-  <meta name="csrf-param"                                  content="authenticity_token">
-  <meta name="csrf-token"                                  content="<?php echo User::nonce(); ?>">
-
-  <!-- Relations -->
-  <link rel="profile"                                      href="http://gmpg.org/xfn/11">
-  <link rel="alternate" hreflang="en"                      href="<?php echo Environment::appBaseURL(); ?>">
-<?php if (User::current()->language !== 'en') {
-  $user = User::current();
-  $lang = $user->language;
-
-  echo '  <link rel="alternate" hreflang="' . $lang .'"                      href="'.Environment::appURL(User::current()->language).'">'.PHP_EOL;
-} ?>
-  <link rel="alternate" hreflang="x-default"               href="<?php echo Environment::appBaseURL(); ?>">
-  <link rel="canonical"                                    href="<?php echo Environment::appBaseURL(); ?>">
-  <link rel="manifest" href="/manifest.json">
-
-  <!-- Robots, whrrrr -->
-  <meta name="robots"                                      content="index, follow, noai, noimageai, noodp, noydir, maximage-preview: large">
-  <meta name="googlebot"                                   content="index, follow, noai, noimageai, noodp, noydir, maximage-preview: large">
-  <meta name="bingbot"                                     content="index, follow, noai, noimageai, noodp, noydir, maximage-preview: large">
-
-  <!-- Googley Oogley https://developer.chrome.com/en/articles/user-agent-client-hints/ -->
-  <meta http-equiv="Accept-CH"                             content="Width, Viewport-Width, Downlink, Sec-CH-UA, Sec-CH-UA-Platform">
-
-  <!-- OS -->
-  <meta name="mobile-web-app-capable"                      content="yes">
-  <meta name="apple-mobile-web-app-title"                  content="PayCal">
-  <meta name="apple-mobile-web-app-capable"                content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style"       content="black">
-  <meta name="theme-color"                                 content="#060606">
-  <meta name="application-name"                            content="<?php echo Environment::appBaseURL(); ?>">
-  <meta name="application-name"                            content="<?php echo Environment::appBaseURL(); ?>">
-  <meta name="msapplication-config"                        content="#none">
-  <meta name="msapplication-TileColor"                     content="#060606">
-  <meta name="msapplication-TileImage"                     content="/mstile-150x150.png">
-  <meta name="msapplication-tap-highlight"                 content="no">
-  <meta name="norton-safeweb-site-verification"            content="D8S4VWZR6KMGWAOEJW87M-6R7CTNNH1AYHZ566CJIIEO39EBTVNU4L3SLGY-5AAYWP7YNIJEYL985B3YFVEQCT-N6V24LQVVJWTQ7ASIUOLDX9N7JDTZ2ELVCIV3PPUR">
-  <!--[if IE]> <meta http-equiv="X-UA-Compatible"          content="IE=Edge,chrome=1"><![endif]-->
-  <meta http-equiv="cleartype"                             content="on">
-
-  <link rel="icon" type="image/x-icon"                     href="/favicon.ico">
-  <link rel="icon" type="image/png"                        href="/favicon-16x16.png" sizes="16x16">
-  <link rel="icon" type="image/png"                        href="/favicon-32x32.png" sizes="32x32">
-  <link rel="apple-touch-icon"                             href="/apple-touch-icon.png" sizes="180x180">
-
-  <!-- Social -->
-  <meta property="og:locale"                               content="en_CA">
-  <meta property="inLanguage"                              content="en-CA">
-  <meta property="og:site_name"                            content="PayCal">
-  <meta property="og:title"                                content="<?php echo Strings::headerI18n('META_TITLE'); ?>">
-  <meta property="og:description"                          content="<?php echo Strings::headerI18n('META_DESCRIPTION'); ?>">
-  <meta property="og:type"                                 content="website">
-  <meta property="og:url"                                  content="<?php echo Environment::appBaseURL(); ?>">
-  <meta property="al:web:url"                              content="<?php echo Environment::appBaseURL(); ?>">
-  <meta property="ia:markup_url"                           content="<?php echo Environment::appBaseURL(); ?>">
-  <meta name="twitter:title"                               content="<?php echo Strings::headerI18n('META_TITLE'); ?>">
-  <meta name="twitter:description"                         content="<?php echo Strings::headerI18n('META_DESCRIPTION'); ?>">
-  <meta name="twitter:card"                                content="summary_large_image">
-  <meta name="twitter:site"                                content="@paycal_app">
-  <meta name="twitter:url"                                 content="https://paycal.app/">
-  <meta name="twitter:domain"                              content="paycal.app">
-  <meta name="twitter:image"                               content="<?php echo Environment::appURL('favicon.ico'); ?>">
-  <link rel="me"                                           href="https://mastodon.social/@paycal">
-
-  <!-- Dublin Core -->
-  <link rel="schema.DC"                                    href="https://purl.org/dc/elements/1.1/">
-  <link rel="schema.DCTERMS"                               href="https://purl.org/dc/terms/">
-  <meta name="dc.title" lang="en"                          content="<?php echo Strings::headerI18n('META_TITLE'); ?>">
-  <meta name="dc.subject" lang="en"                        content="<?php echo Strings::headerI18n('META_KEYWORDS'); ?>">
-  <meta name="dc.description"                              content="<?php echo Strings::headerI18n('META_DESCRIPTION_LONG'); ?>">
-  <meta name="dc.rights"                                   content="URI:/policies/">
-  <meta name="dc.creator"                                  content="PayCal Technologies Inc.">
-  <meta name="dc.publisher"                                content="PayCal Technologies Inc.">
-  <meta name="dc.date"                                     content="<?php echo date('Y-m-d'); ?>">
-  <meta name="dc.language"                                 content="<?php echo $pageLanguage; ?>">
-  <meta name="dc.coverage"                                 content="World">
-  <meta name="dc.type"                                     content="Text">
-  <meta name="dc.format"                                   content="text/html">
-  <meta name="dc.language" scheme="DCTERMS.URI"            content="<?php echo Strings::headerI18n('ENGLISH'); ?>">
-
-  <!-- Start your engines -->
-  <title><?php echo $pageTitle; ?></title>
-
-  <!-- Ready -->
-  <?php
-  $pageFileMap = [
-    'PAGE_ABOUT' => 'content',
-    'PAGE_CONTACT' => 'contact',
-    'PAGE_EARNINGS' => 'earnings',
-    'PAGE_FAQ' => 'content',
-    'PAGE_HELP' => 'help',
-    'PAGE_INDEX' => 'calendar',
-    'PAGE_POLICIES' => 'content',
-    'PAGE_ADMIN' => 'admin',
-    'PAGE_SETTINGS' => 'settings',
-    'PAGE_SITES' => 'sites',
-    'PAGE_ORGANIZATIONS' => 'organizations',
-    'PAGE_FORECAST' => 'forecast',
-    'PAGE_PROFILE' => 'profile',
-    'PAGE_TESTS' => 'admin',
-    'PAGE_TRANSPARENCY' => 'transparency',
-    'PAGE_PREMIUM' => 'premium',
-    'PAGE_PAYPERIODS' => 'payperiods',
-    'PAGE_AUTH' => 'auth',
-  ];
-  $pageFile = $pageFileMap[$currentPage] ?? 'content';
-  $cssVersion = (string) time();
-  ?>
-  <link rel="stylesheet" fetchpriority="high" href="<?php echo Environment::appURL('css/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/navigation/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/utilities/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/datagrid/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/' . $pageFile . '/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/phantomwing/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/responsive/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
-<?php if (in_array($currentPage, ['PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_ABOUT', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA'], true)): ?>
-  <link rel="stylesheet" href="<?php echo Environment::appURL('css/content-views/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo $cspNonce; ?>">
-<?php endif; ?>
-
-  <link rel="dns-prefetch"                                 href="<?php echo Environment::appBaseURL(); ?>">
-  <link rel="preconnect"                                   href="<?php echo Environment::appBaseURL(); ?>">
-  <link rel="dns-prefetch"                                 href="<?php echo Environment::appURL('earnings/'); ?>">
-  <link rel="preconnect"                                   href="<?php echo Environment::appURL('earnings/'); ?>">
-  <link rel="dns-prefetch"                                 href="<?php echo Environment::appURL('sites/'); ?>">
-  <link rel="dns-prefetch"                                 href="<?php echo Environment::appURL('sites/'); ?>">
-  <link rel="dns-prefetch"                                 href="<?php echo Environment::appURL('settings/#account_prefs'); ?>">
-  <link rel="dns-prefetch"                                 href="<?php echo Environment::appURL('about/'); ?>">
-  <link rel="dns-prefetch"                                 href="<?php echo Environment::appURL('help/'); ?>">
-  <link rel="dns-prefetch"                                 href="<?php echo Environment::appURL('policies/'); ?>">
-
-  <!-- Set -->
 <?php
-  $hajRenders = [
-    '__CSP_NONCE__' => $cspNonce,
-    '__JSON_LD__' => $jsonLdDocument,
-  ];
-  echo Render::template('header-application-json-linked-data', $hajRenders);
+$pageFile = PageHeadRenderer::pageFileFor((string) $currentPage);
+$cssVersion = (string) time();
+$canonicalPath = $requestPathForStructuredData === '/' ? '' : ltrim($requestPathForStructuredData, '/');
+$loadPhantomWing = AdminSurface::userCanAccess() && in_array(Environment::appEnv(), ['dev', 'mac'], true);
+$isDocPdfView = ContentView::isDocPage($currentPage) && (($_GET['view'] ?? '') === 'pdf');
+$headContext = [
+  'pageLanguage' => $pageLanguage,
+  'metaDescription' => $metaDescription,
+  'metaDescriptionLong' => $metaDescriptionLong,
+  'pageTitle' => $pageTitle,
+  'canonicalPath' => $canonicalPath,
+  'cspNonce' => $cspNonce,
+  'cssVersion' => $cssVersion,
+  'currentPage' => $currentPage,
+  'pageFile' => $pageFile,
+  'isAuthenticated' => $isAuthenticated,
+  'loadPhantomWing' => $loadPhantomWing,
+  'isDocPdfView' => $isDocPdfView,
+  'jsonLdDocument' => $jsonLdDocument,
+];
+
+echo PageHeadRenderer::renderIdentityMeta($headContext);
+echo PageHeadRenderer::renderRelations($headContext);
+echo PageHeadRenderer::renderRobotsMeta();
+echo PageHeadRenderer::renderSocialMeta($headContext);
+echo PageHeadRenderer::renderDublinCoreMeta($headContext);
 ?>
-
-  <script src="<?php echo Environment::appURL('js/guardian.js'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
-
+  <title><?php echo $pageTitle; ?></title>
 <?php
-// Load the print-trigger for ?view=pdf on doc-article pages.
-// External script + nonce satisfies CSP script-src without 'unsafe-inline'.
-if (ContentView::isDocPage($currentPage) && ($_GET['view'] ?? '') === 'pdf') { ?>
-  <script src="<?php echo Environment::appURL('js/print-trigger.js'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
-<?php } ?>
-
-<?php if ($isAuthenticated) { ?>
-  <script type="module" src="<?php echo Environment::appURL('js/'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
-  <script type="module" src="<?php echo Environment::appURL('js/phantomwing/'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
-  <script type="module" src="<?php echo Environment::appURL('js/encryption/'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
-  <script type="module" src="<?php echo Environment::appURL('js/work-integrity/'); ?>" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8'); ?>"></script>
-<?php } ?>
+echo PageHeadRenderer::renderResourceHints();
+echo PageHeadRenderer::renderStylesheets($headContext);
+echo PageHeadRenderer::renderScripts($headContext);
+?>
 
 </head>
 
@@ -672,7 +535,7 @@ echo Render::template('keyboard-shortcuts', $renders);
     </section>
   </div>
 
-  <div id="dashboardResizeGrip" role="separator" aria-label="Resize dashboard"></div>
+  <div id="dashboardResizeGrip" role="separator" aria-label="<?php echo Strings::headerI18n('DASHBOARD_RESIZE_GRIP_ARIA'); ?>"></div>
 </div>
 <?php } // end isAdmin ?>
 <?php } // end $isAuthenticated ?>
@@ -681,7 +544,8 @@ echo Render::template('keyboard-shortcuts', $renders);
   /** PRIMARY NAVIGATION BAR - Build navigation pages */
   $userUUIDForNav = User::currentUUID();
   $hasPremiumSubscriptionForNav = $userUUIDForNav !== '' && SubscriptionGate::hasActivePremium($userUUIDForNav);
-  $pages = [Page::INDEX, Page::EARNINGS, Page::SITES, Page::ORGANIZATIONS, Page::PROFILE];
+  $isAdminForNav = User::isAdmin();
+  $sidebarNavigation = Render::buildSidebarNavigation($hasPremiumSubscriptionForNav, $isAdminForNav);
 
   $sideNavIcons = [
     'settings' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false"><path d="M19.14 12.94c.04-.31.06-.62.06-.94s-.02-.63-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.1 7.1 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.49-.42h-3.84a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.7 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.05.31-.07.63-.07.95s.02.63.07.94L2.82 14.53a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.4 1.05.72 1.63.95l.36 2.54c.04.24.25.42.49.42h3.84c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.13-.55 1.63-.95l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.57zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>',
@@ -723,10 +587,8 @@ echo Render::template('keyboard-shortcuts', $renders);
 <?php if (!$isAuthenticated) { ?>
   <li class="pages"><a href="/" aria-label="<?php echo htmlspecialchars(Strings::headerI18n('PAYCAL'), ENT_QUOTES, 'UTF-8'); ?>"><span class="nav_icon pages nav_brand_mark" aria-hidden="true"><img class="nav_brand_mark_base" src="/img/paycal-shield.png?v=<?php echo rawurlencode(Environment::appVersion()); ?>" alt="" width="34" height="34" decoding="async"><span class="nav_brand_mark_tint"></span></span><span class="nav_label"><?php echo Strings::html('PAYCAL_HTML_PUBLIC'); ?></span></a></li>
 <?php } else {
-    $navLinks = Render::buildNavLinks($pages, $hasPremiumSubscriptionForNav);
-    echo Render::renderNavLinks($navLinks, $currentPage, 'pages');
+    echo Render::renderSidebarNavigation($sidebarNavigation, (string) $currentPage);
 ?>
-          <li class="pages<?php echo $settingsActive ? ' active' : ''; ?>"><a href="/settings/" data-nav-shortcut="e" aria-keyshortcuts="e" accesskey="e"<?php echo $settingsActive ? " aria-current='page'" : ''; ?>><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['settings']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('SETTINGS_HTML'); ?></span></a></li>
         <?php if ($adminSurfaceEnabled && User::isAdmin() && $adminNavItems !== []) { ?>
           <li class="pages nav_admin_group<?php echo $adminSectionActive ? ' active' : ''; ?>">
             <a

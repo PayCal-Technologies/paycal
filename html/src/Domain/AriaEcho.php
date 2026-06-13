@@ -128,15 +128,5 @@ class AriaEcho
 
     return $normalized;
   }
-
-  /**
-   * Backward-compatible alias for list cadence formatting.
-   *
-   * @param array<int, string> $parts
-   */
-  public static function cadenceList(array $parts): string
-  {
-    return self::cadence($parts, ', ');
-  }
 }
 

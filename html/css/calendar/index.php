@@ -367,7 +367,7 @@ button.cal_menu_selected:focus-visible {
   list-style: none;
 }
 
-#calendar_day_context_menu li {
+#calendar_day_context_menu [role="menuitem"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -376,23 +376,28 @@ button.cal_menu_selected:focus-visible {
   max-width: 100%;
   margin: var(--mar-xs) 0;
   padding: var(--pad-sm) 0 0 var(--pad-sm);
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
   cursor: pointer;
 }
 
-#calendar_day_context_menu li:not([aria-disabled="true"]):hover,
-#calendar_day_context_menu li:not([aria-disabled="true"]):focus {
+#calendar_day_context_menu [role="menuitem"]:not([aria-disabled="true"]):hover,
+#calendar_day_context_menu [role="menuitem"]:not([aria-disabled="true"]):focus {
   border-radius: var(--radius-cell, var(--border-radius));
   background-color: var(--button-primary-bg);
   color: var(--button-primary-text);
   transition: background-color var(--short-transition) ease;
 }
 
-#calendar_day_context_menu li:not([aria-disabled="true"]):focus-visible {
+#calendar_day_context_menu [role="menuitem"]:not([aria-disabled="true"]):focus-visible {
   outline: 2px solid var(--color-focus-ring, #0096d6);
   outline-offset: -2px;
 }
 
-#calendar_day_context_menu li[aria-disabled="true"] {
+#calendar_day_context_menu [role="menuitem"][aria-disabled="true"] {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -410,7 +415,7 @@ button.cal_menu_selected:focus-visible {
   color: var(--color-text);
 }
 
-#calendar_day_context_menu li:not([aria-disabled="true"]):focus kbd {
+#calendar_day_context_menu [role="menuitem"]:not([aria-disabled="true"]):focus kbd {
   color: var(--color-bg);
 }
 

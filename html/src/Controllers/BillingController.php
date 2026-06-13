@@ -91,17 +91,32 @@ final class BillingController
       return;
     }
 
+    $plan = strtolower(trim($this->requestString('plan', 'premium')));
+    if (!in_array($plan, ['premium', 'business'], true)) {
+      $plan = 'premium';
+    }
+
     if (!BillingProvider::isStripe()) {
-      SubscriptionRepository::upgradeToPremium($userUUID);
-      Response::success('[Billing] Premium enabled.', [
+      if ($plan === 'business') {
+        SubscriptionRepository::upgradeToBusiness($userUUID);
+        $tier = Subscription::BUSINESS;
+        $message = '[Billing] Business enabled.';
+      } else {
+        SubscriptionRepository::upgradeToPremium($userUUID);
+        $tier = Subscription::PREMIUM;
+        $message = '[Billing] Premium enabled.';
+      }
+
+      Response::success($message, [
         'billing_provider' => BillingProvider::current(),
-        'tier' => Subscription::PREMIUM->value,
+        'tier' => $tier->value,
+        'plan' => $plan,
       ], HttpStatus::HTTP_CREATED);
       return;
     }
 
     $service = new StripeBillingService();
-    $result = $service->createCheckoutSession($userUUID, $email, $successURL, $cancelURL);
+    $result = $service->createCheckoutSession($userUUID, $email, $successURL, $cancelURL, $plan);
 
     if ($result['success']) {
       Response::success('[Billing] Checkout session created.', $result['data'], HttpStatus::HTTP_CREATED);
@@ -382,11 +397,12 @@ final class BillingController
     }
 
     $sub = SubscriptionRepository::get($userUUID);
-    $isPremium = $sub['tier'] === Subscription::PREMIUM && $sub['status']->grantsAccess();
+    $isPremiumReporting = SubscriptionRepository::isPremiumActive($userUUID);
+    $isBusiness = SubscriptionRepository::isBusinessActive($userUUID);
+    $hasPaidPlan = $isPremiumReporting || $isBusiness;
 
-    // Check if subscription is pending cancellation (has future cancel_date and is still ACTIVE/PREMIUM).
     $cancelDateStr = is_scalar($sub['cancel_date'] ?? null) ? trim((string) $sub['cancel_date']) : '';
-    $isPendingCancellation = $sub['tier'] === Subscription::PREMIUM
+    $isPendingCancellation = $hasPaidPlan
       && $cancelDateStr !== ''
       && ($cancelUnixTime = strtotime($cancelDateStr)) !== false
       && $cancelUnixTime > time();
@@ -395,7 +411,9 @@ final class BillingController
       'billing_provider'        => BillingProvider::current(),
       'tier'                    => $sub['tier']->value,
       'subscription_status'     => $sub['status']->value,
-      'is_premium'              => $isPremium,
+      'is_premium'              => $isPremiumReporting,
+      'is_business'             => $isBusiness,
+      'has_paid_plan'           => $hasPaidPlan,
       'is_pending_cancellation' => $isPendingCancellation,
       'subscription_id'         => $sub['id'],
       'start_date'              => $sub['start_date'],
@@ -616,7 +634,7 @@ final class BillingController
     }
 
     $user = User::current();
-    if ($user->verifyFormNonce('settings', $csrfToken) || $user->verifyFormNonce('organizations', $csrfToken)) {
+    if ($user->verifyFormNonce('settings', $csrfToken) || $user->verifyFormNonce('businesses', $csrfToken)) {
       return true;
     }
 

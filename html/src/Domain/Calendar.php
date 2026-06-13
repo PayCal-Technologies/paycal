@@ -43,7 +43,6 @@ class Calendar
   private const MIN_YEAR = 1;
   private const MAX_YEAR = 9999;
   private const GRID_DAYS = 42;
-  private const WEEK_DAYS = 7;
 
   private int $year;
 
@@ -147,19 +146,7 @@ class Calendar
    */
   public function generateWeekDayLabels(): array
   {
-    $labels = [];
-
-    // Sunday start (0) to Saturday (6)
-    for ($i = 0; $i < self::WEEK_DAYS; $i++) {
-      $date = new \DateTimeImmutable("Sunday +{$i} days");
-
-      $labels[] = [
-        'short' => $date->format('D'),   // Mon
-        'long' => $date->format('l'),    // Monday
-      ];
-    }
-
-    return $labels;
+    return Strings::generateWeekDayLabels();
   }
 
   /**

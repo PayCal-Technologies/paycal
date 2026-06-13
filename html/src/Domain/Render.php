@@ -249,17 +249,29 @@ class Render
   public static function buildNavLinks(array $pages, bool $isPremiumMember = false): array
   {
     $nav = [];
+    /** @var array<string, string> $i18n */
     $i18n = [];
     $i18nKeys = [
       'PAYCAL',
       'EARNINGS_HTML',
       'EARNINGS',
+      'REPORTS_HTML',
+      'REPORTS',
       'SITES_HTML',
       'SITES',
       'PROFILE_HTML',
       'PROFILE',
-      'ORGANIZATIONS_HTML',
-      'ORGANIZATIONS',
+      'BUSINESSES_HTML',
+      'BUSINESSES',
+      'BUSINESS_NAV_DASHBOARD',
+      'BUSINESS_NAV_DETAILS',
+      'BUSINESS_NAV_MEMBERS',
+      'BUSINESS_NAV_SITES',
+      'BUSINESS_NAV_PAYROLL',
+      'BUSINESS_NAV_AUDIT',
+      'BUSINESS_NAV_REPORTS',
+      'SETTINGS_HTML',
+      'SETTINGS',
     ];
     foreach ($i18nKeys as $key) {
       $i18n[$key] = Strings::i18n($key);
@@ -284,11 +296,19 @@ class Render
         ],
         Page::EARNINGS => [
             'page' => Page::EARNINGS->value,
-            'name' => (string) $i18n['EARNINGS_HTML'],
-            'href' => '/earnings/', // Public URL
-            'arialabel' => (string) $i18n['EARNINGS'],
+            'name' => (string) $i18n['REPORTS_HTML'],
+            'href' => '/reports/', // Legacy alias; /earnings/ redirects here
+            'arialabel' => (string) $i18n['REPORTS'],
             'access_key' => (string) 'R',
-            'icon' => (string) Strings::html('MONEY_SVG'),
+            'icon' => (string) Strings::html('REPORTS_SVG'),
+        ],
+        Page::REPORTS => [
+            'page' => Page::REPORTS->value,
+            'name' => (string) $i18n['REPORTS_HTML'],
+            'href' => '/reports/',
+            'arialabel' => (string) $i18n['REPORTS'],
+            'access_key' => (string) 'R',
+            'icon' => (string) Strings::html('REPORTS_SVG'),
         ],
         Page::SITES => [
             'page' => Page::SITES->value,
@@ -306,13 +326,61 @@ class Render
             'access_key' => (string) 'f',
             'icon' => (string) Strings::html('PROFILE_SVG'),
         ],
-        Page::ORGANIZATIONS => [
-          'page' => Page::ORGANIZATIONS->value,
-          'name' => (string) $i18n['ORGANIZATIONS_HTML'],
-          'href' => '/organizations', // Public URL
-          'arialabel' => (string) $i18n['ORGANIZATIONS'],
+        Page::BUSINESSES, Page::BUSINESS_DASHBOARD => [
+          'page' => Page::BUSINESS_DASHBOARD->value,
+          'name' => (string) $i18n['BUSINESS_NAV_DASHBOARD'],
+          'href' => '/business/',
+          'arialabel' => (string) $i18n['BUSINESS_NAV_DASHBOARD'],
           'access_key' => (string) 'O',
-          'icon' => (string) Strings::html('ORGANIZATIONS_SVG'),
+          'icon' => (string) Strings::html('BUSINESSES_SVG'),
+        ],
+        Page::BUSINESS_DETAILS => [
+          'page' => Page::BUSINESS_DETAILS->value,
+          'name' => (string) $i18n['BUSINESS_NAV_DETAILS'],
+          'href' => '/business/details/',
+          'arialabel' => (string) $i18n['BUSINESS_NAV_DETAILS'],
+          'access_key' => (string) '',
+          'icon' => (string) Strings::html('BUSINESSES_SVG'),
+        ],
+        Page::BUSINESS_MEMBERS => [
+          'page' => Page::BUSINESS_MEMBERS->value,
+          'name' => (string) $i18n['BUSINESS_NAV_MEMBERS'],
+          'href' => '/business/members/',
+          'arialabel' => (string) $i18n['BUSINESS_NAV_MEMBERS'],
+          'access_key' => (string) '',
+          'icon' => (string) Strings::html('BUSINESSES_SVG'),
+        ],
+        Page::BUSINESS_SITES => [
+          'page' => Page::BUSINESS_SITES->value,
+          'name' => (string) $i18n['BUSINESS_NAV_SITES'],
+          'href' => '/business/sites/',
+          'arialabel' => (string) $i18n['BUSINESS_NAV_SITES'],
+          'access_key' => (string) '',
+          'icon' => (string) Strings::html('SITES_SVG'),
+        ],
+        Page::BUSINESS_PAYROLL => [
+          'page' => Page::BUSINESS_PAYROLL->value,
+          'name' => (string) $i18n['BUSINESS_NAV_PAYROLL'],
+          'href' => '/business/payroll/',
+          'arialabel' => (string) $i18n['BUSINESS_NAV_PAYROLL'],
+          'access_key' => (string) '',
+          'icon' => (string) Strings::html('MONEY_SVG'),
+        ],
+        Page::BUSINESS_AUDIT => [
+          'page' => Page::BUSINESS_AUDIT->value,
+          'name' => (string) $i18n['BUSINESS_NAV_AUDIT'],
+          'href' => '/business/audit/',
+          'arialabel' => (string) $i18n['BUSINESS_NAV_AUDIT'],
+          'access_key' => (string) '',
+          'icon' => (string) Strings::html('BUSINESSES_SVG'),
+        ],
+        Page::BUSINESS_REPORTS => [
+          'page' => Page::BUSINESS_REPORTS->value,
+          'name' => (string) $i18n['BUSINESS_NAV_REPORTS'],
+          'href' => '/business/reports/',
+          'arialabel' => (string) $i18n['BUSINESS_NAV_REPORTS'],
+          'access_key' => (string) '',
+          'icon' => (string) Strings::html('REPORTS_SVG'),
         ],
         // Admin nav is extension-driven (admin.nav.links capability popover).
         // Core does not render it as a standard nav link.
@@ -321,6 +389,165 @@ class Render
     }
 
     return $nav;
+  }
+
+  /**
+   * Build grouped sidebar navigation (PayCal / Business).
+   *
+   * @return array{groups: array<int, array{id: string, visible: bool, heading: array<string, string>, links: array<int, array<string, string>>}>}
+   */
+  public static function buildSidebarNavigation(bool $isPremiumMember = false, bool $isAdmin = false): array
+  {
+    $showBusiness = $isPremiumMember || $isAdmin;
+
+    $paycalLinks = array_merge(
+      self::buildNavLinks([Page::SITES, Page::REPORTS, Page::PROFILE], $isPremiumMember),
+      [self::settingsNavLink()]
+    );
+
+    $businessLinks = [];
+    if ($showBusiness) {
+      $businessLinks = self::buildNavLinks([
+        Page::BUSINESS_DETAILS,
+        Page::BUSINESS_MEMBERS,
+        Page::BUSINESS_SITES,
+        Page::BUSINESS_PAYROLL,
+        Page::BUSINESS_REPORTS,
+        Page::BUSINESS_AUDIT,
+      ], $isPremiumMember);
+      $businessLinks = self::applyBusinessDetailsSidebarLabel($businessLinks);
+    }
+
+    return [
+      'groups' => [
+        [
+          'id' => 'paycal',
+          'visible' => true,
+          'heading' => self::paycalGroupHeadingLink($isPremiumMember),
+          'links' => $paycalLinks,
+        ],
+        [
+          'id' => 'business',
+          'visible' => $showBusiness,
+          'heading' => self::businessGroupHeadingLink(),
+          'links' => $businessLinks,
+        ],
+      ],
+    ];
+  }
+
+  /**
+   * @return array<string, string>
+   */
+  private static function settingsNavLink(): array
+  {
+    return [
+      'page' => 'PAGE_SETTINGS',
+      'name' => (string) Strings::i18n('SETTINGS_HTML'),
+      'href' => '/settings/',
+      'arialabel' => (string) Strings::i18n('SETTINGS'),
+      'access_key' => 'e',
+      'icon' => (string) Strings::html('SETTINGS_SVG'),
+    ];
+  }
+
+  /**
+   * @return array<string, string>
+   */
+  private static function paycalGroupHeadingLink(bool $isPremiumMember = false): array
+  {
+    $paycalName = (string) Strings::i18n('NAV_SECTION_PAYCAL');
+    $paycalAriaLabel = (string) Strings::i18n('PAYCAL');
+    if ($isPremiumMember) {
+      $paycalName .= ' Premium';
+      $paycalAriaLabel .= ' Premium';
+    }
+
+    return [
+      'page' => Page::INDEX->value,
+      'name' => $paycalName,
+      'href' => '/',
+      'arialabel' => $paycalAriaLabel,
+      'access_key' => 'C',
+      'icon' => self::paycalBrandIconMarkup(),
+    ];
+  }
+
+  /**
+   * @return array<string, string>
+   */
+  private static function businessGroupHeadingLink(): array
+  {
+    $label = (string) Strings::i18n('NAV_SECTION_BUSINESS');
+
+    return [
+      'page' => Page::BUSINESS_DASHBOARD->value,
+      'name' => $label,
+      'href' => '/business/',
+      'arialabel' => $label,
+      'access_key' => 'O',
+      'icon' => (string) Strings::html('BUSINESSES_SVG'),
+    ];
+  }
+
+  /**
+   * @param array<int, array<string, string>> $links
+   *
+   * @return array<int, array<string, string>>
+   */
+  private static function applyBusinessDetailsSidebarLabel(array $links): array
+  {
+    $detailsLabel = (string) Strings::i18n('BUSINESS_NAV_DETAILS');
+
+    foreach ($links as $index => $link) {
+      if (($link['page'] ?? '') !== Page::BUSINESS_DETAILS->value) {
+        continue;
+      }
+
+      $links[$index]['name'] = $detailsLabel;
+      $links[$index]['arialabel'] = $detailsLabel;
+    }
+
+    return $links;
+  }
+
+  /**
+   * Render grouped sidebar navigation.
+   *
+   * @param array{groups: array<int, array{id: string, visible: bool, heading: array<string, string>, links: array<int, array<string, string>>}>} $navigation
+   */
+  public static function renderSidebarNavigation(array $navigation, string $activePage = ''): string
+  {
+    $buffer = '';
+    $normalizedActivePage = self::normalizeActivePage($activePage);
+
+    foreach ($navigation['groups'] as $group) {
+      if ($group['visible'] !== true) {
+        continue;
+      }
+
+      $heading = $group['heading'];
+      if ($heading !== []) {
+        $buffer .= self::renderNavLinks([$heading], $normalizedActivePage, 'pages nav_group_heading');
+      }
+
+      $buffer .= self::renderNavLinks($group['links'], $normalizedActivePage, 'pages nav_sublink');
+    }
+
+    return $buffer;
+  }
+
+  private static function normalizeActivePage(string $activePage): string
+  {
+    if ($activePage === Page::BUSINESSES->value) {
+      return Page::BUSINESS_DASHBOARD->value;
+    }
+
+    if ($activePage === Page::EARNINGS->value) {
+      return Page::REPORTS->value;
+    }
+
+    return $activePage;
   }
 
   /**
@@ -463,17 +690,25 @@ class Render
 
     $activeLabel = $languageNames[$activeLanguage] ?? Language::getDisplayName($activeLanguage);
     $activeFlagSvg = $flags[$activeLanguage] ?? '';
+    $switcherAria = htmlspecialchars(Strings::i18n('NAV_LANGUAGE_SWITCHER_ARIA'), ENT_QUOTES, 'UTF-8');
+    $currentLanguageAria = htmlspecialchars(
+      str_replace('{language}', $activeLabel, Strings::i18n('NAV_LANGUAGE_CURRENT_ARIA')),
+      ENT_QUOTES,
+      'UTF-8',
+    );
+    $menuAria = htmlspecialchars(Strings::i18n('NAV_LANGUAGE_MENU_ARIA'), ENT_QUOTES, 'UTF-8');
+    $activeLabelSafe = htmlspecialchars($activeLabel, ENT_QUOTES, 'UTF-8');
 
-    return '<li class="pages nav_language_switcher" aria-label="Language switcher">'
-      . '<button type="button" class="nav_language_current" aria-haspopup="menu" aria-expanded="false" data-language-toggle="true" aria-label="Language: '
-      . htmlspecialchars($activeLabel, ENT_QUOTES, 'UTF-8')
+    return '<li class="pages nav_language_switcher" aria-label="' . $switcherAria . '">'
+      . '<button type="button" class="nav_language_current" aria-haspopup="menu" aria-expanded="false" data-language-toggle="true" aria-label="'
+      . $currentLanguageAria
       . '" title="'
-      . htmlspecialchars($activeLabel, ENT_QUOTES, 'UTF-8')
+      . $activeLabelSafe
       . '">'
       . '<span class="nav_language_flag">' . $activeFlagSvg . '</span>'
-      . '<span class="nav_language_name">' . htmlspecialchars($activeLabel, ENT_QUOTES, 'UTF-8') . '</span>'
+      . '<span class="nav_language_name">' . $activeLabelSafe . '</span>'
       . '</button>'
-      . '<ul class="nav_language_list" role="menu" aria-label="Languages">'
+      . '<ul class="nav_language_list" role="menu" aria-label="' . $menuAria . '">'
       . $items
       . '</ul>'
       . '</li>';
@@ -723,7 +958,7 @@ class Render
       $path = $jsBase . '/';
     } else {
       // If the name matches a PHP-backed folder, do NOT append .js
-      if (in_array($name, ['encryption', 'calendar', 'earnings', 'sites', 'organizations', 'settings', 'register', 'signin', 'admin', 'help', 'core', 'datagrid', 'payperiods', 'contact', 'tests', 'dev'])) {
+      if (in_array($name, ['encryption', 'calendar', 'earnings', 'team-earnings', 'sites', 'business', 'businesses', 'business-profile', 'settings', 'register', 'signin', 'admin', 'help', 'core', 'datagrid', 'payperiods', 'contact', 'tests', 'dev'])) {
         $path = $jsBase . '/' . $name . '/';
       } else {
         // Otherwise, treat as a JS file

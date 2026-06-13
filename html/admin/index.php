@@ -6,6 +6,7 @@ use PayCal\Domain\Authentication;
 use PayCal\Domain\Config\Environment;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Render;
+use PayCal\Domain\Strings;
 use PayCal\Domain\User;
 use PayCal\Observability\Lens;
 
@@ -15,8 +16,8 @@ require_once '../config.php';
 require_once __DIR__.'/../src/Controllers/AdminPageController.php';
 
 $currentPage = 'PAGE_ADMIN';
-$pageTitle = 'Admin Dashboard - [PayCal]';
-$pageLabel = 'Admin Dashboard';
+$pageTitle = Strings::i18n('ADMIN_DASHBOARD_TITLE') . ' - [PayCal]';
+$pageLabel = Strings::i18n('ADMIN_DASHBOARD_TITLE');
 
 Authentication::redirectHomeIfUnauthenticated();
 AdminSurface::redirectHomeIfPageUnavailable('/admin/');

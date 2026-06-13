@@ -83,7 +83,7 @@ ob_start();
 <div class="metrics-dashboard">
   <div class="dashboard-header">
     <div>
-      <h1>📊 Platform Metrics Dashboard</h1>
+      <h1><span aria-hidden="true">📊 </span><?php echo metrics_index_i18n('ADMIN_METRICS_DASHBOARD_TITLE'); ?></h1>
       <p><?php echo metrics_index_i18n('ADMIN_METRICS_REALTIME_HEALTH_ANALYTICS'); ?></p>
     </div>
     <div class="status-section">

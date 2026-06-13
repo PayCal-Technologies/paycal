@@ -2,7 +2,6 @@
 
 namespace PayCal\Controllers;
 
-use IntlDateFormatter;
 use Throwable;
 use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\Authentication;
@@ -14,7 +13,7 @@ use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Log;
-use PayCal\Domain\OrganizationDiscoveryService;
+use PayCal\Domain\BusinessDiscoveryService;
 use PayCal\Domain\PayPeriodGenerator;
 use PayCal\Domain\Render;
 use PayCal\Domain\RequestGuard;
@@ -122,23 +121,23 @@ class CalendarController
       return $target;
     }
 
-    foreach (Database::smembers(Keys::ORGANIZATION_USER . ':' . $actorUUID) as $orgIdRaw) {
+    foreach (Database::smembers(Keys::BUSINESS_USER . ':' . $actorUUID) as $orgIdRaw) {
       $orgId = self::scalarString($orgIdRaw);
       if ($orgId === '') {
         continue;
       }
 
-      $org = Database::hgetall(Keys::ORGANIZATION . ':' . $orgId);
+      $org = Database::hgetall(Keys::BUSINESS . ':' . $orgId);
       if (empty($org)) {
         continue;
       }
 
       $ownerUUID = self::scalarString($org['owner_uuid'] ?? '');
-      $actorRel = Database::hgetall(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $actorUUID);
+      $actorRel = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $actorUUID);
       $actorRole = strtolower(self::scalarString($actorRel['role'] ?? ''));
       $actorStatus = self::scalarString($actorRel['status'] ?? '');
       $isOwner = $ownerUUID !== '' && $ownerUUID === $actorUUID;
-      $isManager = $actorStatus === OrganizationDiscoveryService::MEMBERSHIP_STATE_ACTIVE && $actorRole === 'coordinator';
+      $isManager = $actorStatus === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE && $actorRole === 'coordinator';
       if (!$isOwner && !$isManager) {
         continue;
       }
@@ -147,9 +146,9 @@ class CalendarController
         return $target;
       }
 
-      $targetRel = Database::hgetall(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $requestedUUID);
+      $targetRel = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $requestedUUID);
       $targetStatus = self::scalarString($targetRel['status'] ?? '');
-      if ($targetStatus === OrganizationDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
+      if ($targetStatus === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
         return $target;
       }
     }
@@ -303,6 +302,7 @@ class CalendarController
         CalendarFields::T->value,
         CalendarFields::W->value,
         'mode',
+        'business_id',
         'organization_id',
         'org_id',
         'target_user_uuid',
@@ -342,50 +342,50 @@ class CalendarController
     }
     $targetUserUUID = InputSanitizer::sanitizeString($targetUserRaw === '' ? $actorUUID : $targetUserRaw);
 
-    $orgIdRaw = InputSanitizer::postString('organization_id');
-    if ($orgIdRaw === '') {
-      $orgIdRaw = InputSanitizer::postString('org_id');
-    }
-    $orgId = InputSanitizer::sanitizeString($orgIdRaw);
+    $orgId = BusinessDiscoveryService::resolvePostedBusinessId(
+      InputSanitizer::postString('business_id'),
+      InputSanitizer::postString('organization_id'),
+      InputSanitizer::postString('org_id'),
+    );
 
-    if ($mode === 'organization') {
+    if (BusinessDiscoveryService::isDelegatedWorkMode($mode)) {
       if (!(bool) SystemConfig::get('org_shared_encryption_enabled')
         || !(bool) SystemConfig::get('org_shared_encryption_enable_write')) {
         self::incrementOrgWriteDeniedCounter('writes_disabled');
-        self::appendOrganizationWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'writes_disabled', $dayId, 0);
-        Response::error('[CC] Organization mode writes are disabled.', [], HttpStatus::HTTP_FORBIDDEN);
+        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'writes_disabled', $dayId, 0);
+        Response::error('[CC] Business mode writes are disabled.', [], HttpStatus::HTTP_FORBIDDEN);
 
         return;
       }
 
       if ($orgId === '') {
         self::incrementOrgWriteDeniedCounter('missing_org_id');
-        Response::error('[CC] organization_id is required for organization mode writes.', [], HttpStatus::HTTP_BAD_REQUEST);
+        Response::error('[CC] business_id is required for business mode writes.', [], HttpStatus::HTTP_BAD_REQUEST);
 
         return;
       }
 
       if ($targetUserUUID === '') {
         self::incrementOrgWriteDeniedCounter('missing_target_user');
-        self::appendOrganizationWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'missing_target_user', $dayId, 0);
-        Response::error('[CC] target_user_uuid is required for organization mode writes.', [], HttpStatus::HTTP_BAD_REQUEST);
+        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'missing_target_user', $dayId, 0);
+        Response::error('[CC] target_user_uuid is required for business mode writes.', [], HttpStatus::HTTP_BAD_REQUEST);
 
         return;
       }
 
-      $orgDiscovery = new OrganizationDiscoveryService();
+      $orgDiscovery = new BusinessDiscoveryService();
       if (!$orgDiscovery->canMutateWorkForOwner($actorUUID, $targetUserUUID, $orgId)) {
         self::incrementOrgWriteDeniedCounter('insufficient_scope');
-        self::appendOrganizationWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'insufficient_scope', $dayId, 0);
-        Response::error('[CC] Insufficient organization scope for delegated work mutation.', [], HttpStatus::HTTP_FORBIDDEN);
+        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'insufficient_scope', $dayId, 0);
+        Response::error('[CC] Insufficient business scope for delegated work mutation.', [], HttpStatus::HTTP_FORBIDDEN);
 
         return;
       }
 
       if (!self::isDateInCurrentPayPeriodForUser($dayId, $targetUserUUID)) {
         self::incrementOrgWriteDeniedCounter('outside_current_period');
-        self::appendOrganizationWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'outside_current_period', $dayId, 0);
-        Response::error('[CC] Organization mode writes are limited to the target user current pay period.', [], HttpStatus::HTTP_UNPROCESSABLE);
+        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'outside_current_period', $dayId, 0);
+        Response::error('[CC] Business mode writes are limited to the target user current pay period.', [], HttpStatus::HTTP_UNPROCESSABLE);
 
         return;
       }
@@ -393,9 +393,9 @@ class CalendarController
 
     // Check if date is locked for editing (historical record locking)
     if (WorkEntryLockService::isLocked($dayId, $targetUserUUID)) {
-      if ($mode === 'organization') {
+      if (BusinessDiscoveryService::isDelegatedWorkMode($mode)) {
         self::incrementOrgWriteDeniedCounter('historical_lock');
-        self::appendOrganizationWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'historical_lock', $dayId, 0);
+        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'historical_lock', $dayId, 0);
       }
       \PayCal\Domain\Response::error(
         self::entryLockedMessage(),
@@ -466,16 +466,16 @@ class CalendarController
           return;
         }
 
-        if ($mode === 'organization') {
+        if (BusinessDiscoveryService::isDelegatedWorkMode($mode)) {
           $contextValidation = WorkEntry::validateOrganizationEnvelopeContext(
             $blob,
             $orgId,
-            OrganizationDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD
+            BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD
           );
           if (!$contextValidation['valid']) {
             self::incrementOrgWriteDeniedCounter('envelope_context_mismatch');
-            self::appendOrganizationWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'envelope_context_mismatch', $dayId, 0);
-            Response::error('[CC] Organization envelope context mismatch.', ['error' => $contextValidation['error']], HttpStatus::HTTP_UNPROCESSABLE);
+            self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'envelope_context_mismatch', $dayId, 0);
+            Response::error('[CC] Business envelope context mismatch.', ['error' => $contextValidation['error']], HttpStatus::HTTP_UNPROCESSABLE);
 
             return;
           }
@@ -575,8 +575,8 @@ class CalendarController
       ];
       \PayCal\Observability\Lens::add('Calendar Batch Success', $diagnostic, 'success');
 
-      if ($mode === 'organization') {
-        self::appendOrganizationWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'success', 'saved', $dayId, $updated);
+      if (BusinessDiscoveryService::isDelegatedWorkMode($mode)) {
+        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'success', 'saved', $dayId, $updated);
       }
       
       Response::success('[CC] Batch update success.', ['week' => $week, 'diagnostic' => $diagnostic], HttpStatus::HTTP_OK);
@@ -636,9 +636,9 @@ class CalendarController
   }
 
   /**
-   * Appends an organization audit event for work-write operations.
+   * Appends a business audit event for work-write operations.
    */
-  private static function appendOrganizationWorkWriteAudit(
+  private static function appendBusinessWorkWriteAudit(
     string $orgId,
     string $actorUUID,
     string $targetUserUUID,
@@ -653,14 +653,14 @@ class CalendarController
     }
 
     try {
-      (new OrganizationDiscoveryService())->appendOrganizationAuditEvent(
+      (new BusinessDiscoveryService())->appendBusinessAuditEvent(
         $orgId,
         'org.work.write',
         $actorUUID,
         [
           'target_user_uuid' => $targetUserUUID,
           'date' => $dayId,
-          'segment' => OrganizationDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+          'segment' => BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
           'outcome' => $outcome,
           'reason' => $reason,
           'entry_count' => (string) $entryCount,
@@ -975,15 +975,7 @@ class CalendarController
     }
 
     // Get month name
-    $userLocale = strtolower($user->language).'_'.strtoupper($user->language);
-    $formatter = new IntlDateFormatter($userLocale, IntlDateFormatter::SHORT, IntlDateFormatter::NONE);
-    $formatter->setPattern('MMMM');
-    $timestamp = mktime(0, 0, 0, $month, 1, $year);
-    if ($timestamp === false) {
-      $timestamp = time(); // Fallback to current time
-    }
-    $monthNameFormatted = $formatter->format($timestamp);
-    $monthName = is_string($monthNameFormatted) ? strtoupper($monthNameFormatted) : 'UNKNOWN';
+    $monthName = Strings::formatLocalizedMonthYear($year, $month);
 
     // Get lock boundary for historical record locking
     $lockBoundary = WorkEntryLockService::getLockBoundaryDate($user->user_uuid);

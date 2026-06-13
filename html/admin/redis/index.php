@@ -3,12 +3,13 @@
 use PayCal\Domain\Authentication;
 use PayCal\Domain\AdminSurface;
 use PayCal\Domain\Render;
+use PayCal\Domain\Strings;
 
 require_once '../../config.php';
 
 $currentPage = 'PAGE_ADMIN';
-$pageTitle = 'Redis Reliability Dashboard - [PayCal]';
-$pageLabel = 'Redis Reliability Dashboard';
+$pageTitle = Strings::i18n('ADMIN_REDIS_TIER0_RELIABILITY_DASHBOARD') . ' - [PayCal]';
+$pageLabel = Strings::i18n('ADMIN_REDIS_TIER0_RELIABILITY_DASHBOARD');
 
 Authentication::redirectHomeIfUnauthenticated();
 AdminSurface::redirectHomeIfPageUnavailable('/admin/redis/');
@@ -22,8 +23,8 @@ echo '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL('admin/re
 <section class="redis-admin" aria-label="Redis Tier-0 Reliability Dashboard">
   <header class="redis-admin__header panel w100 pad_md mar_sm">
     <div>
-      <h1>Redis Tier-0 Reliability</h1>
-      <p>Eviction safety, breaker state, mutation freeze, key churn and namespace quota visibility.</p>
+      <h1><?= htmlspecialchars(Strings::i18n('ADMIN_REDIS_TIER0_RELIABILITY'), ENT_QUOTES, 'UTF-8') ?></h1>
+      <p><?= htmlspecialchars(Strings::i18n('ADMIN_REDIS_OVERVIEW_TEXT'), ENT_QUOTES, 'UTF-8') ?></p>
     </div>
     <div class="redis-admin__actions">
       <button id="redis-refresh" class="btn btn_primary" type="button">Refresh</button>

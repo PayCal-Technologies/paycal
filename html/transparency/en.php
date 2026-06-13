@@ -224,11 +224,11 @@ require_once HTML.'/header.php';
         </section>
 
         <section class="doc-section">
-          <h2>Organization Membership and Role Philosophy</h2>
+          <h2>Business Membership and Role Philosophy</h2>
 
           <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time></p>
           <p>
-            This article explains the Organization &lt;-&gt; Member model, role policy changes,
+            This article explains the Business &lt;-&gt; Member model, role policy changes,
             and the capability/scope philosophy used to keep collaboration permissions auditable.
           </p>
           <ul class="doc-fact-list">
@@ -236,7 +236,7 @@ require_once HTML.'/header.php';
             <li>Publishes current role posture (owner, manager, contributor, member, viewer)</li>
             <li>Clarifies the principle of backend policy as source of truth with UI as projection only</li>
           </ul>
-          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/organization-membership/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/business-membership/'); ?>"><?php echo $readMoreLabel; ?></a></p>
         </section>
 
         <section class="doc-section">
@@ -412,6 +412,23 @@ require_once HTML.'/header.php';
             <li>3 low-severity: dead code, disabled-path input collection, info disclosure in 403 body</li>
           </ul>
           <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/auth-hardening-2026-05/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
+          <h2>How We Made the Business Members Page ~100x Faster</h2>
+
+          <p class="doc-article-meta">Published: <time datetime="2026-06-09">2026-06-09</time></p>
+          <p>
+            For business administrators, the Members page now appears effectively instant on repeat
+            visits — ~1.8 seconds of server time reduced to single-digit milliseconds via Redis
+            pipelining and a materialized cache.
+          </p>
+          <ul class="doc-fact-list">
+            <li>Redis pipelining batches hundreds of sequential round-trips into single round-trips</li>
+            <li>A materialized cache stores the finished grid with a 5-minute expiry and eager invalidation</li>
+            <li>Cache hits are ~100x+ faster; cache misses are still faster than the old page</li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/members-performance-2026-06/'); ?>"><?php echo $readMoreLabel; ?></a></p>
         </section>
 
         <section class="doc-section">

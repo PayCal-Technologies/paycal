@@ -11,7 +11,12 @@ CORS::renderContentType('application/javascript');
 
 Javascript::renderDocBlock();
 
+$registerI18n = [
+  'AUTH_REGISTER_PASSWORDS_NO_MATCH' => Strings::i18n('AUTH_REGISTER_PASSWORDS_NO_MATCH'),
+];
+
 ?>
+const REGISTER_T = <?php echo json_encode($registerI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 
 import PC from "<?php echo Environment::appURL('js/'); ?>";
 
@@ -32,7 +37,7 @@ window.addEventListener('DOMContentLoaded', () => {
   registerForm.addEventListener('submit', (e) => {
     if (password.value !== confirmPassword.value) {
       e.preventDefault();
-      PC.showToast('Passwords do not match. Please re-enter and try again.');
+      PC.showToast(REGISTER_T.AUTH_REGISTER_PASSWORDS_NO_MATCH);
     }
   });
 });

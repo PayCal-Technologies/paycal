@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Opt-in Tanılama ve Phantom Wing - [PayCal]';
-$pageLabel = 'Opt-in Tanılama ve Phantom Wing';
+$pageTitle = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Opt-in Tanılama &amp; Phantom Wing</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       PayCal, sizin yönettiğiniz isteğe bağlı bir tanılama katmanı içerir. İşte tam olarak
       neyi topladığı, cihazınızda ne kaldığı ve nasıl kullanıldığı.
@@ -238,7 +239,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         <li>Telemetri, tüm kimlik doğrulama sayfalarında tamamen bastırılır</li>
         <li>Hız sınırlama ve otomatik istemci geri çekilmesi, yanlışlıkla fazla raporlamayı önler</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Phantom Wing, tüm tanılamaları süresiz olarak kapalı bırakabilmeniz için tasarlanmıştır.
         Opt-in denetimleri, bir şeyler ters gittiğinde size ve destek ekibine ortak bir dil vermek
         için mevcuttur — varsayılan olarak veri toplamak için değil.

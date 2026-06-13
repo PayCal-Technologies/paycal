@@ -33,7 +33,7 @@ final class I18n {
 	public const NEXT_SVG = '<svg class=\'svg-icon\' xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -900 600 600"><path d="M 504 -480 L 348 -636 q -11 -11 -11 -28 t 11 -28 q 11 -11 28 -11 t 28 11 l 184 184 q 6 6 8.5 13 t 2.5 15 q 0 8 -2.5 15 t -8.5 13 L 404 -268 q -11 11 -28 11 t -28 -11 q -11 -11 -11 -28 t 11 -28 l 156 -156 Z"/></svg>';
 	public const PAYCAL = 'Pay<em>C</em>al';
 	public const PROFILE = 'Pro<em>f</em>ile';
-	public const ORGANIZATIONS = 'Organizations';
+	public const BUSINESSES = 'Business';
 	public const POLICIES = 'Po<em>l</em>icies';
 	public const POLICIES_HTML = 'Po<em>l</em>icies';
 	public const PREVIOUS_SVG = '<svg class=\'svg-icon\' xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -900 600 600" width="24"><path d="m 432 -480 l 156 156 q 11 11 11 28 t -11 28 q -11 11 -28 11 t -28 -11 L 348 -452 q -6 -6 -8.5 -13 t -2.5 -15 q 0 -8 2.5 -15 t 8.5 -13 l 184 -184 q 11 -11 28 -11 t 28 11 q 11 11 11 28 t -11 28 L 432 -480 Z"/></svg>';
@@ -43,10 +43,13 @@ final class I18n {
 	public const SITE_NAME = 'Pay<em>C</em>al';
 	public const SITES = '<em>S</em>ites';
 	public const SITES_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/></svg>';
-	public const ORGANIZATIONS_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="8" cy="8" r="3.5"/><path d="M 8 14 c -2.33 0 -7 1.17 -7 3.5 V 22 h 14 v -4.5 c 0 -2.33 -4.67 -3.5 -7 -3.5 Z"/><circle cx="16" cy="7.5" r="3"/><path d="M 16 13.5 c -1.67 0 -5 0.83 -5 2.5 v 3.5 h 10 v -3.5 c 0 -1.67 -3.33 -2.5 -5 -2.5 Z" opacity="0.9"/></g></svg>';
+	public const BUSINESSES_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="8" cy="8" r="3.5"/><path d="M 8 14 c -2.33 0 -7 1.17 -7 3.5 V 22 h 14 v -4.5 c 0 -2.33 -4.67 -3.5 -7 -3.5 Z"/><circle cx="16" cy="7.5" r="3"/><path d="M 16 13.5 c -1.67 0 -5 0.83 -5 2.5 v 3.5 h 10 v -3.5 c 0 -1.67 -3.33 -2.5 -5 -2.5 Z" opacity="0.9"/></g></svg>';
 	public const LANGUAGE_COVERAGE = 'Language Coverage';
-	public const ORGANIZATIONS_HTML = '<em>O</em>rganizations';
+	public const BUSINESSES_HTML = '<em>B</em>usiness';
 	public const PRICING = '<em>P</em>ricing';
 	public const PROFILE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-8 2.24-8 4v1h16v-1c0-1.76-3-4-8-4z"/></svg>';
 	public const PROFILE_HTML = 'Pro<em>f</em>ile';
+	public const REPORTS = 'Reports';
+	public const REPORTS_HTML = '<em>R</em>eports';
+	public const REPORTS_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2 5 5h-5V4zM8 13h8v2H8v-2zm0 4h8v2H8v-2zm0-8h4v2H8V9z"/></svg>';
 }

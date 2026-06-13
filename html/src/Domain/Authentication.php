@@ -438,36 +438,11 @@ class Authentication
   }
 
   /**
-   * Abort the current request if the user is authenticated but has not verified their email.
-   */
-  public static function requireEmailVerifiedOrDie(): void
-  {
-    if (!self::validateAndTouchSession()) {
-      Response::error('[AUTH] Unauthorized', [], HttpStatus::HTTP_UNAUTHORIZED);
-    }
-
-    $currentUser = User::current();
-    if (!$currentUser->email_verified) {
-      Response::error('[AUTH] Email not verified', [], HttpStatus::HTTP_FORBIDDEN);
-    }
-  }
-
-  /**
    * Abort the current request if the current user is not an admin.
    */
   public static function isAdminOrDie(): void
   {
     if (!User::isAdmin())
-      Response::error('[AUTH] Unauthorized', [], HttpStatus::HTTP_UNAUTHORIZED);
-  }
-
-
-  /**
-   * Abort the current request if the current user is not a manager.
-   */
-  public static function isManagerOrDie(): void
-  {
-    if (!User::isManager())
       Response::error('[AUTH] Unauthorized', [], HttpStatus::HTTP_UNAUTHORIZED);
   }
 
@@ -519,6 +494,8 @@ class Authentication
       if (1 === $loginCount) {
         Database::expire($loginKey, 2592000); // 30 days
       }
+
+    BusinessWorkspaceWarmer::requestWarmForUser($userUUID);
   }
 
 
@@ -539,18 +516,6 @@ class Authentication
 
     return '' !== $uuid ? $uuid : null;
   }
-
-  /**
-   * Process user sign in credentials
-   * This function checks user sign in credential against Redis and sets their Cookie.
-   * @return bool the boolean result indicates if a user is authenticated or not
-   */
-  public static function attemptSignin(): bool
-  {
-    Log::debug('[SIGNIN] Password signin disabled. Use passkeys at /auth/.');
-    return false;
-  }
-
 
   /**
    * Generates a verification reminder message for unverified users.
@@ -578,6 +543,9 @@ class Authentication
       'AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER',
       'AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON',
       'AUTH_VERIFICATION_REMINDER_RESEND_LINK',
+      'AUTH_VERIFICATION_REMINDER_COOLDOWN_FMT',
+      'AUTH_VERIFICATION_REMINDER_SENDING',
+      'AUTH_VERIFICATION_REMINDER_SIGNOUT_FAILED',
     ];
     foreach ($i18nKeys as $key) {
       $i18n[$key] = Strings::i18n($key);
@@ -593,41 +561,15 @@ class Authentication
       '__AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER__' => $i18n['AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER'],
       '__AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON__' => $i18n['AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON'],
       '__AUTH_VERIFICATION_REMINDER_RESEND_LINK__' => $i18n['AUTH_VERIFICATION_REMINDER_RESEND_LINK'],
+      '__AUTH_VERIFICATION_REMINDER_COOLDOWN_FMT__' => $i18n['AUTH_VERIFICATION_REMINDER_COOLDOWN_FMT'],
+      '__AUTH_VERIFICATION_REMINDER_SENDING__' => $i18n['AUTH_VERIFICATION_REMINDER_SENDING'],
+      '__AUTH_VERIFICATION_REMINDER_SIGNOUT_FAILED__' => $i18n['AUTH_VERIFICATION_REMINDER_SIGNOUT_FAILED'],
       '__CSP_NONCE__' => $cspNonce,
     ];
 
     return Render::template('verification-reminder', $renders);
   }
 
-
-  /**
-   * Retrieve the authentication types from the platform as an html <select> tag.
-   */
-  public static function getAuthOptionsHtml(): string
-  {
-    $i18n = [];
-    foreach (['SELECT_AUTHENTICATION_LEVEL'] as $key) {
-      $i18n[$key] = Strings::i18n($key);
-    }
-
-    $buffer = "<select id='update_user_auth_level' name='update_user_auth_level' aria-label='"
-            . $i18n['SELECT_AUTHENTICATION_LEVEL']."'>".PHP_EOL;
-
-    foreach (AuthLevel::cases() as $level) {
-      $display = strtoupper($level->value);
-
-      $renders = [
-        '__LEVEL_VALUE__' => $level->value,
-        '__LEVEL_DISPLAY__' => $display,
-      ];
-
-      $buffer .= Render::template('auth-option', $renders);
-    }
-
-    $buffer .= '</select>'.PHP_EOL;
-
-    return $buffer;
-}
 
   /**
    * Destroy a user session and record session duration metrics.

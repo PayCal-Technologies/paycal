@@ -32,8 +32,10 @@ $user = User::current();
 $profileSubscription = SubscriptionRepository::get($user->user_uuid);
 $billingProvider = BillingProvider::current();
 $isStripeBilling = $billingProvider === BillingProvider::STRIPE;
-$isPremiumHint = $profileSubscription['tier'] === Enums\Subscription::PREMIUM
-  && $profileSubscription['status']->grantsAccess();
+$hasActivePremium = SubscriptionRepository::isPremiumActive($user->user_uuid);
+$hasActiveBusiness = SubscriptionRepository::isBusinessActive($user->user_uuid);
+$hasPaidSubscription = $hasActivePremium || $hasActiveBusiness;
+$billingHint = $hasActiveBusiness ? 'business' : ($hasActivePremium ? 'premium' : 'free');
 
 Lens::boot('profile');
 
@@ -41,15 +43,18 @@ $pageTitle = profile_index_i18n('PROFILE') . ' - [' . profile_index_i18n('SITE_N
 $pageLabel = profile_index_i18n('PROFILE');
 $pageLanguage = (string) User::current()->language;
 $settingsCsrfNonce = User::current()->generateFormNonce('settings');
+$businessesCsrfNonce = User::current()->generateFormNonce('businesses');
+require __DIR__ . '/../business/_partials/i18n.php';
+$profilePayPeriodManagedBy = (new BusinessDiscoveryService())->resolveProfilePayPeriodManagedByBusiness($user->user_uuid);
 $localeOptions = [
-  'en-CA' => 'English (Canada)',
-  'fr-CA' => 'French (Canada)',
-  'en-US' => 'English (United States)',
-  'en-GB' => 'English (United Kingdom)',
-  'fr-FR' => 'French (France)',
-  'de-DE' => 'German (Germany)',
-  'es-ES' => 'Spanish (Spain)',
-  'pt-BR' => 'Portuguese (Brazil)',
+  'en-CA' => profile_index_i18n('PROFILE_LOCALE_EN_CA'),
+  'fr-CA' => profile_index_i18n('PROFILE_LOCALE_FR_CA'),
+  'en-US' => profile_index_i18n('PROFILE_LOCALE_EN_US'),
+  'en-GB' => profile_index_i18n('PROFILE_LOCALE_EN_GB'),
+  'fr-FR' => profile_index_i18n('PROFILE_LOCALE_FR_FR'),
+  'de-DE' => profile_index_i18n('PROFILE_LOCALE_DE_DE'),
+  'es-ES' => profile_index_i18n('PROFILE_LOCALE_ES_ES'),
+  'pt-BR' => profile_index_i18n('PROFILE_LOCALE_PT_BR'),
 ];
 
 require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
@@ -143,15 +148,15 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
   </form>
   </dialog>
 
-  <section class="panel profile_lead_panel" id="panel-personal-info" title="<?php echo profile_index_i18n('PROFILE_PERSONAL_INFO_PANEL_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PERSONAL_INFO_PANEL_HELP'); ?>">
-    <div class="organizations_section_header">
+  <section class="panel profile_lead_panel" id="panel-personal-info" aria-labelledby="panel-personal-info-heading" title="<?php echo profile_index_i18n('PROFILE_PERSONAL_INFO_PANEL_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PERSONAL_INFO_PANEL_HELP'); ?>">
+    <div class="businesses_section_header">
       <div>
-        <h2><?php echo profile_index_i18n('PROFILE_PERSONAL_INFO_TITLE'); ?></h2>
+        <h2 id="panel-personal-info-heading"><?php echo profile_index_i18n('PROFILE_PERSONAL_INFO_TITLE'); ?></h2>
       </div>
     </div>
     <form method="POST" action="<?php echo Environment::appURL('api/v1/account/info/update/'); ?>" id="edit_details_form" name="edit_details_form" aria-label="<?php echo profile_index_i18n('PROFILE_PERSONAL_INFO_FORM_ARIA'); ?>">
       <input type="hidden" name="csrf_token" value="<?php echo $settingsCsrfNonce; ?>">
-      <input type="hidden" id="organizations_personal_name" value="">
+      <input type="hidden" id="businesses_personal_name" value="">
 
       <div id="edit_details_status" class="status_message" role="status" aria-live="polite"></div>
 
@@ -174,7 +179,7 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
         <div class="item_pair">
           <label for="edit_details_phone" class="item_label"><?php echo profile_index_i18n('PHONE'); ?></label>
           <div class="item_value">
-            <input type="tel" id="edit_details_phone" name="phone" value="<?php echo $user->phone; ?>" autocomplete="tel-national" maxlength="14" inputmode="numeric" pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}" placeholder="<?php echo profile_index_i18n('ORGANIZATIONS_CONTACT_PHONE_PLACEHOLDER'); ?>" aria-describedby="edit_details_status edit_details_phone_error">
+            <input type="tel" id="edit_details_phone" name="phone" value="<?php echo $user->phone; ?>" autocomplete="tel-national" maxlength="14" inputmode="numeric" pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}" placeholder="<?php echo profile_index_i18n('BUSINESSES_CONTACT_PHONE_PLACEHOLDER'); ?>" aria-describedby="edit_details_status edit_details_phone_error">
             <div id="edit_details_phone_error" class="status_text compact_hint" role="status" aria-live="polite"></div>
           </div>
         </div>
@@ -210,9 +215,9 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
         </div>
 
         <div class="item_pair">
-          <label for="organizations_personal_default_wage" class="item_label"><?php echo profile_index_i18n('WAGE'); ?></label>
+          <label for="businesses_personal_default_wage" class="item_label"><?php echo profile_index_i18n('WAGE'); ?></label>
           <div class="item_value">
-            <input id="organizations_personal_default_wage" type="text" maxlength="32" placeholder="<?php echo profile_index_i18n('ORGANIZATIONS_DEFAULT_WAGE_PLACEHOLDER'); ?>">
+            <input id="businesses_personal_default_wage" type="text" maxlength="32" placeholder="<?php echo profile_index_i18n('BUSINESSES_DEFAULT_WAGE_PLACEHOLDER'); ?>">
           </div>
         </div>
 
@@ -236,18 +241,18 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
     </form>
   </section>
 
-  <section class="panel" id="panel-internationalization" title="<?php echo profile_index_i18n('PROFILE_INTERNATIONALIZATION_TITLE'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_INTERNATIONALIZATION_PANEL_HELP'); ?>">
-    <div class="organizations_section_header">
+  <section class="panel" id="panel-internationalization" aria-labelledby="panel-internationalization-heading" title="<?php echo profile_index_i18n('PROFILE_INTERNATIONALIZATION_TITLE'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_INTERNATIONALIZATION_PANEL_HELP'); ?>">
+    <div class="businesses_section_header">
       <div>
-        <h2><?php echo profile_index_i18n('PROFILE_INTERNATIONALIZATION_TITLE'); ?></h2>
+        <h2 id="panel-internationalization-heading"><?php echo profile_index_i18n('PROFILE_INTERNATIONALIZATION_TITLE'); ?></h2>
       </div>
     </div>
 
     <div class="profile_i18n_grid">
       <div class="item_pair">
-        <label for="organizations_personal_language" class="item_label"><?php echo profile_index_i18n('LANGUAGE'); ?></label>
+        <label for="businesses_personal_language" class="item_label"><?php echo profile_index_i18n('LANGUAGE'); ?></label>
         <div class="item_value">
-          <select id="organizations_personal_language" name="language" aria-describedby="edit_details_status edit_details_language_error">
+          <select id="businesses_personal_language" name="language" aria-describedby="edit_details_status edit_details_language_error">
             <?php foreach (Language::AVAILABLE as $languageCode => $languageName) { ?>
               <option value="<?php echo htmlspecialchars($languageCode, ENT_QUOTES, 'UTF-8'); ?>"<?php if ((string) $user->language === (string) $languageCode) { echo ' selected'; } ?>><?php echo htmlspecialchars($languageName, ENT_QUOTES, 'UTF-8'); ?></option>
             <?php } ?>
@@ -257,9 +262,9 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
       </div>
 
       <div class="item_pair">
-        <label for="organizations_personal_locale" class="item_label"><?php echo profile_index_i18n('LOCALE'); ?></label>
+        <label for="businesses_personal_locale" class="item_label"><?php echo profile_index_i18n('LOCALE'); ?></label>
         <div class="item_value">
-          <select id="organizations_personal_locale" name="locale" aria-describedby="edit_details_status edit_details_locale_error">
+          <select id="businesses_personal_locale" name="locale" aria-describedby="edit_details_status edit_details_locale_error">
             <?php foreach ($localeOptions as $localeCode => $localeLabel) { ?>
               <option value="<?php echo htmlspecialchars($localeCode, ENT_QUOTES, 'UTF-8'); ?>"<?php if ((string) (($user->locale ?? '') !== '' ? $user->locale : 'en-CA') === (string) $localeCode) { echo ' selected'; } ?>><?php echo htmlspecialchars($localeLabel, ENT_QUOTES, 'UTF-8'); ?></option>
             <?php } ?>
@@ -269,32 +274,38 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
       </div>
 
       <div class="item_pair">
-        <label for="organizations_personal_currency_search" class="item_label"><?php echo profile_index_i18n('ORGANIZATIONS_CURRENCY'); ?></label>
+        <label for="businesses_personal_currency_search" class="item_label"><?php echo profile_index_i18n('BUSINESSES_CURRENCY'); ?></label>
         <div class="item_value">
-          <div class="currency_finder" id="organizations_personal_currency_finder" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="organizations_personal_currency_listbox">
-            <input class="currency_finder_search" id="organizations_personal_currency_search" type="text" autocomplete="off" spellcheck="false" placeholder="<?php echo profile_index_i18n('PROFILE_SEARCH_CURRENCIES_PLACEHOLDER'); ?>" aria-autocomplete="list" aria-controls="organizations_personal_currency_listbox" aria-label="<?php echo profile_index_i18n('ORGANIZATIONS_CURRENCY'); ?>">
-            <input id="organizations_personal_currency" type="hidden">
-            <ul id="organizations_personal_currency_listbox" class="currency_finder_list" role="listbox" hidden></ul>
+          <div class="currency_finder" id="businesses_personal_currency_finder" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="businesses_personal_currency_listbox">
+            <input class="currency_finder_search" id="businesses_personal_currency_search" type="text" autocomplete="off" spellcheck="false" placeholder="<?php echo profile_index_i18n('PROFILE_SEARCH_CURRENCIES_PLACEHOLDER'); ?>" aria-autocomplete="list" aria-controls="businesses_personal_currency_listbox" aria-label="<?php echo profile_index_i18n('BUSINESSES_CURRENCY'); ?>">
+            <input id="businesses_personal_currency" type="hidden">
+            <ul id="businesses_personal_currency_listbox" class="currency_finder_list" role="listbox" hidden></ul>
           </div>
         </div>
       </div>
 
       <div class="item_pair">
-        <label for="organizations_personal_timezone_search" class="item_label"><?php echo profile_index_i18n('ORGANIZATIONS_TIMEZONE'); ?></label>
+        <label for="businesses_personal_timezone_search" class="item_label"><?php echo profile_index_i18n('BUSINESSES_TIMEZONE'); ?></label>
         <div class="item_value">
-          <div class="timezone_finder" id="organizations_personal_timezone_finder" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="organizations_personal_timezone_listbox">
-            <input class="timezone_finder_search" id="organizations_personal_timezone_search" type="text" autocomplete="off" spellcheck="false" placeholder="<?php echo profile_index_i18n('PROFILE_SEARCH_TIMEZONES_PLACEHOLDER'); ?>" aria-autocomplete="list" aria-controls="organizations_personal_timezone_listbox" aria-label="<?php echo profile_index_i18n('ORGANIZATIONS_TIMEZONE'); ?>">
-            <input id="organizations_personal_timezone" type="hidden">
-            <ul id="organizations_personal_timezone_listbox" class="timezone_finder_list" role="listbox" hidden></ul>
+          <div class="timezone_finder" id="businesses_personal_timezone_finder" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="businesses_personal_timezone_listbox">
+            <input class="timezone_finder_search" id="businesses_personal_timezone_search" type="text" autocomplete="off" spellcheck="false" placeholder="<?php echo profile_index_i18n('PROFILE_SEARCH_TIMEZONES_PLACEHOLDER'); ?>" aria-autocomplete="list" aria-controls="businesses_personal_timezone_listbox" aria-label="<?php echo profile_index_i18n('BUSINESSES_TIMEZONE'); ?>">
+            <input id="businesses_personal_timezone" type="hidden">
+            <ul id="businesses_personal_timezone_listbox" class="timezone_finder_list" role="listbox" hidden></ul>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="organizations_i18n_preview" class="profile_i18n_preview" role="status" aria-live="polite"></div>
+    <div id="businesses_i18n_preview" class="profile_i18n_preview" role="status" aria-live="polite"></div>
   </section>
 
-  <section class="panel" id="panel-pay-period" title="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_PANEL_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_PANEL_HELP'); ?>"
+  <section class="panel<?php echo $profilePayPeriodManagedBy !== null ? ' is-managed-by-business' : ''; ?>" id="panel-pay-period" aria-labelledby="panel-pay-period-heading" title="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_PANEL_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_PANEL_HELP'); ?>"
+    <?php if ($profilePayPeriodManagedBy !== null) { ?>
+    data-pay-period-managed="true"
+    data-managed-business-id="<?php echo htmlspecialchars((string) $profilePayPeriodManagedBy['business_id'], ENT_QUOTES, 'UTF-8'); ?>"
+    data-managed-business-name="<?php echo htmlspecialchars((string) $profilePayPeriodManagedBy['name'], ENT_QUOTES, 'UTF-8'); ?>"
+    data-managed-payroll-href="<?php echo htmlspecialchars((string) $profilePayPeriodManagedBy['payroll_href'], ENT_QUOTES, 'UTF-8'); ?>"
+    <?php } ?>
     data-user-settings='<?php echo htmlspecialchars((string) (json_encode([
       'pay_frequency'      => (string) ($user->pay_frequency       ?? 'biweekly'),
       'pay_anchor'         => (string) ($user->pay_anchor          ?? 'Monday'),
@@ -307,19 +318,36 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
       'language'           => (string) ($user->language            ?? 'en'),
       'locale'             => (string) (($user->locale             ?? '') !== '' ? $user->locale : 'en-CA'),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}'), ENT_QUOTES, 'UTF-8'); ?>'>
-    <div class="organizations_section_header">
+    <div class="businesses_section_header">
       <div>
-        <h2><?php echo profile_index_i18n('PAY_PERIOD'); ?></h2>
+        <h2 id="panel-pay-period-heading"><?php echo profile_index_i18n('PAY_PERIOD'); ?></h2>
       </div>
     </div>
-    <form id="organizations_personal_form" class="organizations_create_form" method="dialog">
-      <input type="hidden" id="organizations_personal_org_id" value="">
-      <input type="hidden" id="organizations_personal_pay_anchor" value="Monday">
-      <input type="hidden" id="organizations_personal_pay_period_start" value="">
-      <div class="organizations_pp_control_strip" role="group" aria-label="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_CONTROLS_ARIA'); ?>" title="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_CONTROLS_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_CONTROLS_HELP'); ?>">
-        <div class="organizations_pp_control" title="<?php echo profile_index_i18n('PROFILE_PAY_FREQUENCY_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_FREQUENCY_HELP'); ?>">
-          <label for="organizations_personal_pay_frequency"><?php echo profile_index_i18n('PROFILE_PAY_FREQUENCY_LABEL'); ?></label>
-          <select id="organizations_personal_pay_frequency">
+    <div id="profile_pay_period_managed_banner" class="profile_pay_period_managed_banner" role="status" aria-live="polite"<?php if ($profilePayPeriodManagedBy === null) { echo ' hidden'; } ?>>
+      <p class="profile_pay_period_managed_banner_lede">
+        <?php
+        if ($profilePayPeriodManagedBy !== null) {
+          echo htmlspecialchars(
+            sprintf(profile_index_i18n('PROFILE_PAY_PERIOD_MANAGED_BANNER'), (string) $profilePayPeriodManagedBy['name']),
+            ENT_QUOTES,
+            'UTF-8'
+          );
+        }
+        ?>
+      </p>
+      <p class="help_text profile_pay_period_managed_banner_help"><?php echo profile_index_i18n('PROFILE_PAY_PERIOD_MANAGED_HELP'); ?></p>
+      <p class="profile_pay_period_managed_banner_action">
+        <a class="btn btn_secondary" href="<?php echo htmlspecialchars($profilePayPeriodManagedBy !== null ? (string) $profilePayPeriodManagedBy['payroll_href'] : '/business/payroll/', ENT_QUOTES, 'UTF-8'); ?>"><?php echo profile_index_i18n('PROFILE_PAY_PERIOD_MANAGED_LINK'); ?></a>
+      </p>
+    </div>
+    <form id="businesses_personal_form" class="businesses_create_form" method="dialog">
+      <input type="hidden" id="businesses_personal_org_id" value="">
+      <input type="hidden" id="businesses_personal_pay_anchor" value="Monday">
+      <input type="hidden" id="businesses_personal_pay_period_start" value="">
+      <div class="businesses_pp_control_strip" role="group" aria-label="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_CONTROLS_ARIA'); ?>" title="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_CONTROLS_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_PERIOD_CONTROLS_HELP'); ?>">
+        <div class="businesses_pp_control" title="<?php echo profile_index_i18n('PROFILE_PAY_FREQUENCY_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_FREQUENCY_HELP'); ?>">
+          <label for="businesses_personal_pay_frequency"><?php echo profile_index_i18n('PROFILE_PAY_FREQUENCY_LABEL'); ?></label>
+          <select id="businesses_personal_pay_frequency">
             <option value="weekly"><?php echo profile_index_i18n('PROFILE_PAY_FREQUENCY_WEEKLY'); ?></option>
             <option value="biweekly"><?php echo profile_index_i18n('PROFILE_PAY_FREQUENCY_BIWEEKLY'); ?></option>
             <option value="semimonthly"><?php echo profile_index_i18n('PROFILE_PAY_FREQUENCY_SEMIMONTHLY'); ?></option>
@@ -327,81 +355,101 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
           </select>
         </div>
 
-        <div class="organizations_pp_control" title="<?php echo profile_index_i18n('PROFILE_PAY_LENGTH_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_LENGTH_HELP'); ?>">
-          <label for="organizations_personal_pay_period_length"><?php echo profile_index_i18n('LENGTH'); ?></label>
-          <input id="organizations_personal_pay_period_length" type="number" min="7" max="31" readonly>
+        <div class="businesses_pp_control" title="<?php echo profile_index_i18n('PROFILE_PAY_LENGTH_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_LENGTH_HELP'); ?>">
+          <label for="businesses_personal_pay_period_length"><?php echo profile_index_i18n('LENGTH'); ?></label>
+          <input id="businesses_personal_pay_period_length" type="number" min="7" max="31" readonly>
         </div>
 
-        <div class="organizations_pp_control" title="<?php echo profile_index_i18n('PROFILE_PAY_GRACE_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_GRACE_HELP'); ?>">
-          <span class="organizations_pp_control_label"><?php echo profile_index_i18n('PROFILE_PAY_GRACE_LABEL'); ?></span>
-          <div id="organizations_personal_editing_grace_days" class="radio_group organizations_grace_radio_group" role="radiogroup" aria-label="<?php echo profile_index_i18n('PROFILE_PAY_GRACE_LABEL'); ?>" title="<?php echo profile_index_i18n('PROFILE_PAY_GRACE_PICKER_HELP'); ?>">
-            <input type="radio" class="radio" id="organizations_personal_grace_0" name="organizations_personal_editing_grace_days" value="0" checked>
-            <label for="organizations_personal_grace_0"><?php echo profile_index_i18n('NONE'); ?></label>
-            <input type="radio" class="radio" id="organizations_personal_grace_1" name="organizations_personal_editing_grace_days" value="1">
-            <label for="organizations_personal_grace_1"><?php echo profile_index_i18n('PROFILE_PAY_GRACE_1_DAY'); ?></label>
-            <input type="radio" class="radio" id="organizations_personal_grace_2" name="organizations_personal_editing_grace_days" value="2">
-            <label for="organizations_personal_grace_2"><?php echo profile_index_i18n('PROFILE_PAY_GRACE_2_DAYS'); ?></label>
-            <input type="radio" class="radio" id="organizations_personal_grace_3" name="organizations_personal_editing_grace_days" value="3">
-            <label for="organizations_personal_grace_3"><?php echo profile_index_i18n('PROFILE_PAY_GRACE_3_DAYS'); ?></label>
+        <div class="businesses_pp_control" title="<?php echo profile_index_i18n('PROFILE_PAY_GRACE_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_PAY_GRACE_HELP'); ?>">
+          <span class="businesses_pp_control_label"><?php echo profile_index_i18n('PROFILE_PAY_GRACE_LABEL'); ?></span>
+          <div id="businesses_personal_editing_grace_days" class="radio_group businesses_grace_radio_group" role="radiogroup" aria-label="<?php echo profile_index_i18n('PROFILE_PAY_GRACE_LABEL'); ?>" title="<?php echo profile_index_i18n('PROFILE_PAY_GRACE_PICKER_HELP'); ?>">
+            <input type="radio" class="radio" id="businesses_personal_grace_0" name="businesses_personal_editing_grace_days" value="0" checked>
+            <label for="businesses_personal_grace_0"><?php echo profile_index_i18n('NONE'); ?></label>
+            <input type="radio" class="radio" id="businesses_personal_grace_1" name="businesses_personal_editing_grace_days" value="1">
+            <label for="businesses_personal_grace_1"><?php echo profile_index_i18n('PROFILE_PAY_GRACE_1_DAY'); ?></label>
+            <input type="radio" class="radio" id="businesses_personal_grace_2" name="businesses_personal_editing_grace_days" value="2">
+            <label for="businesses_personal_grace_2"><?php echo profile_index_i18n('PROFILE_PAY_GRACE_2_DAYS'); ?></label>
+            <input type="radio" class="radio" id="businesses_personal_grace_3" name="businesses_personal_editing_grace_days" value="3">
+            <label for="businesses_personal_grace_3"><?php echo profile_index_i18n('PROFILE_PAY_GRACE_3_DAYS'); ?></label>
           </div>
         </div>
       </div>
 
-      <div id="organizations_personal_payperiod_warning" class="organizations_payperiod_warning" role="alert" aria-live="assertive"></div>
+      <div id="businesses_personal_payperiod_warning" class="businesses_payperiod_warning" role="alert" aria-live="assertive"></div>
 
-      <div id="organizations_personal_preview" class="organizations_preview_box pay_period_preview_compact" aria-live="polite" title="<?php echo profile_index_i18n('PROFILE_PAY_PREVIEW_HELP'); ?>"></div>
+      <div id="businesses_personal_preview" class="businesses_preview_box pay_period_preview_compact" aria-live="polite" title="<?php echo profile_index_i18n('PROFILE_PAY_PREVIEW_HELP'); ?>"></div>
     </form>
   </section>
 
   <input type="hidden" id="settings_csrf_token" value="<?php echo $settingsCsrfNonce; ?>">
+  <input type="hidden" id="businesses_csrf_token" value="<?php echo $businessesCsrfNonce; ?>">
 
-  <section class="panel" id="panel-billing" title="<?php echo profile_index_i18n('PROFILE_BILLING_PANEL_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_BILLING_PANEL_HELP'); ?>" data-billing-hint="<?php echo $isPremiumHint ? 'premium' : 'free'; ?>" data-billing-hydrated="false" data-billing-provider="<?php echo htmlspecialchars($billingProvider, ENT_QUOTES, 'UTF-8'); ?>" data-account-timezone="<?php echo htmlspecialchars((string) ($user->timezone ?? 'UTC'), ENT_QUOTES, 'UTF-8'); ?>">
-    <div class="organizations_section_header">
+<?php if (!$hasActiveBusiness) {
+  require __DIR__ . '/../business/_partials/profile_connect_panel.php';
+} ?>
+
+  <section class="panel" id="panel-billing" aria-labelledby="panel-billing-heading" title="<?php echo profile_index_i18n('PROFILE_BILLING_PANEL_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_BILLING_PANEL_HELP'); ?>" data-billing-hint="<?php echo htmlspecialchars($billingHint, ENT_QUOTES, 'UTF-8'); ?>" data-billing-hydrated="false" data-billing-provider="<?php echo htmlspecialchars($billingProvider, ENT_QUOTES, 'UTF-8'); ?>" data-account-timezone="<?php echo htmlspecialchars((string) ($user->timezone ?? 'UTC'), ENT_QUOTES, 'UTF-8'); ?>">
+    <div class="businesses_section_header">
       <div>
-        <h2><?php echo profile_index_i18n('PROFILE_BILLING_TITLE'); ?></h2>
+        <h2 id="panel-billing-heading"><?php echo profile_index_i18n('PROFILE_BILLING_TITLE'); ?></h2>
       </div>
     </div>
     <div id="billing_status_sr" class="visually_hidden" role="status" aria-live="polite" aria-atomic="true"></div>
     <?php if ($isStripeBilling) { ?>
       <p class="help_text"><?php echo profile_index_i18n('PROFILE_BILLING_STRIPE_NOTE_PREFIX'); ?> <a href="/contact"><?php echo profile_index_i18n('PROFILE_BILLING_STRIPE_NOTE_LINK'); ?></a>.</p>
     <?php } else { ?>
-      <p class="help_text">Public Core ships with a local Premium toggle for experimenting with organizations and shared features.</p>
+      <p class="help_text"><?php echo profile_index_i18n('PROFILE_BILLING_PUBLIC_CORE_NOTE'); ?></p>
     <?php } ?>
 
-    <div id="billing_free_view" class="billing_shell"<?php if ($isPremiumHint) echo ' hidden'; ?>>
-      <div class="billing_columns">
-        <section class="billing_column billing_column_main" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_FREE_ARIA'); ?>">
-          <p class="billing_plan_value billing_plan_value_free"><strong><?php echo profile_index_i18n('PROFILE_BILLING_FREE_PLAN'); ?></strong></p>
-          <p class="help_text"><?php echo $isStripeBilling
-            ? profile_index_i18n('PROFILE_BILLING_FREE_HELP')
-            : 'You are on Free. Enable Premium to try organizations and collaboration features locally.'; ?></p>
-          <h3><?php echo $isStripeBilling ? profile_index_i18n('PROFILE_BILLING_UPGRADE_PRICE') : 'Premium mode'; ?></h3>
-          <?php if ($isStripeBilling) { ?>
-            <a href="/premium" class="btn btn_secondary"><?php echo profile_index_i18n('PROFILE_BILLING_EXPLORE_BUTTON'); ?></a>
-          <?php } ?>
-          <button type="button" id="billing_upgrade_btn" class="btn btn_primary"><?php echo $isStripeBilling ? profile_index_i18n('PROFILE_BILLING_UPGRADE_BUTTON') : 'Enable Premium'; ?></button>
-          <div id="billing_upgrade_status" class="status_text compact_hint" role="status" aria-live="polite"></div>
+    <div id="billing_free_view" class="billing_shell billing_tier_matrix"<?php if ($hasPaidSubscription) echo ' hidden'; ?>>
+      <p class="help_text billing_matrix_intro"><?php echo profile_index_i18n('PROFILE_BILLING_MATRIX_INTRO'); ?></p>
+      <div class="billing_tier_grid" role="list" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_MATRIX_ARIA'); ?>">
+        <section class="billing_tier_card billing_tier_card_current" role="listitem" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_TIER_PUBLIC'); ?>">
+          <h3><?php echo profile_index_i18n('PROFILE_BILLING_TIER_PUBLIC'); ?></h3>
+          <p class="billing_tier_price"><?php echo profile_index_i18n('PROFILE_BILLING_TIER_PUBLIC_PRICE'); ?></p>
+          <ul class="billing_value_list billing_tier_features">
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PUBLIC_FEATURE_1'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PUBLIC_FEATURE_2'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PUBLIC_FEATURE_3'); ?></span></li>
+          </ul>
+          <p class="billing_tier_current_label"><?php echo profile_index_i18n('PROFILE_BILLING_CURRENT_PLAN'); ?></p>
         </section>
 
-        <section class="billing_column billing_column_side" role="region" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_BENEFITS_ARIA'); ?>">
-          <h3><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_BENEFITS_TITLE'); ?></h3>
-          <ul class="billing_value_list" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURES_ARIA'); ?>">
-            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_1'); ?></span></li>
-            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_2'); ?></span></li>
-            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_3'); ?></span></li>
-            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_4'); ?></span></li>
+        <section class="billing_tier_card" role="listitem" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_TIER_PREMIUM'); ?>">
+          <h3><?php echo profile_index_i18n('PROFILE_BILLING_TIER_PREMIUM'); ?></h3>
+          <p class="billing_tier_price"><?php echo profile_index_i18n('PROFILE_BILLING_TIER_PREMIUM_PRICE'); ?></p>
+          <ul class="billing_value_list billing_tier_features">
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_5'); ?></span></li>
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_6'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_REPORTING_FEATURE'); ?></span></li>
           </ul>
+          <button type="button" id="billing_upgrade_premium_btn" class="btn btn_secondary" data-billing-plan="premium"><?php echo $isStripeBilling ? profile_index_i18n('PROFILE_BILLING_UPGRADE_PREMIUM_BUTTON') : profile_index_i18n('PROFILE_BILLING_ENABLE_PREMIUM'); ?></button>
+          <div id="billing_upgrade_premium_status" class="status_text compact_hint" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="billing_tier_card billing_tier_card_featured" role="listitem" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_TIER_BUSINESS'); ?>">
+          <h3><?php echo profile_index_i18n('PROFILE_BILLING_TIER_BUSINESS'); ?></h3>
+          <p class="billing_tier_price"><?php echo profile_index_i18n('PROFILE_BILLING_TIER_BUSINESS_PRICE'); ?></p>
+          <ul class="billing_value_list billing_tier_features">
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_1'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_2'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_BUSINESS_FEATURE_LISTING'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_4'); ?></span></li>
+          </ul>
+          <button type="button" id="billing_upgrade_business_btn" class="btn btn_primary" data-billing-plan="business"><?php echo $isStripeBilling ? profile_index_i18n('PROFILE_BILLING_UPGRADE_BUSINESS_BUTTON') : profile_index_i18n('PROFILE_BILLING_ENABLE_BUSINESS'); ?></button>
+          <div id="billing_upgrade_business_status" class="status_text compact_hint" role="status" aria-live="polite"></div>
         </section>
       </div>
+      <p class="billing_businesses_link">
+        <a href="#panel-business-connect"><?php echo profile_index_i18n('PROFILE_BILLING_CONNECT_LINK'); ?></a>
+      </p>
     </div>
 
-    <div id="billing_premium_view" class="billing_shell"<?php if (!$isPremiumHint) echo ' hidden'; ?>>
+    <div id="billing_premium_view" class="billing_shell"<?php if (!$hasPaidSubscription) echo ' hidden'; ?>>
       <div class="billing_columns">
         <section class="billing_column billing_column_main" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_ARIA'); ?>">
           <p class="billing_plan_value">
-            <strong id="billing_plan_label"><?php echo profile_index_i18n('PROFILE_BILLING_PLAN_PREMIUM'); ?></strong>
+            <strong id="billing_plan_label"><?php echo $hasActiveBusiness ? profile_index_i18n('PROFILE_BILLING_PLAN_BUSINESS') : profile_index_i18n('PROFILE_BILLING_PLAN_PREMIUM'); ?></strong>
             <span id="billing_plan_status_badge" class="badge" hidden></span>
             <span class="billing_member_since">&mdash; <?php echo profile_index_i18n('PROFILE_BILLING_MEMBER_SINCE'); ?> <span id="billing_start_date">&#8212;</span></span>
           </p>
@@ -434,23 +482,34 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
             </span>
             . <?php echo profile_index_i18n('PROFILE_BILLING_CANCEL_SCHEDULED_SUFFIX'); ?>
           </p>
-          <button type="button" id="billing_portal_btn" class="btn btn_primary"><?php echo $isStripeBilling ? profile_index_i18n('PROFILE_BILLING_PORTAL_BUTTON') : 'Disable Premium'; ?></button>
+          <button type="button" id="billing_portal_btn" class="btn btn_primary"><?php echo $isStripeBilling ? profile_index_i18n('PROFILE_BILLING_PORTAL_BUTTON') : profile_index_i18n('PROFILE_BILLING_DISABLE_PREMIUM'); ?></button>
           <div id="billing_portal_status" class="status_text compact_hint" role="status" aria-live="polite"></div>
-          <p class="billing_organizations_link">
-            <a href="/organizations"><?php echo profile_index_i18n('PROFILE_BILLING_ORGS_LINK'); ?></a>
+          <p class="billing_businesses_link">
+            <a href="/business/"><?php echo profile_index_i18n('PROFILE_BILLING_ORGS_LINK'); ?></a>
           </p>
         </section>
 
         <section class="billing_column billing_column_side" role="region" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_BENEFITS_ARIA'); ?>">
-          <h3><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_BENEFITS_TITLE'); ?></h3>
-          <ul class="billing_value_list" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURES_ARIA'); ?>">
+          <h3 id="billing_subscribed_features_title"><?php echo $hasActiveBusiness ? profile_index_i18n('PROFILE_BILLING_BUSINESS_BENEFITS_TITLE') : profile_index_i18n('PROFILE_BILLING_PREMIUM_BENEFITS_TITLE'); ?></h3>
+          <ul class="billing_value_list" id="billing_subscribed_features_list" aria-label="<?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURES_ARIA'); ?>">
+            <?php if ($hasActiveBusiness) { ?>
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_1'); ?></span></li>
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_2'); ?></span></li>
-            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_3'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_BUSINESS_FEATURE_LISTING'); ?></span></li>
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_4'); ?></span></li>
+            <?php } else { ?>
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_5'); ?></span></li>
             <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_FEATURE_6'); ?></span></li>
+            <li><span><?php echo profile_index_i18n('PROFILE_BILLING_PREMIUM_REPORTING_FEATURE'); ?></span></li>
+            <?php } ?>
           </ul>
+          <?php if ($hasActivePremium && !$hasActiveBusiness) { ?>
+          <div id="billing_business_upgrade_zone" class="billing_business_upgrade_zone">
+            <p class="help_text"><?php echo profile_index_i18n('PROFILE_BILLING_UPGRADE_TO_BUSINESS_HELP'); ?></p>
+            <button type="button" id="billing_upgrade_business_subscribed_btn" class="btn btn_primary" data-billing-plan="business"><?php echo $isStripeBilling ? profile_index_i18n('PROFILE_BILLING_UPGRADE_BUSINESS_BUTTON') : profile_index_i18n('PROFILE_BILLING_ENABLE_BUSINESS'); ?></button>
+            <div id="billing_upgrade_business_subscribed_status" class="status_text compact_hint" role="status" aria-live="polite"></div>
+          </div>
+          <?php } ?>
         </section>
       </div>
       <?php if ($isStripeBilling) { ?>
@@ -467,10 +526,10 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
     </div>
   </section>
 
-  <section class="panel" id="panel-account-activity" data-hover-help="<?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_PANEL_HELP'); ?>">
-    <div class="organizations_section_header">
+  <section class="panel" id="panel-account-activity" aria-labelledby="panel-account-activity-heading" data-hover-help="<?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_PANEL_HELP'); ?>">
+    <div class="businesses_section_header">
       <div>
-        <h2><?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_TITLE'); ?></h2>
+        <h2 id="panel-account-activity-heading"><?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_TITLE'); ?></h2>
         <p class="help_text"><?php echo profile_index_i18n('PROFILE_ACCOUNT_ACTIVITY_INTRO'); ?></p>
       </div>
     </div>
@@ -495,10 +554,10 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
     </div>
   </section>
 
-  <section class="panel" id="panel-danger-zone" title="<?php echo profile_index_i18n('PROFILE_DANGER_PANEL_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_DANGER_PANEL_HELP'); ?>">
-    <div class="organizations_section_header">
+  <section class="panel" id="panel-danger-zone" aria-labelledby="panel-danger-zone-heading" title="<?php echo profile_index_i18n('PROFILE_DANGER_PANEL_HELP'); ?>" data-hover-help="<?php echo profile_index_i18n('PROFILE_DANGER_PANEL_HELP'); ?>">
+    <div class="businesses_section_header">
       <div>
-        <h2><?php echo profile_index_i18n('PROFILE_DANGER_TITLE'); ?></h2>
+        <h2 id="panel-danger-zone-heading"><?php echo profile_index_i18n('PROFILE_DANGER_TITLE'); ?></h2>
         <p class="help_text danger_zone_intro"><?php echo profile_index_i18n('PROFILE_DANGER_INTRO'); ?></p>
       </div>
     </div>
@@ -537,8 +596,12 @@ require_once \PayCal\Domain\Config\Environment::appHome().'html/header.php';
   </section>
 
 <?php
+require __DIR__ . '/../business/_partials/route_gate_dialog.php';
+if (!$hasActiveBusiness) {
+  require __DIR__ . '/../business/_archive/partials/governance_dialogs.php';
+}
 
 echo PHP_EOL."<link rel=\"stylesheet\" href=\"" . Render::cssURL('settings') . "\">".PHP_EOL;
-echo PHP_EOL.Render::jsScript('organizations');
+echo PHP_EOL.Render::jsScript('business-profile');
 
 require_once \PayCal\Domain\Config\Environment::appHome().'html/footer.php';

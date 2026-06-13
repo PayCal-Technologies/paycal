@@ -311,27 +311,6 @@ class Work
   }
 
   /**
-   * Translate a given date to the day of the week and process pay periods
-   * weekly starting from the first occurrence of that day in the given year.
-   *
-   * @param string $userUUID user UUID to process
-   * @param string $date     the input date in "yyyy-mm-dd" format
-   */
-  public static function processWorkYear(string $userUUID, string $date): void
-  {
-    $year = date('Y', intval(strtotime($date)));
-    $firstOfYear = strtotime("{$year}-01-01");
-    $dayOfWeek = (int) date('w', intval($firstOfYear));                // 0=Sun..6=Sat
-    $current = strtotime("-{$dayOfWeek} days", intval($firstOfYear));  // Sunday on/before Jan 1
-    $nextYear = strtotime(((string) ((int) $year + 1)).'-01-01');
-
-    while ($current < $nextYear) {
-      self::processWorkWeek($userUUID, date('Y-m-d', $current));
-      $current = strtotime('+7 days', $current);
-    }
-  }
-
-  /**
    * Calculate regular and overtime hours for a given day.
    *
   * @param float $hours             the total hours worked on a given entry

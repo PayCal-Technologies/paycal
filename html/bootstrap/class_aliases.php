@@ -82,14 +82,9 @@ $aliasClass('PayCal\\Domain\\Enums\\SessionTimeout', 'SessionTimeout');
 $aliasClass('PayCal\\Domain\\Crypto\\ChainVerifier', 'PayCal\\Crypto\\ChainVerifier');
 $aliasClass('PayCal\\Domain\\Encryption\\EnvelopeFormat', 'PayCal\\Encryption\\EnvelopeFormat');
 $aliasClass('PayCal\\Domain\\Encryption\\EnvelopeFormat', 'EnvelopeFormat');
-$aliasClass('PayCal\\Domain\\Encryption\\EncryptionConfig', 'PayCal\\Encryption\\EncryptionConfig');
-$aliasClass('PayCal\\Domain\\Encryption\\EncryptionConfig', 'EncryptionConfig');
-$aliasClass('PayCal\\Domain\\Encryption\\CryptoVersions', 'PayCal\\Encryption\\CryptoVersions');
-$aliasClass('PayCal\\Domain\\Encryption\\CryptoVersions', 'CryptoVersions');
-$aliasClass('PayCal\\Domain\\Encryption\\ClientCapabilities', 'PayCal\\Encryption\\ClientCapabilities');
-$aliasClass('PayCal\\Domain\\Encryption\\ClientCapabilities', 'ClientCapabilities');
 $aliasClass('PayCal\\Controllers\\KekController', 'PayCal\\KekController');
 $aliasClass('PayCal\\Controllers\\KekController', 'KekController');
+$aliasClass('PayCal\\Infrastructure\\Audit\\BusinessAuditRepository', 'PayCal\\Infrastructure\\Audit\\OrgAuditRepository');
 
 // Register global runtime fault handling as early as autoload bootstrap.
 \PayCal\Domain\ShadowTalon::register();

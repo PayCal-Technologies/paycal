@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Error Handling & Message Normalization - [PayCal]';
-$pageLabel = 'Error Handling & Message Normalization';
+$pageTitle = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Error Handling &amp; Message Normalization</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       How PayCal standardizes error reporting across all frontend modules to ensure users
       receive meaningful, secure, and consistent error feedback without exposing sensitive details.
@@ -140,7 +141,7 @@ try {
       </div>
       <p><strong>High-value modules (10+ catch points):</strong></p>
       <ul class="doc-list">
-        <li><code>html/js/organizations/index.php</code> — Org management, access requests, audit trails (19+ catches)</li>
+        <li><code>html/js/businesses/index.php</code> — Org management, access requests, audit trails (19+ catches)</li>
         <li><code>html/js/sites/index.php</code> — Site CRUD, earnings, orphan work recovery (10+ catches)</li>
         <li><code>html/js/calendar/calendar.js</code> — Day-entry operations, copy/paste/delete (2 catches)</li>
       </ul>
@@ -182,7 +183,7 @@ try {
 
       <h3>3. UI Operation Failures</h3>
       <div class="doc-code-block">
-        <pre><code>// Calendar/Organizations: User-initiated actions (paste, delete, update)
+        <pre><code>// Calendar/Businesses: User-initiated actions (paste, delete, update)
 button.addEventListener('click', async () => {
   try {
     await performAction();
@@ -330,7 +331,7 @@ PW.error('Upload failed', {
         <li>Debugging and support teams retain full error context via Phantom Wing</li>
         <li>Code is maintainable, testable, and accessible</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         This commitment to security, clarity, and consistency reflects PayCal's dedication 
         to user trust and transparent information sharing.
       </p>

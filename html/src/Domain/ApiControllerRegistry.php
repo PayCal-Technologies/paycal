@@ -16,7 +16,7 @@ use PayCal\Controllers\ExtensionDiagnosticsController;
 use PayCal\Controllers\HealthController;
 use PayCal\Controllers\KekController;
 use PayCal\Controllers\LoginController;
-use PayCal\Controllers\OrganizationDiscoveryController;
+use PayCal\Controllers\BusinessDiscoveryController;
 use PayCal\Controllers\PasskeyController;
 use PayCal\Controllers\RecoveryEmailController;
 use PayCal\Controllers\SecurityController;
@@ -66,7 +66,7 @@ final class ApiControllerRegistry
       HealthController::class,
       KekController::class,
       LoginController::class,
-      OrganizationDiscoveryController::class,
+      BusinessDiscoveryController::class,
       PasskeyController::class,
       RecoveryEmailController::class,
       SecurityController::class,

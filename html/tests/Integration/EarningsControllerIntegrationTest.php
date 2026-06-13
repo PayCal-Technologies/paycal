@@ -108,11 +108,11 @@ foreach (\PayCal\Domain\Database::scanKeys('telemetry:encryption:' . \PayCal\Dom
 ]);
 \PayCal\Domain\Database::expire(\PayCal\Domain\Constants\Keys::SESSION . ':' . $sessionHash, 3600);
 
-\PayCal\Domain\Database::hset(\PayCal\Domain\Constants\Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $userUUID, [
+\PayCal\Domain\Database::hset(\PayCal\Domain\Constants\Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $userUUID, [
   'organization_id' => $orgId,
   'user_uuid' => $userUUID,
   'role' => 'member',
-  'status' => \PayCal\Domain\OrganizationDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+  'status' => \PayCal\Domain\BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
   'scopes' => 'work.read',
 ]);
 
@@ -123,7 +123,7 @@ $envelope = [
   'meta' => [
     'encryption_mode' => 'organization',
     'org_id' => $orgId,
-    'segment' => \PayCal\Domain\OrganizationDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+    'segment' => \PayCal\Domain\BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
     'key_version' => 'v1',
   ],
 ];
@@ -142,7 +142,7 @@ $response = json_decode((string) $raw, true);
 $counter = (string) \PayCal\Domain\Database::get($counterKey);
 
 \PayCal\Domain\Database::unlink($workKey);
-\PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $userUUID);
+\PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $userUUID);
 \PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::SESSION . ':' . $sessionHash);
 \PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::USER . ':' . $userUUID);
 

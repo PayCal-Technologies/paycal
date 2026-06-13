@@ -7,7 +7,7 @@ use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Database;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Enums\AuthLevel;
-use PayCal\Domain\OrganizationDiscoveryService;
+use PayCal\Domain\BusinessDiscoveryService;
 use PayCal\Domain\Enums\SiteStatus;
 use PayCal\Domain\Sites;
 use PHPUnit\Framework\TestCase;
@@ -256,7 +256,7 @@ final class SitesControllerIntegrationTest extends TestCase
     {
         $ownerUUID = 'owner-user-' . bin2hex(random_bytes(8));
         $ownerEmail = 'owner-' . bin2hex(random_bytes(4)) . '@example.com';
-        $service = new OrganizationDiscoveryService();
+        $service = new BusinessDiscoveryService();
         $createdSiteId = '';
 
         try {
@@ -272,14 +272,14 @@ final class SitesControllerIntegrationTest extends TestCase
                 'status' => 'active',
             ]);
 
-            $createOrg = $service->createOrganization($ownerUUID, 'Delegation Org', [
-                'organization_type' => 'shared',
+            $createOrg = $service->createBusiness($ownerUUID, 'Delegation Org', [
+                'business_type' => 'shared',
             ]);
             $this->assertTrue($createOrg['success']);
-            $orgId = (string) ($createOrg['data']['organization_id'] ?? '');
+            $orgId = (string) ($createOrg['data']['business_id'] ?? '');
             $this->assertNotSame('', $orgId);
 
-            Database::hset(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
+            Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
                 'organization_id' => $orgId,
                 'user_uuid' => $this->testUserUUID,
                 'role' => 'member',
@@ -287,7 +287,7 @@ final class SitesControllerIntegrationTest extends TestCase
                 'scopes' => 'sites.write,sites.read,work.read',
                 'updated_at' => date('c'),
             ]);
-            Database::sadd(Keys::ORGANIZATION_USER . ':' . $this->testUserUUID, $orgId);
+            Database::sadd(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
 
             $_POST = [
                 'owner_uuid' => $ownerUUID,
@@ -314,9 +314,9 @@ final class SitesControllerIntegrationTest extends TestCase
             $site = Database::hgetall(Keys::SITE . ':' . $ownerUUID . ':' . $createdSiteId);
             $this->assertSame('Delegated Site Create', (string) ($site['site_name'] ?? ''));
 
-            $service->leaveOrganization($ownerUUID, $orgId);
-            Database::unlink(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
-            Database::srem(Keys::ORGANIZATION_USER . ':' . $this->testUserUUID, $orgId);
+            $service->leaveBusiness($ownerUUID, $orgId);
+            Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
+            Database::srem(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
         } finally {
             if ($createdSiteId !== '') {
                 Database::unlink(Keys::SITE . ':' . $ownerUUID . ':' . $createdSiteId);
@@ -330,7 +330,7 @@ final class SitesControllerIntegrationTest extends TestCase
     {
         $ownerUUID = 'owner-user-denied-' . bin2hex(random_bytes(8));
         $ownerEmail = 'owner-denied-' . bin2hex(random_bytes(4)) . '@example.com';
-        $service = new OrganizationDiscoveryService();
+        $service = new BusinessDiscoveryService();
 
         try {
             Database::hset(Keys::USER . ':' . $ownerUUID, [
@@ -345,14 +345,14 @@ final class SitesControllerIntegrationTest extends TestCase
                 'status' => 'active',
             ]);
 
-            $createOrg = $service->createOrganization($ownerUUID, 'Delegation Org Denied', [
-                'organization_type' => 'shared',
+            $createOrg = $service->createBusiness($ownerUUID, 'Delegation Org Denied', [
+                'business_type' => 'shared',
             ]);
             $this->assertTrue($createOrg['success']);
-            $orgId = (string) ($createOrg['data']['organization_id'] ?? '');
+            $orgId = (string) ($createOrg['data']['business_id'] ?? '');
             $this->assertNotSame('', $orgId);
 
-            Database::hset(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
+            Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
                 'organization_id' => $orgId,
                 'user_uuid' => $this->testUserUUID,
                 'role' => 'viewer',
@@ -360,7 +360,7 @@ final class SitesControllerIntegrationTest extends TestCase
                 'scopes' => 'work.read,sites.read',
                 'updated_at' => date('c'),
             ]);
-            Database::sadd(Keys::ORGANIZATION_USER . ':' . $this->testUserUUID, $orgId);
+            Database::sadd(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
 
             $_POST = [
                 'owner_uuid' => $ownerUUID,
@@ -382,9 +382,9 @@ final class SitesControllerIntegrationTest extends TestCase
             $this->assertFalse($response['success'] ?? true, 'Delegated create should fail without sites.write scope.');
             $this->assertStringContainsString('Insufficient organization scope', (string) ($response['message'] ?? ''));
 
-            $service->leaveOrganization($ownerUUID, $orgId);
-            Database::unlink(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
-            Database::srem(Keys::ORGANIZATION_USER . ':' . $this->testUserUUID, $orgId);
+            $service->leaveBusiness($ownerUUID, $orgId);
+            Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
+            Database::srem(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
         } finally {
             Database::unlink(Keys::USER_SUBSCRIPTION . ':' . $ownerUUID);
             Database::unlink(Keys::USER . ':' . $ownerUUID);
@@ -431,23 +431,23 @@ final class SitesControllerIntegrationTest extends TestCase
             'meta' => [
                 'encryption_mode' => 'organization',
                 'org_id' => $orgId,
-                'segment' => OrganizationDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+                'segment' => BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
                 'key_version' => 'v1',
             ],
         ];
 
-        Database::hset(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
+        Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
             'organization_id' => $orgId,
             'user_uuid' => $this->testUserUUID,
             'role' => 'member',
-            'status' => OrganizationDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+            'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
             'scopes' => 'work.read,sites.read',
         ]);
         Database::hset($workKey, [
             'encrypted_blob' => base64_encode((string) json_encode($envelope)),
         ]);
 
-        $this->ephemeralKeys[] = Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID;
+        $this->ephemeralKeys[] = Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID;
         $this->ephemeralKeys[] = $workKey;
 
         $controller = new SitesController();
@@ -458,5 +458,43 @@ final class SitesControllerIntegrationTest extends TestCase
         $response = json_decode((string) $output, true);
         $this->assertIsArray($response);
         $this->assertArrayHasKey('success', $response);
+    }
+
+    public function testGetUserSitesExcludesBusinessManagedSites(): void
+    {
+        $businessSiteId = 'biz-site-' . bin2hex(random_bytes(4));
+        $this->ephemeralKeys[] = Keys::SITE . ':' . $this->testUserUUID . ':' . $businessSiteId;
+
+        Database::hset(Keys::SITE . ':' . $this->testUserUUID . ':' . $businessSiteId, [
+            'site_name' => 'Shell Scotford',
+            'wage' => '40.00',
+            'living_out_allowance' => '0',
+            'travel_hours' => '0',
+            'province' => 'AB',
+            'status' => SiteStatus::ACTIVE->value,
+            'ownership_scope' => BusinessDiscoveryService::BUSINESS_SITE_OWNERSHIP_BUSINESS,
+            'business_managed' => '1',
+        ]);
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        $controller = new SitesController();
+        ob_start();
+        $controller->getUserSites();
+        $output = ob_get_clean();
+
+        $response = json_decode((string) $output, true);
+        $this->assertIsArray($response);
+        $this->assertTrue($response['success'] ?? false);
+
+        $sites = $response['data']['sites'] ?? [];
+        $this->assertIsArray($sites);
+
+        $names = array_map(
+            static fn (array $site): string => (string) ($site['site_name'] ?? ''),
+            $sites,
+        );
+        $this->assertContains('Test Site', $names);
+        $this->assertNotContains('Shell Scotford', $names);
     }
 }

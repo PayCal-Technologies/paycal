@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Opt-in Diagnostics & Phantom Wing - [PayCal]';
-$pageLabel = 'Opt-in Diagnostics & Phantom Wing';
+$pageTitle = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Opt-in Diagnostics &amp; Phantom Wing</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       PayCal includes an optional diagnostics layer that you control. Here is exactly what it
       collects, what stays on your device, and how it is used.
@@ -235,7 +236,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         <li>Telemetry is fully suppressed on all authentication pages</li>
         <li>Rate limiting and automatic client back-off prevent any accidental over-reporting</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Phantom Wing is engineered so you can safely leave all diagnostics off indefinitely.
         The opt-in controls exist to give you and the support team a shared language when
         something does go wrong — not to collect data by default.

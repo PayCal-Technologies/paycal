@@ -7,7 +7,7 @@ use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Database;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Enums\AuthLevel;
-use PayCal\Domain\OrganizationDiscoveryService;
+use PayCal\Domain\BusinessDiscoveryService;
 use PayCal\Domain\Sites;
 use PayCal\Domain\Enums\SiteStatus;
 use PHPUnit\Framework\TestCase;
@@ -334,7 +334,7 @@ final class CalendarControllerIntegrationTest extends TestCase
         $response = $this->decodeJsonResponse((string) $output);
 
         $this->assertSame('error', $response['status'] ?? null);
-        $this->assertStringContainsString('organization_id is required', (string) ($response['message'] ?? ''));
+        $this->assertStringContainsString('business_id is required', (string) ($response['message'] ?? ''));
         $counter = Database::get($this->orgWriteDeniedCounterKey('missing_org_id'));
         $this->assertNotNull($counter);
         $this->assertSame('1', (string) $counter);
@@ -365,7 +365,7 @@ final class CalendarControllerIntegrationTest extends TestCase
         $response = $this->decodeJsonResponse((string) $output);
 
         $this->assertSame('error', $response['status'] ?? null);
-        $this->assertStringContainsString('Organization mode writes are disabled', (string) ($response['message'] ?? ''));
+        $this->assertStringContainsString('Business mode writes are disabled', (string) ($response['message'] ?? ''));
         $counter = Database::get($this->orgWriteDeniedCounterKey('writes_disabled'));
         $this->assertNotNull($counter);
         $this->assertSame('1', (string) $counter);
@@ -396,7 +396,7 @@ final class CalendarControllerIntegrationTest extends TestCase
         $response = $this->decodeJsonResponse((string) $output);
 
         $this->assertSame('error', $response['status'] ?? null);
-        $this->assertStringContainsString('Insufficient organization scope for delegated work mutation', (string) ($response['message'] ?? ''));
+        $this->assertStringContainsString('Insufficient business scope for delegated work mutation', (string) ($response['message'] ?? ''));
         $counter = Database::get($this->orgWriteDeniedCounterKey('insufficient_scope'));
         $this->assertNotNull($counter);
         $this->assertSame('1', (string) $counter);
@@ -428,18 +428,18 @@ final class CalendarControllerIntegrationTest extends TestCase
             'pay_frequency' => 'biweekly',
         ]);
 
-        Database::hset(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
+        Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
             'organization_id' => $orgId,
             'user_uuid' => $this->testUserUUID,
             'role' => 'member',
-            'status' => OrganizationDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+            'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
             'scopes' => 'work.write,work.read',
         ]);
-        Database::hset(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $targetUserUUID, [
+        Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $targetUserUUID, [
             'organization_id' => $orgId,
             'user_uuid' => $targetUserUUID,
             'role' => 'member',
-            'status' => OrganizationDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+            'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
             'scopes' => 'work.read',
         ]);
 
@@ -463,7 +463,7 @@ final class CalendarControllerIntegrationTest extends TestCase
             'meta' => [
                 'encryption_mode' => 'organization',
                 'org_id' => $orgId,
-                'segment' => OrganizationDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+                'segment' => BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
                 'key_version' => 'v1',
             ],
         ];
@@ -501,8 +501,8 @@ final class CalendarControllerIntegrationTest extends TestCase
             $this->assertSame(base64_encode((string) json_encode($envelope)), (string) ($stored['encrypted_blob'] ?? ''));
         } finally {
             Database::unlink(Keys::USER . ':' . $targetUserUUID);
-            Database::unlink(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
-            Database::unlink(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $targetUserUUID);
+            Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
+            Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $targetUserUUID);
             Database::unlink(Keys::SITE . ':' . $targetUserUUID . ':' . $targetSiteId);
             Database::unlink(Keys::WORK . ':' . $targetUserUUID . ':' . $day . ':' . $targetSiteId);
             foreach ($payPeriodKeys as $key) {

@@ -26,7 +26,7 @@ Authentication::redirectHomeIfUnauthenticated();
 ?>
 
 <section class='mar_md pad_md'>
-  <h1 class='centered'><?php echo en_index_i18n('HELP'); ?> &amp; <?php echo en_index_i18n('CONTACT_US'); ?></h1>
+  <h1 class='centered'><?php echo en_index_i18n('HELP_CENTER_HEADING'); ?></h1>
 
   <p>
     <?php echo en_index_i18n('HELP_INTRO_PRIMARY_PREFIX'); ?> <em><?php echo en_index_i18n('HELP_INTRO_PRIMARY_EMPHASIS_1'); ?></em>.

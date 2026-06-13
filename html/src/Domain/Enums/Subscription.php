@@ -5,71 +5,62 @@ namespace PayCal\Domain\Enums;
 /**
  * Subscription.php
  *
- * Purpose: User subscription tier enum: FREE (member-only access) or PREMIUM
- *          (org management, up to 1000 members per org).
- *
- * PHP version 8.4.16
- *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
- *
- * @category   Enums
- * @package    PayCal\Domain\Enums
- * @author     Chris Simmons <cshaiku@gmail.com>
- * @copyright  2026 PayCal Technologies Inc.
- * @license    Proprietary License - See LICENSE.txt for full terms
+ * Purpose: User subscription tiers — Public (free), Premium (reporting), Business (orgs).
  */
 enum Subscription: string
 {
   case FREE = 'free';
   case PREMIUM = 'premium';
+  case BUSINESS = 'business';
 
-  /**
-   * Get the monthly price in cents for this subscription tier.
-   * 
-   * @return int Price in cents (e.g., 499 = $4.99)
-   */
   public function priceInCents(): int
   {
     return match ($this) {
-      self::FREE    => 0,
-      self::PREMIUM => 499,  // $4.99/month
+      self::FREE     => 0,
+      self::PREMIUM  => 499,
+      self::BUSINESS => 2999,
     };
   }
 
-  /**
-   * Get the annual price in cents for this subscription tier.
-   * 
-   * @return int Price in cents (e.g., 4799 = $47.99/year)
-   */
   public function annualPriceInCents(): int
   {
     return match ($this) {
-      self::FREE    => 0,
-      self::PREMIUM => 4799,  // $47.99/year (~$4/month equivalent)
+      self::FREE     => 0,
+      self::PREMIUM  => 4799,
+      self::BUSINESS => 28799,
     };
   }
 
-  /**
-   * Maximum members allowed per organization for this tier.
-   * 
-   * @return int Maximum members
-   */
   public function maxMembersPerOrg(): int
   {
     return match ($this) {
-      self::FREE    => 1,      // Personal org only
-      self::PREMIUM => 1000,
+      self::FREE     => 1,
+      self::PREMIUM  => 1,
+      self::BUSINESS => 1000,
     };
   }
 
-  /**
-   * Can this tier create shared (non-personal) organizations?
-   * 
-   * @return bool
-   */
   public function canCreateSharedOrgs(): bool
   {
-    return $this === self::PREMIUM;
+    return $this === self::BUSINESS;
+  }
+
+  public function includesPremiumReporting(): bool
+  {
+    return $this === self::PREMIUM || $this === self::BUSINESS;
+  }
+
+  public function includesBusinessFeatures(): bool
+  {
+    return $this === self::BUSINESS;
+  }
+
+  public function displayLabel(): string
+  {
+    return match ($this) {
+      self::FREE     => 'PayCal Public',
+      self::PREMIUM  => 'PayCal Premium',
+      self::BUSINESS => 'PayCal Business',
+    };
   }
 }

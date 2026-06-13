@@ -504,3 +504,59 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     animation: none;
   }
 }
+
+/* Mobile compact layout: full-width panels; page edge uses --page-edge-inline (2rem min).
+   Sidebar strip reservation lives in navigation/index.php (drawer mode). */
+@media (max-width: 768px) {
+  #main {
+    padding-block: var(--pad-sm) !important;
+    padding-inline: var(--page-edge-inline) !important;
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  #page_footer {
+    padding-block: var(--pad-sm) !important;
+    padding-inline: var(--page-edge-inline) !important;
+    box-sizing: border-box;
+  }
+
+  .panel,
+  #main > section.panel,
+  #calendar-v2-root.panel,
+  .sites_main_container > section.panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 5px !important;
+    box-sizing: border-box;
+  }
+
+  .panel > *,
+  #main .main-content,
+  .sites_main_container,
+  .sites_main_container > .f_column {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .row,
+  .flex {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .datagrid {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .datagrid .datagrid_row_content {
+    max-width: 100%;
+  }
+}

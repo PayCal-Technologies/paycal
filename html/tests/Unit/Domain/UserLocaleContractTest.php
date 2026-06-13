@@ -1,0 +1,122 @@
+<?php declare(strict_types=1);
+
+namespace PayCal\Tests\Unit\Domain;
+
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
+
+final class UserLocaleContractTest extends TestCase
+{
+  #[Test]
+  public function configPhpBootstrapsSessionLocaleConstants(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $config = (string) file_get_contents($projectRoot . '/html/config.php');
+
+    $this->assertStringContainsString("require_once __DIR__ . '/src/session.php'", $config);
+  }
+
+  #[Test]
+  public function sessionPhpResolvesDateLocaleFromStoredLocaleAndLanguage(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $session = (string) file_get_contents($projectRoot . '/html/src/session.php');
+
+    $this->assertStringContainsString('Language::resolveDateLocale(', $session);
+    $this->assertStringContainsString('str_replace(\'-\', \'_\', USER_LOCALE)', $session);
+  }
+
+  #[Test]
+  public function coreJsConfigUsesResolvedDateLocale(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $coreJs = (string) file_get_contents($projectRoot . '/html/js/core/index.php');
+
+    $this->assertStringContainsString('Language::resolveDateLocale(', $coreJs);
+  }
+
+  #[Test]
+  public function workspaceTimestampFormatterUsesViewerLocale(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $workspaceJs = (string) file_get_contents($projectRoot . '/html/js/business/workspace.js.php');
+
+    $this->assertStringContainsString('const resolveViewerLocale = () => {', $workspaceJs);
+    $this->assertStringContainsString('new Intl.DateTimeFormat(viewerLocale, { ...options, timeZone: normalizedZone })', $workspaceJs);
+    $this->assertStringNotContainsString("new Intl.DateTimeFormat('en-US', { ...options, timeZone: normalizedZone })", $workspaceJs);
+  }
+
+  #[Test]
+  public function profileLanguageSaveDoesNotRequirePayPeriodValidationForDetailsSource(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $workspaceJs = (string) file_get_contents($projectRoot . '/html/js/business/workspace.js.php');
+
+    $this->assertStringContainsString("const PAY_PERIOD_SAVE_SOURCES = new Set(['frequency', 'anchor', 'grace', 'calendar-day']);", $workspaceJs);
+    $this->assertStringContainsString('if (PAY_PERIOD_SAVE_SOURCES.has(source) && !payPeriodValid)', $workspaceJs);
+    $this->assertStringContainsString('window.location.reload();', $workspaceJs);
+  }
+
+  #[Test]
+  public function profileLanguageSaveStillWorksWhenPayPeriodManagedByBusiness(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $workspaceJs = (string) file_get_contents($projectRoot . '/html/js/business/workspace.js.php');
+
+    $this->assertStringContainsString('const payPeriodManaged = state.profilePayPeriodManagedByBusiness;', $workspaceJs);
+    $this->assertStringContainsString('if (payPeriodManaged && PAY_PERIOD_SAVE_SOURCES.has(source))', $workspaceJs);
+    $this->assertStringContainsString('if (!payPeriodValid || payPeriodManaged)', $workspaceJs);
+
+    $saveFn = 'const savePersonalBusinessSettings = async (source = \'auto\') => {';
+    $saveStart = strpos($workspaceJs, $saveFn);
+    $this->assertNotFalse($saveStart);
+    $saveBody = substr($workspaceJs, (int) $saveStart, 1200);
+    $this->assertStringNotContainsString(
+      'if (state.profilePayPeriodManagedByBusiness) {',
+      $saveBody,
+    );
+  }
+
+  #[Test]
+  public function calendarLockedMessagesUseI18nConstants(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $calendarIndex = (string) file_get_contents($projectRoot . '/html/js/calendar/index.php');
+    $calendarJs = (string) file_get_contents($projectRoot . '/html/js/calendar/calendar.js');
+
+    $this->assertStringContainsString('CALENDAR_LOCKED_CANNOT_EDIT', $calendarIndex);
+    $this->assertStringContainsString('MSG_CAL_LOCKED_CANNOT_EDIT', $calendarIndex);
+    $this->assertStringContainsString('formatLockedDateMessage(', $calendarJs);
+    $this->assertStringContainsString("'CALENDAR_LOCKED_CANNOT_EDIT'", $calendarJs);
+  }
+
+  #[Test]
+  public function membersGridRendererUsesIntlDateFormatterForAbsoluteJoinDates(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $renderer = (string) file_get_contents($projectRoot . '/html/src/Domain/BusinessMembersGridRenderer.php');
+
+    $this->assertStringContainsString('formatLocalizedJoinDate', $renderer);
+    $this->assertStringContainsString('new \\IntlDateFormatter', $renderer);
+    $this->assertStringContainsString('$this->resolveUserLocale()', $renderer);
+  }
+
+  #[Test]
+  public function calendarGridUsesLocalizedDateFormatting(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $dataGrid = (string) file_get_contents($projectRoot . '/html/src/Domain/DataGrid.php');
+    $calendarJs = (string) file_get_contents($projectRoot . '/html/js/calendar/calendar.js');
+    $settingsJs = (string) file_get_contents($projectRoot . '/html/js/settings/index.php');
+
+    $this->assertStringContainsString('Strings::formatLocalizedMonthYear', $dataGrid);
+    $this->assertStringContainsString('Strings::generateWeekDayLabels', $dataGrid);
+    $this->assertStringNotContainsString("['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']", $dataGrid);
+    $this->assertStringContainsString('function calendarUserLocale()', $calendarJs);
+    $this->assertStringContainsString('function calendarConfig()', $calendarJs);
+    $this->assertStringContainsString('window.__CALENDAR_I18N__', $calendarJs);
+    $this->assertStringNotContainsString("toLocaleDateString('en-US'", $calendarJs);
+    $this->assertStringContainsString('payPeriodLocale', $settingsJs);
+    $this->assertStringContainsString('PC?.config?.USER_LOCALE', $settingsJs);
+  }
+}

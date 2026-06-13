@@ -171,7 +171,7 @@ require_once HTML . '/header.php';
       </p>
       <p>
         Key namespaces include: <code>TRANSPARENCY_*</code> (611 keys), <code>HELP_*</code> (361),
-        <code>ORGANIZATIONS_*</code> (359), <code>ADMIN_*</code> (178), <code>SETTINGS_*</code> (149),
+        <code>BUSINESSES_*</code> (359), <code>ADMIN_*</code> (178), <code>SETTINGS_*</code> (149),
         <code>PROFILE_*</code> (109), <code>AUTH_*</code> (67), <code>EMAIL_*</code> (65), and more.
       </p>
 

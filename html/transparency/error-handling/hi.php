@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'त्रुटि प्रबंधन और संदेश सामान्यीकरण - [PayCal]';
-$pageLabel = 'त्रुटि प्रबंधन और संदेश सामान्यीकरण';
+$pageTitle = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>त्रुटि प्रबंधन और संदेश सामान्यीकरण</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       कैसे PayCal सभी फ्रंटएंड मॉड्यूल में त्रुटि रिपोर्टिंग को मानकीकृत करता है ताकि
       उपयोगकर्ताओं को संवेदनशील विवरण प्रकट किए बिना सार्थक, सुरक्षित और सुसंगत प्रतिक्रिया मिले।
@@ -141,7 +142,7 @@ try {
       </div>
       <p><strong>उच्च-मूल्य मॉड्यूल (10+ कैच पॉइंट):</strong></p>
       <ul class="doc-list">
-        <li><code>html/js/organizations/index.php</code> — संगठन प्रबंधन, पहुंच, ऑडिट ट्रेल्स (19+ catches)</li>
+        <li><code>html/js/businesses/index.php</code> — संगठन प्रबंधन, पहुंच, ऑडिट ट्रेल्स (19+ catches)</li>
         <li><code>html/js/sites/index.php</code> — साइट CRUD, कमाई, अनाथ कार्य पुनरुद्धार (10+ catches)</li>
         <li><code>html/js/calendar/calendar.js</code> — दिन प्रविष्टि संचालन, कॉपी/पेस्ट/डिलीट (2 catches)</li>
       </ul>
@@ -330,7 +331,7 @@ PW.error('अपलोड विफल', {
         <li>डीबगिंग और समर्थन दल Phantom Wing के माध्यम से पूर्ण त्रुटि संदर्भ बनाए रखें</li>
         <li>कोड रखरखाव योग्य, परीक्षण योग्य और accessible हो</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         सुरक्षा, स्पष्टता और सुसंगतता के प्रति यह प्रतिबद्धता PayCal की उपयोगकर्ता विश्वास
         और पारदर्शी जानकारी साझाकरण के लिए समर्पण को दर्शाती है।
       </p>

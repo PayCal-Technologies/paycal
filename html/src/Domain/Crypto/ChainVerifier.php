@@ -108,28 +108,5 @@ final class ChainVerifier
 
     return sodium_crypto_sign_verify_detached($sig, $canonical, $public);
   }
-
-  /**
-   * Create a versioned payload structure.
-   *
-    * @param array<string, mixed> $payload Payload data
-   * @param int    $version Payload version
-   * @param int    $signingKeyVersion Signing key version
-   * @param string $algorithm Algorithm identifier
-   * @return array<string, mixed> Versioned payload structure
-   */
-  public static function createVersionedPayload(
-    array $payload,
-    int $version = 1,
-    int $signingKeyVersion = 1,
-    string $algorithm = 'ed25519'
-  ): array {
-    return [
-      'version' => $version,
-      'algorithm' => $algorithm,
-      'signingKeyVersion' => $signingKeyVersion,
-      'payload' => $payload,
-    ];
-  }
 }
 

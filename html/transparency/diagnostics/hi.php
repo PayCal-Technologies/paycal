@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'ऑप्ट-इन डायग्नोस्टिक्स और Phantom Wing - [PayCal]';
-$pageLabel = 'ऑप्ट-इन डायग्नोस्टिक्स और Phantom Wing';
+$pageTitle = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>ऑप्ट-इन डायग्नोस्टिक्स &amp; Phantom Wing</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       PayCal में एक वैकल्पिक डायग्नोस्टिक्स परत शामिल है जिसे आप नियंत्रित करते हैं। यहाँ
       बताया गया है कि यह वास्तव में क्या संग्रहीत करती है, क्या आपके डिवाइस पर रहता है,
@@ -237,7 +238,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         <li>टेलीमेट्री सभी प्रमाणीकरण पेजों पर पूरी तरह दबाई जाती है</li>
         <li>रेट सीमित करना और स्वचालित क्लाइंट बैक-ऑफ किसी भी आकस्मिक ओवर-रिपोर्टिंग को रोकते हैं</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Phantom Wing को इस तरह इंजीनियर किया गया है कि आप सभी डायग्नोस्टिक्स को
         अनिश्चित काल के लिए बंद रख सकते हैं। ऑप्ट-इन नियंत्रण इसलिए मौजूद हैं ताकि
         कुछ गलत होने पर आपको और सपोर्ट टीम को एक साझा भाषा मिल सके — डिफ़ॉल्ट रूप से

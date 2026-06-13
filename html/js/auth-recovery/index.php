@@ -1,6 +1,24 @@
 <?php declare(strict_types=1);
 
-header('Content-Type: application/javascript; charset=utf-8');
+namespace PayCal\Domain;
+
+require_once __DIR__ . '/../../config.php';
+
+CORS::handleORIGIN();
+CORS::renderContentType('application/javascript; charset=utf-8');
+
+$recoveryI18nKeys = [
+  'AUTH_RECOVER_SEND_CODE',
+  'AUTH_JS_WEBAUTHN_UNSUPPORTED',
+  'AUTH_JS_RECOVER_SEND_CODE_FMT',
+  'AUTH_JS_RECOVER_CANCEL_FAILED',
+  'AUTH_JS_CONFIRM_DEVICE',
+];
+$recoveryI18n = [];
+foreach ($recoveryI18nKeys as $recoveryI18nKey) {
+  $recoveryI18n[$recoveryI18nKey] = Strings::i18n($recoveryI18nKey);
+}
+
 ?>
 import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '/js/core/binary-codec.js';
 
@@ -28,7 +46,15 @@ import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '
   const recoveryKeyInput = document.getElementById('recovery-key');
   const deviceNameInput = document.getElementById('recovery-device-name');
   const workerVersion = document.body?.dataset?.workerVersion || String(Date.now());
-  const WEB_AUTHN_UNSUPPORTED_MESSAGE = 'This browser cannot register passkeys. Use a WebAuthn-capable browser on a secure connection (HTTPS).';
+  const RECOVERY_T = <?php echo json_encode($recoveryI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+  const formatRecoveryMessage = (template, replacements = {}) => {
+    let message = String(template || '');
+    Object.entries(replacements).forEach(([key, value]) => {
+      message = message.split(`{${key}}`).join(String(value ?? ''));
+    });
+    return message;
+  };
+  const WEB_AUTHN_UNSUPPORTED_MESSAGE = RECOVERY_T.AUTH_JS_WEBAUTHN_UNSUPPORTED;
 
   let worker = null;
   let workerRequestId = 0;
@@ -86,7 +112,7 @@ import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '
 
     let remaining = Math.max(0, Number(seconds) || 0);
     sendCodeButton.disabled = true;
-    sendCodeButton.textContent = `Send code (${formatCooldown(remaining)})`;
+    sendCodeButton.textContent = formatRecoveryMessage(RECOVERY_T.AUTH_JS_RECOVER_SEND_CODE_FMT, { time: formatCooldown(remaining) });
 
     sendCooldownTimer = window.setInterval(() => {
       remaining -= 1;
@@ -94,10 +120,10 @@ import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '
         window.clearInterval(sendCooldownTimer);
         sendCooldownTimer = null;
         sendCodeButton.disabled = false;
-        sendCodeButton.textContent = 'Send code';
+        sendCodeButton.textContent = RECOVERY_T.AUTH_RECOVER_SEND_CODE;
         return;
       }
-      sendCodeButton.textContent = `Send code (${formatCooldown(remaining)})`;
+      sendCodeButton.textContent = formatRecoveryMessage(RECOVERY_T.AUTH_JS_RECOVER_SEND_CODE_FMT, { time: formatCooldown(remaining) });
     }, 1000);
   }
 
@@ -423,7 +449,7 @@ import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '
         ? options.excludeCredentials.map((item) => ({ ...item, id: b64urlToBuffer(item.id) }))
         : [];
 
-      setStatus('Confirm on your device…');
+      setStatus(RECOVERY_T.AUTH_JS_CONFIRM_DEVICE);
       const credential = await navigator.credentials.create({ publicKey: options });
       if (!credential) {
         throw new Error('Registration cancelled. Try again.');
@@ -532,7 +558,7 @@ import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '
     });
   });
   cancelButton?.addEventListener('click', () => {
-    cancelRecovery().catch((error) => setStatus(error.message || 'Unable to cancel recovery.'));
+    cancelRecovery().catch((error) => setStatus(error.message || RECOVERY_T.AUTH_JS_RECOVER_CANCEL_FAILED));
   });
 
   consumeMagicLinkIfPresent()

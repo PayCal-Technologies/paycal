@@ -62,19 +62,6 @@ final class AdminSurface
   }
 
   /**
-   * Handles redirectHomeIfUnavailable operation.
-   */
-  public static function redirectHomeIfUnavailable(): void
-  {
-    if (self::userCanAccess()) {
-      return;
-    }
-
-    header('Location: ' . Environment::appURL('/'));
-    exit;
-  }
-
-  /**
    * Handles redirectHomeIfPageUnavailable operation.
    */
   public static function redirectHomeIfPageUnavailable(string $requestPath): void

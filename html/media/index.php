@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use PayCal\Domain\Render;
+use PayCal\Domain\Strings;
 
 require_once '../config.php';
 
@@ -20,7 +21,7 @@ $youtubeEmbedURL = 'https://www.youtube-nocookie.com/embed/V7Ch0bdFNX0?rel=0';
 echo <<<HTML
 <article class="article doc-article" aria-label="PayCal media library">
   <header class="doc-article-header">
-    <h1>Media</h1>
+    <h1><?= htmlspecialchars(Strings::i18n('MEDIA_PAGE_TITLE'), ENT_QUOTES, 'UTF-8') ?></h1>
     <p class="deck">Watch the latest PayCal media in one place.</p>
   </header>
 

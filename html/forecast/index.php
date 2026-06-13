@@ -32,14 +32,38 @@ $currentPage = 'PAGE_FORECAST';
 
 require_once '../config.php';
 
+if (function_exists('forecast_index_i18n') === false) {
+  function forecast_index_i18n(string $key): string
+  {
+    static $cache = [];
+    if (array_key_exists($key, $cache) === false) {
+      $cache[$key] = Strings::i18n($key);
+    }
+
+    return $cache[$key];
+  }
+}
+
+if (function_exists('forecast_index_i18n_fmt') === false) {
+  function forecast_index_i18n_fmt(string $key, array $params = []): string
+  {
+    $label = forecast_index_i18n($key);
+    foreach ($params as $paramKey => $paramValue) {
+      $label = str_replace('{' . $paramKey . '}', (string) $paramValue, $label);
+    }
+
+    return $label;
+  }
+}
+
 Authentication::redirectHomeIfUnauthenticated();
 
 $userUUID = User::currentUUID();
 $hasPremium = $userUUID !== '' && SubscriptionGate::hasActivePremium($userUUID);
 
-$pageTitle   = 'Crew Forecast - [' . Strings::i18n('SITE_NAME') . ']';
-$pageLabel   = 'Crew Forecast';
-$pageLanguage = 'en';
+$pageTitle = forecast_index_i18n('FORECAST_CREW_TITLE') . ' - [' . forecast_index_i18n('SITE_NAME') . ']';
+$pageLabel = forecast_index_i18n('FORECAST_CREW_TITLE');
+$pageLanguage = (string) (User::current()->language ?? 'en');
 
 Lens::boot('forecast');
 
@@ -123,19 +147,45 @@ for ($i = 0; $i < $workerCount; ++$i) {
 
 $today = new \DateTimeImmutable('today');
 $windows = [
-  'Next Pay Period' => ForecastWindow::nextPayPeriod($today, (int) round($rotation->cycleDays() * ($rotation->workDays / $rotation->cycleDays() * 14))),
-  'Next 30 Days'    => ForecastWindow::next30Days($today),
-  'Quarter'         => ForecastWindow::quarter($today),
+  'next_pay_period' => ForecastWindow::nextPayPeriod($today, (int) round($rotation->cycleDays() * ($rotation->workDays / $rotation->cycleDays() * 14))),
+  'next_30_days'    => ForecastWindow::next30Days($today),
+  'quarter'         => ForecastWindow::quarter($today),
 ];
 if ($shutdownDate !== null) {
-  $windows['Shutdown Total'] = ForecastWindow::projectTotal($today, $shutdownDate);
+  $windows['shutdown_total'] = ForecastWindow::projectTotal($today, $shutdownDate);
 }
+
+$windowLabelKeys = [
+  'next_pay_period' => 'FORECAST_WINDOW_NEXT_PAY_PERIOD',
+  'next_30_days'    => 'FORECAST_WINDOW_NEXT_30_DAYS',
+  'quarter'         => 'FORECAST_WINDOW_QUARTER',
+  'shutdown_total'  => 'FORECAST_WINDOW_SHUTDOWN_TOTAL',
+];
+
+$otRuleLabelKeys = [
+  'daily'  => 'FORECAST_OT_RULE_DAILY',
+  'weekly' => 'FORECAST_OT_RULE_WEEKLY',
+  'both'   => 'FORECAST_OT_RULE_BOTH',
+  'none'   => 'FORECAST_OT_RULE_NONE',
+];
+
+$crewSummaryFmt = $workerCount === 1
+  ? forecast_index_i18n_fmt('FORECAST_CREW_SUMMARY_SINGULAR_FMT', [
+    'count'    => (string) $workerCount,
+    'rotation' => $rotationPattern,
+    'rate'     => number_format($rateDollar, 2),
+  ])
+  : forecast_index_i18n_fmt('FORECAST_CREW_SUMMARY_PLURAL_FMT', [
+    'count'    => (string) $workerCount,
+    'rotation' => $rotationPattern,
+    'rate'     => number_format($rateDollar, 2),
+  ]);
 
 // Compute results per window
 /** @var array<string, ForecastResult> $results */
 $results = [];
-foreach ($windows as $wLabel => $window) {
-  $results[$wLabel] = CrewForecastEngine::forecastCrew($crewPairs, $window);
+foreach ($windows as $windowKey => $window) {
+  $results[$windowKey] = CrewForecastEngine::forecastCrew($crewPairs, $window);
 }
 
 // Helper: format dollars
@@ -145,15 +195,15 @@ require_once Config\Environment::appHome() . 'html/header.php';
 ?>
 
 <section class="f_column w100 forecast-page">
-  <h1 class="visually_hidden">Crew Forecast</h1>
+  <h1 class="visually_hidden"><?php echo forecast_index_i18n('FORECAST_CREW_TITLE'); ?></h1>
 
-  <section class="panel w100 forecast-panel" aria-label="Crew parameters">
-    <h2 class="forecast-panel__title">Crew Parameters</h2>
-    <p class="forecast-panel__intro">Configure your crew below to project labor costs. All figures are <strong>ESTIMATES</strong> — not CRA-authoritative payroll calculations.</p>
+  <section class="panel w100 forecast-panel" aria-labelledby="forecast-crew-parameters-heading">
+    <h2 id="forecast-crew-parameters-heading" class="forecast-panel__title"><?php echo forecast_index_i18n('FORECAST_CREW_PARAMETERS'); ?></h2>
+    <p class="forecast-panel__intro"><?php echo forecast_index_i18n('FORECAST_CREW_PARAMETERS_INTRO_LEDE'); ?> <strong><?php echo forecast_index_i18n('FORECAST_ESTIMATE_BADGE'); ?></strong> <?php echo forecast_index_i18n('FORECAST_CREW_PARAMETERS_INTRO_TAIL'); ?></p>
 
-    <form class="forecast-form" method="get" action="/forecast/" aria-label="Crew forecast parameters">
+    <form class="forecast-form" method="get" action="/forecast/" aria-label="<?php echo htmlspecialchars(forecast_index_i18n('FORECAST_CREW_FORM_ARIA'), ENT_QUOTES, 'UTF-8'); ?>">
       <div class="forecast-form__row">
-        <label class="forecast-form__label" for="fc_rotation">Rotation</label>
+        <label class="forecast-form__label" for="fc_rotation"><?php echo forecast_index_i18n('FORECAST_ROTATION'); ?></label>
         <select class="forecast-form__select" id="fc_rotation" name="rotation" aria-describedby="fc_rotation_hint">
           <?php foreach ($allowedPatterns as $pat): ?>
             <option value="<?php echo htmlspecialchars($pat, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $rotationPattern === $pat ? ' selected' : ''; ?>>
@@ -161,49 +211,49 @@ require_once Config\Environment::appHome() . 'html/header.php';
             </option>
           <?php endforeach; ?>
         </select>
-        <span id="fc_rotation_hint" class="forecast-form__hint">Work/rest days per cycle</span>
+        <span id="fc_rotation_hint" class="forecast-form__hint"><?php echo forecast_index_i18n('FORECAST_ROTATION_HINT'); ?></span>
       </div>
 
       <div class="forecast-form__row">
-        <label class="forecast-form__label" for="fc_rate">Hourly Rate ($)</label>
+        <label class="forecast-form__label" for="fc_rate"><?php echo forecast_index_i18n('FORECAST_HOURLY_RATE'); ?></label>
         <input class="forecast-form__input" id="fc_rate" type="number" name="rate"
                min="1" max="9999" step="0.01"
                value="<?php echo htmlspecialchars((string) $rateDollar, ENT_QUOTES, 'UTF-8'); ?>"
                aria-describedby="fc_rate_hint">
-        <span id="fc_rate_hint" class="forecast-form__hint">Base hourly wage in dollars</span>
+        <span id="fc_rate_hint" class="forecast-form__hint"><?php echo forecast_index_i18n('FORECAST_HOURLY_RATE_HINT'); ?></span>
       </div>
 
       <div class="forecast-form__row">
-        <label class="forecast-form__label" for="fc_count">Workers</label>
+        <label class="forecast-form__label" for="fc_count"><?php echo forecast_index_i18n('FORECAST_WORKERS'); ?></label>
         <input class="forecast-form__input" id="fc_count" type="number" name="count"
                min="1" max="500" step="1"
                value="<?php echo htmlspecialchars((string) $workerCount, ENT_QUOTES, 'UTF-8'); ?>"
                aria-describedby="fc_count_hint">
-        <span id="fc_count_hint" class="forecast-form__hint">Number of workers with these parameters</span>
+        <span id="fc_count_hint" class="forecast-form__hint"><?php echo forecast_index_i18n('FORECAST_WORKERS_HINT'); ?></span>
       </div>
 
       <div class="forecast-form__row">
-        <label class="forecast-form__label" for="fc_ot_rule">OT Rule</label>
+        <label class="forecast-form__label" for="fc_ot_rule"><?php echo forecast_index_i18n('FORECAST_OT_RULE'); ?></label>
         <select class="forecast-form__select" id="fc_ot_rule" name="ot_rule">
           <?php foreach ($allowedOtRules as $rule): ?>
             <option value="<?php echo htmlspecialchars($rule, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $otRuleStr === $rule ? ' selected' : ''; ?>>
-              <?php echo htmlspecialchars(ucfirst($rule), ENT_QUOTES, 'UTF-8'); ?>
+              <?php echo htmlspecialchars(forecast_index_i18n($otRuleLabelKeys[$rule] ?? 'FORECAST_OT_RULE_' . strtoupper($rule)), ENT_QUOTES, 'UTF-8'); ?>
             </option>
           <?php endforeach; ?>
         </select>
       </div>
 
       <div class="forecast-form__row">
-        <label class="forecast-form__label" for="fc_per_diem">Per Diem ($/day)</label>
+        <label class="forecast-form__label" for="fc_per_diem"><?php echo forecast_index_i18n('FORECAST_PER_DIEM'); ?></label>
         <input class="forecast-form__input" id="fc_per_diem" type="number" name="per_diem"
                min="0" max="9999" step="0.01"
                value="<?php echo htmlspecialchars((string) $perDiemDollar, ENT_QUOTES, 'UTF-8'); ?>"
                aria-describedby="fc_per_diem_hint">
-        <span id="fc_per_diem_hint" class="forecast-form__hint">Daily living-out allowance per worker</span>
+        <span id="fc_per_diem_hint" class="forecast-form__hint"><?php echo forecast_index_i18n('FORECAST_PER_DIEM_HINT'); ?></span>
       </div>
 
       <div class="forecast-form__row">
-        <label class="forecast-form__label" for="fc_province">Province</label>
+        <label class="forecast-form__label" for="fc_province"><?php echo forecast_index_i18n('PROVINCE'); ?></label>
         <select class="forecast-form__select" id="fc_province" name="province">
           <?php foreach ($allowedProvinces as $prov): ?>
             <option value="<?php echo htmlspecialchars($prov, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $province === $prov ? ' selected' : ''; ?>>
@@ -214,56 +264,55 @@ require_once Config\Environment::appHome() . 'html/header.php';
       </div>
 
       <div class="forecast-form__row">
-        <label class="forecast-form__label" for="fc_anchor">Rotation Anchor Date</label>
+        <label class="forecast-form__label" for="fc_anchor"><?php echo forecast_index_i18n('FORECAST_ANCHOR_DATE'); ?></label>
         <input class="forecast-form__input" id="fc_anchor" type="date" name="anchor"
                value="<?php echo htmlspecialchars($anchorRaw, ENT_QUOTES, 'UTF-8'); ?>"
                aria-describedby="fc_anchor_hint">
-        <span id="fc_anchor_hint" class="forecast-form__hint">First day of the first work block</span>
+        <span id="fc_anchor_hint" class="forecast-form__hint"><?php echo forecast_index_i18n('FORECAST_ANCHOR_DATE_HINT'); ?></span>
       </div>
 
       <div class="forecast-form__row">
-        <label class="forecast-form__label" for="fc_shutdown">Shutdown End Date <span class="forecast-form__optional">(optional)</span></label>
+        <label class="forecast-form__label" for="fc_shutdown"><?php echo forecast_index_i18n('FORECAST_SHUTDOWN_END_DATE'); ?> <span class="forecast-form__optional"><?php echo forecast_index_i18n('FORECAST_OPTIONAL'); ?></span></label>
         <input class="forecast-form__input" id="fc_shutdown" type="date" name="shutdown"
                value="<?php echo htmlspecialchars($shutdownRaw, ENT_QUOTES, 'UTF-8'); ?>"
                aria-describedby="fc_shutdown_hint">
-        <span id="fc_shutdown_hint" class="forecast-form__hint">Adds a Shutdown Total window</span>
+        <span id="fc_shutdown_hint" class="forecast-form__hint"><?php echo forecast_index_i18n('FORECAST_SHUTDOWN_END_HINT'); ?></span>
       </div>
 
       <div class="forecast-form__actions">
-        <button type="submit" class="btn btn--primary forecast-form__submit">Update Forecast</button>
+        <button type="submit" class="btn btn--primary forecast-form__submit"><?php echo forecast_index_i18n('FORECAST_UPDATE_BUTTON'); ?></button>
       </div>
     </form>
   </section>
 
-  <section class="panel w100 forecast-panel" aria-label="Crew cost forecast windows">
-    <h2 class="forecast-panel__title">
-      Projected Labor Cost
+  <section class="panel w100 forecast-panel" aria-labelledby="forecast-windows-heading">
+    <h2 id="forecast-windows-heading" class="forecast-panel__title">
+      <?php echo forecast_index_i18n('FORECAST_PROJECTED_LABOR_COST'); ?>
       <span class="forecast-panel__crew-summary">
-        — <?php echo htmlspecialchars((string) $workerCount, ENT_QUOTES, 'UTF-8'); ?> worker<?php echo $workerCount !== 1 ? 's' : ''; ?>,
-        <?php echo htmlspecialchars($rotationPattern, ENT_QUOTES, 'UTF-8'); ?> rotation,
-        $<?php echo htmlspecialchars(number_format($rateDollar, 2), ENT_QUOTES, 'UTF-8'); ?>/hr
+        — <?php echo htmlspecialchars($crewSummaryFmt, ENT_QUOTES, 'UTF-8'); ?>
       </span>
     </h2>
 
     <div class="datagrid datagrid_cols_6 datagrid_layout_auto forecast-results-grid"
-         role="region" aria-label="Forecast windows">
+         role="region" aria-label="<?php echo htmlspecialchars(forecast_index_i18n('FORECAST_WINDOWS_GRID_ARIA'), ENT_QUOTES, 'UTF-8'); ?>">
       <div class="datagrid_table" role="grid" aria-colcount="6">
         <div class="datagrid_header_row" role="rowgroup">
           <div class="datagrid_header_content" role="row">
-            <div class="datagrid_heading" role="columnheader">Window</div>
-            <div class="datagrid_heading" role="columnheader">Days</div>
-            <div class="datagrid_heading" role="columnheader">Work Days</div>
-            <div class="datagrid_heading" role="columnheader">OT Hours</div>
-            <div class="datagrid_heading" role="columnheader">Est. Gross</div>
-            <div class="datagrid_heading" role="columnheader">Est. Net</div>
+            <div class="datagrid_heading" role="columnheader"><?php echo forecast_index_i18n('FORECAST_COL_WINDOW'); ?></div>
+            <div class="datagrid_heading" role="columnheader"><?php echo forecast_index_i18n('DAYS'); ?></div>
+            <div class="datagrid_heading" role="columnheader"><?php echo forecast_index_i18n('FORECAST_COL_WORK_DAYS'); ?></div>
+            <div class="datagrid_heading" role="columnheader"><?php echo forecast_index_i18n('EARNINGS_BREAKDOWN_OT_HOURS_LABEL'); ?></div>
+            <div class="datagrid_heading" role="columnheader"><?php echo forecast_index_i18n('EARNINGS_FORECAST_EST_GROSS'); ?></div>
+            <div class="datagrid_heading" role="columnheader"><?php echo forecast_index_i18n('EARNINGS_FORECAST_EST_NET'); ?></div>
           </div>
         </div>
         <div class="datagrid_body" role="rowgroup">
-          <?php foreach ($results as $wLabel => $result): ?>
-            <?php $window = $windows[$wLabel]; ?>
-            <div class="datagrid_row<?php echo $wLabel === 'Shutdown Total' ? ' forecast-row--shutdown' : ''; ?>" role="row">
+          <?php foreach ($results as $windowKey => $result): ?>
+            <?php $window = $windows[$windowKey]; ?>
+            <?php $windowLabel = forecast_index_i18n($windowLabelKeys[$windowKey] ?? $windowKey); ?>
+            <div class="datagrid_row<?php echo $windowKey === 'shutdown_total' ? ' forecast-row--shutdown' : ''; ?>" role="row">
               <div class="datagrid_row_content" role="presentation">
-                <div class="datagrid_item" role="gridcell"><?php echo htmlspecialchars($wLabel, ENT_QUOTES, 'UTF-8'); ?></div>
+                <div class="datagrid_item" role="gridcell"><?php echo htmlspecialchars($windowLabel, ENT_QUOTES, 'UTF-8'); ?></div>
                 <div class="datagrid_item" role="gridcell"><?php echo htmlspecialchars((string) $window->days(), ENT_QUOTES, 'UTF-8'); ?></div>
                 <div class="datagrid_item" role="gridcell"><?php echo htmlspecialchars((string) $result->onsiteDays, ENT_QUOTES, 'UTF-8'); ?></div>
                 <div class="datagrid_item forecast-ot" role="gridcell"><?php echo htmlspecialchars(number_format($result->otHours, 1), ENT_QUOTES, 'UTF-8'); ?></div>
@@ -277,17 +326,22 @@ require_once Config\Environment::appHome() . 'html/header.php';
     </div>
 
     <p class="forecast-disclaimer">
-      All figures are projections based on the parameters above. Actual deductions depend on year-to-date income,
-      benefit elections, and other factors. Not CRA-authoritative. Tax estimates use annualised marginal-rate
-      approximations for <?php echo htmlspecialchars($province, ENT_QUOTES, 'UTF-8'); ?>.
+      <?php echo htmlspecialchars(
+        forecast_index_i18n_fmt('FORECAST_DISCLAIMER_FMT', ['province' => $province]),
+        ENT_QUOTES,
+        'UTF-8'
+      ); ?>
     </p>
   </section>
 
   <?php if (!$hasPremium && !User::isAdmin()): ?>
-  <section class="panel w100 forecast-panel forecast-upgrade-notice" aria-label="Upgrade notice">
+  <section class="panel w100 forecast-panel forecast-upgrade-notice" aria-labelledby="forecast-upgrade-heading">
+    <h2 id="forecast-upgrade-heading" class="visually_hidden"><?php echo forecast_index_i18n('FORECAST_UPGRADE_SECTION_ARIA'); ?></h2>
     <p>
-      <strong>Crew Forecasting</strong> is included in PayCal Premium.
-      <a href="/premium/">Upgrade to unlock</a> full crew management, multi-site analytics, and PDF export.
+      <strong><?php echo forecast_index_i18n('FORECAST_UPGRADE_TITLE'); ?></strong>
+      <?php echo forecast_index_i18n('FORECAST_UPGRADE_LEDE_SUFFIX'); ?>
+      <a href="/premium/"><?php echo forecast_index_i18n('FORECAST_UPGRADE_LINK'); ?></a>
+      <?php echo forecast_index_i18n('FORECAST_UPGRADE_LINK_SUFFIX'); ?>
     </p>
   </section>
   <?php endif; ?>

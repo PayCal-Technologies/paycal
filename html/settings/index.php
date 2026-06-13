@@ -283,7 +283,7 @@ require_once Environment::appHome().'html/header.php';
           <div class="item_pair">
             <label for="edit_details_phone" class="item_label"><?php echo settings_index_i18n('PHONE'); ?></label>
             <div class="item_value">
-              <input type="tel" id="edit_details_phone" name="phone" value="<?php echo $user->phone; ?>" autocomplete="tel-national" maxlength="14" inputmode="numeric" pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}" placeholder="<?php echo settings_index_i18n('ORGANIZATIONS_CONTACT_PHONE_PLACEHOLDER'); ?>" aria-describedby="edit_details_status edit_details_phone_error" data-hover-help="<?php echo settings_index_i18n('SETTINGS_EDIT_DETAILS_PHONE_HOVER'); ?>">
+              <input type="tel" id="edit_details_phone" name="phone" value="<?php echo $user->phone; ?>" autocomplete="tel-national" maxlength="14" inputmode="numeric" pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}" placeholder="<?php echo settings_index_i18n('BUSINESSES_CONTACT_PHONE_PLACEHOLDER'); ?>" aria-describedby="edit_details_status edit_details_phone_error" data-hover-help="<?php echo settings_index_i18n('SETTINGS_EDIT_DETAILS_PHONE_HOVER'); ?>">
               <div id="edit_details_phone_error" class="status_text compact_hint" role="status" aria-live="polite"></div>
             </div>
           </div><!-- item_pair -->
@@ -798,6 +798,31 @@ echo Render::dialog([
     <br>
 
     <div class="flex f_baseline w100">
+      <label for="help_popup_timeout_seconds" class="w25"><?php echo settings_index_i18n('SETTINGS_HELP_POPUP_TIMEOUT_LABEL'); ?></label>
+      <div class="w75">
+        <?php $helpPopupTimeout = $user->getHelpPopupTimeoutSeconds(); ?>
+        <div class="proximity_slider_wrap" data-hover-help="<?php echo settings_index_i18n('SETTINGS_HELP_POPUP_TIMEOUT_HOVER'); ?>">
+          <input
+            type="range"
+            id="help_popup_timeout_seconds"
+            name="help_popup_timeout_seconds"
+            min="0"
+            max="30"
+            step="1"
+            value="<?php echo $helpPopupTimeout; ?>"
+            aria-valuemin="0"
+            aria-valuemax="30"
+            aria-valuenow="<?php echo $helpPopupTimeout; ?>"
+            aria-label="<?php echo settings_index_i18n('SETTINGS_HELP_POPUP_TIMEOUT_LABEL'); ?>"
+          >
+          <output for="help_popup_timeout_seconds" id="help_popup_timeout_seconds_output"><?php echo $helpPopupTimeout; ?>s</output>
+        </div>
+      </div>
+    </div>
+
+    <br>
+
+    <div class="flex f_baseline w100">
       <label class="w25"><?php echo settings_index_i18n('SETTINGS_STYLE_LABEL_SIDEBAR'); ?></label>
       <div class="w75">
         <div class="radio_group pill_group" data-hover-help="Set primary navigation position on left or right.">
@@ -859,6 +884,26 @@ echo Render::dialog([
           <label for="nav_overlay_push">Off</label>
           <input class="radio" type="radio" id="nav_overlay_overlay" name="nav_overlay" value="overlay">
           <label for="nav_overlay_overlay">On</label>
+        </div>
+        <div class="overlay_collapse_row" id="overlay_sidebar_timeout_row">
+          <label for="overlay_sidebar_timeout_seconds" class="overlay_collapse_label"><?php echo settings_index_i18n('SETTINGS_OVERLAY_COLLAPSE_LABEL'); ?></label>
+          <?php $overlaySidebarTimeout = $user->getOverlaySidebarTimeoutSeconds(); ?>
+          <div class="proximity_slider_wrap" data-hover-help="<?php echo settings_index_i18n('SETTINGS_OVERLAY_COLLAPSE_HOVER'); ?>">
+            <input
+              type="range"
+              id="overlay_sidebar_timeout_seconds"
+              name="overlay_sidebar_timeout_seconds"
+              min="0"
+              max="30"
+              step="1"
+              value="<?php echo $overlaySidebarTimeout; ?>"
+              aria-valuemin="0"
+              aria-valuemax="30"
+              aria-valuenow="<?php echo $overlaySidebarTimeout; ?>"
+              aria-label="<?php echo settings_index_i18n('SETTINGS_OVERLAY_COLLAPSE_LABEL'); ?>"
+            >
+            <output for="overlay_sidebar_timeout_seconds" id="overlay_sidebar_timeout_seconds_output"><?php echo $overlaySidebarTimeout; ?>s</output>
+          </div>
         </div>
       </div>
     </div>

@@ -14,6 +14,24 @@ use PHPUnit\Framework\TestCase;
 
 final class AccountRecoveryControllerIntegrationTest extends TestCase
 {
+  protected function setUp(): void
+  {
+    parent::setUp();
+    $this->resetRecoveryTestState();
+  }
+
+  protected function tearDown(): void
+  {
+    $this->resetRecoveryTestState();
+    parent::tearDown();
+  }
+
+  private function resetRecoveryTestState(): void
+  {
+    $this->clearAllRecoveryRateLimitKeys();
+    $this->clearRecoveryBlockedIp('127.0.0.1');
+  }
+
   /** @return array<string, mixed> */
   private function decodeJsonPayload(string $output): array
   {
@@ -151,9 +169,24 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
     }
   }
 
+  private function clearAllRecoveryRateLimitKeys(): void
+  {
+    foreach (Database::scanKeys('ratelimit:recovery:*') as $key) {
+      Database::unlink((string) $key);
+    }
+  }
+
+  private function clearRecoveryBlockedIp(string $clientIp): void
+  {
+    $ipHash = substr(hash('sha256', $clientIp), 0, 32);
+    Database::unlink(Keys::accountRecoveryBlockedIp($ipHash));
+  }
+
   public function testStartUnknownEmailReturnsGenericSuccessAndTransactionData(): void
   {
-    $response = $this->runControllerCall('start', ['email' => 'unknown@example.com']);
+    $this->clearRecoveryRateLimitKeys('start');
+    $email = 'unknown-' . bin2hex(random_bytes(4)) . '@example.com';
+    $response = $this->runControllerCall('start', ['email' => $email]);
 
     $this->assertSame('success', $response['status'] ?? null);
     $this->assertNotEmpty($response['data']['txnId'] ?? '');

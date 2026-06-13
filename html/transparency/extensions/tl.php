@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_EXTENSIONS_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Paradigma ng mga Extension - [PayCal]';
-$pageLabel = 'Paradigma ng mga Extension';
+$pageTitle = $i18n['TRANSPARENCY_EXTENSIONS_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_EXTENSIONS_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Paradigma ng mga Extension</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_EXTENSIONS_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       Ang PayCal ay dinisenyo upang manatiling matatag ang pangunahing lohika ng negosyo habang
       ang mga extension layer ay maaaring mag-angkop ng mga tampok para sa iba't ibang deployment
@@ -67,7 +68,7 @@ require_once HTML.'/header.php';
       <ul class="doc-list">
         <li><strong>billing-provider:</strong> mga baseline billing capability hook at pagpili ng mode</li>
         <li><strong>earnings-ytd:</strong> baseline YTD rendering at mga earnings hook point</li>
-        <li><strong>organization-signals:</strong> mga baseline organization signal hook</li>
+        <li><strong>business-signals:</strong> mga baseline business signal hook</li>
       </ul>
     </section>
 

@@ -137,12 +137,12 @@ $ctaHrefSafe = htmlspecialchars($ctaHref ?? '/auth', ENT_QUOTES, 'UTF-8');
         <tr><td>Earnings calculations</td>               <td class="check" aria-label="Included">✓</td><td class="check" aria-label="Included">✓</td></tr>
         <tr><td>Calendar views</td>                      <td class="check" aria-label="Included">✓</td><td class="check" aria-label="Included">✓</td></tr>
         <tr><td>Export records</td>                      <td class="check" aria-label="Included">✓</td><td class="check" aria-label="Included">✓</td></tr>
-        <tr><td>Create organizations</td>                <td class="dash"  aria-label="Not included">—</td><td class="check" aria-label="Included">✓</td></tr>
+        <tr><td>Create your business</td>              <td class="dash"  aria-label="Not included">—</td><td class="check" aria-label="Included">✓</td></tr>
         <tr><td>Invite team members</td>                 <td class="dash"  aria-label="Not included">—</td><td class="check" aria-label="Included">✓</td></tr>
         <tr><td>Role management</td>                     <td class="dash"  aria-label="Not included">—</td><td class="check" aria-label="Included">✓</td></tr>
-        <tr><td>Shared organization access</td>          <td class="dash"  aria-label="Not included">—</td><td class="check" aria-label="Included">✓</td></tr>
+        <tr><td>Shared business access</td>             <td class="dash"  aria-label="Not included">—</td><td class="check" aria-label="Included">✓</td></tr>
         <tr><td>Team payroll visibility</td>             <td class="dash"  aria-label="Not included">—</td><td class="check" aria-label="Included">✓</td></tr>
-        <tr><td>Organization tools</td>                  <td class="dash"  aria-label="Not included">—</td><td class="check" aria-label="Included">✓</td></tr>
+        <tr><td>Business workspace tools</td>           <td class="dash"  aria-label="Not included">—</td><td class="check" aria-label="Included">✓</td></tr>
       </tbody>
     </table>
   </section>

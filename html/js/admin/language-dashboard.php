@@ -79,9 +79,7 @@ function pct(ratio) {
 function progressBar(translatedPct) {
   const val = Math.min(100, Math.max(0, parseFloat(String(translatedPct)))).toFixed(1);
   return `<div class="lang-dash__progress-wrap">
-    <div class="lang-dash__progress-bar-track" role="progressbar" aria-valuenow="${val}" aria-valuemin="0" aria-valuemax="100">
-      <div class="lang-dash__progress-bar" style="width:${val}%"></div>
-    </div>
+    <progress class="lang-dash__progress-native" value="${val}" max="100" aria-label="Translation progress">${val}%</progress>
     <span class="lang-dash__progress-pct">${val}%</span>
   </div>`;
 }
@@ -137,7 +135,7 @@ function renderReport(report) {
     for (const lang of languages) {
       const translatedPct = pct(lang.ratio);
       rows += `<tr>
-        <td><strong>${esc(lang.name)}</strong> <small style="color:var(--text-muted)">${esc(lang.lang)}</small></td>
+        <td><strong>${esc(lang.name)}</strong> <small class="lang-dash__lang-code">${esc(lang.lang)}</small></td>
         <td>${esc(lang.translated)} / ${esc(lang.total)}</td>
         <td>
           <div class="lang-dash__ratio-cell">
@@ -174,7 +172,7 @@ function renderReport(report) {
         <div class="lang-dash__card-header" role="button" tabindex="0" aria-controls="lang-card-body-${esc(lang.lang)}">
           <span class="lang-dash__card-title">
             <span class="lang-dash__card-toggle-icon" aria-hidden="true"></span>
-            ${esc(lang.name)} <small style="color:var(--text-muted)">(${esc(lang.lang)})</small>
+            ${esc(lang.name)} <small class="lang-dash__lang-code">(${esc(lang.lang)})</small>
           </span>
           <span class="lang-dash__card-meta">
             ${progressBar(translatedPct)}
@@ -183,8 +181,8 @@ function renderReport(report) {
           </span>
         </div>
         <div class="lang-dash__card-body" id="lang-card-body-${esc(lang.lang)}">
-          <p style="margin:0 0 0.5rem"><strong>${esc(lang.untranslated)}</strong> keys need translation.</p>
-          <ul style="font-size:0.82rem;max-height:10rem;overflow:auto;padding-left:1.2em;margin:0 0 0.75rem">
+          <p class="lang-dash__card-summary"><strong>${esc(lang.untranslated)}</strong> keys need translation.</p>
+          <ul class="lang-dash__key-list">
             ${keyListHtml}
           </ul>
           <div class="lang-dash__translate-row">

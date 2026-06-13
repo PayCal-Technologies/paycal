@@ -118,11 +118,195 @@ final class Strings
    */
   private static function numberLocale(): string
   {
-    if (defined('USER_LOCALE') && is_string(USER_LOCALE) && USER_LOCALE !== '') {
-      return USER_LOCALE;
+    if (defined('USER_LOCALE')) {
+      $locale = trim((string) USER_LOCALE);
+      if ($locale !== '') {
+        return $locale;
+      }
     }
 
     return 'en_US';
+  }
+
+  /**
+   * Resolve the active user locale tag for date formatting.
+   */
+  public static function resolveUserLocale(): string
+  {
+    if (defined('USER_LOCALE')) {
+      $locale = trim((string) USER_LOCALE);
+      if ($locale !== '') {
+        return $locale;
+      }
+    }
+
+    $user = User::current();
+
+    return Language::resolveDateLocale(trim($user->locale), $user->language);
+  }
+
+  /**
+   * Format a month/year heading using the active user locale.
+   */
+  public static function formatLocalizedMonthYear(int $year, int $month, ?string $locale = null): string
+  {
+    $month = max(1, min(12, $month));
+    $date = new \DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month));
+    $localeTag = ($locale !== null && $locale !== '') ? $locale : self::resolveUserLocale();
+
+    if (!class_exists('\IntlDateFormatter')) {
+      return $date->format('F Y');
+    }
+
+    $formatter = new \IntlDateFormatter(
+      $localeTag,
+      \IntlDateFormatter::NONE,
+      \IntlDateFormatter::NONE,
+      null,
+      \IntlDateFormatter::GREGORIAN,
+      'MMMM y'
+    );
+    $formatted = $formatter->format($date);
+    if (is_string($formatted) && $formatted !== '') {
+      return $formatted;
+    }
+
+    return $date->format('F Y');
+  }
+
+  /**
+   * Format a short month label (e.g. "Jan") using the active user locale.
+   */
+  public static function formatLocalizedShortMonth(int $year, int $month, ?string $locale = null): string
+  {
+    $month = max(1, min(12, $month));
+    $date = new \DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month));
+    $localeTag = ($locale !== null && $locale !== '') ? $locale : self::resolveUserLocale();
+
+    if (!class_exists('\IntlDateFormatter')) {
+      return $date->format('M');
+    }
+
+    $formatter = new \IntlDateFormatter(
+      $localeTag,
+      \IntlDateFormatter::NONE,
+      \IntlDateFormatter::NONE,
+      null,
+      \IntlDateFormatter::GREGORIAN,
+      'MMM'
+    );
+    $formatted = $formatter->format($date);
+    if (is_string($formatted) && $formatted !== '') {
+      return $formatted;
+    }
+
+    return $date->format('M');
+  }
+
+  /**
+   * Format a medium date label (e.g. "Jan 9, 2026") using the active user locale.
+   */
+  public static function formatLocalizedMediumDate(\DateTimeInterface $date, ?string $locale = null): string
+  {
+    $localeTag = ($locale !== null && $locale !== '') ? $locale : self::resolveUserLocale();
+
+    if (!class_exists('\IntlDateFormatter')) {
+      return $date->format('M j, Y');
+    }
+
+    $formatter = new \IntlDateFormatter(
+      $localeTag,
+      \IntlDateFormatter::NONE,
+      \IntlDateFormatter::NONE,
+      'UTC',
+      \IntlDateFormatter::GREGORIAN,
+      'MMM d, yyyy'
+    );
+    $formatted = $formatter->format($date);
+    if (is_string($formatted) && $formatted !== '') {
+      return $formatted;
+    }
+
+    return $date->format('M j, Y');
+  }
+
+  /**
+   * Format a short month/year label (e.g. "Jan 2026") using the active user locale.
+   */
+  public static function formatLocalizedShortMonthYear(int $year, int $month, ?string $locale = null): string
+  {
+    $month = max(1, min(12, $month));
+    $date = new \DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month));
+    $localeTag = ($locale !== null && $locale !== '') ? $locale : self::resolveUserLocale();
+
+    if (!class_exists('\IntlDateFormatter')) {
+      return $date->format('M Y');
+    }
+
+    $formatter = new \IntlDateFormatter(
+      $localeTag,
+      \IntlDateFormatter::NONE,
+      \IntlDateFormatter::NONE,
+      null,
+      \IntlDateFormatter::GREGORIAN,
+      'MMM y'
+    );
+    $formatted = $formatter->format($date);
+    if (is_string($formatted) && $formatted !== '') {
+      return $formatted;
+    }
+
+    return $date->format('M Y');
+  }
+
+  /**
+   * @return list<array{short:string,long:string}>
+   */
+  public static function generateWeekDayLabels(?string $locale = null): array
+  {
+    $labels = [];
+    $localeTag = ($locale !== null && $locale !== '') ? $locale : self::resolveUserLocale();
+
+    if (!class_exists('\IntlDateFormatter')) {
+      for ($i = 0; $i < 7; ++$i) {
+        $date = new \DateTimeImmutable("Sunday +{$i} days");
+        $labels[] = [
+          'short' => $date->format('D'),
+          'long' => $date->format('l'),
+        ];
+      }
+
+      return $labels;
+    }
+
+    $shortFormatter = new \IntlDateFormatter(
+      $localeTag,
+      \IntlDateFormatter::NONE,
+      \IntlDateFormatter::NONE,
+      null,
+      \IntlDateFormatter::GREGORIAN,
+      'EEE'
+    );
+    $longFormatter = new \IntlDateFormatter(
+      $localeTag,
+      \IntlDateFormatter::NONE,
+      \IntlDateFormatter::NONE,
+      null,
+      \IntlDateFormatter::GREGORIAN,
+      'EEEE'
+    );
+
+    for ($i = 0; $i < 7; ++$i) {
+      $date = new \DateTimeImmutable("Sunday +{$i} days");
+      $short = $shortFormatter->format($date);
+      $long = $longFormatter->format($date);
+      $labels[] = [
+        'short' => is_string($short) && $short !== '' ? $short : $date->format('D'),
+        'long' => is_string($long) && $long !== '' ? $long : $date->format('l'),
+      ];
+    }
+
+    return $labels;
   }
 
   /**

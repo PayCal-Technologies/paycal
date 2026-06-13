@@ -16,6 +16,8 @@ const DEFAULT_MESSAGES = {
   downgradeDone: 'Premium has been disabled and your account is now on Free.',
   downgradeError: 'Unable to disable Premium right now.',
   pendingCancellationConfirm: 'Cancellation is already scheduled. You keep full Premium access until {date}. Continue only if you want to end Premium now and switch to Free immediately.',
+  downgradeHelpScheduled: 'Cancellation is already scheduled. Premium remains active until the end date shown above. Use the action below only to end Premium immediately.',
+  downgradeHelpDefault: 'Use Stripe to manage renewal timing. Use this action only if you want to cancel now and switch to Free immediately.',
 };
 
 const ACTIVE_BADGE_LABELS = {
@@ -53,7 +55,10 @@ const normalizeSubscription = (payload) => {
   const isPendingCancellation = Boolean(data.is_pending_cancellation);
 
   return {
+    tier: typeof data.tier === 'string' ? data.tier : 'free',
     is_premium: Boolean(data.is_premium),
+    is_business: Boolean(data.is_business),
+    has_paid_plan: Boolean(data.has_paid_plan ?? data.is_premium ?? data.is_business),
     is_pending_cancellation: isPendingCancellation,
     subscription_status: normalizedStatus,
     start_date: typeof data.start_date === 'string' ? data.start_date : '',
@@ -180,9 +185,9 @@ export const initializeBillingSection = async (options = {}) => {
   const resolveCsrfToken = () => {
     const candidates = [
       root.querySelector('#settings_csrf_token'),
-      root.querySelector('#organizations_csrf_token'),
+      root.querySelector('#businesses_csrf_token'),
       document.getElementById('settings_csrf_token'),
-      document.getElementById('organizations_csrf_token'),
+      document.getElementById('businesses_csrf_token'),
       root.querySelector('input[name="csrf_token"]'),
       document.querySelector('input[name="csrf_token"]'),
     ];
@@ -415,9 +420,16 @@ export const initializeBillingSection = async (options = {}) => {
     }
   };
 
-  const setBillingState = (isPremium) => {
-    freeView.hidden = Boolean(isPremium);
-    premiumView.hidden = !isPremium;
+  const setBillingState = (nextSubscription) => {
+    const hasPaid = Boolean(nextSubscription?.has_paid_plan);
+    freeView.hidden = hasPaid;
+    premiumView.hidden = !hasPaid;
+
+    if (billingPanel instanceof HTMLElement) {
+      const tier = typeof nextSubscription?.tier === 'string' ? nextSubscription.tier : 'free';
+      const hint = tier === 'business' ? 'business' : (hasPaid ? 'premium' : 'free');
+      billingPanel.setAttribute('data-billing-hint', hint);
+    }
   };
 
   const renderStatusBadge = (status) => {
@@ -438,19 +450,33 @@ export const initializeBillingSection = async (options = {}) => {
     statusBadge.className = 'badge badge_' + status.replace(/_/g, '-');
   };
 
+  const planLabelEl = root.querySelector('#billing_plan_label');
+
   const renderSubscription = (nextSubscription) => {
-    setBillingState(Boolean(nextSubscription?.is_premium));
+    setBillingState(nextSubscription);
 
     if (billingPanel instanceof HTMLElement) {
       billingPanel.setAttribute('data-billing-hydrated', 'true');
     }
 
+    if (planLabelEl instanceof HTMLElement) {
+      if (nextSubscription?.is_business) {
+        planLabelEl.textContent = 'Business';
+      } else if (nextSubscription?.is_premium) {
+        planLabelEl.textContent = 'Premium';
+      } else {
+        planLabelEl.textContent = 'Premium';
+      }
+    }
+
+    const hasPaid = Boolean(nextSubscription?.has_paid_plan);
+
     if (startDateEl instanceof HTMLElement) {
-      startDateEl.textContent = nextSubscription?.is_premium ? formatStartDate(nextSubscription.start_date) : '—';
+      startDateEl.textContent = hasPaid ? formatStartDate(nextSubscription.start_date) : '—';
     }
 
     if (renewalDateEl instanceof HTMLElement && renewalLineEl instanceof HTMLElement) {
-      if (nextSubscription?.is_premium && nextSubscription?.renewal_date && !nextSubscription?.is_pending_cancellation) {
+      if (hasPaid && nextSubscription?.renewal_date && !nextSubscription?.is_pending_cancellation) {
         renewalDateEl.textContent = formatStartDate(nextSubscription.renewal_date);
         renewalLineEl.hidden = false;
       } else {
@@ -461,7 +487,7 @@ export const initializeBillingSection = async (options = {}) => {
 
     // Show pending cancellation notice if subscription will cancel at period end
     if (cancelNoticeEl instanceof HTMLElement && cancelDateEl instanceof HTMLElement) {
-      if (nextSubscription?.is_premium && nextSubscription?.is_pending_cancellation && nextSubscription?.cancel_date) {
+      if (hasPaid && nextSubscription?.is_pending_cancellation && nextSubscription?.cancel_date) {
         cancelDateEl.textContent = formatStartDate(nextSubscription.cancel_date);
         renderDateTimePopoverRows(nextSubscription.cancel_date);
         cancelNoticeEl.hidden = false;
@@ -475,10 +501,10 @@ export const initializeBillingSection = async (options = {}) => {
 
     // Update downgrade help text based on pending cancellation state
     if (downgradeHelpEl instanceof HTMLElement) {
-      if (nextSubscription?.is_premium && nextSubscription?.is_pending_cancellation) {
-        downgradeHelpEl.textContent = 'Cancellation is already scheduled. Premium remains active until the end date shown above. Use the action below only to end Premium immediately.';
+      if (hasPaid && nextSubscription?.is_pending_cancellation) {
+        downgradeHelpEl.textContent = messages.downgradeHelpScheduled || DEFAULT_MESSAGES.downgradeHelpScheduled;
       } else {
-        downgradeHelpEl.textContent = 'Use Stripe to manage renewal timing. Use this action only if you want to cancel now and switch to Free immediately.';
+        downgradeHelpEl.textContent = messages.downgradeHelpDefault || DEFAULT_MESSAGES.downgradeHelpDefault;
       }
     }
 
@@ -498,6 +524,23 @@ export const initializeBillingSection = async (options = {}) => {
 
     if (typeof options.onPremiumActivated === 'function') {
       options.onPremiumActivated(nextSubscription);
+    }
+  };
+
+  const announceBusinessActivation = (nextSubscription) => {
+    window.dispatchEvent(new CustomEvent('paycal:billing-business-activated', {
+      detail: { subscription: nextSubscription },
+    }));
+
+    if (typeof options.onBusinessActivated === 'function') {
+      options.onBusinessActivated(nextSubscription);
+    }
+  };
+
+  const announcePaidActivation = (nextSubscription) => {
+    announcePremiumActivation(nextSubscription);
+    if (nextSubscription?.is_business) {
+      announceBusinessActivation(nextSubscription);
     }
   };
 
@@ -628,13 +671,13 @@ export const initializeBillingSection = async (options = {}) => {
     }
   };
 
-  const waitForPremiumActivation = async () => {
+  const waitForPaidActivation = async () => {
     for (let attempt = 0; attempt < activationPollAttempts; attempt += 1) {
       const nextSubscription = attempt === 0 && subscription !== null
         ? subscription
         : await refreshSubscription({ silent: true });
 
-      if (nextSubscription?.is_premium) {
+      if (nextSubscription?.has_paid_plan) {
         return nextSubscription;
       }
 
@@ -680,19 +723,19 @@ export const initializeBillingSection = async (options = {}) => {
       }
     }
 
-    if (subscription?.is_premium) {
+    if (subscription?.has_paid_plan) {
       setScreenReaderStatus(messages.success);
-      announcePremiumActivation(subscription);
+      announcePaidActivation(subscription);
       if (cleanupQueryParam) {
         replaceSearchParam('billing', null);
         replaceSearchParam('session_id', null);
       }
     } else {
       setScreenReaderStatus(messages.confirming);
-      const confirmedSubscription = await waitForPremiumActivation();
-      if (confirmedSubscription?.is_premium) {
+      const confirmedSubscription = await waitForPaidActivation();
+      if (confirmedSubscription?.has_paid_plan) {
         setScreenReaderStatus(messages.success);
-        announcePremiumActivation(confirmedSubscription);
+        announcePaidActivation(confirmedSubscription);
       } else {
         setScreenReaderStatus(messages.delayed);
       }
@@ -709,10 +752,14 @@ export const initializeBillingSection = async (options = {}) => {
     }
   }
 
-  if (upgradeBtn instanceof HTMLButtonElement) {
-    upgradeBtn.addEventListener('click', async () => {
-      upgradeBtn.disabled = true;
-      setInlineStatus(upgradeStatus, messages.checkoutRedirect);
+  const bindUpgradeButton = (button, statusEl, plan = 'premium') => {
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      setInlineStatus(statusEl, messages.checkoutRedirect);
 
       try {
         const csrfToken = resolveCsrfToken();
@@ -724,6 +771,7 @@ export const initializeBillingSection = async (options = {}) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            plan,
             success_url: checkoutSuccessUrl,
             cancel_url: checkoutCancelUrl,
             csrf_token: csrfToken,
@@ -743,22 +791,27 @@ export const initializeBillingSection = async (options = {}) => {
           }
 
           await refreshSubscription({ silent: false });
-          setInlineStatus(upgradeStatus, messages.success);
+          setInlineStatus(statusEl, messages.success);
           setScreenReaderStatus(messages.success);
-          if (subscription?.is_premium) {
-            announcePremiumActivation(subscription);
+          if (subscription?.has_paid_plan) {
+            announcePaidActivation(subscription);
           }
-          upgradeBtn.disabled = false;
+          button.disabled = false;
           return;
         }
 
         throw new Error(extractMessage(payload, messages.checkoutError));
       } catch (error) {
-        upgradeBtn.disabled = false;
-        setInlineStatus(upgradeStatus, error instanceof Error ? error.message : messages.checkoutError);
+        button.disabled = false;
+        setInlineStatus(statusEl, error instanceof Error ? error.message : messages.checkoutError);
       }
     });
-  }
+  };
+
+  bindUpgradeButton(root.querySelector('#billing_upgrade_premium_btn'), root.querySelector('#billing_upgrade_premium_status'), 'premium');
+  bindUpgradeButton(root.querySelector('#billing_upgrade_business_btn'), root.querySelector('#billing_upgrade_business_status'), 'business');
+  bindUpgradeButton(root.querySelector('#billing_upgrade_business_subscribed_btn'), root.querySelector('#billing_upgrade_business_subscribed_status'), 'business');
+  bindUpgradeButton(upgradeBtn, upgradeStatus, 'premium');
 
   if (portalBtn instanceof HTMLButtonElement) {
     portalBtn.addEventListener('click', async () => {

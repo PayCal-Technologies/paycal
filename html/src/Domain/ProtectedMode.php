@@ -33,12 +33,9 @@ use PayCal\Infrastructure\Telemetry\SecurityLog;
  */
 final class ProtectedMode
 {
-  private const SESSION_AUTH_METHOD = 'auth_method';
   private const SESSION_AUTH_STRENGTH = 'auth_strength';
 
   private const USER_WEBAUTHN_ENABLED = 'webauthn_enabled';
-  private const USER_PASSWORD_ONLY_RISK = 'password_only_risk';
-  private const USER_LAST_AUTH_METHOD = 'last_auth_method';
 
   /**
    * HTTP methods treated as mutating writes.
@@ -66,18 +63,6 @@ final class ProtectedMode
   ];
 
   /**
-   * Determine whether a user should be treated as password-restricted.
-   *
-   * @param string $userUUID User UUID
-   *
-   * @return bool True when passkeys are enabled for the account
-   */
-  public static function shouldRestrictPasswordSession(string $userUUID): bool
-  {
-    return self::isPasskeyEnabled($userUUID);
-  }
-
-  /**
    * Check whether passkeys are enabled for a user.
    *
    * @param string $userUUID User UUID
@@ -95,34 +80,6 @@ final class ProtectedMode
     $normalizedFlag = strtolower($flag);
 
     return '1' === $flag || 'true' === $normalizedFlag || 'yes' === $normalizedFlag;
-  }
-
-  /**
-   * Mark a session and user record as password-only restricted.
-   *
-   * @param string $sessionHash Session hash
-   * @param string $userUUID    User UUID
-   */
-  public static function markPasswordOnlyRestricted(string $sessionHash, string $userUUID): void
-  {
-    if ('' === $sessionHash || '' === $userUUID) {
-      return;
-    }
-
-    $sessionKey = Keys::SESSION . ':' . $sessionHash;
-    $userKey = Keys::USER . ':' . $userUUID;
-
-    Database::hset($sessionKey, [
-      self::SESSION_AUTH_METHOD => 'password',
-      self::SESSION_AUTH_STRENGTH => 'password_only',
-    ]);
-
-    Database::hset($userKey, [
-      self::USER_PASSWORD_ONLY_RISK => '1',
-      self::USER_LAST_AUTH_METHOD => 'password',
-    ]);
-
-    SecurityLog::logProtectedModeActivated($userUUID, 'password_warning_only');
   }
 
   /**

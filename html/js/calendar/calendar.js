@@ -122,9 +122,40 @@
     }
   }
 
+  function calendarConfig() {
+    return window.PayCalCore?.config ?? window.PC?.config ?? null;
+  }
+
   function calendarI18n(key, fallback = '') {
-    const value = String(window.PC?.config?.[key] ?? '').trim();
-    return value !== '' ? value : fallback;
+    const fromPage = String(window.__CALENDAR_I18N__?.[key] ?? '').trim();
+    if (fromPage !== '') {
+      return fromPage;
+    }
+
+    const fromConfig = String(calendarConfig()?.[key] ?? '').trim();
+    return fromConfig !== '' ? fromConfig : fallback;
+  }
+
+  function calendarUserLocale() {
+    const locale = String(calendarConfig()?.USER_LOCALE ?? '').trim();
+    return locale !== '' ? locale : undefined;
+  }
+
+  // Payroll column headings stay English in every UI locale.
+  const WORK_ENTRY_COLUMN_HEADINGS = Object.freeze({
+    site: 'Site',
+    regular: 'Regular',
+    overtime: 'Overtime',
+    livingOutAllowance: 'Living Out Allowance',
+    travel: 'Travel',
+  });
+
+  function calendarWorkDetailsLabel() {
+    return calendarI18n('I_WORK_DETAILS', 'work details');
+  }
+
+  function formatCalendarLocaleDate(date, options) {
+    return date.toLocaleDateString(calendarUserLocale(), options);
   }
 
   function calendarI18nFormat(key, fallback, params = {}) {
@@ -246,7 +277,12 @@
   const CRYPTO_IDLE_TIMEOUT_MIN_MS = 60 * 1000;
   const CRYPTO_IDLE_TIMEOUT_MAX_MS = 30 * 60 * 1000;
   const CRYPTO_HIDDEN_ZEROIZE_DELAY_MS = 15 * 1000;
-  const WEB_AUTHN_UNSUPPORTED_UNLOCK_MESSAGE = 'This browser cannot use passkeys, so encrypted entries cannot be unlocked here. Use a WebAuthn-capable browser on a secure connection (HTTPS).';
+  function calendarWebAuthnUnsupportedMessage() {
+    return calendarI18n(
+      'CALENDAR_WEB_AUTHN_UNSUPPORTED',
+      'This browser cannot use passkeys, so encrypted entries cannot be unlocked here. Use a WebAuthn-capable browser on a secure connection (HTTPS).'
+    );
+  }
 
   function isWebAuthnCapableBrowser() {
     const hasPublicKeyCredential = typeof window.PublicKeyCredential !== 'undefined';
@@ -360,7 +396,7 @@
 
         if (modal.open) {
           if (window.PayCalCore && typeof window.PayCalCore.closeModal === 'function') {
-            window.PayCalCore.closeModal('calendar-modal', 'Work Details');
+            window.PayCalCore.closeModal('calendar-modal', calendarWorkDetailsLabel());
           } else {
             modal.close();
           }
@@ -2109,7 +2145,7 @@
     }
 
     const getMenuItems = (enabledOnly = false) => {
-      const items = Array.from(menu.querySelectorAll('li[data-action]'));
+      const items = Array.from(menu.querySelectorAll('[role="menuitem"][data-action]'));
       if (!enabledOnly) {
         return items;
       }
@@ -2132,7 +2168,7 @@
     };
 
     if (!dayContextMenuMenuBound) {
-      menu.querySelectorAll('li[data-action]').forEach(item => {
+      menu.querySelectorAll('[role="menuitem"][data-action]').forEach(item => {
         item.addEventListener('mouseenter', function() {
           if (menu.classList.contains('hidden')) {
             return;
@@ -2246,7 +2282,7 @@
         return;
       }
 
-      const items = Array.from(liveMenu.querySelectorAll('li[data-action]')).filter((item) => item.getAttribute('aria-disabled') !== 'true');
+      const items = Array.from(liveMenu.querySelectorAll('[role="menuitem"][data-action]')).filter((item) => item.getAttribute('aria-disabled') !== 'true');
       if (items.length === 0) {
         return;
       }
@@ -2320,7 +2356,7 @@
   function applyDayContextMenuState(menu, dateId) {
     const state = getDayContextMenuState(dateId);
 
-    menu.querySelectorAll('li[data-action]').forEach((item) => {
+    menu.querySelectorAll('[role="menuitem"][data-action]').forEach((item) => {
       const action = item.getAttribute('data-action') || '';
       const enabled = Boolean(state[action]);
       item.setAttribute('aria-disabled', enabled ? 'false' : 'true');
@@ -2382,7 +2418,7 @@
     menu.classList.toggle('context-menu-align-top', y >= maxY || pointerPrefersTop);
     targetCell.appendChild(menu);
 
-    const firstItem = Array.from(menu.querySelectorAll('li[data-action]')).find((item) => item.getAttribute('aria-disabled') !== 'true');
+    const firstItem = Array.from(menu.querySelectorAll('[role="menuitem"][data-action]')).find((item) => item.getAttribute('aria-disabled') !== 'true');
     const openedWithPointer = activeContextMenuOpenMode === 'pointer';
     if (firstItem && !openedWithPointer) {
       firstItem.focus();
@@ -2418,7 +2454,7 @@
     const dateId = activeContextMenuDateId;
     const menu = document.getElementById('calendar_day_context_menu');
     if (menu) {
-      const item = menu.querySelector(`li[data-action="${action}"]`);
+      const item = menu.querySelector(`[role="menuitem"][data-action="${action}"]`);
       if (item && item.getAttribute('aria-disabled') === 'true') {
         return;
       }
@@ -2542,7 +2578,7 @@
       return dateId;
     }
 
-    return localDate.toLocaleDateString(undefined, {
+    return formatCalendarLocaleDate(localDate, {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -2561,6 +2597,29 @@
     return cell && (cell.getAttribute('data-locked') === '1' || cell.classList.contains('datagrid_month_cell_locked'));
   }
 
+  function formatLockedDateMessage(dateLabel, daysRemaining = null) {
+    if (typeof daysRemaining === 'number' && Number.isFinite(daysRemaining) && daysRemaining > 0) {
+      const unit = daysRemaining === 1
+        ? calendarI18n('CALENDAR_DAY_SINGULAR', 'day')
+        : calendarI18n('CALENDAR_DAYS', 'days');
+      return calendarI18nFormat(
+        'CALENDAR_LOCKED_CANNOT_EDIT_GRACE',
+        'Cannot edit {date} - this period is locked. You can edit entries for {days} more {unit}.',
+        {
+          date: dateLabel,
+          days: String(daysRemaining),
+          unit,
+        }
+      );
+    }
+
+    return calendarI18nFormat(
+      'CALENDAR_LOCKED_CANNOT_EDIT',
+      'Cannot edit {date} - this period is locked',
+      { date: dateLabel }
+    );
+  }
+
   /**
    * Show status message for locked date.
    * @param {string} dateId - Date ID in YYYY-MM-DD format
@@ -2568,7 +2627,7 @@
   function showLockedDateMessage(dateId) {
     const dateLabel = formatStatusDateLabel(dateId);
     const grid = document.getElementById('calendar-grid');
-    let message = `Cannot edit ${dateLabel} - this period is locked`;
+    let message = formatLockedDateMessage(dateLabel);
 
     // Try to show remaining edit window from lockBoundary
     if (grid) {
@@ -2578,12 +2637,11 @@
           const today = new Date();
           const lockDate = new Date(lockBoundary + 'T00:00:00');
           const daysRemaining = Math.ceil((lockDate - today) / (1000 * 60 * 60 * 24));
-          
+
           if (daysRemaining > 0) {
-            const dayLabel = daysRemaining === 1 ? 'day' : 'days';
-            message = `Cannot edit ${dateLabel} - this period is locked. You can edit entries for ${daysRemaining} more ${dayLabel}.`;
+            message = formatLockedDateMessage(dateLabel, daysRemaining);
           } else {
-            message = `Cannot edit ${dateLabel} - this period is locked.`;
+            message = formatLockedDateMessage(dateLabel);
           }
         } catch {
           // Silently fall back to default message if date calculation fails
@@ -2949,7 +3007,7 @@
         event.preventDefault();
         if (isDatePickerOpen()) {
           if (window.PayCalCore && typeof window.PayCalCore.closeModal === 'function') {
-            window.PayCalCore.closeModal('modal_cal_picker', 'Date Picker');
+            window.PayCalCore.closeModal('modal_cal_picker', calendarI18n('DATE_PICKER', 'Date Picker'));
           }
           return;
         }
@@ -3220,12 +3278,18 @@
 
     const normalizeMonthNavA11yHints = () => {
       if (prevBtn) {
-        prevBtn.setAttribute('aria-label', 'Previous month ([ or Page Up)');
+        const prevLabel = calendarI18n('DATAGRID_PREVIOUS_MONTH_ARIA', prevBtn.getAttribute('aria-label') || '');
+        if (prevLabel !== '') {
+          prevBtn.setAttribute('aria-label', prevLabel);
+        }
         prevBtn.setAttribute('aria-keyshortcuts', '[ PageUp');
       }
 
       if (nextBtn) {
-        nextBtn.setAttribute('aria-label', 'Next month (] or Page Down)');
+        const nextLabel = calendarI18n('DATAGRID_NEXT_MONTH_ARIA', nextBtn.getAttribute('aria-label') || '');
+        if (nextLabel !== '') {
+          nextBtn.setAttribute('aria-label', nextLabel);
+        }
         nextBtn.setAttribute('aria-keyshortcuts', '] PageDown');
       }
     };
@@ -3545,7 +3609,7 @@
       const month = selectedMonthBtn.getAttribute('data-month');
 
       if (window.PayCalCore && typeof window.PayCalCore.closeModal === 'function') {
-        window.PayCalCore.closeModal('modal_cal_picker', 'Date Picker');
+        window.PayCalCore.closeModal('modal_cal_picker', calendarI18n('DATE_PICKER', 'Date Picker'));
       }
 
       navigateToMonth(year, month);
@@ -3587,7 +3651,7 @@
       openPickerBtn.addEventListener('click', function(event) {
         event.preventDefault();
         if (window.PayCalCore && typeof window.PayCalCore.openModal === 'function') {
-          window.PayCalCore.openModal('modal_cal_picker', 'Date Picker');
+          window.PayCalCore.openModal('modal_cal_picker', calendarI18n('DATE_PICKER', 'Date Picker'));
         }
 
         if (yearInput && typeof yearInput.focus === 'function') {
@@ -3735,8 +3799,11 @@
           hasDek,
         });
         const unlockMessage = isWebAuthnCapableBrowser()
-          ? 'Secure unlock is required before editing. Sign in with your passkey again and retry.'
-          : WEB_AUTHN_UNSUPPORTED_UNLOCK_MESSAGE;
+          ? calendarI18n(
+            'CALENDAR_UNLOCK_REQUIRED_EDIT',
+            'Secure unlock is required before editing. Sign in with your passkey again and retry.'
+          )
+          : calendarWebAuthnUnsupportedMessage();
         PayCalCore.updateStatusMessage(unlockMessage, 'error', 5000);
         return;
       }
@@ -3757,11 +3824,11 @@
     if (dateHeader) {
       try {
         const date = new Date(dateId + 'T00:00:00');
-        const formattedDate = date.toLocaleDateString('en-US', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
+        const formattedDate = formatCalendarLocaleDate(date, {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
         });
         dateHeader.textContent = formattedDate;
       } catch {
@@ -3773,7 +3840,7 @@
 
     if (!modal.open) {
       if (window.PayCalCore && typeof window.PayCalCore.openModal === 'function') {
-        window.PayCalCore.openModal('calendar-modal', 'Work Details');
+        window.PayCalCore.openModal('calendar-modal', calendarWorkDetailsLabel());
       } else {
         modal.showModal();
       }
@@ -3838,7 +3905,7 @@
 
     if (modal.open) {
       if (window.PayCalCore && typeof window.PayCalCore.closeModal === 'function') {
-        window.PayCalCore.closeModal('calendar-modal', 'Work Details');
+        window.PayCalCore.closeModal('calendar-modal', calendarWorkDetailsLabel());
       } else {
         modal.close();
       }
@@ -3921,11 +3988,11 @@
         if (cell.getAttribute('data-id')) {
           try {
             const cellDate = new Date(cell.getAttribute('data-id') + 'T00:00:00');
-            const formatted = cellDate.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            const formatted = formatCalendarLocaleDate(cellDate, {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             });
             if (formatted === dateText) {
               foundDate = cell.getAttribute('data-id');
@@ -3974,11 +4041,11 @@
         <table class="work-entries-table">
           <thead>
             <tr>
-              <th class="th-site">Site</th>
-              <th class="th-regular">Regular</th>
-              <th class="th-overtime">Overtime</th>
-              <th class="th-loa">LOA</th>
-              <th class="th-travel">Travel</th>
+              <th class="th-site">${escapeText(WORK_ENTRY_COLUMN_HEADINGS.site)}</th>
+              <th class="th-regular">${escapeText(WORK_ENTRY_COLUMN_HEADINGS.regular)}</th>
+              <th class="th-overtime">${escapeText(WORK_ENTRY_COLUMN_HEADINGS.overtime)}</th>
+              <th class="th-loa">${escapeText(WORK_ENTRY_COLUMN_HEADINGS.livingOutAllowance)}</th>
+              <th class="th-travel">${escapeText(WORK_ENTRY_COLUMN_HEADINGS.travel)}</th>
               <th class="th-action"></th>
             </tr>
           </thead>
@@ -4076,13 +4143,14 @@
   }
   
   /**
-   * Fetch all active sites from the API.
-   * @returns {Promise<Array<{site_id: string, site_name: string}>>}
+   * Fetch merged personal + business-linked sites for the work-entry dialog.
+   * Business-linked sites use display_name with a [ABBREV] prefix.
+   * @returns {Promise<Array<{site_id: string, site_name: string, scope?: string}>>}
    */
   async function fetchAllSites() {
     try {
       const appUrl = window.location.origin;
-      const response = await fetch(`${appUrl}/api/v1/sites`, {
+      const response = await fetch(`${appUrl}/api/v1/sites/calendar`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -4091,25 +4159,33 @@
       });
 
       if (!response.ok) {
-        console.error('[Calendar] API error fetching sites:', response.status);
+        console.error('[Calendar] API error fetching calendar sites:', response.status);
         return [];
       }
 
-      const data = await response.json();
-      const sites = data.sites || [];
-      
-      // Filter for active sites and map to our catalog format
+      const payload = await response.json();
+      const data = payload && typeof payload.data === 'object' ? payload.data : payload;
+      const sites = Array.isArray(data?.sites) ? data.sites : [];
+
       return sites
-        .filter(site => (site.status || '').toLowerCase() === 'active')
-        .map(site => ({
-          site_id: (site.id || '').toString().trim(),
-          site_name: (site.site_name || '').toString().trim(),
+        .map((site) => ({
+          site_id: (site.site_id || site.id || '').toString().trim(),
+          site_name: (site.display_name || site.site_name || '').toString().trim(),
+          scope: (site.scope || 'personal').toString().trim(),
           wage: parseMoneyValue(site.wage ?? 0),
         }))
-        .filter(site => site.site_name) // Remove empty names
-        .sort((a, b) => a.site_name.localeCompare(b.site_name));
+        .filter((site) => site.site_id !== '' && site.site_name !== '')
+        .sort((a, b) => {
+          const aScope = a.scope === 'business' ? 1 : 0;
+          const bScope = b.scope === 'business' ? 1 : 0;
+          if (aScope !== bScope) {
+            return aScope - bScope;
+          }
+
+          return a.site_name.localeCompare(b.site_name);
+        });
     } catch (error) {
-      console.error('[Calendar] Error fetching sites from API:', error);
+      console.error('[Calendar] Error fetching calendar sites from API:', error);
       return [];
     }
   }
@@ -4128,7 +4204,7 @@
       ))
     );
 
-    let sitesOptions = '<option value="">Select site...</option>';
+    let sitesOptions = `<option value="">${escapeText(calendarI18n('CALENDAR_MODAL_SELECT_SITE', 'Select site...'))}</option>`;
     if (siteCatalog.length > 0) {
       sitesOptions += siteCatalog.map((site, siteIndex) => {
         const entryMatched = !!(entry && (
@@ -4151,25 +4227,25 @@
     
     return `
       <tr class="work-entry-row" data-row-index="${index}">
-        <td data-label="Site">
+        <td data-label="${escapeText(WORK_ENTRY_COLUMN_HEADINGS.site)}">
           <select class="entry-site-select" name="site_${index}" required>
             ${sitesOptions}
           </select>
         </td>
-        <td data-label="Regular">
+        <td data-label="${escapeText(WORK_ENTRY_COLUMN_HEADINGS.regular)}">
           <input type="number" name="regular_${index}" step="0.5" min="0" max="24" placeholder="0" class="entry-hours-input" value="${regularValue > 0 ? regularValue : ''}">
         </td>
-        <td data-label="Overtime">
+        <td data-label="${escapeText(WORK_ENTRY_COLUMN_HEADINGS.overtime)}">
           <input type="number" name="overtime_${index}" step="0.5" min="0" max="24" placeholder="0" class="entry-hours-input" value="${overtimeValue > 0 ? overtimeValue : ''}">
         </td>
-        <td data-label="LOA">
+        <td data-label="${escapeText(WORK_ENTRY_COLUMN_HEADINGS.livingOutAllowance)}">
           <input type="number" name="loa_${index}" step="0.5" min="0" max="24" placeholder="0" class="entry-hours-input" value="${loaValue > 0 ? loaValue : ''}">
         </td>
-        <td data-label="Travel">
+        <td data-label="${escapeText(WORK_ENTRY_COLUMN_HEADINGS.travel)}">
           <input type="number" name="travel_${index}" step="0.5" min="0" max="24" placeholder="0" class="entry-hours-input" value="${travelValue > 0 ? travelValue : ''}">
         </td>
         <td data-label="">
-          <button type="button" class="work-entry-delete" data-row="${index}">Delete</button>
+          <button type="button" class="work-entry-delete" data-row="${index}">${escapeText(calendarI18n('DELETE', 'Delete'))}</button>
         </td>
       </tr>
     `;
@@ -4527,13 +4603,16 @@
 
   function computeCalendarDayTooltip(entries, dateId = '') {
     const totals = computeCalendarTotals(entries, dateId);
+    const grossLabel = calendarI18n('GROSS', 'Gross');
+    const deductionsLabel = calendarI18n('DEDUCTIONS', 'Deductions');
+    const netLabel = calendarI18n('NET', 'Net');
 
     return [
       `Regular: ${formatHourValue(totals.regularTotal)}`,
       `Overtime: ${formatHourValue(totals.overtimeTotal)}`,
-      `Gross: $${formatMoneyValue(totals.grossTotal)}`,
-      `Deductions: $${formatMoneyValue(Math.max(0, totals.grossTotal - totals.netTotal))}`,
-      `Net: $${formatMoneyValue(totals.netTotal)}`,
+      `${grossLabel}: $${formatMoneyValue(totals.grossTotal)}`,
+      `${deductionsLabel}: $${formatMoneyValue(Math.max(0, totals.grossTotal - totals.netTotal))}`,
+      `${netLabel}: $${formatMoneyValue(totals.netTotal)}`,
     ].join(' | ');
   }
 
@@ -4563,12 +4642,15 @@
         netTotal += cellTotals.netTotal;
       });
 
+      const grossLabel = calendarI18n('GROSS', 'Gross');
+      const deductionsLabel = calendarI18n('DEDUCTIONS', 'Deductions');
+      const netLabel = calendarI18n('NET', 'Net');
       const rangeTitle = [
         `Regular: ${formatHourValue(regularTotal)}`,
         `Overtime: ${formatHourValue(overtimeTotal)}`,
-        `Gross: $${formatMoneyValue(grossTotal)}`,
-        `Deductions: $${formatMoneyValue(Math.max(0, grossTotal - netTotal))}`,
-        `Net: $${formatMoneyValue(netTotal)}`,
+        `${grossLabel}: $${formatMoneyValue(grossTotal)}`,
+        `${deductionsLabel}: $${formatMoneyValue(Math.max(0, grossTotal - netTotal))}`,
+        `${netLabel}: $${formatMoneyValue(netTotal)}`,
       ].join(' | ');
       selectedCells.forEach((selectedCell) => {
         selectedCell.setAttribute('data-tooltip', rangeTitle);
@@ -4674,7 +4756,7 @@
     return workEntries.map(entry => {
       const siteNameRaw = (entry.site_name || entry.n || '').toString().trim();
       const siteName = escapeText(siteNameRaw);
-      const spokenSiteName = siteNameRaw || 'Work entry';
+      const spokenSiteName = siteNameRaw || calendarI18n('CALENDAR_WORK_ENTRY_LABEL', 'Work entry');
       const hasExplicitHours = (
         entry.hours !== undefined || entry.h !== undefined ||
         entry.regular_hours !== undefined || entry.r !== undefined ||
@@ -4685,7 +4767,13 @@
       const isEncryptedPlaceholder = !!entry.encrypted_blob && !hasExplicitHours;
 
       if (isEncryptedPlaceholder) {
-        const placeholderAria = escapeText(window.PayCalAriaEcho.cadence(spokenSiteName ? `${spokenSiteName}. Encrypted work details are unavailable in this view.` : 'Encrypted work details are unavailable in this view.'));
+        const encryptedUnavailable = calendarI18n(
+          'CALENDAR_ENCRYPTED_DETAILS_UNAVAILABLE',
+          'Encrypted work details are unavailable in this view.'
+        );
+        const placeholderAria = escapeText(window.PayCalAriaEcho.cadence(
+          spokenSiteName ? `${spokenSiteName}. ${encryptedUnavailable}` : encryptedUnavailable
+        ));
         return `<div class="work work_${posClass}" aria-label="${placeholderAria}"><strong>${siteName}</strong><br />--&nbsp;/&nbsp;--&nbsp;/&nbsp;--&nbsp;/&nbsp;--</div>`;
       }
 
@@ -4832,7 +4920,10 @@
 
   async function saveEntriesForDate(activeDate, entries) {
     if (calendarLockedForVerification || !isCalendarEmailVerified()) {
-      throw new Error('Email verification required. Use the banner above to enter your code or resend verification email.');
+      throw new Error(calendarI18n(
+        'CALENDAR_EMAIL_VERIFICATION_REQUIRED',
+        'Email verification required. Use the banner above to enter your code or resend verification email.'
+      ));
     }
 
     coreLog('[Calendar Save] saveEntriesForDate start', { activeDate, count: Array.isArray(entries) ? entries.length : 0 });
@@ -4842,7 +4933,10 @@
 
     try {
       if (!(await ensurePayCalDEK())) {
-        throw new Error('Unlock required before save. Use passkey unlock and then save again.');
+        throw new Error(calendarI18n(
+          'CALENDAR_UNLOCK_REQUIRED_SAVE',
+          'Unlock required before save. Use passkey unlock and then save again.'
+        ));
       }
 
       const optimisticEntries = normalizeEntriesForSave(entries);
@@ -4928,7 +5022,7 @@
       // Check for ENTRY_LOCKED status from backend
       if (savePayload?.status === 'ENTRY_LOCKED' || savePayload?.data?.status === 'ENTRY_LOCKED') {
         const lockedDate = savePayload?.date || savePayload?.data?.date || activeDate;
-        throw new Error(`Cannot edit ${formatStatusDateLabel(lockedDate)} - this period is locked`);
+        throw new Error(formatLockedDateMessage(formatStatusDateLabel(lockedDate)));
       }
 
       const weekPayload = savePayload?.week || savePayload?.data?.week || null;

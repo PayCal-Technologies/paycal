@@ -369,13 +369,6 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
   font-weight: 600;
 }
 
-[data-grid="sites-active"] .datagrid_col_site_name,
-[data-grid="sites-archived"] .datagrid_col_site_name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 [data-grid="sites-active"] .datagrid_heading_actions,
 [data-grid="sites-active"] .datagrid_item_actions,
 [data-grid="sites-archived"] .datagrid_heading_actions,

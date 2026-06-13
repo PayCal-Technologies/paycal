@@ -97,39 +97,4 @@ final class Response
   {
     self::json('error', $message, $code, $extra);
   }
-
-  /**
-   * Send raw HTML output with optional HTTP status code.
-   * Sends HTML content directly to client with proper Content-Type header.
-   *
-   * @param string $html Raw HTML markup to send to client
-   * @param int    $code HTTP status code (default: 200 OK)
-   */
-  public static function html(string $html, int $code = HttpStatus::HTTP_OK): void
-  {
-    http_response_code($code);
-    header('Content-Type: text/html; charset=utf-8');
-    echo $html;
-
-    if (self::shouldTerminate()) {
-      exit;
-    }
-  }
-
-  /**
-   * Redirect client to a different URL and exit.
-   * Sends a Location header with HTTP status code (typically 302 for temporary redirects).
-   *
-   * @param string $location Target URL to redirect to (default: "/" for homepage)
-   * @param int    $code     HTTP status code (default: 302 Found for temporary redirects; use 301 for permanent)
-   */
-  public static function redirect(string $location = '/', int $code = HttpStatus::HTTP_FOUND): void
-  {
-    http_response_code($code);
-    header('Location: '.$location);
-
-    if (self::shouldTerminate()) {
-      exit;
-    }
-  }
 }

@@ -25,8 +25,8 @@ Example:
 <?php declare(strict_types=1);
 
 return [
-  'id' => 'organization-signals',
-  'name' => 'Organization Signals (Private Override)',
+  'id' => 'business-signals',
+  'name' => 'Business Signals (Private Override)',
   'version' => '2.0.0-private.1',
   'description' => 'Private UX and workflow enhancements.',
   'author' => 'PayCal Private',
@@ -34,11 +34,11 @@ return [
   'core_compat' => '>=1.0.0',
   'enabled' => true,
   'capabilities' => [
-    'organization.signal.owner_inbox' => 'advanced',
-    'organization.signal.owner_triage' => true,
+    'business.signal.owner_inbox' => 'advanced',
+    'business.signal.owner_triage' => true,
   ],
   'hooks' => [
-    'organization.audit_event',
+    'business.audit_event',
   ],
   'bootstrap' => 'bootstrap.php',
 ];

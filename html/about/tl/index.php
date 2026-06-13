@@ -27,7 +27,7 @@
 
       <h2>Libre at Premium</h2>
       <p>Ganap na gumagana ang PayCal para sa mga indibidwal nang walang bayad.</p>
-      <p>Maaaring pumili ang mga organization na mag-upgrade sa Premium plan para sa shared features.</p>
+      <p>Maaaring pumili ang mga business na mag-upgrade sa Premium plan para sa shared features.</p>
 
       <table class="table" aria-label="Paghahambing ng Libre at Premium na plano">
         <thead>
@@ -42,12 +42,12 @@
             <td>Personal na work tracking, earnings estimates, pay-period visibility, at exports</td>
           </tr>
           <tr>
-            <td>Premium (Organizations)</td>
+            <td>Premium (Businesses)</td>
             <td>Shared access, team management, at advanced workflows</td>
           </tr>
           <tr>
             <td>Presyo</td>
-            <td>$4.99 CAD/buwan bawat organization</td>
+            <td>$4.99 CAD/buwan bawat business</td>
           </tr>
         </tbody>
       </table>

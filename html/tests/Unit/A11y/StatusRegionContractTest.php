@@ -9,11 +9,14 @@ use PHPUnit\Framework\TestCase;
 final class StatusRegionContractTest extends TestCase
 {
   #[Test]
-  public function settingsAndOrganizationsExposeCoreStatusRegions(): void
+  public function settingsAndBusinessesExposeCoreStatusRegions(): void
   {
     $projectRoot = dirname(__DIR__, 4);
     $settings = (string) file_get_contents($projectRoot . '/html/settings/index.php');
-    $organizations = (string) file_get_contents($projectRoot . '/html/organizations/index.php');
+    $dashboard = (string) file_get_contents($projectRoot . '/html/business/index.php');
+    $editorDialog = (string) file_get_contents($projectRoot . '/html/business/_archive/partials/editor_dialog.php');
+    $discoveryPanel = (string) file_get_contents($projectRoot . '/html/business/_partials/editor_sites_discovery_panel.php');
+    $auditPanel = (string) file_get_contents($projectRoot . '/html/business/_partials/editor_audit_panels.php');
 
     $settingsIds = [
       'passkey_credentials_sr_status',
@@ -22,22 +25,37 @@ final class StatusRegionContractTest extends TestCase
       'delete_account_status',
     ];
 
-    $organizationsIds = [
-      'organizations_grid_sr_status',
-      'organizations_members_grid_sr_status',
-      'organizations_invites_sr_status',
-      'organizations_discovery_sr_status',
-      'organizations_audit_sr_status',
-      'organizations_access_requests_sr_status',
+    $dashboardIds = [];
+
+    $membersPage = (string) file_get_contents($projectRoot . '/html/business/members/index.php');
+
+    $membersPageIds = [
+      'businesses_members_grid_sr_status',
+    ];
+
+    $editorDialogIds = [
+      'businesses_invites_sr_status',
+      'businesses_access_requests_sr_status',
     ];
 
     foreach ($settingsIds as $id) {
       $this->assertStringContainsString($id, $settings);
     }
 
-    foreach ($organizationsIds as $id) {
-      $this->assertStringContainsString($id, $organizations);
+    foreach ($dashboardIds as $id) {
+      $this->assertStringContainsString($id, $dashboard);
     }
+
+    foreach ($membersPageIds as $id) {
+      $this->assertStringContainsString($id, $membersPage);
+    }
+
+    foreach ($editorDialogIds as $id) {
+      $this->assertStringContainsString($id, $editorDialog);
+    }
+
+    $this->assertStringContainsString('businesses_discovery_sr_status', $discoveryPanel);
+    $this->assertStringContainsString('businesses_audit_sr_status', $auditPanel);
   }
 
   #[Test]

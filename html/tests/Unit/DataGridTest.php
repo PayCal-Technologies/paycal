@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PayCal\Domain\ArrayPager;
 use PayCal\Domain\DataGrid;
 use PayCal\Domain\PagerInterface;
 use PHPUnit\Framework\Attributes\Group;
@@ -183,6 +184,37 @@ final class DataGridTest extends TestCase
   }
 
   #[Test]
+  public function setSearchValueRendersSearchInputValue(): void
+  {
+    $grid = DataGrid::create('search-value-grid', 'Search Value Grid');
+    $grid->enableSearch('Filter rows...');
+    $grid->setSearchValue('alpha filter');
+    $grid->addColumn('name', 'Name');
+
+    $html = $grid->table();
+
+    $this->assertStringContainsString('class="datagrid_search"', $html);
+    $this->assertStringContainsString('value="alpha filter"', $html);
+  }
+
+  #[Test]
+  public function tableRendersFullscreenToggleInControls(): void
+  {
+    $grid = DataGrid::create('fullscreen-grid', 'Fullscreen Grid');
+    $grid->enableSearch();
+    $grid->addColumn('name', 'Name');
+
+    $html = $grid->table();
+
+    $this->assertStringContainsString('datagrid_fullscreen_toggle', $html);
+    $this->assertStringContainsString('data-action="toggle-fullscreen"', $html);
+    $this->assertStringContainsString('aria-expanded="false"', $html);
+    $this->assertStringContainsString('datagrid_fullscreen_icon_expand', $html);
+    $this->assertStringContainsString('datagrid_fullscreen_icon_collapse', $html);
+    $this->assertStringNotContainsString('style=', $html);
+  }
+
+  #[Test]
   public function enableSearchAcceptsCustomPlaceholder(): void
   {
     $grid = DataGrid::create('test', 'Test');
@@ -313,10 +345,25 @@ final class DataGridTest extends TestCase
   #[Test]
   public function tableRendersPaginationWhenEnabled(): void
   {
-    // Note: DataGrid.table() calls getTotal() and getPageSize()
-    // which are not in PagerInterface, so pagination rendering
-    // requires a concrete Pager instance (integration test territory)
-    $this->assertTrue(true, 'Pagination rendering tested via integration tests');
+    $rows = [];
+    for ($i = 1; $i <= 25; $i++) {
+      $rows[] = ['id' => (string) $i, 'name' => 'Row '.$i];
+    }
+
+    $grid = DataGrid::create('test', 'Test');
+    $grid->addColumn('name', 'Name');
+    $grid->setItemLabel('rows');
+
+    $pager = new ArrayPager($rows, 10);
+    $pager->setPage(2);
+
+    $html = $grid->table($pager);
+
+    $this->assertStringContainsString('datagrid_pagination_top', $html);
+    $this->assertStringContainsString('data-direction="prev"', $html);
+    $this->assertStringContainsString('data-direction="next"', $html);
+    $this->assertStringContainsString('Showing 11–20 of 25 rows', $html);
+    $this->assertStringContainsString('data-total-pages="3"', $html);
   }
 
   #[Test]
@@ -325,18 +372,37 @@ final class DataGridTest extends TestCase
     $grid = DataGrid::create('test', 'Test');
     $grid->addColumn('name', 'Name');
 
-    $pager = $this->createMockPager([], 5, false);
+    $html = $grid->table();
 
-    $html = $grid->table($pager);
-
-    $this->assertStringNotContainsString('datagrid_pagination', $html);
+    $this->assertStringNotContainsString('datagrid_pager', $html);
   }
 
   #[Test]
   public function tableShowsCorrectPaginationInfo(): void
   {
-    // Pagination rendering requires concrete Pager with getTotal/getPageSize
-    $this->assertTrue(true, 'Tested via integration suite');
+    $grid = DataGrid::create('test', 'Test');
+    $grid->addColumn('name', 'Name');
+    $grid->setItemLabel('sites');
+
+    $pager = $this->createMockPager([['id' => '1', 'name' => 'Alpha']], 1, false);
+
+    $html = $grid->table($pager);
+
+    $this->assertStringContainsString('Showing 1–1 of 1 sites', $html);
+    $this->assertStringNotContainsString('data-direction="prev"', $html);
+  }
+
+  #[Test]
+  public function tableIncludesVirtualScrollFlagWhenEnabled(): void
+  {
+    $grid = DataGrid::create('test', 'Test');
+    $grid->addColumn('name', 'Name');
+    $grid->enableVirtualScroll();
+
+    $html = $grid->table();
+
+    $this->assertStringContainsString('data-virtualize="1"', $html);
+    $this->assertStringNotContainsString('style=', $html);
   }
 
   #[Test]
@@ -435,6 +501,8 @@ final class DataGridTest extends TestCase
     $pager->method('hasNext')->willReturn(
       $hasPagination && $currentPage < max(1, (int) ceil($totalRecords / $pageSize))
     );
+    $pager->method('getTotal')->willReturn($totalRecords);
+    $pager->method('getPageSize')->willReturn($pageSize);
 
     return $pager;
   }

@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Diagnostics optionnels et Phantom Wing - [PayCal]';
-$pageLabel = 'Diagnostics optionnels et Phantom Wing';
+$pageTitle = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Diagnostics optionnels &amp; Phantom Wing</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       PayCal comprend une couche de diagnostics optionnelle que vous contrôlez. Voici exactement
       ce qu'elle collecte, ce qui reste sur votre appareil et comment elle est utilisée.
@@ -241,7 +242,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         <li>La télémétrie est entièrement supprimée sur toutes les pages d'authentification</li>
         <li>La limitation de débit et le repli automatique du client empêchent tout sur-signalement accidentel</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Phantom Wing est conçu pour que vous puissiez laisser tous les diagnostics désactivés
         indéfiniment. Les contrôles d'activation existent pour donner à vous et à l'équipe de
         support un langage commun lorsque quelque chose tourne mal — pas pour collecter des

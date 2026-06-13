@@ -12,11 +12,54 @@ CORS::renderContentType('application/javascript');
 Javascript::renderDocBlock();
 
 $user = User::current();
+$earningsI18nKeys = [
+  'GROSS', 'NET', 'DEDUCTIONS', 'EARNINGS_PIEGRAPHS_NO_VALUES', 'EARNINGS_LABEL',
+  'DATE', 'SITE', 'WAGE', 'HOURS', 'REGULAR_HOURS', 'OVERTIME_HOURS', 'LOA', 'TRAVEL',
+  'NOT_FOUND', 'EARNINGS_GRID_ROW_SINGULAR', 'EARNINGS_GRID_ROW_PLURAL', 'EARNINGS_GRID_STATUS_TEMPLATE',
+  'EARNINGS_TREND_NO_DATA_STATUS', 'EARNINGS_TREND_NO_DATA_DESC', 'EARNINGS_TREND_NO_NUMERIC_STATUS',
+  'EARNINGS_TREND_NO_NUMERIC_DESC', 'EARNINGS_TREND_UPDATED_STATUS', 'EARNINGS_TREND_UPDATED_DESC',
+  'EARNINGS_CHART_DATA_LOAD_FAILED', 'EARNINGS_TREND_LOAD_FAILED_STATUS',
+  'EARNINGS_TREND_DIRECTION_INCREASING', 'EARNINGS_TREND_DIRECTION_DECREASING', 'EARNINGS_TREND_DIRECTION_FLAT',
+  'EARNINGS_TREND_HOVER_TOOLTIP', 'EARNINGS_TREND_Y_AXIS_LABEL',
+  'EARNINGS_DAILY_LOAD_FAILED_PREFIX', 'EARNINGS_DAILY_NO_DATA_FOR_YEAR', 'EARNINGS_UNKNOWN_ERROR',
+  'EARNINGS_FORECAST_TITLE', 'EARNINGS_FORECAST_BADGE_ESTIMATE', 'EARNINGS_FORECAST_BADGE_NOT_CRA',
+  'EARNINGS_FORECAST_WORKSPACE_ARIA', 'EARNINGS_FORECAST_LOADING', 'EARNINGS_FORECAST_NEXT_PAYCHECK',
+  'EARNINGS_FORECAST_NEXT_30_DAYS', 'EARNINGS_FORECAST_YEAR_PROJECTION', 'EARNINGS_FORECAST_CARD_GROSS',
+  'EARNINGS_FORECAST_CARD_HOURS', 'EARNINGS_FORECAST_CARD_CONFIDENCE', 'EARNINGS_FORECAST_SCENARIO_CONSERVATIVE',
+  'EARNINGS_FORECAST_SCENARIO_NORMAL', 'EARNINGS_FORECAST_SCENARIO_OVERTIME', 'EARNINGS_FORECAST_SCENARIO_CUSTOM',
+  'EARNINGS_FORECAST_SCENARIOS_TITLE', 'EARNINGS_FORECAST_ASSUMPTIONS_TITLE', 'EARNINGS_FORECAST_ASSUMPTIONS_EMPTY',
+  'EARNINGS_FORECAST_ASSUMP_FIELD', 'EARNINGS_FORECAST_ASSUMP_VALUE', 'EARNINGS_FORECAST_ASSUMP_SOURCE',
+  'EARNINGS_FORECAST_VALUE_MISSING', 'EARNINGS_FORECAST_SOURCE_SAVED', 'EARNINGS_FORECAST_SOURCE_SCHEDULED',
+  'EARNINGS_FORECAST_SOURCE_TEMPORARY', 'EARNINGS_FORECAST_SOURCE_ESTIMATED', 'EARNINGS_FORECAST_SOURCE_MISSING',
+  'EARNINGS_FORECAST_CONFIDENCE_HIGH', 'EARNINGS_FORECAST_CONFIDENCE_MEDIUM', 'EARNINGS_FORECAST_CONFIDENCE_LOW',
+  'EARNINGS_FORECAST_TIMELINE_TITLE', 'EARNINGS_FORECAST_TIMELINE_SR_FMT', 'EARNINGS_FORECAST_CALC_TITLE',
+  'EARNINGS_FORECAST_RESET_PROFILE', 'EARNINGS_FORECAST_RESET_SCHEDULED', 'EARNINGS_FORECAST_CALC_WAGE',
+  'EARNINGS_FORECAST_CALC_REG_HRS', 'EARNINGS_FORECAST_CALC_OT_HRS', 'EARNINGS_FORECAST_CALC_LOA',
+  'EARNINGS_FORECAST_CALC_TRAVEL', 'EARNINGS_FORECAST_CALC_PROVINCE', 'EARNINGS_FORECAST_CALC_PAY_FREQ',
+  'EARNINGS_FORECAST_CALC_ANCHOR', 'EARNINGS_FORECAST_CALC_YTD_GROSS', 'EARNINGS_FORECAST_PAY_FREQ_WEEKLY',
+  'EARNINGS_FORECAST_PAY_FREQ_BIWEEKLY', 'EARNINGS_FORECAST_PAY_FREQ_SEMIMONTHLY', 'EARNINGS_FORECAST_PAY_FREQ_MONTHLY',
+  'EARNINGS_FORECAST_ASSUMP_WAGE', 'EARNINGS_FORECAST_ASSUMP_REG_HRS', 'EARNINGS_FORECAST_ASSUMP_OT_HRS',
+  'EARNINGS_FORECAST_ASSUMP_LOA', 'EARNINGS_FORECAST_ASSUMP_TRAVEL', 'EARNINGS_FORECAST_ASSUMP_PROVINCE',
+  'EARNINGS_FORECAST_ASSUMP_PAY_FREQ', 'EARNINGS_FORECAST_ASSUMP_ANCHOR', 'EARNINGS_FORECAST_ASSUMP_YTD_GROSS',
+  'EARNINGS_FORECAST_PREVIEW_FAILED', 'EARNINGS_FORECAST_SUMMARY_UPDATED_FMT', 'EARNINGS_FORECAST_DISCLAIMER',
+  'EARNINGS_FORECAST_NO_DATA', 'EARNINGS_FORECAST_LOAD_FAILED', 'EARNINGS_FORECAST_SETUP_NOTICE',
+];
+$earningsI18n = [];
+foreach ($earningsI18nKeys as $earningsI18nKey) {
+  $earningsI18n[$earningsI18nKey] = Strings::i18n($earningsI18nKey);
+}
 ?>import PC from '/js/';
 import PW from '/js/phantomwing/';
 import nacl from '/js/vendor/tweetnacl.js';
 import EarningsExport from '/js/earnings/earnings-export.js';
 import { fromBase64 as decodeBase64 } from '/js/core/binary-codec.js';
+import {
+  buildPieGraphDataset,
+  createPieGraphHelpers,
+  getPieGraphPalette,
+} from '/js/earnings/pie-graph-core.js';
+import { createEarningsFormatHelpers } from '/js/earnings/format.js';
+import { initForecastWorkspace } from '/js/earnings/forecast-calculator.js';
 
 // === Canonical Verification Payload Utilities ===
 // Fixed key order, no whitespace, locale-independent, v1
@@ -263,6 +306,8 @@ window.addEventListener('pagehide', clearEarningsTransientGlobals);
 window.addEventListener('beforeunload', clearEarningsTransientGlobals);
 
 document.addEventListener("DOMContentLoaded", () => {
+  Object.assign(PC.config, <?php echo json_encode($earningsI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
+  const earningsFormatHelpers = createEarningsFormatHelpers({ locale: PC.config.USER_LOCALE });
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -286,90 +331,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     return label;
   }
-
-  function initDelayedHoverHelp() {
-    const targets = Array.from(document.querySelectorAll('[data-hover-help]'));
-    if (targets.length === 0) {
-      return;
-    }
-
-    const tooltipEl = document.createElement('div');
-    tooltipEl.className = 'hover_help_tooltip';
-    tooltipEl.setAttribute('role', 'tooltip');
-    tooltipEl.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(tooltipEl);
-
-    let showTimer = null;
-    let activeTarget = null;
-
-    const clearShowTimer = () => {
-      if (showTimer !== null) {
-        window.clearTimeout(showTimer);
-        showTimer = null;
-      }
-    };
-
-    const hideTooltip = () => {
-      clearShowTimer();
-      activeTarget = null;
-      tooltipEl.classList.remove('is-visible');
-      tooltipEl.setAttribute('aria-hidden', 'true');
-    };
-
-    const positionTooltip = (targetEl) => {
-      if (!targetEl) {
-        return;
-      }
-
-      tooltipEl.style.bottom = '1.5rem';
-      tooltipEl.style.right = '1.5rem';
-      tooltipEl.style.top = 'auto';
-      tooltipEl.style.left = 'auto';
-    };
-
-    const showTooltip = (targetEl) => {
-      const helpText = (targetEl?.getAttribute('data-hover-help') || '').trim();
-      if (!helpText) {
-        return;
-      }
-
-      activeTarget = targetEl;
-      tooltipEl.textContent = helpText;
-      tooltipEl.classList.add('is-visible');
-      tooltipEl.setAttribute('aria-hidden', 'false');
-      positionTooltip(targetEl);
-    };
-
-    const scheduleShow = (targetEl) => {
-      clearShowTimer();
-      showTimer = window.setTimeout(() => {
-        showTimer = null;
-        showTooltip(targetEl);
-      }, 250);
-    };
-
-    targets.forEach((targetEl) => {
-      targetEl.addEventListener('mouseenter', () => scheduleShow(targetEl));
-      targetEl.addEventListener('mouseleave', hideTooltip);
-      targetEl.addEventListener('focus', () => scheduleShow(targetEl));
-      targetEl.addEventListener('blur', hideTooltip);
-      targetEl.addEventListener('mousedown', hideTooltip);
-    });
-
-    window.addEventListener('scroll', () => {
-      if (activeTarget && tooltipEl.classList.contains('is-visible')) {
-        positionTooltip(activeTarget);
-      }
-    }, true);
-
-    window.addEventListener('resize', () => {
-      if (activeTarget && tooltipEl.classList.contains('is-visible')) {
-        positionTooltip(activeTarget);
-      }
-    });
-  }
-
-  initDelayedHoverHelp();
 
   function buildDailyGridCell(content, colId) {
     const cell = document.createElement('div');
@@ -567,7 +528,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const minValue = Math.min(...safeValues);
     const maxValue = Math.max(...safeValues);
     const deltaValue = safeValues[safeValues.length - 1] - safeValues[0];
-    const direction = deltaValue > 0 ? 'increasing' : (deltaValue < 0 ? 'decreasing' : 'flat');
+    const direction = deltaValue > 0
+      ? getI18nLabel('EARNINGS_TREND_DIRECTION_INCREASING', 'increasing')
+      : (deltaValue < 0
+        ? getI18nLabel('EARNINGS_TREND_DIRECTION_DECREASING', 'decreasing')
+        : getI18nLabel('EARNINGS_TREND_DIRECTION_FLAT', 'flat'));
 
     statusNode.textContent = formatI18n(
       'EARNINGS_TREND_UPDATED_STATUS',
@@ -576,14 +541,14 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     descNode.textContent = formatI18n(
       'EARNINGS_TREND_UPDATED_DESC',
-      'Line chart showing gross earnings trend across {year}. Data spans {firstDate} to {lastDate} with {points} points. Values range from ${minValue} to ${maxValue} and overall trend is {direction}.',
+      'Line chart showing gross earnings trend across {year}. Data spans {firstDate} to {lastDate} with {points} points. Values range from {minValue} to {maxValue} and overall trend is {direction}.',
       {
         year,
         firstDate,
         lastDate,
         points: values.length,
-        minValue: minValue.toFixed(2),
-        maxValue: maxValue.toFixed(2),
+        minValue: earningsFormatHelpers.formatCurrency(minValue),
+        maxValue: earningsFormatHelpers.formatCurrency(maxValue),
         direction,
       }
     );
@@ -851,7 +816,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const probe = document.createElementNS(SVG_NS, "text");
     probe.setAttribute("font-size", "13");
-    probe.textContent = `$\${yMax} (100%)`;
+    probe.textContent = formatI18n(
+      'EARNINGS_TREND_Y_AXIS_LABEL',
+      '{amount} ({pct})',
+      { amount: earningsFormatHelpers.formatCurrency(yMax), pct: earningsFormatHelpers.formatPercent(100, 0) },
+    );
     linegraphSVG.appendChild(probe);
     let labelWidth = 0;
     try {
@@ -977,7 +946,11 @@ document.addEventListener("DOMContentLoaded", () => {
       t.setAttribute("font-size", "13");
       const textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#000';
       t.setAttribute("fill", textColor);
-      t.textContent = `\$${v} (${(p * 100).toFixed(0)}%)`;
+      t.textContent = formatI18n(
+        'EARNINGS_TREND_Y_AXIS_LABEL',
+        '{amount} ({pct})',
+        { amount: earningsFormatHelpers.formatCurrency(v), pct: earningsFormatHelpers.formatPercent(p * 100, 0) },
+      );
       linegraphSVG.appendChild(t);
     });
 
@@ -1090,11 +1063,14 @@ document.addEventListener("DOMContentLoaded", () => {
       dot.setAttribute("cy", y);
       setVisible(dot, true);
 
-      const dateStr = formatDateKeyShort(dateKeys[i]);
+      const dateStr = formatDateKeyShort(dateKeys[i], PC.config.USER_LOCALE);
       const amountValue = Number(amounts[i]);
       if (!Number.isFinite(amountValue)) return;
-      const valStr = amountValue.toFixed(2);
-      tipText.textContent = `${dateStr}: \$${valStr}`;
+      tipText.textContent = formatI18n(
+        'EARNINGS_TREND_HOVER_TOOLTIP',
+        '{date}: {amount}',
+        { date: dateStr, amount: earningsFormatHelpers.formatCurrency(amountValue) },
+      );
       const bbox = tipText.getBBox();
       tipRect.setAttribute("width", bbox.width + 8);
       tipRect.setAttribute("height", bbox.height + 6);
@@ -1193,193 +1169,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return normalized;
   }
 
-  function parseMoneyLike(value) {
-    const normalized = String(value ?? '0').replace(/[^0-9.-]/g, '');
-    const amount = Number(normalized);
-    return Number.isFinite(amount) ? amount : 0;
-  }
-
-  function monthLabelFromKey(monthKey) {
-    const [year, month] = String(monthKey).split('-');
-    const y = Number(year);
-    const m = Number(month);
-    if (!Number.isFinite(y) || !Number.isFinite(m) || m < 1 || m > 12) {
-      return String(monthKey);
-    }
-
-    return new Date(y, m - 1, 1).toLocaleDateString(PC.config.USER_LOCALE, {
-      month: 'long',
-      year: 'numeric',
-    });
-  }
-
-  function buildPieGraphDataset(dailyPayload) {
-    const ytd = { gross: 0, deductions: 0, net: 0 };
-    const monthly = {};
-
-    Object.entries(dailyPayload || {}).forEach(([dateKey, record]) => {
-      if (!isIsoDateKey(dateKey) || !record || typeof record !== 'object') {
-        return;
-      }
-
-      const gross = parseMoneyLike(record.gross);
-      const deductions = parseMoneyLike(record.deductions ?? record.tax);
-      const net = parseMoneyLike(record.net);
-      const monthKey = String(dateKey).slice(0, 7);
-
-      ytd.gross += gross;
-      ytd.deductions += deductions;
-      ytd.net += net;
-
-      if (!monthly[monthKey]) {
-        monthly[monthKey] = { gross: 0, deductions: 0, net: 0 };
-      }
-
-      monthly[monthKey].gross += gross;
-      monthly[monthKey].deductions += deductions;
-      monthly[monthKey].net += net;
-    });
-
-    return { ytd, monthly };
-  }
-
-  function pieSegmentsFromTotals(totals, palette) {
-    const colors = palette || {};
-    return [
-      { key: 'gross', label: 'Gross', value: Math.max(0, Number(totals?.gross || 0)), color: String(colors.gross || '#1e4778') },
-      { key: 'net', label: 'Net', value: Math.max(0, Number(totals?.net || 0)), color: String(colors.net || '#8bb7e6') },
-      { key: 'deductions', label: 'Deductions', value: Math.max(0, Number(totals?.deductions || 0)), color: String(colors.deductions || '#f2d2a6') },
-    ];
-  }
-
-  function getPieGraphPalette(panelEl) {
-    const colorSource = panelEl || document.documentElement;
-    const styles = getComputedStyle(colorSource);
-    const readVar = (varName, fallback) => {
-      const value = styles.getPropertyValue(varName).trim();
-      return value !== '' ? value : fallback;
-    };
-
-    return {
-      gross: readVar('--earnings-piegraphs-color-gross', '#1e4778'),
-      net: readVar('--earnings-piegraphs-color-net', '#8bb7e6'),
-      deductions: readVar('--earnings-piegraphs-color-deductions', '#f2d2a6'),
-    };
-  }
-
-  const pieAmountFormatter = new Intl.NumberFormat(PC.config.USER_LOCALE || undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+  const pieHelpers = createPieGraphHelpers({
+    locale: PC.config.USER_LOCALE,
+    grossLabel: getI18nLabel('GROSS', 'Gross'),
+    netLabel: getI18nLabel('NET', 'Net'),
+    deductionsLabel: getI18nLabel('DEDUCTIONS', 'Deductions'),
+    emptyLabel: getI18nLabel('EARNINGS_PIEGRAPHS_NO_VALUES', 'No values available.'),
+    escapeHtml,
   });
-
-  const piePercentFormatter = new Intl.NumberFormat(PC.config.USER_LOCALE || undefined, {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  });
-
-  function formatPieAmount(value) {
-    return `$${pieAmountFormatter.format(Number(value) || 0)}`;
-  }
-
-  function formatPiePercent(value) {
-    return `${piePercentFormatter.format(Number(value) || 0)}%`;
-  }
-
-  function renderPieSvg(svgEl, legendEl, totals, palette) {
-    if (!svgEl || !legendEl) {
-      return;
-    }
-
-    const segments = pieSegmentsFromTotals(totals, palette);
-    const total = segments.reduce((sum, seg) => sum + seg.value, 0);
-    svgEl.textContent = '';
-
-    if (!Number.isFinite(total) || total <= 0) {
-      window.Guardian.setHTML(legendEl, '<p class="earnings_piegraphs_empty">No values available.</p>');
-      return;
-    }
-
-    const cx = 120;
-    const cy = 120;
-    const r = 90;
-    const grossRatio = segments[0].value / total;
-    // Center gross on the left side; remaining segments flow clockwise.
-    let start = Math.PI - (grossRatio * Math.PI);
-    const parts = [];
-
-    segments.forEach((seg) => {
-      const ratio = seg.value / total;
-      const sweep = ratio * Math.PI * 2;
-      const end = start + sweep;
-
-      const x1 = cx + r * Math.cos(start);
-      const y1 = cy + r * Math.sin(start);
-      const x2 = cx + r * Math.cos(end);
-      const y2 = cy + r * Math.sin(end);
-      const largeArc = sweep > Math.PI ? 1 : 0;
-
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`);
-      path.setAttribute('fill', seg.color);
-      path.setAttribute('class', `earnings_piegraphs_slice earnings_piegraphs_slice_${seg.key}`);
-      path.dataset.segKey = seg.key;
-      const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-      title.textContent = `${seg.label}: ${formatPieAmount(seg.value)} (${formatPiePercent(ratio * 100)})`;
-      path.appendChild(title);
-      svgEl.appendChild(path);
-
-      parts.push({ ...seg, pct: ratio * 100 });
-      start = end;
-    });
-
-    const cutout = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    cutout.setAttribute('cx', String(cx));
-    cutout.setAttribute('cy', String(cy));
-    cutout.setAttribute('r', '46');
-    cutout.setAttribute('class', 'earnings_piegraphs_cutout');
-    cutout.setAttribute('fill', 'var(--surface, #111)');
-    svgEl.appendChild(cutout);
-
-    const totalText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    totalText.setAttribute('x', String(cx));
-    totalText.setAttribute('y', String(cy + 4));
-    totalText.setAttribute('text-anchor', 'middle');
-    totalText.setAttribute('class', 'earnings_piegraphs_total');
-    totalText.textContent = formatPieAmount(total);
-    svgEl.appendChild(totalText);
-
-    window.Guardian.setHTML(legendEl, parts.map((seg) => (
-      `<div class="earnings_piegraphs_legend_row" data-seg-key="${escapeHtml(seg.key)}">`
-      + `<span class="earnings_piegraphs_legend_dot earnings_piegraphs_legend_dot_${seg.key}"></span>`
-      + `<span class="earnings_piegraphs_legend_label">${escapeHtml(seg.label)}</span>`
-      + `<span class="earnings_piegraphs_legend_value">${formatPieAmount(seg.value)} (${formatPiePercent(seg.pct)})</span>`
-      + `</div>`
-    )).join(''));
-
-    const setHoveredSegment = (segKey) => {
-      svgEl.querySelectorAll('.earnings_piegraphs_slice').forEach((slice) => {
-        const active = segKey !== '' && slice.dataset.segKey === segKey;
-        slice.classList.toggle('is-hovered', active);
-      });
-
-      legendEl.querySelectorAll('.earnings_piegraphs_legend_row').forEach((row) => {
-        const active = segKey !== '' && row.dataset.segKey === segKey;
-        row.classList.toggle('is-hovered', active);
-      });
-    };
-
-    svgEl.querySelectorAll('.earnings_piegraphs_slice').forEach((slice) => {
-      const segKey = String(slice.dataset.segKey || '');
-      slice.addEventListener('mouseenter', () => setHoveredSegment(segKey));
-      slice.addEventListener('mouseleave', () => setHoveredSegment(''));
-    });
-
-    legendEl.querySelectorAll('.earnings_piegraphs_legend_row').forEach((row) => {
-      const segKey = String(row.dataset.segKey || '');
-      row.addEventListener('mouseenter', () => setHoveredSegment(segKey));
-      row.addEventListener('mouseleave', () => setHoveredSegment(''));
-    });
-  }
+  const { renderPieSvg, monthLabelFromKey } = pieHelpers;
 
   function renderPieGraphsForYear(year, dailyPayload) {
     const panel = PC.getElement(`earnings_piegraphs_panel_${year}`);
@@ -1399,12 +1197,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const dataset = buildPieGraphDataset(dailyPayload);
-    renderPieSvg(ytdSvg, ytdLegend, dataset.ytd, palette);
+    renderPieSvg(ytdSvg, ytdLegend, dataset.ytd, palette, window.Guardian);
 
     const months = Object.keys(dataset.monthly).sort();
     if (months.length === 0) {
       monthSelect.textContent = '';
-      renderPieSvg(monthSvg, monthLegend, { gross: 0, deductions: 0, net: 0 }, palette);
+      renderPieSvg(monthSvg, monthLegend, { gross: 0, deductions: 0, net: 0 }, palette, window.Guardian);
       return;
     }
 
@@ -1418,7 +1216,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const renderSelectedMonth = () => {
       const selectedKey = String(monthSelect.value || '');
-      renderPieSvg(monthSvg, monthLegend, dataset.monthly[selectedKey] || { gross: 0, deductions: 0, net: 0 }, palette);
+      renderPieSvg(
+        monthSvg,
+        monthLegend,
+        dataset.monthly[selectedKey] || { gross: 0, deductions: 0, net: 0 },
+        palette,
+        window.Guardian,
+      );
     };
 
     if (!monthSelect.dataset.piegraphsBound) {
@@ -1606,150 +1410,6 @@ document.addEventListener("DOMContentLoaded", () => {
     throw new Error(`Unsupported export format: ${format}`);
   }
 
-  /**
-   * Team earnings export: CSV/TXT from embedded data-team-rows JSON; PDF via print.
-   */
-  function buildTeamCsv(type, org, year, rows) {
-    const hdr = `"${org}","${type}","${year}"\n`;
-    if (type === 'members') {
-      const head = [
-        getI18nLabel('NAME', 'Name'),
-        getI18nLabel('EARNINGS_ROLE', 'Role'),
-        getI18nLabel('GROSS', 'Gross'),
-        getI18nLabel('EARNINGS_BREAKDOWN_REG_HRS', 'Reg Hours'),
-        getI18nLabel('EARNINGS_BREAKDOWN_OT_HRS', 'OT Hours'),
-        getI18nLabel('LOA', 'LOA'),
-      ].join(',') + '\n';
-      return hdr + head + rows.map(r =>
-        `"${r.name}","${r.role}",${r.gross.toFixed(2)},${r.reg_hours.toFixed(2)},${r.ot_hours.toFixed(2)},${r.loa.toFixed(2)}`
-      ).join('\n');
-    }
-    if (type === 'sites') {
-      const head = [
-        getI18nLabel('EARNINGS_SITE', 'Site'),
-        getI18nLabel('GROSS', 'Gross'),
-        getI18nLabel('MEMBERS', 'Members'),
-        getI18nLabel('EARNINGS_BREAKDOWN_REG_HRS', 'Reg Hours'),
-        getI18nLabel('EARNINGS_BREAKDOWN_OT_HRS', 'OT Hours'),
-      ].join(',') + '\n';
-      return hdr + head + rows.map(r =>
-        `"${r.site}",${r.gross.toFixed(2)},${r.members},${r.reg_hrs.toFixed(2)},${r.ot_hrs.toFixed(2)}`
-      ).join('\n');
-    }
-    if (type === 'risks') {
-      const head = [
-        getI18nLabel('EARNINGS_SEVERITY', 'Severity'),
-        getI18nLabel('EARNINGS_TITLE', 'Title'),
-        getI18nLabel('EARNINGS_CAUSE', 'Cause'),
-        getI18nLabel('EARNINGS_ACTION', 'Action'),
-      ].join(',') + '\n';
-      return hdr + head + rows.map(r =>
-        `"${r.severity}","${r.title}","${r.cause}","${r.action}"`
-      ).join('\n');
-    }
-    if (type === 'recommendations') {
-      const head = [
-        getI18nLabel('EARNINGS_PRIORITY', 'Priority'),
-        getI18nLabel('EARNINGS_ACTION', 'Action'),
-        getI18nLabel('EARNINGS_SOURCE', 'Source'),
-      ].join(',') + '\n';
-      return hdr + head + rows.map(r =>
-        `"${r.priority}","${r.text}","${r.source}"`
-      ).join('\n');
-    }
-    return '';
-  }
-
-  function buildTeamTxt(type, org, year, rows) {
-    const sep = '\u2500'.repeat(60);
-    const reportLabel = getI18nLabel('EARNINGS_REPORT', 'REPORT').toUpperCase();
-    const typeLabelByKey = {
-      members: getI18nLabel('EARNINGS_MEMBER_EARNINGS_RANKING', 'Members'),
-      sites: getI18nLabel('EARNINGS_SITE_PAYROLL_COST', 'Sites'),
-      risks: getI18nLabel('EARNINGS_RISK_REGISTER', 'Risks'),
-      recommendations: getI18nLabel('EARNINGS_RECOMMENDED_ACTIONS', 'Recommendations'),
-    };
-    const typeLabel = (typeLabelByKey[type] || type).toUpperCase();
-    const hdr = `${org.toUpperCase()} \u2014 ${typeLabel} ${reportLabel} \u2014 ${year}\n${sep}\n`;
-    if (type === 'members') {
-      const regLabel = getI18nLabel('EARNINGS_BREAKDOWN_REG_HRS', 'Reg Hrs').toLowerCase();
-      const otLabel = getI18nLabel('EARNINGS_BREAKDOWN_OT_HRS', 'OT Hrs').toLowerCase();
-      return hdr + rows.map((r, i) =>
-        `${String(i + 1).padStart(2)}. ${r.name.padEnd(28)} ${r.role.padEnd(12)} $${r.gross.toFixed(2).padStart(12)}  ${regLabel} ${r.reg_hours.toFixed(1)}h  ${otLabel} ${r.ot_hours.toFixed(1)}h`
-      ).join('\n');
-    }
-    if (type === 'sites') {
-      const membersLabel = getI18nLabel('MEMBERS', 'members').toLowerCase();
-      const regLabel = getI18nLabel('EARNINGS_BREAKDOWN_REG_HRS', 'Reg Hrs').toLowerCase();
-      const otLabel = getI18nLabel('EARNINGS_BREAKDOWN_OT_HRS', 'OT Hrs').toLowerCase();
-      return hdr + rows.map((r, i) =>
-        `${String(i + 1).padStart(2)}. ${r.site.padEnd(28)} $${r.gross.toFixed(2).padStart(12)}  ${r.members} ${membersLabel}  ${regLabel} ${r.reg_hrs.toFixed(1)}h  ${otLabel} ${r.ot_hrs.toFixed(1)}h`
-      ).join('\n');
-    }
-    if (type === 'risks') {
-      const actionPrefix = getI18nLabel('EARNINGS_ACTION', 'Action');
-      return hdr + rows.map((r, i) =>
-        `${String(i + 1).padStart(2)}. [${r.severity.toUpperCase()}] ${r.title}\n    ${r.cause}\n    \u2192 ${actionPrefix}: ${r.action}`
-      ).join('\n\n');
-    }
-    if (type === 'recommendations') {
-      const sourcePrefix = getI18nLabel('EARNINGS_SOURCE', 'Source');
-      return hdr + rows.map((r, i) =>
-        `${String(i + 1).padStart(2)}. [${r.priority.toUpperCase()}] ${r.text}\n    ${sourcePrefix}: ${r.source}`
-      ).join('\n\n');
-    }
-    return '';
-  }
-
-  function downloadTeamText(content, filename, mime) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([content], { type: mime }));
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 100);
-  }
-
-  function bindTeamExportButtons() {
-    document.addEventListener('click', (event) => {
-      const btn = event.target.closest('[data-team-export-format]');
-      if (!btn) { return; }
-      event.preventDefault();
-
-      const format = btn.dataset.teamExportFormat;
-      if (format === 'pdf') {
-        window.print();
-        return;
-      }
-
-      const figure = btn.closest('[data-team-type]');
-      if (!figure) { return; }
-      const type = figure.dataset.teamType || 'data';
-      const year = figure.dataset.teamYear || String(new Date().getFullYear());
-      const org  = figure.dataset.teamOrg || getI18nLabel('EARNINGS_TEAM_EARNINGS', 'Team Earnings');
-      const raw  = figure.dataset.teamRows;
-      if (!raw) { return; }
-
-      let rows;
-      try { rows = JSON.parse(raw); } catch { return; }
-
-      const origText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = '\u2026';
-      try {
-        const fname = `paycal-team-${type}-${year}`;
-        if (format === 'csv') {
-          downloadTeamText(buildTeamCsv(type, org, year, rows), `${fname}.csv`, 'text/csv;charset=utf-8');
-        } else if (format === 'txt') {
-          downloadTeamText(buildTeamTxt(type, org, year, rows), `${fname}.txt`, 'text/plain;charset=utf-8');
-        }
-      } finally {
-        btn.disabled = false;
-        btn.textContent = origText;
-      }
-    });
-  }
-
   function bindYearlyExportButtons() {
     // Use event delegation so dynamically-injected buttons (e.g. pay-period cards
     // loaded via loadSection/Guardian.setHTML) are covered without re-binding.
@@ -1857,22 +1517,23 @@ async function render_daily_year(year) {
       getI18nLabel('NET', 'Net')
     ];
 
+  const formatMoneyCell = (value) => earningsFormatHelpers.formatAmount(value, 2, 2);
   const rows = Object.entries(dailyData)
     .sort(([d1], [d2]) => parseDateKeyToLocalMs(d1) - parseDateKeyToLocalMs(d2))
     .map(([date, record], index) => ({
       id: `daily-${year}-${index}`,
       date: formatDateKeyForDisplay(date, PC.config.USER_LOCALE),
       site: (record.site_name || '').toString(),
-      wage: (record.wage || '0.00').toString(),
-      hours: (record.hours || '0.00').toString(),
-      regular: (record.regular_hours || '0.00').toString(),
-      overtime: (record.overtime_hours || '0.00').toString(),
-      travel: (record.travel_hours ?? record.travel ?? '0.00').toString(),
-      loa: (record.living_out_allowance ?? record.loa ?? '0.00').toString(),
-      gross: (record.gross || '0.00').toString(),
-      tax: (record.tax || record.deductions || '0.00').toString(),
-      deductions: (record.deductions || record.tax || '0.00').toString(),
-      net: (record.net || '0.00').toString(),
+      wage: formatMoneyCell(record.wage || 0),
+      hours: formatMoneyCell(record.hours || 0),
+      regular: formatMoneyCell(record.regular_hours || 0),
+      overtime: formatMoneyCell(record.overtime_hours || 0),
+      travel: formatMoneyCell(record.travel_hours ?? record.travel ?? 0),
+      loa: formatMoneyCell(record.living_out_allowance ?? record.loa ?? 0),
+      gross: formatMoneyCell(record.gross || 0),
+      tax: formatMoneyCell(record.tax || record.deductions || 0),
+      deductions: formatMoneyCell(record.deductions || record.tax || 0),
+      net: formatMoneyCell(record.net || 0),
     }));
 
   const gridElement = buildDailyGridElement(year, headers, rows, useLegacyPrivateColumns);
@@ -2012,6 +1673,27 @@ async function render_daily_year(year) {
     render_daily_year(year);
   }
 
+  let forecastWorkspaceCleanup = null;
+  const initForecastTab = () => {
+    const workspace = PC.getElement('forecast_workspace');
+    if (!(workspace instanceof HTMLElement) || workspace.dataset.forecastInitialized === '1') {
+      return;
+    }
+    if (forecastWorkspaceCleanup) {
+      forecastWorkspaceCleanup();
+    }
+    workspace.dataset.forecastInitialized = '1';
+    const loadingEl = workspace.querySelector('.forecast-workspace__loading');
+    if (loadingEl instanceof HTMLElement) {
+      loadingEl.classList.add('visually_hidden');
+    }
+    forecastWorkspaceCleanup = initForecastWorkspace(workspace, {
+      config: PC.config,
+      previewUrl: `${PC.config.pc_api}forecast/preview`,
+      locale: PC.config.USER_LOCALE,
+    });
+  };
+
   const activateEarningsTab = (tab) => {
     const target = PC.query("#" + tab.dataset.tabTarget);
     if (!target) {
@@ -2032,6 +1714,11 @@ async function render_daily_year(year) {
     tab.setAttribute('aria-selected', 'true');
     tab.setAttribute('tabindex', '0');
     target.classList.add("active");
+
+    if (tab.dataset.tabTarget === 'tab-forecast') {
+      initForecastTab();
+      return;
+    }
 
     // Extract year from tab target (tab-2026 -> 2026)
     const year = parseInt(tab.dataset.tabTarget.replace('tab-', ''), 10);
@@ -2129,6 +1816,11 @@ function initializeEarningsGraphs() {
     return;
   }
 
+  if (activeTab.dataset.tabTarget === 'tab-forecast') {
+    initForecastTab();
+    return;
+  }
+
   const year = parseInt(activeTab.dataset.tabTarget.replace('tab-', ''), 10);
   if (isNaN(year)) {
     return;
@@ -2142,115 +1834,5 @@ function initializeEarningsGraphs() {
   // Initialize graphs on page load
   initializeEarningsGraphs();
   bindYearlyExportButtons();
-  bindTeamExportButtons();
-
-  // Team Earnings: org selector auto-submit (replaces inline onchange handler)
-  const teamOrgSelect = document.getElementById('earnings_team_org');
-  if (teamOrgSelect instanceof HTMLSelectElement) {
-    teamOrgSelect.addEventListener('change', () => {
-      const form = teamOrgSelect.closest('form');
-      if (form instanceof HTMLFormElement) {
-        form.submit();
-      }
-    });
-  }
-
-  // Team Earnings: row click → member breakdown dialog
-  function formatMoney(v) {
-    return '$' + Number(v).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  function formatHours(v) {
-    return Number(v).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  function openMemberDialog(memberData) {
-    const body = document.getElementById('earnings_team_member_dialog_body');
-    const title = document.getElementById('earnings_team_member_dialog_title');
-    if (!(body instanceof HTMLElement) || !(title instanceof HTMLElement)) return;
-
-    title.textContent = formatI18n('EARNINGS_MEMBER_DIALOG_TITLE', '{name} - {year} Earnings', {
-      name: memberData.name,
-      year: memberData.year,
-    });
-
-    const months = Array.isArray(memberData.months) ? memberData.months : [];
-
-    let html = '<div class="earnings_breakdown_meta">';
-    html += '<span class="earnings_breakdown_role">' + escapeHtml(memberData.role.charAt(0).toUpperCase() + memberData.role.slice(1)) + '</span>';
-    html += '</div>';
-
-    if (months.length === 0) {
-      html += '<p class="earnings_breakdown_empty">' + escapeHtml(formatI18n('EARNINGS_BREAKDOWN_NO_ENTRIES_FOR_YEAR', 'No entries for {year}.', { year: String(memberData.year) })) + '</p>';
-    } else {
-      html += '<div class="earnings_breakdown_grid">';
-      html += '<div class="earnings_breakdown_header">';
-      html += '<span>' + escapeHtml(getI18nLabel('EARNINGS_MONTH', 'Month')) + '</span><span>' + escapeHtml(getI18nLabel('EARNINGS_BREAKDOWN_REG_HRS', 'Reg Hrs')) + '</span><span>' + escapeHtml(getI18nLabel('EARNINGS_BREAKDOWN_OT_HRS', 'OT Hrs')) + '</span><span>' + escapeHtml(getI18nLabel('GROSS', 'Gross')) + '</span>';
-      html += '</div>';
-
-      for (const m of months) {
-        html += '<div class="earnings_breakdown_row">';
-        html += '<span>' + escapeHtml(m.label) + '</span>';
-        html += '<span class="earnings_breakdown_num">' + formatHours(m.reg_hours) + '</span>';
-        html += '<span class="earnings_breakdown_num">' + formatHours(m.ot_hours)  + '</span>';
-        html += '<span class="earnings_breakdown_num">' + formatMoney(m.gross)     + '</span>';
-        html += '</div>';
-      }
-
-      html += '<div class="earnings_breakdown_totals">';
-      html += '<span>' + escapeHtml(getI18nLabel('EARNINGS_BREAKDOWN_TOTAL', 'Total')) + '</span>';
-      html += '<span class="earnings_breakdown_num">' + formatHours(memberData.reg_hours) + '</span>';
-      html += '<span class="earnings_breakdown_num">' + formatHours(memberData.ot_hours)  + '</span>';
-      html += '<span class="earnings_breakdown_num">' + formatMoney(memberData.gross)     + '</span>';
-      html += '</div>';
-
-      html += '</div>';
-    }
-
-    PC.setHTML(body, html);
-    PC.openModal('earnings_team_member_dialog');
-  }
-
-  function bindTeamMemberRows() {
-    const rows = document.querySelectorAll('.earnings_team_grid_row--clickable');
-    rows.forEach((row) => {
-      if (!(row instanceof HTMLElement)) return;
-      if (row.dataset.memberBound === '1') return;
-      row.dataset.memberBound = '1';
-
-      const activate = () => {
-        const raw = row.getAttribute('data-member');
-        if (!raw) return;
-        try {
-          const data = JSON.parse(raw);
-          openMemberDialog(data);
-        } catch { /* malformed JSON — skip */ }
-      };
-
-      row.addEventListener('click', activate);
-      row.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          activate();
-        }
-      });
-    });
-  }
-
-  bindTeamMemberRows();
-
-  // YTD charts: per-panel series toggles (scoped to .earnings_ytd_body)
-  document.querySelectorAll('.earnings_ytd_controls').forEach((controls) => {
-    if (!(controls instanceof HTMLElement)) return;
-    controls.addEventListener('change', (e) => {
-      const cb = e.target;
-      if (!(cb instanceof HTMLInputElement) || cb.type !== 'checkbox') return;
-      const series = cb.dataset.series;
-      const body = cb.closest('.earnings_ytd_body');
-      if (series && body instanceof HTMLElement) {
-        body.toggleAttribute('data-hide-' + series, !cb.checked);
-      }
-    });
-  });
 
 });

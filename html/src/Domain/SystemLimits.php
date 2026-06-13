@@ -35,91 +35,10 @@ class SystemLimits
   public const DEFAULT_PAGE_SIZE = SystemConfig::DEFAULT_PAGE_SIZE;
 
   /**
-   * @return array<string, array<string, mixed>>
-   */
-  public static function getSchema(): array
-  {
-    return SystemConfig::getSchema();
-  }
-
-  /**
-   * @return array<string, array<string, array<string, mixed>>>
-   */
-  public static function getByCategory(): array
-  {
-    return SystemConfig::getByCategory();
-  }
-
-  /**
-   * @return array<string, string>
-   */
-  public static function getCategoryLabels(): array
-  {
-    return SystemConfig::getCategoryLabels();
-  }
-
-  /**
-   * @return array<int, string>
-   */
-  public static function getKeys(): array
-  {
-    return SystemConfig::getKeys();
-  }
-
-  /**
    * Handles get operation.
    */
   public static function get(string $key): bool|float|int|string
   {
     return SystemConfig::get($key);
   }
-
-  /**
-   * @return array<string, bool|float|int|string>
-   */
-  public static function getAll(): array
-  {
-    return SystemConfig::getAll();
-  }
-
-  /**
-   * @return array<string, mixed>
-   */
-  public static function validate(string $key, mixed $value): array
-  {
-    return SystemConfig::validate($key, $value);
-  }
-
-  /**
-   * @return array<string, mixed>
-   */
-  public static function set(string $key, mixed $value): array
-  {
-    return SystemConfig::set($key, $value);
-  }
-
-  /**
-   * Handles remove operation.
-   */
-  public static function remove(string $key): bool
-  {
-    return SystemConfig::remove($key);
-  }
-
-  /**
-   * Handles resetAll operation.
-   */
-  public static function resetAll(): void
-  {
-    SystemConfig::resetAll();
-  }
-
-  /**
-   * Handles clearCache operation.
-   */
-  public static function clearCache(): void
-  {
-    SystemConfig::clearCache();
-  }
 }
-

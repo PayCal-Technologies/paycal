@@ -1,12 +1,48 @@
 <?php declare(strict_types=1);
 
-header('Content-Type: application/javascript');
+namespace PayCal\Domain;
+
+require_once __DIR__ . '/../../config.php';
+
+CORS::handleORIGIN();
+CORS::renderContentType('application/javascript');
+
+$authI18nKeys = [
+  'AUTH_SIGNIN_PASSKEY_STATUS',
+  'AUTH_REGISTER_PASSKEY_STATUS',
+  'AUTH_JS_WEBAUTHN_UNSUPPORTED',
+  'AUTH_JS_REGISTER_UNSUPPORTED',
+  'AUTH_JS_REGISTER_UNSUPPORTED_HELP',
+  'AUTH_JS_SIGNIN_RECOVERY_CODE',
+  'AUTH_JS_CONFIRM_DEVICE',
+  'AUTH_JS_SUCCESS_REDIRECTING',
+  'AUTH_JS_RECOVERY_START_FAILED',
+  'AUTH_JS_RECOVERY_SEND_FAILED',
+  'AUTH_JS_REGISTER_CHECK_EMAIL',
+  'AUTH_JS_REGISTER_FAILED',
+  'AUTH_JS_EMAIL_ALREADY_REGISTERED',
+  'AUTH_JS_INVALID_INVITE_CODE',
+  'AUTH_JS_ENTER_FULL_NAME',
+  'AUTH_JS_ENTER_VALID_EMAIL',
+  'AUTH_JS_EMAIL_REQUIRED',
+  'AUTH_JS_NO_ACCOUNT',
+  'AUTH_JS_SIGNIN_FAILED',
+  'AUTH_JS_REQUEST_TIMEOUT',
+  'AUTH_JS_NETWORK_ERROR',
+];
+$authI18n = [];
+foreach ($authI18nKeys as $authI18nKey) {
+  $authI18n[$authI18nKey] = Strings::i18n($authI18nKey);
+}
+
 ?>
 import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '/js/core/binary-codec.js';
 
 // Passkey-only auth helpers for /auth
 
-const WEB_AUTHN_UNSUPPORTED_MESSAGE = 'This browser cannot use passkeys. Use a WebAuthn-capable browser on a secure connection (HTTPS).';
+const AUTH_T = <?php echo json_encode($authI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+const WEB_AUTHN_UNSUPPORTED_MESSAGE = AUTH_T.AUTH_JS_WEBAUTHN_UNSUPPORTED;
 const WEB_AUTHN_HELP_URL = '/help/webauthn-security.php';
 const isWebAuthnCapableBrowser = () => {
   const hasPublicKeyCredential = typeof window.PublicKeyCredential !== 'undefined';
@@ -17,7 +53,7 @@ const isWebAuthnCapableBrowser = () => {
 };
 
 const passkeyStatusEl = document.getElementById('signin-passkey-status');
-const DEFAULT_SIGNIN_STATUS = 'Use a passkey on this device, or sign in from another device.';
+const DEFAULT_SIGNIN_STATUS = AUTH_T.AUTH_SIGNIN_PASSKEY_STATUS;
 const animateStatusEl = (el) => {
   if (!el) return;
   el.classList.remove('status-drop-in');
@@ -34,7 +70,7 @@ const setPasskeyStatus = (msg) => {
 };
 
 const registerStatusEl = document.getElementById('register-passkey-status');
-const DEFAULT_REGISTER_STATUS = 'You\'ll create a passkey to secure your account.';
+const DEFAULT_REGISTER_STATUS = AUTH_T.AUTH_REGISTER_PASSKEY_STATUS;
 const setRegisterStatus = (msg) => {
   if (registerStatusEl) {
     registerStatusEl.textContent = msg;
@@ -46,8 +82,8 @@ const authBannerEl = document.getElementById('auth-feedback-banner');
 let authBannerTimer = null;
 let recoveryStartInFlight = false;
 const RECOVERY_PREFILL_SESSION_KEY = 'paycal.recovery.prefill';
-const registerUnsupportedWarning = 'This browser cannot create a passkey. Use a modern WebAuthn browser on HTTPS to create your account.';
-const registerUnsupportedHelpLabel = 'Why passkeys are required and how your encrypted data is protected';
+const registerUnsupportedWarning = AUTH_T.AUTH_JS_REGISTER_UNSUPPORTED;
+const registerUnsupportedHelpLabel = AUTH_T.AUTH_JS_REGISTER_UNSUPPORTED_HELP;
 
 const hideAuthBanner = () => {
   if (!authBannerEl) return;
@@ -129,7 +165,7 @@ const showRecoveryCodeComposer = (prefillEmail = '') => {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'auth-feedback-banner-btn';
-  button.textContent = 'Send recovery code';
+  button.textContent = AUTH_T.AUTH_JS_SIGNIN_RECOVERY_CODE;
 
   button.addEventListener('click', async () => {
     const email = String(input.value || '').trim();
@@ -185,18 +221,18 @@ const applyRegisterWebAuthnWarningState = (showBanner = false) => {
 
 const signupFriendlyMessage = (apiMessage) => {
   const message = String(apiMessage || '').trim();
-  if (message === '') return 'Registration failed. Try again.';
+  if (message === '') return AUTH_T.AUTH_JS_REGISTER_FAILED;
   if (/email is already registered/i.test(message)) {
-    return 'This email is already registered. Sign in instead.';
+    return AUTH_T.AUTH_JS_EMAIL_ALREADY_REGISTERED;
   }
   if (/invalid invite code/i.test(message)) {
-    return 'Invite code is invalid. Please check it and try again.';
+    return AUTH_T.AUTH_JS_INVALID_INVITE_CODE;
   }
   if (/full name is required/i.test(message)) {
-    return 'Please enter your full name.';
+    return AUTH_T.AUTH_JS_ENTER_FULL_NAME;
   }
   if (/valid email is required/i.test(message)) {
-    return 'Please enter a valid email address.';
+    return AUTH_T.AUTH_JS_ENTER_VALID_EMAIL;
   }
   return message;
 };
@@ -225,15 +261,15 @@ const suggestedDeviceNameFromEmail = (emailRaw) => {
 const signinFriendlyMessage = (apiMessage, statusCode) => {
   const message = String(apiMessage || '').trim();
   if (/email is required/i.test(message)) {
-    return 'Email is required.';
+    return AUTH_T.AUTH_JS_EMAIL_REQUIRED;
   }
   if (statusCode === 401 || /authentication failed/i.test(message)) {
-    return 'No account found. Create an account instead.';
+    return AUTH_T.AUTH_JS_NO_ACCOUNT;
   }
   if (message !== '') {
     return message;
   }
-  return 'Sign-in failed. Try again.';
+  return AUTH_T.AUTH_JS_SIGNIN_FAILED;
 };
 
 const parseJsonOrNull = async (response) => {
@@ -257,9 +293,9 @@ const fetchJsonWithTimeout = async (url, options, timeoutMs = 15000) => {
     return { response, payload };
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error('Request timed out. Please try again.');
+      throw new Error(AUTH_T.AUTH_JS_REQUEST_TIMEOUT);
     }
-    throw new Error('Network issue. Please try again.');
+    throw new Error(AUTH_T.AUTH_JS_NETWORK_ERROR);
   } finally {
     window.clearTimeout(timerId);
   }
@@ -337,8 +373,8 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
 
     setPasskeyStatus(
       preferPhoneFlow
-        ? 'Confirm on your device…'
-        : 'Confirm on your device…'
+        ? AUTH_T.AUTH_JS_CONFIRM_DEVICE
+        : AUTH_T.AUTH_JS_CONFIRM_DEVICE
     );
     const assertion = await navigator.credentials.get({ publicKey: options, mediation: 'optional' });
     if (!assertion) {
@@ -398,13 +434,13 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
       throw new Error(finishPayload.message || 'Passkey login failed.');
     }
 
-    setPasskeyStatus('Success. Redirecting…');
+    setPasskeyStatus(AUTH_T.AUTH_JS_SUCCESS_REDIRECTING);
     hideAuthBanner();
     window.location.href = preferPhoneFlow
       ? '/settings/?passkey_onboarding=1#panel-passkeys'
       : '/';
   } catch (error) {
-    const msg = error?.message || 'Sign-in failed. Try again.';
+    const msg = error?.message || AUTH_T.AUTH_JS_SIGNIN_FAILED;
     
     // Send recovery code and redirect to recovery page when passkey cannot be used.
     if (error?.isPasskeyRecoverable) {
@@ -474,10 +510,10 @@ const requestRecoveryCodeAndRedirect = async (email, options = {}) => {
         window.location.href = recoveryUrlWithLanguage();
       }, source === 'auto' ? 300 : 500);
     } else {
-      throw new Error('Unable to start account recovery.');
+      throw new Error(AUTH_T.AUTH_JS_RECOVERY_START_FAILED);
     }
   } catch (error) {
-    const msg = error?.message || 'Unable to send recovery code. Try again.';
+    const msg = error?.message || AUTH_T.AUTH_JS_RECOVERY_SEND_FAILED;
     showAuthBanner(msg, 'error', { autoHideMs: 0 });
     showRecoveryCodeComposer(String(email || '').trim());
     setPasskeyStatus('Recovery code could not be sent. Try again.');
@@ -611,7 +647,7 @@ if (registerButton) {
         delete options.authenticatorSelection.authenticatorAttachment;
       }
 
-      setRegisterStatus('Confirm on your device…');
+      setRegisterStatus(AUTH_T.AUTH_JS_CONFIRM_DEVICE);
       const credential = await navigator.credentials.create({ publicKey: options });
       if (!credential) {
         throw new Error('Registration cancelled.');
@@ -642,9 +678,9 @@ if (registerButton) {
 
       const emailSent = finishPayload.verification_email_sent === true;
       if (emailSent) {
-        setRegisterStatus('Success. Check your email to verify your account.');
+        setRegisterStatus(AUTH_T.AUTH_JS_REGISTER_CHECK_EMAIL);
       } else {
-        setRegisterStatus('Success. Check your email to verify your account.');
+        setRegisterStatus(AUTH_T.AUTH_JS_REGISTER_CHECK_EMAIL);
       }
 
       hideAuthBanner();

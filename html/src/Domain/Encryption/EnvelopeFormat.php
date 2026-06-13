@@ -124,47 +124,4 @@ class EnvelopeFormat
     /** @var array{version: int, nonce: string, ciphertext: string, aad: string|null} */
     return $envelope;
   }
-
-  /**
-   * @param array<string, mixed> $envelope
-   */
-  public static function getVersion(array $envelope): int
-  {
-    $version = $envelope['version'] ?? 0;
-
-    return is_numeric($version) ? (int) $version : 0;
-  }
-
-  /**
-   * @param array<string, mixed> $envelope
-   */
-  public static function getNonce(array $envelope): string
-  {
-    $nonce = $envelope['nonce'] ?? '';
-
-    return is_scalar($nonce) ? (string) $nonce : '';
-  }
-
-  /**
-   * @param array<string, mixed> $envelope
-   */
-  public static function getCiphertext(array $envelope): string
-  {
-    $ciphertext = $envelope['ciphertext'] ?? '';
-
-    return is_scalar($ciphertext) ? (string) $ciphertext : '';
-  }
-
-  /**
-   * @param array<string, mixed> $envelope
-   */
-  public static function getAAD(array $envelope): ?string
-  {
-    $aad = $envelope['aad'] ?? null;
-    if ($aad === null) {
-      return null;
-    }
-
-    return is_scalar($aad) ? (string) $aad : null;
-  }
 }

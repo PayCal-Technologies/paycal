@@ -5,18 +5,19 @@ use PayCal\Domain\AdminSurface;
 use PayCal\Domain\Config\Environment;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Render;
+use PayCal\Domain\Strings;
 
 require_once __DIR__ . '/../config.php';
 
 $currentPage = 'PAGE_ADMIN';
-$pageTitle = 'Language Editor - [PayCal]';
+$pageTitle = Strings::i18n('ADMIN_LANGUAGE_EDITOR') . ' - [PayCal]';
 $message = '&nbsp;';
 
 
 Authentication::redirectHomeIfUnauthenticated();
 AdminSurface::redirectHomeIfPageUnavailable('/admin/languages/');
 
-$pageLabel = 'Language Editor';
+$pageLabel = Strings::i18n('ADMIN_LANGUAGE_EDITOR');
 $pageLanguage = USER_LANGUAGE;
 
 $supportedLanguages = ['en', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'hi', 'tl', 'tr'];

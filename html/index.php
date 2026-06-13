@@ -67,36 +67,36 @@ if (function_exists('calendar_viewable_members_for_actor') === false) {
 			return $viewable;
 		}
 
-		foreach (Database::smembers(Keys::ORGANIZATION_USER . ':' . $actorUUID) as $orgIdRaw) {
+		foreach (Database::smembers(Keys::BUSINESS_USER . ':' . $actorUUID) as $orgIdRaw) {
 			$orgId = calendar_scalar_string($orgIdRaw);
 			if ($orgId === '') {
 				continue;
 			}
 
-			$org = Database::hgetall(Keys::ORGANIZATION . ':' . $orgId);
+			$org = Database::hgetall(Keys::BUSINESS . ':' . $orgId);
 			if (empty($org)) {
 				continue;
 			}
 
 			$ownerUUID = calendar_scalar_string($org['owner_uuid'] ?? '');
-			$actorRelationship = Database::hgetall(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $actorUUID);
+			$actorRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $actorUUID);
 			$actorStatus = calendar_scalar_string($actorRelationship['status'] ?? '');
 			$actorRole = strtolower(calendar_scalar_string($actorRelationship['role'] ?? ''));
 			$isOwner = $ownerUUID !== '' && $ownerUUID === $actorUUID;
-					 $isManager = $actorStatus === OrganizationDiscoveryService::MEMBERSHIP_STATE_ACTIVE && $actorRole === 'coordinator';
+					 $isManager = $actorStatus === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE && $actorRole === 'coordinator';
 					 if (!$isOwner && !$isManager) {
 				continue;
 			}
 
-			foreach (Database::smembers(Keys::ORGANIZATION_MEMBERS . ':' . $orgId) as $memberUUIDRaw) {
+			foreach (Database::smembers(Keys::BUSINESS_MEMBERS . ':' . $orgId) as $memberUUIDRaw) {
 				$memberUUID = calendar_scalar_string($memberUUIDRaw);
 				if ($memberUUID === '') {
 					continue;
 				}
 
-				$memberRelationship = Database::hgetall(Keys::ORGANIZATION_RELATIONSHIP . ':' . $orgId . ':' . $memberUUID);
+				$memberRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $memberUUID);
 				$memberStatus = calendar_scalar_string($memberRelationship['status'] ?? '');
-				if ($memberStatus !== OrganizationDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
+				if ($memberStatus !== BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
 					continue;
 				}
 
@@ -178,11 +178,13 @@ if (null !== $pathMonthParam) {
 
 // Unknown rewritten paths should be hard 404s, not calendar/auth responses.
 if (!in_array($normalizedRequestPath, $allowedRequestPaths, true)) {
+	$notFoundPageLanguageRaw = defined('USER_LANGUAGE') ? (string) USER_LANGUAGE : Language::DEFAULT;
+	$notFoundPageLanguage = htmlspecialchars(str_replace('_', '-', $notFoundPageLanguageRaw), ENT_QUOTES, 'UTF-8');
 	http_response_code(404);
 	header('Content-Type: text/html; charset=UTF-8');
 	header('X-Robots-Tag: noindex, nofollow');
 	Security::sendCoreSecurityHeaders();
-	echo '<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars((string) html_index_i18n('NOT_FOUND_404_TITLE'), ENT_QUOTES, 'UTF-8') . '</title></head><body><main><h1>' . htmlspecialchars((string) html_index_i18n('NOT_FOUND_404_TITLE'), ENT_QUOTES, 'UTF-8') . '</h1><p>' . htmlspecialchars((string) html_index_i18n('NOT_FOUND_404_BODY'), ENT_QUOTES, 'UTF-8') . '</p></main></body></html>';
+	echo '<!doctype html><html lang="' . $notFoundPageLanguage . '"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars((string) html_index_i18n('NOT_FOUND_404_TITLE'), ENT_QUOTES, 'UTF-8') . '</title></head><body><main><h1>' . htmlspecialchars((string) html_index_i18n('NOT_FOUND_404_TITLE'), ENT_QUOTES, 'UTF-8') . '</h1><p>' . htmlspecialchars((string) html_index_i18n('NOT_FOUND_404_BODY'), ENT_QUOTES, 'UTF-8') . '</p></main></body></html>';
 	exit;
 }
 
@@ -488,8 +490,11 @@ $yearPickerMarkup = '<label class="date_picker_year_label visually_hidden" for="
 	. '<datalist id="cal_year_options">' . $yearOptions . '</datalist>';
 
 $monthButtons = [];
-$userLocale = strtolower((string) ($currentUser->language ?? 'en')) . '_' . strtoupper((string) ($currentUser->language ?? 'en'));
-$monthFormatter = new \IntlDateFormatter($userLocale, \IntlDateFormatter::SHORT, \IntlDateFormatter::NONE);
+$monthPickerLocale = Language::resolveDateLocale(
+	trim((string) ($currentUser->locale ?? '')),
+	(string) ($currentUser->language ?? Language::DEFAULT),
+);
+$monthFormatter = new \IntlDateFormatter($monthPickerLocale, \IntlDateFormatter::SHORT, \IntlDateFormatter::NONE);
 $monthFormatter->setPattern('MMM');
 for ($monthValue = 1; $monthValue <= 12; ++$monthValue) {
 	$monthPretty = (string) $monthFormatter->format((new \DateTimeImmutable(sprintf('2000-%02d-01', $monthValue)))->getTimestamp());
@@ -523,7 +528,7 @@ $datePickerDialog = Render::template('calendar-date-picker-dialog', [
 	'__VIEW_LOWER__' => html_index_i18n('VIEW_LOWER'),
 ]);
 
-$calendarMonthContext = (new \DateTimeImmutable(sprintf('%04d-%02d-01', (int) $yearParam, (int) $monthNumberParam)))->format('F Y');
+$calendarMonthContext = Strings::formatLocalizedMonthYear((int) $yearParam, (int) $monthNumberParam);
 
 $calendarControlsTrailingHtml = '';
 if (count($viewableMembers) > 1) {
@@ -603,7 +608,7 @@ $grid = new DataGrid([
 
 $message = '&nbsp;';
 $pageTitle = (string) html_index_i18n('CALENDAR') . ' - [PayCal]';
-$pageLabel = 'CALENDAR';
+$pageLabel = html_index_i18n('CALENDAR');
 $pageLanguage = User::current()->language ?? 'en';
 $isEmailVerified = User::current()->email_verified ?? false;
 
@@ -629,7 +634,7 @@ require_once Environment::appHome().'html/header.php';
 
 <?php echo $datePickerDialog; ?>
 
-<div id="calendar_day_context_menu" class="hidden" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_DAY_MENU_ARIA'), ENT_QUOTES, 'UTF-8'); ?>" tabindex="-1">
+<div id="calendar_day_context_menu" class="hidden" role="menu" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_DAY_MENU_ARIA'), ENT_QUOTES, 'UTF-8'); ?>" tabindex="-1">
 	<div id="calendar_day_context_menu_head" class="centered" aria-hidden="true"></div>
 	<svg class="visually_hidden" aria-hidden="true" focusable="false" width="0" height="0">
 		<defs>
@@ -643,11 +648,11 @@ require_once Environment::appHome().'html/header.php';
 			</symbol>
 		</defs>
 	</svg>
-	<ul role="menu" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_DAY_ACTIONS_ARIA'), ENT_QUOTES, 'UTF-8'); ?>">
-		<li tabindex="-1" data-action="copy" role="menuitem"><span><?php echo html_index_i18n('COPY'); ?></span><kbd class="calendar_shortcut" data-shortcut-modifier="primary" data-shortcut-key="C"><span class="calendar_shortcut_mod" aria-hidden="true"><svg class="svg-icon calendar_shortcut_icon calendar_shortcut_icon_mac" focusable="false"><use href="#mod-mac"></use></svg><svg class="svg-icon calendar_shortcut_icon calendar_shortcut_icon_win" focusable="false"><use href="#mod-win"></use></svg></span><span class="calendar_shortcut_sep" aria-hidden="true">+</span><span class="calendar_shortcut_key">C</span></kbd></li>
-		<li tabindex="-1" data-action="paste" role="menuitem"><span><?php echo html_index_i18n('PASTE'); ?></span><kbd class="calendar_shortcut" data-shortcut-modifier="primary" data-shortcut-key="V"><span class="calendar_shortcut_mod" aria-hidden="true"><svg class="svg-icon calendar_shortcut_icon calendar_shortcut_icon_mac" focusable="false"><use href="#mod-mac"></use></svg><svg class="svg-icon calendar_shortcut_icon calendar_shortcut_icon_win" focusable="false"><use href="#mod-win"></use></svg></span><span class="calendar_shortcut_sep" aria-hidden="true">+</span><span class="calendar_shortcut_key">V</span></kbd></li>
-		<li tabindex="-1" data-action="open" role="menuitem"><span><?php echo html_index_i18n('OPEN'); ?></span><kbd class="calendar_shortcut" data-shortcut-key="Enter" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('ENTER_KEY'), ENT_QUOTES, 'UTF-8'); ?>"><span class="calendar_shortcut_key" aria-hidden="true">↵</span></kbd></li>
-		<li tabindex="-1" data-action="delete" role="menuitem"><span><?php echo html_index_i18n('DELETE'); ?></span><kbd class="calendar_shortcut" data-shortcut-key="Delete"><span class="calendar_shortcut_key"><?php echo html_index_i18n('DELETE_KEY'); ?></span></kbd></li>
+	<ul role="none" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_DAY_ACTIONS_ARIA'), ENT_QUOTES, 'UTF-8'); ?>">
+		<li role="none"><button type="button" tabindex="-1" data-action="copy" role="menuitem"><span><?php echo html_index_i18n('COPY'); ?></span><kbd class="calendar_shortcut" data-shortcut-modifier="primary" data-shortcut-key="C"><span class="calendar_shortcut_mod" aria-hidden="true"><svg class="svg-icon calendar_shortcut_icon calendar_shortcut_icon_mac" focusable="false"><use href="#mod-mac"></use></svg><svg class="svg-icon calendar_shortcut_icon calendar_shortcut_icon_win" focusable="false"><use href="#mod-win"></use></svg></span><span class="calendar_shortcut_sep" aria-hidden="true">+</span><span class="calendar_shortcut_key">C</span></kbd></button></li>
+		<li role="none"><button type="button" tabindex="-1" data-action="paste" role="menuitem"><span><?php echo html_index_i18n('PASTE'); ?></span><kbd class="calendar_shortcut" data-shortcut-modifier="primary" data-shortcut-key="V"><span class="calendar_shortcut_mod" aria-hidden="true"><svg class="svg-icon calendar_shortcut_icon calendar_shortcut_icon_mac" focusable="false"><use href="#mod-mac"></use></svg><svg class="svg-icon calendar_shortcut_icon calendar_shortcut_icon_win" focusable="false"><use href="#mod-win"></use></svg></span><span class="calendar_shortcut_sep" aria-hidden="true">+</span><span class="calendar_shortcut_key">V</span></kbd></button></li>
+		<li role="none"><button type="button" tabindex="-1" data-action="open" role="menuitem"><span><?php echo html_index_i18n('OPEN'); ?></span><kbd class="calendar_shortcut" data-shortcut-key="Enter" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('ENTER_KEY'), ENT_QUOTES, 'UTF-8'); ?>"><span class="calendar_shortcut_key" aria-hidden="true">↵</span></kbd></button></li>
+		<li role="none"><button type="button" tabindex="-1" data-action="delete" role="menuitem"><span><?php echo html_index_i18n('DELETE'); ?></span><kbd class="calendar_shortcut" data-shortcut-key="Delete"><span class="calendar_shortcut_key"><?php echo html_index_i18n('DELETE_KEY'); ?></span></kbd></button></li>
 	</ul>
 </div>
 
@@ -684,6 +689,59 @@ if ($cacheVersion === '' || $cacheVersion === 'unknown') {
 }
 $cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
 $cspNonce = (is_string($cspNonceRaw) && $cspNonceRaw !== '') ? $cspNonceRaw : User::nonce();
+
+$calendarPageI18nKeys = [
+	'CALENDAR_MODAL_ADD_ENTRY',
+	'CALENDAR_MODAL_DESC',
+	'CALENDAR_MODAL_EMPTY',
+	'CALENDAR_MODAL_SELECT_SITE',
+	'DELETE',
+	'SAVE',
+	'CLOSE',
+	'I_WORK_DETAILS',
+	'VIEW',
+	'DATE_PICKER',
+	'GROSS',
+	'DEDUCTIONS',
+	'NET',
+	'CALENDAR_DAYS',
+	'CALENDAR_DAY_SINGULAR',
+	'CALENDAR_LOCKED_UNVERIFIED',
+	'CALENDAR_LOCKED_CANNOT_EDIT',
+	'CALENDAR_LOCKED_CANNOT_EDIT_GRACE',
+	'CALENDAR_UNLOCK_REQUIRED_EDIT',
+	'CALENDAR_WEB_AUTHN_UNSUPPORTED',
+	'CALENDAR_EMAIL_VERIFICATION_REQUIRED',
+	'CALENDAR_UNLOCK_REQUIRED_SAVE',
+	'CALENDAR_ENCRYPTION_REQUIRED',
+	'CALENDAR_WORK_ENTRY_LABEL',
+	'CALENDAR_ENCRYPTED_DETAILS_UNAVAILABLE',
+	'CALENDAR_NO_ENTRIES_TO_COPY_ON',
+	'CALENDAR_COPIED_ENTRIES_FROM',
+	'CALENDAR_CLIPBOARD_EMPTY_FOR',
+	'CALENDAR_PASTING_TO',
+	'CALENDAR_PASTED_ENTRIES_TO',
+	'CALENDAR_PASTE_FAILED_FOR',
+	'CALENDAR_DELETING_FOR',
+	'CALENDAR_ENTRIES_DELETED_FOR',
+	'CALENDAR_DELETE_FAILED_FOR',
+	'CALENDAR_UNKNOWN_ERROR',
+	'CALENDAR_MONTH_UPDATED_TO',
+	'CALENDAR_SAVING_ELLIPSIS',
+	'CALENDAR_SAVING_ENTRIES_FOR',
+	'CALENDAR_SAVED_ENTRIES_FOR',
+	'CALENDAR_SAVE_FAILED_FOR',
+	'CALENDAR_SAVE_FAILED_SHORT',
+	'DATAGRID_PREVIOUS_MONTH_ARIA',
+	'DATAGRID_NEXT_MONTH_ARIA',
+];
+$calendarPageI18n = [];
+foreach ($calendarPageI18nKeys as $calendarPageI18nKey) {
+	$calendarPageI18n[$calendarPageI18nKey] = html_index_i18n($calendarPageI18nKey);
+}
+echo '    <script nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '">window.__CALENDAR_I18N__ = '
+	. json_encode($calendarPageI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)
+	. ';</script>' . PHP_EOL;
 
 echo '    <script type="module" src="' . Environment::appURL('js/core/binary-codec.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"></script>' . PHP_EOL;
 echo '    <script type="module" src="' . Environment::appURL('js/core/set-utils.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"></script>' . PHP_EOL;

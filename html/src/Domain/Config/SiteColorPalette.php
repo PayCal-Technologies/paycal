@@ -128,14 +128,6 @@ final class SiteColorPalette
     }
 
     /**
-     * Returns true if the given hex string is in the palette.
-     */
-    public static function isValid(string $hex): bool
-    {
-        return in_array(strtoupper($hex), array_map('strtoupper', self::hexValues()), true);
-    }
-
-    /**
      * Returns the label for a given hex, or null if not found.
      */
     public static function labelFor(string $hex): ?string

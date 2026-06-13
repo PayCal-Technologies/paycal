@@ -28,14 +28,15 @@ use PayCal\Domain\Database;
 use PayCal\Domain\Enums\AuthLevel;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Render;
+use PayCal\Domain\Strings;
 use PayCal\Domain\User;
 use PayCal\Domain\UserRepository;
 
 require_once '../../config.php';
 
 $currentPage = 'PAGE_ADMIN';
-$pageTitle   = 'Auditor Role Management - [PayCal]';
-$pageLabel   = 'Auditor Role Management';
+$pageTitle   = Strings::i18n('ADMIN_USER_ROLES_TITLE') . ' - [PayCal]';
+$pageLabel   = Strings::i18n('ADMIN_USER_ROLES_TITLE');
 
 Authentication::redirectHomeIfUnauthenticated();
 AdminSurface::redirectHomeIfPageUnavailable('/admin/user-roles/');
@@ -136,22 +137,22 @@ $cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
 $cspNonce    = is_scalar($cspNonceRaw) ? (string) $cspNonceRaw : '';
 echo PHP_EOL . '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL('admin'), ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL;
 ?>
-<section class="admin-surface pad_lg" aria-label="Auditor Role Management">
+<section class="admin-surface pad_lg" aria-label="<?= htmlspecialchars(Strings::i18n('ADMIN_USER_ROLES_TITLE'), ENT_QUOTES, 'UTF-8') ?>">
 
   <header class="panel w100 pad_md mar_sm">
-    <h1>Auditor Role Management</h1>
+    <h1><?= htmlspecialchars(Strings::i18n('ADMIN_USER_ROLES_TITLE'), ENT_QUOTES, 'UTF-8') ?></h1>
     <p>Grant or revoke the <strong>AUDITOR</strong> role for registered users.
        Auditors may sign in and view the <a href="/soc/">/soc Auditor Portal</a>
        but cannot access the admin panel or any other privileged surfaces.</p>
   </header>
 
 <?php if ($flashOk !== ''): ?>
-  <div class="panel w100 pad_sm mar_sm" role="status" style="border-left: 4px solid var(--color-success, #2da44e);">
+  <div class="panel w100 pad_sm mar_sm admin-flash admin-flash--success" role="status">
     <p><?= htmlspecialchars($flashOk, ENT_QUOTES, 'UTF-8') ?></p>
   </div>
 <?php endif; ?>
 <?php if ($flashError !== ''): ?>
-  <div class="panel w100 pad_sm mar_sm" role="alert" style="border-left: 4px solid var(--color-danger, #cf222e);">
+  <div class="panel w100 pad_sm mar_sm admin-flash admin-flash--danger" role="alert">
     <p><?= htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8') ?></p>
   </div>
 <?php endif; ?>
@@ -181,8 +182,8 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL
             <form method="POST" action="/admin/user-roles/" class="inline-form">
               <input type="hidden" name="action" value="revoke">
               <input type="hidden" name="uuid"   value="<?= htmlspecialchars($auditor->user_uuid, ENT_QUOTES, 'UTF-8') ?>">
-              <button type="submit" class="btn btn_delete btn_sm"
-                      onclick="return confirm('Revoke AUDITOR access for <?= htmlspecialchars(addslashes($auditor->email), ENT_QUOTES, 'UTF-8') ?>?')">
+              <button type="submit" class="btn btn_delete btn_sm admin-revoke-auditor-btn"
+                      data-confirm="Revoke AUDITOR access for <?= htmlspecialchars($auditor->email, ENT_QUOTES, 'UTF-8') ?>?">
                 Revoke
               </button>
             </form>
@@ -239,5 +240,24 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL
   </section>
 
 </section>
+<script nonce="<?= htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') ?>">
+document.addEventListener('click', (event) => {
+  const button = event.target instanceof Element ? event.target.closest('.admin-revoke-auditor-btn') : null;
+  if (!button) {
+    return;
+  }
+
+  const form = button.closest('form');
+  if (!form) {
+    return;
+  }
+
+  event.preventDefault();
+  const message = button.getAttribute('data-confirm') || 'Revoke AUDITOR access?';
+  if (window.confirm(message)) {
+    form.requestSubmit(button);
+  }
+});
+</script>
 <?php
 require_once HTML . '/footer.php';

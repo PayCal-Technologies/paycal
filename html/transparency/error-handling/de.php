@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Fehlerbehandlung und Nachrichtennormalisierung - [PayCal]';
-$pageLabel = 'Fehlerbehandlung und Nachrichtennormalisierung';
+$pageTitle = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Fehlerbehandlung und Nachrichtennormalisierung</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       Wie PayCal die Fehlerberichterstattung über alle Frontend-Module hinweg standardisiert,
       um Benutzer mit aussagekräftigen, sicheren und konsistenten Fehlermeldungen zu versorgen,
@@ -142,7 +143,7 @@ try {
       </div>
       <p><strong>Hochwertige Module (10+ Catch-Punkte):</strong></p>
       <ul class="doc-list">
-        <li><code>html/js/organizations/index.php</code> — Organisationsverwaltung, Zugriffe, Audit Trails (19+ catches)</li>
+        <li><code>html/js/businesses/index.php</code> — Organisationsverwaltung, Zugriffe, Audit Trails (19+ catches)</li>
         <li><code>html/js/sites/index.php</code> — Site CRUD, Einnahmen, verwaiste Arbeit (10+ catches)</li>
         <li><code>html/js/calendar/calendar.js</code> — Tageseinträge, Kopieren/Einfügen/Löschen (2 catches)</li>
       </ul>
@@ -332,7 +333,7 @@ PW.error('Upload fehlgeschlagen', {
         <li>Debug- und Support-Teams zeilen vollständigen Fehlerkontext via Phantom Wing</li>
         <li>Code wartbar, testbar und zugänglich ist</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Diese Verpflichtung zu Sicherheit, Klarheit und Konsistenz spiegelt
         PayCals Widmung zu Benutzervertrauen und transparenter Informationsfreigabe wider.
       </p>

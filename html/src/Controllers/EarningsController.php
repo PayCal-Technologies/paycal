@@ -12,8 +12,8 @@ use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Log;
 use PayCal\Domain\Money;
-use PayCal\Domain\OrganizationDiscoveryService;
-use PayCal\Infrastructure\Organization\OrganizationEncryptionService;
+use PayCal\Domain\BusinessDiscoveryService;
+use PayCal\Infrastructure\Business\BusinessEncryptionService;
 use PayCal\Domain\Enums\PayFrequency;
 use PayCal\Domain\PayPeriods;
 use PayCal\Domain\Response;
@@ -28,6 +28,8 @@ use PayCal\Domain\User;
 use PayCal\Domain\Work;
 use PayCal\Domain\WorkEntry;
 use PayCal\Domain\EarningsPdf;
+use PayCal\Domain\ForecastProjectionService;
+use PayCal\Domain\ForecastScenario;
 use PayCal\Domain\Xlsx;
 use PayCal\Observability\Lens;
 
@@ -212,11 +214,11 @@ class EarningsController
     if (is_array($orgMeta)) {
       $actorUUID = User::currentUUID();
       if ($actorUUID === '' || $credentialId === '') {
-        self::appendOrganizationWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'missing_actor_or_credential');
+        self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'missing_actor_or_credential');
         return null;
       }
 
-      $wrap = (new OrganizationEncryptionService())->resolveActiveWrapForUnwrap(
+      $wrap = (new BusinessEncryptionService())->resolveActiveWrapForUnwrap(
         $orgMeta['org_id'],
         $orgMeta['segment'],
         $orgMeta['key_version'],
@@ -226,17 +228,17 @@ class EarningsController
         $orgMeta['dek_id']
       );
       if (!$wrap['success']) {
-        self::appendOrganizationWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'wrap_resolution_failed');
+        self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'wrap_resolution_failed');
         return null;
       }
 
       $wrappedDek = self::scalarString($wrap['data']['wrapped_dek'] ?? '');
       if ($wrappedDek === '') {
-        self::appendOrganizationWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'missing_wrapped_dek');
+        self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'missing_wrapped_dek');
         return null;
       }
 
-      self::appendOrganizationWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'success', 'wrap_resolved');
+      self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'success', 'wrap_resolved');
 
       if (self::debugRequested()) {
         self::debug('resolveDekForEnvelope:source', [
@@ -274,14 +276,14 @@ class EarningsController
   }
 
   /** @param array{org_id: string, segment: string, key_version: string, dek_id: string} $orgMeta */
-  private static function appendOrganizationWorkReadAudit(array $orgMeta, string $actorUUID, string $targetUUID, string $outcome, string $reason): void
+  private static function appendBusinessWorkReadAudit(array $orgMeta, string $actorUUID, string $targetUUID, string $outcome, string $reason): void
   {
     if ($orgMeta['org_id'] === '') {
       return;
     }
 
     try {
-      (new OrganizationDiscoveryService())->appendOrganizationAuditEvent(
+      (new BusinessDiscoveryService())->appendBusinessAuditEvent(
         (string) $orgMeta['org_id'],
         'org.work.read',
         $actorUUID !== '' ? $actorUUID : User::currentUUID(),
@@ -316,7 +318,7 @@ class EarningsController
     $meta = is_array($metaRaw) ? $metaRaw : [];
     $modeRaw = $meta['encryption_mode'] ?? ($envelope['encryption_mode'] ?? '');
     $mode = is_scalar($modeRaw) ? trim((string) $modeRaw) : '';
-    if ($mode !== 'organization') {
+    if (!BusinessDiscoveryService::isBusinessEncryptionMode($mode)) {
       return null;
     }
 
@@ -1285,6 +1287,57 @@ class EarningsController
     header('Content-Disposition: attachment; filename="' . $filename . '"; filename*=UTF-8\'\''. $encoded);
     header('Cache-Control: max-age=0');
     echo $pdf;
+  }
+
+  /**
+   * GET forecast/state — initial forecast workspace state (no Redis mutation).
+   */
+  #[Route('forecast/state', ['GET'])]
+  public static function getForecastState(): void
+  {
+    self::bootLens('api/forecast/state');
+
+    $scenarioRaw = strtolower(trim(InputSanitizer::getString('scenario') ?? 'normal'));
+    $scenario = ForecastScenario::tryFrom($scenarioRaw) ?? ForecastScenario::Normal;
+
+    $state = (new ForecastProjectionService())->buildState(User::current(), $scenario);
+    Response::success('[EC] Forecast state retrieved.', $state);
+  }
+
+  /**
+   * POST forecast/preview — recalculate with calculator overrides (no persistence).
+   *
+   * Body: { overrides?: object, scenario?: string }
+   */
+  #[Route('forecast/preview', ['POST'])]
+  public static function postForecastPreview(): void
+  {
+    self::bootLens('api/forecast/preview');
+
+    $body = file_get_contents('php://input');
+    $postData = [];
+    if (is_string($body) && $body !== '') {
+      try {
+        $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+        if (is_array($decoded)) {
+          $postData = $decoded;
+        }
+      } catch (\JsonException) {
+        Response::error('[EC] Invalid JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+        return;
+      }
+    }
+
+    $scenarioInput = $postData['scenario'] ?? 'normal';
+    $scenarioRaw = strtolower(trim(is_scalar($scenarioInput) ? (string) $scenarioInput : 'normal'));
+    $scenario = ForecastScenario::tryFrom($scenarioRaw) ?? ForecastScenario::Normal;
+    $overrides = isset($postData['overrides']) && is_array($postData['overrides'])
+      ? $postData['overrides']
+      : [];
+
+    $state = (new ForecastProjectionService())->preview(User::current(), $overrides, $scenario);
+    Response::success('[EC] Forecast preview calculated.', $state);
   }
 }
 

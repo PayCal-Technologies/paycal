@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Hata İşleme ve Mesaj Normalleştirmesi - [PayCal]';
-$pageLabel = 'Hata İşleme ve Mesaj Normalleştirmesi';
+$pageTitle = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Hata İşleme ve Mesaj Normalleştirmesi</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_ERROR_HANDLING_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       PayCal'ın tüm ön yüz modüllerinde hata raporlamasını nasıl standartlaştırdığı; kullanıcıların
       hassas ayrıntıları açıklamadan anlamlı, güvenli ve tutarlı hata geri bildirimi almasını sağlamak.
@@ -140,7 +141,7 @@ try {
       </div>
       <p><strong>Yüksek değerli modüller (10+ catch noktası):</strong></p>
       <ul class="doc-list">
-        <li><code>html/js/organizations/index.php</code> — Organizasyon yönetimi, erişim istekleri, denetim izleri (19+ catches)</li>
+        <li><code>html/js/businesses/index.php</code> — Organizasyon yönetimi, erişim istekleri, denetim izleri (19+ catches)</li>
         <li><code>html/js/sites/index.php</code> — Site CRUD, kazançlar, sahipsiz iş kurtarma (10+ catches)</li>
         <li><code>html/js/calendar/calendar.js</code> — Gün girişi işlemleri, kopyala/yapıştır/sil (2 catches)</li>
       </ul>
@@ -330,7 +331,7 @@ PW.error('Yükleme başarısız', {
         <li>Hata ayıklama ve destek ekipleri Phantom Wing aracılığıyla tam hata bağlamını korur</li>
         <li>Kod sürdürülebilir, test edilebilir ve erişilebilirdir</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Güvenlik, netlik ve tutarlılığa olan bu bağlılık, PayCal'ın kullanıcı güveni ve
         şeffaf bilgi paylaşımına olan adanmışlığını yansıtır.
       </p>

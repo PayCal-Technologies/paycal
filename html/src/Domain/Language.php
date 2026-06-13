@@ -107,4 +107,41 @@ final class Language
 
     return self::isSupported($requested) ? $requested : $fallbackCode;
   }
+
+  /**
+   * Resolve BCP-47 / ICU locale tag for date and number formatting.
+   *
+   * Prefers a stored locale when its language subtag matches the UI language;
+   * otherwise falls back to the UI language code (Intl accepts bare codes like "fr").
+   */
+  public static function resolveDateLocale(string $storedLocale, string $language): string
+  {
+    $language = strtolower(trim($language));
+    if (!self::isSupported($language)) {
+      $language = self::DEFAULT;
+    }
+
+    $storedLocale = trim($storedLocale);
+    if ($storedLocale !== '') {
+      $localeLanguage = self::extractLanguageSubtag($storedLocale);
+      if ($localeLanguage !== '' && $localeLanguage === $language) {
+        return $storedLocale;
+      }
+    }
+
+    return $language;
+  }
+
+  /**
+   * Extract the primary ISO-639-1 language code from a locale tag.
+   */
+  public static function extractLanguageSubtag(string $localeTag): string
+  {
+    $normalized = str_replace('_', '-', trim($localeTag));
+    if (preg_match('/^([a-z]{2})/i', $normalized, $matches) === 1) {
+      return strtolower($matches[1]);
+    }
+
+    return '';
+  }
 }

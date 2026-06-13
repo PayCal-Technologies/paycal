@@ -121,7 +121,7 @@ foreach ($i18nKeys as $i18nKey) {
  * 
  * PUBLIC API - User Experience:
  * =============================
- *   showToast(text, type, ms)   - Canonical cross-page toast API
+ *   showToast(text, type, skipTTS) - Canonical cross-page toast API (auto-dismiss from help_popup_timeout_seconds)
  *   textToSpeech(text)          - Speak text using Web Speech API
  *   activateCapslockWarning()   - Show CAPS LOCK warning
  *   deactivateCapslockWarning() - Hide CAPS LOCK warning
@@ -193,7 +193,7 @@ const PayCalCore = (() => {
   /** INIT */
   const config = {
     pc_api               : '<?php echo \PayCal\Domain\Environment::appURL('api/v1'); ?>',
-    USER_LOCALE          : '<?php echo htmlspecialchars((string) (($user->locale ?? '') !== '' ? $user->locale : $user->language), ENT_QUOTES, 'UTF-8'); ?>',
+    USER_LOCALE          : '<?php echo htmlspecialchars(Language::resolveDateLocale(trim((string) ($user->locale ?? '')), (string) ($user->language ?? Language::DEFAULT)), ENT_QUOTES, 'UTF-8'); ?>',
     CAPSLOCK_ACTIVE      : '<?php echo htmlspecialchars($i18n['CAPSLOCK_ACTIVE'], ENT_QUOTES, 'UTF-8'); ?>',
     KEYBOARD_SHORTCUTS   : '<?php echo htmlspecialchars($i18n['KEYBOARD_SHORTCUTS'], ENT_QUOTES, 'UTF-8'); ?>',
     OPENED_DIALOG        : '<?php echo htmlspecialchars($i18n['OPENED_DIALOG'], ENT_QUOTES, 'UTF-8'); ?>',
@@ -207,6 +207,8 @@ const PayCalCore = (() => {
     form_ttl_settings_seconds : <?php echo (int) $user->getFormTtlSettingsSeconds(); ?>,
     form_ttl_calendar_seconds : <?php echo (int) $user->getFormTtlCalendarSeconds(); ?>,
     form_ttl_general_seconds : <?php echo (int) $user->getFormTtlGeneralSeconds(); ?>,
+    help_popup_timeout_seconds : <?php echo (int) $user->getHelpPopupTimeoutSeconds(); ?>,
+    overlay_sidebar_timeout_seconds : <?php echo (int) $user->getOverlaySidebarTimeoutSeconds(); ?>,
     languages            : { <?php
       $langEntries = [];
       foreach (\PayCal\Domain\Language::AVAILABLE as $code => $name) {
@@ -440,7 +442,7 @@ const PayCalCore = (() => {
 
   function warnNotificationsPollingError(error) {
     if (error instanceof Error) {
-      PW.warn(error.message || 'Organizations notifications polling failed.');
+      PW.warn(error.message || 'Businesses notifications polling failed.');
       return;
     }
 
@@ -449,7 +451,7 @@ const PayCalCore = (() => {
       return;
     }
 
-    PW.warn('Organizations notifications polling failed.');
+    PW.warn('Businesses notifications polling failed.');
   }
 
   function ensureDialogChrome(dialog) { a11y.ensureDialogChrome(dialog); }
@@ -655,9 +657,9 @@ const PayCalCore = (() => {
    * Update status message with themed styling and icons.
    * @param {string} message - The message to display
    * @param {string} type - 'success', 'save', 'copy', 'paste', 'delete', 'error', 'info', 'working' (default: 'info')
-   * @param {number} autoClearMs - Auto-clear after this many ms (0 = don't auto-clear, default: 4000)
+   * @param {number} autoClearMs - Pass 0 to keep visible until replaced; otherwise uses help_popup_timeout_seconds
    */
-  function updateStatusMessage(message, type = 'info', autoClearMs = 4000, skipTTS = false) {
+  function updateStatusMessage(message, type = 'info', autoClearMs, skipTTS = false) {
     const statusDiv = document.getElementById('status');
     
     if (!statusDiv) {
@@ -774,24 +776,26 @@ const PayCalCore = (() => {
       } catch {}
     }
 
-    // Auto-clear if specified
-    if (autoClearMs > 0) {
-      const effectiveAutoClearMs = autoClearMs * 2;
+    const dismissMs = autoClearMs === 0 ? 0 : getNotificationDismissTimeoutMs();
+
+    // Auto-clear when dismiss timeout is configured (0 = never)
+    if (dismissMs > 0) {
       setTimeout(() => {
         if (statusDiv.dataset.statusToken === token) {
           statusDiv.textContent = '';
           statusDiv.className = 'status';
           delete statusDiv.dataset.statusToken;
         }
-      }, effectiveAutoClearMs);
+      }, dismissMs);
     }
   }
 
   /**
    * Canonical cross-page toast API.
    * Use this from page scripts to avoid page-level toast duplication.
+   * Auto-dismiss duration comes from config.help_popup_timeout_seconds (0 = never).
    */
-  function showToast(message, type = 'info', autoClearMs = 3000, skipTTS = false) {
+  function showToast(message, type = 'info', autoClearMs, skipTTS = false) {
     updateStatusMessage(message, type, autoClearMs, skipTTS);
   }
 
@@ -943,12 +947,124 @@ const PayCalCore = (() => {
   let orgNotificationsIntervalId = null;
   let orgNotificationsSignature = '';
   let orgNotificationsUpdateHandler = null;
+  let hoverHelpDismissTimer = null;
+
+  const clearHoverHelpDismissTimer = () => {
+    if (hoverHelpDismissTimer !== null) {
+      window.clearTimeout(hoverHelpDismissTimer);
+      hoverHelpDismissTimer = null;
+    }
+  };
+
+  const getNotificationDismissTimeoutMs = () => {
+    const seconds = Number(config.help_popup_timeout_seconds) || 0;
+    return seconds > 0 ? seconds * 1000 : 0;
+  };
+
+  const initHoverHelp = () => {
+    if (typeof window.__PAYCAL_HOVER_HELP_INIT__ !== 'undefined' && window.__PAYCAL_HOVER_HELP_INIT__) {
+      return;
+    }
+    window.__PAYCAL_HOVER_HELP_INIT__ = true;
+
+    const targets = Array.from(document.querySelectorAll('[data-hover-help]'));
+    if (targets.length === 0) {
+      return;
+    }
+
+    const tooltipEl = document.createElement('div');
+    tooltipEl.className = 'hover_help_tooltip';
+    tooltipEl.setAttribute('role', 'tooltip');
+    tooltipEl.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tooltipEl);
+
+    let showTimer = null;
+    let activeTarget = null;
+
+    const clearShowTimer = () => {
+      if (showTimer !== null) {
+        window.clearTimeout(showTimer);
+        showTimer = null;
+      }
+    };
+
+    const ensureTooltipContainer = (targetEl) => {
+      if (!(targetEl instanceof HTMLElement)) {
+        return;
+      }
+      const openDialog = targetEl.closest('dialog[open]');
+      const desiredParent = openDialog instanceof HTMLElement ? openDialog : document.body;
+      if (tooltipEl.parentElement !== desiredParent) {
+        desiredParent.appendChild(tooltipEl);
+      }
+    };
+
+    const hideTooltip = () => {
+      clearShowTimer();
+      clearHoverHelpDismissTimer();
+      activeTarget = null;
+      tooltipEl.classList.remove('is-visible');
+      tooltipEl.setAttribute('aria-hidden', 'true');
+    };
+
+    const showTooltip = (targetEl) => {
+      const helpText = (targetEl?.getAttribute('data-hover-help') || '').trim();
+      if (!helpText) {
+        return;
+      }
+
+      activeTarget = targetEl;
+      ensureTooltipContainer(targetEl);
+      tooltipEl.textContent = helpText;
+      tooltipEl.classList.add('is-visible');
+      tooltipEl.setAttribute('aria-hidden', 'false');
+
+      clearHoverHelpDismissTimer();
+      const dismissTimeoutMs = getNotificationDismissTimeoutMs();
+      if (dismissTimeoutMs > 0) {
+        hoverHelpDismissTimer = window.setTimeout(() => {
+          hoverHelpDismissTimer = null;
+          hideTooltip();
+        }, dismissTimeoutMs);
+      }
+    };
+
+    const scheduleShow = (targetEl) => {
+      clearShowTimer();
+      showTimer = window.setTimeout(() => {
+        showTimer = null;
+        showTooltip(targetEl);
+      }, 250);
+    };
+
+    targets.forEach((targetEl) => {
+      targetEl.addEventListener('mouseenter', () => scheduleShow(targetEl));
+      targetEl.addEventListener('mouseleave', hideTooltip);
+      targetEl.addEventListener('focus', () => scheduleShow(targetEl));
+      targetEl.addEventListener('blur', hideTooltip);
+      targetEl.addEventListener('mousedown', hideTooltip);
+    });
+
+    window.addEventListener('scroll', () => {
+      if (activeTarget && tooltipEl.classList.contains('is-visible')) {
+        ensureTooltipContainer(activeTarget);
+      }
+    }, true);
+
+    window.addEventListener('resize', () => {
+      if (activeTarget && tooltipEl.classList.contains('is-visible')) {
+        ensureTooltipContainer(activeTarget);
+      }
+    });
+  };
 
   function init() {
     if (hasInitialized) {
       return cleanupHandler || (() => {});
     }
     hasInitialized = true;
+
+    initHoverHelp();
 
     // ====================================================================
     // DIAGNOSTIC DATA OUTPUT
@@ -1343,7 +1459,7 @@ const PayCalCore = (() => {
 
     const navShortcutRoutes = {
       c: "/",
-      r: "/earnings/",
+      r: "/reports/",
       s: "/sites/",
       o: "/profile/",
       e: "/settings/",
@@ -2143,12 +2259,12 @@ const PayCalCore = (() => {
       }
     }
 
-    const getOrganizationsNavLink = () => document.querySelector(
-      '.nav_menu--primary a[href="/organizations"], .nav_menu--primary a[href="/organizations/"]'
+    const getBusinessesNavLink = () => document.querySelector(
+      '.nav_menu--primary a[href="/business"], .nav_menu--primary a[href="/business/"], .nav_menu--primary a[href="/businesses"], .nav_menu--primary a[href="/businesses/"]'
     );
 
-    const setOrganizationsNavNotificationDot = (totalUnread) => {
-      const navLink = getOrganizationsNavLink();
+    const setBusinessesNavNotificationDot = (totalUnread) => {
+      const navLink = getBusinessesNavLink();
       if (!(navLink instanceof HTMLElement)) {
         return;
       }
@@ -2174,12 +2290,12 @@ const PayCalCore = (() => {
 
       navLink.setAttribute('data-has-notifications', '1');
       navLink.setAttribute('aria-label', unread > 99
-        ? 'Organizations, 99 plus unread notifications'
-        : `Organizations, ${String(unread)} unread notification${unread === 1 ? '' : 's'}`
+        ? 'Businesses, 99 plus unread notifications'
+        : `Businesses, ${String(unread)} unread notification${unread === 1 ? '' : 's'}`
       );
     };
 
-    const pollOrganizationsNotifications = async () => {
+    const pollBusinessesNotifications = async () => {
       const params = new URLSearchParams({
         channel: 'organization_notifications',
       });
@@ -2195,37 +2311,38 @@ const PayCalCore = (() => {
       });
 
       if (!response.ok) {
-        throw new Error(`Organization notifications channel failed (${response.status}).`);
+        throw new Error(`Business notifications channel failed (${response.status}).`);
       }
 
       const payload = await response.json();
       if (!payload || payload.status !== 'success') {
-        throw new Error(String(payload?.error || payload?.message || 'Organization notifications payload invalid.'));
+        throw new Error(String(payload?.error || payload?.message || 'Business notifications payload invalid.'));
       }
 
       orgNotificationsSignature = String(payload.latest_signature || '');
-      setOrganizationsNavNotificationDot(Number(payload.total_unread || 0));
+      setBusinessesNavNotificationDot(Number(payload.total_unread || 0));
     };
 
-    const startOrganizationsNotificationsPolling = () => {
-      pollOrganizationsNotifications().catch((error) => warnNotificationsPollingError(error));
+    const startBusinessesNotificationsPolling = () => {
+      pollBusinessesNotifications().catch((error) => warnNotificationsPollingError(error));
       if (orgNotificationsIntervalId !== null) {
         clearInterval(orgNotificationsIntervalId);
         orgNotificationsIntervalId = null;
       }
       orgNotificationsIntervalId = window.setInterval(() => {
-        pollOrganizationsNotifications().catch((error) => warnNotificationsPollingError(error));
+        pollBusinessesNotifications().catch((error) => warnNotificationsPollingError(error));
       }, 60000);
     };
 
-    startOrganizationsNotificationsPolling();
+    startBusinessesNotificationsPolling();
     orgNotificationsUpdateHandler = () => {
-      pollOrganizationsNotifications().catch((error) => warnNotificationsPollingError(error));
+      pollBusinessesNotifications().catch((error) => warnNotificationsPollingError(error));
     };
     window.addEventListener('paycal:notifications-updated', orgNotificationsUpdateHandler);
 
     // Cleanup function
     cleanupHandler = () => {
+      clearHoverHelpDismissTimer();
       clearInterval(clockInterval);
       if (orgNotificationsIntervalId !== null) {
         clearInterval(orgNotificationsIntervalId);

@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -21,8 +22,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Rafforzamento di Auth, Passkey e Redis — Maggio 2026 - [PayCal]';
-$pageLabel = 'Rafforzamento di Auth, Passkey & Redis — Maggio 2026';
+$pageTitle = $i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -33,7 +34,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Rafforzamento di Auth, Passkey &amp; Redis — Maggio 2026</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       Il 12 maggio 2026 abbiamo condotto un audit interno della nostra infrastruttura di
       autenticazione, passkey e Redis. Abbiamo trovato undici problemi, tutti in codice scritto

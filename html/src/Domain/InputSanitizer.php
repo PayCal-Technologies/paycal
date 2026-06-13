@@ -177,31 +177,6 @@ final class InputSanitizer
   }
 
   /**
-   * Sanitize all values in $_POST.
-   *
-   * @return array<string, string>
-   */
-  public static function fromPost(): array
-  {
-    $maxLen = SystemConfig::MAX_STRING_LENGTH;
-    $postRaw = json_encode($_POST);
-    if ($postRaw !== false && strlen($postRaw) > $maxLen) {
-      throw new \RuntimeException('InputSanitizer: POST input exceeds maximum allowed length of ' . $maxLen . ' bytes');
-    }
-    return self::sanitizeArray($_POST);
-  }
-
-  /**
-   * Sanitize all values from HTTP DELETE headers.
-   *
-   * @return array<string, string>
-   */
-  public static function fromDelete(): array
-  {
-    return self::sanitizeArray((array) getallheaders());
-  }
-
-  /**
    * Sanitize an array (keys and values)
    * Recursively applies sanitizeString to each element.
    *

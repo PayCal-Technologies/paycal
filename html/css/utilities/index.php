@@ -41,7 +41,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .pad_sm   { padding: var(--pad-sm); }
 .pad_md   { padding: var(--pad-md); }
 .pad_lg   { padding: var(--pad-lg); }
-.pad_wide { padding-inline: var(--pad-md); }
+.pad_wide { padding-inline: var(--page-edge-inline); }
+.page_edge_inline { padding-inline: var(--page-edge-inline); }
+.page_edge_inner_inline { padding-inline: var(--page-edge-inner-inline); }
 
 /* FLEX RELATED */
 .flex            { display: flex; width: 100%; }

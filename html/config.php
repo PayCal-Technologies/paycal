@@ -142,6 +142,8 @@ if (!defined('MIN_CHARACTER_LENGTH')) {
 	define('MIN_CHARACTER_LENGTH', (int) ($_ENV['MIN_CHARACTER_LENGTH'] ?? 3));
 }
 
+// User-scoped presentation constants (USER_LOCALE, theme, spacing, setlocale).
+require_once __DIR__ . '/src/session.php';
 
 /*
 +-------------------+----------------------+---------------------------+-----------------------------+

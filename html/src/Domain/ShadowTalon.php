@@ -202,10 +202,12 @@ final class ShadowTalon
     $referencePrefix = self::escapeI18n('SHADOW_TALON_REFERENCE_PREFIX');
     $returnHome = self::escapeI18n('SHADOW_TALON_RETURN_HOME');
     $contactSupport = self::escapeI18n('SHADOW_TALON_CONTACT_SUPPORT');
+    $pageLanguageRaw = defined('USER_LANGUAGE') ? (string) USER_LANGUAGE : Language::DEFAULT;
+    $pageLanguage = htmlspecialchars(str_replace('_', '-', $pageLanguageRaw), ENT_QUOTES, 'UTF-8');
 
     return <<<HTML
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="{$pageLanguage}" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">

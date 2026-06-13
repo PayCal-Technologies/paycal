@@ -39,11 +39,13 @@ final class FormErrorRecoveryContractTest extends TestCase
     $projectRoot = dirname(__DIR__, 4);
     $settingsPage = (string) file_get_contents($projectRoot . '/html/settings/index.php');
     $sitesPage = (string) file_get_contents($projectRoot . '/html/sites/index.php');
+    $siteEditorDialogs = (string) file_get_contents($projectRoot . '/html/sites/_partials/site_editor_dialogs.php');
 
     $this->assertStringContainsString('change_email_new_email_error', $settingsPage);
     $this->assertStringContainsString('aria-describedby="recovery_email_send_status recovery_email_input_error"', $settingsPage);
 
-    $this->assertStringContainsString('edit_site_name_error', $sitesPage);
+    $this->assertStringContainsString('site_editor_dialogs.php', $sitesPage);
+    $this->assertStringContainsString('edit_site_name_error', $siteEditorDialogs);
     $this->assertStringContainsString("aria-describedby='recovery_site_form_status recovery_site_name_error'", $sitesPage);
   }
 }

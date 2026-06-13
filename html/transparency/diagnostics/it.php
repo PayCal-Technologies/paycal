@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Diagnostica opt-in e Phantom Wing - [PayCal]';
-$pageLabel = 'Diagnostica opt-in e Phantom Wing';
+$pageTitle = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Diagnostica opt-in &amp; Phantom Wing</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       PayCal include un livello di diagnostica opzionale che voi controllate. Ecco esattamente
       cosa raccoglie, cosa rimane sul vostro dispositivo e come viene utilizzata.
@@ -239,7 +240,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         <li>La telemetria è completamente soppressa su tutte le pagine di autenticazione</li>
         <li>La limitazione della velocità e il back-off automatico del client prevengono qualsiasi segnalazione eccessiva accidentale</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Phantom Wing è progettato in modo da poter lasciare tutta la diagnostica disattivata
         indefinitamente. I controlli opt-in esistono per dare a voi e al team di supporto un
         linguaggio condiviso quando qualcosa va storto — non per raccogliere dati per impostazione

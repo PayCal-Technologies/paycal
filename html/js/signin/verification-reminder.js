@@ -6,6 +6,20 @@
 (function() {
   'use strict';
 
+  const reminderRoot = document.getElementById('email-verification-reminder');
+  const VERIFICATION_T = {
+    cooldownFmt: reminderRoot?.dataset.cooldownFmt || 'Please wait {time} before resending.',
+    sending: reminderRoot?.dataset.resendSending || 'Resend verification email (sending...)',
+    signoutFailed: reminderRoot?.dataset.signoutFailed || 'Unable to sign out right now. Try again.',
+  };
+  const formatVerificationMessage = (template, replacements = {}) => {
+    let message = String(template || '');
+    Object.entries(replacements).forEach(([key, value]) => {
+      message = message.split(`{${key}}`).join(String(value ?? ''));
+    });
+    return message;
+  };
+
   // Profile dropdown toggle
   const profileBtn = document.getElementById('profile-btn');
   const profileMenu = document.getElementById('profile-menu');
@@ -39,7 +53,7 @@
       try {
         const response = await fetch('/api/v1/auth/logout', { method: 'POST' });
         if (!response.ok) {
-          showStatus('Unable to sign out right now. Try again.', 'error');
+          showStatus(VERIFICATION_T.signoutFailed, 'error');
           return;
         }
         window.location.href = '/auth/';
@@ -104,7 +118,7 @@
     const countdownText = formatCooldownTime(resendCooldownRemainingSeconds);
 
     if (resendInFlight) {
-      resendEmailLink.textContent = `${resendOriginalText || 'Resend verification email'} (sending...)`;
+      resendEmailLink.textContent = VERIFICATION_T.sending;
     } else {
       resendEmailLink.textContent = isCoolingDown
         ? `${resendOriginalText || 'Resend verification email'} (${countdownText})`
@@ -118,7 +132,7 @@
     if (resendCooldownHintEl) {
       if (isCoolingDown) {
         resendCooldownHintEl.hidden = false;
-        resendCooldownHintEl.textContent = `Please wait ${countdownText} before resending.`;
+        resendCooldownHintEl.textContent = formatVerificationMessage(VERIFICATION_T.cooldownFmt, { time: countdownText });
       } else {
         resendCooldownHintEl.hidden = true;
         resendCooldownHintEl.textContent = '';

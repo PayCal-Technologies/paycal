@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 namespace PayCal\Domain;
+
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Enums\SiteStatus;
 
@@ -50,9 +51,26 @@ final class SitesService
    */
   public function get(string $userUUID): array
   {
-    $sites = iterator_to_array(Sites::getInstance()->getSites($userUUID, 'all'));
+    return $this->getPersonal($userUUID);
+  }
 
-    return array_values($sites);
+  /**
+   * Returns personally created sites (excludes business-workspace-managed sites).
+   *
+   * @return array<int, array<string,string>>
+   */
+  public function getPersonal(string $userUUID): array
+  {
+    $sites = iterator_to_array(Sites::getInstance()->getSites($userUUID, 'all'));
+    $personal = [];
+    foreach ($sites as $siteId => $siteData) {
+      if (BusinessDiscoveryService::isBusinessManagedSite($siteData)) {
+        continue;
+      }
+      $personal[$siteId] = $siteData;
+    }
+
+    return array_values($personal);
   }
 
   /**
@@ -169,8 +187,17 @@ final class SitesService
     }
 
     // Set site status to 'archived' instead of deleting it
-    $siteKey = "site:{$userUUID}:{$siteId}";
+    $siteKey = Keys::SITE . ':' . $userUUID . ':' . $siteId;
+    if (!Database::exists($siteKey)) {
+      return [
+          'success' => false,
+          'archived_count' => 0,
+          'locked_entries' => 0,
+      ];
+    }
+
     Database::hset($siteKey, ['status' => SiteStatus::ARCHIVED->value]);
+    (new BusinessDiscoveryService())->invalidateLinkedBusinessCachesForSite($userUUID, $siteId);
 
     return [
         'success' => true,
@@ -213,8 +240,9 @@ final class SitesService
     }
 
     // Delete the site record
-    $siteKey = "site:{$userUUID}:{$siteId}";
+    $siteKey = Keys::SITE . ':' . $userUUID . ':' . $siteId;
     Database::unlink($siteKey);
+    (new BusinessDiscoveryService())->purgeDeletedSiteFromAllBusinesses($userUUID, $siteId);
 
     return [
         'success' => true,
@@ -238,8 +266,10 @@ final class SitesService
     $dates = [];
     $entries = [];
 
+    $entryHashes = $keys !== [] ? Database::pipelineHgetall($keys) : [];
+
     foreach ($keys as $key) {
-      $data = Database::hgetall($key);
+      $data = $entryHashes[$key] ?? [];
 
       if (empty($data)) {
         continue;
@@ -531,6 +561,8 @@ final class SitesService
     $orphanedGroups = [];
     $totalCount = 0;
 
+    $workHashes = $workKeys !== [] ? Database::pipelineHgetall($workKeys) : [];
+
     foreach ($workKeys as $workKey) {
       // Extract site_id from work:UUID:DATE:SITE_ID
       $parts = explode(':', $workKey);
@@ -546,7 +578,7 @@ final class SitesService
       }
 
       // This work entry is orphaned
-      $workData = Database::hgetall($workKey);
+      $workData = $workHashes[$workKey] ?? [];
 
       if (!isset($orphanedGroups[$siteId])) {
         // Initialize group with data from first work entry

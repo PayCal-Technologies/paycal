@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_EXTENSIONS_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Paradigme des extensions - [PayCal]';
-$pageLabel = 'Paradigme des extensions';
+$pageTitle = $i18n['TRANSPARENCY_EXTENSIONS_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_EXTENSIONS_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Paradigme des extensions</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_EXTENSIONS_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       PayCal est conçu de manière à ce que la logique métier fondamentale reste stable pendant
       que les couches d'extension peuvent adapter les fonctionnalités pour différents déploiements
@@ -67,7 +68,7 @@ require_once HTML.'/header.php';
       <ul class="doc-list">
         <li><strong>billing-provider :</strong> hooks de capacité de facturation de base et sélection de mode</li>
         <li><strong>earnings-ytd :</strong> rendu YTD de base et points de hook de gains</li>
-        <li><strong>organization-signals :</strong> hooks de signal d'organisation de base</li>
+        <li><strong>business-signals :</strong> hooks de signal d'entreprise de base</li>
       </ul>
     </section>
 

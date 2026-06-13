@@ -101,7 +101,7 @@ final class SettingsPageTest extends TestCase
   }
 
   /**
-   * Style Preferences Form Fields
+   * Interface Preferences Form Fields
    */
   #[Test]
   public function styleFormHasCorrectAction(): void
@@ -171,6 +171,34 @@ final class SettingsPageTest extends TestCase
     $this->assertCount(2, $validValues, "variant should have exactly 2 options");
     $this->assertContains('light', $validValues);
     $this->assertContains('dark', $validValues);
+  }
+
+  #[Test]
+  public function helpPopupTimeoutHasValidValues(): void
+  {
+    $fieldName = 'help_popup_timeout_seconds';
+    $min = 0;
+    $max = 30;
+    $step = 1;
+
+    $this->assertSame(0, $min, "{$fieldName} slider minimum should be 0");
+    $this->assertSame(30, $max, "{$fieldName} slider maximum should be 30");
+    $this->assertSame(1, $step, "{$fieldName} slider step should be 1");
+    $this->assertSame('8', \PayCal\Domain\UserPreferenceDefaults::DEFAULT_HELP_POPUP_TIMEOUT_SECONDS);
+  }
+
+  #[Test]
+  public function overlaySidebarTimeoutHasValidValues(): void
+  {
+    $fieldName = 'overlay_sidebar_timeout_seconds';
+    $min = 0;
+    $max = 30;
+    $step = 1;
+
+    $this->assertSame(0, $min, "{$fieldName} slider minimum should be 0");
+    $this->assertSame(30, $max, "{$fieldName} slider maximum should be 30");
+    $this->assertSame(1, $step, "{$fieldName} slider step should be 1");
+    $this->assertSame('5', \PayCal\Domain\UserPreferenceDefaults::DEFAULT_OVERLAY_SIDEBAR_TIMEOUT_SECONDS);
   }
 
   #[Test]

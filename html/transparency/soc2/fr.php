@@ -3,9 +3,20 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../config.php';
 
+$i18n = [];
+$i18nKeys = [
+  'BREADCRUMB',
+  'HELP_TOC_TRANSPARENCY_HUB',
+  'TRANSPARENCY_SOC2_PAGE_TITLE',
+];
+foreach ($i18nKeys as $key) {
+  $i18n[$key] = \PayCal\Domain\Strings::i18n($key);
+}
+
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Conformite SOC 2 chez PayCal - [PayCal]';
-$pageLabel = 'Conformite SOC 2 chez PayCal';
+$pageTitle = $i18n['TRANSPARENCY_SOC2_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_SOC2_PAGE_TITLE'];
+
 
 require_once HTML . '/header.php';
 ?>
@@ -13,11 +24,11 @@ require_once HTML . '/header.php';
   <nav class="doc-breadcrumb" aria-label="Fil d'Ariane">
     <a href="<?php echo transparency_href('/transparency/'); ?>">Centre de transparence</a>
     <span class="separator">/</span>
-    <span class="current">Conformité SOC 2 chez PayCal</span>
+    <span class="current"><?php echo htmlspecialchars($i18n['TRANSPARENCY_SOC2_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></span>
   </nav>
 
   <header class="doc-article-header">
-    <h1>Préparation SOC 2 et modèle de sécurité de PayCal</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_SOC2_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">Une vue technique de la façon dont PayCal associe les contrôles SOC 2 aux comportements système appliqués et aux preuves générées en continu.</p>
     <p class="doc-article-meta">Published: <time datetime="2026-04-15">2026-04-15</time></p>
   </header>

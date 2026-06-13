@@ -14,7 +14,7 @@ use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Log;
 use PayCal\Domain\Language;
-use PayCal\Domain\OrganizationDiscoveryService;
+use PayCal\Domain\BusinessDiscoveryService;
 use PayCal\Domain\PayPeriodGenerator;
 use PayCal\Domain\Enums\PayFrequency;
 use PayCal\Infrastructure\Resilience\RedisReliabilityService;
@@ -104,8 +104,8 @@ class SettingsController
    */
   public function getProfileSettings(): void
   {
-    $service = new OrganizationDiscoveryService();
-    $personal = $service->ensurePersonalOrganization(User::currentUUID());
+    $service = new BusinessDiscoveryService();
+    $personal = $service->ensurePersonalBusiness(User::currentUUID());
     if ($personal['success'] !== true) {
       $message = $personal['message'] !== ''
         ? $personal['message']
@@ -115,14 +115,14 @@ class SettingsController
     }
 
     $personalData = $personal['data'];
-    $orgIdRaw = $personalData['organization_id'] ?? '';
+    $orgIdRaw = $personalData['business_id'] ?? '';
     $orgId = is_scalar($orgIdRaw) ? (string) $orgIdRaw : '';
     if ($orgId === '') {
-      Response::error('[SC] Personal organization id is missing.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[SC] Personal business id is missing.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
-    $result = $service->getOrganizationSettings(User::currentUUID(), $orgId);
+    $result = $service->getBusinessSettings(User::currentUUID(), $orgId);
     if ($result['success']) {
       Response::success('[SC] Profile settings retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
@@ -150,8 +150,8 @@ class SettingsController
       return;
     }
 
-    $service = new OrganizationDiscoveryService();
-    $personal = $service->ensurePersonalOrganization(User::currentUUID());
+    $service = new BusinessDiscoveryService();
+    $personal = $service->ensurePersonalBusiness(User::currentUUID());
     if ($personal['success'] !== true) {
       $message = $personal['message'] !== ''
         ? $personal['message']
@@ -161,14 +161,14 @@ class SettingsController
     }
 
     $personalData = $personal['data'];
-    $orgIdRaw = $personalData['organization_id'] ?? '';
+    $orgIdRaw = $personalData['business_id'] ?? '';
     $orgId = is_scalar($orgIdRaw) ? (string) $orgIdRaw : '';
     if ($orgId === '') {
-      Response::error('[SC] Personal organization id is missing.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[SC] Personal business id is missing.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
-    $result = $service->updateOrganizationSettings(User::currentUUID(), $orgId, $filtered);
+    $result = $service->updateBusinessSettings(User::currentUUID(), $orgId, $filtered);
     if ($result['success']) {
       Response::success('[SC] Profile settings updated.', $result['data'], HttpStatus::HTTP_OK);
     } else {
@@ -1241,6 +1241,14 @@ class SettingsController
         : UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY;
     }
 
+    if (isset($filtered['help_popup_timeout_seconds'])) {
+      $timeoutRaw = $filtered['help_popup_timeout_seconds'];
+      $timeout = is_numeric($timeoutRaw) ? (int) $timeoutRaw : -1;
+      $filtered['help_popup_timeout_seconds'] = ($timeout >= 0 && $timeout <= 30)
+        ? (string) $timeout
+        : UserPreferenceDefaults::DEFAULT_HELP_POPUP_TIMEOUT_SECONDS;
+    }
+
     return $filtered;
   }
 
@@ -1321,6 +1329,14 @@ class SettingsController
       $filtered['nav_state_primary'] = in_array($state, $allowedStates, true)
         ? $state
         : UserPreferenceDefaults::DEFAULT_NAV_STATE_PRIMARY;
+    }
+
+    if (isset($filtered['overlay_sidebar_timeout_seconds'])) {
+      $timeoutRaw = $filtered['overlay_sidebar_timeout_seconds'];
+      $timeout = is_numeric($timeoutRaw) ? (int) $timeoutRaw : -1;
+      $filtered['overlay_sidebar_timeout_seconds'] = ($timeout >= 0 && $timeout <= 30)
+        ? (string) $timeout
+        : UserPreferenceDefaults::DEFAULT_OVERLAY_SIDEBAR_TIMEOUT_SECONDS;
     }
 
     return $filtered;

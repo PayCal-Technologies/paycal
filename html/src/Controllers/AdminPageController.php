@@ -440,15 +440,17 @@ class AdminPageController
       if ($idx > 0 && $idx % 8 === 0) {
         $paletteSwatchesHtml .= '</div><div class="admin-palette-row">';
       }
-      $paletteSwatchesHtml .= "<div class='admin-palette-swatch' style='background:{$hex}' title='{$label}'>"
+      $paletteSwatchesHtml .= "<div class='admin-palette-swatch' data-hex='{$hex}' title='{$label}'>"
         . "<span class='admin-palette-swatch-label'>{$label}</span>"
         . "<span class='admin-palette-swatch-hex'>{$hex}</span>"
         . "</div>";
     }
-    $siteColorPaletteHtml = "<section class='flex f_row panel w100 mar_sm pad_md' aria-label='Site Color Palette'>"
+    $siteColorPaletteLabel = htmlspecialchars(self::batchI18n('ADMIN_SITE_COLOR_PALETTE'), ENT_QUOTES, 'UTF-8');
+    $siteColorPaletteDesc = htmlspecialchars(self::batchI18n('ADMIN_SITE_COLOR_PALETTE_DESC'), ENT_QUOTES, 'UTF-8');
+    $siteColorPaletteHtml = "<section class='flex f_row panel w100 mar_sm pad_md' aria-label='{$siteColorPaletteLabel}'>"
       . "<section class='f_column w100 pad_md'>"
-      . "<h2>Site Color Palette</h2>"
-      . "<p class='text-muted'>32 curated colors used for site identification across the calendar, reports, dashboards, and exports. Organized as 4 rows &times; 8 colors by hue family.</p>"
+      . "<h2>{$siteColorPaletteLabel}</h2>"
+      . "<p class='text-muted'>{$siteColorPaletteDesc}</p>"
       . "<div class='admin-palette-grid'><div class='admin-palette-row'>{$paletteSwatchesHtml}</div></div>"
       . "</section></section>";
 

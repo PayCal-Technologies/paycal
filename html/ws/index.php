@@ -312,29 +312,29 @@ if ($channel === 'test_suite_stream') {
   return;
 }
 
-if ($channel === 'organization_audit') {
-  $organizationId = wsGetStringQuery('organization_id');
+if ($channel === 'business_audit') {
+  $organizationId = wsGetStringQuery('business_id');
   $sinceEventId = wsGetStringQuery('since_event_id');
 
   if ($organizationId === '') {
     wsRespond([
       'status' => 'error',
-      'message' => 'organization_id is required.',
-      'channel' => 'organization_audit',
+      'message' => 'business_id is required.',
+      'channel' => 'business_audit',
       'timestamp_utc' => gmdate('Y-m-d\TH:i:s\Z'),
     ], 400);
 
     return;
   }
 
-  $service = new OrganizationDiscoveryService();
+  $service = new BusinessDiscoveryService();
   $result = $service->listAuditTimeline(User::currentUUID(), $organizationId);
   if (!$result['success']) {
     wsRespond([
       'status' => 'error',
       'message' => (string) $result['message'],
-      'channel' => 'organization_audit',
-      'organization_id' => $organizationId,
+      'channel' => 'business_audit',
+      'business_id' => $organizationId,
       'timestamp_utc' => gmdate('Y-m-d\TH:i:s\Z'),
     ], 403);
 
@@ -371,9 +371,9 @@ if ($channel === 'organization_audit') {
 
   wsRespond([
     'status' => 'success',
-    'service' => 'ws-organization-audit',
-    'channel' => 'organization_audit',
-    'organization_id' => $organizationId,
+    'service' => 'ws-business-audit',
+    'channel' => 'business_audit',
+    'business_id' => $organizationId,
     'latest_event_id' => $latestEventId,
     'events' => $events,
     'timestamp_utc' => gmdate('Y-m-d\TH:i:s\Z'),
@@ -382,34 +382,34 @@ if ($channel === 'organization_audit') {
   return;
 }
 
-if ($channel === 'organization_requests_live') {
+if ($channel === 'business_requests_live') {
   $actorUUID = User::currentUUID();
   $sinceSignature = wsGetStringQuery('since_signature');
 
-  $service = new OrganizationDiscoveryService();
-  $organizationsResult = $service->listForUser($actorUUID);
-  if (!$organizationsResult['success']) {
+  $service = new BusinessDiscoveryService();
+  $businessesResult = $service->listForUser($actorUUID);
+  if (!$businessesResult['success']) {
     wsRespond([
       'status' => 'error',
-      'message' => (string) $organizationsResult['message'],
-      'channel' => 'organization_requests_live',
+      'message' => (string) $businessesResult['message'],
+      'channel' => 'business_requests_live',
       'timestamp_utc' => gmdate('Y-m-d\\TH:i:s\\Z'),
     ], 403);
 
     return;
   }
 
-  $organizations = is_array($organizationsResult['data']['organizations'] ?? null)
-    ? $organizationsResult['data']['organizations']
+  $businesses = is_array($businessesResult['data']['businesses'] ?? null)
+    ? $businessesResult['data']['businesses']
     : [];
 
   $pendingRequests = [];
-  foreach ($organizations as $organization) {
+  foreach ($businesses as $organization) {
     if (!is_array($organization)) {
       continue;
     }
 
-    $organizationIdRaw = $organization['organization_id'] ?? '';
+    $organizationIdRaw = $organization['business_id'] ?? '';
     $organizationId = is_scalar($organizationIdRaw) ? (string) $organizationIdRaw : '';
     if ($organizationId === '') {
       continue;
@@ -455,8 +455,8 @@ if ($channel === 'organization_requests_live') {
 
       $pendingRequests[] = [
         'request_id' => $requestId,
-        'organization_id' => $organizationId,
-        'organization_name' => $organizationName,
+        'business_id' => $organizationId,
+        'business_name' => $organizationName,
         'requester_contact_email' => $requesterEmail,
         'requester_uuid' => $requesterUUID,
         'status' => $status,
@@ -473,7 +473,7 @@ if ($channel === 'organization_requests_live') {
   foreach ($pendingRequests as $request) {
     $signatureSeed[] = implode('|', [
       (string) $request['request_id'],
-      (string) $request['organization_id'],
+      (string) $request['business_id'],
       (string) $request['status'],
       (string) $request['created_at'],
     ]);
@@ -484,8 +484,8 @@ if ($channel === 'organization_requests_live') {
 
   wsRespond([
     'status' => 'success',
-    'service' => 'ws-organization-requests-live',
-    'channel' => 'organization_requests_live',
+    'service' => 'ws-business-requests-live',
+    'channel' => 'business_requests_live',
     'pending_count' => count($pendingRequests),
     'latest_signature' => $latestSignature,
     'unchanged' => $unchanged,
@@ -496,17 +496,17 @@ if ($channel === 'organization_requests_live') {
   return;
 }
 
-if ($channel === 'organization_discovery') {
+if ($channel === 'business_discovery') {
   $actorUUID = User::currentUUID();
   $sinceSignature = wsGetStringQuery('since_signature');
 
-  $service = new OrganizationDiscoveryService();
+  $service = new BusinessDiscoveryService();
   $result = $service->discoveryForUser($actorUUID);
   if (!$result['success']) {
     wsRespond([
       'status' => 'error',
       'message' => (string) $result['message'],
-      'channel' => 'organization_discovery',
+      'channel' => 'business_discovery',
       'timestamp_utc' => gmdate('Y-m-d\\TH:i:s\\Z'),
     ], 403);
 
@@ -525,11 +525,11 @@ if ($channel === 'organization_discovery') {
 
   wsRespond([
     'status' => 'success',
-    'service' => 'ws-organization-discovery',
-    'channel' => 'organization_discovery',
+    'service' => 'ws-business-discovery',
+    'channel' => 'business_discovery',
     'latest_signature' => $latestSignature,
     'unchanged' => $unchanged,
-    'user_organizations' => is_array($data['user_organizations'] ?? null) ? $data['user_organizations'] : [],
+    'user_businesses' => is_array($data['user_businesses'] ?? null) ? $data['user_businesses'] : [],
     'user_sites' => $userSites,
     'match_candidates' => $matchCandidates,
     'timestamp_utc' => gmdate('Y-m-d\\TH:i:s\\Z'),
@@ -538,14 +538,14 @@ if ($channel === 'organization_discovery') {
   return;
 }
 
-if ($channel === 'organization_notifications') {
+if ($channel === 'business_notifications') {
   $actorUUID = User::currentUUID();
-  $summary = (new OrganizationNotificationService())->summarizeUnreadForUser($actorUUID);
+  $summary = (new BusinessNotificationService())->summarizeUnreadForUser($actorUUID);
 
   wsRespond([
     'status' => 'success',
-    'service' => 'ws-organization-notifications',
-    'channel' => 'organization_notifications',
+    'service' => 'ws-business-notifications',
+    'channel' => 'business_notifications',
     'total_unread' => (int) $summary['total_unread'],
     'unread_by_org' => $summary['by_org'],
     'timestamp_utc' => gmdate('Y-m-d\\TH:i:s\\Z'),

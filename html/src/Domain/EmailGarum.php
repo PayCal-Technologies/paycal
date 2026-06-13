@@ -643,15 +643,15 @@ class EmailGarum
   }
 
   /**
-   * Send organization access invite email.
+   * Send business access invite email.
    *
    * @param string           $inviteToken      Invite acceptance token
    * @param string           $inviteeEmail     Recipient email address
-   * @param string           $organizationName Organization display name
+   * @param string           $organizationName Business display name
    * @param string           $inviterName      Name of inviting user
    * @param array<int,string> $scopes          Permission scopes requested
    */
-  public static function sendOrganizationInvite(
+  public static function sendBusinessInvite(
     string $inviteToken,
     string $inviteeEmail,
     string $organizationName,
@@ -664,7 +664,7 @@ class EmailGarum
       $normalizedBatchCode = self::generateInviteBatchCode();
     }
 
-    $subject = '[PayCal] Organization Access Invite (Batch ' . $normalizedBatchCode . ')';
+    $subject = '[PayCal] Business Access Invite (Batch ' . $normalizedBatchCode . ')';
 
     $baseUrl = Environment::appBaseURL();
     $acceptUrl = rtrim($baseUrl, '/') . '/profile/?org_invite_token=' . urlencode($inviteToken);
@@ -673,7 +673,7 @@ class EmailGarum
     $templateData = [
       '__PC_NAME__' => self::appName(),
       '__INVITER_NAME__' => htmlspecialchars($inviterName ?: 'A PayCal user', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
-      '__ORGANIZATION_NAME__' => htmlspecialchars($organizationName ?: 'Organization', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+      '__ORGANIZATION_NAME__' => htmlspecialchars($organizationName ?: 'Business', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
       '__SCOPE_LIST__' => htmlspecialchars($scopeList, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
       '__ACCEPT_URL__' => htmlspecialchars($acceptUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
     ];
@@ -694,28 +694,28 @@ class EmailGarum
     );
 
     if (!$sent) {
-      error_log('[Email] sendOrganizationInvite failed: ' . $transport->getLastError());
+      error_log('[Email] sendBusinessInvite failed: ' . $transport->getLastError());
     }
 
     return $sent;
   }
 
   /**
-   * Notify an organization owner that a user requested access.
+   * Notify a business owner that a user requested access.
    */
-  public static function sendOrganizationAccessRequest(
+  public static function sendBusinessAccessRequest(
     string $ownerEmail,
     string $organizationName,
     string $requesterName,
     string $requesterEmail,
     string $requestId
   ): bool {
-    $subject = '[PayCal] Organization Access Request';
+    $subject = '[PayCal] Business Access Request';
 
-    $reviewUrl = rtrim(Environment::appBaseURL(), '/') . '/organizations/';
+    $reviewUrl = rtrim(Environment::appBaseURL(), '/') . '/business/';
     $templateData = [
       '__PC_NAME__' => self::appName(),
-      '__ORGANIZATION_NAME__' => htmlspecialchars($organizationName ?: 'Organization', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+      '__ORGANIZATION_NAME__' => htmlspecialchars($organizationName ?: 'Business', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
       '__REQUESTER_NAME__' => htmlspecialchars($requesterName ?: 'PayCal user', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
       '__REQUESTER_EMAIL__' => htmlspecialchars($requesterEmail ?: 'not-provided', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
       '__REQUEST_ID__' => htmlspecialchars($requestId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
@@ -739,16 +739,16 @@ class EmailGarum
     );
 
     if (!$sent) {
-      error_log('[Email] sendOrganizationAccessRequest failed: ' . $transport->getLastError());
+      error_log('[Email] sendBusinessAccessRequest failed: ' . $transport->getLastError());
     }
 
     return $sent;
   }
 
   /**
-   * Send organization activity notification email.
+   * Send business activity notification email.
    */
-  public static function sendOrganizationEventNotification(
+  public static function sendBusinessEventNotification(
     string $emailTo,
     string $recipientName,
     string $organizationName,
@@ -761,32 +761,32 @@ class EmailGarum
     }
 
     $appName = self::appName();
-    $subject = '[' . $appName . '] Organization Notification: ' . $eventLabel;
+    $subject = '[' . $appName . '] Business Notification: ' . $eventLabel;
     $orgSafe = htmlspecialchars($organizationName ?: 'Organization', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $nameSafe = htmlspecialchars($recipientName ?: 'there', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $eventSafe = htmlspecialchars($eventLabel, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $detailSafe = htmlspecialchars($eventDetail, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $timeSafe = htmlspecialchars($eventTimeUTC !== '' ? $eventTimeUTC : (gmdate('Y-m-d H:i:s') . ' UTC'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-    $url = htmlspecialchars(rtrim(Environment::appBaseURL(), '/') . '/organizations/', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    $url = htmlspecialchars(rtrim(Environment::appBaseURL(), '/') . '/business/', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
     $detailLineHtml = $detailSafe !== '' ? '<p style="margin:0 0 14px;">' . $detailSafe . '</p>' : '';
     $detailLineText = $eventDetail !== '' ? "\n{$eventDetail}\n" : "\n";
 
     $htmlBody = '<!doctype html><html><body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.45;color:#1f2937;">'
-      . '<h2 style="margin:0 0 12px;">Organization Notification</h2>'
+      . '<h2 style="margin:0 0 12px;">Business Notification</h2>'
       . '<p style="margin:0 0 14px;">Hello ' . $nameSafe . ',</p>'
       . '<p style="margin:0 0 14px;"><strong>' . $eventSafe . '</strong> in <strong>' . $orgSafe . '</strong>.</p>'
       . $detailLineHtml
       . '<p style="margin:0 0 14px;">Event time (UTC): ' . $timeSafe . '</p>'
-      . '<p style="margin:0 0 16px;"><a href="' . $url . '">Open Organizations</a></p>'
+      . '<p style="margin:0 0 16px;"><a href="' . $url . '">Open Business</a></p>'
       . '<p style="margin:0;color:#6b7280;">' . htmlspecialchars($appName, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . ' automated notification.</p>'
       . '</body></html>';
 
-    $textBody = "Organization Notification\n\n"
+    $textBody = "Business Notification\n\n"
       . "Hello {$recipientName},\n\n"
       . "{$eventLabel} in {$organizationName}.{$detailLineText}"
       . "Event time (UTC): " . ($eventTimeUTC !== '' ? $eventTimeUTC : (gmdate('Y-m-d H:i:s') . ' UTC')) . "\n"
-      . 'Open Organizations: ' . rtrim(Environment::appBaseURL(), '/') . '/organizations/' . "\n\n"
+      . 'Open Business: ' . rtrim(Environment::appBaseURL(), '/') . '/business/' . "\n\n"
       . $appName . ' automated notification.';
 
     $transport = new EmailTransport();
@@ -802,7 +802,7 @@ class EmailGarum
     );
 
     if (!$sent) {
-      error_log('[Email] sendOrganizationEventNotification failed: ' . $transport->getLastError());
+      error_log('[Email] sendBusinessEventNotification failed: ' . $transport->getLastError());
     }
 
     return $sent;

@@ -79,23 +79,6 @@ class TaxBracket implements \JsonSerializable
   }
 
   /**
-   * Create from array format [min, max, rate].
-   *
-   * @param array<int, float|int> $array Array with exactly 3 elements
-   *
-   * @throws InvalidArgumentException if array is invalid
-   */
-  public static function fromArray(array $array): self
-  {
-    $itemCount = count($array);
-    if (3 !== $itemCount) {
-      throw new InvalidArgumentException('Array must have exactly 3 elements, got: '.$itemCount);
-    }
-
-    return new self((int) $array[0], (int) $array[1], (int) $array[2]);
-  }
-
-  /**
    * Create from integer values (cents and basis points).
    *
    * @param int $minIncomeCents  Minimum income in cents (inclusive)

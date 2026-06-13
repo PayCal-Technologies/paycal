@@ -181,6 +181,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   white-space: nowrap;
 }
 
+.soc-ctrl-title {
+  font-family: inherit;
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
 .soc-control-table .soc-ctrl-notes {
   font-size: 0.82rem;
   opacity: 0.8;
@@ -332,6 +338,16 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   opacity: 0.65;
 }
 
+.soc-anchor-intro {
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.75;
+}
+
+.soc-tx-pending {
+  opacity: 0.45;
+}
+
 /* ── Backup evidence strip ───────────────────────────────────────────────── */
 
 .soc-backup-strip {
@@ -363,6 +379,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .soc-backup-kpi__value {
   font-size: 1.1rem;
   font-weight: 600;
+}
+
+.soc-backup-kpi__value--filename {
+  font-size: 0.75rem;
+  word-break: break-all;
 }
 
 .soc-backup-kpi__sub {

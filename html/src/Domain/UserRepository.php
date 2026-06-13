@@ -15,7 +15,7 @@ use PayCal\Domain\Enums\FormTTL;
  * - This repository is the canonical mapping layer between Redis fields and the
  *   User entity. Avoid ad hoc field-name translations elsewhere.
  * - Changes here ripple into authentication, settings, pay-period generation,
- *   organizations, and recovery flows.
+ *   businesses, and recovery flows.
  * - When adding new user fields, update mapping, normalization, and save paths
  *   together so reads and writes stay symmetric.
  * - Controllers should prefer repository helpers over direct user hash access.
@@ -400,6 +400,42 @@ final class UserRepository
 
 
   /**
+   * Batch profile lookup via a single pipelined round trip.
+   *
+   * Use instead of calling find() in a loop (N+1). Unknown UUIDs are simply
+   * absent from the returned map.
+   *
+   * @param array<int, string> $uuids
+   * @return array<string, User> UUID => hydrated user
+   */
+  public static function findMany(array $uuids): array
+  {
+    $keysByUuid = [];
+    foreach ($uuids as $uuid) {
+      if ('' !== $uuid) {
+        $keysByUuid[$uuid] = Keys::USER . ':' . $uuid;
+      }
+    }
+
+    if ([] === $keysByUuid) {
+      return [];
+    }
+
+    $hashes = Database::pipelineHgetall(array_values($keysByUuid));
+
+    $users = [];
+    foreach ($keysByUuid as $uuid => $key) {
+      $fields = $hashes[$key] ?? [];
+      if ($fields !== []) {
+        $users[$uuid] = self::hydrate($uuid, $fields);
+      }
+    }
+
+    return $users;
+  }
+
+
+  /**
    * @param array<string, string> $fields
    */
   private static function hydrate(string $uuid, array $fields): User
@@ -548,11 +584,17 @@ final class UserRepository
       case 'dyslexia_typography':
         $user->dyslexia_typography = $value;
         return;
+      case 'help_popup_timeout_seconds':
+        $user->help_popup_timeout_seconds = $value;
+        return;
       case 'nav_position_primary':
         $user->nav_position_primary = $value;
         return;
       case 'nav_state_primary':
         $user->nav_state_primary = $value;
+        return;
+      case 'overlay_sidebar_timeout_seconds':
+        $user->overlay_sidebar_timeout_seconds = $value;
         return;
       case 'calendar_autofocus':
         $user->calendar_autofocus = $value;
@@ -674,42 +716,6 @@ final class UserRepository
     }
 
     return AuthLevel::GUEST;
-  }
-
-
-  /**
-   * Handles save operation.
-   */
-  public static function save(User $user): void
-  {
-    if ('' === $user->user_uuid) {
-      throw new \InvalidArgumentException('User UUID cannot be empty.');
-    }
-
-    $key = Keys::USER . ':' . $user->user_uuid;
-
-    $allowed = array_column(UserFields::cases(), 'value');
-    $data = [];
-
-    foreach ($allowed as $field) {
-      if (!property_exists($user, $field))
-        continue;
-
-      $value = $user->{$field};
-
-      if (null === $value)
-        continue;
-
-      if (is_bool($value)) {
-        $data[$field] = $value ? '1' : '0';
-        continue;
-      }
-
-      $data[$field] = (string) $value;
-    }
-
-    if ($data !== [])
-      Database::hset($key, $data);
   }
 }
 

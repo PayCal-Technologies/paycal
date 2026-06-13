@@ -19,6 +19,7 @@ if (!function_exists('transparency_href')) {
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_HUB_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_HOME',
 ];
@@ -29,8 +30,8 @@ foreach ($i18nKeys as $key) {
 $readMoreLabel = 'और पढ़ें';
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'पारदर्शिता केंद्र - [PayCal]';
-$pageLabel = 'पारदर्शिता केंद्र';
+$pageTitle = $i18n['TRANSPARENCY_HUB_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_HUB_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -41,7 +42,7 @@ require_once HTML.'/header.php';
     </nav>
 
     <header class="doc-article-header">
-      <h1>पारदर्शिता केंद्र</h1>
+      <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_HUB_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
       <p class="deck">हम PayCal की कार्यप्रणाली प्रकाशित करते हैं ताकि उपयोगकर्ता निर्णयों की जांच कर सकें — केवल वक्तव्यों पर भरोसा नहीं करना पड़े।</p>
     </header>
 

@@ -42,6 +42,7 @@ class Database
   private const DEFAULT_SCAN_COUNT = 100;
   private const DEFAULT_KEY_SCAN_COUNT = 10000;
   private const MAX_SCAN_ITERATIONS = 10000;
+  private const PIPELINE_BATCH_SIZE = 2000;
 
   private static ?Redis $readInstance = null;
 
@@ -415,15 +416,87 @@ class Database
 
 
   /**
-   * Retrieves all field names from a Database hash.
-   * @param string $key Database hash key
-   * @return array<string> Array of field names
+   * Retrieves all field-value pairs for many hashes in one round trip (pipelined HGETALL).
+   *
+   * Use instead of calling hgetall() in a loop — N sequential round trips become
+   * a single pipelined batch. Missing keys map to an empty array.
+   *
+   * @param array<int, string> $keys Database hash keys
+   * @return array<string, array<string, string>> Key => field/value map (missing keys = [])
    */
-  public static function hkeys(string $key): array
+  public static function pipelineHgetall(array $keys): array
   {
-    $result = (array) self::getReadInstance()->hkeys($key);
+    $normalizedKeys = [];
+    foreach ($keys as $key) {
+      if ($key !== '') {
+        $normalizedKeys[] = $key;
+      }
+    }
 
-    return $result;
+    if ([] === $normalizedKeys) {
+      return [];
+    }
+
+    $results = self::pipelineHgetallOn(self::getReadInstance()->client, $normalizedKeys);
+
+    // Preserve the read-replica fallback contract of hgetall(): keys that came
+    // back empty may be victims of replica lag, so retry them as one pipelined
+    // batch against the primary. No empties (the common case) costs nothing.
+    $emptyKeys = [];
+    foreach ($results as $key => $fields) {
+      if ([] === $fields) {
+        $emptyKeys[] = $key;
+      }
+    }
+
+    if ([] !== $emptyKeys) {
+      try {
+        $fallback = self::pipelineHgetallOn(self::getWriteInstance()->client, $emptyKeys);
+        foreach ($fallback as $key => $fields) {
+          if ([] !== $fields) {
+            $results[$key] = $fields;
+            if (class_exists('PayCal\\Observability\\Lens')) {
+              \PayCal\Observability\Lens::increment('redis.replica.fallback');
+            }
+          }
+        }
+      } catch (\Throwable $e) {
+        // Suppress fallback errors, keep replica results
+      }
+    }
+
+    return $results;
+  }
+
+
+  /**
+   * @param array<int, string> $keys
+   * @return array<string, array<string, string>>
+   */
+  private static function pipelineHgetallOn(\Redis $redis, array $keys): array
+  {
+    $results = [];
+
+    foreach (array_chunk($keys, self::PIPELINE_BATCH_SIZE) as $chunk) {
+      $redis->multi(\Redis::PIPELINE);
+      foreach ($chunk as $key) {
+        $redis->hGetAll($key);
+      }
+      $responses = (array) $redis->exec();
+
+      foreach ($chunk as $index => $key) {
+        $raw = $responses[$index] ?? [];
+        $normalized = [];
+        if (is_array($raw)) {
+          foreach ($raw as $field => $value) {
+            $normalized[(string) $field] = is_scalar($value) ? (string) $value : '';
+          }
+        }
+        $results[$key] = $normalized;
+      }
+    }
+
+    return $results;
   }
 
 
@@ -600,18 +673,9 @@ class Database
    */
   public static function unlink(string $key): int
   {
-    return self::getWriteInstance()->client->unlink($key);
-  }
+    $result = self::getWriteInstance()->client->unlink($key);
 
-
-  /**
-   * Removes the expiration from a key.
-   * @param string $key Key name
-   * @return bool True if successful
-   */
-  public static function persist(string $key): bool
-  {
-    return (bool) self::getWriteInstance()->client->persist($key);
+    return is_int($result) ? $result : 0;
   }
 
 
@@ -734,6 +798,32 @@ class Database
 
 
   /**
+   * Read a range of values from a Redis list.
+   *
+   * @param string $key List key
+   * @param int $start Inclusive start index
+   * @param int $stop Inclusive stop index
+   * @return array<int, string>
+   */
+  public static function lrange(string $key, int $start, int $stop): array
+  {
+    $raw = self::getReadInstance()->client->lRange($key, $start, $stop);
+    if (!is_array($raw)) {
+      return [];
+    }
+
+    $out = [];
+    foreach ($raw as $value) {
+      if (is_scalar($value)) {
+        $out[] = (string) $value;
+      }
+    }
+
+    return $out;
+  }
+
+
+  /**
    * Renames a Database key.
    * @param string $oldkey The current key name
    * @param string $newkey The new key name
@@ -781,172 +871,6 @@ class Database
     return (int) self::getReadInstance()->client->sIsMember($key, $member);
   }
 
-
-  /**
-   * Add a member to a sorted set with a given score.
-   *
-   * @param string $key    Sorted set key
-   * @param float  $score  Numeric score for ordering
-   * @param string $member Member value
-   * @return int Number of elements added (0 if already existed and score updated)
-   */
-  public static function zadd(string $key, float $score, string $member): int
-  {
-    return (int) self::getWriteInstance()->client->zAdd($key, $score, $member);
-  }
-
-
-  /**
-   * Return members of a sorted set within a score range (inclusive).
-   *
-   * Pass '-inf' or '+inf' as string values for open-ended ranges.
-   *
-   * @param string     $key   Sorted set key
-   * @param float|string $min Minimum score or '-inf'
-   * @param float|string $max Maximum score or '+inf'
-   * @return array<int, string> Ordered list of member strings
-   */
-  public static function zrangebyscore(string $key, float|string $min, float|string $max): array
-  {
-    $result = self::getReadInstance()->client->zRangeByScore($key, (string) $min, (string) $max);
-
-    return is_array($result) ? array_values(array_map('strval', $result)) : [];
-  }
-
-  /**
-   * Resets fields and sets dummy values for all keys matching a pattern using pipelining.
-   *
-   * @param string               $pattern        Key pattern to match (e.g. "work:*")
-   * @param array<string>        $fieldsToRemove Fields to delete from each hash
-   * @param array<string,string> $dummyValues    Fields/values to HSET after deletion
-   * @param int                  $scanCount      Number of keys per SCAN batch (passed to scanKeys)
-   */
-  public static function resetWorkKeysPipelineSafe(
-    string $pattern,
-    array $fieldsToRemove,
-    array $dummyValues,
-    int $scanCount = self::DEFAULT_SCAN_COUNT
-  ): void {
-    // Get all matching keys safely using your scanKeys helper
-    $keys = self::scanKeys($pattern, $scanCount);
-
-    if (empty($keys)) {
-      return;
-    }
-
-    // Execute pipeline on all keys
-    self::multi(function ($r) use ($keys, $fieldsToRemove, $dummyValues): void {
-      foreach ($keys as $key) {
-        Database::unlink($key);
-
-        // delete unwanted fields
-        $r->hDel($key, ...$fieldsToRemove);
-
-        // set dummy values
-        $args = [$key];
-        foreach ($dummyValues as $field => $value) {
-          $args[] = $field;
-          $args[] = $value;
-        }
-        $r->hSet(...$args);
-      }
-    });
-  }
-
-
-  // ////////////////////////////////////////////////////////////////////////////
-  // BACKEND-NEUTRAL METHODS
-  //
-  // These methods provide a higher-level abstraction that decouples domain
-  // logic from Redis-specific operations. This prepares for future multi-backend
-  // support (Redis + Postgres) without requiring changes to domain code.
-
-  /**
-   * Fetch a complete record by key.
-   * Backend-neutral alternative to hgetall().
-   *
-   * @param string $key Record key
-   * @return array<string, string> Record data
-   */
-  public static function fetchRecord(string $key): array
-  {
-    return self::hgetall($key);
-  }
-
-  /**
-   * Store a complete record by key.
-   * Backend-neutral alternative to hset().
-   *
-   * @param string               $key  Record key
-   * @param array<string,string> $data Record data
-   */
-  public static function storeRecord(string $key, array $data): void
-  {
-    self::hset($key, $data);
-  }
-
-  /**
-   * Check if a record exists.
-   * Backend-neutral alternative to exists().
-   *
-   * @param string $key Record key
-   * @return bool True if record exists
-   */
-  public static function recordExists(string $key): bool
-  {
-    return self::exists($key);
-  }
-
-  /**
-   * Get a single field from a record.
-   * Backend-neutral alternative to hget().
-   *
-   * @param string $key   Record key
-   * @param string $field Field name
-   * @return string Field value or empty string
-   */
-  public static function getField(string $key, string $field): string
-  {
-    return self::hget($key, $field);
-  }
-
-  /**
-   * Set a single field in a record.
-   * Backend-neutral alternative to hset().
-   *
-   * @param string $key   Record key
-   * @param string $field Field name
-   * @param string $value Field value
-   */
-  public static function setField(string $key, string $field, string $value): void
-  {
-    self::hset($key, [$field => $value]);
-  }
-
-  /**
-   * Delete a record.
-   * Backend-neutral alternative to unlink().
-   *
-   * @param string $key Record key
-   * @return int Number of records deleted
-   */
-  public static function deleteRecord(string $key): int
-  {
-    return self::unlink($key);
-  }
-
-  /**
-   * Check if a field exists in a record.
-   * Backend-neutral alternative to hexists().
-   *
-   * @param string $key   Record key
-   * @param string $field Field name
-   * @return bool True if field exists
-   */
-  public static function hasField(string $key, string $field): bool
-  {
-    return self::hexists($key, $field);
-  }
 
   /**
    * Get Redis server INFO statistics.

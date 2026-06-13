@@ -4103,6 +4103,10 @@ import { uniqueNonEmptyStrings } from "../core/set-utils.js";
       Guardian.setHTML(elements.gridBody, html);
       const grid = elements.gridContainer?.querySelector('.datagrid[data-grid="organizations"]');
       syncGridDataset(grid);
+      const searchInput = elements.gridContainer?.querySelector('.datagrid_search');
+      if (searchInput instanceof HTMLInputElement) {
+        searchInput.value = state.grid.search;
+      }
       decorateGridRowsForPremiumLocks();
       announceGridStatus(changeReason);
     } catch (error) {
@@ -6705,36 +6709,14 @@ import { uniqueNonEmptyStrings } from "../core/set-utils.js";
       state.grid.page = '1';
       state.searchDebounceId = window.setTimeout(() => {
         loadGrid({ search, page: '1' })
-          .then(() => searchInput.focus())
+          .then(() => {
+            const freshSearchInput = elements.gridContainer?.querySelector('.datagrid_search');
+            if (freshSearchInput instanceof HTMLInputElement) {
+              freshSearchInput.focus({ preventScroll: true });
+            }
+          })
           .catch((error) => PW.error(error));
       }, 250);
-      return;
-    }
-
-    const managerGridContainers = [
-      { container: elements.auditGridContainer, managerKey: 'auditGridManager' },
-      { container: elements.freeAuditGridContainer, managerKey: 'freeAuditGridManager' },
-      { container: elements.membersInviteHistoryGridContainer, managerKey: 'inviteHistoryGridManager' },
-      { container: elements.membersGridContainer, managerKey: 'membersGridManager' },
-    ];
-
-    for (const { container, managerKey } of managerGridContainers) {
-      if (container instanceof HTMLElement && container.contains(searchInput)) {
-        const manager = state[managerKey];
-        if (manager && typeof manager.setSearch === 'function') {
-          const refocusHandler = (e) => {
-            if (container.contains(searchInput)) {
-              searchInput.focus();
-            }
-            document.removeEventListener('paycal:datagrid-reloaded', refocusHandler);
-          };
-          state.searchDebounceId = window.setTimeout(() => {
-            manager.setSearch(search);
-            document.addEventListener('paycal:datagrid-reloaded', refocusHandler);
-          }, 250);
-        }
-        return;
-      }
     }
   };
 

@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -21,8 +22,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Pagpapatibay ng Auth, Passkey at Redis — Mayo 2026 - [PayCal]';
-$pageLabel = 'Pagpapatibay ng Auth, Passkey & Redis — Mayo 2026';
+$pageTitle = $i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -33,7 +34,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Pagpapatibay ng Auth, Passkey &amp; Redis — Mayo 2026</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       Noong Mayo 12, 2026, nagsagawa kami ng panloob na pag-audit ng aming imprastraktura ng
       pagpapatunay, passkey, at Redis. Nahanap namin ang labing-isang isyu — lahat nasa code na

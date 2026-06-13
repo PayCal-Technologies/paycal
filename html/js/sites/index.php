@@ -28,6 +28,26 @@ import PC from "<?php echo Environment::appURL('js/'); ?>";
 import PW from "<?php echo Environment::appURL('js/phantomwing/'); ?>";
 import { createDataGrid } from "/js/datagrid/";
 
+<?php require __DIR__ . '/i18n.php'; ?>
+
+const siteEditorResolveGridSiteName = (row) => {
+  if (!(row instanceof HTMLElement)) {
+    return '';
+  }
+
+  const nameEl = row.querySelector('.business_sites_site_name_text');
+  if (nameEl instanceof HTMLElement) {
+    return String(nameEl.textContent || '').trim();
+  }
+
+  const siteNameCol = row.querySelector('.datagrid_col_site_name');
+  if (siteNameCol instanceof HTMLElement) {
+    return String(siteNameCol.textContent || '').trim();
+  }
+
+  return String(row.querySelector('.datagrid_item')?.textContent || '').trim();
+};
+
 debugLog('Imports loaded successfully');
 
 // API helper - construct API endpoint URLs with version
@@ -87,84 +107,6 @@ document.addEventListener("DOMContentLoaded", async () =>
   debugLog('Sites page loaded (DOMContentLoaded)');
   debugLog('Initializing DataGrids...');
 
-  const initializeHoverHelp = () => {
-    const targets = Array.from(document.querySelectorAll('[data-hover-help]'));
-    if (targets.length === 0) {
-      return;
-    }
-
-    const tooltipEl = document.createElement('div');
-    tooltipEl.className = 'hover_help_tooltip';
-    tooltipEl.setAttribute('role', 'tooltip');
-    tooltipEl.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(tooltipEl);
-
-    let showTimer = null;
-    let activeTarget = null;
-
-    const clearShowTimer = () => {
-      if (showTimer !== null) {
-        window.clearTimeout(showTimer);
-        showTimer = null;
-      }
-    };
-
-    const hideTooltip = () => {
-      clearShowTimer();
-      activeTarget = null;
-      tooltipEl.classList.remove('is-visible');
-      tooltipEl.setAttribute('aria-hidden', 'true');
-    };
-
-    const positionTooltip = (targetEl) => {
-      if (!targetEl) {
-        return;
-      }
-      const margin = '1.5rem';
-      tooltipEl.style.bottom = margin;
-      tooltipEl.style.right = margin;
-      tooltipEl.style.top = 'auto';
-      tooltipEl.style.left = 'auto';
-    };
-
-    const showTooltip = (targetEl) => {
-      const helpText = (targetEl?.getAttribute('data-hover-help') || '').trim();
-      if (!helpText) {
-        return;
-      }
-
-      activeTarget = targetEl;
-      tooltipEl.textContent = helpText;
-      tooltipEl.classList.add('is-visible');
-      tooltipEl.setAttribute('aria-hidden', 'false');
-      positionTooltip(targetEl);
-    };
-
-    const scheduleShow = (targetEl) => {
-      clearShowTimer();
-      showTimer = window.setTimeout(() => {
-        showTimer = null;
-        showTooltip(targetEl);
-      }, 250);
-    };
-
-    targets.forEach((targetEl) => {
-      targetEl.addEventListener('mouseenter', () => scheduleShow(targetEl));
-      targetEl.addEventListener('mouseleave', hideTooltip);
-      targetEl.addEventListener('focus', () => scheduleShow(targetEl));
-      targetEl.addEventListener('blur', hideTooltip);
-      targetEl.addEventListener('mousedown', hideTooltip);
-    });
-
-    window.addEventListener('scroll', () => {
-      if (activeTarget && tooltipEl.classList.contains('is-visible')) {
-        positionTooltip(activeTarget);
-      }
-    }, true);
-  };
-
-  initializeHoverHelp();
-
   // ── Site Color Swatch Picker ─────────────────────────────────────────────
   let colorPickSave = false;
   const swatchesContainer = PC.getElement('edit_site_color_swatches');
@@ -207,8 +149,17 @@ document.addEventListener("DOMContentLoaded", async () =>
     const order = state?.sort ? `${state.sort} ${state.direction || 'asc'}` : 'default order';
     const search = state?.search ? `search ${state.search}` : 'no search filter';
     const page = state?.page || 1;
-    const label = gridId === 'sites-grid-archived' ? 'Archived sites' : 'Active sites';
-    statusNode.textContent = `${label} grid ${reason}. ${rowCount} result${rowCount === 1 ? '' : 's'}. ${order}. ${search}. Page ${page}.`;
+    const label = gridId === 'sites-grid-archived' ? SITES_T.SITES_GRID_ARCHIVED_LABEL : SITES_T.SITES_GRID_ACTIVE_LABEL;
+    const resultsLabel = sitesPluralLabel(rowCount, SITES_T.SITES_RESULT_SINGULAR, SITES_T.SITES_RESULT_PLURAL);
+    statusNode.textContent = sitesFormatMessage(SITES_T.SITES_GRID_STATUS, {
+      label,
+      reason,
+      count: rowCount,
+      resultsLabel,
+      order,
+      search,
+      page,
+    });
   };
 
   document.addEventListener('paycal:datagrid-reloaded', (event) => {
@@ -273,20 +224,20 @@ document.addEventListener("DOMContentLoaded", async () =>
 
     if (!nameValue || !wageValue) {
       if (!nameValue) {
-        setFieldError(nameInput, nameErrorId, 'Enter a site name.');
+        setFieldError(nameInput, nameErrorId, SITES_T.SITES_ERROR_ENTER_SITE_NAME);
       }
       if (!wageValue) {
-        setFieldError(wageInput, wageErrorId, 'Enter an hourly wage.');
+        setFieldError(wageInput, wageErrorId, SITES_T.SITES_ERROR_ENTER_HOURLY_WAGE);
       }
-      setFormStatus(statusElementId, 'Enter both site name and wage.');
+      setFormStatus(statusElementId, SITES_T.SITES_ERROR_ENTER_NAME_AND_WAGE);
       (nameValue ? wageInput : nameInput)?.focus();
       return false;
     }
 
     const wageNum = parseFloat(wageValue);
     if (Number.isNaN(wageNum) || wageNum <= 0) {
-      setFieldError(wageInput, wageErrorId, 'Wage must be greater than zero.');
-      setFormStatus(statusElementId, 'Enter a wage greater than zero — a zero wage means earnings cannot be calculated.');
+      setFieldError(wageInput, wageErrorId, SITES_T.SITES_ERROR_WAGE_MUST_BE_POSITIVE);
+      setFormStatus(statusElementId, SITES_T.SITES_ERROR_WAGE_ZERO_EXPLANATION);
       wageInput?.focus();
       return false;
     }
@@ -370,7 +321,7 @@ document.addEventListener("DOMContentLoaded", async () =>
         const modal = PC.getElement('modal_create_site');
         modal?.close();
 
-        PC.showToast('Site created successfully');
+        PC.showToast(SITES_T.SITES_CREATED_SUCCESS);
 
         form.reset();
         setFormStatus('create_site_form_status', '');
@@ -383,13 +334,13 @@ document.addEventListener("DOMContentLoaded", async () =>
         manager.reload();
       } else {
         PW.error('Error creating site');
-        setFormStatus('create_site_form_status', responseData.message || 'Error creating site.');
-        PC.showToast('Error creating site');
+        setFormStatus('create_site_form_status', responseData.message || SITES_T.SITES_ERROR_CREATING);
+        PC.showToast(SITES_T.SITES_ERROR_CREATING);
       }
     } catch (error) {
       PW.error(`Error creating site: ${getErrorMessage(error)}`);
-      setFormStatus('create_site_form_status', 'Unable to create site right now. Please try again.');
-      PC.showToast('Error creating site');
+      setFormStatus('create_site_form_status', SITES_T.SITES_ERROR_CREATE_RETRY);
+      PC.showToast(SITES_T.SITES_ERROR_CREATING);
     }
   }
 
@@ -488,7 +439,7 @@ document.addEventListener("DOMContentLoaded", async () =>
       }
     } catch (error) {
       PW.error(`Error loading site data: ${getErrorMessage(error)}`);
-      PC.showToast('Error loading site data');
+      PC.showToast(SITES_T.SITES_ERROR_LOADING);
     }
   }
 
@@ -531,7 +482,7 @@ document.addEventListener("DOMContentLoaded", async () =>
         setFieldError(nameInput, 'edit_site_name_error', '');
         setFieldError(wageInput, 'edit_site_wage_error', '');
 
-        PC.showToast('Site updated successfully');
+        PC.showToast(SITES_T.SITES_UPDATED_SUCCESS);
 
         // If org planning section is visible, save those fields too
         const planningEl = PC.getElement('edit_site_org_planning');
@@ -551,7 +502,7 @@ document.addEventListener("DOMContentLoaded", async () =>
             end_date:           /** @type {HTMLInputElement} */ (PC.getElement('edit_site_end_date_input'))?.value || '',
           });
           fetch(
-            apiUrl(`organizations/${encodeURIComponent(planOrgId)}/sites/${encodeURIComponent(planOwner)}/${encodeURIComponent(planSiteId)}/settings/update`),
+            apiUrl(`businesses/${encodeURIComponent(planOrgId)}/sites/${encodeURIComponent(planOwner)}/${encodeURIComponent(planSiteId)}/settings/update`),
             { method: 'POST', credentials: 'include', body: planBody }
           ).catch(() => {});
         }
@@ -561,13 +512,13 @@ document.addEventListener("DOMContentLoaded", async () =>
         gridManagerArchived.reload();
       } else {
         PW.error('Error updating site');
-        setFormStatus('edit_site_form_status', responseData.message || 'Error updating site.');
-        PC.showToast('Error updating site');
+        setFormStatus('edit_site_form_status', responseData.message || SITES_T.SITES_ERROR_UPDATING);
+        PC.showToast(SITES_T.SITES_ERROR_UPDATING);
       }
     } catch (error) {
       PW.error(`Error updating site: ${getErrorMessage(error)}`);
-      setFormStatus('edit_site_form_status', 'Unable to update site right now. Please try again.');
-      PC.showToast('Error updating site');
+      setFormStatus('edit_site_form_status', SITES_T.SITES_ERROR_UPDATE_RETRY);
+      PC.showToast(SITES_T.SITES_ERROR_UPDATING);
     }
   }
 
@@ -585,34 +536,47 @@ document.addEventListener("DOMContentLoaded", async () =>
   function openDeleteDialog(siteId, siteName, siteStatus = 'active') {
     debugLog('openDeleteDialog called', {siteId, siteName, siteStatus});
     const modal = PC.getElement('modal_confirm_delete_site');
+    const titleEl = PC.getElement('modal_confirm_delete_site_title');
     const messageEl = PC.getElement('confirm_delete_site_message');
     const confirmBtn = PC.getElement('confirm_delete_site_yes');
+    const cancelBtn = PC.getElement('confirm_delete_site_no');
+    const ariaEl = PC.getElement('confirm_delete_site_aria');
 
     if (!modal) return;
 
-    const escapedName = siteName || 'this site';
+    const escapedName = siteName || SITES_T.SITES_THIS_SITE;
     
     // Different messages and button text based on status
     if (siteStatus === 'archived') {
-      // Permanent delete from archived
-      PC.setHTML(messageEl, `<strong class="delete_message_danger">⚠️ PERMANENT DELETION</strong><br><br>` +
-        `You are about to <strong>permanently delete</strong> "${escapedName}" and all its archived work entries.<br><br>` +
-        `<strong>This action cannot be undone. All historical data will be lost forever.</strong>`);
+      if (titleEl) {
+        titleEl.textContent = SITES_T.SITES_FINALITY_DELETE_TITLE;
+      }
+      if (ariaEl) {
+        ariaEl.textContent = SITES_T.SITES_FINALITY_DELETE_ARIA;
+      }
+      PC.setHTML(messageEl, sitesFormatMessage(SITES_T.SITES_DELETE_PERMANENT_BODY, { name: escapedName }));
       
       if (confirmBtn) {
-        confirmBtn.textContent = 'Yes, Permanently Delete';
+        confirmBtn.textContent = SITES_T.SITES_FINALITY_DELETE_CONFIRM;
         confirmBtn.className = 'btn btn_danger';
       }
     } else {
-      // Archive active site
-      PC.setHTML(messageEl, `Are you sure you want to archive "${escapedName}"?<br><br>` +
-        `<strong>The site will be moved to Archived, and all associated work entries will be preserved.</strong><br><br>` +
-        `You can permanently delete it later from the Archived tab if needed.`);
+      if (titleEl) {
+        titleEl.textContent = SITES_T.SITES_CONFIRM_ARCHIVE_TITLE;
+      }
+      if (ariaEl) {
+        ariaEl.textContent = SITES_T.SITES_CONFIRM_ARCHIVE_ARIA;
+      }
+      PC.setHTML(messageEl, sitesFormatMessage(SITES_T.SITES_ARCHIVE_CONFIRM_BODY, { name: escapedName }));
       
       if (confirmBtn) {
-        confirmBtn.textContent = 'Archive Site';
+        confirmBtn.textContent = SITES_T.SITES_ARCHIVE_SITE;
         confirmBtn.className = 'btn btn_primary';
       }
+    }
+
+    if (cancelBtn) {
+      cancelBtn.textContent = SITES_T.CANCEL;
     }
 
     // Set state
@@ -674,15 +638,15 @@ document.addEventListener("DOMContentLoaded", async () =>
         closeDeleteDialog();
         
         if (currentDeleteSiteStatus === 'archived') {
-          // Permanent delete
           const deletedCount = responseData?.deleted_work_count ?? 0;
-          PC.showToast(`Site permanently deleted. ${deletedCount} archived work ${deletedCount === 1 ? 'entry' : 'entries'} removed.`);
+          const entriesLabel = sitesPluralLabel(deletedCount, SITES_T.SITES_WORK_ENTRY_SINGULAR, SITES_T.SITES_WORK_ENTRY_PLURAL);
+          PC.showToast(sitesFormatMessage(SITES_T.SITES_PERMANENTLY_DELETED_SUCCESS, { count: deletedCount, entriesLabel }));
         } else {
-          // Archive
           const archivedCount = responseData?.archived_count ?? 0;
+          const entriesLabel = sitesPluralLabel(archivedCount, SITES_T.SITES_WORK_ENTRY_SINGULAR, SITES_T.SITES_WORK_ENTRY_PLURAL);
           const message = archivedCount > 0
-            ? `Site archived. ${archivedCount} work ${archivedCount === 1 ? 'entry' : 'entries'} preserved.`
-            : 'Site archived (no work entries found).';
+            ? sitesFormatMessage(SITES_T.SITES_ARCHIVED_SUCCESS, { count: archivedCount, entriesLabel })
+            : SITES_T.SITES_ARCHIVED_SUCCESS_NO_ENTRIES;
           PC.showToast(message);
         }
 
@@ -695,12 +659,12 @@ document.addEventListener("DOMContentLoaded", async () =>
         await loadSiteEarnings(parseInt(currentYear));
       } else {
         PW.error('Error deleting site');
-        PC.showToast('Error deleting site');
+        PC.showToast(SITES_T.SITES_ERROR_DELETING);
         if (confirmBtn) confirmBtn.disabled = false;
       }
     } catch (error) {
       PW.error(`Error deleting site: ${getErrorMessage(error)}`);
-      PC.showToast('Error deleting site');
+      PC.showToast(SITES_T.SITES_ERROR_DELETING);
       if (confirmBtn) confirmBtn.disabled = false;
     }
   }
@@ -897,7 +861,7 @@ document.addEventListener("DOMContentLoaded", async () =>
       PW.error(`Error loading site earnings: ${getErrorMessage(error)}`);
       loadingEl?.classList.add('hidden');
       if (listEl) {
-        PC.setHTML(listEl, '<div class="f_center earnings_error">Failed to load earnings data</div>');
+        PC.setHTML(listEl, `<div class="f_center earnings_error">${SITES_T.SITES_EARNINGS_FAILED_LOAD}</div>`);
         listEl.classList.remove('hidden');
       }
     }
@@ -928,7 +892,7 @@ document.addEventListener("DOMContentLoaded", async () =>
         <div class="flex f_space_between f_center site_earnings_header">
           <div class="site_name_bold">
             ${site.site_name}
-            ${site.site_status === 'archived' ? '<span class="site_archived_badge"> (Archived)</span>' : ''}
+            ${site.site_status === 'archived' ? `<span class="site_archived_badge"> ${SITES_T.SITES_ARCHIVED_BADGE}</span>` : ''}
           </div>
           <div class="site_earnings_amount">
             ${formatCurrencyLocale(site.total_earnings)}
@@ -940,8 +904,15 @@ document.addEventListener("DOMContentLoaded", async () =>
         </div>
         
         <div class="flex f_space_between site_earnings_details">
-          <span>${formatNumberLocale(site.total_hours, 1, 1)} hours (${formatNumberLocale(site.regular_hours, 1, 1)} reg, ${formatNumberLocale(site.overtime_hours, 1, 1)} OT)</span>
-          <span>${formatNumberLocale(site.work_days, 0, 0)} days ◆ ${formatNumberLocale(percentage, 1, 1)}%</span>
+          <span>${sitesFormatMessage(SITES_T.SITES_HOURS_REG_OT, {
+            hours: formatNumberLocale(site.total_hours, 1, 1),
+            regular: formatNumberLocale(site.regular_hours, 1, 1),
+            overtime: formatNumberLocale(site.overtime_hours, 1, 1),
+          })}</span>
+          <span>${sitesFormatMessage(SITES_T.SITES_DAYS_PERCENT, {
+            days: formatNumberLocale(site.work_days, 0, 0),
+            percent: formatNumberLocale(percentage, 1, 1),
+          })}</span>
         </div>
       `);
 
@@ -962,15 +933,15 @@ document.addEventListener("DOMContentLoaded", async () =>
     const avgPerSite = totals.sites_count > 0 ? totals.earnings / totals.sites_count : 0;
 
     PC.setHTML(totalsEl, `
-      <div class="datagrid datagrid_cols_5 datagrid_layout_auto site_earnings_totals_datagrid" data-grid="site-earnings-totals" role="region" aria-label="Site earnings totals summary">
+      <div class="datagrid datagrid_cols_5 datagrid_layout_auto site_earnings_totals_datagrid" data-grid="site-earnings-totals" role="region" aria-label="${SITES_T.SITES_EARNINGS_TOTALS_ARIA}">
         <div class="datagrid_table" role="grid" aria-colcount="5" aria-rowcount="1">
           <div class="datagrid_header_row" role="rowgroup">
             <div class="datagrid_header_content" role="row">
-              <div class="datagrid_heading" role="columnheader">Earnings</div>
-              <div class="datagrid_heading" role="columnheader">Hours</div>
-              <div class="datagrid_heading" role="columnheader">Days</div>
-              <div class="datagrid_heading" role="columnheader">Sites</div>
-              <div class="datagrid_heading" role="columnheader">Average</div>
+              <div class="datagrid_heading" role="columnheader">${SITES_T.EARNINGS}</div>
+              <div class="datagrid_heading" role="columnheader">${SITES_T.HOURS}</div>
+              <div class="datagrid_heading" role="columnheader">${SITES_T.DAYS}</div>
+              <div class="datagrid_heading" role="columnheader">${SITES_T.SITES}</div>
+              <div class="datagrid_heading" role="columnheader">${SITES_T.AVERAGE}</div>
             </div>
           </div>
 
@@ -1067,11 +1038,11 @@ document.addEventListener("DOMContentLoaded", async () =>
     if (!modal || !contentEl) return;
 
     if (titleEl) {
-      titleEl.textContent = `Archived Work: ${siteName}`;
+      titleEl.textContent = sitesFormatMessage(SITES_T.SITES_ARCHIVED_WORK_TITLE_NAMED, { name: siteName });
     }
 
     // Show loading state
-    PC.setHTML(contentEl, '<p class="loading-message">Loading archived data...</p>');
+    PC.setHTML(contentEl, `<p class="loading-message">${SITES_T.SITES_LOADING_ARCHIVED_DATA}</p>`);
     
     if (finalityBtn) {
       finalityBtn.classList.add('hidden');
@@ -1092,7 +1063,7 @@ document.addEventListener("DOMContentLoaded", async () =>
         const summary = responseData;
         
         if (summary.count === 0) {
-          PC.setHTML(contentEl, '<p class="loading-message">No archived work entries found.</p>');
+          PC.setHTML(contentEl, `<p class="loading-message">${SITES_T.SITES_NO_ARCHIVED_ENTRIES}</p>`);
           return;
         }
 
@@ -1105,24 +1076,24 @@ document.addEventListener("DOMContentLoaded", async () =>
         let html = `
           <div class="archived-summary-card">
             <div class="flex f_space_between archived-summary-row">
-              <strong>Total Archived Entries:</strong>
+              <strong>${SITES_T.SITES_TOTAL_ARCHIVED_ENTRIES}</strong>
                 <span>${formatNumberLocale(summary.count, 0, 0)}</span>
             </div>
             <div class="flex f_space_between archived-summary-row">
-              <strong>Total Earnings:</strong>
+              <strong>${SITES_T.SITES_TOTAL_EARNINGS}</strong>
                 <span class="primary-text">${formatCurrencyLocale(summary.total_earnings)}</span>
             </div>
             <div class="flex f_space_between archived-summary-row">
-              <strong>Total Hours:</strong>
+              <strong>${SITES_T.SITES_TOTAL_HOURS}</strong>
                 <span>${formatNumberLocale(summary.total_hours, 1, 1)}</span>
             </div>
             <div class="flex f_space_between">
-              <strong>Date Range:</strong>
-              <span>${summary.date_range.start || 'N/A'} to ${summary.date_range.end || 'N/A'}</span>
+              <strong>${SITES_T.SITES_DATE_RANGE}</strong>
+              <span>${summary.date_range.start || 'N/A'} ${SITES_T.TO || 'to'} ${summary.date_range.end || 'N/A'}</span>
             </div>
           </div>
 
-          <h3 class="archived-entries-title">Archived Entries</h3>
+          <h3 class="archived-entries-title">${SITES_T.SITES_ARCHIVED_ENTRIES_HEADING}</h3>
           <div class="archived-entries-list">
         `;
 
@@ -1138,7 +1109,7 @@ document.addEventListener("DOMContentLoaded", async () =>
               </div>
               <div class="flex f_space_between archived-entry-meta">
                 <span>${entry.site_name}</span>
-                <span>${formatNumberLocale(entry.hours, 1, 1)} hours</span>
+                <span>${formatNumberLocale(entry.hours, 1, 1)} ${SITES_T.HOURS.toLowerCase()}</span>
               </div>
             </div>
           `;
@@ -1148,7 +1119,7 @@ document.addEventListener("DOMContentLoaded", async () =>
         PC.setHTML(contentEl, html);
 
       } else {
-        PC.setHTML(contentEl, '<p class="error-message">Error loading archived data.</p>');
+        PC.setHTML(contentEl, `<p class="error-message">${SITES_T.SITES_ERROR_LOADING_ARCHIVED}</p>`);
       }
     } catch (error) {
       PW.error(`Error loading archived work: ${getErrorMessage(error)}`);
@@ -1180,13 +1151,7 @@ document.addEventListener("DOMContentLoaded", async () =>
     if (!modal) return;
 
     if (messageEl && currentArchivedSiteName) {
-      PC.setHTML(messageEl, `
-        <strong class="warning-strong">⚠️ PERMANENT DELETION WARNING</strong><br><br>
-        You are about to <strong>permanently delete</strong> all archived work entries for:<br>
-        <strong>"${currentArchivedSiteName}"</strong><br><br>
-        <strong>This action cannot be undone. All historical data will be lost forever.</strong><br><br>
-        Are you absolutely sure you want to proceed?
-      `);
+      PC.setHTML(messageEl, sitesFormatMessage(SITES_T.SITES_FINALITY_DELETE_BODY, { name: currentArchivedSiteName }));
     }
 
     modal.showModal();
@@ -1230,19 +1195,20 @@ document.addEventListener("DOMContentLoaded", async () =>
         closeArchivedWorkDialog();
         
         const deletedCount = responseData?.deleted_count ?? 0;
-        PC.showToast(`Permanently deleted ${deletedCount} archived work ${deletedCount === 1 ? 'entry' : 'entries'}.`);
+        const entriesLabel = sitesPluralLabel(deletedCount, SITES_T.SITES_WORK_ENTRY_SINGULAR, SITES_T.SITES_WORK_ENTRY_PLURAL);
+        PC.showToast(sitesFormatMessage(SITES_T.SITES_FINALITY_DELETE_SUCCESS, { count: deletedCount, entriesLabel }));
 
         // Reload earnings
         const currentYear = document.querySelector('#earnings_year_tabs .tab.active')?.textContent || new Date().getFullYear();
         await loadSiteEarnings(parseInt(currentYear));
       } else {
         PW.error('Error performing finality delete');
-        PC.showToast('Error performing finality delete');
+        PC.showToast(SITES_T.SITES_ERROR_PERMANENT_DELETE);
         if (confirmBtn) confirmBtn.disabled = false;
       }
     } catch (error) {
       PW.error(`Error performing finality delete: ${getErrorMessage(error)}`);
-      PC.showToast('Error performing finality delete');
+      PC.showToast(SITES_T.SITES_ERROR_PERMANENT_DELETE);
       if (confirmBtn) confirmBtn.disabled = false;
     }
   }
@@ -1301,7 +1267,7 @@ document.addEventListener("DOMContentLoaded", async () =>
     }
 
     const siteId = row.dataset.id || '';
-    const siteName = row.querySelector('.datagrid_item')?.textContent?.trim() || 'this site';
+    const siteName = siteEditorResolveGridSiteName(row) || SITES_T.SITES_THIS_SITE;
     const grid = row.closest('.datagrid_container');
     const siteStatus = grid?.id === 'sites-grid-archived' ? 'archived' : 'active';
 
@@ -1426,10 +1392,11 @@ document.addEventListener("DOMContentLoaded", async () =>
           const totalCount = data.total_count || 0;
           const groupCount = data.orphaned_groups.length;
           
-          countEl.textContent = `${totalCount} orphaned work ${totalCount === 1 ? 'entry' : 'entries'}`;
+          const entriesLabel = sitesPluralLabel(totalCount, SITES_T.SITES_ENTRY_SINGULAR, SITES_T.SITES_ENTRY_PLURAL);
+          countEl.textContent = sitesFormatMessage(SITES_T.SITES_ORPHANED_COUNT, { count: totalCount, entriesLabel });
           
           if (groupCount > 1) {
-            countEl.textContent += ` (${groupCount} different sites)`;
+            countEl.textContent += ` ${sitesFormatMessage(SITES_T.SITES_ORPHANED_SITES_SUFFIX, { groupCount })}`;
           }
           
           banner.classList.remove('hidden');
@@ -1476,7 +1443,7 @@ document.addEventListener("DOMContentLoaded", async () =>
       modal.showModal();
     } catch (error) {
       PW.error(`Failed to show orphaned work dialog: ${error?.message || String(error)}`);
-      alert('Failed to load orphaned work data. Please try again.');
+      alert(SITES_T.SITES_ERROR_ORPHANED_LOAD);
     }
   }
 
@@ -1491,7 +1458,7 @@ document.addEventListener("DOMContentLoaded", async () =>
     if (!container) return;
 
     if (groups.length === 0) {
-      PC.setHTML(container, '<p class="orphaned_groups_empty">No orphaned work entries found.</p>');
+      PC.setHTML(container, `<p class="orphaned_groups_empty">${SITES_T.SITES_ORPHANED_EMPTY}</p>`);
       return;
     }
 
@@ -1506,8 +1473,8 @@ document.addEventListener("DOMContentLoaded", async () =>
         <div class="orphaned_group_info">
           <h3 class="orphaned_group_name">${escapeHTML(group.site_name)}</h3>
           <div class="orphaned_group_stats">
-            <span class="orphaned_stat">${group.count} ${group.count === 1 ? 'entry' : 'entries'}</span>
-            <span class="orphaned_stat">${formatNumberLocale(group.total_hours, 1, 1)} hours</span>
+            <span class="orphaned_stat">${group.count} ${sitesPluralLabel(group.count, SITES_T.SITES_ENTRY_SINGULAR, SITES_T.SITES_ENTRY_PLURAL)}</span>
+            <span class="orphaned_stat">${formatNumberLocale(group.total_hours, 1, 1)} ${SITES_T.HOURS.toLowerCase()}</span>
             <span class="orphaned_stat">${escapeHTML(group.date_range)}</span>
           </div>
         </div>
@@ -1517,7 +1484,7 @@ document.addEventListener("DOMContentLoaded", async () =>
           data-orphaned-site-id="${escapeHTML(group.site_id)}"
           data-site-name="${escapeHTML(group.site_name)}"
           data-work-count="${group.count}">
-          🔧 Recover
+          🔧 ${SITES_T.SITES_RECOVER_BUTTON}
         </button>
       </div>
     `).join('');
@@ -1560,7 +1527,7 @@ document.addEventListener("DOMContentLoaded", async () =>
     PC.getElement('recovery_site_name_input').value = siteName;
     PC.getElement('recovery_site_name_display').textContent = siteName;
     PC.getElement('recovery_work_count_display').textContent = 
-      `${workCount} work ${workCount === 1 ? 'entry' : 'entries'}`;
+      `${workCount} ${sitesPluralLabel(workCount, SITES_T.SITES_WORK_ENTRY_SINGULAR, SITES_T.SITES_WORK_ENTRY_PLURAL)}`;
     
     // Clear other fields
     PC.getElement('recovery_site_wage_input').value = '';
@@ -1596,7 +1563,7 @@ document.addEventListener("DOMContentLoaded", async () =>
     const submitBtn = PC.getElement('recovery_site_submit');
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Creating...';
+      submitBtn.textContent = SITES_T.SITES_CREATING;
     }
 
     try {
@@ -1634,17 +1601,17 @@ document.addEventListener("DOMContentLoaded", async () =>
         setFieldError(recoveryWageInput, 'recovery_site_wage_error', '');
       } else {
         PW.error(`Recovery failed: ${data.message || 'Unknown error'}`);
-        setFormStatus('recovery_site_form_status', data.message || 'Failed to recover orphaned work.');
-        PC.showToast(data.message || 'Failed to recover orphaned work');
+        setFormStatus('recovery_site_form_status', data.message || SITES_T.SITES_ERROR_RECOVERY);
+        PC.showToast(data.message || SITES_T.SITES_ERROR_RECOVERY);
       }
     } catch (error) {
       PW.error(`Recovery error: ${error?.message || String(error)}`);
-      setFormStatus('recovery_site_form_status', 'Failed to recover orphaned work. Please try again.');
-      PC.showToast('Failed to recover orphaned work. Please try again.');
+      setFormStatus('recovery_site_form_status', SITES_T.SITES_ERROR_RECOVERY_RETRY);
+      PC.showToast(SITES_T.SITES_ERROR_RECOVERY_RETRY);
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Create Site & Bind Work';
+        submitBtn.textContent = SITES_T.SITES_CREATE_SITE_BIND_WORK;
       }
     }
   }

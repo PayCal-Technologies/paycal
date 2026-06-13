@@ -24,7 +24,6 @@ use PayCal\Domain\User;
 use PayCal\Domain\WorkEntryRepository;
 use PayCal\Domain\UserRepository;
 use PayCal\Domain\UserSettings;
-use PayCal\Domain\ValueError;
 
 /**
  * AdminController.php

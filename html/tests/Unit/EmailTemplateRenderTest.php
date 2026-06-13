@@ -136,6 +136,9 @@ final class EmailTemplateRenderTest extends TestCase
       '__AUTH_VERIFICATION_REMINDER_CODE_PLACEHOLDER__' => 'Enter verification code',
       '__AUTH_VERIFICATION_REMINDER_VERIFY_BUTTON__' => 'Verify',
       '__AUTH_VERIFICATION_REMINDER_RESEND_LINK__' => 'Resend verification email',
+      '__AUTH_VERIFICATION_REMINDER_COOLDOWN_FMT__' => 'Please wait {time} before resending.',
+      '__AUTH_VERIFICATION_REMINDER_SENDING__' => 'Resend verification email (sending...)',
+      '__AUTH_VERIFICATION_REMINDER_SIGNOUT_FAILED__' => 'Unable to sign out right now. Try again.',
     ]);
 
     $this->assertStringNotContainsString(

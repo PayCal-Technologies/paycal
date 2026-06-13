@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_EXTENSIONS_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Extensieparadigma - [PayCal]';
-$pageLabel = 'Extensieparadigma';
+$pageTitle = $i18n['TRANSPARENCY_EXTENSIONS_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_EXTENSIONS_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Extensieparadigma</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_EXTENSIONS_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       PayCal is zo ontworpen dat de centrale bedrijfslogica stabiel blijft terwijl extensielagen
       functies kunnen aanpassen voor verschillende implementaties en productstrategieën.
@@ -66,7 +67,7 @@ require_once HTML.'/header.php';
       <ul class="doc-list">
         <li><strong>billing-provider:</strong> basisfacturatie-capaciteitshooks en modusselectie</li>
         <li><strong>earnings-ytd:</strong> basis YTD-rendering en inkomsten-hookpunten</li>
-        <li><strong>organization-signals:</strong> basisorganisatiesignaal-hooks</li>
+        <li><strong>business-signals:</strong> basisbedrijfssignaal-hooks</li>
       </ul>
     </section>
 

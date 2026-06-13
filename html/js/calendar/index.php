@@ -28,8 +28,15 @@ $i18nKeys = [
   'CALENDAR_PASTED_ENTRIES_TO',
   'CALENDAR_SAVED_ENTRIES_FOR',
   'CALENDAR_UNKNOWN_ERROR',
+  'CALENDAR_LOCKED_CANNOT_EDIT',
+  'CALENDAR_LOCKED_CANNOT_EDIT_GRACE',
+  'CALENDAR_DAY_SINGULAR',
+  'CALENDAR_DAYS',
+  'CALENDAR_ENCRYPTION_REQUIRED',
   'I_WORK_DETAILS',
   'LAST_UPDATED',
+  'SITE',
+  'DELETE',
 ];
 $i18n = [];
 foreach ($i18nKeys as $i18nKey) {
@@ -72,7 +79,11 @@ const MSG_CAL_COPIED_ENTRIES_FROM = <?php echo json_encode($i18n['CALENDAR_COPIE
 const MSG_CAL_PASTED_ENTRIES_TO = <?php echo json_encode($i18n['CALENDAR_PASTED_ENTRIES_TO']); ?>;
 const MSG_CAL_SAVED_ENTRIES_FOR = <?php echo json_encode($i18n['CALENDAR_SAVED_ENTRIES_FOR']); ?>;
 const MSG_CAL_UNKNOWN_ERROR = <?php echo json_encode($i18n['CALENDAR_UNKNOWN_ERROR']); ?>;
-const MSG_CAL_ENCRYPTION_REQUIRED = 'Encryption key unavailable. Unlock your account key to view or save work entries.';
+const MSG_CAL_LOCKED_CANNOT_EDIT = <?php echo json_encode($i18n['CALENDAR_LOCKED_CANNOT_EDIT']); ?>;
+const MSG_CAL_LOCKED_CANNOT_EDIT_GRACE = <?php echo json_encode($i18n['CALENDAR_LOCKED_CANNOT_EDIT_GRACE']); ?>;
+const MSG_CAL_DAY_SINGULAR = <?php echo json_encode($i18n['CALENDAR_DAY_SINGULAR']); ?>;
+const MSG_CAL_DAYS_PLURAL = <?php echo json_encode($i18n['CALENDAR_DAYS']); ?>;
+const MSG_CAL_ENCRYPTION_REQUIRED = <?php echo json_encode($i18n['CALENDAR_ENCRYPTION_REQUIRED']); ?>;
 const CAL_TOTAL_HOURS_MAX = 24;
 const LABEL_LAST_UPDATED = <?php echo json_encode($i18n['LAST_UPDATED']); ?>;
 const CAL_WORK_ENTRY_FIELDS = {
@@ -1253,7 +1264,7 @@ const create_work_row = (work_div, index = 0) => {
 
   const label = document.createElement("label");
   label.className = "list_item pad_sm w100";
-  label.textContent = "Site";
+  label.textContent = <?php echo json_encode($i18n['SITE']); ?>;
 
   const br = document.createElement("br");
 
@@ -1267,7 +1278,7 @@ const create_work_row = (work_div, index = 0) => {
   const deleteBtn = document.createElement("button");
   deleteBtn.type = "button";
   deleteBtn.className = "btn btn_cancel mar_md";
-  deleteBtn.textContent = "Delete";
+  deleteBtn.textContent = <?php echo json_encode($i18n['DELETE']); ?>;
   deleteBtn.addEventListener("click", () => {
     wrapper.remove();
     updateWorkTotalMessage();

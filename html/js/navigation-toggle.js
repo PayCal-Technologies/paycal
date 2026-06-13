@@ -9,6 +9,8 @@
  * Controlled by PROXIMITY_STORAGE_KEY ('0' = off, '1' = on, default on).
  * Trigger distance controlled by PROXIMITY_PX_STORAGE_KEY (px, default 200, range 0-600).
  * Call NavToggle.setProximityEnabled(bool) / setProximityPx(number) from the settings UI.
+ * Overlay auto-collapse timeout is controlled by overlay_sidebar_timeout_seconds in PayCalCore.config
+ * (0 = never). Call NavToggle.setOverlaySidebarTimeout(number) from the settings UI.
  */
 export default (() => {
   const STORAGE_KEY              = 'paycal_nav_state';       // '0' = collapsed, '1' = pinned
@@ -19,6 +21,7 @@ export default (() => {
   const DEFAULT_LABEL_COLLAPSE = '';
   const DEFAULT_ANNOUNCE_EXPANDED = '';
   const DEFAULT_ANNOUNCE_COLLAPSED = '';
+  const COMPACT_DRAWER_MAX_PX = 768;
 
   let nav, primaryNav, status, main, toggle, skipLink;
   let state       = 'collapsed';
@@ -29,9 +32,32 @@ export default (() => {
   let proximityEnabled = true;   // runtime flag; synced from localStorage on init
   let proximityPx = 200;         // trigger distance in px; synced from localStorage on init
   let overlayMode = false;       // runtime flag; synced from localStorage on init
+  let overlaySidebarTimeoutSeconds = 5; // synced from PayCalCore.config on init
+  let overlayIdleTimer = null;   // auto-collapse after pointer idle in overlay mode
+  let overlayIdleMoveFrame = null;
+
+  function isCompactDrawerViewport() {
+    return window.matchMedia(`(max-width: ${COMPACT_DRAWER_MAX_PX}px)`).matches;
+  }
 
   function syncResponsiveState() {
+    const compact = isCompactDrawerViewport();
+    document.body.toggleAttribute('data-nav-viewport-compact', compact);
     document.body.setAttribute('data-nav-top-density', 'full');
+
+    if (!isSidebarMode()) return;
+
+    if (compact) {
+      if (state === 'pinned') {
+        collapse(false);
+      }
+      return;
+    }
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === '1' && state === 'collapsed') {
+      pin();
+    }
   }
 
   function queueResponsiveSync() {
@@ -50,6 +76,46 @@ export default (() => {
     return pos === 'left' || pos === 'right';
   }
 
+  function getOverlaySidebarTimeoutSeconds() {
+    const seconds = Number(overlaySidebarTimeoutSeconds);
+    return Number.isFinite(seconds) && seconds > 0 ? Math.min(30, Math.round(seconds)) : 0;
+  }
+
+  function clearOverlayIdleTimer() {
+    if (overlayIdleTimer !== null) {
+      clearTimeout(overlayIdleTimer);
+      overlayIdleTimer = null;
+    }
+  }
+
+  function shouldApplyOverlayTimeout() {
+    return overlayMode && state === 'pinned' && getOverlaySidebarTimeoutSeconds() > 0;
+  }
+
+  function collapseFromOverlayTimeout() {
+    if (!shouldApplyOverlayTimeout()) return;
+    clearOverlayIdleTimer();
+    collapse(false, hoverOpened);
+  }
+
+  function scheduleOverlayIdleCollapse() {
+    clearOverlayIdleTimer();
+    if (!shouldApplyOverlayTimeout()) return;
+
+    overlayIdleTimer = setTimeout(() => {
+      overlayIdleTimer = null;
+      collapseFromOverlayTimeout();
+    }, getOverlaySidebarTimeoutSeconds() * 1000);
+  }
+
+  function resetOverlayIdleTimer() {
+    if (!shouldApplyOverlayTimeout()) {
+      clearOverlayIdleTimer();
+      return;
+    }
+    scheduleOverlayIdleCollapse();
+  }
+
   function announce(msg) {
     if (!status) return;
     status.textContent = '';
@@ -61,6 +127,8 @@ export default (() => {
   }
 
   function persistState(collapsed) {
+    if (isCompactDrawerViewport()) return;
+
     const value = collapsed ? '0' : '1';
     localStorage.setItem(STORAGE_KEY, value);
     const navState = collapsed ? 'collapsed' : 'pinned';
@@ -139,9 +207,11 @@ export default (() => {
     // Don't persist hover-only opens; the saved state should reflect the user's
     // deliberate choice so the next page load starts collapsed as expected.
     if (!fromHover) persistState(false);
+    resetOverlayIdleTimer();
   }
 
   function collapse(returnFocus = false, fromHover = false) {
+    clearOverlayIdleTimer();
     if (!fromHover) hoverOpened = false;
     // Blur before disabling collapsed items so focus never lands on hidden links.
     if (nav.contains(document.activeElement)) document.activeElement.blur();
@@ -289,6 +359,11 @@ export default (() => {
         persistState(false);
       }
 
+      if (isCompactDrawerViewport()) {
+        applyBodyClass('collapsed');
+        setCollapsedInteractivity(true);
+      }
+
       syncAccessibleState();
 
       // Load proximity preference ('1' = on by default).
@@ -302,11 +377,36 @@ export default (() => {
       overlayMode = (localStorage.getItem(OVERLAY_STORAGE_KEY) ?? '0') === '1';
       document.body.classList.toggle('nav-overlay-mode', overlayMode);
 
+      const configTimeout = typeof window !== 'undefined'
+        ? window.PayCalCore?.config?.overlay_sidebar_timeout_seconds
+        : undefined;
+      const parsedTimeout = Number(configTimeout);
+      overlaySidebarTimeoutSeconds = Number.isFinite(parsedTimeout) ? parsedTimeout : 5;
+
+      // Overlay idle timeout: collapse expanded overlay sidebar after pointer inactivity.
+      document.addEventListener('mousemove', () => {
+        if (!shouldApplyOverlayTimeout()) return;
+        if (overlayIdleMoveFrame !== null) return;
+        overlayIdleMoveFrame = requestAnimationFrame(() => {
+          overlayIdleMoveFrame = null;
+          resetOverlayIdleTimer();
+        });
+      }, { passive: true });
+
+      document.addEventListener('mouseleave', () => {
+        if (!shouldApplyOverlayTimeout()) return;
+        collapseFromOverlayTimeout();
+      });
+
+      if (shouldApplyOverlayTimeout()) {
+        scheduleOverlayIdleCollapse();
+      }
+
       // Proximity hover: auto-reveal when mouse is within proximityPx of sidebar edge.
       // Only collapses on mouse-leave if *this* feature opened the sidebar.
       // Gated by proximityEnabled — toggled at runtime via setProximityEnabled().
       document.addEventListener('mousemove', (e) => {
-        if (!proximityEnabled) return;
+        if (!proximityEnabled || isCompactDrawerViewport()) return;
         if (proximityFrame !== null) return; // throttle to one rAF per move batch
         proximityFrame = requestAnimationFrame(() => {
           proximityFrame = null;
@@ -379,11 +479,36 @@ export default (() => {
       overlayMode = Boolean(enabled);
       localStorage.setItem(OVERLAY_STORAGE_KEY, overlayMode ? '1' : '0');
       document.body.classList.toggle('nav-overlay-mode', overlayMode);
+      if (overlayMode && state === 'pinned') {
+        resetOverlayIdleTimer();
+      } else {
+        clearOverlayIdleTimer();
+      }
     },
 
     /** Returns current overlay mode state (for settings UI to read on load). */
     isOverlayMode() {
       return overlayMode;
+    },
+
+    /**
+     * Set overlay sidebar auto-collapse timeout in seconds (0 = never).
+     * Called by the settings UI after server persistence.
+     * @param {number} seconds integer 0–30
+     */
+    setOverlaySidebarTimeout(seconds) {
+      const parsed = Number(seconds);
+      overlaySidebarTimeoutSeconds = Number.isFinite(parsed) ? Math.min(30, Math.max(0, Math.round(parsed))) : 5;
+      if (shouldApplyOverlayTimeout()) {
+        resetOverlayIdleTimer();
+      } else {
+        clearOverlayIdleTimer();
+      }
+    },
+
+    /** Returns current overlay sidebar timeout in seconds (for settings UI). */
+    getOverlaySidebarTimeout() {
+      return getOverlaySidebarTimeoutSeconds();
     },
   };
 })();

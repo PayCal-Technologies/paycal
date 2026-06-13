@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config.php';
 
 $i18n = [];
 $i18nKeys = [
+  'TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE',
   'BREADCRUMB',
   'HELP_TOC_TRANSPARENCY_HUB',
 ];
@@ -22,8 +23,8 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = 'Opt-in Diagnostiek & Phantom Wing - [PayCal]';
-$pageLabel = 'Opt-in Diagnostiek & Phantom Wing';
+$pageTitle = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'] . ' - [PayCal]';
+$pageLabel = $i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>
 <article class="article doc-article">
@@ -34,7 +35,7 @@ require_once HTML.'/header.php';
   </nav>
 
   <header class="doc-article-header">
-    <h1>Opt-in Diagnostiek &amp; Phantom Wing</h1>
+    <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_DIAGNOSTICS_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
       PayCal bevat een optionele diagnostieklaag die u beheert. Hier staat precies wat deze
       verzamelt, wat op uw apparaat blijft en hoe het wordt gebruikt.
@@ -240,7 +241,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         <li>Telemetrie wordt volledig onderdrukt op alle authenticatiepagina's</li>
         <li>Frequentielimieten en automatische clientterugval voorkomen per ongeluk te veel rapporteren</li>
       </ol>
-      <p style="margin-top: 1.5rem;">
+      <p class="doc-section-footer-note">
         Phantom Wing is zo ontworpen dat u alle diagnostiek voor onbepaalde tijd uitgeschakeld
         kunt laten. De opt-in-besturingen bestaan om u en het ondersteuningsteam een gedeelde
         taal te geven wanneer er iets misgaat — niet om standaard gegevens te verzamelen.

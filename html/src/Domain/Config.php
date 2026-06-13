@@ -35,23 +35,6 @@ namespace PayCal\Domain;
 class Config
 {
   /**
-   * Loads configuration, including constants from bootstrap/constants.php.
-   * Acts as a central loader for app constants and settings.
-   *
-   * @param null|string $file Optional file to load (defaults to constants.php).
-   * @return void
-   */
-  public static function load(?string $file = null): void
-  {
-    $defaultFile = __DIR__.'/../../bootstrap/constants.php';
-    $fileToLoad = $file ?: $defaultFile;
-
-    if (file_exists($fileToLoad)) {
-      require_once $fileToLoad;
-    }
-  }
-
-  /**
    * Create multiple string constants from an associative array.
    * Calls createStringConstant() for each key-value pair.
    *

@@ -14,16 +14,26 @@ use PHPUnit\Framework\TestCase;
  */
 final class GuardianSanitizerTest extends TestCase
 {
+  private function pageHeadRendererFile(): string
+  {
+    return __DIR__ . '/../../src/Domain/PageHeadRenderer.php';
+  }
+
+  private function headerFile(): string
+  {
+    return __DIR__ . '/../../header.php';
+  }
+
   /**
    * Test that Guardian configuration constants are accessible
    */
   public function testGuardianConstantsExists(): void
   {
-    // Guardian configuration is embedded in header.php and core/index.php
-    // Verify the expected configuration paths exist
-    $headerFile = __DIR__ . '/../../header.php';
-    $this->assertFileExists($headerFile);
-    $this->assertStringContainsString('guardian.js', file_get_contents($headerFile));
+    // Guardian script wiring lives in PageHeadRenderer; header.php delegates to it.
+    $pageHeadRendererFile = $this->pageHeadRendererFile();
+    $this->assertFileExists($pageHeadRendererFile);
+    $this->assertStringContainsString('guardian.js', (string) file_get_contents($pageHeadRendererFile));
+    $this->assertStringContainsString('PageHeadRenderer::renderScripts', (string) file_get_contents($this->headerFile()));
   }
 
   /**
@@ -31,9 +41,8 @@ final class GuardianSanitizerTest extends TestCase
    */
   public function testGuardianScriptHasNonce(): void
   {
-    $headerFile = __DIR__ . '/../../header.php';
-    $content = file_get_contents($headerFile);
-    
+    $content = (string) file_get_contents($this->pageHeadRendererFile());
+
     $this->assertStringContainsString('nonce=', $content);
     $this->assertStringContainsString('guardian.js', $content);
   }
@@ -85,14 +94,13 @@ final class GuardianSanitizerTest extends TestCase
    */
   public function testGuardianConfigConsistency(): void
   {
-    $headerFile = __DIR__ . '/../../header.php';
-    $headerContent = file_get_contents($headerFile);
-    
-    // Verify that Guardian is loaded
-    // This ensures the sanitizer is active before any user content is rendered
-    $guardianPos = strpos($headerContent, 'guardian.js');
-    
-    $this->assertNotFalse($guardianPos, 'Guardian should be referenced in header');
+    $pageHeadContent = (string) file_get_contents($this->pageHeadRendererFile());
+
+    // Guardian must load from renderScripts so it runs before app modules.
+    $guardianPos = strpos($pageHeadContent, 'guardian.js');
+    $this->assertNotFalse($guardianPos, 'Guardian should be referenced in PageHeadRenderer');
+    $this->assertStringContainsString('renderScripts', $pageHeadContent);
+    $this->assertStringContainsString('PageHeadRenderer::renderScripts', (string) file_get_contents($this->headerFile()));
   }
 
   /**
@@ -100,11 +108,9 @@ final class GuardianSanitizerTest extends TestCase
    */
   public function testGuardianNonceCompliance(): void
   {
-    $headerFile = __DIR__ . '/../../header.php';
-    $content = file_get_contents($headerFile);
-    
-    // Count occurrences of nonce attributes on scripts
-    $this->assertStringContainsString('nonce="<?php echo', $content);
+    $content = (string) file_get_contents($this->pageHeadRendererFile());
+
+    $this->assertStringContainsString('<script src="{$guardian}" nonce="{$cspNonce}"></script>', $content);
     $this->assertStringContainsString('guardian.js', $content);
   }
 

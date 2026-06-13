@@ -19,6 +19,7 @@ $cssVersion = Environment::appVersion();
 $userEmail = htmlspecialchars($currentUser->email ?? 'user@paycal.app', ENT_QUOTES, 'UTF-8');
 $verificationError = InputSanitizer::getString('verification_error') ?? '';
 $i18nKeys = [
+  'SKIP_TO_CONTENT',
   'CONTACT',
   'HELP',
   'PROFILE',
@@ -42,9 +43,10 @@ $i18n = [];
 foreach ($i18nKeys as $i18nKey) {
   $i18n[$i18nKey] = Strings::i18n($i18nKey);
 }
+$pageLanguage = defined('USER_LANGUAGE') ? (string) USER_LANGUAGE : 'en';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo htmlspecialchars(str_replace('_', '-', $pageLanguage), ENT_QUOTES, 'UTF-8'); ?>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,6 +58,7 @@ foreach ($i18nKeys as $i18nKey) {
   <link rel="stylesheet" href="<?php echo Environment::appURL('css/unverified/'); ?>?v=<?php echo $cssVersion; ?>">
 </head>
 <body>
+  <a id="skip_to_content" class="skip_link" href="#main" accesskey="0" aria-keyshortcuts="Alt+0"><?php echo htmlspecialchars($i18n['SKIP_TO_CONTENT'], ENT_QUOTES, 'UTF-8'); ?></a>
   <header>
     <div class="header-logo"><?php echo htmlspecialchars($i18n['SITE_NAME'], ENT_QUOTES, 'UTF-8'); ?></div>
     <div class="header-profile">
@@ -68,7 +71,7 @@ foreach ($i18nKeys as $i18nKey) {
     </div>
   </header>
 
-  <main>
+  <main id="main" tabindex="-1">
     <div class="verification-shell">
       <div class="verification-card">
         <h1><?php echo htmlspecialchars($i18n['UNVERIFIED_HEADING'], ENT_QUOTES, 'UTF-8'); ?></h1>

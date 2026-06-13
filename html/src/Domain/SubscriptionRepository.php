@@ -16,7 +16,7 @@ use PayCal\Domain\Enums\SubscriptionStatus;
  *   status state used by premium gating across the app.
  * - Payment-provider identifiers are persistence details; keep provider logic
  *   separated from feature-gating consumers.
- * - Status transitions here affect organizations, billing UI, and premium-only
+ * - Status transitions here affect businesses, billing UI, and premium-only
  *   capabilities, so write changes should be treated as behavior changes.
  *
  * @category   Domain
@@ -151,21 +151,6 @@ final class SubscriptionRepository
   }
 
   /**
-   * Mark subscription as expired (no renewal after cancellation or lapsed payment).
-   *
-   * @param string $userUUID
-   * @return void
-   */
-  public static function markExpired(string $userUUID): void
-  {
-    $key = Keys::USER_SUBSCRIPTION . ':' . $userUUID;
-    Database::hset($key, [
-      'status'                   => SubscriptionStatus::EXPIRED->value,
-      'subscription_renewal_date' => '',
-    ]);
-  }
-
-  /**
    * Mark subscription as pending cancellation (will downgrade at period end).
    * Keeps Premium tier active until cancel_at date is reached.
    *
@@ -182,9 +167,11 @@ final class SubscriptionRepository
 
     $fields = [
       'status'                   => SubscriptionStatus::ACTIVE->value,
-      'tier'                     => Subscription::PREMIUM->value,
       'subscription_cancel_date' => $cancelDate,
     ];
+
+    $current = self::get($userUUID);
+    $fields['tier'] = $current['tier']->value;
 
     if ($subscriptionId !== null && $subscriptionId !== '') {
       $fields['subscription_id'] = $subscriptionId;
@@ -222,8 +209,58 @@ final class SubscriptionRepository
   public static function isPremiumActive(string $userUUID): bool
   {
     $subscription = self::get($userUUID);
-    return $subscription['tier'] === Subscription::PREMIUM
+
+    return $subscription['tier']->includesPremiumReporting()
       && $subscription['status']->grantsAccess();
+  }
+
+  public static function isBusinessActive(string $userUUID): bool
+  {
+    $subscription = self::get($userUUID);
+
+    return $subscription['tier'] === Subscription::BUSINESS
+      && $subscription['status']->grantsAccess();
+  }
+
+  /**
+   * Upgrade user to PayCal Business subscription.
+   */
+  public static function upgradeToBusiness(
+    string $userUUID,
+    ?string $externalSubscriptionId = null,
+    ?string $stripeCustomerId = null,
+    ?int $renewalAtUnixTime = null,
+  ): void {
+    $now = date('c');
+    $key = Keys::USER_SUBSCRIPTION . ':' . $userUUID;
+
+    $renewalDate = $renewalAtUnixTime !== null && $renewalAtUnixTime > 0
+      ? date('c', $renewalAtUnixTime)
+      : '';
+
+    $fields = [
+      'tier'                      => Subscription::BUSINESS->value,
+      'status'                    => SubscriptionStatus::ACTIVE->value,
+      'subscription_id'           => $externalSubscriptionId ?? '',
+      'subscription_start_date'   => $now,
+      'subscription_renewal_date' => $renewalDate,
+      'subscription_cancel_date'  => '',
+    ];
+
+    if ($stripeCustomerId !== null) {
+      $fields['stripe_customer_id'] = $stripeCustomerId;
+    }
+
+    Database::hset($key, $fields);
+
+    $user = User::current();
+    if ($user->user_uuid === $userUUID) {
+      $user->subscription_tier = Subscription::BUSINESS;
+      $user->subscription_status = SubscriptionStatus::ACTIVE;
+      $user->subscription_id = $externalSubscriptionId;
+      $user->subscription_start_date = $now;
+      $user->subscription_renewal_date = $renewalDate;
+    }
   }
 
   /**
@@ -235,8 +272,9 @@ final class SubscriptionRepository
   private static function parseSubscription(string $value): Subscription
   {
     return match (strtolower(trim($value))) {
-      'premium' => Subscription::PREMIUM,
-      default   => Subscription::FREE,
+      'premium'  => Subscription::PREMIUM,
+      'business' => Subscription::BUSINESS,
+      default    => Subscription::FREE,
     };
   }
 
