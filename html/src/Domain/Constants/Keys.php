@@ -587,5 +587,116 @@ final class Keys
   {
     return self::ORG_LOCKED_PERIOD_METRICS . self::SEPARATOR . $businessId . self::SEPARATOR . (string) $year;
   }
+
+  // Legacy organization aliases (public transitional code; same Redis namespaces as business:*).
+  public const ORGANIZATION = self::BUSINESS;
+  public const ORGANIZATION_SETTINGS = self::BUSINESS_SETTINGS;
+  public const ORGANIZATION_USER = self::BUSINESS_USER;
+  public const ORGANIZATION_OWNER = self::BUSINESS_OWNER;
+  public const ORGANIZATION_SITE = self::BUSINESS_SITE;
+  public const ORGANIZATION_SITE_SETTINGS = self::BUSINESS_SITE_SETTINGS;
+  public const ORGANIZATION_MEMBERS = self::BUSINESS_MEMBERS;
+  public const ORGANIZATION_RELATIONSHIP = self::BUSINESS_RELATIONSHIP;
+  public const ORGANIZATION_INVITE = self::BUSINESS_INVITE;
+  public const ORGANIZATION_INVITE_EMAIL = self::BUSINESS_INVITE_EMAIL;
+  public const ORGANIZATION_INVITE_ORG = self::BUSINESS_INVITE_ORG;
+  public const ORGANIZATION_INVITE_TOKEN = self::BUSINESS_INVITE_TOKEN;
+  public const ORGANIZATION_AUDIT = self::BUSINESS_AUDIT;
+  public const ORGANIZATION_AUDIT_EVENT = self::BUSINESS_AUDIT_EVENT;
+  public const ORGANIZATION_ACCESS_REQUEST = self::BUSINESS_ACCESS_REQUEST;
+  public const ORGANIZATION_ACCESS_REQUEST_ORG = self::BUSINESS_ACCESS_REQUEST_ORG;
+  public const ORGANIZATION_ACCESS_REQUEST_REQUESTER = self::BUSINESS_ACCESS_REQUEST_REQUESTER;
+  public const ORGANIZATION_ACCESS_REQUEST_ACTIVE = self::BUSINESS_ACCESS_REQUEST_ACTIVE;
+  public const ORGANIZATION_DEK_WRAP = self::BUSINESS_DEK_WRAP;
+
+  public static function organizationInviteImportPrepare(string $importId): string
+  {
+    return self::businessInviteImportPrepare($importId);
+  }
+
+  public static function organizationInviteImportChallenge(string $challengeId): string
+  {
+    return self::businessInviteImportChallenge($challengeId);
+  }
+
+  public static function organizationConsent(string $consentId): string
+  {
+    return self::businessConsent($consentId);
+  }
+
+  public static function organizationConsentsByOrg(string $orgId): string
+  {
+    return self::businessConsentsByOrg($orgId);
+  }
+
+  public static function organizationConsentsByUser(string $userUUID): string
+  {
+    return self::businessConsentsByUser($userUUID);
+  }
+
+  public static function organizationDekRegistry(string $orgId, string $segment): string
+  {
+    return self::businessDekRegistry($orgId, $segment);
+  }
+
+  public static function organizationDekVersion(string $orgId, string $segment, string $version): string
+  {
+    return self::businessDekVersion($orgId, $segment, $version);
+  }
+
+  public static function organizationDekWrap(
+    string $orgId,
+    string $segment,
+    string $version,
+    string $userUUID,
+    string $credentialId,
+  ): string {
+    return self::businessDekWrap($orgId, $segment, $version, $userUUID, $credentialId);
+  }
+
+  public static function organizationAuditControlTest(string $testId): string
+  {
+    return self::businessAuditControlTest($testId);
+  }
+
+  public static function organizationAuditControlTestIndex(string $orgId): string
+  {
+    return self::businessAuditControlTestIndex($orgId);
+  }
+
+  public static function organizationNotificationUnreadByUser(string $userUUID): string
+  {
+    return self::businessNotificationUnreadByUser($userUUID);
+  }
+
+  public static function organizationNotificationTotalByUser(string $userUUID): string
+  {
+    return self::businessNotificationTotalByUser($userUUID);
+  }
+
+  public static function organizationNotificationLastRead(string $orgId, string $userUUID): string
+  {
+    return self::businessNotificationLastRead($orgId, $userUUID);
+  }
+
+  public static function organizationNotificationEventsByOrg(string $orgId): string
+  {
+    return self::businessNotificationEventsByOrg($orgId);
+  }
+
+  public static function organizationNotificationChannelOrg(string $orgId): string
+  {
+    return self::businessNotificationChannelOrg($orgId);
+  }
+
+  public static function organizationNotificationChannelRole(string $orgId, string $role): string
+  {
+    return self::businessNotificationChannelRole($orgId, $role);
+  }
+
+  public static function organizationNotificationChannelUser(string $userUUID): string
+  {
+    return self::businessNotificationChannelUser($userUUID);
+  }
 }
 

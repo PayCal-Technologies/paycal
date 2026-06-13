@@ -29,15 +29,17 @@ final class ReadmeVersionHookContractTest extends TestCase
   }
 
   #[Test]
-  public function gitHooksSyncStageAndCommitReadmeChanges(): void
+  public function gitHooksCheckReadmeWithoutAutoMutate(): void
   {
     $preCommit = (string) file_get_contents($this->projectRoot() . '/scripts/hooks/pre-commit.sh');
     $prePush = (string) file_get_contents($this->projectRoot() . '/scripts/hooks/pre-push.sh');
 
-    $this->assertStringContainsString('readme-version-hook.sh', $preCommit);
-    $this->assertStringContainsString('readme-version-hook.sh', $prePush);
-    $this->assertStringContainsString('readme-version-hook.sh" stage', $preCommit);
-    $this->assertStringContainsString('readme-version-hook.sh" commit', $prePush);
+    $this->assertStringContainsString('check-readme-version.sh', $preCommit);
+    $this->assertStringContainsString('check-readme-version.sh', $prePush);
+    $this->assertStringNotContainsString('readme-version-hook.sh" stage', $preCommit);
+    $this->assertStringNotContainsString('readme-version-hook.sh" commit', $prePush);
+    $this->assertStringNotContainsString('apply-missing-method-docblocks.php', $preCommit);
+    $this->assertStringContainsString('fix:docblocks', $preCommit);
   }
 
   #[Test]

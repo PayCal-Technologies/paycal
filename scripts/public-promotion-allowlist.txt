@@ -1,0 +1,12 @@
+# Public promotion allowlist (repo-relative path prefixes or exact files).
+# Any candidate path in a promotion diff must match at least one entry.
+html/
+docs/
+strings/
+templates/
+README.md
+VERSION
+composer.json
+composer.lock
+package.json
+package-lock.json

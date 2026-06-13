@@ -66,8 +66,11 @@ class DataGrid
    */
   private static function numberLocale(): string
   {
-    if (defined('USER_LOCALE') && is_string(USER_LOCALE) && USER_LOCALE !== '') {
-      return USER_LOCALE;
+    if (defined('USER_LOCALE')) {
+      $locale = trim((string) USER_LOCALE);
+      if ($locale !== '') {
+        return $locale;
+      }
     }
 
     return 'en_US';
@@ -924,21 +927,23 @@ class DataGrid
     bool $sortable = false,
     ?string $width = null,
     ?string $align = null,
-    bool $noEllipsis = false,
+    bool $defaultVisible = true,
+    bool $toggleable = true,
+    bool $rawHtml = false,
   ): void {
     $column = [
         'key' => $key,
         'label' => $label,
         'sortable' => $sortable,
+        'defaultVisible' => $defaultVisible,
+        'toggleable' => $toggleable,
+        'rawHtml' => $rawHtml,
     ];
     if (null !== $width) {
       $column['width'] = $width;
     }
     if (null !== $align) {
       $column['align'] = $align;
-    }
-    if ($noEllipsis) {
-      $column['noEllipsis'] = true;
     }
     $this->columns[] = $column;
   }
@@ -957,6 +962,14 @@ class DataGrid
   public function enableVirtualScroll(): void
   {
     $this->meta['virtualScrollEnabled'] = true;
+  }
+
+  /**
+   * Enable the column visibility control strip between toolbar and headers.
+   */
+  public function enableColumnVisibility(): void
+  {
+    $this->meta['columnVisibilityEnabled'] = true;
   }
 
   /**
@@ -1023,6 +1036,22 @@ class DataGrid
   public function setNoChrome(bool $enabled = true): void
   {
     $this->meta['noChrome'] = $enabled;
+  }
+
+  /**
+   * Merge search and top pagination into one toolbar row.
+   */
+  public function setToolbarLayout(string $layout): void
+  {
+    $this->meta['toolbarLayout'] = $layout;
+  }
+
+  /**
+   * Render prev/next pagination as arrow-only icon buttons.
+   */
+  public function setPaginationArrowsOnly(bool $enabled = true): void
+  {
+    $this->meta['paginationArrowsOnly'] = $enabled;
   }
 
   /**

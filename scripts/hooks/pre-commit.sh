@@ -18,8 +18,11 @@ paycal_log "pre-commit" "Scanning staged changes for secrets and sensitive local
 paycal_log "pre-commit" "Checking Composer validity and direct dependency freshness"
 "${repo_root}/scripts/hooks/check-composer-state.sh"
 
-paycal_log "pre-commit" "Syncing README release docs with VERSION (stage into commit)"
-"${repo_root}/scripts/hooks/readme-version-hook.sh" stage
+paycal_log "pre-commit" "Checking README release docs match VERSION (no auto-sync)"
+if ! "${repo_root}/scripts/hooks/check-readme-version.sh"; then
+  paycal_log "fatal" "Run: scripts/paycal fix:readme-version"
+  exit 1
+fi
 
 staged_php_files="$(git diff --cached --name-only --diff-filter=ACM | grep -E '\\.php$' || true)"
 
@@ -73,27 +76,15 @@ if [[ -n "${staged_php_files}" ]]; then
     cd "${repo_root}"
   fi
   if [[ -n "${staged_php_files_in_src}" ]]; then
-    paycal_log "pre-commit" "Stage 1: compiling missing-docblock report for html/src"
-    missing_docblocks_report="$(mktemp "${repo_root}/tmp/missing-docblocks.XXXXXX.json")"
-    staged_src_paths_file="$(mktemp "${repo_root}/tmp/staged-src-docblocks.XXXXXX.txt")"
-    printf "%s\n" "${staged_php_files_in_src}" > "${staged_src_paths_file}"
-    php scripts/test/list-missing-method-docblocks.php --output "${missing_docblocks_report}" --paths-file "${staged_src_paths_file}"
-
-    paycal_log "pre-commit" "Stage 2: applying generated docblocks for reported methods"
-    changed_docblocks_paths_file="$(mktemp "${repo_root}/tmp/changed-docblocks.XXXXXX.txt")"
-    php scripts/test/apply-missing-method-docblocks.php --input "${missing_docblocks_report}" --output-paths-file "${changed_docblocks_paths_file}"
-
-    changed_docblock_files="$(cat "${changed_docblocks_paths_file}" 2>/dev/null || true)"
-    if [[ -n "${changed_docblock_files}" ]]; then
-      while IFS= read -r changed_file; do
-        [[ -z "${changed_file}" ]] && continue
-        git add "${changed_file}"
-      done <<< "${changed_docblock_files}"
+    paycal_log "pre-commit" "Running docblock quality checks for staged html/src files"
+    if ! php scripts/test/check-missing-method-docblocks.php; then
+      paycal_log "fatal" "Missing method docblocks; run: scripts/paycal fix:docblocks"
+      exit 1
     fi
-
-    paycal_log "pre-commit" "Running docblock quality checks for html/src"
-    php scripts/test/check-missing-method-docblocks.php
-    php scripts/test/check-duplicate-docblocks.php
+    if ! php scripts/test/check-duplicate-docblocks.php; then
+      paycal_log "fatal" "Duplicate docblocks detected; fix manually or run: scripts/paycal fix:docblocks"
+      exit 1
+    fi
   fi
 fi
 

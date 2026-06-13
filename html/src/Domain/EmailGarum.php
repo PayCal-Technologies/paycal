@@ -808,6 +808,64 @@ class EmailGarum
     return $sent;
   }
 
+  /** @deprecated Use sendBusinessInvite(); legacy Organization* callers. */
+  /**
+   * @param array<int,string> $scopes
+   */
+  public static function sendOrganizationInvite(
+    string $inviteToken,
+    string $inviteeEmail,
+    string $organizationName,
+    string $inviterName,
+    array $scopes,
+    ?string $batchCode = null
+  ): bool {
+    return self::sendBusinessInvite(
+      $inviteToken,
+      $inviteeEmail,
+      $organizationName,
+      $inviterName,
+      $scopes,
+      $batchCode
+    );
+  }
+
+  /** @deprecated Use sendBusinessAccessRequest(); legacy Organization* callers. */
+  public static function sendOrganizationAccessRequest(
+    string $ownerEmail,
+    string $organizationName,
+    string $requesterName,
+    string $requesterEmail,
+    string $requestId
+  ): bool {
+    return self::sendBusinessAccessRequest(
+      $ownerEmail,
+      $organizationName,
+      $requesterName,
+      $requesterEmail,
+      $requestId
+    );
+  }
+
+  /** @deprecated Use sendBusinessEventNotification(); legacy Organization* callers. */
+  public static function sendOrganizationEventNotification(
+    string $emailTo,
+    string $recipientName,
+    string $organizationName,
+    string $eventLabel,
+    string $eventDetail,
+    string $eventTimeUTC
+  ): bool {
+    return self::sendBusinessEventNotification(
+      $emailTo,
+      $recipientName,
+      $organizationName,
+      $eventLabel,
+      $eventDetail,
+      $eventTimeUTC
+    );
+  }
+
   /**
    * Handles generateInviteBatchCode operation.
    */

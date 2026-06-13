@@ -9,3 +9,10 @@
 /scripts/install-git-hooks.sh @cshaiku
 /scripts/test/check-missing-method-docblocks.php @cshaiku
 /scripts/test/check-duplicate-docblocks.php @cshaiku
+/composer.json @cshaiku
+/composer.lock @cshaiku
+/package.json @cshaiku
+/package-lock.json @cshaiku
+/phpstan.neon @cshaiku
+/phpunit.xml @cshaiku
+/.gitleaks.toml @cshaiku

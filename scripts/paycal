@@ -17,6 +17,11 @@ Categories:
   hooks:install
   hooks:pre-commit
   hooks:pre-push
+  hooks:post-commit
+  fix:readme-version
+  fix:docblocks
+  checks:readme-version
+  checks:policy-meta
   checks:composer-state
   checks:dependency-security
   checks:semantic-diff [--cached|--base-ref REF --head-ref REF] [--paths-file FILE]
@@ -78,6 +83,21 @@ case "${cmd}" in
     ;;
   hooks:pre-push)
     exec "${SCRIPT_DIR}/hooks/pre-push.sh" "$@"
+    ;;
+  hooks:post-commit)
+    exec "${SCRIPT_DIR}/hooks/post-commit.sh" "$@"
+    ;;
+  fix:readme-version)
+    exec "${SCRIPT_DIR}/hooks/fix-readme-version.sh" "$@"
+    ;;
+  fix:docblocks)
+    exec "${SCRIPT_DIR}/hooks/fix-docblocks.sh" "$@"
+    ;;
+  checks:readme-version)
+    exec "${SCRIPT_DIR}/hooks/check-readme-version.sh" "$@"
+    ;;
+  checks:policy-meta)
+    exec "${SCRIPT_DIR}/hooks/check-policy-meta.sh" "$@"
     ;;
   checks:staged-sensitive)
     exec "${SCRIPT_DIR}/hooks/check-staged-sensitive.sh" "$@"

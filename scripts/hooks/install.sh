@@ -12,7 +12,9 @@ hooks_dst="${repo_root}/.git/hooks"
 
 install -m 0755 "${hooks_src}/pre-commit" "${hooks_dst}/pre-commit"
 install -m 0755 "${hooks_src}/pre-push" "${hooks_dst}/pre-push"
+install -m 0755 "${hooks_src}/post-commit" "${hooks_dst}/post-commit"
 
 paycal_log "ok" "Installed hooks:"
 paycal_log "ok" " - ${hooks_dst}/pre-commit"
 paycal_log "ok" " - ${hooks_dst}/pre-push"
+paycal_log "ok" " - ${hooks_dst}/post-commit"

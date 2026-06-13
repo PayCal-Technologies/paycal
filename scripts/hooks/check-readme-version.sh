@@ -82,7 +82,7 @@ for readme_rel in "${readme_paths[@]}"; do
 done
 
 if [[ "${failures}" -gt 0 ]]; then
-  paycal_log "fatal" "README version policy failed (${failures} issue(s)). Run scripts/hooks/sync-readme-version.sh or scripts/version-bump.sh."
+  paycal_log "fatal" "README version policy failed (${failures} issue(s)). Run: scripts/paycal fix:readme-version"
   exit 1
 fi
 

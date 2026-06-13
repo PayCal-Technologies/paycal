@@ -92,8 +92,8 @@ final class BusinessSurface
   public static function pageTitleKeyFor(string $currentPage): string
   {
     foreach (self::navTabs() as $tab) {
-      if (($tab['page'] ?? '') === $currentPage) {
-        return (string) ($tab['label_key'] ?? 'BUSINESSES');
+      if ($tab['page'] === $currentPage) {
+        return $tab['label_key'];
       }
     }
 

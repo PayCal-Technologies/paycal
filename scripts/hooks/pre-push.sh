@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 source "${REPO_ROOT}/scripts/lib/common.sh"
+source "${SCRIPT_DIR}/verified-head-lib.sh"
 
 repo_root="$(paycal_repo_root)"
 cd "${repo_root}"
@@ -38,8 +39,14 @@ else
 	paycal_log "pre-push" "Skipping public promotion scope guard for remote: ${remote_name:-unknown}"
 fi
 
-paycal_log "pre-push" "Syncing and committing README release docs with VERSION"
-"${repo_root}/scripts/hooks/readme-version-hook.sh" commit
+paycal_log "pre-push" "Checking README release docs match VERSION"
+if ! "${repo_root}/scripts/hooks/check-readme-version.sh"; then
+	paycal_log "fatal" "Run: scripts/paycal fix:readme-version"
+	exit 1
+fi
+
+paycal_log "pre-push" "Running repository policy meta-checks"
+"${repo_root}/scripts/hooks/check-policy-meta.sh"
 
 paycal_log "pre-push" "Verifying PHPStan baseline policy"
 if grep -q "baseline" "phpstan.neon"; then
@@ -55,7 +62,11 @@ fi
 paycal_log "pre-push" "Running full PHPStan Level 9 verification"
 vendor/bin/phpstan analyse --configuration=phpstan.neon --level=9 --memory-limit=1G --no-progress
 
-paycal_log "pre-push" "Running PayCal quick tests"
-composer run test:quick
+if paycal_head_has_verified_quick_tests "${repo_root}"; then
+	paycal_log "pre-push" "Skipping PayCal quick tests (HEAD already verified by pre-commit/post-commit)"
+else
+	paycal_log "pre-push" "Running PayCal quick tests"
+	composer run test:quick
+fi
 
 paycal_log "pre-push" "OK: phpstan + quick tests passed"
