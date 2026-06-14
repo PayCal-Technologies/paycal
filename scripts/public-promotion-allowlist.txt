@@ -4,6 +4,7 @@ html/
 docs/
 strings/
 templates/
+config/business-trust.php
 README.md
 VERSION
 composer.json

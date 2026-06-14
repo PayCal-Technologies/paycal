@@ -60,6 +60,7 @@ final class G5DomainRenderersA11yContractTest extends TestCase
     $this->assertStringContainsString('role="tabpanel" aria-labelledby="{$forecastTabBtnId}"', $memberReports);
   }
 
+  #[Group('private-moat')]
   #[Test]
   public function contactCardMenuToggleUsesMenuHaspopupNotTrue(): void
   {

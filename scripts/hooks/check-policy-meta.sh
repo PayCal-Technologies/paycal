@@ -74,6 +74,12 @@ if [[ -d "${repo_root}/.github/workflows" ]]; then
   fi
 fi
 
+if [[ -f "${repo_root}/scripts/test/check-test-repo-boundaries.php" ]]; then
+  if ! php "${repo_root}/scripts/test/check-test-repo-boundaries.php"; then
+    failures=$((failures + 1))
+  fi
+fi
+
 if [[ "${failures}" -gt 0 ]]; then
   paycal_log "fatal" "Policy meta-check failed (${failures} issue(s))"
   exit 1

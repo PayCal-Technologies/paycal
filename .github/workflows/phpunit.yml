@@ -10,24 +10,44 @@ on:
   pull_request:
     paths:
       - "html/**"
+      - "scripts/**"
+      - "githooks/**"
+      - ".github/**"
+      - "README.md"
+      - "VERSION"
+      - "docs/**"
+      - "strings/**"
+      - "templates/**"
+      - "config/**"
       - "scripts/check-semantic-diff.php"
       - "scripts/test/**"
       - ".php-cs-fixer.php"
       - "composer.json"
       - "composer.lock"
       - "phpunit.xml"
+      - "phpunit.public.xml"
       - "infection.json.dist"
       - ".github/workflows/phpunit.yml"
   push:
     branches: [ main ]
     paths:
       - "html/**"
+      - "scripts/**"
+      - "githooks/**"
+      - ".github/**"
+      - "README.md"
+      - "VERSION"
+      - "docs/**"
+      - "strings/**"
+      - "templates/**"
+      - "config/**"
       - "scripts/check-semantic-diff.php"
       - "scripts/test/**"
       - ".php-cs-fixer.php"
       - "composer.json"
       - "composer.lock"
       - "phpunit.xml"
+      - "phpunit.public.xml"
       - "infection.json.dist"
       - ".github/workflows/phpunit.yml"
   workflow_dispatch:
@@ -68,7 +88,7 @@ jobs:
         run: composer install --no-interaction --no-progress --prefer-dist
 
       - name: Stage 1 Fast Gate (unit)
-        run: composer run test:unit
+        run: composer run test:quick
 
   full-validation:
     if: github.event_name != 'schedule'

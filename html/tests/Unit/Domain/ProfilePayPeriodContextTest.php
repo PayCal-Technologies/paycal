@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 #[Group('unit')]
 final class ProfilePayPeriodContextTest extends TestCase
 {
+  #[Group('private-moat')]
   #[Test]
   public function profilePageDocumentsManagedPayPeriodBannerAndProfileBundleBoot(): void
   {

@@ -22,6 +22,7 @@ Categories:
   fix:docblocks
   checks:readme-version
   checks:policy-meta
+  checks:test-boundaries
   checks:composer-state
   checks:dependency-security
   checks:semantic-diff [--cached|--base-ref REF --head-ref REF] [--paths-file FILE]
@@ -102,6 +103,9 @@ case "${cmd}" in
     ;;
   checks:policy-meta)
     exec "${SCRIPT_DIR}/hooks/check-policy-meta.sh" "$@"
+    ;;
+  checks:test-boundaries)
+    exec php "${SCRIPT_DIR}/test/check-test-repo-boundaries.php" "$@"
     ;;
   checks:staged-sensitive)
     exec "${SCRIPT_DIR}/hooks/check-staged-sensitive.sh" "$@"

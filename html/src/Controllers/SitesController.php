@@ -692,31 +692,26 @@ final class SitesController
       'direction' => $direction
     ]);
 
-    $i18n = [];
-    foreach (['SITES_CREATE'] as $key) {
-      $i18n[$key] = Strings::i18n($key);
-    }
-
-    $grid = DataGrid::create("sites-{$status}", 'Sites');
+    $grid = DataGrid::create("sites-{$status}", Strings::i18n('SITES'));
     // Only show Create Site button on Active tab
     if (SiteStatus::ACTIVE->value === $status) {
       $grid->addControl([
           'type' => 'primary',
-          'label' => $i18n['SITES_CREATE'],
+          'label' => Strings::i18n('SITES_CREATE'),
           'action' => 'create-site',
       ]);
     }
-    $grid->enableSearch('Filter sites…');
+    $grid->enableSearch(Strings::i18n('BUSINESS_SITES_FILTER_PLACEHOLDER'));
     $grid->setSearchValue($search);
     $grid->enableSorting();
     $grid->enableColumnResize();
-    $grid->addColumn('site_name', 'Name', true, 'minmax(14rem, 3fr)', null, true);
-    $grid->addColumn('wage', 'Wage', true, 'minmax(5rem, 1fr)', 'right');
-    $grid->addColumn('living_out_allowance', 'LOA', true, 'minmax(5rem, 1fr)', 'right');
-    $grid->addColumn('travel_hours', 'Travel', true, 'minmax(5rem, 1fr)', 'right');
-    $grid->addColumn('province', 'Province', true, 'minmax(8rem, 1.5fr)', 'right');
-    $grid->addColumn('entries', 'Entries', true, 'minmax(4rem, 0.75fr)', 'right');
-    $grid->addColumn('budget_amount', 'Budget', false, 'minmax(6rem, 1fr)', 'right');
+    $grid->addColumn('site_name', Strings::i18n('NAME'), true, 'minmax(14rem, 3fr)');
+    $grid->addColumn('wage', Strings::i18n('WAGE'), true, 'minmax(5rem, 1fr)', 'right');
+    $grid->addColumn('living_out_allowance', Strings::i18n('LOA'), true, 'minmax(5rem, 1fr)', 'right');
+    $grid->addColumn('travel_hours', Strings::i18n('TRAVEL'), true, 'minmax(5rem, 1fr)', 'right');
+    $grid->addColumn('province', Strings::i18n('PROVINCE'), true, 'minmax(8rem, 1.5fr)', 'right');
+    $grid->addColumn('entries', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_ENTRIES'), true, 'minmax(4rem, 0.75fr)', 'right');
+    $grid->addColumn('budget_amount', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_BUDGET'), false, 'minmax(6rem, 1fr)', 'right');
     // Use 3D box icon for active sites (archive), trash for archived (permanent delete)
     $actionIcon = SiteStatus::ACTIVE->value === $status ? '📦' : '🗑';
     $grid->addRowAction('delete', $actionIcon);

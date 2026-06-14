@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: daily dependency security audit for Composer (PHP) and npm (JS).
 # Usage: scripts/paycal checks:dependency-security
 #        composer run security:audit
-# Why here: mirrors the security-gates CI workflow so the same checks can be
+# Why here: mirrors composer-audit and npm-audit jobs in security-gates CI so the
 #   run locally or in pre-push to catch CVEs and version drift before they
 #   reach GitHub. Complements dependabot (which raises PRs) by giving an
 #   immediate pass/fail signal at the command line.

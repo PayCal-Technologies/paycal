@@ -20,6 +20,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('soc2')]
 final class CcLifecycleV2ArtifactsInvariantsTest extends TestCase
 {
   private string $repoRoot;

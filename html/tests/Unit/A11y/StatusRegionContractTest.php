@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 #[Group('a11y')]
 final class StatusRegionContractTest extends TestCase
 {
+  #[Group('private-moat')]
   #[Test]
   public function settingsAndBusinessesExposeCoreStatusRegions(): void
   {

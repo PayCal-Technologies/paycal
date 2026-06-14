@@ -24,6 +24,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('soc2')]
 final class Cc8ChangeManagementInvariantsTest extends TestCase
 {
   private string $repoRoot;

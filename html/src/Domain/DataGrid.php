@@ -583,7 +583,7 @@ class DataGrid
                     $value = $compute($row, $column);
                   }
                 ?>
-                  <div class="<?php echo $this->escape($itemClass); ?>" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>">
+                  <div class="<?php echo $this->escape($itemClass); ?>" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>" data-col-label="<?php echo $this->escape($columnLabel); ?>">
                     <?php echo $this->escape(self::toString($value)); ?>
                   </div>
                 <?php } ?>
@@ -635,9 +635,20 @@ class DataGrid
     $page = self::toInt($this->meta['page'] ?? 1, 1);
     $rows = $this->rows;
     $i18n = [];
-    $i18nKeys = ['PREVIOUS', 'NEXT', 'ACTION', 'DATAGRID_NO_ENTRIES_FOUND'];
+    $i18nKeys = [
+      'PREVIOUS',
+      'NEXT',
+      'ACTION',
+      'DATAGRID_NO_ENTRIES_FOUND',
+      'CALENDAR_WORK_ENTRY_LABEL',
+      'CALENDAR_ENCRYPTED_DETAILS_UNAVAILABLE',
+    ];
+    $monthLanguage = trim(self::toString($this->meta['language'] ?? '', ''));
+    $monthLocaleTag = trim(self::toString($this->meta['locale'] ?? '', ''));
     foreach ($i18nKeys as $key) {
-      $i18n[$key] = Strings::i18n($key);
+      $i18n[$key] = $monthLanguage !== ''
+        ? Strings::i18n($key, $monthLanguage)
+        : Strings::i18n($key);
     }
 
     if (null !== $pager) {
@@ -713,7 +724,11 @@ class DataGrid
     }
     
     // Format month names
-    $currentMonthName = (new \DateTime("$year-$month-01"))->format('F Y');
+    $currentMonthName = Strings::formatLocalizedMonthYear(
+      $year,
+      $month,
+      $monthLocaleTag !== '' ? $monthLocaleTag : null,
+    );
     $currentMonthValue = sprintf('%04d-%02d', $year, $month);
     $chromeClass = !empty($this->meta['noChrome']) ? ' datagrid_no_chrome' : '';
     $descriptionId = trim(self::toString($this->meta['descriptionId'] ?? 'calendar-grid-instructions'));
@@ -727,7 +742,9 @@ class DataGrid
           data-action="prev-month"
           data-month="<?php echo $prevMonth; ?>"
           data-year="<?php echo $prevYear; ?>"
-          aria-label="Previous month ([ or Page Up)"
+          aria-label="<?php echo $this->escape($monthLanguage !== ''
+            ? Strings::i18n('DATAGRID_PREVIOUS_MONTH_ARIA', $monthLanguage)
+            : Strings::i18n('DATAGRID_PREVIOUS_MONTH_ARIA')); ?>"
           aria-keyshortcuts="[ PageUp"
           accesskey="["
         >
@@ -750,7 +767,9 @@ class DataGrid
           data-action="next-month"
           data-month="<?php echo $nextMonth; ?>"
           data-year="<?php echo $nextYear; ?>"
-          aria-label="Next month (] or Page Down)"
+          aria-label="<?php echo $this->escape($monthLanguage !== ''
+            ? Strings::i18n('DATAGRID_NEXT_MONTH_ARIA', $monthLanguage)
+            : Strings::i18n('DATAGRID_NEXT_MONTH_ARIA')); ?>"
           aria-keyshortcuts="] PageDown"
           accesskey="]"
         >
@@ -778,7 +797,12 @@ class DataGrid
 
       <!-- Weekday Headers (Sun-Sat) -->
       <div class="calendar-v2-weekday-headers" aria-hidden="true">
-        <?php foreach (['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $dayName) { ?>
+        <?php foreach (Strings::generateWeekDayLabels($monthLocaleTag !== '' ? $monthLocaleTag : null) as $dayLabel) {
+          $dayName = self::toString($dayLabel['short'], '');
+          if ($dayName === '') {
+            continue;
+          }
+        ?>
           <div class="calendar-v2-weekday-header"><?php echo htmlspecialchars($dayName, ENT_QUOTES, 'UTF-8'); ?></div>
         <?php } ?>
       </div>

@@ -7,7 +7,7 @@ PayCal treats **GitHub CI as authoritative** and local hooks as fast feedback. H
 | Control | Private repo | Public repo |
 | --- | --- | --- |
 | Protected `main` | Required | Required |
-| Required status checks | PHPUnit, PHPStan, security gates, JS, README/policy | Same core set |
+| Required status checks | Policy Meta, PHPUnit, PHPStan, security gates, JS | Same core set |
 | Pull request before merge | Recommended (even solo) | Recommended |
 | Review for workflow/hook edits | Required via CODEOWNERS | Required via CODEOWNERS |
 | Direct push to public `main` | N/A | Block |
@@ -22,6 +22,12 @@ Configure these in GitHub repository settings (not in this repo). See `.github/r
 | pre-commit | Secrets scan, Composer state, README/VERSION check, staged PHP lint + PHPStan, docblock checks (no auto-mutate), quick tests |
 | post-commit | Record verified HEAD stamp after successful pre-commit |
 | pre-push | Public promotion allowlist (public remote only), README/VERSION check, policy meta-checks, full PHPStan, quick tests (skipped when HEAD matches verified stamp) |
+
+**Policy Meta CI** (`.github/workflows/policy-meta.yml`) runs on every PR and push to `main` with no path filter. It mirrors `scripts/paycal checks:policy-meta` plus composer/npm audit so hook-only changes cannot bypass GitHub.
+
+## Test repo boundaries
+
+See `html/tests/README.md`. Public `test:quick` uses `phpunit.public.xml` and excludes `soc2` and `private-moat` groups. CI **Repo Health** workflow runs the same gate on every PR/push.
 
 Explicit fixers (run manually, review diff, stage intentionally):
 

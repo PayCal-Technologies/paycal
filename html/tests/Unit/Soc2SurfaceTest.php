@@ -12,6 +12,8 @@ use PayCal\Domain\Extensions\ExtensionRuntime;
  * Unit tests for SOC2 capability seam defaults and override behavior.
  */
 #[Group('unit')]
+#[Group('soc2')]
+#[Group('private-moat')]
 final class Soc2SurfaceTest extends TestCase
 {
   private bool $originalBooted;

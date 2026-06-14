@@ -10,6 +10,15 @@ on:
   push:
     paths:
       - "html/**"
+      - "scripts/**"
+      - "githooks/**"
+      - ".github/**"
+      - "README.md"
+      - "VERSION"
+      - "docs/**"
+      - "strings/**"
+      - "templates/**"
+      - "config/**"
       - "scripts/check-semantic-diff.php"
       - "scripts/test/**"
       - ".php-cs-fixer.php"
@@ -20,6 +29,15 @@ on:
   pull_request:
     paths:
       - "html/**"
+      - "scripts/**"
+      - "githooks/**"
+      - ".github/**"
+      - "README.md"
+      - "VERSION"
+      - "docs/**"
+      - "strings/**"
+      - "templates/**"
+      - "config/**"
       - "scripts/check-semantic-diff.php"
       - "scripts/test/**"
       - ".php-cs-fixer.php"

@@ -1,0 +1,49 @@
+name: Repo Health
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  repo-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f  # v2
+        with:
+          php-version: "8.5"
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Public quick gate
+        run: composer run test:quick
+
+      - name: PHPStan level 9
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --level=9 --no-progress --memory-limit=512M
+
+      - name: Policy and test boundary checks
+        run: |
+          bash scripts/hooks/check-policy-meta.sh
+          php scripts/test/check-test-repo-boundaries.php

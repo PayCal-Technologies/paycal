@@ -21,6 +21,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('soc2')]
 final class Cc7SystemOperationsReadinessInvariantsTest extends TestCase
 {
   private string $repoRoot;

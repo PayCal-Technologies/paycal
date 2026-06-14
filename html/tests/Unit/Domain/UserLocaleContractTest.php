@@ -2,6 +2,7 @@
 
 namespace PayCal\Tests\Unit\Domain;
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -35,6 +36,7 @@ final class UserLocaleContractTest extends TestCase
     $this->assertStringContainsString('Language::resolveDateLocale(', $coreJs);
   }
 
+  #[Group('private-moat')]
   #[Test]
   public function workspaceTimestampFormatterUsesViewerLocale(): void
   {
@@ -46,6 +48,7 @@ final class UserLocaleContractTest extends TestCase
     $this->assertStringNotContainsString("new Intl.DateTimeFormat('en-US', { ...options, timeZone: normalizedZone })", $workspaceJs);
   }
 
+  #[Group('private-moat')]
   #[Test]
   public function profileLanguageSaveDoesNotRequirePayPeriodValidationForDetailsSource(): void
   {
@@ -57,6 +60,7 @@ final class UserLocaleContractTest extends TestCase
     $this->assertStringContainsString('window.location.reload();', $workspaceJs);
   }
 
+  #[Group('private-moat')]
   #[Test]
   public function profileLanguageSaveStillWorksWhenPayPeriodManagedByBusiness(): void
   {

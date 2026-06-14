@@ -20,6 +20,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('soc2')]
 final class BundleIntegrityInvariantsTest extends TestCase
 {
   private string $repoRoot;

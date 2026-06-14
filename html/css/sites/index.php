@@ -345,26 +345,28 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 [data-grid="sites-active"] .datagrid_heading,
 [data-grid="sites-archived"] .datagrid_heading {
   padding: 0.5rem 0.5rem 0.6rem 0.5rem;
+  font-size: var(--font-md);
+  font-weight: 600;
 }
 
-/* Tighter numeric cells */
-[data-grid="sites-active"] .datagrid_col_wage,
-[data-grid="sites-active"] .datagrid_col_living_out_allowance,
-[data-grid="sites-active"] .datagrid_col_travel_hours,
-[data-grid="sites-active"] .datagrid_col_entries,
-[data-grid="sites-active"] .datagrid_col_budget_amount,
-[data-grid="sites-archived"] .datagrid_col_wage,
-[data-grid="sites-archived"] .datagrid_col_living_out_allowance,
-[data-grid="sites-archived"] .datagrid_col_travel_hours,
-[data-grid="sites-archived"] .datagrid_col_entries,
-[data-grid="sites-archived"] .datagrid_col_budget_amount {
+/* Tighter numeric data cells (headings stay uniform above) */
+[data-grid="sites-active"] .datagrid_item.datagrid_col_wage,
+[data-grid="sites-active"] .datagrid_item.datagrid_col_living_out_allowance,
+[data-grid="sites-active"] .datagrid_item.datagrid_col_travel_hours,
+[data-grid="sites-active"] .datagrid_item.datagrid_col_entries,
+[data-grid="sites-active"] .datagrid_item.datagrid_col_budget_amount,
+[data-grid="sites-archived"] .datagrid_item.datagrid_col_wage,
+[data-grid="sites-archived"] .datagrid_item.datagrid_col_living_out_allowance,
+[data-grid="sites-archived"] .datagrid_item.datagrid_col_travel_hours,
+[data-grid="sites-archived"] .datagrid_item.datagrid_col_entries,
+[data-grid="sites-archived"] .datagrid_item.datagrid_col_budget_amount {
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
 }
 
-/* Budget column: accent colour when set, muted when empty */
-[data-grid="sites-active"] .datagrid_col_budget_amount:not(:empty),
-[data-grid="sites-archived"] .datagrid_col_budget_amount:not(:empty) {
+/* Budget data cells: accent colour when set, muted when empty */
+[data-grid="sites-active"] .datagrid_item.datagrid_col_budget_amount:not(:empty),
+[data-grid="sites-archived"] .datagrid_item.datagrid_col_budget_amount:not(:empty) {
   color: var(--color-primary, #4a9eff);
   font-weight: 600;
 }
@@ -504,24 +506,11 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
     flex-shrink: 0;
   }
 
-  /* Per-column labels — content property overrides the empty default above */
-  [data-grid="sites-active"] .datagrid_col_site_name::before,
-  [data-grid="sites-archived"] .datagrid_col_site_name::before { content: "Name"; }
-
-  [data-grid="sites-active"] .datagrid_col_wage::before,
-  [data-grid="sites-archived"] .datagrid_col_wage::before { content: "Wage"; }
-
-  [data-grid="sites-active"] .datagrid_col_living_out_allowance::before,
-  [data-grid="sites-archived"] .datagrid_col_living_out_allowance::before { content: "LOA"; }
-
-  [data-grid="sites-active"] .datagrid_col_travel_hours::before,
-  [data-grid="sites-archived"] .datagrid_col_travel_hours::before { content: "Travel"; }
-
-  [data-grid="sites-active"] .datagrid_col_province::before,
-  [data-grid="sites-archived"] .datagrid_col_province::before { content: "Province"; }
-
-  [data-grid="sites-active"] .datagrid_col_entries::before,
-  [data-grid="sites-archived"] .datagrid_col_entries::before { content: "Entries"; }
+  /* Per-column labels — localized via data-col-label on each datagrid_item */
+  [data-grid="sites-active"] .datagrid_item[data-col-label]::before,
+  [data-grid="sites-archived"] .datagrid_item[data-col-label]::before {
+    content: attr(data-col-label);
+  }
 
   /* Actions row: no label, push button right, add a divider */
   [data-grid="sites-active"] .datagrid_item_actions::before,

@@ -26,6 +26,7 @@ final class OrganizationsAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('applyContactInputAriaLabels', $organizationsJs);
   }
 
+  #[Group('private-moat')]
   #[Test]
   public function earningsOrgViewUsesNavigationSemanticsAndNamedSelector(): void
   {

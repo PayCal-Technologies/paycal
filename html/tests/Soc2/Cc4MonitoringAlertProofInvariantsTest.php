@@ -22,6 +22,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('soc2')]
 final class Cc4MonitoringAlertProofInvariantsTest extends TestCase
 {
   private string $repoRoot;

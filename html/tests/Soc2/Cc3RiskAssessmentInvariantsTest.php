@@ -24,6 +24,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('soc2')]
 final class Cc3RiskAssessmentInvariantsTest extends TestCase
 {
   private string $repoRoot;
