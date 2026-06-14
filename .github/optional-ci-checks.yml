@@ -1,0 +1,39 @@
+# Optional GitHub verification workflow manifest (informational / manual evidence only).
+#
+# These checks describe workflows that MAY run on GitHub. They are NOT required
+# branch-protection checks and are NOT PayCal's CI authority.
+#
+# Authoritative gates (mandatory locally):
+#   scripts/paycal checks:policy-meta
+#   scripts/paycal checks:test-boundaries
+#   composer run test:quick
+#   PHPStan L9 via pre-push
+#   pre-commit and pre-push hooks
+
+version: 1
+default_branch: main
+
+github_safety_public_main:
+  require_signed_commits: true
+  require_linear_history: true
+  block_force_push: true
+  block_branch_deletion: true
+
+optional_verification_checks:
+  - "Policy Meta / policy-meta"
+  - "Repo Health / repo-health"
+  - "PHPUnit / fast-gate (8.4)"
+  - "PHPUnit / full-validation"
+  - "PHPStan / phpstan (8.4)"
+  - "PHPStan / phpstan (8.5)"
+  - "JavaScript Quality / javascript-quality"
+  - "Security Gates / composer-audit"
+  - "Security Gates / npm-audit"
+  - "Security Gates / phpstan"
+  - "Security Gates / secret-scan"
+  - "EnforceStrictTypes / strict-types"
+  - "CheckRedisCliUsage / no-redis-cli"
+
+notes:
+  - "Run optional workflows manually: gh workflow run <file> --repo PayCal-Technologies/paycal"
+  - "Do not add optional_verification_checks to GitHub branch protection."

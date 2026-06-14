@@ -2,7 +2,7 @@
 # Protect CI/CD, security gates, and git hook enforcement from unreviewed changes.
 
 /.github/workflows/ @cshaiku
-/.github/required-checks.yml @cshaiku
+/.github/optional-ci-checks.yml @cshaiku
 /githooks/ @cshaiku
 /.githooks/ @cshaiku
 /scripts/hooks/ @cshaiku

@@ -26,15 +26,14 @@ Both the private and public repositories share most of `html/tests/`. **Which te
 3. **Private-only asset** (`workspace.js.php`, `_archive/`, `Soc2Surface`, full earnings UI) → `#[Group('private-moat')]` on class or method; public `test:quick` excludes it.
 4. Run `php scripts/test/check-test-repo-boundaries.php` before pushing.
 
-## CI
+## Verification (local-authoritative)
 
-| Repo | Fast gate | Compliance | Cross-repo |
-| --- | --- | --- | --- |
-| Public | `test:quick` in PHPUnit workflow | N/A | Self-contained |
-| Private | `test:quick` in PHPUnit workflow | `test:soc2` in SOC2 Compliance workflow | Public Repo Health workflow |
-
-Before promoting private → public, run from private:
+Mandatory before push/promotion — not GitHub Actions:
 
 ```bash
-scripts/paycal checks:public-health
+composer run test:quick
+scripts/paycal checks:policy-meta
+scripts/paycal checks:public-health   # from private before promotion
 ```
+
+Optional GitHub workflows (`.github/workflows/`) may be run for evidence; see `.github/optional-ci-checks.yml`.
