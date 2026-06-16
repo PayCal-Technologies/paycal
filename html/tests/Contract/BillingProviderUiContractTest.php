@@ -4,28 +4,28 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Contract: billing UI remains provider-aware across profile markup and JS.
+ * Contract: billing UI remains provider-aware across account settings markup and JS.
  */
 #[Group('contract')]
 final class BillingProviderUiContractTest extends TestCase
 {
-  public function testProfilePanelExposesBillingProviderDataAttribute(): void
+  public function testAccountPanelExposesBillingProviderDataAttribute(): void
   {
-    $profile = $this->readProjectFile('profile/index.php');
+    $vars = $this->readProjectFile('settings/_partials/vars_account.php');
+    $billing = $this->readProjectFile('settings/_partials/panel_account_billing.php');
 
-    $this->assertStringContainsString('$billingProvider = BillingProvider::current();', $profile);
-    $this->assertStringContainsString('$isStripeBilling = $billingProvider === BillingProvider::STRIPE;', $profile);
-    $this->assertStringContainsString('data-billing-provider="<?php echo htmlspecialchars($billingProvider, ENT_QUOTES, \'UTF-8\'); ?>"', $profile);
+    $this->assertStringContainsString('$billingProvider = BillingProvider::current();', $vars);
+    $this->assertStringContainsString('$isStripeBilling = $billingProvider === BillingProvider::STRIPE;', $vars);
+    $this->assertStringContainsString('data-billing-provider="<?php echo htmlspecialchars($billingProvider, ENT_QUOTES, \'UTF-8\'); ?>"', $billing);
   }
 
-  public function testProfileBillingActionsRemainProviderConditional(): void
+  public function testAccountBillingActionsRemainProviderConditional(): void
   {
-    $profile = $this->readProjectFile('profile/index.php');
+    $billing = $this->readProjectFile('settings/_partials/panel_account_billing.php');
 
-    $this->assertStringContainsString('<?php if ($isStripeBilling) { ?>', $profile);
-    $this->assertStringContainsString('<?php } else { ?>', $profile);
-    $this->assertStringContainsString('<?php if ($isStripeBilling) { ?>', $profile);
-    $this->assertStringContainsString('id="billing_downgrade_zone"', $profile);
+    $this->assertStringContainsString('<?php if ($isStripeBilling) { ?>', $billing);
+    $this->assertStringContainsString('<?php } else { ?>', $billing);
+    $this->assertStringContainsString('id="billing_downgrade_zone"', $billing);
   }
 
   public function testBillingJsReadsProviderFromPanelDataset(): void

@@ -55,7 +55,7 @@ require_once HTML.'/header.php';
       <p>
         Se riscontrate un problema e volete condividere più contesto con il supporto, potete
         abilitare diagnostica aggiuntiva in
-        <a href="/settings/">Impostazioni → Debug (Opzionale)</a>.
+        <a href="/settings/diagnostics/">Impostazioni → Debug (Opzionale)</a>.
         Ogni impostazione è indipendente; potete attivare solo quella rilevante.
         Tutte e tre sono <strong>Disattivate</strong> per impostazione predefinita.
       </p>
@@ -220,7 +220,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         non come cookie del browser. Seguono il vostro account su tutti i dispositivi e le sessioni
         e sono <strong>Disattivate</strong> per impostazione predefinita per ogni account —
         inclusi i nuovi. Potete modificarle in qualsiasi momento in
-        <a href="/settings/">Impostazioni → Debug (Opzionale)</a>.
+        <a href="/settings/diagnostics/">Impostazioni → Debug (Opzionale)</a>.
       </p>
       <p>
         La disattivazione di un'impostazione ha effetto immediato al successivo caricamento della

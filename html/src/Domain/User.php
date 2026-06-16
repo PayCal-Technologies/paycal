@@ -117,19 +117,44 @@ final class User
   public string $spacing                             = UserPreferenceDefaults::DEFAULT_SPACING;
   public string $dyslexia_typography                 = UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY;
   public string $help_popup_timeout_seconds          = UserPreferenceDefaults::DEFAULT_HELP_POPUP_TIMEOUT_SECONDS;
+  public string $toast_position                      = UserPreferenceDefaults::DEFAULT_TOAST_POSITION;
+  public string $toast_width_preset                  = UserPreferenceDefaults::DEFAULT_TOAST_WIDTH_PRESET;
+  public string $toast_font_size                     = UserPreferenceDefaults::DEFAULT_TOAST_FONT_SIZE;
   public string $nav_position_primary                = UserPreferenceDefaults::DEFAULT_NAV_POSITION_PRIMARY;
   public string $nav_state_primary                   = UserPreferenceDefaults::DEFAULT_NAV_STATE_PRIMARY;
+  public string $nav_proximity                       = UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY;
+  public string $nav_overlay                         = UserPreferenceDefaults::DEFAULT_NAV_OVERLAY;
+  public string $nav_proximity_px                    = UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY_PX;
   public string $overlay_sidebar_timeout_seconds     = UserPreferenceDefaults::DEFAULT_OVERLAY_SIDEBAR_TIMEOUT_SECONDS;
   public string $calendar_autofocus                  = UserPreferenceDefaults::DEFAULT_CALENDAR_AUTOFOCUS;
   public string $calendar_audio_labels               = UserPreferenceDefaults::DEFAULT_CALENDAR_AUDIO_LABELS;
   public string $calendar_day_name_format            = UserPreferenceDefaults::DEFAULT_CALENDAR_DAY_NAME_FORMAT;
+  public string $calendar_day_name_position          = UserPreferenceDefaults::DEFAULT_CALENDAR_DAY_NAME_POSITION;
   public string $calendar_date_label_position        = UserPreferenceDefaults::DEFAULT_CALENDAR_DATE_LABEL_POSITION;
   public string $calendar_work_entry_position        = UserPreferenceDefaults::DEFAULT_CALENDAR_WORK_ENTRY_POSITION;
   public bool $calendar_work_entry_fields_hours      = true;
+  public bool $calendar_work_entry_fields_regular    = true;
   public bool $calendar_work_entry_fields_overtime   = true;
   public bool $calendar_work_entry_fields_living_out = true;
   public bool $calendar_work_entry_fields_travel     = true;
+  public string $calendar_week_start                 = UserPreferenceDefaults::DEFAULT_CALENDAR_WEEK_START;
+  public string $calendar_default_view               = UserPreferenceDefaults::DEFAULT_CALENDAR_DEFAULT_VIEW;
+  public bool $calendar_show_gross_badge              = false;
+  public bool $calendar_show_net_badge                = false;
+  public bool $calendar_show_deductions_badge         = false;
+  public bool $calendar_highlight_pay_period          = false;
+  public string $accent_preset                       = UserPreferenceDefaults::DEFAULT_ACCENT_PRESET;
+  public string $high_contrast_enabled                = UserPreferenceDefaults::DEFAULT_HIGH_CONTRAST_ENABLED;
+  public string $reduced_motion_enabled               = UserPreferenceDefaults::DEFAULT_REDUCED_MOTION_ENABLED;
+  public string $sr_verbosity                        = UserPreferenceDefaults::DEFAULT_SR_VERBOSITY;
+  public string $keyboard_shortcuts_hint             = UserPreferenceDefaults::DEFAULT_KEYBOARD_SHORTCUTS_HINT;
+  public string $require_reauth_export               = UserPreferenceDefaults::DEFAULT_REQUIRE_REAUTH_EXPORT;
+  public string $require_reauth_import               = UserPreferenceDefaults::DEFAULT_REQUIRE_REAUTH_IMPORT;
+  public string $export_encrypt_preference            = UserPreferenceDefaults::DEFAULT_EXPORT_ENCRYPT_PREFERENCE;
+  public string $debug_ttl_minutes                   = UserPreferenceDefaults::DEFAULT_DEBUG_TTL_MINUTES;
+  public string $debug_enabled_until                 = '';
   public string $voice                               = UserPreferenceDefaults::DEFAULT_VOICE;
+  public string $voice_volume                        = UserPreferenceDefaults::DEFAULT_VOICE_VOLUME;
   public string $audio_feedback                      = UserPreferenceDefaults::DEFAULT_AUDIO_FEEDBACK;
   public string $debug_console_enabled               = UserPreferenceDefaults::DEFAULT_DEBUG_CONSOLE_ENABLED;
   public string $debug_fine_grained_enabled          = UserPreferenceDefaults::DEFAULT_DEBUG_FINE_GRAINED_ENABLED;
@@ -592,6 +617,76 @@ final class User
   }
 
   /**
+   * Toast anchor position preset.
+   */
+  public function getToastPosition(): string
+  {
+    $value = strtolower(trim($this->toast_position));
+    $allowed = ['upper-left', 'upper-center', 'upper-right', 'lower-left', 'lower-center', 'lower-right', 'full-top', 'full-bottom'];
+
+    return in_array($value, $allowed, true)
+      ? $value
+      : UserPreferenceDefaults::DEFAULT_TOAST_POSITION;
+  }
+
+  /**
+   * Toast max-width preset.
+   */
+  public function getToastWidthPreset(): string
+  {
+    $value = strtolower(trim($this->toast_width_preset));
+    $allowed = ['tiny', 'narrow', 'normal', 'large', 'larger', 'full-width'];
+
+    return in_array($value, $allowed, true)
+      ? $value
+      : UserPreferenceDefaults::DEFAULT_TOAST_WIDTH_PRESET;
+  }
+
+  /**
+   * Toast font size slider value (-5…+5).
+   */
+  public function getToastFontSize(): int
+  {
+    $raw = trim($this->toast_font_size);
+    if ($raw === '' || preg_match('/^-?\d+$/', $raw) !== 1) {
+      return (int) UserPreferenceDefaults::DEFAULT_TOAST_FONT_SIZE;
+    }
+
+    return max(-5, min(5, (int) $raw));
+  }
+
+  /**
+   * Sidebar proximity hover enabled.
+   */
+  public function isNavProximityEnabled(): bool
+  {
+    $value = strtolower(trim($this->nav_proximity));
+
+    return $value === 'on' || $value === '';
+  }
+
+  /**
+   * Sidebar overlay mode (true = overlay, false = push).
+   */
+  public function isNavOverlayMode(): bool
+  {
+    return strtolower(trim($this->nav_overlay)) === 'overlay';
+  }
+
+  /**
+   * Sidebar proximity trigger distance in px (0–600).
+   */
+  public function getNavProximityPx(): int
+  {
+    $value = (int) $this->nav_proximity_px;
+    if ($value < 0 || $value > 600) {
+      return (int) UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY_PX;
+    }
+
+    return $value;
+  }
+
+  /**
    * Get overlay sidebar auto-collapse timeout in seconds.
    * @return int timeout in seconds, or 0 for no auto-collapse
    */
@@ -661,6 +756,4 @@ final class User
     return 'U'.substr($hA256Hash, 0, 8);
   }
 }
-
-
 

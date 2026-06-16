@@ -57,7 +57,7 @@ require_once HTML.'/header.php';
       <p>
         Kung may naranasan kang problema at nais mong ibahagi ang karagdagang konteksto sa
         suporta, maaari mong i-enable ang karagdagang diagnostics sa
-        <a href="/settings/">Mga Setting → Pag-debug (Opsyonal)</a>.
+        <a href="/settings/diagnostics/">Mga Setting → Pag-debug (Opsyonal)</a>.
         Ang bawat setting ay independyente; maaari mong i-on lamang ang may kaugnayan.
         Lahat ng tatlo ay naka-default sa <strong>Off</strong>.
       </p>
@@ -223,7 +223,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         hindi bilang mga browser cookie. Sinusundan nila ang iyong account sa lahat ng device at
         session at naka-default sa <strong>Off</strong> para sa bawat account — kasama ang mga
         bagong account. Maaari mong baguhin ang mga ito anumang oras sa
-        <a href="/settings/">Mga Setting → Pag-debug (Opsyonal)</a>.
+        <a href="/settings/diagnostics/">Mga Setting → Pag-debug (Opsyonal)</a>.
       </p>
       <p>
         Ang pag-off ng isang setting ay agad na magkakabisa sa susunod na pag-load ng pahina.

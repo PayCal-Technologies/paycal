@@ -25,6 +25,7 @@ use PayCal\Domain\Strings;
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\SystemLimits;
 use PayCal\Domain\User;
+use PayCal\Domain\UserPreferenceDefaults;
 use PayCal\Domain\UserRepository;
 use PayCal\Domain\Work;
 use PayCal\Domain\WorkEntry;
@@ -73,7 +74,6 @@ use PayCal\Observability\Lens;
 class CalendarController
 {
   private const MAX_AUTOREPAIR_DATES = SystemLimits::MAX_USER_RESULTS;
-  private const WEEK_START_SUNDAY = 0;
   private const GRID_SPAN_DAYS = 41;
   private const MIN_MONTH = 1;
   private const MAX_MONTH = 12;
@@ -85,6 +85,11 @@ class CalendarController
   private static function scalarString(mixed $value, string $default = ''): string
   {
     return is_scalar($value) ? (string) $value : $default;
+  }
+
+  private static function weekStartForUser(?User $user): int
+  {
+    return UserPreferenceDefaults::calendarWeekStartDay($user);
   }
 
   /**
@@ -785,7 +790,8 @@ class CalendarController
         \PayCal\Domain\Response::error('[CC] Invalid year or month.', [], \PayCal\Domain\Enums\HttpStatus::HTTP_BAD_REQUEST);
         return;
       }
-      $calendar = Calendar::fromDate(new \DateTime("{$year}-{$month}-01"), self::WEEK_START_SUNDAY, $user);
+      $weekStart = self::weekStartForUser($user);
+      $calendar = Calendar::fromDate(new \DateTime("{$year}-{$month}-01"), $weekStart, $user);
       // Generate calendar data
       $calendarData = $this->generateCalendarData($calendar, $year, $month, $user);
       Response::success('[CC] Calendar data retrieved.', $calendarData, \PayCal\Domain\Enums\HttpStatus::HTTP_OK);
@@ -893,17 +899,20 @@ class CalendarController
 
     // Get week day headers
     $weekHeaders = [];
+    $dayNameFormat = $user->calendar_day_name_format;
+    if (!in_array($dayNameFormat, ['narrow', 'short', 'long'], true)) {
+      $dayNameFormat = UserPreferenceDefaults::DEFAULT_CALENDAR_DAY_NAME_FORMAT;
+    }
     foreach ($calendar->generateWeekDayLabels() as $day) {
-      $dayNameFormat = $user->calendar_day_name_format;
       $weekHeaders[] = [
-          'abbr' => $day[$dayNameFormat],
+          'abbr' => $day[$dayNameFormat] ?? $day['short'],
           'full' => $day['long'],
       ];
     }
 
     // Pre-fetch work data
     $firstOfMonth = $calendar->getFirstDay();
-    $firstWeekday = ((int) $firstOfMonth->format('w') + 7 - self::WEEK_START_SUNDAY) % 7;
+    $firstWeekday = ((int) $firstOfMonth->format('w') + 7 - self::weekStartForUser($user)) % 7;
     $gridStart = (clone $firstOfMonth)->modify("- {$firstWeekday} days");
     $gridEnd = (clone $gridStart)->modify('+' . self::GRID_SPAN_DAYS . ' days');
     $start = \DateTimeImmutable::createFromMutable($gridStart);
@@ -1060,7 +1069,8 @@ class CalendarController
     }
 
     try {
-      $calendar = Calendar::fromDate(new \DateTime("{$year}-{$month}-01"), self::WEEK_START_SUNDAY, $user);
+      $weekStart = self::weekStartForUser($user);
+      $calendar = Calendar::fromDate(new \DateTime("{$year}-{$month}-01"), $weekStart, $user);
       $monthData = $this->generateMonthData($calendar, $user);
       
       Response::success('[CC] Month data retrieved.', $monthData, HttpStatus::HTTP_OK);
@@ -1098,7 +1108,7 @@ class CalendarController
 
     // Pre-fetch work data for the entire 42-day grid
     $firstOfMonth = $calendar->getFirstDay();
-    $firstWeekday = ((int) $firstOfMonth->format('w') + 7 - self::WEEK_START_SUNDAY) % 7;
+    $firstWeekday = ((int) $firstOfMonth->format('w') + 7 - self::weekStartForUser($user)) % 7;
     $gridStart = (clone $firstOfMonth)->modify("- {$firstWeekday} days");
     $gridEnd = (clone $gridStart)->modify('+' . self::GRID_SPAN_DAYS . ' days');
     
@@ -1326,5 +1336,4 @@ class CalendarController
     ]);
   }
 }
-
 

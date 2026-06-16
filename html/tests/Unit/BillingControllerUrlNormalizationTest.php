@@ -73,8 +73,8 @@ final class BillingControllerUrlNormalizationTest extends TestCase
     $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
 
     $this->assertSame(
-      'https://dev.paycal.app/profile/?billing=portal',
-      $this->invokeNormalize('/profile/?billing=portal', '/profile/?billing=portal')
+      'https://dev.paycal.app/settings/account/?billing=portal',
+      $this->invokeNormalize('/settings/account/?billing=portal', '/settings/account/?billing=portal')
     );
   }
 
@@ -84,8 +84,8 @@ final class BillingControllerUrlNormalizationTest extends TestCase
     $_SERVER['HTTP_X_FORWARDED_HOST'] = 'dev.paycal.app';
     $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
 
-    $candidate = 'https://dev.paycal.app/profile/?billing=portal';
-    $this->assertSame($candidate, $this->invokeNormalize($candidate, '/profile/?billing=portal'));
+    $candidate = 'https://dev.paycal.app/settings/account/?billing=portal';
+    $this->assertSame($candidate, $this->invokeNormalize($candidate, '/settings/account/?billing=portal'));
   }
 
   public function testUntrustedAbsoluteHostFallsBackToRequestHost(): void
@@ -95,8 +95,8 @@ final class BillingControllerUrlNormalizationTest extends TestCase
     $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
 
     $this->assertSame(
-      'https://dev.paycal.app/profile/?billing=portal',
-      $this->invokeNormalize('https://evil.example/anywhere', '/profile/?billing=portal')
+      'https://dev.paycal.app/settings/account/?billing=portal',
+      $this->invokeNormalize('https://evil.example/anywhere', '/settings/account/?billing=portal')
     );
   }
 
@@ -105,8 +105,8 @@ final class BillingControllerUrlNormalizationTest extends TestCase
     unset($_SERVER['HTTP_HOST'], $_SERVER['HTTPS'], $_SERVER['HTTP_X_FORWARDED_HOST'], $_SERVER['HTTP_X_FORWARDED_PROTO']);
 
     $this->assertSame(
-      'https://dev.paycal.local/profile/?billing=portal',
-      $this->invokeNormalize('/profile/?billing=portal', '/profile/?billing=portal')
+      'https://dev.paycal.local/settings/account/?billing=portal',
+      $this->invokeNormalize('/settings/account/?billing=portal', '/settings/account/?billing=portal')
     );
   }
 

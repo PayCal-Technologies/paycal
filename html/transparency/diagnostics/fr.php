@@ -55,7 +55,7 @@ require_once HTML.'/header.php';
       <p>
         Si vous rencontrez un problème et souhaitez partager davantage de contexte avec le support,
         vous pouvez activer des diagnostics supplémentaires dans
-        <a href="/settings/">Paramètres → Débogage (Optionnel)</a>.
+        <a href="/settings/diagnostics/">Paramètres → Débogage (Optionnel)</a>.
         Chaque paramètre est indépendant ; vous pouvez activer uniquement celui qui est pertinent.
         Les trois sont <strong>Désactivés</strong> par défaut.
       </p>
@@ -222,7 +222,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         cookies de navigateur. Ils suivent votre compte sur tous les appareils et sessions et
         sont <strong>Désactivés</strong> par défaut pour chaque compte — y compris les nouveaux.
         Vous pouvez les modifier à tout moment dans
-        <a href="/settings/">Paramètres → Débogage (Optionnel)</a>.
+        <a href="/settings/diagnostics/">Paramètres → Débogage (Optionnel)</a>.
       </p>
       <p>
         La désactivation d'un paramètre prend effet immédiatement au prochain chargement de page.

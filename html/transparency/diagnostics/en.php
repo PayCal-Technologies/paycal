@@ -54,7 +54,7 @@ require_once HTML.'/header.php';
       </p>
       <p>
         If you run into a problem and want to share more context with support, you can enable
-        extra diagnostics in <a href="/settings/">Settings → Debugging (Optional)</a>.
+        extra diagnostics in <a href="/settings/diagnostics/">Settings → Debugging (Optional)</a>.
         Each setting is independent; you can turn on just the one that is relevant.
         All three default to <strong>Off</strong>.
       </p>
@@ -216,7 +216,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         They follow your account across devices and sessions and default to
         <strong>Off</strong> for every account — including new accounts.
         You can change them at any time in
-        <a href="/settings/">Settings → Debugging (Optional)</a>.
+        <a href="/settings/diagnostics/">Settings → Debugging (Optional)</a>.
       </p>
       <p>
         Turning a setting off takes effect immediately on the next page load.

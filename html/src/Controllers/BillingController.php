@@ -70,9 +70,9 @@ final class BillingController
       return;
     }
 
-    $successRaw = $this->requestString('success_url', '/profile/?billing=success');
-    $cancelRaw = $this->requestString('cancel_url', '/profile/?billing=cancel');
-    $successTarget = $this->normalizeAppURL($successRaw, '/profile/?billing=success');
+    $successRaw = $this->requestString('success_url', '/settings/account/?billing=success');
+    $cancelRaw = $this->requestString('cancel_url', '/settings/account/?billing=cancel');
+    $successTarget = $this->normalizeAppURL($successRaw, '/settings/account/?billing=success');
     // Sign the ?next= value so handleCheckoutReturn can reject attacker-crafted URLs.
     $sessionHash = Authentication::getSessionHashFromCookie() ?? '';
     $returnPath  = '/api/v1/billing/checkout-return?next=' . rawurlencode($successTarget);
@@ -80,7 +80,7 @@ final class BillingController
       $returnPath .= '&nxt_sig=' . hash_hmac('sha256', $successTarget, $sessionHash);
     }
     $successURL = $this->normalizeAppURL($returnPath, '/api/v1/billing/checkout-return');
-    $cancelURL = $this->normalizeAppURL($cancelRaw, '/profile/?billing=cancel');
+    $cancelURL = $this->normalizeAppURL($cancelRaw, '/settings/account/?billing=cancel');
 
     $user = User::current();
     $userUUID = User::currentUUID();
@@ -142,13 +142,13 @@ final class BillingController
     Authentication::redirectHomeIfUnauthenticated();
 
     if (!$this->billingProviderAllows(__FUNCTION__)) {
-      header('Location: /profile/?billing=success', true, 302);
+      header('Location: /settings/account/?billing=success', true, 302);
       exit;
     }
 
     $userUUID = User::currentUUID();
     if ($userUUID === '') {
-      header('Location: /profile/?billing=delayed', true, 302);
+      header('Location: /settings/account/?billing=delayed', true, 302);
       exit;
     }
 
@@ -197,8 +197,8 @@ final class BillingController
       return;
     }
 
-    $returnRaw = $this->requestString('return_url', '/profile/?billing=portal');
-    $returnURL = $this->normalizeAppURL($returnRaw, '/profile/?billing=portal');
+    $returnRaw = $this->requestString('return_url', '/settings/account/?billing=portal');
+    $returnURL = $this->normalizeAppURL($returnRaw, '/settings/account/?billing=portal');
 
     $userUUID = User::currentUUID();
     if ($userUUID === '') {
@@ -519,7 +519,7 @@ final class BillingController
    */
   private function verifiedRedirectTarget(mixed $nextRaw, mixed $sigRaw): string
   {
-    $fallback = $this->defaultAppOrigin() . '/profile/?billing=success';
+    $fallback = $this->defaultAppOrigin() . '/settings/account/?billing=success';
 
     $next = is_scalar($nextRaw) ? trim((string) $nextRaw) : '';
     $sig  = is_scalar($sigRaw)  ? trim((string) $sigRaw)  : '';
@@ -539,7 +539,7 @@ final class BillingController
       return $fallback;
     }
 
-    return $this->normalizeAppURL($next, '/profile/?billing=success');
+    return $this->normalizeAppURL($next, '/settings/account/?billing=success');
   }
 
   /**

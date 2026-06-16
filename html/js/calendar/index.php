@@ -68,6 +68,7 @@ import PW from '<?php echo Environment::appURL('js/phantomwing/'); ?>';
 import { fromBase64, latin1FromBase64, latin1ToBase64, toBase64 } from '<?php echo Environment::appURL('js/core/binary-codec.js'); ?>';
 
 let sites = <?php echo Sites::getSitesAsJson($user->user_uuid); ?>;
+let calendarSiteCatalogRefresh = null;
 const MSG_CAL_INVALID_HOURS = <?php echo json_encode($i18n['ERROR_CAL_INVALID_HOURS']); ?>;
 const MSG_CAL_NONCE_FETCH = <?php echo json_encode($i18n['ERROR_CAL_NONCE_FETCH']); ?>;
 const MSG_CAL_NONCE_PASTE = <?php echo json_encode($i18n['ERROR_CAL_NONCE_PASTE']); ?>;
@@ -88,6 +89,7 @@ const CAL_TOTAL_HOURS_MAX = 24;
 const LABEL_LAST_UPDATED = <?php echo json_encode($i18n['LAST_UPDATED']); ?>;
 const CAL_WORK_ENTRY_FIELDS = {
   hours: <?php echo $user->calendar_work_entry_fields_hours ? 'true' : 'false'; ?>,
+  regular: <?php echo $user->calendar_work_entry_fields_regular ? 'true' : 'false'; ?>,
   overtime: <?php echo $user->calendar_work_entry_fields_overtime ? 'true' : 'false'; ?>,
   livingOut: <?php echo $user->calendar_work_entry_fields_living_out ? 'true' : 'false'; ?>,
   travel: <?php echo $user->calendar_work_entry_fields_travel ? 'true' : 'false'; ?>
@@ -1056,6 +1058,11 @@ const renderDayEntries = async (day, entries) => {
     const spokenMetrics = [];
     const fields = [];
     if (CAL_WORK_ENTRY_FIELDS.hours) {
+      const totalHours = formatEntryNumber(entry.hours ?? entry.h ?? ((parseFloat(regularHours) || 0) + (parseFloat(overtimeHours) || 0)));
+      fields.push(totalHours);
+      spokenMetrics.push(`${totalHours} total hours`);
+    }
+    if (CAL_WORK_ENTRY_FIELDS.regular) {
       fields.push(regularHours);
       spokenMetrics.push(`${regularHours} regular hours`);
     }
@@ -1373,6 +1380,68 @@ const set_select_value = (el, value) => {
   return el;
 };
 
+const buildCalendarSiteOption = (site) => {
+  const option = document.createElement('option');
+  option.value = String(site?.site_id || '');
+  option.textContent = String(site?.display_name || site?.site_name || '');
+  if (site?.scope) {
+    option.dataset.scope = String(site.scope);
+  }
+  if (site?.business_abbrev) {
+    option.dataset.businessAbbrev = String(site.business_abbrev);
+  }
+  return option;
+};
+
+const updateSiteSelectTemplate = (catalogSites) => {
+  const template = PC.getElement('template_site_select');
+  const select = template?.content?.querySelector('select');
+  if (!(select instanceof HTMLSelectElement) || !Array.isArray(catalogSites)) {
+    return false;
+  }
+
+  const activeSites = catalogSites.filter(site => String(site?.site_id || '') !== '' && String(site?.display_name || site?.site_name || '') !== '');
+  if (activeSites.length === 0) {
+    return false;
+  }
+
+  select.textContent = '';
+  activeSites.forEach(site => {
+    select.appendChild(buildCalendarSiteOption(site));
+  });
+  sites = activeSites.reduce((acc, site) => {
+    acc[String(site.site_id)] = site;
+    return acc;
+  }, {});
+  return true;
+};
+
+const refreshCalendarSiteCatalog = async () => {
+  if (calendarSiteCatalogRefresh) {
+    return calendarSiteCatalogRefresh;
+  }
+
+  calendarSiteCatalogRefresh = (async () => {
+    try {
+      const response = await fetch('/api/v1/sites/catalog', {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      const payload = await response.json();
+      const catalogSites = Array.isArray(payload?.sites)
+        ? payload.sites
+        : (Array.isArray(payload?.data?.sites) ? payload.data.sites : []);
+      updateSiteSelectTemplate(catalogSites);
+    } catch (error) {
+      PW.warn?.(`Unable to refresh site catalog: ${error?.message || String(error)}`);
+    } finally {
+      calendarSiteCatalogRefresh = null;
+    }
+  })();
+
+  return calendarSiteCatalogRefresh;
+};
+
 /*
  * Shows the work details modal for a selected calendar day, supporting multiple work entries.
  * Displays the modal, populates it with existing entries from data-work-entries, and allows adding/editing/deleting multiple entries.
@@ -1380,7 +1449,9 @@ const set_select_value = (el, value) => {
  * @param HTMLElement el                 HTML element representing the selected calendar day.
  * @returns void
  */
-const show_modal_cal_work = (el) => {
+const show_modal_cal_work = async (el) => {
+  await refreshCalendarSiteCatalog();
+
   PC.state.active_day_id = el.id;
   PC.getElement('cal_work_date').value = el.id;
   PC.getElement('cal_work_date').readOnly = true;
@@ -1497,5 +1568,3 @@ function addOnChangeListener(selectId, callback) {
     PW.error(`Select element with id '${selectId}' not found`);
   }
 }
-
-

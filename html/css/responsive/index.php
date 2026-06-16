@@ -206,7 +206,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     width: fit-content;
     max-width: calc(100vw - (var(--pad-lg) * 2));
     padding: var(--pad-xs);
-    font-size: var(--font-md);
+    font-size: clamp(0.75rem, calc(var(--font-md) + var(--toast-font-adjustment, 0rem)), 1.5rem);
   }
 
   form {

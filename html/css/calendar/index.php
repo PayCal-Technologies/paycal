@@ -15,6 +15,278 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
  * Date: March 1, 2026
  */
 
+/* Full-bleed calendar app surface — sole exception to #main page-edge inset */
+body.page-calendar #page_header {
+  margin-bottom: 0;
+}
+
+body.page-calendar #main {
+  padding-inline: 0;
+  padding-block: 0;
+  margin-top: 0;
+}
+
+body.page-calendar #calendar-v2-root.calendar_full_bleed.panel {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Work-entry typography — floor stays legible; scales with user --font-* tokens */
+:root {
+  --cal-work-entry-font-size-min: 0.8125rem;
+  --cal-work-entry-font-size: max(var(--cal-work-entry-font-size-min), var(--font-sm));
+  --cal-work-entry-line-height: 1.35;
+  --cal-work-entry-badge-font-size-min: 0.75rem;
+  --cal-work-entry-badge-font-size: max(var(--cal-work-entry-badge-font-size-min), var(--font-xs));
+}
+
+.calendar_control_strip {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  align-self: stretch;
+  gap: 0.25rem;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0.22rem 0.35rem;
+  box-sizing: border-box;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--panel-border);
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+.calendar_control_strip > * {
+  flex: 0 0 auto;
+}
+
+.calendar_view_pills {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  border: 1px inset var(--border-inset-color, var(--panel-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-bg) 90%, var(--border-inset-color, var(--panel-border)));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--panel-text, white) 10%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, black 18%, transparent);
+  overflow: hidden;
+}
+
+.calendar_range_controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 0;
+  margin-left: auto;
+  min-width: 0;
+  border: 1px inset var(--border-inset-color, var(--panel-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-bg) 90%, var(--border-inset-color, var(--panel-border)));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--panel-text, white) 10%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, black 18%, transparent);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.calendar_range_controls[hidden] {
+  display: none;
+}
+
+.calendar_range_picker {
+  flex: 0 1 auto;
+  min-width: 8rem;
+  max-width: 22rem;
+  margin: 0;
+  min-height: 2.05rem;
+  padding: 0.28rem 0.8rem;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--button-text);
+  font-family: var(--sans-serif);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.calendar_range_button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.1rem;
+  min-width: 2.1rem;
+  min-height: 2.05rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--panel-border) 70%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--button-text);
+  font-family: var(--sans-serif);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.calendar_range_picker:hover,
+.calendar_range_picker:focus-visible,
+.calendar_range_button:hover,
+.calendar_range_button:focus-visible {
+  background-color: color-mix(in srgb, var(--btn-selected-back, var(--button-bg-hover)) 45%, transparent);
+  color: var(--button-text-hover, var(--button-text));
+}
+
+.calendar_range_picker:focus-visible,
+.calendar_range_button:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #0096d6);
+  outline-offset: 2px;
+}
+
+.calendar_view_pills .radio + label {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding: 0.28rem 0.7rem;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-align: center;
+  transition: background-color var(--short-transition, 0.1s) ease, color var(--short-transition, 0.1s) ease;
+}
+
+.calendar_view_pills .radio:hover + label,
+.calendar_view_pills .radio:focus-visible + label {
+  border: 0;
+  background-color: color-mix(in srgb, var(--btn-selected-back, var(--button-bg-active)) 45%, transparent);
+  color: var(--btn-selected-fore, var(--button-text));
+}
+
+.calendar_view_pills input[type="radio"]:checked + label,
+.calendar_view_pills .radio:active + label {
+  border: 0;
+  border-bottom: 0;
+  background-color: var(--btn-selected-back, var(--button-bg-active));
+  color: var(--btn-selected-fore, var(--button-text));
+}
+
+.calendar_view_pills:focus-within {
+  outline: 2px solid var(--color-focus-ring, var(--button-primary-text));
+  outline-offset: 1px;
+  border-radius: 999px;
+}
+
+.calendar_view_panel.hidden {
+  display: none;
+}
+
+.calendar_anchor_picker_content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.calendar_anchor_picker_label {
+  font-weight: 600;
+}
+
+.calendar_anchor_picker_input {
+  width: 100%;
+  max-width: 18rem;
+}
+
+.calendar_payperiod_picker_list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: min(60vh, 24rem);
+  overflow: auto;
+  padding: 0.75rem 1rem;
+}
+
+.calendar_payperiod_picker_option {
+  display: block;
+  width: 100%;
+  text-align: start;
+  padding: 0.55rem 0.75rem;
+  border: 1px inset var(--border-inset-color, var(--panel-border));
+  border-radius: var(--radius-control, var(--border-radius));
+  background: color-mix(in srgb, var(--panel-bg) 92%, var(--border-inset-color, var(--panel-border)));
+  color: var(--button-text, var(--color-text));
+  cursor: pointer;
+}
+
+.calendar_payperiod_picker_option.cal_menu_selected,
+.calendar_payperiod_picker_option:hover,
+.calendar_payperiod_picker_option:focus-visible {
+  background-color: var(--btn-selected-back, var(--button-bg-active));
+  color: var(--btn-selected-fore, var(--button-text));
+}
+
+.calendar-v2-view-heading {
+  cursor: default;
+}
+
+#calendar-payperiod-grid .datagrid_month_row .datagrid_month_cell,
+#calendar-week-grid .datagrid_month_row .datagrid_month_cell {
+  min-height: 6.5rem;
+}
+
+@media (max-width: 768px) {
+  body.page-calendar #main {
+    padding-inline: 0 !important;
+    padding-block: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  body.page-calendar #page_header {
+    margin-bottom: 0 !important;
+  }
+
+  body.page-calendar #calendar-v2-root.calendar_full_bleed.panel {
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  .calendar_control_strip {
+    gap: 0.25rem;
+  }
+
+  .calendar_view_pills .radio + label {
+    padding: 0.25rem 0.55rem;
+    font-size: 0.9rem;
+  }
+
+  .calendar_range_picker {
+    min-width: 6.5rem;
+    max-width: 14rem;
+  }
+}
+
 /* CALENDAR DATE PICKER & MODAL */
 #modal_cal_picker {
   width: min(1200px, 80vw);
@@ -299,9 +571,9 @@ button.cal_menu_selected:focus-visible {
   border-radius: var(--radius-cell, var(--border-radius));
   background: var(--work-back);
   font-family: var(--sans-serif);
-  font-size: var(--font-sm);
+  font-size: var(--cal-work-entry-font-size);
   font-weight: 400;
-  line-height: var(--font-lg);
+  line-height: var(--cal-work-entry-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--work-fore);
@@ -544,8 +816,8 @@ button.cal_menu_selected:focus-visible {
   }
 
   .work {
-    font-size: var(--font-xs);
-    line-height: 1.2;
+    font-size: var(--cal-work-entry-font-size);
+    line-height: var(--cal-work-entry-line-height);
     margin: 1px 0 0 0;
   }
 
@@ -556,7 +828,7 @@ button.cal_menu_selected:focus-visible {
 
   .work_row span {
     margin: 0 2px;
-    font-size: var(--font-xs);
+    font-size: var(--cal-work-entry-font-size);
   }
 }
 
@@ -590,10 +862,10 @@ button.cal_menu_selected:focus-visible {
   }
 
   .work {
-    font-size: 0.6rem;
+    font-size: var(--cal-work-entry-font-size);
     margin: 0;
     padding: 1px;
-    line-height: 1.1;
+    line-height: var(--cal-work-entry-line-height);
     white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -609,7 +881,7 @@ button.cal_menu_selected:focus-visible {
   .work_row span {
     margin: 0;
     padding: 0;
-    font-size: 0.6rem;
+    font-size: var(--cal-work-entry-font-size);
   }
 
   .week {
@@ -637,10 +909,13 @@ button.cal_menu_selected:focus-visible {
 
 .datagrid_layout_month .datagrid_controls {
   display: flex;
-  gap: 8px;
+  gap: 0.35rem;
   margin-bottom: 12px;
   flex-wrap: nowrap;
   align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  overflow-x: auto;
 }
 
 .datagrid_layout_month .datagrid_controls_trailing {
@@ -710,8 +985,13 @@ button.cal_menu_selected:focus-visible {
   color: var(--color-text, var(--panel-text));
   background-color: transparent;
   border: none;
-  margin: 0 12px;
-  flex: 0 0 auto;
+  margin: 0;
+  flex: 0 1 auto;
+  min-width: 8rem;
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .datagrid_layout_month .datagrid_control {
@@ -726,6 +1006,17 @@ button.cal_menu_selected:focus-visible {
   cursor: pointer;
   transition: background-color 120ms ease;
   font-weight: 500;
+}
+
+.datagrid_layout_month .datagrid_control_icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  min-width: 2.25rem;
+  padding-inline: 0;
+  font-weight: 800;
 }
 
 .datagrid_layout_month .datagrid_control:hover {
@@ -744,8 +1035,11 @@ button.cal_menu_selected:focus-visible {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-start;
+  gap: 0.35rem;
   margin-bottom: 12px;
+  min-width: 0;
+  overflow-x: auto;
 }
 .calendar-v2-nav-button:hover {
   background-color: var(--button-bg-hover);
@@ -753,15 +1047,16 @@ button.cal_menu_selected:focus-visible {
 
 @media (max-width: 900px) {
   .datagrid_layout_month .datagrid_controls {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
   }
 
   .datagrid_layout_month .datagrid_controls_trailing {
-    order: -1;
+    order: 4;
     margin-left: 0;
     min-width: 0;
-    flex: 1 1 100%;
-    width: 100%;
+    flex: 0 1 18rem;
+    width: auto;
     justify-content: stretch;
   }
 
@@ -903,6 +1198,48 @@ button.cal_menu_selected:focus-visible {
   border-bottom-right-radius: 0;
 }
 
+.datagrid_month_cell.calendar_pp_in_period {
+  border-top: 3px double var(--accent-color, #4d8ef0);
+}
+
+.datagrid_month_cell.calendar_pp_period_start {
+  border-top-width: 4px;
+}
+
+.datagrid_month_cell.calendar_pp_period_end {
+  border-top-width: 4px;
+}
+
+.calendar_earnings_badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.calendar_earnings_badge {
+  font-size: var(--cal-work-entry-badge-font-size);
+  line-height: var(--cal-work-entry-line-height);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  --earnings-badge-bg: color-mix(in srgb, var(--panel-bg) 70%, var(--accent-color, #4d8ef0));
+  background: var(--earnings-badge-bg);
+  color: var(--work-entry-fore, var(--work-fore));
+  color: contrast-color(var(--earnings-badge-bg) vs #fff, #111);
+}
+
+.calendar_earnings_badge_gross {
+  --earnings-badge-bg: color-mix(in srgb, var(--panel-bg) 70%, var(--accent-color, #4d8ef0));
+}
+
+.calendar_earnings_badge_net {
+  --earnings-badge-bg: color-mix(in srgb, var(--panel-bg) 65%, var(--color-success, #2e7d32));
+}
+
+.calendar_earnings_badge_deductions {
+  --earnings-badge-bg: color-mix(in srgb, var(--panel-bg) 65%, var(--earnings-piegraphs-color-deductions, #f2d2a6));
+}
+
 .datagrid_month_cell.datagrid_month_cell_today .datagrid_month_cell_header {
   font-weight: 700;
 }
@@ -954,6 +1291,9 @@ button.cal_menu_selected:focus-visible {
 
 /* Day number header */
 .datagrid_month_cell_header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   margin-bottom: 10px;
   padding-bottom: 8px;
   min-width: 0;
@@ -964,9 +1304,14 @@ button.cal_menu_selected:focus-visible {
   transition: color 120ms ease;
 }
 
+.datagrid_month_cell_day {
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+}
+
 /* Content area with metrics */
 .datagrid_month_cell_content {
-  font-size: 0.65rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1049,16 +1394,30 @@ button.cal_menu_selected:focus-visible {
   height: 20px;
   padding: 0 6px;
   border-radius: 10px;
-  background: rgba(0, 188, 212, 0.15);
-  color: var(--color-primary);
-  font-size: 0.6rem;
+  --entries-badge-bg: color-mix(in srgb, var(--panel-bg) 85%, var(--color-primary, #00bcd4));
+  background: var(--entries-badge-bg);
+  color: var(--work-entry-fore, var(--work-fore));
+  color: contrast-color(var(--entries-badge-bg) vs #fff, #111);
+  font-size: var(--cal-work-entry-badge-font-size);
   font-weight: 700;
 }
 
 /* Hours badge */
 .datagrid_month_value.hours-badge {
-  background: rgba(76, 175, 80, 0.15);
-  color: #4caf50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  --hours-badge-bg: color-mix(in srgb, var(--panel-bg) 85%, var(--color-success, #4caf50));
+  background: var(--hours-badge-bg);
+  color: var(--work-entry-fore, var(--work-fore));
+  color: contrast-color(var(--hours-badge-bg) vs #fff, #111);
+  font-size: var(--cal-work-entry-badge-font-size);
+  font-weight: 700;
+  flex: 0 0 auto;
 }
 
 /* Empty state */
@@ -1322,7 +1681,6 @@ button.cal_menu_selected:focus-visible {
     width: 90%;
   }
   .datagrid_month_cell_content {
-    font-size: 0.6rem;
     gap: 4px;
   }
 }
@@ -1358,23 +1716,191 @@ button.cal_menu_selected:focus-visible {
   }
 }
 
-/* Force final modal sizing/layout (overrides earlier duplicate blocks) */
-#calendar-modal {
-  width: 65vw;
-  max-width: 65vw;
+/* Work-entry editor: reset shared dialog chrome and own the full viewport. */
+#calendar-modal.calendar_modal {
+  position: fixed;
+  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: none;
+  width: 100vw;
+  max-width: 100vw;
+  min-width: 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-@media (max-width: 1024px) {
-  #calendar-modal {
-    width: 90vw;
-    max-width: 90vw;
-  }
+#calendar-modal.calendar_modal[open] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+#calendar-modal.calendar_modal > * {
+  grid-column: 1;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#calendar-modal .calendar_modal_header {
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 4rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+}
+
+#calendar-modal .calendar_modal_header h2 {
+  width: auto;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--modal-head-fore);
+  font-size: var(--font-xl);
+  line-height: 1.2;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+#calendar-modal .calendar_modal_close {
+  grid-column: 2;
+  justify-self: end;
+  position: static !important;
+  inset: auto !important;
+  left: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+#calendar-modal .calendar_modal_body {
+  grid-row: 2;
+  display: block;
+  min-height: 0;
+  padding: 1rem;
+  overflow: auto;
+}
+
+#calendar-modal #calendar-modal-content,
+#calendar-modal .work-entries-form {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+#calendar-modal .work-entries-form {
+  overflow-x: auto;
+}
+
+#calendar-modal .work-entries-table {
+  width: 100%;
+  min-width: 48rem;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+#calendar-modal .work-entries-table th,
+#calendar-modal .work-entries-table td {
+  min-width: 0;
+}
+
+#calendar-modal .work-entries-table th.th-site {
+  width: 28%;
+}
+
+#calendar-modal .work-entries-table th.th-regular,
+#calendar-modal .work-entries-table th.th-overtime,
+#calendar-modal .work-entries-table th.th-loa,
+#calendar-modal .work-entries-table th.th-travel {
+  width: 13%;
+}
+
+#calendar-modal .work-entries-table th.th-action {
+  width: 20%;
+}
+
+#calendar-modal .calendar_modal_footer {
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0.75rem 1rem 1rem;
+}
+
+#calendar-modal .calendar_modal_footer_center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: var(--gap-sm);
+}
+
+#calendar-modal .work-entry-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+#calendar-modal .work-entry-add,
+#calendar-modal .work-entry-delete {
+  flex: 0 0 auto;
 }
 
 @media (max-width: 768px) {
-  #calendar-modal {
-    width: 95vw;
-    max-width: 95vw;
+  #calendar-modal.calendar_modal {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  #calendar-modal .calendar_modal_header {
+    min-height: 3.5rem;
+    padding: 0.625rem 0.75rem;
+  }
+
+  #calendar-modal .calendar_modal_header h2 {
+    font-size: var(--font-lg);
+  }
+
+  #calendar-modal .calendar_modal_body {
+    padding: 0.75rem;
+  }
+
+  #calendar-modal .work-entries-form {
+    overflow-x: visible;
+  }
+
+  #calendar-modal .work-entries-table {
+    min-width: 0;
+  }
+
+  #calendar-modal .work-entries-table td.work-entry-row-actions {
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  #calendar-modal .calendar_modal_footer_center {
+    flex-wrap: wrap;
   }
 }
 
@@ -1383,8 +1909,8 @@ button.cal_menu_selected:focus-visible {
    ========================================================================= */
 
 .datagrid_month_cell_content .work {
-  font-size: 0.65rem;
-  line-height: 1.4;
+  font-size: var(--cal-work-entry-font-size);
+  line-height: var(--cal-work-entry-line-height);
   padding: 4px 0;
   margin: 4px 0 0 0;
   color: inherit;
@@ -1400,7 +1926,7 @@ button.cal_menu_selected:focus-visible {
   display: inline;
   font-weight: 600;
   margin-right: 0.25rem;
-  color: var(--panel-text);
+  color: inherit;
 }
 
 .datagrid_month_cell_content .work br {
@@ -1410,7 +1936,7 @@ button.cal_menu_selected:focus-visible {
 /* Responsive: show line breaks on smaller screens */
 @media (max-width: 1024px) {
   .datagrid_month_cell_content .work {
-    font-size: 0.6rem;
+    font-size: var(--cal-work-entry-font-size);
   }
 }
 
@@ -1421,10 +1947,12 @@ button.cal_menu_selected:focus-visible {
 /* MONTH CALENDAR CONTAINER */
 .datagrid_controls {
   display: flex;
-  gap: 8px;
+  gap: 0.35rem;
   margin-bottom: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
+  min-width: 0;
+  overflow-x: auto;
 }
 
 .datagrid_controls.hidden {
@@ -1502,7 +2030,6 @@ button.cal_menu_selected:focus-visible {
 /* Day number header */
 /* Content area with metrics */
 .datagrid_month_cell_content {
-  font-size: 0.65rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1538,16 +2065,30 @@ button.cal_menu_selected:focus-visible {
   height: 20px;
   padding: 0 6px;
   border-radius: 10px;
-  background: rgba(0, 188, 212, 0.15);
-  color: var(--color-primary);
-  font-size: 0.6rem;
+  --entries-badge-bg: color-mix(in srgb, var(--panel-bg) 85%, var(--color-primary, #00bcd4));
+  background: var(--entries-badge-bg);
+  color: var(--work-entry-fore, var(--work-fore));
+  color: contrast-color(var(--entries-badge-bg) vs #fff, #111);
+  font-size: var(--cal-work-entry-badge-font-size);
   font-weight: 700;
 }
 
 /* Hours badge */
 .datagrid_month_value.hours-badge {
-  background: rgba(76, 175, 80, 0.15);
-  color: #4caf50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  --hours-badge-bg: color-mix(in srgb, var(--panel-bg) 85%, var(--color-success, #4caf50));
+  background: var(--hours-badge-bg);
+  color: var(--work-entry-fore, var(--work-fore));
+  color: contrast-color(var(--hours-badge-bg) vs #fff, #111);
+  font-size: var(--cal-work-entry-badge-font-size);
+  font-weight: 700;
+  flex: 0 0 auto;
 }
 
 /* Empty state */
@@ -1574,7 +2115,6 @@ button.cal_menu_selected:focus-visible {
   }
 
   .datagrid_month_cell_content {
-    font-size: 0.6rem;
     gap: 4px;
   }
 }
@@ -1593,16 +2133,64 @@ button.cal_menu_selected:focus-visible {
    USER POSITIONING PREFERENCES
    ========================================================================= */
 
-/* Date label positioning */
-.datagrid_month_cell_header_left {
+/* Weekday heading positioning */
+.datagrid_day_heading_left .calendar-v2-weekday-header,
+.datagrid_layout_month[data-day-heading-position="left"] .calendar-v2-weekday-header,
+.calendar-v2-weekday-headers_left .calendar-v2-weekday-header {
   text-align: left;
 }
 
-.datagrid_month_cell_header_center {
+.datagrid_day_heading_center .calendar-v2-weekday-header,
+.datagrid_layout_month[data-day-heading-position="middle"] .calendar-v2-weekday-header,
+.datagrid_layout_month[data-day-heading-position="center"] .calendar-v2-weekday-header,
+.calendar-v2-weekday-headers_center .calendar-v2-weekday-header {
   text-align: center;
 }
 
+.datagrid_day_heading_right .calendar-v2-weekday-header,
+.datagrid_layout_month[data-day-heading-position="right"] .calendar-v2-weekday-header,
+.calendar-v2-weekday-headers_right .calendar-v2-weekday-header {
+  text-align: right;
+}
+
+/* Date label positioning */
+.datagrid_date_label_left .datagrid_month_cell_header,
+.datagrid_layout_month[data-date-label-position="left"] .datagrid_month_cell_header,
+.datagrid_month_cell_header_left {
+  text-align: left;
+  justify-content: flex-start;
+  flex-direction: row;
+}
+
+.datagrid_date_label_left .datagrid_month_cell_day,
+.datagrid_month_cell_day_left {
+  text-align: left;
+}
+
+.datagrid_date_label_center .datagrid_month_cell_header,
+.datagrid_layout_month[data-date-label-position="middle"] .datagrid_month_cell_header,
+.datagrid_layout_month[data-date-label-position="center"] .datagrid_month_cell_header,
+.datagrid_month_cell_header_center {
+  text-align: center;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.datagrid_date_label_center .datagrid_month_cell_day,
+.datagrid_month_cell_day_center {
+  text-align: center;
+}
+
+.datagrid_date_label_right .datagrid_month_cell_header,
+.datagrid_layout_month[data-date-label-position="right"] .datagrid_month_cell_header,
 .datagrid_month_cell_header_right {
+  text-align: right;
+  justify-content: flex-end;
+  flex-direction: row;
+}
+
+.datagrid_date_label_right .datagrid_month_cell_day,
+.datagrid_month_cell_day_right {
   text-align: right;
 }
 
@@ -1721,7 +2309,6 @@ button.cal_menu_selected:focus-visible {
   }
 
   .datagrid_month_cell_content {
-    font-size: 0.9rem;
     gap: 6px;
     flex: 1;
     overflow-y: auto;
@@ -1735,14 +2322,16 @@ button.cal_menu_selected:focus-visible {
 
 /* ── Site color tinted background on work entry blocks (CSP-safe) ───────── */
 <?php
-foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
+use PayCal\Domain\Config\SiteColorPalette;
+
+foreach (SiteColorPalette::pickerPalette() as $pc) {
   $h = strtoupper($pc['hex']);
-  $r = hexdec(substr($h, 1, 2));
-  $g = hexdec(substr($h, 3, 2));
-  $b = hexdec(substr($h, 5, 2));
-  $luma = ((0.299 * $r) + (0.587 * $g) + (0.114 * $b));
-  $textColor = $luma >= 155.0 ? '#111111' : '#FFFFFF';
-  echo ".work[data-site-color=\"{$h}\"] { background: color-mix(in srgb, {$h} 22%, var(--work-back, #1e2330)); border-left: 3px solid {$h}; color: {$textColor}; }\n";
+  echo ".work[data-site-color=\"{$h}\"] {\n";
+  echo "  --work-site-tint: color-mix(in srgb, {$h} 22%, var(--work-tint-mix-base, var(--work-entry-back, var(--work-back, var(--color-surface-muted, #1e2330)))));\n";
+  echo "  background: var(--work-site-tint);\n";
+  echo "  border-left: 3px solid {$h};\n";
+  echo "  color: var(--work-entry-fore, var(--work-fore));\n";
+  echo "  color: contrast-color(var(--work-site-tint) vs #fff, #111);\n";
+  echo "}\n";
 }
 ?>
-

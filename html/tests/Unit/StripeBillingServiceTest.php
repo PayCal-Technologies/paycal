@@ -209,7 +209,7 @@ final class StripeBillingServiceTest extends TestCase
     $userUUID = 'stripe-portal-backfill-' . bin2hex(random_bytes(6));
     $subscriptionId = 'sub_' . bin2hex(random_bytes(6));
     $customerId = 'cus_' . bin2hex(random_bytes(6));
-    $returnURL = 'https://dev.paycal.local/profile/?billing=portal';
+    $returnURL = 'https://dev.paycal.local/settings/account/?billing=portal';
     $portalURL = 'https://billing.stripe.test/session/' . bin2hex(random_bytes(6));
 
     SubscriptionRepository::upgradeToPremium($userUUID, $subscriptionId, null);

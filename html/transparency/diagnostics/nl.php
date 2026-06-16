@@ -55,7 +55,7 @@ require_once HTML.'/header.php';
       <p>
         Als u een probleem ondervindt en meer context met ondersteuning wilt delen, kunt u extra
         diagnostiek inschakelen via
-        <a href="/settings/">Instellingen → Foutopsporing (Optioneel)</a>.
+        <a href="/settings/diagnostics/">Instellingen → Foutopsporing (Optioneel)</a>.
         Elke instelling is onafhankelijk; u kunt alleen de relevante inschakelen.
         Alle drie staan standaard op <strong>Uit</strong>.
       </p>
@@ -220,7 +220,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         browsercookies. Ze volgen uw account op alle apparaten en sessies en staan standaard
         op <strong>Uit</strong> voor elk account — inclusief nieuwe accounts.
         U kunt ze op elk moment wijzigen in
-        <a href="/settings/">Instellingen → Foutopsporing (Optioneel)</a>.
+        <a href="/settings/diagnostics/">Instellingen → Foutopsporing (Optioneel)</a>.
       </p>
       <p>
         Het uitschakelen van een instelling wordt onmiddellijk van kracht bij het volgende laden

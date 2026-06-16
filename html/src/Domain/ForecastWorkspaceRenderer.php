@@ -35,7 +35,7 @@ final class ForecastWorkspaceRenderer
     $safeId = htmlspecialchars($workspaceId, ENT_QUOTES, 'UTF-8');
 
     if (($initialState['setup_required'] ?? false) === true) {
-      $setupLink = '<a href="/profile/">'
+      $setupLink = '<a href="/settings/account/">'
         . htmlspecialchars(Strings::i18n('EARNINGS_FORECAST_SETUP_LINK'), ENT_QUOTES, 'UTF-8')
         . '</a>';
       $setupNotice = str_replace(

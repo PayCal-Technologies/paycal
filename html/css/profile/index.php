@@ -13,14 +13,36 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 #main:has(#panel-billing) {
   display: flex;
   flex-direction: column;
-  gap: clamp(1rem, 2vw, 1.6rem);
+  gap: var(--gap-lg);
 }
 
 #main:has(#panel-billing) > section.panel {
   width: min(80vw, 1240px);
   margin-left: auto;
   margin-right: auto;
-  padding: clamp(1rem, 2vw, 1.5rem);
+  padding: var(--gap-md) var(--gap-lg);
+}
+
+#main:has(#panel-billing) .businesses_section_header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--gap-md);
+  margin: 0 0 var(--gap-md);
+}
+
+#main:has(#panel-billing) .businesses_section_header h2 {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  letter-spacing: 0.04rem;
+}
+
+#main:has(#panel-billing) .businesses_section_header .help_text {
+  margin: var(--gap-xs) 0 0;
+  font-size: var(--font-sm);
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--panel-text) 82%, transparent);
+  text-align: left;
 }
 
 /* Billing first-paint guardrails */
@@ -42,43 +64,38 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 #panel-personal-info .profile_personal_info_grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem 1.25rem;
+  gap: var(--gap-md) var(--gap-lg);
   align-items: start;
 }
 
 #panel-personal-info .item_pair {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 0.4rem 1rem;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-xs);
+  align-items: start;
   margin: 0;
-  padding: 0.08rem 0;
+  padding: 0;
   min-width: 0;
 }
 
 #panel-personal-info .item_label {
-  display: flex;
-  align-items: center;
-  line-height: 1.3;
-  padding-top: 0;
+  display: block;
+  line-height: 1.35;
+  padding: 0;
   margin: 0;
-  font-weight: 700;
-  align-self: center;
-  text-align: right;
-  flex: 0 1 8.5rem;
-  min-width: 6.5rem;
-  min-height: 2.3rem;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  text-align: left;
+  min-height: 0;
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
 #panel-personal-info .item_value {
   display: grid;
-  gap: 0.25rem;
+  gap: var(--gap-xs);
   width: 100%;
-  max-width: 25rem;
-  flex: 1 1 14rem;
+  max-width: none;
   min-width: 0;
 }
 
@@ -131,41 +148,37 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 #panel-internationalization .profile_i18n_grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem 1.25rem;
+  gap: var(--gap-md) var(--gap-lg);
   align-items: start;
 }
 
 #panel-internationalization .item_pair {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 0.4rem 1rem;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-xs);
+  align-items: start;
   margin: 0;
-  padding: 0.08rem 0;
+  padding: 0;
   min-width: 0;
 }
 
 #panel-internationalization .item_label {
-  display: flex;
-  align-items: center;
-  line-height: 1.3;
+  display: block;
+  line-height: 1.35;
   margin: 0;
-  font-weight: 700;
-  text-align: right;
-  flex: 0 1 8.5rem;
-  min-width: 6.5rem;
-  min-height: 2.3rem;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  text-align: left;
+  min-height: 0;
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
 #panel-internationalization .item_value {
   display: grid;
-  gap: 0.25rem;
+  gap: var(--gap-xs);
   width: 100%;
-  max-width: 25rem;
-  flex: 1 1 14rem;
+  max-width: none;
   min-width: 0;
 }
 
@@ -173,18 +186,19 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 #panel-internationalization .item_value select,
 #panel-internationalization .currency_finder_search,
 #panel-internationalization .timezone_finder_search {
-  min-height: 2.3rem;
+  min-height: 2.75rem;
   margin: 0;
-  padding: 0.42rem 0.62rem;
+  padding: 0.5rem 0.75rem;
   box-sizing: border-box;
+  text-align: left;
 }
 
 #panel-internationalization .profile_i18n_preview {
-  margin-top: var(--mar-md, 1rem);
-  padding: var(--pad-md, 0.8rem);
-  border: 1px solid var(--panel-border, #3a3a3a);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--panel-bg, #1f2530) 86%, black 14%);
+  margin-top: var(--gap-md);
+  padding: var(--gap-md);
+  border: 1px solid color-mix(in srgb, var(--panel-border, #3a3a3a) 80%, transparent);
+  border-radius: var(--radius-panel, 10px);
+  background: color-mix(in srgb, var(--panel-bg, #1f2530) 92%, var(--panel-border, #3a3a3a));
 }
 
 #panel-internationalization .profile_i18n_preview_rows {
@@ -213,10 +227,22 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 #panel-personal-info .item_value textarea,
 #panel-personal-info .currency_finder_search,
 #panel-personal-info .timezone_finder_search {
-  min-height: 2.3rem;
+  min-height: 2.75rem;
   margin: 0;
-  padding: 0.42rem 0.62rem;
+  padding: 0.5rem 0.75rem;
   box-sizing: border-box;
+  text-align: left;
+}
+
+#panel-personal-info .item_value input:focus-visible,
+#panel-personal-info .item_value select:focus-visible,
+#panel-personal-info .item_value textarea:focus-visible,
+#panel-internationalization .item_value input:focus-visible,
+#panel-internationalization .item_value select:focus-visible,
+#panel-internationalization .currency_finder_search:focus-visible,
+#panel-internationalization .timezone_finder_search:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #0096d6);
+  outline-offset: 2px;
 }
 
 #panel-personal-info #edit_details_email:read-only {
@@ -283,10 +309,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 #panel-pay-period .businesses_pp_control {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  padding: 0.55rem 0.65rem 0.65rem;
-  border-left: 1px solid var(--fore-dark, #2a2a2a);
-  background: var(--back-light, rgba(255, 255, 255, 0.04));
+  gap: var(--gap-xs);
+  padding: var(--gap-sm) var(--gap-md);
+  border-left: 1px solid color-mix(in srgb, var(--fore-dark, #2a2a2a) 80%, transparent);
+  background: color-mix(in srgb, var(--back-light, rgba(255, 255, 255, 0.04)) 90%, transparent);
 }
 
 #panel-pay-period .businesses_pp_control:first-child {
@@ -296,9 +322,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 #panel-pay-period .businesses_pp_control label,
 #panel-pay-period .businesses_pp_control_label {
   display: block;
-  text-align: center;
+  text-align: left;
   font-size: var(--font-sm);
-  font-weight: 700;
+  font-weight: 600;
+  margin: 0;
 }
 
 #panel-pay-period .businesses_pp_control select,
@@ -840,19 +867,19 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   }
 }
 
-/* Mobile: compact profile layout — tight rows, full-width inputs, clear nav strip */
+/* Mobile: compact profile layout — stacked fields, token spacing */
 @media (max-width: 768px) {
   #main:has(#panel-personal-info) {
-    gap: 5px !important;
+    gap: var(--gap-sm);
   }
 
   #main:has(#panel-personal-info) > section.panel {
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 100%;
+    max-width: 100%;
     min-width: 0;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding: 5px !important;
+    margin-left: 0;
+    margin-right: 0;
+    padding: var(--gap-sm) var(--gap-md);
     overflow-wrap: anywhere;
     box-sizing: border-box;
   }
@@ -865,59 +892,53 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   }
 
   #main:has(#panel-personal-info) .businesses_section_header {
-    margin-bottom: 0.35rem;
-    gap: 0.25rem;
-    align-items: center;
+    margin-bottom: var(--gap-sm);
+    gap: var(--gap-xs);
+    align-items: flex-start;
   }
 
   #main:has(#panel-personal-info) .businesses_section_header h2 {
     font-size: 1rem;
-    line-height: 1.2;
+    line-height: 1.25;
     text-align: left;
   }
 
   #main:has(#panel-personal-info) .businesses_section_header .help_text {
-    margin-top: 0.15rem;
+    margin-top: var(--gap-xs);
     font-size: 0.82rem;
-    line-height: 1.3;
+    line-height: 1.35;
     text-align: left;
   }
 
   #panel-personal-info .profile_personal_info_grid,
   #panel-internationalization .profile_i18n_grid {
-    gap: 0.25rem;
+    gap: var(--gap-sm);
   }
 
   #main:has(#panel-personal-info) #panel-personal-info .item_pair,
   #main:has(#panel-personal-info) #panel-internationalization .item_pair {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.12rem;
-    align-items: start;
-    justify-content: initial;
-    margin: 0 0 0.3rem;
+    gap: var(--gap-xs);
+    margin: 0 0 var(--gap-sm);
     padding: 0;
   }
 
   #main:has(#panel-personal-info) .item_pair .item_label,
   #main:has(#panel-personal-info) .item_pair .item_value {
-    padding: 0 !important;
-    margin: 0 !important;
+    padding: 0;
+    margin: 0;
   }
 
   #main:has(#panel-personal-info) .item_pair .item_label {
     min-height: 0;
-    flex: none;
     font-size: 0.84rem;
-    line-height: 1.2;
-    font-weight: 700;
+    line-height: 1.25;
+    font-weight: 600;
     text-align: left;
   }
 
   #main:has(#panel-personal-info) .item_pair .item_value {
-    width: 100% !important;
-    max-width: none !important;
-    flex: none;
+    width: 100%;
+    max-width: none;
   }
 
   #main:has(#panel-personal-info) .item_value input,
@@ -925,11 +946,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   #main:has(#panel-personal-info) .item_value textarea,
   #main:has(#panel-personal-info) .currency_finder_search,
   #main:has(#panel-personal-info) .timezone_finder_search {
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0.32rem 0.45rem !important;
-    min-height: 2rem;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0.45rem 0.65rem;
+    min-height: 2.5rem;
     text-align: left;
     box-sizing: border-box;
   }

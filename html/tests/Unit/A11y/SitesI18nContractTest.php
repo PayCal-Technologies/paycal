@@ -161,11 +161,12 @@ final class SitesI18nContractTest extends TestCase
   public function profileBillingUsesI18nForLocalCoreCopy(): void
   {
     $projectRoot = dirname(__DIR__, 4);
-    $page = (string) file_get_contents($projectRoot . '/html/profile/index.php');
+    $billing = (string) file_get_contents($projectRoot . '/html/settings/_partials/panel_account_billing.php');
+    $locale = (string) file_get_contents($projectRoot . '/html/settings/_partials/panel_account_locale.php');
 
-    $this->assertStringContainsString("profile_index_i18n('PROFILE_BILLING_PUBLIC_CORE_NOTE')", $page);
-    $this->assertStringContainsString("profile_index_i18n('PROFILE_LOCALE_EN_CA')", $page);
-    $this->assertStringNotContainsString("'English (Canada)'", $page);
-    $this->assertStringNotContainsString('>Enable Premium<', $page);
+    $this->assertStringContainsString("settings_index_i18n('PROFILE_BILLING_PUBLIC_CORE_NOTE')", $billing);
+    $this->assertStringContainsString("settings_index_i18n('PROFILE_LOCALE_EN_CA')", (string) file_get_contents($projectRoot . '/html/settings/_partials/vars_account.php'));
+    $this->assertStringNotContainsString("'English (Canada)'", $locale);
+    $this->assertStringNotContainsString('>Enable Premium<', $billing);
   }
 }

@@ -53,6 +53,51 @@ final class SettingsControllerTest extends TestCase
     return $result;
   }
 
+  /**
+   * @param array<string, mixed> $input
+   * @return array<string, mixed>
+   */
+  private function normalizeStyle(array $input): array
+  {
+    $method = new ReflectionMethod(SettingsController::class, 'normalizeStylePreferences');
+
+    /** @var array<string, mixed> $result */
+    $result = $method->invoke(null, $input);
+
+    return $result;
+  }
+
+  /**
+   * @param array<string, mixed> $input
+   * @return array<string, mixed>
+   */
+  private function normalizeCalendar(array $input): array
+  {
+    $method = new ReflectionMethod(SettingsController::class, 'normalizeCalendarPreferences');
+
+    /** @var array<string, mixed> $result */
+    $result = $method->invoke(null, $input);
+
+    return $result;
+  }
+
+  #[Test]
+  public function normalizeCalendarWeekStartAcceptsSundayAndMonday(): void
+  {
+    $this->assertSame('0', $this->normalizeCalendar(['calendar_week_start' => '0'])['calendar_week_start']);
+    $this->assertSame('1', $this->normalizeCalendar(['calendar_week_start' => '1'])['calendar_week_start']);
+    $this->assertSame('0', $this->normalizeCalendar(['calendar_week_start' => 'Tuesday'])['calendar_week_start']);
+  }
+
+  #[Test]
+  public function normalizeCalendarDefaultViewAcceptsKnownViews(): void
+  {
+    $this->assertSame('month', $this->normalizeCalendar(['calendar_default_view' => 'month'])['calendar_default_view']);
+    $this->assertSame('week', $this->normalizeCalendar(['calendar_default_view' => 'WEEK'])['calendar_default_view']);
+    $this->assertSame('pay_period', $this->normalizeCalendar(['calendar_default_view' => 'pay_period'])['calendar_default_view']);
+    $this->assertArrayNotHasKey('calendar_default_view', $this->normalizeCalendar(['calendar_default_view' => 'year']));
+  }
+
   #[Test]
   public function normalizeSplitsLegacyCombinedThemeValue(): void
   {
@@ -338,5 +383,38 @@ final class SettingsControllerTest extends TestCase
     ]);
 
     $this->assertSame('left', $result['nav_position_primary']);
+  }
+
+  #[Test]
+  public function normalizeNavigationKeepsValidProximityAndOverlay(): void
+  {
+    $result = $this->normalizeNavigation([
+      'nav_proximity' => 'ON',
+      'nav_overlay' => 'overlay',
+      'nav_proximity_px' => '250',
+    ]);
+
+    $this->assertSame('on', $result['nav_proximity']);
+    $this->assertSame('overlay', $result['nav_overlay']);
+    $this->assertSame('250', $result['nav_proximity_px']);
+  }
+
+  #[Test]
+  public function normalizeStyleKeepsValidToastPreferences(): void
+  {
+    $result = $this->normalizeStyle([
+      'toast_position' => 'upper-right',
+      'toast_font_size' => '3',
+    ]);
+
+    $this->assertSame('upper-right', $result['toast_position']);
+    $this->assertSame('3', $result['toast_font_size']);
+  }
+
+  #[Test]
+  public function normalizeStyleKeepsFullWidthToastPositions(): void
+  {
+    $this->assertSame('full-top', $this->normalizeStyle(['toast_position' => 'full-top'])['toast_position']);
+    $this->assertSame('full-bottom', $this->normalizeStyle(['toast_position' => 'full-bottom'])['toast_position']);
   }
 }

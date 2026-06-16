@@ -58,27 +58,107 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   padding-bottom: 4rem;
 }
 
-/* Edit Site dialog: two-column, full-width, full-height layout */
+/* Site editor dialogs: full-window layout with stable header/body/footer rows. */
+#modal_create_site,
 #modal_edit_site {
-  --dialog-max-width: min(96vw, 1200px);
-  --dialog-max-height: 96dvh;
-  top: max(0.5rem, 2dvh);
+  position: fixed;
+  inset: 0;
+  top: 0;
+  left: 0;
+  transform: none;
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
 }
 
+#modal_create_site[open],
+#modal_edit_site[open] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+#modal_create_site > form,
+#modal_edit_site > form {
+  grid-column: 1;
+  grid-row: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+#modal_create_site .modal_header,
+#modal_edit_site .modal_header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 3.75rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+}
+
+#modal_create_site .modal_title,
+#modal_edit_site .modal_title {
+  grid-column: 1;
+  justify-self: start;
+  margin: 0;
+  padding: 0;
+  text-align: left !important;
+}
+
+#modal_create_site .modal_header .btn_close,
+#modal_edit_site .modal_header .btn_close {
+  grid-column: 2;
+  justify-self: end;
+}
+
+#modal_create_site .modal_content,
 #modal_edit_site .modal_content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
+  gap: 0;
   padding: 0;
   overflow: hidden;
   min-height: 0;
 }
 
-.edit_site_col {
-  display: flex;
-  flex-direction: column;
+#modal_create_site .modal_content {
+  align-content: start;
+  gap: 0.9rem;
+  padding: 1.25rem;
+  overflow-y: auto;
+}
+
+#modal_create_site .modal_footer,
+#modal_edit_site .modal_footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.8rem 1rem 1rem;
+}
+
+#modal_create_site .modal_footer > .flex,
+#modal_edit_site .modal_footer > .flex {
+  justify-content: center;
   gap: 0.75rem;
-  padding: 1.5rem;
+  width: 100%;
+}
+
+.edit_site_col {
+  display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
+  gap: 1rem;
+  padding: clamp(1rem, 2.2vw, 1.75rem);
   overflow-y: auto;
   min-height: 0;
 }
@@ -88,8 +168,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 .edit_site_col_heading {
-  margin: 0 0 0.5rem;
-  padding-bottom: 0.4rem;
+  margin: 0 0 0.35rem;
+  padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--panel-border, #2a2a2a);
   font-size: 0.72rem;
   font-weight: 700;
@@ -104,7 +184,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   grid-template-columns: 180px minmax(0, 1fr);
   align-items: center;
   gap: 1rem;
-  min-height: 3.25rem;
+  min-height: 3.5rem;
   padding: 0;
   width: 100%;
 }
@@ -113,9 +193,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   text-align: right;
   padding: 0;
   font-size: 0.88rem;
+  line-height: 1.25;
 }
 
 #modal_edit_site .item_value {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
   padding: 0;
 }
 
@@ -156,7 +240,8 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 /* ── Custom swatch color picker ───────────────────────────────────────────── */
 .item_pair_color {
   align-items: start;
-  padding-top: 0.25rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
 }
 
 .item_label_color {
@@ -177,12 +262,17 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 
 .site_color_picker {
   display: block;
+  width: 100%;
+  overflow: visible;
 }
 
 .site_color_swatches {
   display: grid;
   grid-template-columns: repeat(5, 2rem);
-  gap: 0.3rem;
+  gap: 0.45rem;
+  align-items: center;
+  padding-top: 0.15rem;
+  isolation: isolate;
 }
 
 .site_color_swatch {
@@ -309,11 +399,15 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 [data-grid="sites-archived"] {
   --grid-template-columns:
     minmax(14rem, 3fr)
+    minmax(7rem, 1fr)
     minmax(5rem, 1fr)
     minmax(5rem, 1fr)
     minmax(5rem, 1fr)
     minmax(8rem, 1.5fr)
     minmax(4rem, 0.75fr)
+    minmax(6rem, 1fr)
+    minmax(6rem, 1fr)
+    minmax(6rem, 1fr)
     minmax(3rem, max-content);
   font-size: 0.9em;
 }
@@ -326,18 +420,21 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
   padding: 0.4rem 0.5rem;
 }
 
-/* Explicit column template: Name | Wage | LOA | Travel | Province | Entries | Budget | Action */
+/* Explicit column template: Name | Ownership | Wage | LOA | Travel | Province | Entries | Gross | Budget | Used | Action */
 [data-grid="sites-active"] .datagrid_header_content,
 [data-grid="sites-active"] .datagrid_row_content,
 [data-grid="sites-archived"] .datagrid_header_content,
 [data-grid="sites-archived"] .datagrid_row_content {
   grid-template-columns:
     minmax(10rem, 3fr)
+    minmax(6.5rem, 1fr)
     minmax(4.5rem, 1fr)
     minmax(4rem, 1fr)
     minmax(4rem, 1fr)
     minmax(6rem, 1.4fr)
     minmax(3.5rem, 0.7fr)
+    minmax(5rem, 1fr)
+    minmax(5rem, 1fr)
     minmax(5rem, 1fr)
     2.5rem;
 }
@@ -354,12 +451,16 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 [data-grid="sites-active"] .datagrid_item.datagrid_col_living_out_allowance,
 [data-grid="sites-active"] .datagrid_item.datagrid_col_travel_hours,
 [data-grid="sites-active"] .datagrid_item.datagrid_col_entries,
+[data-grid="sites-active"] .datagrid_item.datagrid_col_work_gross,
 [data-grid="sites-active"] .datagrid_item.datagrid_col_budget_amount,
+[data-grid="sites-active"] .datagrid_item.datagrid_col_budget_used,
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_wage,
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_living_out_allowance,
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_travel_hours,
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_entries,
-[data-grid="sites-archived"] .datagrid_item.datagrid_col_budget_amount {
+[data-grid="sites-archived"] .datagrid_item.datagrid_col_work_gross,
+[data-grid="sites-archived"] .datagrid_item.datagrid_col_budget_amount,
+[data-grid="sites-archived"] .datagrid_item.datagrid_col_budget_used {
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
 }
@@ -369,6 +470,38 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_budget_amount:not(:empty) {
   color: var(--color-primary, #4a9eff);
   font-weight: 600;
+}
+
+[data-grid="sites-active"] .datagrid_col_ownership,
+[data-grid="sites-archived"] .datagrid_col_ownership {
+  color: var(--text-muted, #888);
+  font-size: 0.8rem;
+}
+
+.site_budget_used_cell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.site_budget_progress {
+  width: 100%;
+  height: 0.45rem;
+  min-width: 3rem;
+  overflow: hidden;
+}
+
+.site_budget_used_value {
+  font-variant-numeric: tabular-nums;
+}
+
+[data-grid="sites-active"] .datagrid_col_site_name,
+[data-grid="sites-archived"] .datagrid_col_site_name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 [data-grid="sites-active"] .datagrid_heading_actions,
@@ -382,6 +515,60 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 [data-grid="sites-archived"] .datagrid_heading_actions {
   color: transparent;
   user-select: none;
+}
+
+/* Business /business/sites/ assigned grid (loaded via sites.css on that page). */
+[data-grid="business-sites-active"],
+[data-grid="business-sites-archived"] {
+  width: 100%;
+  max-width: none;
+  --grid-template-columns:
+    minmax(14rem, 3fr)
+    minmax(4rem, 0.75fr)
+    minmax(6rem, 1fr)
+    minmax(6rem, 1fr)
+    minmax(7rem, 1.1fr)
+    minmax(3rem, max-content);
+  font-size: 0.9em;
+}
+
+[data-grid="business-sites-active"] .datagrid_header_content,
+[data-grid="business-sites-active"] .datagrid_row_content,
+[data-grid="business-sites-archived"] .datagrid_header_content,
+[data-grid="business-sites-archived"] .datagrid_row_content {
+  grid-template-columns:
+    minmax(12rem, 3fr)
+    minmax(3.5rem, 0.7fr)
+    minmax(5.5rem, 1fr)
+    minmax(5.5rem, 1fr)
+    minmax(6.5rem, 1fr)
+    2.5rem;
+}
+
+[data-grid="business-sites-active"] .datagrid_item,
+[data-grid="business-sites-active"] .datagrid_heading,
+[data-grid="business-sites-archived"] .datagrid_item,
+[data-grid="business-sites-archived"] .datagrid_heading {
+  min-width: 0;
+  padding: 0.4rem 0.5rem;
+}
+
+[data-grid="business-sites-active"] .datagrid_col_site_name,
+[data-grid="business-sites-archived"] .datagrid_col_site_name,
+[data-grid="business-sites-active"] .datagrid_col_budget_used,
+[data-grid="business-sites-archived"] .datagrid_col_budget_used {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.25;
+}
+
+/* Personal sites scope note */
+.sites_personal_scope_note {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--text-muted, #888);
+  font-size: var(--font-sm, 0.875rem);
 }
 
 /* Sites earnings analytics spacing */
@@ -422,11 +609,14 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 @media (max-width: 600px) {
   #main:has(.sites_main_container) > .sites_main_container {
     width: 100%;
-    gap: clamp(0.5rem, 1.5vw, 0.8rem);
+    max-width: 100%;
+    gap: 5px;
   }
 
   #main:has(.sites_main_container) section.panel {
-    padding: clamp(0.6rem, 1.5vw, 0.9rem);
+    width: 100%;
+    max-width: 100%;
+    padding: 5px;
   }
 
   #sites_list_panel .tabs,
@@ -476,66 +666,444 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 }
 
 /* ==========================================================================
-   Sites DataGrid — Mobile card layout  (<= 719 px)
-   Each row becomes a labelled card. ::before labels use the datagrid_col_*
-   classes added by DataGrid::renderTable() so they stay in sync with the
-   column definitions in SitesController without extra markup.
+   Sites DataGrid — responsive financial summary cards
    ========================================================================== */
-@media (max-width: 719px) {
-  /* Card frame */
+@media (max-width: 899px) {
+  #sites_list_panel .tab-disclaimer {
+    line-height: 1.35;
+  }
+
+  [data-grid="sites-active"] .datagrid_controls,
+  [data-grid="sites-archived"] .datagrid_controls {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.45rem;
+    margin-bottom: 0.55rem;
+  }
+
+  [data-grid="sites-active"] .datagrid_search,
+  [data-grid="sites-archived"] .datagrid_search {
+    min-width: 0;
+    width: 100%;
+  }
+
+  [data-grid="sites-active"] .datagrid_column_menu,
+  [data-grid="sites-archived"] .datagrid_column_menu {
+    margin: 0 0 0.65rem;
+  }
+
+  [data-grid="sites-active"] .datagrid_column_menu_toggle,
+  [data-grid="sites-archived"] .datagrid_column_menu_toggle {
+    min-height: 2.25rem;
+    border-radius: 999px;
+  }
+
+  [data-grid="sites-active"] .datagrid_header_row,
+  [data-grid="sites-archived"] .datagrid_header_row {
+    display: none;
+  }
+
+  [data-grid="sites-active"] .datagrid_body,
+  [data-grid="sites-archived"] .datagrid_body {
+    display: grid;
+    gap: 0.75rem;
+  }
+
   [data-grid="sites-active"] .datagrid_row,
   [data-grid="sites-archived"] .datagrid_row {
+    position: relative;
     border: 1px solid var(--border, rgba(255,255,255,0.12));
-    border-radius: var(--radius-cell, 4px);
-    margin: 0.35rem 0;
+    border-left-width: 0.4rem;
+    border-radius: 6px;
+    margin: 0;
+    background: color-mix(in srgb, var(--panel-bg, #151515) 88%, var(--color-primary, #4a9eff) 12%);
+    overflow: hidden;
   }
 
-  /* Override the generic card row padding */
   [data-grid="sites-active"] .datagrid_row_content,
   [data-grid="sites-archived"] .datagrid_row_content {
-    padding: 0.6rem 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+    grid-template-areas:
+      "site site action"
+      "ownership ownership action"
+      "entries gross gross"
+      "budget budget budget"
+      "used used used";
+    gap: 0.7rem;
+    align-items: stretch;
+    padding: 0.85rem 0.85rem 0.95rem 1rem;
   }
 
-  /* Column label styling applied via ::before on every data cell */
   [data-grid="sites-active"] .datagrid_item::before,
   [data-grid="sites-archived"] .datagrid_item::before {
-    content: "";
-    font-size: var(--font-sm);
-    font-weight: 600;
-    color: var(--text-muted);
-    flex-shrink: 0;
-  }
-
-  /* Per-column labels — localized via data-col-label on each datagrid_item */
-  [data-grid="sites-active"] .datagrid_item[data-col-label]::before,
-  [data-grid="sites-archived"] .datagrid_item[data-col-label]::before {
+    display: block;
+    margin-bottom: 0.2rem;
     content: attr(data-col-label);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
 
-  /* Actions row: no label, push button right, add a divider */
+  [data-grid="sites-active"] .datagrid_col_site_name,
+  [data-grid="sites-archived"] .datagrid_col_site_name {
+    grid-area: site;
+    min-width: 0;
+    padding: 0 2.8rem 0 0;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_site_name::before,
+  [data-grid="sites-archived"] .datagrid_col_site_name::before {
+    content: none;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_ownership,
+  [data-grid="sites-archived"] .datagrid_col_ownership {
+    grid-area: ownership;
+    justify-self: start;
+    width: fit-content;
+    max-width: 100%;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid color-mix(in srgb, var(--panel-border, #555) 70%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel-bg, #151515) 70%, var(--button-bg, #333) 30%);
+    color: var(--text-muted, #aaa);
+    font-size: 0.72rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_ownership::before,
+  [data-grid="sites-archived"] .datagrid_col_ownership::before {
+    content: none;
+  }
+
+  [data-grid="sites-active"] .datagrid_item.datagrid_col_wage,
+  [data-grid="sites-active"] .datagrid_item.datagrid_col_living_out_allowance,
+  [data-grid="sites-active"] .datagrid_item.datagrid_col_travel_hours,
+  [data-grid="sites-active"] .datagrid_item.datagrid_col_province,
+  [data-grid="sites-archived"] .datagrid_item.datagrid_col_wage,
+  [data-grid="sites-archived"] .datagrid_item.datagrid_col_living_out_allowance,
+  [data-grid="sites-archived"] .datagrid_item.datagrid_col_travel_hours,
+  [data-grid="sites-archived"] .datagrid_item.datagrid_col_province {
+    display: none;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_entries,
+  [data-grid="sites-active"] .datagrid_col_work_gross,
+  [data-grid="sites-archived"] .datagrid_col_entries,
+  [data-grid="sites-archived"] .datagrid_col_work_gross {
+    min-width: 0;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid color-mix(in srgb, var(--panel-border, #555) 78%, transparent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--panel-bg, #151515) 82%, var(--button-bg, #333) 18%);
+    font-size: 1rem;
+    font-weight: 800;
+    text-align: left;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_entries,
+  [data-grid="sites-archived"] .datagrid_col_entries {
+    grid-area: entries;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_work_gross,
+  [data-grid="sites-archived"] .datagrid_col_work_gross {
+    grid-area: gross;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_budget_amount,
+  [data-grid="sites-archived"] .datagrid_col_budget_amount {
+    grid-area: budget;
+    padding: 0.2rem 0 0;
+    color: var(--color-primary, #4a9eff);
+    font-size: 0.98rem;
+    font-weight: 800;
+    text-align: left;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_budget_amount:empty,
+  [data-grid="sites-archived"] .datagrid_col_budget_amount:empty {
+    display: none;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_budget_used,
+  [data-grid="sites-archived"] .datagrid_col_budget_used {
+    grid-area: used;
+    padding: 0;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_budget_used:empty,
+  [data-grid="sites-archived"] .datagrid_col_budget_used:empty {
+    display: none;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_budget_used::before,
+  [data-grid="sites-archived"] .datagrid_col_budget_used::before {
+    content: none;
+  }
+
   [data-grid="sites-active"] .datagrid_item_actions::before,
   [data-grid="sites-archived"] .datagrid_item_actions::before { content: none; }
 
   [data-grid="sites-active"] .datagrid_item_actions,
   [data-grid="sites-archived"] .datagrid_item_actions {
-    justify-content: flex-end;
-    padding-top: 0.5rem;
-    margin-top: 0.25rem;
-    border-top: 1px solid var(--border, rgba(255,255,255,0.1));
+    grid-area: action;
+    align-self: start;
+    justify-self: end;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    text-align: right;
   }
 
-  /* Name cell: headline of the card, full width, allow wrap */
-  [data-grid="sites-active"] .datagrid_col_site_name,
-  [data-grid="sites-archived"] .datagrid_col_site_name {
-    white-space: normal;
+  [data-grid="sites-active"] .datagrid_actions,
+  [data-grid="sites-archived"] .datagrid_actions {
+    justify-content: flex-end;
+  }
+
+  [data-grid="sites-active"] .datagrid_action,
+  [data-grid="sites-archived"] .datagrid_action {
+    width: 2.15rem;
+    min-width: 2.15rem;
+    height: 2.15rem;
+    padding: 0;
+    border-radius: 999px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  #sites_list_panel .tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-grid="sites-active"] .datagrid_controls,
+  [data-grid="sites-archived"] .datagrid_controls {
+    grid-template-columns: 1fr;
+  }
+
+  [data-grid="sites-active"] .datagrid_control,
+  [data-grid="sites-active"] .datagrid_search,
+  [data-grid="sites-archived"] .datagrid_control,
+  [data-grid="sites-archived"] .datagrid_search {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  [data-grid="sites-active"] .datagrid_row_content,
+  [data-grid="sites-archived"] .datagrid_row_content {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "site action"
+      "ownership ownership"
+      "entries gross"
+      "budget budget"
+      "used used";
+    gap: 0.55rem;
+    padding: 0.75rem;
+  }
+
+  [data-grid="sites-active"] .datagrid_col_entries,
+  [data-grid="sites-active"] .datagrid_col_work_gross,
+  [data-grid="sites-archived"] .datagrid_col_entries,
+  [data-grid="sites-archived"] .datagrid_col_work_gross {
+    padding: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  [data-grid="sites-active"] .datagrid_item::before,
+  [data-grid="sites-archived"] .datagrid_item::before {
+    font-size: 0.62rem;
+  }
+}
+
+@media (max-width: 768px) {
+  #modal_create_site .modal_content,
+  #modal_edit_site .modal_content {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    overflow-y: auto;
+  }
+
+  .edit_site_col {
+    gap: 1.35rem;
+    padding: 1.25rem 1rem 1.5rem;
     overflow: visible;
-    text-overflow: unset;
-    font-weight: 600;
-    font-size: 1.05em;
+  }
+
+  .edit_site_col_basic {
+    border-right: 0;
+    border-bottom: 1px solid var(--panel-border, #2a2a2a);
+  }
+
+  #modal_create_site .item_pair,
+  #modal_edit_site .item_pair {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 0.55rem;
+    min-height: 0;
+    padding: 0 0 0.15rem;
+  }
+
+  #modal_create_site .item_label,
+  #modal_edit_site .item_label {
+    display: block;
+    text-align: left;
+    line-height: 1.35;
+    margin: 0;
+  }
+
+  #modal_create_site input:not([type="color"]),
+  #modal_create_site select,
+  #modal_edit_site input:not([type="color"]),
+  #modal_edit_site select {
+    min-height: 3rem;
+  }
+
+  .item_pair_color {
+    gap: 0.7rem;
+    padding-top: 0.15rem;
+    padding-bottom: 1.4rem;
+    margin-bottom: 0.4rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--panel-border, #2a2a2a) 72%, transparent);
+  }
+
+  .item_label_color {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .site_color_name {
+    display: block;
+    min-height: 1.1rem;
+    line-height: 1.25;
+  }
+
+  .site_color_swatches {
+    grid-template-columns: repeat(auto-fill, minmax(2rem, 2rem));
+    gap: 0.65rem;
+    padding-top: 0.25rem;
     padding-bottom: 0.35rem;
-    border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
-    margin-bottom: 0.2rem;
-    /* Name row: label on left, value on right like other rows */
+    overflow: visible;
+  }
+
+  .site_color_swatch:hover {
+    transform: none;
+  }
+
+  .site_color_swatch.is-selected {
+    position: relative;
+    z-index: 1;
+  }
+
+  .edit_site_col_advanced {
+    padding-top: 1.65rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  #modal_create_site .modal_content,
+  #modal_edit_site .modal_content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 0;
+    overflow-y: auto;
+  }
+
+  .edit_site_col {
+    display: grid;
+    grid-auto-rows: max-content;
+    align-content: start;
+    width: 100%;
+    max-width: 100%;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .edit_site_col_basic {
+    border-right: 0;
+    border-bottom: 1px solid var(--panel-border, #2a2a2a);
+  }
+
+  #modal_edit_site .item_pair.item_pair_color {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 0.7rem;
+    min-height: auto;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.1rem;
+  }
+
+  #modal_edit_site .item_pair.item_pair_color .item_label,
+  #modal_edit_site .item_pair.item_pair_color .item_value {
+    display: grid;
+    gap: 0.35rem;
+    width: 100%;
+    text-align: left;
+  }
+
+  #modal_edit_site .item_pair.item_pair_color .item_value {
+    margin-top: 0;
+  }
+
+  .site_color_picker,
+  .site_color_swatches {
+    width: 100%;
+  }
+
+  .site_color_swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2rem, 2rem));
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .site_color_swatch,
+  .site_color_swatch:hover {
+    position: static;
+    transform: none;
+  }
+
+  .edit_site_col_advanced {
+    clear: both;
+    padding-top: 1.5rem;
+  }
+}
+
+@media (max-width: 420px) {
+  #modal_create_site .modal_header,
+  #modal_edit_site .modal_header {
+    min-height: 3.5rem;
+    padding: 0.65rem 0.85rem;
+  }
+
+  .edit_site_col {
+    gap: 1.25rem;
+    padding: 1.15rem 0.85rem 1.35rem;
+  }
+
+  #modal_create_site .modal_footer,
+  #modal_edit_site .modal_footer {
+    padding: 0.75rem 0.85rem 0.9rem;
   }
 }
 
@@ -625,23 +1193,176 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 }
 
 .site_earnings_row {
-  padding: 0.85rem;
+  display: grid;
+  gap: 0.8rem;
+  padding: 0.95rem;
   border: 1px solid var(--panel-border);
-  border-radius: var(--radius-panel, var(--border-radius));
-  background: var(--panel-bg);
+  border-left: 0.4rem solid var(--color-primary, #4a9eff);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--panel-bg, #151515) 88%, var(--color-primary, #4a9eff) 12%);
 }
 
 .site_earnings_row + .site_earnings_row {
-  margin-top: 0.6rem;
+  margin-top: 0.75rem;
 }
 
 .site_earnings_header {
-  margin-bottom: 0.45rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.site_earnings_title_group {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.site_earnings_title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.site_earnings_amount {
+  font-size: 1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.site_archived_badge {
+  justify-self: start;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--panel-border, #555) 70%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-bg, #151515) 70%, var(--button-bg, #333) 30%);
+  color: var(--text-muted, #aaa);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .site_earnings_details {
   margin-top: 0.45rem;
   line-height: 1.45;
+}
+
+.site_earnings_metrics {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(5rem, 0.8fr);
+  gap: 0.65rem;
+}
+
+.site_earnings_metric {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--panel-border, #555) 78%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--panel-bg, #151515) 82%, var(--button-bg, #333) 18%);
+}
+
+.site_earnings_metric_label,
+.site_earnings_budget_header {
+  color: var(--text-muted, #888);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.site_earnings_metric_value {
+  min-width: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.site_earnings_budget {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.site_earnings_budget_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.site_earnings_bar {
+  width: 100%;
+  height: 0.45rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-border, #555) 45%, transparent);
+}
+
+.site_earnings_bar_fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary, #4a9eff);
+}
+
+.site_earnings_bar_fill[data-width="0"] { width: 0%; }
+.site_earnings_bar_fill[data-width="5"] { width: 5%; }
+.site_earnings_bar_fill[data-width="10"] { width: 10%; }
+.site_earnings_bar_fill[data-width="15"] { width: 15%; }
+.site_earnings_bar_fill[data-width="20"] { width: 20%; }
+.site_earnings_bar_fill[data-width="25"] { width: 25%; }
+.site_earnings_bar_fill[data-width="30"] { width: 30%; }
+.site_earnings_bar_fill[data-width="35"] { width: 35%; }
+.site_earnings_bar_fill[data-width="40"] { width: 40%; }
+.site_earnings_bar_fill[data-width="45"] { width: 45%; }
+.site_earnings_bar_fill[data-width="50"] { width: 50%; }
+.site_earnings_bar_fill[data-width="55"] { width: 55%; }
+.site_earnings_bar_fill[data-width="60"] { width: 60%; }
+.site_earnings_bar_fill[data-width="65"] { width: 65%; }
+.site_earnings_bar_fill[data-width="70"] { width: 70%; }
+.site_earnings_bar_fill[data-width="75"] { width: 75%; }
+.site_earnings_bar_fill[data-width="80"] { width: 80%; }
+.site_earnings_bar_fill[data-width="85"] { width: 85%; }
+.site_earnings_bar_fill[data-width="90"] { width: 90%; }
+.site_earnings_bar_fill[data-width="95"] { width: 95%; }
+.site_earnings_bar_fill[data-width="100"] { width: 100%; }
+
+@media (max-width: 600px) {
+  .site_earnings_row {
+    padding: 0.9rem;
+  }
+
+  .site_earnings_metrics {
+    grid-template-columns: minmax(0, 1fr) minmax(4.5rem, 0.55fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .site_earnings_header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.45rem;
+  }
+
+  .site_earnings_amount {
+    justify-self: start;
+  }
+
+  .site_earnings_metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Sites main container (two-panel layout) */

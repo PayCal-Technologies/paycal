@@ -150,8 +150,8 @@ export const initializeBillingSection = async (options = {}) => {
   const messages = { ...DEFAULT_MESSAGES, ...(isRecord(options.messages) ? options.messages : {}) };
   const fetchImpl = typeof options.fetchImpl === 'function' ? options.fetchImpl : window.fetch.bind(window);
   const successUrl = typeof options.successUrl === 'string' ? options.successUrl : '/api/v1/billing/checkout-return';
-  const cancelUrl = typeof options.cancelUrl === 'string' ? options.cancelUrl : '/profile/?billing=cancel';
-  const returnUrl = typeof options.returnUrl === 'string' ? options.returnUrl : '/profile/#panel-billing';
+  const cancelUrl = typeof options.cancelUrl === 'string' ? options.cancelUrl : '/settings/account/?billing=cancel';
+  const returnUrl = typeof options.returnUrl === 'string' ? options.returnUrl : '/settings/account/#panel-billing';
   const activationPollAttempts = Number.isInteger(options.activationPollAttempts) ? options.activationPollAttempts : 8;
   const activationPollDelayMs = Number.isInteger(options.activationPollDelayMs) ? options.activationPollDelayMs : 1500;
   const requestTimeoutMs = Number.isInteger(options.requestTimeoutMs) ? options.requestTimeoutMs : 7000;

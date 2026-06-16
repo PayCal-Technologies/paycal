@@ -37,7 +37,7 @@ final class FormErrorRecoveryContractTest extends TestCase
   public function settingsAndSitesPagesRetainErrorDescriptionsForSensitiveFlows(): void
   {
     $projectRoot = dirname(__DIR__, 4);
-    $settingsPage = (string) file_get_contents($projectRoot . '/html/settings/index.php');
+    $settingsPage = (string) file_get_contents($projectRoot . '/html/settings/_partials/modals.php');
     $sitesPage = (string) file_get_contents($projectRoot . '/html/sites/index.php');
     $siteEditorDialogs = (string) file_get_contents($projectRoot . '/html/sites/_partials/site_editor_dialogs.php');
 

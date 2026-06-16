@@ -2725,8 +2725,9 @@ final class BusinessDiscoveryService
   /**
    * Build the merged site catalog used by the calendar work-entry dialog.
    *
-   * Personal sites are returned without a prefix. Business-linked sites owned by
-   * the actor are returned with a business abbreviation prefix.
+   * Personal sites are returned using their stored name. Business-link metadata
+   * stays available separately so consumers can badge it without changing the
+   * selectable site name.
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
@@ -2780,9 +2781,7 @@ final class BusinessDiscoveryService
         'wage' => (string) ($siteData['wage'] ?? '0'),
         'scope' => $isBusinessLinked ? 'business' : 'personal',
         'business_abbrev' => $isBusinessLinked ? $abbrev : '',
-        'display_name' => $isBusinessLinked && $abbrev !== ''
-          ? '[' . $abbrev . '] ' . $siteName
-          : $siteName,
+        'display_name' => $siteName,
       ];
     }
 
@@ -6120,5 +6119,4 @@ final class BusinessDiscoveryService
     ];
   }
 }
-
 

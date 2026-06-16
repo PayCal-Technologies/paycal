@@ -121,6 +121,7 @@ if ($isAuthenticated) {
       'USER_CALENDAR_AUTOFOCUS' => (string) $user->calendar_autofocus,
       'USER_CALENDAR_AUDIOLABELS' => (string) $user->calendar_audio_labels,
       'USER_CALENDAR_DAY_NAME_FORMAT' => (string) $user->calendar_day_name_format,
+      'USER_CALENDAR_DAY_NAME_POSITION' => (string) $user->calendar_day_name_position,
       'USER_AUTH_COOKIE' => $authCookie,
   ]);
 }

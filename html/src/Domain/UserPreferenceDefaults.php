@@ -60,6 +60,24 @@ final class UserPreferenceDefaults
    */
   public const DEFAULT_HELP_POPUP_TIMEOUT_SECONDS = '8';
 
+  /** Toast anchor: upper-left, upper-center, upper-right, lower-left, lower-center, lower-right. */
+  public const DEFAULT_TOAST_POSITION = 'lower-center';
+
+  /** Toast width preset: tiny, narrow, normal, large, larger, full-width. */
+  public const DEFAULT_TOAST_WIDTH_PRESET = 'normal';
+
+  /** Toast font size slider (-5…+5). */
+  public const DEFAULT_TOAST_FONT_SIZE = '0';
+
+  /** Sidebar proximity hover: on, off. */
+  public const DEFAULT_NAV_PROXIMITY = 'on';
+
+  /** Sidebar overlay mode: overlay, push. */
+  public const DEFAULT_NAV_OVERLAY = 'push';
+
+  /** Sidebar proximity trigger distance in px (0–600). */
+  public const DEFAULT_NAV_PROXIMITY_PX = '200';
+
   /**
    * Default primary navigation position.
    *
@@ -101,26 +119,62 @@ final class UserPreferenceDefaults
   /**
    * Default calendar day name format.
    *
-   * Options: 'short', 'long'
-   * Controls how day names are displayed (e.g., "Mon" vs "Monday").
+   * Options: 'narrow', 'short', 'long'
+   * Controls weekday label width (e.g., "M", "Mon", "Monday").
    */
   public const DEFAULT_CALENDAR_DAY_NAME_FORMAT = 'short';
 
   /**
+   * Default calendar day name position.
+   *
+   * Options: 'left', 'middle', 'right'
+   * Controls weekday heading alignment.
+   */
+  public const DEFAULT_CALENDAR_DAY_NAME_POSITION = 'middle';
+
+  /**
    * Default calendar date label position.
    *
-   * Options: 'left', 'right', 'above', 'below'
-   * Controls where date labels appear relative to cells.
+   * Options: 'left', 'middle', 'right'
+   * Controls where date labels appear within calendar cells.
    */
   public const DEFAULT_CALENDAR_DATE_LABEL_POSITION = 'right';
 
   /**
    * Default calendar work entry position.
    *
-   * Options: 'top', 'middle', 'bottom'
+   * Options: 'left', 'middle', 'right'
    * Controls where work entries display within calendar cells.
    */
   public const DEFAULT_CALENDAR_WORK_ENTRY_POSITION = 'middle';
+
+  /** Calendar grid week start: 0 = Sunday, 1 = Monday. */
+  public const DEFAULT_CALENDAR_WEEK_START = '0';
+
+  /** Default calendar view: month, week, or pay_period. */
+  public const DEFAULT_CALENDAR_DEFAULT_VIEW = 'month';
+
+  public const DEFAULT_ACCENT_PRESET = 'default';
+  public const DEFAULT_HIGH_CONTRAST_ENABLED = '0';
+  public const DEFAULT_REDUCED_MOTION_ENABLED = 'system';
+  public const DEFAULT_SR_VERBOSITY = 'standard';
+  public const DEFAULT_KEYBOARD_SHORTCUTS_HINT = 'first_visit';
+  public const DEFAULT_REQUIRE_REAUTH_EXPORT = '0';
+  public const DEFAULT_REQUIRE_REAUTH_IMPORT = '0';
+  public const DEFAULT_EXPORT_ENCRYPT_PREFERENCE = '0';
+  public const DEFAULT_DEBUG_TTL_MINUTES = '15';
+
+  /**
+   * Resolve stored week-start preference to Calendar grid index (0–6, Sunday-based).
+   */
+  public static function calendarWeekStartDay(?User $user = null): int
+  {
+    $raw = $user === null
+      ? self::DEFAULT_CALENDAR_WEEK_START
+      : trim($user->calendar_week_start);
+
+    return $raw === '1' ? 1 : 0;
+  }
 
   /**
     * Default voice preference.
@@ -128,6 +182,9 @@ final class UserPreferenceDefaults
     * Options: 'system_default', 'system_female', 'system_male', and provider-specific voices.
     */
     public const DEFAULT_VOICE = 'system_default';
+
+  /** Default TTS output volume (0.0–1.0). */
+  public const DEFAULT_VOICE_VOLUME = '1';
 
     /**
    * Default audio feedback preference.

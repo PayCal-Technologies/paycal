@@ -290,7 +290,7 @@ if (ContentView::isDocPage($currentPage)) {
 }
 
 ?><!DOCTYPE html><!-- Hello there. -->
-<html lang="<?php echo htmlspecialchars((string) $pageLanguage, ENT_QUOTES, 'UTF-8'); ?>" dir="ltr" prefix="og: http://ogp.me/ns#" data-os="<?php echo htmlspecialchars($platformToken, ENT_QUOTES, 'UTF-8'); ?>" data-a11y-animated-images="system" data-a11y-link-underlines="true" data-a11y-dyslexia-typography="<?php echo htmlspecialchars((string) (User::current()->dyslexia_typography ?? UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY), ENT_QUOTES, 'UTF-8'); ?>">
+<html lang="<?php echo htmlspecialchars((string) $pageLanguage, ENT_QUOTES, 'UTF-8'); ?>" dir="ltr" prefix="og: http://ogp.me/ns#" data-os="<?php echo htmlspecialchars($platformToken, ENT_QUOTES, 'UTF-8'); ?>" data-a11y-animated-images="system" data-a11y-link-underlines="true" data-a11y-dyslexia-typography="<?php echo htmlspecialchars((string) (User::current()->dyslexia_typography ?? UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY), ENT_QUOTES, 'UTF-8'); ?>" data-a11y-high-contrast="<?php echo htmlspecialchars((string) (User::current()->high_contrast_enabled ?? UserPreferenceDefaults::DEFAULT_HIGH_CONTRAST_ENABLED), ENT_QUOTES, 'UTF-8'); ?>" data-a11y-reduced-motion="<?php echo htmlspecialchars((string) (User::current()->reduced_motion_enabled ?? UserPreferenceDefaults::DEFAULT_REDUCED_MOTION_ENABLED), ENT_QUOTES, 'UTF-8'); ?>" data-accent-preset="<?php echo htmlspecialchars((string) (User::current()->accent_preset ?? UserPreferenceDefaults::DEFAULT_ACCENT_PRESET), ENT_QUOTES, 'UTF-8'); ?>">
 
 <!--
   _______   ______    ___________          _______   __  ___  __   __       __       ______
@@ -362,8 +362,19 @@ $navInitialState = in_array($navInitialStateRaw, ['collapsed', 'pinned'], true)
 $isSidePrimaryNav = in_array($navPrimaryPosition, ['left', 'right'], true);
 $activeLanguageForNav = Language::resolveFromQuery('l');
 $languageNavHtml = Render::languageNav($activeLanguageForNav);
+$bodyClassNames = array_values(array_filter([
+  ($currentPage ?? '') === 'PAGE_INDEX' ? 'page-calendar' : '',
+]));
+$toastPosition = htmlspecialchars($userForNav->getToastPosition(), ENT_QUOTES, 'UTF-8');
+$toastFontSize = (string) $userForNav->getToastFontSize();
+$mobilePageLabel = isset($pageLabel) && is_scalar($pageLabel) && trim((string) $pageLabel) !== ''
+  ? (string) $pageLabel
+  : preg_replace('/\s+-\s+\[[^\]]+\]$/', '', (string) $pageTitle);
+if (!is_string($mobilePageLabel) || trim($mobilePageLabel) === '') {
+  $mobilePageLabel = $siteName;
+}
 ?>
-<body role="document" aria-label="<?php echo Strings::headerI18n('SITE_NAME'); ?>" data-nav-primary-position="<?php echo htmlspecialchars($navPrimaryPosition, ENT_QUOTES, 'UTF-8'); ?>" data-nav-initial-state="<?php echo htmlspecialchars($navInitialState, ENT_QUOTES, 'UTF-8'); ?>">
+<body role="document" aria-label="<?php echo Strings::headerI18n('SITE_NAME'); ?>"<?php if ($bodyClassNames !== []) { ?> class="<?php echo htmlspecialchars(implode(' ', $bodyClassNames), ENT_QUOTES, 'UTF-8'); ?>"<?php } ?> data-nav-primary-position="<?php echo htmlspecialchars($navPrimaryPosition, ENT_QUOTES, 'UTF-8'); ?>" data-nav-initial-state="<?php echo htmlspecialchars($navInitialState, ENT_QUOTES, 'UTF-8'); ?>" data-toast-position="<?php echo $toastPosition; ?>" data-toast-font-size="<?php echo htmlspecialchars($toastFontSize, ENT_QUOTES, 'UTF-8'); ?>">
 
 <div id="status" class="status centered" aria-live="polite" role="status"></div>
 
@@ -371,7 +382,10 @@ $languageNavHtml = Render::languageNav($activeLanguageForNav);
 
 <a id="skip_to_content" class="skip_link" href="#main" accesskey="0" aria-keyshortcuts="Alt+0"><?php echo Strings::headerI18n('SKIP_TO_CONTENT'); ?></a>
 
-<?php if ($isSidePrimaryNav) { ?>
+<?php if ($isSidePrimaryNav && $isAuthenticated) { ?>
+<div id="mobile_navigation_bar" class="mobile_navigation_bar" aria-hidden="true">
+  <span class="mobile_navigation_title"><?php echo htmlspecialchars($mobilePageLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+</div>
 <button
   id="sidebar_toggle_control"
   class="sidebar_toggle_accessible"

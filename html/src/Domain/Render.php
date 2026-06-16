@@ -321,7 +321,7 @@ class Render
         Page::PROFILE => [
             'page' => Page::PROFILE->value,
             'name' => (string) $i18n['PROFILE_HTML'],
-            'href' => '/profile/', // Public URL
+            'href' => '/settings/account/',
             'arialabel' => (string) $i18n['PROFILE'],
             'access_key' => (string) 'f',
             'icon' => (string) Strings::html('PROFILE_SVG'),
@@ -401,7 +401,7 @@ class Render
     $showBusiness = $isPremiumMember || $isAdmin;
 
     $paycalLinks = array_merge(
-      self::buildNavLinks([Page::SITES, Page::REPORTS, Page::PROFILE], $isPremiumMember),
+      self::buildNavLinks([Page::SITES, Page::REPORTS], $isPremiumMember),
       [self::settingsNavLink()]
     );
 
@@ -444,7 +444,7 @@ class Render
     return [
       'page' => 'PAGE_SETTINGS',
       'name' => (string) Strings::i18n('SETTINGS_HTML'),
-      'href' => '/settings/',
+      'href' => SettingsNav::defaultSubPageHref(),
       'arialabel' => (string) Strings::i18n('SETTINGS'),
       'access_key' => 'e',
       'icon' => (string) Strings::html('SETTINGS_SVG'),

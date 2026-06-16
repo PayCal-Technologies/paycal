@@ -22,7 +22,7 @@ final class SettingsPageTest extends TestCase
   public function calendarFormHasCorrectAction(): void
   {
     $expectedAction = '/api/settings/calendar/update/';
-    
+
     // This test documents the expected API endpoint
     $this->assertSame('/api/settings/calendar/update/', $expectedAction);
   }
@@ -64,6 +64,18 @@ final class SettingsPageTest extends TestCase
   }
 
   #[Test]
+  public function calendarDayNamePositionHasValidValues(): void
+  {
+    $validValues = ['left', 'middle', 'right'];
+    $fieldName = 'calendar_day_name_position';
+
+    $this->assertCount(3, $validValues, "calendar_day_name_position should have exactly 3 options");
+    $this->assertContains('left', $validValues);
+    $this->assertContains('middle', $validValues);
+    $this->assertContains('right', $validValues);
+  }
+
+  #[Test]
   public function calendarAudioLabelsHasValidValues(): void
   {
     $validValues = ['number', 'short', 'long'];
@@ -92,12 +104,13 @@ final class SettingsPageTest extends TestCase
   {
     $checkboxFields = [
       'calendar_work_entry_fields_hours',
+      'calendar_work_entry_fields_regular',
       'calendar_work_entry_fields_overtime',
       'calendar_work_entry_fields_living_out',
       'calendar_work_entry_fields_travel',
     ];
     
-    $this->assertCount(4, $checkboxFields, "Should have exactly 4 work entry field checkboxes");
+    $this->assertCount(5, $checkboxFields, "Should have exactly 5 work entry field checkboxes");
   }
 
   /**

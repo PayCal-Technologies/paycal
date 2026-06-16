@@ -101,6 +101,7 @@
 
   --work-entry-back: var(--color-surface);
   --work-entry-fore: var(--color-text);
+  --work-tint-mix-base: var(--work-entry-back, var(--work-back, var(--color-surface-muted)));
 
   --dialog-bg: var(--elevation-2-bg);
   --dialog-text: var(--color-text);

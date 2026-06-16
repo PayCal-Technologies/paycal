@@ -75,6 +75,11 @@ $spacingOverride = $normalizeAdjustment(strtolower($spacingOverrideRaw), []);
 $combinedTextAdjustment = max(-5, min(5, $textAdjustment + $textOverride));
 $combinedSpacingAdjustment = max(-5, min(5, $spacingAdjustment + $spacingOverride));
 
+$toastFontSizeRaw = trim((string) ($user->toast_font_size ?? UserPreferenceDefaults::DEFAULT_TOAST_FONT_SIZE));
+$toastFontSizeAdjustment = preg_match('/^-?\d+$/', $toastFontSizeRaw) === 1
+  ? max(-5, min(5, (int) $toastFontSizeRaw))
+  : 0;
+
 $resolveCssLengthOrNumber = static function (mixed $raw, string $default): string {
   if (!is_scalar($raw) && $raw !== null) {
     return $default;
@@ -191,6 +196,9 @@ $navBarStickiness = "static";
   --gap-sm:                              var(--pad-sm);
   --gap-md:                              var(--pad-md);
   --gap-lg:                              var(--pad-lg);
+
+  --toast-font-adjustment:               <?php echo ($toastFontSizeAdjustment * 0.125); ?>rem;
+  --toast-width-normal:                  32rem;
 
   /*
    * Page edge inset — horizontal padding for all user-facing #main content.
@@ -321,6 +329,52 @@ html[data-a11y-dyslexia-typography="on"] a {
   word-spacing: 0.16em;
 }
 
+html[data-a11y-high-contrast="1"] {
+  --focus-ring-color: #ffff00;
+  filter: contrast(1.15);
+}
+
+html[data-a11y-high-contrast="1"] body {
+  background-color: #000;
+  color: #fff;
+}
+
+html[data-a11y-reduced-motion="on"] *,
+html[data-a11y-reduced-motion="on"] *::before,
+html[data-a11y-reduced-motion="on"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-a11y-reduced-motion="system"] *,
+  html[data-a11y-reduced-motion="system"] *::before,
+  html[data-a11y-reduced-motion="system"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-accent-preset="ocean"] {
+  --accent-color: #0ea5e9;
+}
+
+html[data-accent-preset="forest"] {
+  --accent-color: #16a34a;
+}
+
+html[data-accent-preset="sunset"] {
+  --accent-color: #ea580c;
+}
+
+html[data-accent-preset="slate"] {
+  --accent-color: #64748b;
+}
+
 <?php
 
 $allowedThemes = [
@@ -428,15 +482,6 @@ footer, header, main, nav { display: block; }
   padding-block: clamp(0.6rem, 1.3vw, 1rem);
   padding-inline: var(--page-edge-inline);
   box-sizing: border-box;
-}
-
-.public_extension_disclaimer {
-  margin: 1.5rem 0 0;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.85rem;
-  color: var(--text-muted, inherit);
-  opacity: 0.85;
 }
 
 .ledge {
@@ -1557,12 +1602,12 @@ label:focus {
   left: 50%;
   right: auto;
   width: fit-content;
-  max-width: min(50vw, 42rem);
+  max-width: var(--toast-width-normal);
   margin: 0;
   height: auto;
   min-height: 3rem;
   z-index: 11000;
-  font-size: var(--font-md);
+  font-size: clamp(0.75rem, calc(var(--font-md) + var(--toast-font-adjustment, 0rem)), 1.5rem);
   border-radius: var(--radius-panel, var(--border-radius));
   background-color: var(--panel-text);
   color: var(--panel-bg);
@@ -1572,6 +1617,91 @@ label:focus {
   padding: 0;
   overflow: hidden;
   transform: translateX(-50%);
+}
+
+<?php for ($toastFontSizeStep = -5; $toastFontSizeStep <= 5; $toastFontSizeStep++) { ?>
+body[data-toast-font-size='<?php echo $toastFontSizeStep; ?>'] {
+  --toast-font-adjustment: <?php echo ($toastFontSizeStep * 0.125); ?>rem;
+}
+<?php } ?>
+
+body[data-toast-position='upper-left'] .status.visible {
+  top: calc(env(safe-area-inset-top, 0px) + var(--pad-lg));
+  bottom: auto;
+  left: var(--pad-lg);
+  right: auto;
+  transform: none;
+}
+
+body[data-toast-position='upper-center'] .status.visible {
+  top: calc(env(safe-area-inset-top, 0px) + var(--pad-lg));
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+body[data-toast-position='upper-right'] .status.visible {
+  top: calc(env(safe-area-inset-top, 0px) + var(--pad-lg));
+  bottom: auto;
+  left: auto;
+  right: var(--pad-lg);
+  transform: none;
+}
+
+body[data-toast-position='lower-left'] .status.visible {
+  top: auto;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad-lg));
+  left: var(--pad-lg);
+  right: auto;
+  transform: none;
+}
+
+body[data-toast-position='lower-center'] .status.visible {
+  top: auto;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad-lg));
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+body[data-toast-position='lower-right'] .status.visible {
+  top: auto;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad-lg));
+  left: auto;
+  right: var(--pad-lg);
+  transform: none;
+}
+
+body[data-toast-position='full-top'] .status.visible {
+  top: env(safe-area-inset-top, 0px);
+  bottom: auto;
+  left: env(safe-area-inset-left, 0px);
+  right: env(safe-area-inset-right, 0px);
+  width: auto;
+  max-width: none;
+  transform: none;
+  border-radius: 0;
+  justify-content: center;
+}
+
+body[data-toast-position='full-bottom'] .status.visible {
+  top: auto;
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: env(safe-area-inset-left, 0px);
+  right: env(safe-area-inset-right, 0px);
+  width: auto;
+  max-width: none;
+  transform: none;
+  border-radius: 0;
+  justify-content: center;
+}
+
+body[data-toast-position='full-top'] .status.visible .status-message-text,
+body[data-toast-position='full-bottom'] .status.visible .status-message-text {
+  flex-grow: 0;
+  text-align: center;
+  justify-content: center;
 }
 
 .status.visible {

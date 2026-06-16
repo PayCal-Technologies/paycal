@@ -13,7 +13,10 @@ $i18nKeys = [
   'UPDATING_CALENDAR_AUTOFOCUS_TO',
   'UPDATING_CALENDAR_DATE_LABEL_POSITION_TO',
   'UPDATING_CALENDAR_DAY_NAME_FORMAT_TO',
+  'UPDATING_CALENDAR_DAY_NAME_POSITION_TO',
   'UPDATING_CALENDAR_WORK_ENTRY_POSITION_TO',
+  'UPDATING_CALENDAR_WEEK_START_TO',
+  'UPDATING_CALENDAR_DEFAULT_VIEW_TO',
   'UPDATING_INFO',
   'UPDATING_PAY_PERIOD',
   'CANCEL',
@@ -36,15 +39,56 @@ $i18nKeys = [
   'SETTINGS_JS_PASSKEYS_REMOVED',
   'SETTINGS_JS_PASSKEYS_UPDATE_FAILED',
   'SETTINGS_JS_WORK_ENTRY_FIELDS_UPDATED',
+  'SETTINGS_JS_CALENDAR_DISPLAY_UPDATED',
+  'SETTINGS_JS_DENSITY_UPDATED_FMT',
+  'SETTINGS_JS_ACCENT_UPDATED_FMT',
+  'SETTINGS_JS_HIGH_CONTRAST_UPDATED_FMT',
+  'SETTINGS_JS_REDUCED_MOTION_UPDATED_FMT',
+  'SETTINGS_JS_SR_VERBOSITY_UPDATED_FMT',
+  'SETTINGS_JS_KEYBOARD_SHORTCUTS_HINT_UPDATED_FMT',
+  'SETTINGS_JS_SECURITY_PREF_UPDATED',
+  'SETTINGS_JS_DEBUG_TTL_UPDATED',
+  'SETTINGS_JS_SESSIONS_LOADED_COUNT_FMT',
+  'SETTINGS_JS_SESSIONS_LOADING',
+  'SETTINGS_JS_SESSIONS_LOAD_FAILED',
+  'SETTINGS_JS_SESSIONS_NONE',
+  'SETTINGS_JS_SESSIONS_REVOKED_FMT',
+  'SETTINGS_JS_SESSIONS_REVOKE_FAILED',
+  'SETTINGS_JS_EXPORT_HISTORY_LOAD_FAILED',
+  'SETTINGS_JS_EXPORT_HISTORY_NONE',
+  'SETTINGS_JS_EXPORT_ENCRYPT_PROMPT',
+  'SETTINGS_JS_EXPORT_ENCRYPT_CONFIRM',
+  'SETTINGS_JS_EXPORT_ENCRYPT_MISMATCH',
+  'SETTINGS_JS_EXPORT_ENCRYPT_FAILED',
+  'SETTINGS_JS_EXPORT_ENCRYPTED_SUCCESS',
+  'SETTINGS_JS_RECOVERY_KEY_ACTIVE',
+  'KEYBOARD_SHORTCUTS',
   'SETTINGS_JS_AUDIO_MUTED',
   'SETTINGS_JS_AUDIO_ENABLED',
   'SETTINGS_JS_AUDIO_ENABLED_SPEECH',
   'SETTINGS_JS_AUDIO_TOAST_FMT',
   'SETTINGS_JS_VOICE_UPDATED_FMT',
+  'SETTINGS_JS_VOICE_VOLUME_UPDATED',
+  'SETTINGS_JS_DEBUG_CONSOLE_TOAST_FMT',
+  'SETTINGS_JS_DEBUG_FINE_GRAINED_TOAST_FMT',
+  'SETTINGS_JS_DEBUG_NETWORK_TOAST_FMT',
+  'SETTINGS_JS_DIAGNOSTICS_BUNDLE_COPIED',
+  'SETTINGS_JS_DIAGNOSTICS_BUNDLE_FAILED',
+  'SETTINGS_JS_PASSKEY_ONBOARDING_TOAST',
+  'SETTINGS_JS_SUPPORT_INFO_COPIED',
+  'SETTINGS_JS_SUPPORT_INFO_COPY_FAILED',
+  'SETTINGS_JS_SUPPORT_INFO_LABEL',
+  'SETTINGS_VOICE_PREVIEW_SAMPLE',
   'SETTINGS_JS_THEME_UPDATED_FMT',
   'SETTINGS_JS_LANGUAGE_UPDATED',
+  'SETTINGS_JS_TIMEZONE_UPDATED',
+  'SETTINGS_JS_CURRENCY_UPDATED',
+  'SETTINGS_JS_WORK_DEFAULTS_UPDATED',
   'SETTINGS_JS_TYPOGRAPHY_UPDATED',
   'SETTINGS_JS_HELP_POPUP_TIMEOUT_UPDATED',
+  'SETTINGS_JS_TOAST_POSITION_UPDATED',
+  'SETTINGS_JS_TOAST_SIZE_UPDATED',
+  'SETTINGS_JS_NAV_DISTANCE_UPDATED',
   'SETTINGS_JS_TOGGLE_ON',
   'SETTINGS_JS_TOGGLE_OFF',
   'SETTINGS_JS_PROXIMITY_FMT',
@@ -103,9 +147,57 @@ Javascript::renderDocBlock();
 import PC from "<?php echo Environment::appURL('js/'); ?>";
 import PW from "<?php echo Environment::appURL('js/phantomwing/'); ?>";
 import { initializeBillingSection } from "../core/billing.js";
-import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from "../core/binary-codec.js";
+import { fromBase64Url as b64urlToBuffer, toBase64, toBase64Url as bufferToB64url } from "../core/binary-codec.js";
 
 const SETTINGS_T = <?php echo json_encode($i18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+(() => {
+  const node = document.getElementById('settings-legacy-hash-redirects');
+  if (!(node instanceof HTMLScriptElement)) {
+    return;
+  }
+
+  let redirects = null;
+  try {
+    redirects = JSON.parse(node.textContent || '');
+  } catch {
+    return;
+  }
+
+  if (!redirects || typeof redirects !== 'object') {
+    return;
+  }
+
+  const hashKey = (window.location.hash || '').replace(/^#/, '');
+  if (hashKey === '') {
+    return;
+  }
+
+  const target = redirects[hashKey];
+  if (typeof target !== 'string' || target === '') {
+    return;
+  }
+
+  const currentPath = window.location.pathname.replace(/\/$/, '');
+  const targetPath = target.replace(/\/$/, '');
+  if (currentPath !== targetPath) {
+    window.location.replace(target + (window.location.search || ''));
+  }
+})();
+
+const getSettingsCsrfToken = () => {
+  const workspaceToken = document.querySelector('#settings_csrf_token');
+  if (workspaceToken instanceof HTMLInputElement && workspaceToken.value !== '') {
+    return workspaceToken.value;
+  }
+
+  const formToken = document.querySelector('#settings-workspace input[name="csrf_token"], form[id^="account_"] input[name="csrf_token"]');
+  if (formToken instanceof HTMLInputElement) {
+    return formToken.value;
+  }
+
+  return '';
+};
 
 const formatSettingsMessage = (template, replacements = {}) => {
   let message = String(template || '');
@@ -113,6 +205,13 @@ const formatSettingsMessage = (template, replacements = {}) => {
     message = message.split(`{${key}}`).join(String(value ?? ''));
   });
   return message;
+};
+
+const appendSettingsCsrfToken = (formData) => {
+  const csrfValue = getSettingsCsrfToken();
+  if (csrfValue !== '') {
+    formData.append('csrf_token', csrfValue);
+  }
 };
 
 const isDebugEnabled = () => window.PAYCAL_DEBUG === true;
@@ -130,30 +229,23 @@ const debugLog = (...args) => {
  * @param {string} endpoint - API endpoint for the update.
  * @param {string} messageTemplate - Message template with {value} placeholder.
  */
-const handleRadioGroup = (name, endpoint, messageTemplate) => {
+const handleRadioGroup = (name, endpoint, messageTemplate, options = {}) => {
+  const reloadOnSuccess = options.reloadOnSuccess === true;
+
   PC.queryAll(`input[name="${name}"]`).forEach(radioButton => {
     radioButton.addEventListener('change', () => {
-      const value = PC.query(`input[name="${name}"]:checked`).value;
       const checkedRadio = PC.query(`input[name="${name}"]:checked`);
-      const label = checkedRadio
-        ? (document.querySelector(`label[for="${checkedRadio.id}"]`)?.textContent?.trim() || value)
-        : value;
-      const formData = new FormData();
-      formData.append(name, value);
-
-
-      // Find and append CSRF token from the nearest form
-      const form = radioButton.closest('form');
-      if (form) {
-        const csrfInput = form.querySelector('input[name="csrf_token"]');
-        if (csrfInput) {
-          formData.append('csrf_token', csrfInput.value);
-        }
+      if (!(checkedRadio instanceof HTMLInputElement)) {
+        return;
       }
 
-      const submitPromise = PC.updateResource(endpoint, formData);
+      const value = checkedRadio.value;
+      const label = document.querySelector(`label[for="${checkedRadio.id}"]`)?.textContent?.trim() || value;
+      const formData = new FormData();
+      formData.append(name, value);
+      appendSettingsCsrfToken(formData);
 
-      submitPromise.then(() => {
+      PC.updateResource(endpoint, formData).then(() => {
         PC.showToast(
           messageTemplate
             .replace('{value}', value)
@@ -164,6 +256,9 @@ const handleRadioGroup = (name, endpoint, messageTemplate) => {
         );
         if (PC.state.audio_feedback === 'all') {
           PC.textToSpeech(label);
+        }
+        if (reloadOnSuccess) {
+          window.location.reload();
         }
       }).catch(error => PW.error(error));
     });
@@ -189,6 +284,74 @@ const broadcastDebugSettingsUpdate = () => {
   window.dispatchEvent(new CustomEvent('paycal:debug-settings-updated', { detail }));
 };
 
+const encryptExportPayloadWithPassphrase = async (payloadJson, passphrase) => {
+  if (!window.crypto?.subtle) {
+    throw new Error('Web Crypto is unavailable in this browser.');
+  }
+
+  const encoder = new TextEncoder();
+  const salt = window.crypto.getRandomValues(new Uint8Array(16));
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const baseKey = await window.crypto.subtle.importKey(
+    'raw',
+    encoder.encode(passphrase),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+  const aesKey = await window.crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations: 210000,
+      hash: 'SHA-256',
+    },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt']
+  );
+  const ciphertext = await window.crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    aesKey,
+    encoder.encode(payloadJson)
+  );
+
+  return JSON.stringify({
+    format: 'paycal-export-encrypted-v1',
+    kdf: 'PBKDF2-SHA256',
+    iterations: 210000,
+    cipher: 'AES-GCM',
+    salt: toBase64(salt),
+    iv: toBase64(iv),
+    ciphertext: toBase64(new Uint8Array(ciphertext)),
+  }, null, 2);
+};
+
+const promptForExportPassphrase = () => {
+  const initial = window.prompt(SETTINGS_T.SETTINGS_JS_EXPORT_ENCRYPT_PROMPT, '');
+  if (initial === null) {
+    return null;
+  }
+
+  const trimmed = String(initial).trim();
+  if (trimmed === '') {
+    return null;
+  }
+
+  const confirm = window.prompt(SETTINGS_T.SETTINGS_JS_EXPORT_ENCRYPT_CONFIRM, '');
+  if (confirm === null) {
+    return null;
+  }
+
+  if (String(confirm).trim() !== trimmed) {
+    PC.showToast(SETTINGS_T.SETTINGS_JS_EXPORT_ENCRYPT_MISMATCH, 'error', 4000, true);
+    return null;
+  }
+
+  return trimmed;
+};
+
 
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -196,11 +359,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (params.get('passkey_onboarding') === '1') {
     PC.showToast(
-      'Signed in on this phone. Tap Add another device to add a local passkey for this device.',
+      SETTINGS_T.SETTINGS_JS_PASSKEY_ONBOARDING_TOAST,
       'save',
       10000,
       true
     );
+    const passkeysPanel = document.getElementById('panel-passkeys');
+    if (passkeysPanel instanceof HTMLElement) {
+      passkeysPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  (() => {
+    const settingsWorkspace = document.getElementById('settings-workspace');
+    const hintPref = PC.query('input[name="keyboard_shortcuts_hint"]:checked')?.value
+      || settingsWorkspace?.dataset.keyboardShortcutsHint
+      || 'first_visit';
+    const configShown = PC.config && PC.config.settings_keyboard_hint_shown === true;
+    const storageShown = localStorage.getItem('settings_keyboard_hint_shown') === '1';
+    if (!configShown && !storageShown && hintPref === 'first_visit' && document.getElementById('modal_help')) {
+      PC.openModal('modal_help', SETTINGS_T.KEYBOARD_SHORTCUTS || PC.config?.KEYBOARD_SHORTCUTS || 'Keyboard shortcuts');
+      localStorage.setItem('settings_keyboard_hint_shown', '1');
+    }
+  })();
+
+  const recoveryKeyBadgeEl = document.getElementById('settings_recovery_key_badge');
+  if (recoveryKeyBadgeEl instanceof HTMLElement) {
+    const hasRecoveryKey = recoveryKeyBadgeEl.dataset.hasRecoveryKey === '1'
+      || recoveryKeyBadgeEl.getAttribute('data-has-recovery-key') === '1';
+    recoveryKeyBadgeEl.hidden = !hasRecoveryKey;
+    recoveryKeyBadgeEl.classList.toggle('is-visible', hasRecoveryKey);
+    if (hasRecoveryKey) {
+      recoveryKeyBadgeEl.setAttribute('aria-label', SETTINGS_T.SETTINGS_JS_RECOVERY_KEY_ACTIVE);
+    }
   }
 
   const addPasskeyButtonEl = document.getElementById('add_passkey_button');
@@ -1403,6 +1594,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     PC.openModal('modal_delete_account', SETTINGS_T.DELETE_ACCOUNT);
     PC.getElement('delete_account_confirm_phrase').focus();
   });
+  PC.addClickAndEnterListener('settings_data_delete_account_btn', (e) => {
+    e.preventDefault();
+    PC.openModal('modal_delete_account', SETTINGS_T.DELETE_ACCOUNT);
+    PC.getElement('delete_account_confirm_phrase').focus();
+  });
   PC.addClickAndEnterListener('delete_account_cancel_btn', (e) => { e.preventDefault(); PC.closeModal('modal_delete_account', SETTINGS_T.DELETE_ACCOUNT); });
 
 
@@ -1583,13 +1779,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (panelName && modalName) updatePanelField(panelName, modalName.value);
         if (panelPhone && modalPhone) updatePanelField(panelPhone, modalPhone.value);
-        if (panelProvince && modalProvince) {
-          const provinceLabel = modalProvince.options[modalProvince.selectedIndex]?.text || modalProvince.value;
-          updatePanelField(panelProvince, provinceLabel);
+        if (panelProvince instanceof HTMLSelectElement && modalProvince instanceof HTMLSelectElement) {
+          panelProvince.value = modalProvince.value;
         }
         if (panelTimezone && modalTimezone) {
-          const timezoneLabel = modalTimezone.options[modalTimezone.selectedIndex]?.text || modalTimezone.value;
-          updatePanelField(panelTimezone, timezoneLabel);
+          panelTimezone.value = modalTimezone.value;
         }
 
         if (editDetailsStatus) {
@@ -1616,15 +1810,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     isRequestInFlight: false,
   };
 
-  const getSettingsCsrfToken = () => {
+  const getRecoveryEmailCsrfToken = () => {
     const form = PC.getElement('edit_details_form');
     const formToken = form?.querySelector('input[name="csrf_token"]');
     if (formToken && typeof formToken.value === 'string' && formToken.value !== '') {
       return formToken.value;
     }
 
-    const fallback = document.querySelector('input[name="csrf_token"]');
-    return fallback && typeof fallback.value === 'string' ? fallback.value : '';
+    return getSettingsCsrfToken();
   };
 
   const formatCooldownTime = (totalSeconds) => {
@@ -1785,7 +1978,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!emailInput || !statusEl) return;
 
     const email = emailInput.value.trim();
-    const csrfToken = getSettingsCsrfToken();
+    const csrfToken = getRecoveryEmailCsrfToken();
     setFieldErrorState(emailInput, 'recovery_email_input_error', '');
     
     if (!email || !email.includes('@')) {
@@ -1875,7 +2068,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!codeInput || !statusEl || !verifyBtn) return;
 
     const code = codeInput.value.trim();
-    const csrfToken = getSettingsCsrfToken();
+    const csrfToken = getRecoveryEmailCsrfToken();
     setFieldErrorState(codeInput, 'recovery_email_code_error', '');
     
     if (!code || code.length !== 6) {
@@ -1959,7 +2152,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const resendRecoveryEmailCode = async () => {
     const statusEl = PC.getElement('recovery_email_send_status');
-    const csrfToken = getSettingsCsrfToken();
+    const csrfToken = getRecoveryEmailCsrfToken();
 
     if (!statusEl || !recoveryEmailState.currentEmail) return;
     if (!csrfToken) {
@@ -2074,13 +2267,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* CALENDAR */
   handleRadioGroup('calendar_autofocus', 'settings/calendar', <?php echo json_encode($i18n['UPDATING_CALENDAR_AUTOFOCUS_TO'] . ' {value}', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
   handleRadioGroup('calendar_day_name_format', 'settings/calendar', <?php echo json_encode($i18n['UPDATING_CALENDAR_DAY_NAME_FORMAT_TO'] . ' {value}', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
+  handleRadioGroup('calendar_day_name_position', 'settings/calendar', <?php echo json_encode($i18n['UPDATING_CALENDAR_DAY_NAME_POSITION_TO'] . ' {value}', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
   handleRadioGroup('calendar_audio_labels', 'settings/calendar', <?php echo json_encode($i18n['UPDATING_CALENDAR_AUDIO_LABELS_TO'] . ' {value}', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
   handleRadioGroup('calendar_date_label_position', 'settings/calendar', <?php echo json_encode($i18n['UPDATING_CALENDAR_DATE_LABEL_POSITION_TO'] . ' {value}', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
   handleRadioGroup('calendar_work_entry_position', 'settings/calendar', <?php echo json_encode($i18n['UPDATING_CALENDAR_WORK_ENTRY_POSITION_TO'] . ' {value}', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
+  handleRadioGroup('calendar_week_start', 'settings/calendar', <?php echo json_encode($i18n['UPDATING_CALENDAR_WEEK_START_TO'] . ' {value}', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
+  handleRadioGroup('calendar_default_view', 'settings/calendar', <?php echo json_encode($i18n['UPDATING_CALENDAR_DEFAULT_VIEW_TO'] . ' {value}', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
 
-  handleRadioGroup('debug_console_enabled', 'settings/debug', 'Console Messages: {label}');
-  handleRadioGroup('debug_fine_grained_enabled', 'settings/debug', 'Detailed Diagnostics: {label}');
-  handleRadioGroup('debug_network_enabled', 'settings/debug', 'Network Insights: {label}');
+  handleRadioGroup('debug_console_enabled', 'settings/debug', <?php echo json_encode($i18n['SETTINGS_JS_DEBUG_CONSOLE_TOAST_FMT'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
+  handleRadioGroup('debug_fine_grained_enabled', 'settings/debug', <?php echo json_encode($i18n['SETTINGS_JS_DEBUG_FINE_GRAINED_TOAST_FMT'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
+  handleRadioGroup('debug_network_enabled', 'settings/debug', <?php echo json_encode($i18n['SETTINGS_JS_DEBUG_NETWORK_TOAST_FMT'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
+  handleRadioGroup('high_contrast_enabled', 'settings/style', <?php echo json_encode($i18n['SETTINGS_JS_HIGH_CONTRAST_UPDATED_FMT'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>, { reloadOnSuccess: true });
+  handleRadioGroup('reduced_motion_enabled', 'settings/style', <?php echo json_encode($i18n['SETTINGS_JS_REDUCED_MOTION_UPDATED_FMT'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>, { reloadOnSuccess: true });
+  handleRadioGroup('sr_verbosity', 'settings/style', <?php echo json_encode($i18n['SETTINGS_JS_SR_VERBOSITY_UPDATED_FMT'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
+  handleRadioGroup('keyboard_shortcuts_hint', 'settings/style', <?php echo json_encode($i18n['SETTINGS_JS_KEYBOARD_SHORTCUTS_HINT_UPDATED_FMT'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
+
+  const debugTtlMinutesSelect = document.getElementById('debug_ttl_minutes');
+  if (debugTtlMinutesSelect instanceof HTMLSelectElement) {
+    debugTtlMinutesSelect.addEventListener('change', () => {
+      const formData = new FormData();
+      formData.append('debug_ttl_minutes', debugTtlMinutesSelect.value);
+      appendSettingsCsrfToken(formData);
+      PC.updateResource('settings/debug', formData).then(() => {
+        PC.showToast(SETTINGS_T.SETTINGS_JS_DEBUG_TTL_UPDATED, 'save', 3000, true);
+      }).catch(error => PW.error(error));
+    });
+  }
+
+  PC.addClickAndEnterListener('settings_show_keyboard_shortcuts_btn', (e) => {
+    e.preventDefault();
+    PC.openModal('modal_help', SETTINGS_T.KEYBOARD_SHORTCUTS || PC.config?.KEYBOARD_SHORTCUTS || 'Keyboard shortcuts');
+  });
 
   ['debug_console_enabled', 'debug_fine_grained_enabled', 'debug_network_enabled'].forEach((fieldName) => {
     PC.queryAll(`input[name="${fieldName}"]`).forEach((input) => {
@@ -2095,30 +2312,49 @@ document.addEventListener("DOMContentLoaded", async () => {
     checkbox.addEventListener('change', () => {
       const formData = new FormData();
       formData.append('calendar_work_entry_fields_hours', PC.query('input[name="calendar_work_entry_fields_hours"]')?.checked ? '1' : '0');
+      formData.append('calendar_work_entry_fields_regular', PC.query('input[name="calendar_work_entry_fields_regular"]')?.checked ? '1' : '0');
       formData.append('calendar_work_entry_fields_overtime', PC.query('input[name="calendar_work_entry_fields_overtime"]')?.checked ? '1' : '0');
       formData.append('calendar_work_entry_fields_living_out', PC.query('input[name="calendar_work_entry_fields_living_out"]')?.checked ? '1' : '0');
       formData.append('calendar_work_entry_fields_travel', PC.query('input[name="calendar_work_entry_fields_travel"]')?.checked ? '1' : '0');
-      
-      // Get CSRF token from the calendar form
-      let csrfToken = null;
-      const form = checkbox.closest('form');
-      if (form) {
-        const csrfInput = form.querySelector('input[name="csrf_token"]');
-        if (csrfInput) csrfToken = csrfInput.value;
-      }
-      // Fallback: try to find CSRF in the document
-      if (!csrfToken) {
-        const csrfFallback = document.querySelector('input[name="csrf_token"]');
-        if (csrfFallback) csrfToken = csrfFallback.value;
-      }
-      if (csrfToken) {
-        formData.append('csrf_token', csrfToken);
-      }
 
-      const submitPromise = PC.updateResource('settings/calendar', formData);
+      appendSettingsCsrfToken(formData);
 
-      submitPromise.then(() => {
+      PC.updateResource('settings/calendar', formData).then(() => {
         PC.showToast(SETTINGS_T.SETTINGS_JS_WORK_ENTRY_FIELDS_UPDATED, 'save');
+      }).catch(error => PW.error(error));
+    });
+  });
+
+  // Handle calendar display badge checkboxes
+  PC.queryAll('input[name="calendar_show_gross_badge"], input[name="calendar_show_net_badge"], input[name="calendar_show_deductions_badge"], input[name="calendar_highlight_pay_period"]').forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      const formData = new FormData();
+      formData.append('calendar_show_gross_badge', PC.query('input[name="calendar_show_gross_badge"]')?.checked ? '1' : '0');
+      formData.append('calendar_show_net_badge', PC.query('input[name="calendar_show_net_badge"]')?.checked ? '1' : '0');
+      formData.append('calendar_show_deductions_badge', PC.query('input[name="calendar_show_deductions_badge"]')?.checked ? '1' : '0');
+      formData.append('calendar_highlight_pay_period', PC.query('input[name="calendar_highlight_pay_period"]')?.checked ? '1' : '0');
+      appendSettingsCsrfToken(formData);
+
+      PC.updateResource('settings/calendar', formData).then(() => {
+        PC.showToast(SETTINGS_T.SETTINGS_JS_CALENDAR_DISPLAY_UPDATED, 'save');
+      }).catch(error => PW.error(error));
+    });
+  });
+
+  // Security reauth / export encryption preference checkboxes
+  PC.queryAll('input[name="require_reauth_export"], input[name="require_reauth_import"], input[name="export_encrypt_preference"]').forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      const formData = new FormData();
+      ['require_reauth_export', 'require_reauth_import', 'export_encrypt_preference'].forEach((fieldName) => {
+        const input = PC.query(`input[name="${fieldName}"]`);
+        if (input instanceof HTMLInputElement) {
+          formData.append(fieldName, input.checked ? '1' : '0');
+        }
+      });
+      appendSettingsCsrfToken(formData);
+
+      PC.updateResource('account/info', formData).then(() => {
+        PC.showToast(SETTINGS_T.SETTINGS_JS_SECURITY_PREF_UPDATED, 'save');
       }).catch(error => PW.error(error));
     });
   });
@@ -2146,7 +2382,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   PC.queryAll('input[name="audio_feedback"]').forEach(radioButton => {
     radioButton.addEventListener('change', () => {
       const previousAudioFeedback = PC.state.audio_feedback;
-      PC.state.audio_feedback = PC.query('input[name="audio_feedback"]:checked').value;
+      const checkedAudio = PC.query('input[name="audio_feedback"]:checked');
+      if (!(checkedAudio instanceof HTMLInputElement)) {
+        return;
+      }
+
+      PC.state.audio_feedback = checkedAudio.value;
       if (window.tts) {
         window.tts.audio_feedback = PC.state.audio_feedback;
       }
@@ -2161,20 +2402,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       const formData = new FormData();
       formData.append('audio_feedback', PC.state.audio_feedback);
-      const audioForm = PC.getElement('account_audio_form');
-      let csrfToken = null;
-      if (audioForm) {
-        const csrfInput = audioForm.querySelector('input[name="csrf_token"]');
-        if (csrfInput) csrfToken = csrfInput.value;
-      }
-      // Fallback: try to find CSRF in the document
-      if (!csrfToken) {
-        const csrfFallback = document.querySelector('input[name="csrf_token"]');
-        if (csrfFallback) csrfToken = csrfFallback.value;
-      }
-      if (csrfToken) {
-        formData.append('csrf_token', csrfToken);
-      }
+      appendSettingsCsrfToken(formData);
       PC.updateResource('settings/audio', formData).then(() => {
         const modeLabel = PC.state.audio_feedback === 'none'
           ? SETTINGS_T.SETTINGS_JS_AUDIO_MUTED
@@ -2212,22 +2440,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const formData = new FormData();
     formData.append('voice', voice);
-
-    // Add CSRF token
-    const audioForm = PC.getElement('account_audio_form');
-    let csrfToken = null;
-    if (audioForm) {
-      const csrfInput = audioForm.querySelector('input[name="csrf_token"]');
-      if (csrfInput) csrfToken = csrfInput.value;
-    }
-    // Fallback: try to find CSRF in the document
-    if (!csrfToken) {
-      const csrfFallback = document.querySelector('input[name="csrf_token"]');
-      if (csrfFallback) csrfToken = csrfFallback.value;
-    }
-    if (csrfToken) {
-      formData.append('csrf_token', csrfToken);
-    }
+    appendSettingsCsrfToken(formData);
 
     PC.updateResource('settings/audio', formData).then(() => {
       PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_VOICE_UPDATED_FMT, { voice: voiceLabel }), 'save', 3000, true);
@@ -2242,6 +2455,46 @@ document.addEventListener("DOMContentLoaded", async () => {
       saveVoiceSelection(radioButton);
     });
   });
+
+  const voiceVolumeSlider = PC.getElement('voice_volume');
+  const voiceVolumeOutput = PC.getElement('voice_volume_output');
+  const applyVoiceVolume = (percent) => {
+    const clamped = Math.max(0, Math.min(100, Number.parseInt(String(percent), 10) || 0));
+    if (window.TTS && typeof window.TTS.setVolume === 'function') {
+      window.TTS.setVolume(clamped / 100);
+    } else if (window.tts) {
+      window.tts.voice_volume = clamped / 100;
+    }
+    if (voiceVolumeOutput instanceof HTMLOutputElement) {
+      voiceVolumeOutput.textContent = `${clamped}%`;
+    }
+  };
+  const saveVoiceVolume = () => {
+    if (!(voiceVolumeSlider instanceof HTMLInputElement)) {
+      return;
+    }
+    const formData = new FormData();
+    formData.append('voice_volume', voiceVolumeSlider.value);
+    appendSettingsCsrfToken(formData);
+    PC.updateResource('settings/audio', formData).then(() => {
+      PC.showToast(SETTINGS_T.SETTINGS_JS_VOICE_VOLUME_UPDATED, 'save', 3000, true);
+    }).catch(error => PW.error(error));
+  };
+  if (voiceVolumeSlider instanceof HTMLInputElement) {
+    applyVoiceVolume(voiceVolumeSlider.value);
+    voiceVolumeSlider.addEventListener('input', () => applyVoiceVolume(voiceVolumeSlider.value));
+    voiceVolumeSlider.addEventListener('change', saveVoiceVolume);
+  }
+
+  const voicePreviewBtn = document.getElementById('settings_voice_preview_btn');
+  if (voicePreviewBtn instanceof HTMLButtonElement) {
+    voicePreviewBtn.addEventListener('click', () => {
+      if (PC.state.audio_feedback === 'none') {
+        return;
+      }
+      PC.textToSpeech(SETTINGS_T.SETTINGS_VOICE_PREVIEW_SAMPLE);
+    });
+  }
 
   /* STYLE */
   const themePicker = PC.getElement('theme_picker');
@@ -2272,6 +2525,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   lockChooseOption(themePicker);
   lockChooseOption(languagePicker);
 
+  const TEXT_SIZE_BASE_REM = 1.125;
+  const TEXT_SIZE_CLAMP_MIN_REM = 0.75;
+  const SPACING_SIZE_BASE_REM = 1;
+  const SPACING_SIZE_CLAMP_MIN_REM = 0.6;
+  const SLIDER_STEP_REM = 0.125;
+  const SLIDER_STEP_COUNT = 10;
+
   const clampSliderAdjustment = (value) => {
     const parsed = Number.parseInt(String(value), 10);
     if (!Number.isFinite(parsed)) {
@@ -2281,11 +2541,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     return Math.max(-5, Math.min(5, parsed));
   };
 
-  const toAdjustmentLabel = (value) => {
-    const normalized = clampSliderAdjustment(value);
-    const rem = normalized * 0.125;
-    return `${rem > 0 ? '+' : ''}${parseFloat(rem.toFixed(3))}rem`;
+  const getRootFontSizePx = () => {
+    const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+    return Number.isFinite(rootSize) && rootSize > 0 ? rootSize : 16;
   };
+
+  // Per-step display scale: 11 unique px labels; center = baseline. CSS still uses rem + clamp.
+  const toSliderStepDisplayPxLabel = (sliderValue, baseRem, clampMinRem) => {
+    const normalized = clampSliderAdjustment(sliderValue);
+    const rootPx = getRootFontSizePx();
+    const minPx = Math.round(clampMinRem * rootPx);
+    const baselinePx = Math.round(baseRem * rootPx);
+    const maxPx = (2 * baselinePx) - minPx;
+    const stepIndex = normalized + 5;
+    const px = Math.round(minPx + (stepIndex * (maxPx - minPx)) / SLIDER_STEP_COUNT);
+
+    return `${px}px`;
+  };
+
+  const toTextSizeLabel = (value) => toSliderStepDisplayPxLabel(value, TEXT_SIZE_BASE_REM, TEXT_SIZE_CLAMP_MIN_REM);
+
+  const toSpacingSizeLabel = (value) => toSliderStepDisplayPxLabel(value, SPACING_SIZE_BASE_REM, SPACING_SIZE_CLAMP_MIN_REM);
 
   const applyRootScaleAdjustment = (group, value) => {
     const root = document.documentElement;
@@ -2317,6 +2593,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   function submitStyleChange() {
+    if (!(themePicker instanceof HTMLSelectElement) || !(variantPicker instanceof HTMLSelectElement) || !(styleForm instanceof HTMLFormElement)) {
+      return;
+    }
+
     const theme = themePicker.value;
     const variant = variantPicker.value;
     if (theme !== 'choose' && variant) {
@@ -2325,8 +2605,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       formData.append('theme', theme);
       formData.append('variant', variant);
       // Add CSRF token
-      const csrf = styleForm.querySelector('input[name="csrf_token"]');
-      if (csrf) formData.append('csrf_token', csrf.value);
+      const csrfValue = getSettingsCsrfToken();
+      if (csrfValue !== '') formData.append('csrf_token', csrfValue);
       PC.updateResource('settings/style', formData).then(() => {
         PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_THEME_UPDATED_FMT, { theme, variant }), 'save', 3000, true);
         if (PC.state.audio_feedback === 'all') {
@@ -2337,8 +2617,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  themePicker.addEventListener('change', submitStyleChange);
-  variantPicker.addEventListener('change', submitStyleChange);
+  themePicker?.addEventListener('change', submitStyleChange);
+  variantPicker?.addEventListener('change', submitStyleChange);
   if (languagePicker instanceof HTMLSelectElement) {
     languagePicker.addEventListener('change', () => {
       const language = languagePicker.value;
@@ -2347,40 +2627,105 @@ document.addEventListener("DOMContentLoaded", async () => {
         const formData = new FormData();
         formData.append('language', language);
         // Add CSRF token
-        const csrf = document.querySelector('#account_style_form input[name="csrf_token"]');
-        if (csrf) formData.append('csrf_token', csrf.value);
+        const csrfValue = getSettingsCsrfToken();
+        if (csrfValue !== '') formData.append('csrf_token', csrfValue);
         PC.updateResource('settings/style', formData).then(() => {
           const langName = PC.getLanguageName(language);
           PC.showToast(SETTINGS_T.SETTINGS_JS_LANGUAGE_UPDATED, 'save', 3000, true);
           if (PC.state.audio_feedback === 'all') {
             PC.textToSpeech(langName);
           }
-          window.location.hash = '#preferences';
           PC.delay(1).then(() => { window.location.reload(); });
         }).catch(error => PW.error(error));
       }
     });
   }
-  const submitSliderPreference = (fieldName, sliderEl, valueEl, toastLabel) => {
+
+  const submitAccountLocaleField = (fieldName, fieldEl, toastMessage) => {
+    if (!(fieldEl instanceof HTMLSelectElement)) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append(fieldName, fieldEl.value);
+    const csrfValue = getSettingsCsrfToken();
+    if (csrfValue !== '') {
+      formData.append('csrf_token', csrfValue);
+    }
+
+    PC.updateResource('account/info', formData).then(() => {
+      PC.showToast(toastMessage, 'save', 3000, true);
+    }).catch(error => PW.error(error));
+  };
+
+  const accountTimezonePicker = PC.getElement('timezone_picker');
+  if (accountTimezonePicker instanceof HTMLSelectElement) {
+    accountTimezonePicker.addEventListener('change', () => {
+      submitAccountLocaleField('timezone', accountTimezonePicker, SETTINGS_T.SETTINGS_JS_TIMEZONE_UPDATED);
+    });
+  }
+
+  const currencyPicker = PC.getElement('currency_picker');
+  if (currencyPicker instanceof HTMLSelectElement) {
+    currencyPicker.addEventListener('change', () => {
+      submitAccountLocaleField('currency', currencyPicker, SETTINGS_T.SETTINGS_JS_CURRENCY_UPDATED);
+    });
+  }
+
+  const submitAccountWorkDefaultField = (fieldName, controlEl, toastMessage) => {
+    if (!(controlEl instanceof HTMLElement)) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append(fieldName, controlEl instanceof HTMLInputElement || controlEl instanceof HTMLSelectElement ? controlEl.value : '');
+    const csrfValue = getSettingsCsrfToken();
+    if (csrfValue !== '') {
+      formData.append('csrf_token', csrfValue);
+    }
+
+    PC.updateResource('account/info', formData).then(() => {
+      PC.showToast(toastMessage, 'save', 3000, true);
+    }).catch(error => PW.error(error));
+  };
+
+  const defaultSitePicker = PC.getElement('default_site_id');
+  if (defaultSitePicker instanceof HTMLSelectElement) {
+    defaultSitePicker.addEventListener('change', () => {
+      submitAccountWorkDefaultField('default_site_id', defaultSitePicker, SETTINGS_T.SETTINGS_JS_WORK_DEFAULTS_UPDATED);
+    });
+  }
+
+  ['default_hours', 'default_living_out_allowance', 'default_travel_hours'].forEach((fieldId) => {
+    const fieldEl = PC.getElement(fieldId);
+    if (fieldEl instanceof HTMLInputElement) {
+      fieldEl.addEventListener('change', () => {
+        submitAccountWorkDefaultField(fieldId, fieldEl, SETTINGS_T.SETTINGS_JS_WORK_DEFAULTS_UPDATED);
+      });
+    }
+  });
+
+  const submitSliderPreference = (fieldName, sliderEl, valueEl, toastLabel, toSizeLabel) => {
     if (!(sliderEl instanceof HTMLInputElement)) {
       return;
     }
 
     const normalized = String(clampSliderAdjustment(sliderEl.value));
+    const sizeLabel = toSizeLabel(sliderEl.value);
     if (valueEl) {
-      valueEl.textContent = toAdjustmentLabel(normalized);
+      valueEl.textContent = sizeLabel;
     }
 
     applyRootScaleAdjustment(fieldName, normalized);
 
     const formData = new FormData();
     formData.append(fieldName, normalized);
-    const csrf = document.querySelector('#account_style_form input[name="csrf_token"]');
-    if (csrf) formData.append('csrf_token', csrf.value);
+    const csrfValue = getSettingsCsrfToken();
+    if (csrfValue !== '') formData.append('csrf_token', csrfValue);
     PC.updateResource('settings/style', formData).then(() => {
       PC.showToast(`${toastLabel} updated`, 'save', 3000, true);
       if (PC.state.audio_feedback === 'all') {
-        PC.textToSpeech(toAdjustmentLabel(normalized));
+        PC.textToSpeech(sizeLabel);
       }
     }).catch(error=> PW.error(error));
   };
@@ -2388,38 +2733,103 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (textSlider instanceof HTMLInputElement) {
     textSlider.addEventListener('input', () => {
       if (textSliderValue) {
-        textSliderValue.textContent = toAdjustmentLabel(textSlider.value);
+        textSliderValue.textContent = toTextSizeLabel(textSlider.value);
       }
       applyRootScaleAdjustment('text', textSlider.value);
     });
 
     textSlider.addEventListener('change', () => {
-      submitSliderPreference('text', textSlider, textSliderValue, 'Text size');
+      submitSliderPreference('text', textSlider, textSliderValue, 'Text size', toTextSizeLabel);
     });
 
     applyRootScaleAdjustment('text', textSlider.value);
     if (textSliderValue) {
-      textSliderValue.textContent = toAdjustmentLabel(textSlider.value);
+      textSliderValue.textContent = toTextSizeLabel(textSlider.value);
     }
   }
 
   if (spacingSlider instanceof HTMLInputElement) {
     spacingSlider.addEventListener('input', () => {
       if (spacingSliderValue) {
-        spacingSliderValue.textContent = toAdjustmentLabel(spacingSlider.value);
+        spacingSliderValue.textContent = toSpacingSizeLabel(spacingSlider.value);
       }
       applyRootScaleAdjustment('spacing', spacingSlider.value);
     });
 
     spacingSlider.addEventListener('change', () => {
-      submitSliderPreference('spacing', spacingSlider, spacingSliderValue, 'Spacing');
+      submitSliderPreference('spacing', spacingSlider, spacingSliderValue, 'Spacing', toSpacingSizeLabel);
     });
 
     applyRootScaleAdjustment('spacing', spacingSlider.value);
     if (spacingSliderValue) {
-      spacingSliderValue.textContent = toAdjustmentLabel(spacingSlider.value);
+      spacingSliderValue.textContent = toSpacingSizeLabel(spacingSlider.value);
     }
   }
+
+  const densityPresetMap = {
+    density_preset_compact: { text: '-2', spacing: '-5', labelKey: 'compact' },
+    density_preset_comfortable: { text: '0', spacing: '0', labelKey: 'comfortable' },
+    density_preset_spacious: { text: '2', spacing: '5', labelKey: 'spacious' },
+  };
+
+  Object.entries(densityPresetMap).forEach(([elementId, preset]) => {
+    const presetInput = document.getElementById(elementId);
+    if (!(presetInput instanceof HTMLInputElement)) {
+      return;
+    }
+
+    presetInput.addEventListener('change', () => {
+      if (!presetInput.checked) {
+        return;
+      }
+
+      if (textSlider instanceof HTMLInputElement) {
+        textSlider.value = preset.text;
+        applyRootScaleAdjustment('text', preset.text);
+        if (textSliderValue) {
+          textSliderValue.textContent = toTextSizeLabel(preset.text);
+        }
+      }
+
+      if (spacingSlider instanceof HTMLInputElement) {
+        spacingSlider.value = preset.spacing;
+        applyRootScaleAdjustment('spacing', preset.spacing);
+        if (spacingSliderValue) {
+          spacingSliderValue.textContent = toSpacingSizeLabel(preset.spacing);
+        }
+      }
+
+      const formData = new FormData();
+      formData.append('text', preset.text);
+      formData.append('spacing', preset.spacing);
+      appendSettingsCsrfToken(formData);
+
+      const spokenLabel = document.querySelector(`label[for="${elementId}"]`)?.textContent?.trim() || preset.labelKey;
+      PC.updateResource('settings/style', formData).then(() => {
+        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_DENSITY_UPDATED_FMT, { label: spokenLabel }), 'save', 3000, true);
+        if (PC.state.audio_feedback === 'all') {
+          PC.textToSpeech(spokenLabel);
+        }
+      }).catch(error => PW.error(error));
+    });
+  });
+
+  const accentPresetSelect = document.getElementById('accent_preset');
+  if (accentPresetSelect instanceof HTMLSelectElement) {
+    accentPresetSelect.addEventListener('change', () => {
+      const preset = accentPresetSelect.value;
+      const formData = new FormData();
+      formData.append('accent_preset', preset);
+      appendSettingsCsrfToken(formData);
+
+      PC.updateResource('settings/style', formData).then(() => {
+        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_ACCENT_UPDATED_FMT, { preset }), 'save', 3000, true);
+        document.documentElement.setAttribute('data-accent-preset', preset);
+        refreshCoreStylesheet();
+      }).catch(error => PW.error(error));
+    });
+  }
+
   Array.from(PC.queryAll('input[name="dyslexia_typography"]')).forEach(radioButton => {
     radioButton.addEventListener('change', function() {
       const preference = PC.query('input[name="dyslexia_typography"]:checked').value;
@@ -2428,8 +2838,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const spokenLabel = label ? label.textContent.trim() : preference;
       const formData = new FormData();
       formData.append('dyslexia_typography', preference);
-      const csrf = document.querySelector('#account_style_form input[name="csrf_token"]');
-      if (csrf) formData.append('csrf_token', csrf.value);
+      const csrfValue = getSettingsCsrfToken();
+      if (csrfValue !== '') formData.append('csrf_token', csrfValue);
       PC.updateResource('settings/style', formData).then(() => {
         PC.showToast(SETTINGS_T.SETTINGS_JS_TYPOGRAPHY_UPDATED, 'save', 3000, true);
         if (PC.state.audio_feedback === 'all') {
@@ -2461,8 +2871,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const timeoutSeconds = helpPopupTimeoutSlider.value;
       const formData = new FormData();
       formData.append('help_popup_timeout_seconds', timeoutSeconds);
-      const csrf = document.querySelector('#account_style_form input[name="csrf_token"]');
-      if (csrf) formData.append('csrf_token', csrf.value);
+      const csrfValue = getSettingsCsrfToken();
+      if (csrfValue !== '') formData.append('csrf_token', csrfValue);
       PC.updateResource('settings/style', formData).then(() => {
         PC.config.help_popup_timeout_seconds = Number(timeoutSeconds) || 0;
         PC.showToast(SETTINGS_T.SETTINGS_JS_HELP_POPUP_TIMEOUT_UPDATED, 'save', 3000, true);
@@ -2472,6 +2882,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       }).catch(error => PW.error(error));
     });
   }
+
+  const submitStylePreference = (fields, onSuccess) => {
+    const formData = new FormData();
+    Object.entries(fields).forEach(([key, value]) => {
+      formData.append(key, String(value));
+    });
+    const csrfValue = getSettingsCsrfToken();
+    if (csrfValue !== '') {
+      formData.append('csrf_token', csrfValue);
+    }
+
+    return PC.updateResource('settings/style', formData).then(() => {
+      if (typeof onSuccess === 'function') {
+        onSuccess();
+      }
+    }).catch(error => PW.error(error));
+  };
+
+  const applyToastRuntimePreferences = ({ position, fontSize } = {}) => {
+    if (typeof position === 'string' && position !== '') {
+      document.body.setAttribute('data-toast-position', position);
+      PC.config.toast_position = position;
+    }
+    if (Number.isFinite(Number(fontSize))) {
+      const normalized = clampSliderAdjustment(fontSize);
+      document.body.setAttribute('data-toast-font-size', String(normalized));
+      PC.config.toast_font_size = normalized;
+    }
+  };
 
   const submitNavPositionPreference = (fieldName, attributeName, statusLabel) => {
     const checked = PC.query(`input[name="${fieldName}"]:checked`);
@@ -2483,10 +2922,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const formData = new FormData();
     formData.append(fieldName, value);
 
-    const styleForm = PC.getElement('account_style_form');
-    const csrfInput = styleForm ? styleForm.querySelector('input[name="csrf_token"]') : null;
-    if (csrfInput) {
-      formData.append('csrf_token', csrfInput.value);
+    const csrfInput = styleForm instanceof HTMLFormElement
+      ? styleForm.querySelector('input[name="csrf_token"]')
+      : null;
+    const csrfValue = csrfInput instanceof HTMLInputElement && csrfInput.value !== ''
+      ? csrfInput.value
+      : getSettingsCsrfToken();
+    if (csrfValue !== '') {
+      formData.append('csrf_token', csrfValue);
     }
 
     PC.updateResource('settings/style', formData).then(() => {
@@ -2504,30 +2947,68 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  /* Sidebar proximity hover toggle (localStorage only, no server round-trip) */
+  const sidebarForm = PC.getElement('account_sidebar_form');
+  const getSidebarCsrfToken = () => {
+    const csrfInput = sidebarForm instanceof HTMLFormElement
+      ? sidebarForm.querySelector('input[name="csrf_token"]')
+      : null;
+    return csrfInput instanceof HTMLInputElement && csrfInput.value !== ''
+      ? csrfInput.value
+      : getSettingsCsrfToken();
+  };
+
+  const submitSidebarPreference = (fields, toastMessage, runtimeApply) => {
+    const formData = new FormData();
+    Object.entries(fields).forEach(([key, value]) => {
+      formData.append(key, String(value));
+    });
+    const csrfValue = getSidebarCsrfToken();
+    if (csrfValue !== '') {
+      formData.append('csrf_token', csrfValue);
+    }
+
+    PC.updateResource('settings/style', formData).then(() => {
+      if (typeof runtimeApply === 'function') {
+        runtimeApply();
+      }
+      Object.entries(fields).forEach(([key, value]) => {
+        if (Object.prototype.hasOwnProperty.call(PC.config, key)) {
+          PC.config[key] = value;
+        }
+      });
+      PC.showToast(toastMessage, 'save', 3000, true);
+    }).catch(error => PW.error(error));
+  };
+
+  /* Sidebar proximity hover toggle (server persisted) */
   (() => {
     const navToggle = (typeof window !== 'undefined' && window.NavToggle) ? window.NavToggle : null;
     const onRadio  = PC.query('#nav_proximity_on');
     const offRadio = PC.query('#nav_proximity_off');
+    const distanceSlider = PC.query('#nav_proximity_px');
     if (!onRadio || !offRadio) return;
 
-    // Initialise from current NavToggle state (which reflects localStorage).
-    const proximityOn = navToggle ? navToggle.isProximityEnabled() : true;
-    (proximityOn ? onRadio : offRadio).checked = true;
+    const syncProximityDistanceEnabled = (enabled) => {
+      if (distanceSlider instanceof HTMLInputElement) {
+        distanceSlider.disabled = !enabled;
+      }
+    };
+
+    syncProximityDistanceEnabled(onRadio.checked);
 
     [onRadio, offRadio].forEach(radio => {
       radio.addEventListener('change', () => {
         const enabled = onRadio.checked;
-        if (navToggle) navToggle.setProximityEnabled(enabled);
-        // Disable the distance slider when proximity is off.
-        const slider = PC.query('#nav_proximity_px');
-        if (slider) slider.disabled = !enabled;
-        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_PROXIMITY_FMT, { state: enabled ? SETTINGS_T.SETTINGS_JS_TOGGLE_ON : SETTINGS_T.SETTINGS_JS_TOGGLE_OFF }), 'save', 3000, true);
+        const value = enabled ? 'on' : 'off';
+        submitSidebarPreference({ nav_proximity: value }, formatSettingsMessage(SETTINGS_T.SETTINGS_JS_PROXIMITY_FMT, { state: enabled ? SETTINGS_T.SETTINGS_JS_TOGGLE_ON : SETTINGS_T.SETTINGS_JS_TOGGLE_OFF }), () => {
+          if (navToggle) navToggle.setProximityEnabled(enabled);
+          syncProximityDistanceEnabled(enabled);
+        });
       });
     });
   })();
 
-  /* Sidebar proximity trigger-distance slider (localStorage only) */
+  /* Sidebar proximity trigger-distance slider (server persisted) */
   (() => {
     const navToggle = (typeof window !== 'undefined' && window.NavToggle) ? window.NavToggle : null;
     const slider   = PC.query('#nav_proximity_px');
@@ -2535,21 +3016,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     const onRadio  = PC.query('#nav_proximity_on');
     if (!slider || !output) return;
 
-    const currentPx = navToggle ? navToggle.getProximityPx() : 200;
-    slider.value = currentPx;
-    output.value = currentPx + ' px';
-
-    // Disable slider if proximity is currently off.
-    if (slider && onRadio && !onRadio.checked) slider.disabled = true;
-
     slider.addEventListener('input', () => {
-      const px = parseInt(slider.value, 10);
-      output.value = px + ' px';
+      const px = parseInt(slider.value, 10) || 0;
+      output.value = `${px} px`;
       if (navToggle) navToggle.setProximityPx(px);
     });
+
+    slider.addEventListener('change', () => {
+      const px = parseInt(slider.value, 10) || 0;
+      submitSidebarPreference({ nav_proximity_px: px }, SETTINGS_T.SETTINGS_JS_NAV_DISTANCE_UPDATED, () => {
+        if (navToggle) navToggle.setProximityPx(px);
+      });
+    });
+
+    if (slider instanceof HTMLInputElement && onRadio instanceof HTMLInputElement && !onRadio.checked) {
+      slider.disabled = true;
+    }
   })();
 
-  /* Sidebar overlay-vs-push toggle (localStorage only, no server round-trip) */
+  /* Sidebar overlay-vs-push toggle (server persisted) */
   (() => {
     const navToggle      = (typeof window !== 'undefined' && window.NavToggle) ? window.NavToggle : null;
     const pushRadio      = PC.query('#nav_overlay_push');
@@ -2563,17 +3048,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     };
 
-    // Initialise from current NavToggle state (which reflects localStorage).
-    const overlayOn = navToggle ? navToggle.isOverlayMode() : false;
-    (overlayOn ? overlayRadio : pushRadio).checked = true;
-    syncOverlayCollapseEnabled(overlayOn);
+    syncOverlayCollapseEnabled(overlayRadio.checked);
 
     [pushRadio, overlayRadio].forEach(radio => {
       radio.addEventListener('change', () => {
         const overlay = overlayRadio.checked;
-        if (navToggle) navToggle.setOverlayMode(overlay);
-        syncOverlayCollapseEnabled(overlay);
-        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_OVERLAY_FMT, { state: overlay ? SETTINGS_T.SETTINGS_JS_TOGGLE_ON : SETTINGS_T.SETTINGS_JS_TOGGLE_OFF }), 'save', 3000, true);
+        const value = overlay ? 'overlay' : 'push';
+        submitSidebarPreference({ nav_overlay: value }, formatSettingsMessage(SETTINGS_T.SETTINGS_JS_OVERLAY_FMT, { state: overlay ? SETTINGS_T.SETTINGS_JS_TOGGLE_ON : SETTINGS_T.SETTINGS_JS_TOGGLE_OFF }), () => {
+          if (navToggle) navToggle.setOverlayMode(overlay);
+          syncOverlayCollapseEnabled(overlay);
+        });
       });
     });
   })();
@@ -2599,19 +3083,54 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     overlaySidebarTimeoutSlider.addEventListener('change', () => {
       const timeoutSeconds = overlaySidebarTimeoutSlider.value;
-      const formData = new FormData();
-      formData.append('overlay_sidebar_timeout_seconds', timeoutSeconds);
-      const csrf = document.querySelector('#account_style_form input[name="csrf_token"]');
-      if (csrf) formData.append('csrf_token', csrf.value);
-      PC.updateResource('settings/style', formData).then(() => {
+      submitSidebarPreference({ overlay_sidebar_timeout_seconds: timeoutSeconds }, SETTINGS_T.SETTINGS_JS_OVERLAY_COLLAPSE_UPDATED, () => {
         const numericTimeout = Number(timeoutSeconds) || 0;
         PC.config.overlay_sidebar_timeout_seconds = numericTimeout;
         if (navToggle) navToggle.setOverlaySidebarTimeout(numericTimeout);
-        PC.showToast(SETTINGS_T.SETTINGS_JS_OVERLAY_COLLAPSE_UPDATED, 'save', 3000, true);
+      });
+      if (PC.state.audio_feedback === 'all') {
+        PC.textToSpeech(formatOverlaySidebarTimeoutLabel(timeoutSeconds));
+      }
+    });
+  }
+
+  Array.from(PC.queryAll('input[name="toast_position"]')).forEach(radioButton => {
+    radioButton.addEventListener('change', () => {
+      const checked = PC.query('input[name="toast_position"]:checked');
+      if (!(checked instanceof HTMLInputElement)) {
+        return;
+      }
+      submitStylePreference({ toast_position: checked.value }, () => {
+        applyToastRuntimePreferences({ position: checked.value });
+        PC.showToast(SETTINGS_T.SETTINGS_JS_TOAST_POSITION_UPDATED, 'save', 3000, true);
+      });
+    });
+  });
+
+  const toastFontSizeSlider = PC.getElement('toast_font_size');
+  const toastFontSizeOutput = PC.getElement('toast_font_size_output');
+
+  if (toastFontSizeSlider instanceof HTMLInputElement) {
+    const updateToastFontSizeDisplay = () => {
+      const normalized = clampSliderAdjustment(toastFontSizeSlider.value);
+      if (toastFontSizeOutput) {
+        toastFontSizeOutput.value = toTextSizeLabel(normalized);
+      }
+      toastFontSizeSlider.setAttribute('aria-valuenow', String(normalized));
+      applyToastRuntimePreferences({ fontSize: normalized });
+    };
+
+    updateToastFontSizeDisplay();
+    toastFontSizeSlider.addEventListener('input', updateToastFontSizeDisplay);
+    toastFontSizeSlider.addEventListener('change', () => {
+      const fontSize = clampSliderAdjustment(toastFontSizeSlider.value);
+      submitStylePreference({ toast_font_size: fontSize }, () => {
+        applyToastRuntimePreferences({ fontSize });
+        PC.showToast(SETTINGS_T.SETTINGS_JS_TOAST_SIZE_UPDATED, 'save', 3000, true);
         if (PC.state.audio_feedback === 'all') {
-          PC.textToSpeech(formatOverlaySidebarTimeoutLabel(timeoutSeconds));
+          PC.textToSpeech(toTextSizeLabel(fontSize));
         }
-      }).catch(error => PW.error(error));
+      });
     });
   }
 
@@ -3283,8 +3802,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     setDataPortabilityStatus('Export started. Requesting account dataset from server.', 'muted');
     appendDataPortabilityLog('Export started', 'POST /api/v1/account/data/export');
 
+    const exportSectionPairs = [
+      ['export_section_user', PC.query('#export_section_user')?.checked === false ? '0' : '1'],
+      ['export_section_sites', PC.query('#export_section_sites')?.checked === false ? '0' : '1'],
+      ['export_section_work', PC.query('#export_section_work')?.checked === false ? '0' : '1'],
+    ];
+
     try {
-      const { response, data, raw } = await postDataPortabilityForm('/api/v1/account/data/export');
+      const { response, data, raw } = await postDataPortabilityForm('/api/v1/account/data/export', exportSectionPairs);
       if (!response.ok || !data || data.status !== 'success') {
         const message = data?.message || raw || `Export request failed with HTTP ${response.status}.`;
         setDataPortabilityStatus(message, 'error');
@@ -3301,7 +3826,30 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      const payloadJson = JSON.stringify(payload, null, 2);
+      let payloadJson = JSON.stringify(payload, null, 2);
+      const exportEncryptPreferenceEl = document.getElementById('export_encrypt_preference');
+      const shouldClientEncrypt = exportEncryptPreferenceEl instanceof HTMLInputElement && exportEncryptPreferenceEl.checked;
+
+      if (shouldClientEncrypt) {
+        const passphrase = promptForExportPassphrase();
+        if (passphrase === null) {
+          setDataPortabilityStatus('Export encryption cancelled. Plaintext payload was not written.', 'info');
+          appendDataPortabilityLog('Export encryption cancelled', 'User cancelled passphrase entry.');
+          return;
+        }
+
+        try {
+          payloadJson = await encryptExportPayloadWithPassphrase(payloadJson, passphrase);
+          appendDataPortabilityLog('Export encrypted', 'Payload encrypted locally with AES-GCM.');
+        } catch (error) {
+          const message = SETTINGS_T.SETTINGS_JS_EXPORT_ENCRYPT_FAILED;
+          setDataPortabilityStatus(message, 'error');
+          appendDataPortabilityLog('Export encryption failed', String(error?.message || 'unknown error'));
+          PW.error(error);
+          return;
+        }
+      }
+
       if (dataPortabilityEls.exportPayload) {
         dataPortabilityEls.exportPayload.value = payloadJson;
       }
@@ -3319,13 +3867,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const exportWarning = String(normalized.warning || '').trim();
-      if (exportWarning) {
+      if (shouldClientEncrypt) {
+        setDataPortabilityStatus(SETTINGS_T.SETTINGS_JS_EXPORT_ENCRYPTED_SUCCESS, 'success');
+        appendDataPortabilityLog('Export completed', `Reference ${String(normalized.reference || '-')}; encrypted payload ready.`);
+      } else if (exportWarning) {
         setDataPortabilityStatus(`Export completed. ${exportWarning}`, 'info');
         appendDataPortabilityLog('Export warning', exportWarning);
       } else {
         setDataPortabilityStatus('Export completed. Payload is ready to copy, download, or import.', 'success');
       }
-      appendDataPortabilityLog('Export completed', `Reference ${String(normalized.reference || '-')}; ${summarizeCounts(normalized.counts)}`);
+      if (!shouldClientEncrypt) {
+        appendDataPortabilityLog('Export completed', `Reference ${String(normalized.reference || '-')}; ${summarizeCounts(normalized.counts)}`);
+      }
+
+      loadExportHistory();
     } catch (error) {
       const message = `Export request failed: ${String(error?.message || 'unknown error')}`;
       setDataPortabilityStatus(message, 'error');
@@ -3580,10 +4135,243 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   updateDataPortabilityButtons();
 
-  await initializeBillingSection({
-    successUrl: '/api/v1/billing/checkout-return',
-    cancelUrl: '/profile/?billing=cancel',
-    returnUrl: '/profile/#panel-billing',
+  const formatSessionTimestamp = (rawValue) => {
+    const numeric = Number.parseInt(String(rawValue || ''), 10);
+    if (!Number.isFinite(numeric) || numeric <= 0) {
+      return '-';
+    }
+
+    return new Date(numeric * 1000).toLocaleString();
+  };
+
+  const renderAccountSessions = (sessions) => {
+    const listEl = document.getElementById('settings_sessions_list');
+    const statusEl = document.getElementById('settings_sessions_status');
+    if (!(listEl instanceof HTMLElement)) {
+      return;
+    }
+
+    listEl.textContent = '';
+    const rows = Array.isArray(sessions) ? sessions : [];
+
+    if (rows.length === 0) {
+      const emptyItem = document.createElement('li');
+      emptyItem.textContent = SETTINGS_T.SETTINGS_JS_SESSIONS_NONE;
+      listEl.appendChild(emptyItem);
+      if (statusEl instanceof HTMLElement) {
+        statusEl.textContent = SETTINGS_T.SETTINGS_JS_SESSIONS_NONE;
+      }
+      return;
+    }
+
+    rows.forEach((session) => {
+      const item = document.createElement('li');
+      const agent = String(session?.user_agent || 'Unknown device');
+      const lastActivity = formatSessionTimestamp(session?.last_activity);
+      const currentSuffix = session?.is_current ? ' (current)' : '';
+      item.textContent = `${agent}${currentSuffix} — last active ${lastActivity}`;
+      listEl.appendChild(item);
+    });
+
+    if (statusEl instanceof HTMLElement) {
+      statusEl.textContent = formatSettingsMessage(SETTINGS_T.SETTINGS_JS_SESSIONS_LOADED_COUNT_FMT, { count: rows.length });
+    }
+  };
+
+  const loadAccountSessions = async () => {
+    const listEl = document.getElementById('settings_sessions_list');
+    if (!(listEl instanceof HTMLElement)) {
+      return;
+    }
+
+    const statusEl = document.getElementById('settings_sessions_status');
+    if (statusEl instanceof HTMLElement) {
+      statusEl.textContent = SETTINGS_T.SETTINGS_JS_SESSIONS_LOADING;
+    }
+
+    try {
+      const { response, data, raw } = await postDataPortabilityForm('/api/v1/account/sessions/list');
+      if (!response.ok || !data || data.status !== 'success') {
+        throw new Error(data?.message || raw || SETTINGS_T.SETTINGS_JS_SESSIONS_LOAD_FAILED);
+      }
+
+      const normalized = normalizeApiData(data);
+      renderAccountSessions(normalized.sessions || []);
+    } catch (error) {
+      if (statusEl instanceof HTMLElement) {
+        statusEl.textContent = SETTINGS_T.SETTINGS_JS_SESSIONS_LOAD_FAILED;
+      }
+      listEl.textContent = '';
+      const errorItem = document.createElement('li');
+      errorItem.textContent = SETTINGS_T.SETTINGS_JS_SESSIONS_LOAD_FAILED;
+      listEl.appendChild(errorItem);
+      PW.error(error);
+    }
+  };
+
+  const revokeOtherAccountSessions = async () => {
+    const statusEl = document.getElementById('settings_sessions_status');
+    const revokeBtn = document.getElementById('settings_revoke_other_sessions_btn');
+    if (revokeBtn instanceof HTMLButtonElement) {
+      revokeBtn.disabled = true;
+      revokeBtn.setAttribute('aria-disabled', 'true');
+    }
+
+    try {
+      const { response, data, raw } = await postDataPortabilityForm('/api/v1/account/sessions/revoke_others');
+      if (!response.ok || !data || data.status !== 'success') {
+        throw new Error(data?.message || raw || SETTINGS_T.SETTINGS_JS_SESSIONS_REVOKE_FAILED);
+      }
+
+      const normalized = normalizeApiData(data);
+      const revoked = Number(normalized.revoked || 0);
+      if (statusEl instanceof HTMLElement) {
+        statusEl.textContent = formatSettingsMessage(SETTINGS_T.SETTINGS_JS_SESSIONS_REVOKED_FMT, { count: revoked });
+      }
+      await loadAccountSessions();
+    } catch (error) {
+      if (statusEl instanceof HTMLElement) {
+        statusEl.textContent = SETTINGS_T.SETTINGS_JS_SESSIONS_REVOKE_FAILED;
+      }
+      PW.error(error);
+    } finally {
+      if (revokeBtn instanceof HTMLButtonElement) {
+        revokeBtn.disabled = false;
+        revokeBtn.setAttribute('aria-disabled', 'false');
+      }
+    }
+  };
+
+  const renderExportHistory = (history) => {
+    const listEl = document.getElementById('settings_export_history_list');
+    if (!(listEl instanceof HTMLElement)) {
+      return;
+    }
+
+    listEl.textContent = '';
+    const rows = Array.isArray(history) ? history : [];
+
+    if (rows.length === 0) {
+      const emptyItem = document.createElement('li');
+      emptyItem.textContent = SETTINGS_T.SETTINGS_JS_EXPORT_HISTORY_NONE;
+      listEl.appendChild(emptyItem);
+      return;
+    }
+
+    rows.forEach((entry) => {
+      const item = document.createElement('li');
+      const reference = String(entry?.reference || '-');
+      const exportedAt = String(entry?.exported_at || '-');
+      const siteCount = Number(entry?.counts?.sites || 0);
+      const workCount = Number(entry?.counts?.work_entries || 0);
+      item.textContent = `${reference} — ${exportedAt} (${siteCount} sites, ${workCount} work entries)`;
+      listEl.appendChild(item);
+    });
+  };
+
+  const loadExportHistory = async () => {
+    const listEl = document.getElementById('settings_export_history_list');
+    if (!(listEl instanceof HTMLElement)) {
+      return;
+    }
+
+    try {
+      const { response, data, raw } = await postDataPortabilityForm('/api/v1/account/export/history');
+      if (!response.ok || !data || data.status !== 'success') {
+        throw new Error(data?.message || raw || SETTINGS_T.SETTINGS_JS_EXPORT_HISTORY_LOAD_FAILED);
+      }
+
+      const normalized = normalizeApiData(data);
+      renderExportHistory(normalized.history || []);
+    } catch (error) {
+      listEl.textContent = '';
+      const errorItem = document.createElement('li');
+      errorItem.textContent = SETTINGS_T.SETTINGS_JS_EXPORT_HISTORY_LOAD_FAILED;
+      listEl.appendChild(errorItem);
+      PW.error(error);
+    }
+  };
+
+  if (document.getElementById('settings_sessions_list')) {
+    loadAccountSessions();
+  }
+  if (document.getElementById('settings_export_history_list')) {
+    loadExportHistory();
+  }
+
+  const revokeOtherSessionsBtn = document.getElementById('settings_revoke_other_sessions_btn');
+  if (revokeOtherSessionsBtn instanceof HTMLButtonElement) {
+    revokeOtherSessionsBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      revokeOtherAccountSessions();
+    });
+  }
+
+  const copySupportInfoBtn = document.getElementById('settings_copy_support_info_btn');
+  const copySupportInfoStatus = document.getElementById('settings_copy_support_info_status');
+  if (copySupportInfoBtn instanceof HTMLButtonElement) {
+    copySupportInfoBtn.addEventListener('click', async () => {
+      const payload = [
+        SETTINGS_T.SETTINGS_JS_SUPPORT_INFO_LABEL,
+        `URL: ${window.location.href}`,
+        `User agent: ${navigator.userAgent}`,
+        `Language: ${navigator.language || 'unknown'}`,
+        `Viewport: ${window.innerWidth}x${window.innerHeight}`,
+        `Time: ${new Date().toISOString()}`,
+      ].join('\n');
+
+      try {
+        await navigator.clipboard.writeText(payload);
+        if (copySupportInfoStatus instanceof HTMLElement) {
+          copySupportInfoStatus.textContent = SETTINGS_T.SETTINGS_JS_SUPPORT_INFO_COPIED;
+        }
+        PC.showToast(SETTINGS_T.SETTINGS_JS_SUPPORT_INFO_COPIED, 'save', 3000, true);
+      } catch (error) {
+        if (copySupportInfoStatus instanceof HTMLElement) {
+          copySupportInfoStatus.textContent = SETTINGS_T.SETTINGS_JS_SUPPORT_INFO_COPY_FAILED;
+        }
+        PW.error(error);
+      }
+    });
+  }
+
+  const exportDebugBundleBtn = document.getElementById('settings_export_debug_bundle_btn');
+  const exportDebugBundleStatus = document.getElementById('settings_export_debug_bundle_status');
+  if (exportDebugBundleBtn instanceof HTMLButtonElement) {
+    exportDebugBundleBtn.addEventListener('click', async () => {
+      let bundleText = '';
+      try {
+        if (window.PW && typeof window.PW.exportErrorData === 'function') {
+          bundleText = JSON.stringify(window.PW.exportErrorData(), null, 2);
+        } else {
+          bundleText = JSON.stringify({
+            timestamp: new Date().toISOString(),
+            url: window.location.href,
+            userAgent: navigator.userAgent,
+          }, null, 2);
+        }
+        await navigator.clipboard.writeText(bundleText);
+        if (exportDebugBundleStatus instanceof HTMLElement) {
+          exportDebugBundleStatus.textContent = SETTINGS_T.SETTINGS_JS_DIAGNOSTICS_BUNDLE_COPIED;
+        }
+        PC.showToast(SETTINGS_T.SETTINGS_JS_DIAGNOSTICS_BUNDLE_COPIED, 'save', 3000, true);
+      } catch (error) {
+        if (exportDebugBundleStatus instanceof HTMLElement) {
+          exportDebugBundleStatus.textContent = SETTINGS_T.SETTINGS_JS_DIAGNOSTICS_BUNDLE_FAILED;
+        }
+        PW.error(error);
+      }
+    });
+  }
+
+  const settingsWorkspace = document.getElementById('settings-workspace');
+  const isAccountSubpage = settingsWorkspace instanceof HTMLElement && settingsWorkspace.dataset.settingsSubpage === 'account';
+  const hasBillingPanel = document.getElementById('panel-billing') instanceof HTMLElement;
+  if (!(isAccountSubpage && hasBillingPanel)) {
+    await initializeBillingSection({
+      successUrl: '/api/v1/billing/checkout-return',
+      cancelUrl: '/settings/account/?billing=cancel',
+      returnUrl: '/settings/account/#panel-billing',
     messages: {
       success: SETTINGS_T.BILLING_JS_PREMIUM_ACTIVE,
       cancel: SETTINGS_T.BILLING_JS_PREMIUM_DISABLED,
@@ -3592,5 +4380,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       downgradeHelpScheduled: SETTINGS_T.BILLING_JS_DOWNGRADE_HELP_SCHEDULED,
       downgradeHelpDefault: SETTINGS_T.BILLING_JS_DOWNGRADE_HELP_DEFAULT,
     },
-  });
+    });
+  }
 });

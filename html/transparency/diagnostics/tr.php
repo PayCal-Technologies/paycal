@@ -54,7 +54,7 @@ require_once HTML.'/header.php';
       </p>
       <p>
         Bir sorunla karşılaşırsanız ve destekle daha fazla bağlam paylaşmak isterseniz,
-        <a href="/settings/">Ayarlar → Hata Ayıklama (İsteğe Bağlı)</a> bölümünde
+        <a href="/settings/diagnostics/">Ayarlar → Hata Ayıklama (İsteğe Bağlı)</a> bölümünde
         ek tanılamayı etkinleştirebilirsiniz.
         Her ayar bağımsızdır; yalnızca ilgili olanı açabilirsiniz.
         Üçü de varsayılan olarak <strong>Kapalı</strong>'dır.
@@ -218,7 +218,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         Üç tanılama ayarı da tarayıcı tanımlama bilgileri olarak değil, hesap tercihleri olarak
         depolanır. Tüm cihazlar ve oturumlarda hesabınızı takip ederler ve yeni hesaplar dahil
         her hesap için varsayılan olarak <strong>Kapalı</strong>'dır.
-        Bunları istediğiniz zaman <a href="/settings/">Ayarlar → Hata Ayıklama (İsteğe Bağlı)</a>
+        Bunları istediğiniz zaman <a href="/settings/diagnostics/">Ayarlar → Hata Ayıklama (İsteğe Bağlı)</a>
         bölümünden değiştirebilirsiniz.
       </p>
       <p>

@@ -260,7 +260,7 @@ final class Strings
   }
 
   /**
-   * @return list<array{short:string,long:string}>
+   * @return list<array{narrow:string,short:string,long:string}>
    */
   public static function generateWeekDayLabels(?string $locale = null): array
   {
@@ -270,8 +270,10 @@ final class Strings
     if (!class_exists('\IntlDateFormatter')) {
       for ($i = 0; $i < 7; ++$i) {
         $date = new \DateTimeImmutable("Sunday +{$i} days");
+        $short = $date->format('D');
         $labels[] = [
-          'short' => $date->format('D'),
+          'narrow' => self::firstUtf8Character($short),
+          'short' => $short,
           'long' => $date->format('l'),
         ];
       }
@@ -279,6 +281,14 @@ final class Strings
       return $labels;
     }
 
+    $narrowFormatter = new \IntlDateFormatter(
+      $localeTag,
+      \IntlDateFormatter::NONE,
+      \IntlDateFormatter::NONE,
+      null,
+      \IntlDateFormatter::GREGORIAN,
+      'EEEEE'
+    );
     $shortFormatter = new \IntlDateFormatter(
       $localeTag,
       \IntlDateFormatter::NONE,
@@ -298,15 +308,27 @@ final class Strings
 
     for ($i = 0; $i < 7; ++$i) {
       $date = new \DateTimeImmutable("Sunday +{$i} days");
+      $narrow = $narrowFormatter->format($date);
       $short = $shortFormatter->format($date);
       $long = $longFormatter->format($date);
+      $shortLabel = is_string($short) && $short !== '' ? $short : $date->format('D');
       $labels[] = [
-        'short' => is_string($short) && $short !== '' ? $short : $date->format('D'),
+        'narrow' => is_string($narrow) && $narrow !== '' ? $narrow : self::firstUtf8Character($shortLabel),
+        'short' => $shortLabel,
         'long' => is_string($long) && $long !== '' ? $long : $date->format('l'),
       ];
     }
 
     return $labels;
+  }
+
+  private static function firstUtf8Character(string $value): string
+  {
+    if (preg_match('/^./us', $value, $match) === 1) {
+      return $match[0];
+    }
+
+    return substr($value, 0, 1);
   }
 
   /**
@@ -767,4 +789,3 @@ final class Strings
     return defined('USER_LANGUAGE') ? USER_LANGUAGE : 'en';
   }
 }
-

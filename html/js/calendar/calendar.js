@@ -126,8 +126,39 @@
     return window.PayCalCore?.config ?? window.PC?.config ?? null;
   }
 
+  /** @type {Record<string, string>|null} */
+  let calendarPageI18nCache = null;
+
+  function calendarPageI18nMap() {
+    if (calendarPageI18nCache !== null) {
+      return calendarPageI18nCache;
+    }
+
+    const legacy = window.__CALENDAR_I18N__;
+    if (legacy && typeof legacy === 'object') {
+      calendarPageI18nCache = legacy;
+      return calendarPageI18nCache;
+    }
+
+    const node = document.getElementById('calendar-page-i18n');
+    if (node instanceof HTMLScriptElement && node.textContent.trim() !== '') {
+      try {
+        const parsed = JSON.parse(node.textContent);
+        if (parsed && typeof parsed === 'object') {
+          calendarPageI18nCache = parsed;
+          return calendarPageI18nCache;
+        }
+      } catch {
+        // Fall through to empty map.
+      }
+    }
+
+    calendarPageI18nCache = {};
+    return calendarPageI18nCache;
+  }
+
   function calendarI18n(key, fallback = '') {
-    const fromPage = String(window.__CALENDAR_I18N__?.[key] ?? '').trim();
+    const fromPage = String(calendarPageI18nMap()[key] ?? '').trim();
     if (fromPage !== '') {
       return fromPage;
     }
@@ -1162,6 +1193,117 @@
   // =========================================================================
 
   
+  function getCalendarGrids() {
+    return Array.from(document.querySelectorAll('#calendar-v2-root .datagrid_layout_month'));
+  }
+
+  function getActiveCalendarGrid() {
+    const activePanel = document.querySelector('#calendar-v2-root .calendar_view_panel:not(.hidden)');
+    if (activePanel) {
+      const activeGrid = activePanel.querySelector('.datagrid_layout_month');
+      if (activeGrid) {
+        return activeGrid;
+      }
+    }
+
+    return document.getElementById('calendar-grid');
+  }
+
+  function mountCalendarViewToolbar() {
+    const root = document.getElementById('calendar-v2-root');
+    const activeView = root?.dataset.activeView || root?.dataset.defaultView || 'month';
+    document.querySelectorAll('#calendar-v2-root .calendar_range_controls').forEach((controls) => {
+      if (!(controls instanceof HTMLElement)) {
+        return;
+      }
+
+      controls.hidden = controls.getAttribute('data-calendar-range-controls') !== activeView;
+    });
+  }
+
+  function calendarRangeActionSelector(viewName, direction) {
+    const normalized = ['month', 'week', 'pay_period'].includes(viewName) ? viewName : 'month';
+    const actions = {
+      month: direction === 'prev' ? 'prev-month' : 'next-month',
+      week: direction === 'prev' ? 'prev-week' : 'next-week',
+      pay_period: direction === 'prev' ? 'prev-pay-period' : 'next-pay-period',
+    };
+
+    return `.calendar_range_controls[data-calendar-range-controls="${normalized}"]:not([hidden]) [data-action="${actions[normalized]}"]`;
+  }
+
+  function initCalendarViewToggle() {
+    const root = document.getElementById('calendar-v2-root');
+    if (!root) {
+      return;
+    }
+
+    const panels = {
+      month: document.getElementById('calendar-view-month'),
+      week: document.getElementById('calendar-view-week'),
+      pay_period: document.getElementById('calendar-view-pay-period'),
+    };
+
+    const showView = (viewName) => {
+      const normalized = ['month', 'week', 'pay_period'].includes(viewName) ? viewName : 'month';
+      Object.entries(panels).forEach(([key, panel]) => {
+        if (!(panel instanceof HTMLElement)) {
+          return;
+        }
+
+        const isActive = key === normalized;
+        panel.classList.toggle('hidden', !isActive);
+        panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+      });
+
+      root.dataset.activeView = normalized;
+      mountCalendarViewToolbar();
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', normalized);
+      if (normalized === 'month') {
+        url.searchParams.delete('week_start');
+        url.searchParams.delete('pay_period_start');
+      } else if (normalized === 'week') {
+        url.searchParams.delete('pay_period_start');
+        const weekPicker = document.getElementById('cal_week_picker_button');
+        const weekAnchor = weekPicker?.getAttribute('data-anchor') || '';
+        if (weekAnchor !== '') {
+          url.searchParams.set('week_start', weekAnchor);
+        }
+      } else if (normalized === 'pay_period') {
+        url.searchParams.delete('week_start');
+        const payPeriodPicker = document.getElementById('cal_payperiod_picker_button');
+        const payPeriodAnchor = payPeriodPicker?.getAttribute('data-anchor') || '';
+        if (payPeriodAnchor !== '') {
+          url.searchParams.set('pay_period_start', payPeriodAnchor);
+        }
+      }
+      window.history.replaceState(window.history.state, '', url.pathname + url.search);
+
+      const activeGrid = getActiveCalendarGrid();
+      if (activeGrid) {
+        refreshAllCalendarDayTooltips(activeGrid);
+        activeGrid.querySelectorAll('.datagrid_month_cell[data-id]').forEach((cell) => {
+          updateCalendarEarningsBadges(cell);
+        });
+      }
+    };
+
+    Array.from(document.querySelectorAll('input[name="calendar_view_mode"]')).forEach((radio) => {
+      radio.addEventListener('change', () => {
+        if (!(radio instanceof HTMLInputElement) || !radio.checked) {
+          return;
+        }
+
+        showView(radio.value);
+      });
+    });
+
+    const defaultView = root.dataset.defaultView || 'month';
+    showView(defaultView);
+  }
+
   /**
    * Initialize calendar grid on page load.
    */
@@ -1170,10 +1312,12 @@
     coreLog('%c[Calendar Debug] Booting...', 'color: #0bc; font-weight: bold;');
     applyResolvedPlatformToken();
     
-    const grid = document.getElementById('calendar-grid');
+    const grids = getCalendarGrids();
+    const grid = getActiveCalendarGrid() || document.getElementById('calendar-grid');
     calendarConsoleDebug('boot start', {
       path: window.location.pathname,
       hasGrid: !!grid,
+      gridCount: grids.length,
       emailVerified: isCalendarEmailVerified(),
     });
         if (!isCalendarEmailVerified()) {
@@ -1195,21 +1339,32 @@
     
     const debugEl = document.getElementById('calendar-debug-indicator');
     
-    if (grid) {
-      // Bind interactions first so cell clicks work even if crypto bootstrap is slow.
-      attachGridCellHandlers(grid);
+    if (grids.length > 0) {
+      initCalendarViewToggle();
+
+      grids.forEach((calendarGrid) => {
+        attachGridCellHandlers(calendarGrid);
+        attachDayContextMenuHandlers(calendarGrid);
+        refreshAllCalendarDayTooltips(calendarGrid);
+        calendarGrid.querySelectorAll('.datagrid_month_cell[data-id]').forEach((cell) => {
+          updateCalendarEarningsBadges(cell);
+        });
+      });
+
       attachGridKeyboardNavigation();
       attachModalHandlers();
       attachDayContextMenuKeyboardCapture();
-      attachDayContextMenuHandlers(grid);
-      refreshAllCalendarDayTooltips(grid);
       void ensureCalendarSiteCatalog();
-      ensureVisibleDailyEarningsLoaded(grid);
 
-      const initialCellCount = grid.querySelectorAll('.datagrid_month_cell').length;
+      const initialCellCount = grid ? grid.querySelectorAll('.datagrid_month_cell').length : 0;
       calendarConsoleDebug('grid handlers attached', {
         cellCount: initialCellCount,
+        gridCount: grids.length,
       });
+
+      if (grid) {
+        ensureVisibleDailyEarningsLoaded(grid);
+      }
 
       let hasDek = false;
       cryptoLog('[CRYPTO] Boot: attempting non-interactive DEK check...');
@@ -1234,14 +1389,16 @@
           cryptoLog('[CRYPTO] Boot: DEK available, encrypting profile');
           await ensureProfileEncrypted();
           cryptoLog('[CRYPTO] Boot: DEK available, hydrating grid');
-          await hydrateEncryptedCalendarGrid(grid);
+          for (const calendarGrid of grids) {
+            await hydrateEncryptedCalendarGrid(calendarGrid);
+          }
           cryptoLog('[CRYPTO] Boot: hydration complete');
           calendarConsoleDebug('boot crypto hydration complete', {
             hasDek: true,
           });
         } else {
           cryptoLog('[CRYPTO] Boot: DEK not available, hiding encrypted cells');
-          hideEncryptedCalendarGrid(grid);
+          grids.forEach((calendarGrid) => hideEncryptedCalendarGrid(calendarGrid));
           cryptoLog('[CRYPTO] Boot: hidden encrypted cells, unlock panel will show on access');
           calendarConsoleDebug('boot crypto unavailable; grid masked', {
             hasDek: false,
@@ -1260,26 +1417,43 @@
       
       // Focus target day based on autofocus preference or URL parameter
       setTimeout(() => {
+        const focusGrid = getActiveCalendarGrid() || grid;
+        if (!focusGrid) {
+          return;
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         let targetDay = urlParams.get('day');
+        const calendarRoot = document.getElementById('calendar-v2-root');
+        const activeView = calendarRoot?.dataset.activeView || 'month';
         
         // If no URL parameter, use autofocus preference
         if (!targetDay) {
           const autofocusMode = window.__CALENDAR_AUTOFOCUS || 'today';
           const today = new Date();
-          const currentYear = parseInt(grid.dataset.year || today.getFullYear(), 10);
-          const currentMonth = parseInt(grid.dataset.month || (today.getMonth() + 1), 10);
-          
-          if ('first' === autofocusMode) {
+          const todayYmd = String(today.getFullYear()) + '-'
+            + String(today.getMonth() + 1).padStart(2, '0') + '-'
+            + String(today.getDate()).padStart(2, '0');
+
+          if (activeView === 'week' || activeView === 'pay_period') {
+            targetDay = todayYmd;
+            focusLog('[Calendar Focus] Active compact view, focusing today', { targetDay, activeView });
+          } else if ('first' === autofocusMode) {
+            const currentYear = parseInt(focusGrid.dataset.year || today.getFullYear(), 10);
+            const currentMonth = parseInt(focusGrid.dataset.month || (today.getMonth() + 1), 10);
             // Focus first day of month
             targetDay = String(currentYear) + '-' + String(currentMonth).padStart(2, '0') + '-01';
             focusLog('[Calendar Focus] Autofocus mode: FIRST', { targetDay });
           } else if ('last' === autofocusMode) {
+            const currentYear = parseInt(focusGrid.dataset.year || today.getFullYear(), 10);
+            const currentMonth = parseInt(focusGrid.dataset.month || (today.getMonth() + 1), 10);
             // Focus last day of month
             const lastDay = new Date(currentYear, currentMonth, 0).getDate();
             targetDay = String(currentYear) + '-' + String(currentMonth).padStart(2, '0') + '-' + String(lastDay).padStart(2, '0');
             focusLog('[Calendar Focus] Autofocus mode: LAST', { targetDay, lastDay });
           } else {
+            const currentYear = parseInt(focusGrid.dataset.year || today.getFullYear(), 10);
+            const currentMonth = parseInt(focusGrid.dataset.month || (today.getMonth() + 1), 10);
             // Default 'today': focus today's date (if in displayed month) or first day
             if (today.getFullYear() === currentYear && (today.getMonth() + 1) === currentMonth) {
               const todayDate = String(today.getDate()).padStart(2, '0');
@@ -1296,7 +1470,7 @@
         }
         
         if (targetDay) {
-          focusTargetDay(targetDay, grid);
+          focusTargetDay(targetDay, focusGrid);
         } else {
           focusLog('[Calendar Focus] No target day determined');
         }
@@ -2040,13 +2214,24 @@
 
     coreLog('[Calendar KeyDown]', event.key, 'on cell', cell.getAttribute('data-id'));
 
-    const triggerMonthNavigation = (direction) => {
-      const selector = direction === 'prev'
-        ? '[data-action="prev-month"]'
-        : '[data-action="next-month"]';
+    const triggerRangeNavigation = (direction) => {
+      const root = document.getElementById('calendar-v2-root');
+      const activeView = root?.dataset.activeView || 'month';
+      let selector = '';
+
+      if (activeView === 'month') {
+        selector = calendarRangeActionSelector('month', direction);
+      } else if (activeView === 'week') {
+        selector = calendarRangeActionSelector('week', direction);
+      } else if (activeView === 'pay_period') {
+        selector = calendarRangeActionSelector('pay_period', direction);
+      } else {
+        return;
+      }
+
       const button = document.querySelector(selector);
       if (!button) {
-        console.error('[Calendar Nav] Missing month navigation button', { direction, selector });
+        console.error('[Calendar Nav] Missing range navigation button', { direction, selector, activeView });
         return;
       }
 
@@ -2092,10 +2277,10 @@
         navigateGridCellRight(cell);
         break;
       case 'PageUp':
-        triggerMonthNavigation('prev');
+        triggerRangeNavigation('prev');
         break;
       case 'PageDown':
-        triggerMonthNavigation('next');
+        triggerRangeNavigation('next');
         break;
       case 'Enter':
         event.preventDefault();
@@ -3016,7 +3201,14 @@
           return;
         }
 
-        const pickerBtn = document.getElementById('cal_picker_button');
+        const root = document.getElementById('calendar-v2-root');
+        const activeView = root?.dataset.activeView || 'month';
+        let pickerBtn = document.getElementById('cal_picker_button');
+        if (activeView === 'week') {
+          pickerBtn = document.getElementById('cal_week_picker_button');
+        } else if (activeView === 'pay_period') {
+          pickerBtn = document.getElementById('cal_payperiod_picker_button');
+        }
         if (pickerBtn) {
           pickerBtn.click();
         }
@@ -3078,13 +3270,16 @@
         }
 
         event.preventDefault();
-        const prevBtn = document.querySelector('[data-action="prev-month"]');
-        coreLog('[Calendar Keyboard] [ pressed, triggering prev month');
+        const root = document.getElementById('calendar-v2-root');
+        const activeView = root?.dataset.activeView || 'month';
+        const prevSelector = calendarRangeActionSelector(activeView, 'prev');
+        const prevBtn = document.querySelector(prevSelector);
+        coreLog('[Calendar Keyboard] [ pressed, triggering previous range');
         if (prevBtn) {
           prevBtn.click();
         }
       }
-      // ] for next month
+      // ] for next range
       else if (
         event.key === ']'
         && !event.altKey
@@ -3100,8 +3295,11 @@
         }
 
         event.preventDefault();
-        const nextBtn = document.querySelector('[data-action="next-month"]');
-        coreLog('[Calendar Keyboard] ] pressed, triggering next month');
+        const root = document.getElementById('calendar-v2-root');
+        const activeView = root?.dataset.activeView || 'month';
+        const nextSelector = calendarRangeActionSelector(activeView, 'next');
+        const nextBtn = document.querySelector(nextSelector);
+        coreLog('[Calendar Keyboard] ] pressed, triggering next range');
         if (nextBtn) {
           nextBtn.click();
         }
@@ -3261,8 +3459,8 @@
    * Attach handlers to month navigation buttons.
    */
   function attachMonthNavigationHandlers() {
-    const prevBtn = document.querySelector('[data-action="prev-month"]');
-    const nextBtn = document.querySelector('[data-action="next-month"]');
+    const prevBtn = document.querySelector('.calendar_range_controls[data-calendar-range-controls="month"] [data-action="prev-month"]');
+    const nextBtn = document.querySelector('.calendar_range_controls[data-calendar-range-controls="month"] [data-action="next-month"]');
     const openPickerBtn = document.getElementById('cal_picker_button');
     const pickerDialog = document.getElementById('modal_cal_picker');
     const datePickerGoBtn = document.getElementById('date_picker_go_btn');
@@ -3270,11 +3468,6 @@
     const pickerMinYear = yearInput ? parseInt(yearInput.getAttribute('data-min-year') || '', 10) : Number.NaN;
     const pickerMaxYear = yearInput ? parseInt(yearInput.getAttribute('data-max-year') || '', 10) : Number.NaN;
     const monthButtons = Array.from(document.querySelectorAll('#cal_menu_right button'));
-    const calendarUserForm = document.getElementById('calendar_user_view_form');
-    const calendarUserLookup = document.getElementById('calendar_user_lookup');
-    const calendarUserList = document.getElementById('calendar_user_lookup_list');
-    const calendarUserHidden = document.getElementById('calendar_user_uuid_hidden');
-    const calendarUserClearBtn = document.getElementById('calendar_user_clear_btn');
 
     const normalizeMonthNavA11yHints = () => {
       if (prevBtn) {
@@ -3296,128 +3489,6 @@
 
     normalizeMonthNavA11yHints();
 
-    if (calendarUserForm instanceof HTMLFormElement
-      && calendarUserLookup instanceof HTMLInputElement
-      && calendarUserList instanceof HTMLDataListElement
-      && calendarUserHidden instanceof HTMLInputElement) {
-      const options = Array.from(calendarUserList.querySelectorAll('option'));
-      const lookupMap = new Map();
-
-      const navigateToCalendarUser = (userUUID, clearView = false) => {
-        const grid = document.getElementById('calendar-grid');
-        const gridYear = (grid && grid.dataset && grid.dataset.year) ? String(grid.dataset.year).trim() : String(new Date().getFullYear());
-        const gridMonthRaw = (grid && grid.dataset && grid.dataset.month) ? String(grid.dataset.month).trim() : String(new Date().getMonth() + 1);
-        const gridMonth = String(parseInt(gridMonthRaw, 10) || (new Date().getMonth() + 1)).padStart(2, '0');
-        const monthValue = `${gridYear}-${gridMonth}`;
-        const urlBuilder = new URL(`/${monthValue}`, window.location.origin);
-
-        urlBuilder.searchParams.set('month', monthValue);
-        if (!clearView && userUUID && userUUID.trim() !== '') {
-          urlBuilder.searchParams.set('user_uuid', userUUID.trim());
-        }
-        if (clearView) {
-          urlBuilder.searchParams.set('clear_user_view', '1');
-        }
-        urlBuilder.searchParams.set('recalc_week_entries', '1');
-
-        // Force a fresh deterministic navigation on delegated-user switches.
-        urlBuilder.searchParams.set('_view_nonce', String(Date.now()));
-        window.location.assign(urlBuilder.pathname + '?' + urlBuilder.searchParams.toString());
-      };
-
-      const normalizeLookupLabel = (value) => {
-        return (value || '')
-          .toString()
-          .replace(/\s+/g, ' ')
-          .trim()
-          .toLowerCase();
-      };
-
-      for (const option of options) {
-        if (!(option instanceof HTMLOptionElement)) {
-          continue;
-        }
-
-        const label = normalizeLookupLabel(option.value || '');
-        const userUUID = ((option.dataset && option.dataset.userUuid) || option.getAttribute('data-user-uuid') || '').trim();
-        if (label !== '' && userUUID !== '') {
-          lookupMap.set(label, userUUID);
-        }
-      }
-
-      const resolveUserUUID = () => {
-        const label = normalizeLookupLabel(calendarUserLookup.value || '');
-        if (label === '') {
-          return '';
-        }
-
-        return lookupMap.get(label) || '';
-      };
-
-      const submitResolvedSelection = () => {
-        const resolvedUUID = resolveUserUUID();
-        if (resolvedUUID === '') {
-          return;
-        }
-
-        if (calendarUserHidden.value === resolvedUUID) {
-          return;
-        }
-
-        calendarUserHidden.value = resolvedUUID;
-        navigateToCalendarUser(resolvedUUID, false);
-      };
-
-      calendarUserLookup.addEventListener('input', submitResolvedSelection);
-      calendarUserLookup.addEventListener('change', submitResolvedSelection);
-      calendarUserLookup.addEventListener('blur', submitResolvedSelection);
-      calendarUserLookup.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter') {
-          return;
-        }
-
-        event.preventDefault();
-        submitResolvedSelection();
-      });
-
-      calendarUserForm.addEventListener('submit', (event) => {
-        const submitter = event.submitter;
-        if (submitter instanceof HTMLElement && submitter.id === 'calendar_user_clear_btn') {
-          event.preventDefault();
-          const selfLabel = (calendarUserForm.dataset.selfLabel || '').trim();
-          if (selfLabel !== '') {
-            calendarUserLookup.value = selfLabel;
-          }
-          calendarUserHidden.value = '';
-          navigateToCalendarUser('', true);
-          return;
-        }
-
-        const resolvedUUID = resolveUserUUID();
-        if (resolvedUUID === '') {
-          event.preventDefault();
-          return;
-        }
-
-        event.preventDefault();
-        calendarUserHidden.value = resolvedUUID;
-        navigateToCalendarUser(resolvedUUID, false);
-      });
-
-      if (calendarUserClearBtn instanceof HTMLButtonElement) {
-        calendarUserClearBtn.addEventListener('click', (event) => {
-          event.preventDefault();
-          const selfLabel = (calendarUserForm.dataset.selfLabel || '').trim();
-          if (selfLabel !== '') {
-            calendarUserLookup.value = selfLabel;
-          }
-
-          calendarUserHidden.value = '';
-          navigateToCalendarUser('', true);
-        });
-      }
-    }
-
     const announceCurrentMonth = () => {
       const statusEl = document.getElementById('calendar-month-status');
       const pickerBtn = document.getElementById('cal_picker_button');
@@ -3435,6 +3506,76 @@
       }
     };
 
+    const reinitializeCalendarAfterPartialRefresh = async (options = {}) => {
+      const grids = getCalendarGrids();
+      const activeGrid = getActiveCalendarGrid() || document.getElementById('calendar-grid');
+
+      initCalendarViewToggle();
+      mountCalendarViewToolbar();
+
+      grids.forEach((calendarGrid) => {
+        attachGridCellHandlers(calendarGrid);
+        attachDayContextMenuHandlers(calendarGrid);
+        refreshAllCalendarDayTooltips(calendarGrid);
+        calendarGrid.querySelectorAll('.datagrid_month_cell[data-id]').forEach((cell) => {
+          updateCalendarEarningsBadges(cell);
+        });
+        ensureVisibleDailyEarningsLoaded(calendarGrid);
+      });
+
+      attachGridKeyboardNavigation();
+      void ensureCalendarSiteCatalog();
+      attachMonthNavigationHandlers();
+      setCalendarScreenMode(calendarScreenMode);
+
+      if (PayCalCryptoState.hasDek) {
+        for (const calendarGrid of grids) {
+          await hydrateEncryptedCalendarGrid(calendarGrid);
+        }
+      } else if (activeGrid) {
+        hideEncryptedCalendarGrid(activeGrid);
+      }
+
+      const focusDay = options.focusDay;
+      if (typeof focusDay === 'string' && focusDay !== '' && activeGrid) {
+        setTimeout(() => focusTargetDay(focusDay, activeGrid), 25);
+      }
+    };
+
+    const refreshCalendarPage = async (targetUrl, options = {}) => {
+      try {
+        const response = await fetch(targetUrl, {
+          credentials: 'include',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const replaceIds = ['calendar-v2-root', 'modal_cal_picker', 'modal_cal_week_picker', 'modal_cal_payperiod_picker'];
+
+        for (const elementId of replaceIds) {
+          const nextEl = doc.getElementById(elementId);
+          const currentEl = document.getElementById(elementId);
+          if (nextEl && currentEl) {
+            currentEl.replaceWith(nextEl);
+          } else if (nextEl && !currentEl) {
+            document.body.appendChild(nextEl);
+          }
+        }
+
+        window.history.pushState({}, '', targetUrl);
+        await reinitializeCalendarAfterPartialRefresh(options);
+      } catch (error) {
+        console.error('[Calendar Nav] Async refresh failed, falling back to full navigation', { error, targetUrl });
+        window.location.href = targetUrl;
+      }
+    };
+
     const refreshCalendarMonth = async (year, month) => {
       if (!year || !month) {
         console.error('[Calendar Nav] Missing year or month for refresh', { year, month });
@@ -3449,62 +3590,77 @@
       if (selectedUserUUID !== '') {
         urlBuilder.searchParams.set('user_uuid', selectedUserUUID);
       }
+      urlBuilder.searchParams.set('view', 'month');
       const targetUrl = urlBuilder.pathname + urlBuilder.search;
+      const targetDay = storedDay ? `${year}-${monthStr}-${String(storedDay).padStart(2, '0')}` : `${year}-${monthStr}-01`;
 
-      try {
-        const response = await fetch(targetUrl, {
-          credentials: 'include',
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
+      await refreshCalendarPage(targetUrl, { focusDay: targetDay });
+      announceCurrentMonth();
+    };
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
+    const getSelectedUserUUID = () => {
+      return (document.getElementById('calendar-v2-root')?.dataset?.calendarUserUuid || '').trim();
+    };
 
-        const html = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-
-        const nextRoot = doc.getElementById('calendar-v2-root');
-        const nextPickerDialog = doc.getElementById('modal_cal_picker');
-        const currentRoot = document.getElementById('calendar-v2-root');
-        const currentPickerDialog = document.getElementById('modal_cal_picker');
-
-        if (!nextRoot || !currentRoot) {
-          throw new Error('Missing calendar root in partial response');
-        }
-
-        currentRoot.replaceWith(nextRoot);
-        if (nextPickerDialog && currentPickerDialog) {
-          currentPickerDialog.replaceWith(nextPickerDialog);
-        }
-
-        window.history.pushState({ month: `${year}-${monthStr}` }, '', targetUrl);
-
-        const grid = document.getElementById('calendar-grid');
-        if (grid) {
-          attachGridCellHandlers(grid);
-          attachDayContextMenuHandlers(grid);
-          refreshAllCalendarDayTooltips(grid);
-          void ensureCalendarSiteCatalog();
-          ensureVisibleDailyEarningsLoaded(grid);
-          attachMonthNavigationHandlers();
-          setCalendarScreenMode(calendarScreenMode);
-          announceCurrentMonth();
-
-          if (PayCalCryptoState.hasDek) {
-            await hydrateEncryptedCalendarGrid(grid);
-          } else {
-            hideEncryptedCalendarGrid(grid);
-          }
-
-          const targetDay = storedDay ? `${year}-${monthStr}-${String(storedDay).padStart(2, '0')}` : `${year}-${monthStr}-01`;
-          setTimeout(() => focusTargetDay(targetDay, grid), 25);
-        }
-      } catch (error) {
-        console.error('[Calendar Nav] Async refresh failed, falling back to full navigation', { error, targetUrl });
-        window.location.href = targetUrl;
+    const buildWeekCalendarUrl = (anchorYmd) => {
+      const parts = String(anchorYmd || '').split('-');
+      if (parts.length !== 3) {
+        return '';
       }
+
+      const urlBuilder = new URL(`/${parts[0]}-${parts[1]}`, window.location.origin);
+      urlBuilder.searchParams.set('week_start', anchorYmd);
+      urlBuilder.searchParams.set('view', 'week');
+      const selectedUserUUID = getSelectedUserUUID();
+      if (selectedUserUUID !== '') {
+        urlBuilder.searchParams.set('user_uuid', selectedUserUUID);
+      }
+
+      return urlBuilder.pathname + urlBuilder.search;
+    };
+
+    const buildPayPeriodCalendarUrl = (anchorYmd) => {
+      const parts = String(anchorYmd || '').split('-');
+      if (parts.length !== 3) {
+        return '';
+      }
+
+      const activeGrid = document.getElementById('calendar-payperiod-grid');
+      const canonicalAnchor = String(activeGrid?.dataset?.rangeAnchor || anchorYmd).trim() || anchorYmd;
+      const canonicalParts = canonicalAnchor.split('-');
+      const monthPath = canonicalParts.length === 3
+        ? `${canonicalParts[0]}-${canonicalParts[1]}`
+        : `${parts[0]}-${parts[1]}`;
+
+      const urlBuilder = new URL(`/${monthPath}`, window.location.origin);
+      urlBuilder.searchParams.set('pay_period_start', canonicalAnchor);
+      urlBuilder.searchParams.set('view', 'pay_period');
+      const selectedUserUUID = getSelectedUserUUID();
+      if (selectedUserUUID !== '') {
+        urlBuilder.searchParams.set('user_uuid', selectedUserUUID);
+      }
+
+      return urlBuilder.pathname + urlBuilder.search;
+    };
+
+    const navigateToWeek = (anchorYmd) => {
+      const targetUrl = buildWeekCalendarUrl(anchorYmd);
+      if (targetUrl === '') {
+        return;
+      }
+
+      void refreshCalendarPage(targetUrl, { focusDay: anchorYmd });
+    };
+
+    const navigateToPayPeriod = (anchorYmd) => {
+      const grid = document.getElementById('calendar-payperiod-grid');
+      const resolvedAnchor = String(grid?.dataset?.rangeAnchor || anchorYmd || '').trim() || anchorYmd;
+      const targetUrl = buildPayPeriodCalendarUrl(resolvedAnchor);
+      if (targetUrl === '') {
+        return;
+      }
+
+      void refreshCalendarPage(targetUrl, { focusDay: resolvedAnchor });
     };
 
     const navigateToMonth = (year, month) => {
@@ -3758,6 +3914,103 @@
 
         event.preventDefault();
         submitDatePickerSelection();
+      });
+    }
+
+    document.querySelectorAll('[data-action="prev-week"], [data-action="next-week"]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const anchor = button.getAttribute('data-anchor') || '';
+        if (anchor !== '') {
+          navigateToWeek(anchor);
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-action="prev-pay-period"], [data-action="next-pay-period"]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const anchor = button.getAttribute('data-anchor') || '';
+        if (anchor !== '') {
+          navigateToPayPeriod(anchor);
+        }
+      });
+    });
+
+    const weekPickerBtn = document.getElementById('cal_week_picker_button');
+    const weekPickerDialog = document.getElementById('modal_cal_week_picker');
+    const weekDateInput = document.getElementById('cal_week_date_input');
+    const weekPickerGoBtn = document.getElementById('cal_week_picker_go_btn');
+
+    if (weekPickerBtn && typeof weekPickerBtn.addEventListener === 'function') {
+      weekPickerBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (window.PayCalCore && typeof window.PayCalCore.openModal === 'function') {
+          window.PayCalCore.openModal('modal_cal_week_picker', calendarI18n('CALENDAR_WEEK_PICKER_TITLE', 'Select week'));
+        }
+        if (weekDateInput instanceof HTMLInputElement && typeof weekDateInput.focus === 'function') {
+          setTimeout(() => weekDateInput.focus(), 100);
+        }
+      });
+    }
+
+    if (weekPickerGoBtn && typeof weekPickerGoBtn.addEventListener === 'function') {
+      weekPickerGoBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        const picked = weekDateInput instanceof HTMLInputElement ? String(weekDateInput.value || '').trim() : '';
+        if (picked === '') {
+          return;
+        }
+
+        if (window.PayCalCore && typeof window.PayCalCore.closeModal === 'function') {
+          window.PayCalCore.closeModal('modal_cal_week_picker', calendarI18n('CALENDAR_WEEK_PICKER_TITLE', 'Select week'));
+        }
+
+        navigateToWeek(picked);
+      });
+    }
+
+    const payPeriodPickerBtn = document.getElementById('cal_payperiod_picker_button');
+    if (payPeriodPickerBtn && typeof payPeriodPickerBtn.addEventListener === 'function') {
+      payPeriodPickerBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (window.PayCalCore && typeof window.PayCalCore.openModal === 'function') {
+          window.PayCalCore.openModal('modal_cal_payperiod_picker', calendarI18n('CALENDAR_PAY_PERIOD_PICKER_TITLE', 'Select pay period'));
+        }
+      });
+    }
+
+    document.querySelectorAll('.calendar_payperiod_picker_option').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        const anchor = button.getAttribute('data-pay-period-start') || '';
+        if (anchor === '') {
+          return;
+        }
+
+        if (window.PayCalCore && typeof window.PayCalCore.closeModal === 'function') {
+          window.PayCalCore.closeModal('modal_cal_payperiod_picker', calendarI18n('CALENDAR_PAY_PERIOD_PICKER_TITLE', 'Select pay period'));
+        }
+
+        navigateToPayPeriod(anchor);
+      });
+    });
+
+    if (weekPickerDialog && typeof weekPickerDialog.addEventListener === 'function') {
+      weekPickerDialog.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') {
+          return;
+        }
+
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement) || target.id !== 'cal_week_date_input') {
+          return;
+        }
+
+        event.preventDefault();
+        weekPickerGoBtn?.click();
       });
     }
   }
@@ -4033,8 +4286,8 @@
     }
 
     const rowsHtml = (existingEntries && existingEntries.length > 0)
-      ? existingEntries.map((entry, index) => generateWorkEntryRow(index, siteCatalog, entry)).join('')
-      : generateWorkEntryRow(0, siteCatalog);
+      ? existingEntries.map((entry, index) => generateWorkEntryRow(index, siteCatalog, entry, index === existingEntries.length - 1)).join('')
+      : generateWorkEntryRow(0, siteCatalog, null, true);
     
     const formHtml = `
       <div class="work-entries-form">
@@ -4063,7 +4316,7 @@
       focusToken,
     });
     
-    attachRowDeleteHandlers();
+    attachWorkEntryRowActionHandlers();
     
     // Update footer buttons to have Save functionality
     updateModalFooterForEdit();
@@ -4196,7 +4449,7 @@
    * @param {Array<{site_id: string, site_name: string}>} siteCatalog - Site options
    * @returns {string} HTML string for table row
    */
-  function generateWorkEntryRow(index, siteCatalog, entry = null) {
+  function generateWorkEntryRow(index, siteCatalog, entry = null, includeAddButton = false) {
     const entryHasSiteMatch = !!(
       entry && siteCatalog.some(site => (
         (entry.site_id && entry.site_id === site.site_id) ||
@@ -4244,17 +4497,45 @@
         <td data-label="${escapeText(WORK_ENTRY_COLUMN_HEADINGS.travel)}">
           <input type="number" name="travel_${index}" step="0.5" min="0" max="24" placeholder="0" class="entry-hours-input" value="${travelValue > 0 ? travelValue : ''}">
         </td>
-        <td data-label="">
+        <td class="work-entry-row-actions" data-label="">
           <button type="button" class="work-entry-delete" data-row="${index}">${escapeText(calendarI18n('DELETE', 'Delete'))}</button>
+          ${includeAddButton ? `<button type="button" class="work-entry-add" data-action="add-row">${escapeText(calendarI18n('CALENDAR_MODAL_ADD', 'Add'))}</button>` : ''}
         </td>
       </tr>
     `;
   }
   
   /**
-   * Attach click handlers to delete buttons.
+   * Keep the Add action on the bottom work-entry row.
    */
-  function attachRowDeleteHandlers() {
+  function refreshWorkEntryAddButton() {
+    const rows = Array.from(document.querySelectorAll('#work-entries-tbody .work-entry-row'));
+    rows.forEach((row, index) => {
+      const actionsCell = row.querySelector('.work-entry-row-actions');
+      if (!(actionsCell instanceof HTMLElement)) {
+        return;
+      }
+
+      const existingAdd = actionsCell.querySelector('.work-entry-add');
+      const isLast = index === rows.length - 1;
+      if (isLast && !existingAdd) {
+        Guardian.insertHTML(
+          actionsCell,
+          'beforeend',
+          `<button type="button" class="work-entry-add" data-action="add-row">${escapeText(calendarI18n('CALENDAR_MODAL_ADD', 'Add'))}</button>`
+        );
+      } else if (!isLast && existingAdd) {
+        existingAdd.remove();
+      }
+    });
+  }
+
+  /**
+   * Attach click handlers to work-entry row action buttons.
+   */
+  function attachWorkEntryRowActionHandlers() {
+    refreshWorkEntryAddButton();
+
     document.querySelectorAll('.work-entry-delete').forEach(btn => {
       if ('1' === btn.getAttribute('data-bound-delete')) {
         return;
@@ -4273,8 +4554,24 @@
           coreLog('[Calendar Delete] Removing row', rowIndex);
           row.remove();
           coreLog('[Calendar Delete] Row removed, remaining rows:', document.querySelectorAll('.work-entry-row').length);
+          if (document.querySelectorAll('#work-entries-tbody .work-entry-row').length === 0) {
+            const modal = document.getElementById('calendar-modal');
+            const activeDate = modal ? modal.getAttribute('data-active-date') : '';
+            addWorkEntryRow(activeDate);
+            return;
+          }
+          refreshWorkEntryAddButton();
+          attachWorkEntryRowActionHandlers();
         }
       });
+    });
+
+    document.querySelectorAll('.work-entry-add').forEach(btn => {
+      if ('1' === btn.getAttribute('data-bound-add')) {
+        return;
+      }
+      btn.setAttribute('data-bound-add', '1');
+      btn.addEventListener('click', handleModalAction);
     });
   }
 
@@ -4288,9 +4585,11 @@
 
     const siteCatalog = await fetchAllSites();
     const rowCount = tbody.querySelectorAll('tr').length;
-    const newRow = generateWorkEntryRow(rowCount, siteCatalog);
+    refreshWorkEntryAddButton();
+    const newRow = generateWorkEntryRow(rowCount, siteCatalog, null, true);
     Guardian.insertHTML(tbody, 'beforeend', newRow);
-    attachRowDeleteHandlers();
+    refreshWorkEntryAddButton();
+    attachWorkEntryRowActionHandlers();
   }
   
   /**
@@ -4301,8 +4600,10 @@
     if (!footer) return;
     
     Guardian.setHTML(footer, `
-      <button type="button" class="btn btn_primary calendar_modal_action calendar_modal_action_save" data-action="save">${escapeText(calendarI18n('SAVE', 'Save'))}</button>
-      <button type="button" class="btn btn_cancel calendar_modal_action calendar_modal_action_close" data-action="close">${escapeText(calendarI18n('CLOSE', 'Close'))}</button>
+      <div class="calendar_modal_footer_center">
+        <button type="button" class="btn btn_primary calendar_modal_action calendar_modal_action_save" data-action="save">${escapeText(calendarI18n('SAVE', 'Save'))}</button>
+        <button type="button" class="btn btn_cancel calendar_modal_action calendar_modal_action_close" data-action="close">${escapeText(calendarI18n('CLOSE', 'Close'))}</button>
+      </div>
     `);
     
     // Attach handlers
@@ -4593,11 +4894,17 @@
       netTotal = parseMoneyValue(daily.net ?? 0);
     }
 
+    const deductionsTotal = dateId && Object.prototype.hasOwnProperty.call(calendarDailyEarningsByDate, dateId)
+      ? parseMoneyValue(calendarDailyEarningsByDate[dateId].deductions ?? Math.max(0, grossTotal - netTotal))
+      : Math.max(0, grossTotal - netTotal);
+
     return {
       regularTotal,
       overtimeTotal,
+      totalHours: regularTotal + overtimeTotal,
       grossTotal,
       netTotal,
+      deductionsTotal,
     };
   }
 
@@ -4668,6 +4975,8 @@
     const tooltipText = computeCalendarDayTooltip(sourceEntries, dateId);
     cell.setAttribute('data-tooltip', tooltipText);
     cell.removeAttribute('title');
+    updateCalendarEarningsBadges(cell, sourceEntries, dateId);
+    updateCalendarHoursBadge(cell, sourceEntries, dateId);
 
     if (calendarHoverTooltipCell === cell) {
       setCalendarHoverTooltipText(tooltipText);
@@ -4681,7 +4990,172 @@
 
     grid.querySelectorAll('.datagrid_month_cell[data-id]').forEach((cell) => {
       updateCalendarDayTooltip(cell);
+      updateCalendarEarningsBadges(cell);
+      updateCalendarHoursBadge(cell);
     });
+  }
+
+  function getCalendarDisplayPrefs() {
+    const root = document.getElementById('calendar-v2-root');
+    return {
+      showGross: root?.dataset.showGrossBadge === '1',
+      showNet: root?.dataset.showNetBadge === '1',
+      showDeductions: root?.dataset.showDeductionsBadge === '1',
+    };
+  }
+
+  function getWorkEntryFieldPrefs() {
+    if (typeof CAL_WORK_ENTRY_FIELDS === 'object' && CAL_WORK_ENTRY_FIELDS !== null) {
+      return CAL_WORK_ENTRY_FIELDS;
+    }
+
+    const root = document.getElementById('calendar-v2-root');
+    if (root) {
+      return {
+        hours: root.dataset.workEntryHours === '1',
+        regular: root.dataset.workEntryRegular === '1',
+        overtime: root.dataset.workEntryOvertime === '1',
+        livingOut: root.dataset.workEntryLivingOut === '1',
+        travel: root.dataset.workEntryTravel === '1',
+      };
+    }
+
+    return {
+      hours: true,
+      regular: true,
+      overtime: true,
+      livingOut: true,
+      travel: true,
+    };
+  }
+
+  function buildWorkEntryDisplayFields(regularValue, overtimeValue, livingOutValue, travelValue, isEncryptedPlaceholder = false, totalValue = null) {
+    const prefs = getWorkEntryFieldPrefs();
+
+    if (isEncryptedPlaceholder) {
+      const enabledCount = [
+        prefs.hours,
+        prefs.regular,
+        prefs.overtime,
+        prefs.livingOut,
+        prefs.travel,
+      ].filter(Boolean).length;
+
+      return {
+        fields: enabledCount > 0 ? Array(enabledCount).fill('--') : [],
+        spokenMetrics: [],
+      };
+    }
+
+    const fields = [];
+    const spokenMetrics = [];
+
+    if (prefs.hours) {
+      const numericTotal = totalValue === null || totalValue === undefined
+        ? (parseFloat(regularValue) || 0) + (parseFloat(overtimeValue) || 0)
+        : totalValue;
+      const value = formatHourValue(numericTotal);
+      fields.push(value);
+      spokenMetrics.push(`${value} total hours`);
+    }
+    if (prefs.regular) {
+      const value = formatHourValue(regularValue);
+      fields.push(value);
+      spokenMetrics.push(`${value} regular hours`);
+    }
+    if (prefs.overtime) {
+      const value = formatHourValue(overtimeValue);
+      fields.push(value);
+      spokenMetrics.push(`${value} overtime hours`);
+    }
+    if (prefs.livingOut) {
+      const value = formatHourValue(livingOutValue);
+      fields.push(value);
+      spokenMetrics.push(`${value} living out allowance`);
+    }
+    if (prefs.travel) {
+      const value = formatHourValue(travelValue);
+      fields.push(value);
+      spokenMetrics.push(`${value} travel hours`);
+    }
+
+    return { fields, spokenMetrics };
+  }
+
+  function updateCalendarEarningsBadges(cell, entries = null, dateId = '') {
+    if (!cell) {
+      return;
+    }
+
+    const prefs = getCalendarDisplayPrefs();
+    cell.querySelectorAll('.calendar_earnings_badges').forEach((row) => row.remove());
+    if (!prefs.showGross && !prefs.showNet && !prefs.showDeductions) {
+      return;
+    }
+
+    const resolvedDateId = dateId || cell.getAttribute('data-id') || '';
+    let sourceEntries = entries;
+    if (!Array.isArray(sourceEntries)) {
+      sourceEntries = getEntriesFromCalendarCell(cell);
+    }
+
+    const totals = computeCalendarTotals(sourceEntries, resolvedDateId);
+    if (totals.grossTotal <= 0 && totals.netTotal <= 0 && totals.deductionsTotal <= 0) {
+      return;
+    }
+
+    const badgesRow = document.createElement('div');
+    badgesRow.className = 'calendar_earnings_badges';
+    if (prefs.showGross && totals.grossTotal > 0) {
+      const grossBadge = document.createElement('span');
+      grossBadge.className = 'calendar_earnings_badge calendar_earnings_badge_gross';
+      grossBadge.textContent = `$${formatMoneyValue(totals.grossTotal)}`;
+      badgesRow.appendChild(grossBadge);
+    }
+    if (prefs.showDeductions && totals.deductionsTotal > 0) {
+      const deductionsBadge = document.createElement('span');
+      deductionsBadge.className = 'calendar_earnings_badge calendar_earnings_badge_deductions';
+      deductionsBadge.textContent = `$${formatMoneyValue(totals.deductionsTotal)}`;
+      badgesRow.appendChild(deductionsBadge);
+    }
+    if (prefs.showNet && totals.netTotal > 0) {
+      const netBadge = document.createElement('span');
+      netBadge.className = 'calendar_earnings_badge calendar_earnings_badge_net';
+      netBadge.textContent = `$${formatMoneyValue(totals.netTotal)}`;
+      badgesRow.appendChild(netBadge);
+    }
+    if (!badgesRow.childElementCount) {
+      return;
+    }
+    cell.appendChild(badgesRow);
+  }
+
+  function updateCalendarHoursBadge(cell, entries = null, dateId = '') {
+    if (!cell) {
+      return;
+    }
+
+    const header = cell.querySelector('.datagrid_month_cell_header');
+    if (!header) {
+      return;
+    }
+
+    header.querySelectorAll('.hours-badge').forEach((badge) => badge.remove());
+
+    const resolvedDateId = dateId || cell.getAttribute('data-id') || '';
+    let sourceEntries = entries;
+    if (!Array.isArray(sourceEntries)) {
+      sourceEntries = getEntriesFromCalendarCell(cell);
+    }
+
+    const totals = computeCalendarTotals(sourceEntries, resolvedDateId);
+    if (totals.totalHours <= 0) {
+      cell.removeAttribute('data-total-hours');
+      return;
+    }
+
+    const formatted = formatHourValue(totals.totalHours);
+    cell.setAttribute('data-total-hours', formatted);
   }
 
   if (!window.PayCalAriaEcho) {
@@ -4771,10 +5245,14 @@
           'CALENDAR_ENCRYPTED_DETAILS_UNAVAILABLE',
           'Encrypted work details are unavailable in this view.'
         );
+        const placeholderDisplay = buildWorkEntryDisplayFields(0, 0, 0, 0, true);
+        const placeholderFieldsMarkup = placeholderDisplay.fields.length > 0
+          ? `<br />${placeholderDisplay.fields.join('&nbsp;/&nbsp;')}`
+          : '';
         const placeholderAria = escapeText(window.PayCalAriaEcho.cadence(
           spokenSiteName ? `${spokenSiteName}. ${encryptedUnavailable}` : encryptedUnavailable
         ));
-        return `<div class="work work_${posClass}" aria-label="${placeholderAria}"><strong>${siteName}</strong><br />--&nbsp;/&nbsp;--&nbsp;/&nbsp;--&nbsp;/&nbsp;--</div>`;
+        return `<div class="work work_${posClass}" aria-label="${placeholderAria}"><strong>${siteName}</strong>${placeholderFieldsMarkup}</div>`;
       }
 
       const regularRaw = entry.regular_hours ?? entry.r;
@@ -4792,28 +5270,29 @@
       const overtimeValue = entryTotal - regularValue;
       displayDailyRegularUsed += regularValue;
 
-      const fields = [
-        formatHourValue(regularValue),
-        formatHourValue(overtimeValue),
-        formatHourValue(entry.living_out_allowance ?? entry.l ?? 0),
-        formatHourValue(entry.travel_hours ?? entry.t ?? 0),
-      ];
+      const displayFields = buildWorkEntryDisplayFields(
+        regularValue,
+        overtimeValue,
+        entry.living_out_allowance ?? entry.l ?? 0,
+        entry.travel_hours ?? entry.t ?? 0,
+        false,
+        entry.hours ?? entry.h ?? entryTotal,
+      );
+      const fields = displayFields.fields;
+      const spokenMetrics = displayFields.spokenMetrics;
 
       const spokenDate = (dateAria || '').toString().trim();
-      const spokenMetrics = [
-        `${fields[0]} regular hours`,
-        `${fields[1]} overtime hours`,
-        `${fields[2]} living out allowance`,
-        `${fields[3]} travel hours`,
-      ];
       const spokenSummary = window.PayCalAriaEcho.cadence(spokenMetrics, ', ');
       const lead = spokenDate ? `${spokenSiteName} on ${spokenDate}` : spokenSiteName;
-      const entryAriaLabel = escapeText(window.PayCalAriaEcho.cadence(spokenSummary ? `${lead}. ${spokenSummary}.` : `${lead}.`));
+      const entryAriaLabel = escapeText(window.PayCalAriaEcho.cadence(
+        spokenSummary ? `${lead}. ${spokenSummary}.` : `${lead}.`
+      ));
 
       const siteColorRaw = entry.site_color ? String(entry.site_color).toUpperCase() : '';
       const siteColorValid = /^#[0-9A-Fa-f]{6}$/i.test(siteColorRaw);
       const siteColorAttr = siteColorValid ? ` data-site-color="${escapeText(siteColorRaw)}"` : '';
-      return `<div class="work work_${posClass}"${siteColorAttr} aria-label="${entryAriaLabel}"><strong>${siteName}</strong><br />${fields.join('&nbsp;/&nbsp;')}</div>`;
+      const fieldsMarkup = fields.length > 0 ? `<br />${fields.join('&nbsp;/&nbsp;')}` : '';
+      return `<div class="work work_${posClass}"${siteColorAttr} aria-label="${entryAriaLabel}"><strong>${siteName}</strong>${fieldsMarkup}</div>`;
 
     }).join('');
   }

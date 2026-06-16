@@ -209,6 +209,11 @@ const PayCalCore = (() => {
     form_ttl_general_seconds : <?php echo (int) $user->getFormTtlGeneralSeconds(); ?>,
     help_popup_timeout_seconds : <?php echo (int) $user->getHelpPopupTimeoutSeconds(); ?>,
     overlay_sidebar_timeout_seconds : <?php echo (int) $user->getOverlaySidebarTimeoutSeconds(); ?>,
+    toast_position : <?php echo json_encode($user->getToastPosition(), JSON_UNESCAPED_UNICODE); ?>,
+    toast_font_size : <?php echo (int) $user->getToastFontSize(); ?>,
+    nav_proximity : <?php echo json_encode($user->isNavProximityEnabled() ? 'on' : 'off', JSON_UNESCAPED_UNICODE); ?>,
+    nav_overlay : <?php echo json_encode($user->isNavOverlayMode() ? 'overlay' : 'push', JSON_UNESCAPED_UNICODE); ?>,
+    nav_proximity_px : <?php echo (int) $user->getNavProximityPx(); ?>,
     languages            : { <?php
       $langEntries = [];
       foreach (\PayCal\Domain\Language::AVAILABLE as $code => $name) {
@@ -1461,8 +1466,8 @@ const PayCalCore = (() => {
       c: "/",
       r: "/reports/",
       s: "/sites/",
-      o: "/profile/",
-      e: "/settings/",
+      o: "/settings/account/",
+      e: "/settings/account/",
       a: "/about/",
       h: "/help/",
       n: "/transparency/",

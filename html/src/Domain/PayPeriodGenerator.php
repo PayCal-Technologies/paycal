@@ -155,6 +155,35 @@ final class PayPeriodGenerator
   }
 
   /**
+   * Resolve a stored pay period when available, otherwise compute one from user settings.
+   *
+   * Mirrors Calendar::getCurrentPayPeriods() fallback so calendar/earnings views still
+   * render when the requested date is outside the persisted Redis schedule window.
+   */
+  public static function resolveForDateOrCompute(User $user, \DateTimeImmutable $date): PayPeriods
+  {
+    $scheduled = self::resolveForDate($user, $date);
+    if (null !== $scheduled) {
+      return $scheduled;
+    }
+
+    $timezone = $user->timezone ?: 'America/Edmonton';
+    $zone = new \DateTimeZone($timezone);
+    $target = $date->setTimezone($zone)->setTime(0, 0, 0);
+    $frequency = self::resolveFrequency($user);
+    $anchor = self::normalizeAnchor($user->pay_anchor ?? 'Monday');
+    $epoch = null;
+    if ($frequency === PayFrequency::BIWEEKLY) {
+      $epochSource = is_string($user->pay_epoch) && $user->pay_epoch !== ''
+        ? $user->pay_epoch
+        : ($user->pay_period_start ?: '2024-01-01');
+      $epoch = self::normalizeDate($epochSource, $zone);
+    }
+
+    return PayPeriods::fromDate($target, $frequency, $anchor, $epoch, $timezone);
+  }
+
+  /**
    * Remove all persisted schedule data for a user.
    *
    * @param string $userUUID User UUID

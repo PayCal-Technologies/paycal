@@ -1,14 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
 # NEEDS TRANSLATION
 14_DAYS 14 दिन
 1_WEEK 1 सप्ताह
@@ -775,6 +766,7 @@ CALENDAR_HELP_LINK कैलेंडर सहायता
 CALENDAR_LOCKED_CANNOT_EDIT {date} ko edit nahi kar sakte - yeh avadhi lock hai
 CALENDAR_LOCKED_CANNOT_EDIT_GRACE {date} ko edit nahi kar sakte - yeh avadhi lock hai. Aap {days} aur {unit} tak entries edit kar sakte hain.
 CALENDAR_LOCKED_UNVERIFIED Jab tak aapka email verify nahi hota, calendar lock rahega. Apna account verify karne ke liye upar ka banner istemal karen.
+CALENDAR_MODAL_ADD Add
 CALENDAR_MODAL_ADD_ENTRY प्रविष्टि जोड़ें
 CALENDAR_MODAL_DESC चयनित दिन के लिए कार्य प्रविष्टियाँ संपादित या जोड़ें। पंक्तियाँ जोड़ने के लिए प्रविष्टि जोड़ें, परिवर्तन लागू करने के लिए सेव, या रद्द करने के लिए बंद करें का उपयोग करें।
 CALENDAR_MODAL_EMPTY इस तिथि के लिए कोई प्रविष्टि नहीं।
@@ -1479,6 +1471,7 @@ FIRST पहला
 FOCUS Focus
 FOOTER Footer
 FOOTER_COPYRIGHT © %s PayCal Technologies Inc. All rights reserved.
+FOOTER_TRADEMARK PayCal™ is a trademark of PayCal Technologies Inc. (registration pending).
 FOOTER_SOC2_BADGE_ARIA SOC 2 ऑडिट-तैयार — अनुपालन विवरण देखें
 FOR for
 FORECAST_ANCHOR_DATE Rotation Anchor Date
@@ -2706,6 +2699,32 @@ SESSION_TIMEOUT_MODAL_META Session timeout warning and extension
 SESSION_TIMEOUT_STAY_LOGGED_IN Stay Logged In
 SESSION_TIMEOUT_TITLE Session Timeout
 SETTINGS सेटिंग्स
+SETTINGS_ACCESSIBILITY_TYPOGRAPHY_FORM_ARIA Typography and readability preferences
+SETTINGS_DIAGNOSTICS_BASIC_DESC Start here for common fixes. Copy support info when contacting us.
+SETTINGS_DIAGNOSTICS_BASIC_TITLE Basic troubleshooting
+SETTINGS_DIAGNOSTICS_COPY_SUPPORT_INFO Copy support info
+SETTINGS_DIAGNOSTICS_LINK_ISSUE_REPORT Send issue report
+SETTINGS_DIAGNOSTICS_LINK_TROUBLESHOOTING Troubleshooting guide
+SETTINGS_NAV_ACCESSIBILITY Accessibility
+SETTINGS_NAV_APPEARANCE Appearance
+SETTINGS_NAV_ARIA Settings sections
+SETTINGS_NAV_CALENDAR Calendar
+SETTINGS_NAV_DATA Data
+SETTINGS_NAV_DIAGNOSTICS Diagnostics
+SETTINGS_NAV_SECURITY Security
+SETTINGS_PAGE_ACCESSIBILITY_DESC Audio cues, voice, typography, and readability options.
+SETTINGS_PAGE_ACCESSIBILITY_TITLE Accessibility
+SETTINGS_PAGE_APPEARANCE_DESC Theme, density, sidebar behavior, and toast timing.
+SETTINGS_PAGE_APPEARANCE_TITLE Appearance
+SETTINGS_PAGE_CALENDAR_DESC Calendar focus, labels, entry layout, and visible work fields.
+SETTINGS_PAGE_CALENDAR_TITLE Calendar
+SETTINGS_PAGE_DATA_DESC Export, import, and account data portability.
+SETTINGS_PAGE_DATA_TITLE Data
+SETTINGS_PAGE_DIAGNOSTICS_DESC Troubleshooting tools and optional developer diagnostics.
+SETTINGS_PAGE_DIAGNOSTICS_TITLE Diagnostics
+SETTINGS_PAGE_SECURITY_DESC Passkeys, session timing, sensitive actions, and emergency sign-out.
+SETTINGS_PAGE_SECURITY_TITLE Security
+SETTINGS_REDIRECT_LOADING Opening settings…
 SETTINGS_ACCOUNT_DETAILS_DESC Update your profile, recovery email, and employment details. Use Save to apply changes.
 SETTINGS_ACCOUNT_DETAILS_TITLE Account Details
 SETTINGS_ADD_DEVICE Add Device
@@ -2715,10 +2734,20 @@ SETTINGS_ARIA_EDIT_ACCOUNT_DETAILS Edit Account Details
 SETTINGS_ARIA_RECOVERY_ACCOUNT_DELETION_ACTIONS Recovery and account deletion actions
 SETTINGS_AUDIO_FEEDBACK_MODE_ARIA Audio feedback mode
 SETTINGS_CALENDAR_LABEL_AUDIO Audio
-SETTINGS_CALENDAR_LABEL_DATE Date
+SETTINGS_CALENDAR_LABEL_DATE Heading
+SETTINGS_CALENDAR_LABEL_POSITION Position
 SETTINGS_CALENDAR_LABEL_ENTRIES Entries
 SETTINGS_CALENDAR_LABEL_FIELDS Fields
-SETTINGS_CALENDAR_LABEL_LABEL Label
+SETTINGS_CALENDAR_LABEL_BADGES Badges
+SETTINGS_CALENDAR_BADGES_HOVER Toggle work field badges and calendar display options on the calendar.
+SETTINGS_CALENDAR_SHOW_GROSS_BADGE Gross
+SETTINGS_CALENDAR_SHOW_HOURS_BADGE Hours
+SETTINGS_CALENDAR_SHOW_REGULAR_BADGE Regular
+SETTINGS_CALENDAR_SHOW_NET_BADGE Net
+SETTINGS_CALENDAR_SHOW_DEDUCTIONS_BADGE Deductions
+SETTINGS_CALENDAR_PAY_PERIOD_BADGE Pay Period
+SETTINGS_CALENDAR_HIGHLIGHT_PAY_PERIOD Pay Period
+SETTINGS_CALENDAR_LABEL_LABEL Day
 SETTINGS_CALENDAR_LABEL_TODAY Today
 SETTINGS_CHANGE_EMAIL_CODE_PLACEHOLDER Enter 6-digit code
 SETTINGS_CHANGE_EMAIL_COMPLETE Complete Email Change
@@ -2937,6 +2966,7 @@ SITES_ARCHIVED_WORK_TITLE Archived Work
 SITES_ARCHIVED_WORK_TITLE_NAMED Archived Work: {name}
 SITES_ARCHIVE_CONFIRM_BODY «{name}» संग्रहित करें? कार्य प्रविष्टियाँ सुरक्षित रहेंगी।<br><br>आप इसे संग्रहीत टैब से पुनर्स्थापित या स्थायी रूप से हटा सकते हैं।
 SITES_ARCHIVE_SITE संग्रहित करें
+BUSINESS_PLANNING व्यावसायिक योजना
 SITES_BUSINESS_PLANNING_HEADING Business Planning
 SITES_CLIENT_LABEL Client
 SITES_CLIENT_PLACEHOLDER e.g. Imperial Oil
@@ -3763,6 +3793,7 @@ UPDATING_CALENDAR_AUDIO_LABELS_TO कैलेंडर ऑडियो ले�
 UPDATING_CALENDAR_AUTOFOCUS_TO कैलेंडर ऑटोफोकस अपडेट कर रहे हैं
 UPDATING_CALENDAR_DATE_LABEL_POSITION_TO Updating Calendar date label position to
 UPDATING_CALENDAR_DAY_NAME_FORMAT_TO Updating Calendar Day Name Format to
+UPDATING_CALENDAR_DAY_NAME_POSITION_TO Updating Calendar heading position to
 UPDATING_CALENDAR_WORK_ENTRY_POSITION_TO Updating Calendar work entry position to
 UPDATING_INFO Updating Info...
 UPDATING_LANGUAGE_TO भाषा अपडेट कर रहे हैं
@@ -3822,3 +3853,84 @@ YEAR_TO_DATE_EARNINGS वर्ष से अब तक की कमाई
 YOUR_EMAIL Email
 YOUR_NAME Name
 TRANSPARENCY_MEMBERS_PERFORMANCE_2026_06_PAGE_TITLE How We Made the Business Members Page ~100x Faster
+
+SETTINGS_DIAGNOSTICS_EXPORT_BUNDLE_BTN Copy debug bundle
+SETTINGS_DIAGNOSTICS_LINK_TRANSPARENCY How diagnostics work
+SETTINGS_VOICE_VOLUME_HOVER Adjust how loud spoken feedback plays in your browser.
+SETTINGS_VOICE_VOLUME_LABEL Volume
+SETTINGS_VOICE_PREVIEW_BTN Test voice
+SETTINGS_VOICE_PREVIEW_SAMPLE This is a preview of your selected voice.
+SETTINGS_JS_DIAGNOSTICS_BUNDLE_COPIED Debug bundle copied to clipboard.
+SETTINGS_JS_DIAGNOSTICS_BUNDLE_FAILED Could not copy the debug bundle automatically.
+SETTINGS_JS_SUPPORT_INFO_COPIED Support info copied to clipboard.
+SETTINGS_JS_SUPPORT_INFO_COPY_FAILED Could not copy automatically. Select and copy the text from your browser console instead.
+SETTINGS_JS_SUPPORT_INFO_LABEL PayCal support info
+SETTINGS_JS_VOICE_VOLUME_UPDATED Voice volume updated
+SETTINGS_JS_PASSKEY_ONBOARDING_TOAST Signed in on this phone. Tap Add another device to add a local passkey for this device.
+SETTINGS_JS_DEBUG_CONSOLE_TOAST_FMT Console messages: {label}
+SETTINGS_JS_DEBUG_FINE_GRAINED_TOAST_FMT Detailed diagnostics: {label}
+SETTINGS_JS_DEBUG_NETWORK_TOAST_FMT Network insights: {label}
+
+SETTINGS_NAV_ACCOUNT Account
+SETTINGS_PAGE_ACCOUNT_TITLE Account
+SETTINGS_PAGE_ACCOUNT_DESC Profile summary, language, timezone, and currency.
+SETTINGS_ACCOUNT_PROFILE_TITLE Profile
+SETTINGS_ACCOUNT_PROFILE_DESC Read-only summary. Use Edit account details for name, phone, province, and employment fields.
+SETTINGS_ACCOUNT_PROFILE_SUMMARY_ARIA Account profile summary
+SETTINGS_ACCOUNT_EDIT_DETAILS_BTN Edit account details
+SETTINGS_ACCOUNT_LOCALE_TITLE Locale
+SETTINGS_ACCOUNT_LOCALE_DESC Language, timezone, and currency preferences for your account.
+SETTINGS_ACCOUNT_LOCALE_FORM_ARIA Account locale preferences
+SETTINGS_ACCOUNT_LANGUAGE_HOVER Changes interface language after reload.
+SETTINGS_ACCOUNT_CURRENCY_HOVER Preferred currency for pay and earnings display.
+SETTINGS_CALENDAR_LABEL_WEEK_START Week starts on
+SETTINGS_CALENDAR_WEEK_START_HOVER Choose whether calendar weeks begin on Sunday or Monday.
+SETTINGS_CALENDAR_WEEK_START_SUNDAY Sunday
+SETTINGS_CALENDAR_WEEK_START_MONDAY Monday
+SETTINGS_CALENDAR_LABEL_DEFAULT_VIEW Default view
+SETTINGS_CALENDAR_DEFAULT_VIEW_HOVER Choose which calendar view opens first.
+SETTINGS_CALENDAR_DEFAULT_VIEW_MONTH Month
+SETTINGS_CALENDAR_DEFAULT_VIEW_PAY_PERIOD Period
+SETTINGS_CALENDAR_DEFAULT_VIEW_WEEK Week
+
+SETTINGS_JS_TIMEZONE_UPDATED Timezone updated
+SETTINGS_JS_CURRENCY_UPDATED Currency updated
+UPDATING_CALENDAR_WEEK_START_TO Updating calendar week start to
+UPDATING_CALENDAR_DEFAULT_VIEW_TO Updating calendar default view to
+SETTINGS_APPEARANCE_NOTIFICATIONS_FORM_ARIA Notification appearance preferences
+SETTINGS_APPEARANCE_NOTIFICATIONS_TITLE Notifications
+SETTINGS_APPEARANCE_SIDEBAR_FORM_ARIA Sidebar appearance preferences
+SETTINGS_APPEARANCE_SIDEBAR_TITLE Sidebar
+SETTINGS_APPEARANCE_THEME_TITLE Theme
+SETTINGS_DURATION_LABEL Duration
+SETTINGS_JS_NAV_DISTANCE_UPDATED Sidebar distance updated
+SETTINGS_JS_TOAST_POSITION_UPDATED Toast position updated
+SETTINGS_JS_TOAST_SIZE_UPDATED Toast size updated
+SETTINGS_JS_TOAST_WIDTH_UPDATED Toast width updated
+SETTINGS_NAV_DISTANCE_HOVER How close the mouse must get to the sidebar edge before it reveals. 0 = edge only, 600 = most of the screen.
+SETTINGS_NAV_DISTANCE_LABEL Distance
+SETTINGS_NAV_OVERLAY_HOVER Push shifts page content aside when the sidebar is open. Overlay floats the sidebar on top of content.
+SETTINGS_NAV_OVERLAY_LABEL Overlay
+SETTINGS_NAV_PROXIMITY_HOVER Automatically reveal the sidebar when the mouse moves near its edge.
+SETTINGS_NAV_PROXIMITY_LABEL Proximity
+SETTINGS_STYLE_LABEL_POSITION Position
+SETTINGS_TOAST_POSITION_HOVER Choose where toast notifications appear on screen.
+SETTINGS_TOAST_POSITION_LABEL Position
+SETTINGS_TOAST_POSITION_LOWER_CENTER Lower center
+SETTINGS_TOAST_POSITION_LOWER_LEFT Lower left
+SETTINGS_TOAST_POSITION_LOWER_RIGHT Lower right
+SETTINGS_TOAST_POSITION_UPPER_CENTER Upper center
+SETTINGS_TOAST_POSITION_UPPER_LEFT Upper left
+SETTINGS_TOAST_POSITION_UPPER_RIGHT Upper right
+SETTINGS_TOAST_POSITION_FULL_TOP Full top
+SETTINGS_TOAST_POSITION_FULL_BOTTOM Full bottom
+SETTINGS_TOAST_SIZE_HOVER Adjust toast notification text size. 0 is the default.
+SETTINGS_TOAST_SIZE_LABEL Size
+SETTINGS_TOAST_WIDTH_FULL_WIDTH Full width
+SETTINGS_TOAST_WIDTH_HOVER Choose the maximum width for toast notifications.
+SETTINGS_TOAST_WIDTH_LABEL Width
+SETTINGS_TOAST_WIDTH_LARGE Large
+SETTINGS_TOAST_WIDTH_LARGER Larger
+SETTINGS_TOAST_WIDTH_NARROW Narrow
+SETTINGS_TOAST_WIDTH_NORMAL Normal
+SETTINGS_TOAST_WIDTH_TINY Tiny

@@ -6,7 +6,7 @@ PayCal™ is a payroll tracking platform focused on transparency, accessibility,
 
 The goal is simple: make pay easier to understand while keeping personal financial data private.
 
-Latest documented release: **v1.058.000**
+Latest documented release: **v1.057.006**
 
 [![Test
 Suite](https://img.shields.io/badge/tests-1574%20listed-blue)](html/tests/)
@@ -345,13 +345,37 @@ bash scripts/native-fix-redis-launchagent.sh
 
 # Recent Releases
 
-## v1.058.000 (2026-06-13)
+## v1.057.006 (2026-06-15)
 
-**Release Focus:** Public business extension shell, v1.057 core promotion, and README version gate
+**Release Focus:** Mobile sidebar hamburger icon visibility fix
 
-- Added `business-surface` extension with minimal `/business/*` IA stub pages and shared extension disclaimers on business and admin surfaces.
-- Promoted v1.057 core features, A11y/i18n sweep, page-edge spacing, and reports consolidation while keeping private moat tools out of the public tree (SOC2 admin, Argus, full workspace UI).
-- Enforced README release documentation on pre-commit (when `VERSION`/`README.md` change) and on every pre-push via `scripts/hooks/check-readme-version.sh`.
+- See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
+
+
+## v1.057.005 (2026-06-15)
+
+**Release Focus:** Mobile sidebar navigation and compact page-title bar
+
+- See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
+
+
+## v1.057.004 (2026-06-15)
+
+**Release Focus:** docs(governance): reframe GitHub as passive storage, local CI authoritative
+
+- See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
+
+
+## v1.057.000 (2026-06-12)
+
+**Release Focus:** Business IA launch, three-tier billing, Argus observability, trust/listing moderation, and members workspace polish
+
+- Shipped Public / Premium / Business billing tiers with profile billing matrix UX, Stripe checkout integration, and tier-gated business capabilities.
+- Added business trust, visibility, and listing-submission moderation with admin review console, search-index eligibility, and audit ledger events.
+- Introduced Argus observability control panel with trace packages, investigation presets, capture scope, mandatory expiry, `trace_id` timelines, and admin toasts.
+- Rebuilt business workspace IA (organization → business rename) with governance, payroll, sites, reports, members, and audit subpages plus pending-members accordion.
+- Consolidated earnings under `/reports/`, redesigned forecast workspace, expanded i18n across business/calendar/earnings surfaces, and hardened members grid Redis cache performance.
+- Documented production deploy hygiene: preserve server `.env`, sync vendor via `composer install`, reload services after promotion.
 
 See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
 

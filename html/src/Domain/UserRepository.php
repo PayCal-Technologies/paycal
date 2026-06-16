@@ -77,6 +77,12 @@ final class UserRepository
         continue;
       }
 
+      if (in_array($property, ['calendar_show_gross_badge', 'calendar_show_net_badge', 'calendar_show_deductions_badge', 'calendar_highlight_pay_period'], true)) {
+        $u->{$property} = (bool) (int) $value;
+
+        continue;
+      }
+
       // Special case: int-typed property
       if ('dek_version' === $property) {
         $u->dek_version = (int) $value;
@@ -507,6 +513,9 @@ final class UserRepository
       case 'calendar_work_entry_fields_hours':
         $user->calendar_work_entry_fields_hours = $value;
         return;
+      case 'calendar_work_entry_fields_regular':
+        $user->calendar_work_entry_fields_regular = $value;
+        return;
       case 'calendar_work_entry_fields_overtime':
         $user->calendar_work_entry_fields_overtime = $value;
         return;
@@ -587,11 +596,29 @@ final class UserRepository
       case 'help_popup_timeout_seconds':
         $user->help_popup_timeout_seconds = $value;
         return;
+      case 'toast_position':
+        $user->toast_position = $value;
+        return;
+      case 'toast_width_preset':
+        $user->toast_width_preset = $value;
+        return;
+      case 'toast_font_size':
+        $user->toast_font_size = $value;
+        return;
       case 'nav_position_primary':
         $user->nav_position_primary = $value;
         return;
       case 'nav_state_primary':
         $user->nav_state_primary = $value;
+        return;
+      case 'nav_proximity':
+        $user->nav_proximity = $value;
+        return;
+      case 'nav_overlay':
+        $user->nav_overlay = $value;
+        return;
+      case 'nav_proximity_px':
+        $user->nav_proximity_px = $value;
         return;
       case 'overlay_sidebar_timeout_seconds':
         $user->overlay_sidebar_timeout_seconds = $value;
@@ -605,14 +632,68 @@ final class UserRepository
       case 'calendar_day_name_format':
         $user->calendar_day_name_format = $value;
         return;
+      case 'calendar_day_name_position':
+        $user->calendar_day_name_position = $value;
+        return;
       case 'calendar_date_label_position':
         $user->calendar_date_label_position = $value;
         return;
       case 'calendar_work_entry_position':
         $user->calendar_work_entry_position = $value;
         return;
+      case 'calendar_week_start':
+        $user->calendar_week_start = $value;
+        return;
+      case 'calendar_default_view':
+        $user->calendar_default_view = $value;
+        return;
+      case 'calendar_show_gross_badge':
+        $user->calendar_show_gross_badge = (bool) (int) $value;
+        return;
+      case 'calendar_show_net_badge':
+        $user->calendar_show_net_badge = (bool) (int) $value;
+        return;
+      case 'calendar_show_deductions_badge':
+        $user->calendar_show_deductions_badge = (bool) (int) $value;
+        return;
+      case 'calendar_highlight_pay_period':
+        $user->calendar_highlight_pay_period = (bool) (int) $value;
+        return;
+      case 'accent_preset':
+        $user->accent_preset = $value;
+        return;
+      case 'high_contrast_enabled':
+        $user->high_contrast_enabled = $value;
+        return;
+      case 'reduced_motion_enabled':
+        $user->reduced_motion_enabled = $value;
+        return;
+      case 'sr_verbosity':
+        $user->sr_verbosity = $value;
+        return;
+      case 'keyboard_shortcuts_hint':
+        $user->keyboard_shortcuts_hint = $value;
+        return;
+      case 'require_reauth_export':
+        $user->require_reauth_export = $value;
+        return;
+      case 'require_reauth_import':
+        $user->require_reauth_import = $value;
+        return;
+      case 'export_encrypt_preference':
+        $user->export_encrypt_preference = $value;
+        return;
+      case 'debug_ttl_minutes':
+        $user->debug_ttl_minutes = $value;
+        return;
+      case 'debug_enabled_until':
+        $user->debug_enabled_until = $value;
+        return;
       case 'voice':
         $user->voice = $value;
+        return;
+      case 'voice_volume':
+        $user->voice_volume = $value;
         return;
       case 'audio_feedback':
         $user->audio_feedback = $value;
@@ -718,5 +799,4 @@ final class UserRepository
     return AuthLevel::GUEST;
   }
 }
-
 

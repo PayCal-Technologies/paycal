@@ -118,7 +118,7 @@ final class UserLocaleContractTest extends TestCase
     $this->assertStringNotContainsString("['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']", $dataGrid);
     $this->assertStringContainsString('function calendarUserLocale()', $calendarJs);
     $this->assertStringContainsString('function calendarConfig()', $calendarJs);
-    $this->assertStringContainsString('window.__CALENDAR_I18N__', $calendarJs);
+    $this->assertStringContainsString('calendar-page-i18n', $calendarJs);
     $this->assertStringNotContainsString("toLocaleDateString('en-US'", $calendarJs);
     $this->assertStringContainsString('payPeriodLocale', $settingsJs);
     $this->assertStringContainsString('PC?.config?.USER_LOCALE', $settingsJs);

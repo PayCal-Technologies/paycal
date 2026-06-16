@@ -26,8 +26,10 @@ use PayCal\Domain\Enums\Timezone;
 use PayCal\Domain\SystemLimits;
 use PayCal\Domain\User;
 use PayCal\Domain\UserPreferenceDefaults;
-use PayCal\Domain\UserRepository;
 use PayCal\Domain\UserSettings;
+use PayCal\Domain\UserRepository;
+use PayCal\Domain\UserSessionService;
+use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Work;
 use PayCal\Domain\WorkEntryLockService;
 
@@ -263,41 +265,59 @@ class SettingsController
       return;
     }
 
+    if ((string) $user->require_reauth_export === '1' && !self::hasRecentPasskeyStepUp()) {
+      Response::error('[SC] Passkey verification required before export.', [
+        'step_up_required' => true,
+      ], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    $includeUser = InputSanitizer::postString('export_section_user') !== '0';
+    $includeSites = InputSanitizer::postString('export_section_sites') !== '0';
+    $includeWork = InputSanitizer::postString('export_section_work') !== '0';
+    if (!$includeUser && !$includeSites && !$includeWork) {
+      $includeUser = $includeSites = $includeWork = true;
+    }
+
     $sites = [];
-    foreach (\PayCal\Domain\Sites::getSites($userUUID, 'all') as $siteId => $siteData) {
-      $sites[] = [
-        'id' => $this->scalarString($siteId),
-        'site_name' => $this->scalarString($siteData['site_name'] ?? ''),
-        'wage' => $this->scalarString($siteData['wage'] ?? ''),
-        'living_out_allowance' => $this->scalarString($siteData['living_out_allowance'] ?? ''),
-        'travel_hours' => $this->scalarString($siteData['travel_hours'] ?? ''),
-        'status' => $this->scalarString($siteData['status'] ?? 'active'),
-        'province' => $this->scalarString($siteData['province'] ?? ''),
-      ];
+    if ($includeSites) {
+      foreach (\PayCal\Domain\Sites::getSites($userUUID, 'all') as $siteId => $siteData) {
+        $sites[] = [
+          'id' => $this->scalarString($siteId),
+          'site_name' => $this->scalarString($siteData['site_name'] ?? ''),
+          'wage' => $this->scalarString($siteData['wage'] ?? ''),
+          'living_out_allowance' => $this->scalarString($siteData['living_out_allowance'] ?? ''),
+          'travel_hours' => $this->scalarString($siteData['travel_hours'] ?? ''),
+          'status' => $this->scalarString($siteData['status'] ?? 'active'),
+          'province' => $this->scalarString($siteData['province'] ?? ''),
+        ];
+      }
     }
 
     $workEntries = [];
-    $start = new \DateTimeImmutable('1970-01-01');
-    $end = new \DateTimeImmutable('2100-01-01');
-    foreach (Work::getWorkInRange($start, $end, $userUUID) as $key => $workData) {
-      $isArchived = str_starts_with($this->scalarString($key), Keys::WORK . ':archived:');
-      $workEntries[] = [
-        'date' => $this->scalarString($workData['date'] ?? ''),
-        'site_id' => $this->scalarString($workData['site_id'] ?? ''),
-        'site_name' => $this->scalarString($workData['site_name'] ?? ''),
-        'hours' => $this->scalarString($workData['hours'] ?? ''),
-        'regular_hours' => $this->scalarString($workData['regular_hours'] ?? ''),
-        'overtime_hours' => $this->scalarString($workData['overtime_hours'] ?? ''),
-        'living_out_allowance' => $this->scalarString($workData['living_out_allowance'] ?? ''),
-        'travel_hours' => $this->scalarString($workData['travel_hours'] ?? ''),
-        'wage' => $this->scalarString($workData['wage'] ?? ''),
-        'gross' => isset($workData['gross']) ? $this->scalarString($workData['gross']) : '',
-        'tax' => isset($workData['tax']) ? $this->scalarString($workData['tax']) : '',
-        'net' => isset($workData['net']) ? $this->scalarString($workData['net']) : '',
-        'other' => isset($workData['other']) ? $this->scalarString($workData['other']) : '',
-        'encrypted_blob' => $this->scalarString($workData['encrypted_blob'] ?? ''),
-        'archived' => $isArchived,
-      ];
+    if ($includeWork) {
+      $start = new \DateTimeImmutable('1970-01-01');
+      $end = new \DateTimeImmutable('2100-01-01');
+      foreach (Work::getWorkInRange($start, $end, $userUUID) as $key => $workData) {
+        $isArchived = str_starts_with($this->scalarString($key), Keys::WORK . ':archived:');
+        $workEntries[] = [
+          'date' => $this->scalarString($workData['date'] ?? ''),
+          'site_id' => $this->scalarString($workData['site_id'] ?? ''),
+          'site_name' => $this->scalarString($workData['site_name'] ?? ''),
+          'hours' => $this->scalarString($workData['hours'] ?? ''),
+          'regular_hours' => $this->scalarString($workData['regular_hours'] ?? ''),
+          'overtime_hours' => $this->scalarString($workData['overtime_hours'] ?? ''),
+          'living_out_allowance' => $this->scalarString($workData['living_out_allowance'] ?? ''),
+          'travel_hours' => $this->scalarString($workData['travel_hours'] ?? ''),
+          'wage' => $this->scalarString($workData['wage'] ?? ''),
+          'gross' => isset($workData['gross']) ? $this->scalarString($workData['gross']) : '',
+          'tax' => isset($workData['tax']) ? $this->scalarString($workData['tax']) : '',
+          'net' => isset($workData['net']) ? $this->scalarString($workData['net']) : '',
+          'other' => isset($workData['other']) ? $this->scalarString($workData['other']) : '',
+          'encrypted_blob' => $this->scalarString($workData['encrypted_blob'] ?? ''),
+          'archived' => $isArchived,
+        ];
+      }
     }
 
     $payload = [
@@ -307,8 +327,14 @@ class SettingsController
       'security' => [
         'contains_plaintext' => true,
         'warning' => self::DATA_EXPORT_PLAINTEXT_WARNING,
+        'client_encrypt_recommended' => (string) $user->export_encrypt_preference === '1',
       ],
-      'user' => $this->buildPortableUserData($user),
+      'sections' => [
+        'user' => $includeUser,
+        'sites' => $includeSites,
+        'work_entries' => $includeWork,
+      ],
+      'user' => $includeUser ? $this->buildPortableUserData($user) : new \stdClass(),
       'sites' => $sites,
       'work_entries' => $workEntries,
     ];
@@ -327,6 +353,16 @@ class SettingsController
       'work_entry_count' => count($workEntries),
     ]);
 
+    self::appendExportHistory($userUUID, [
+      'reference' => $payload['reference'],
+      'exported_at' => $payload['exported_at'],
+      'checksum_sha256' => hash('sha256', $payloadJson),
+      'counts' => [
+        'sites' => count($sites),
+        'work_entries' => count($workEntries),
+      ],
+    ]);
+
     Response::success('[SC] Account data export prepared.', [
       'schema_version' => self::DATA_TRANSFER_SCHEMA_VERSION,
       'reference' => $payload['reference'],
@@ -338,6 +374,66 @@ class SettingsController
         'work_entries' => count($workEntries),
       ],
       'payload' => $payload,
+    ], HttpStatus::HTTP_OK);
+  }
+
+  #[Route('account/sessions/list', ['POST'])]
+  public function listAccountSessions(): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    $userUUID = User::currentUUID();
+    $csrfToken = InputSanitizer::postString('csrf_token');
+    $user = UserRepository::getByUUID($userUUID);
+    if (!$user || !$user->verifyFormNonce('settings', $csrfToken)) {
+      Response::error('Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    $currentHash = Authentication::getSessionHashFromCookie() ?? '';
+    Response::success('[SC] Sessions listed.', [
+      'sessions' => UserSessionService::listForUser($userUUID, $currentHash !== '' ? $currentHash : null),
+    ], HttpStatus::HTTP_OK);
+  }
+
+  #[Route('account/sessions/revoke_others', ['POST'])]
+  public function revokeOtherAccountSessions(): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    $userUUID = User::currentUUID();
+    $csrfToken = InputSanitizer::postString('csrf_token');
+    $user = UserRepository::getByUUID($userUUID);
+    if (!$user || !$user->verifyFormNonce('settings', $csrfToken)) {
+      Response::error('Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    $currentHash = Authentication::getSessionHashFromCookie() ?? '';
+    if ($currentHash === '') {
+      Response::error('[SC] No active session.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $revoked = UserSessionService::revokeOtherSessions($userUUID, $currentHash);
+    Response::success('[SC] Other sessions revoked.', ['revoked' => $revoked], HttpStatus::HTTP_OK);
+  }
+
+  #[Route('account/export/history', ['POST'])]
+  public function listExportHistory(): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    $userUUID = User::currentUUID();
+    $csrfToken = InputSanitizer::postString('csrf_token');
+    $user = UserRepository::getByUUID($userUUID);
+    if (!$user || !$user->verifyFormNonce('settings', $csrfToken)) {
+      Response::error('Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    Response::success('[SC] Export history loaded.', [
+      'history' => self::readExportHistory($userUUID),
     ], HttpStatus::HTTP_OK);
   }
 
@@ -353,6 +449,14 @@ class SettingsController
   public function prepareAccountDataImport(): void
   {
     Authentication::abortIfUnauthenticated();
+
+    $user = UserRepository::getByUUID(User::currentUUID());
+    if ($user && (string) $user->require_reauth_import === '1' && !self::hasRecentPasskeyStepUp()) {
+      Response::error('[SC] Passkey verification required before import.', [
+        'step_up_required' => true,
+      ], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
 
     $allowedStrings = ['payload_json'];
     $droppedKeys = [];
@@ -629,6 +733,7 @@ class SettingsController
       'audio_feedback' => (string) $user->audio_feedback,
       'editing_grace_days' => (string) $user->editing_grace_days,
       'calendar_work_entry_fields_hours' => $user->calendar_work_entry_fields_hours,
+      'calendar_work_entry_fields_regular' => $user->calendar_work_entry_fields_regular,
       'calendar_work_entry_fields_overtime' => $user->calendar_work_entry_fields_overtime,
       'calendar_work_entry_fields_living_out' => $user->calendar_work_entry_fields_living_out,
       'calendar_work_entry_fields_travel' => $user->calendar_work_entry_fields_travel,
@@ -666,6 +771,7 @@ class SettingsController
       'audio_feedback',
       'editing_grace_days',
       'calendar_work_entry_fields_hours',
+      'calendar_work_entry_fields_regular',
       'calendar_work_entry_fields_overtime',
       'calendar_work_entry_fields_living_out',
       'calendar_work_entry_fields_travel',
@@ -680,6 +786,7 @@ class SettingsController
       $value = $userPayload[$field];
       if (in_array($field, [
         'calendar_work_entry_fields_hours',
+        'calendar_work_entry_fields_regular',
         'calendar_work_entry_fields_overtime',
         'calendar_work_entry_fields_living_out',
         'calendar_work_entry_fields_travel',
@@ -952,9 +1059,12 @@ class SettingsController
     $filtered = self::normalizeThemeVariant($filtered);
     $filtered = self::normalizeStylePreferences($filtered);
     $filtered = self::normalizeCalendarPreferences($filtered);
+    $filtered = self::normalizeAudioPreferences($filtered);
     $filtered = self::normalizeNavigationPreferences($filtered);
     $filtered = self::normalizePayPeriodPreferences($filtered);
     $filtered = self::normalizeAccountInfoPreferences($filtered);
+    $filtered = self::normalizeExtendedPreferences($filtered);
+    $filtered = self::applyDebugTtlSideEffects($filtered);
 
     $normalizedPayPeriodDebug = [];
     foreach (['pay_period_start', 'pay_frequency', 'pay_anchor', 'editing_grace_days', 'pay_period_length', 'pay_epoch'] as $field) {
@@ -984,6 +1094,8 @@ class SettingsController
 
       return;
     }
+
+    self::expireDebugPreferencesIfNeeded($user);
 
     // CSRF verification
     $csrfToken = InputSanitizer::postString('csrf_token');
@@ -1261,6 +1373,26 @@ class SettingsController
         : UserPreferenceDefaults::DEFAULT_HELP_POPUP_TIMEOUT_SECONDS;
     }
 
+    if (isset($filtered['toast_position'])) {
+      $positionRaw = is_scalar($filtered['toast_position']) ? strtolower(trim((string) $filtered['toast_position'])) : '';
+      $allowedPositions = ['upper-left', 'upper-center', 'upper-right', 'lower-left', 'lower-center', 'lower-right', 'full-top', 'full-bottom'];
+      $filtered['toast_position'] = in_array($positionRaw, $allowedPositions, true)
+        ? $positionRaw
+        : UserPreferenceDefaults::DEFAULT_TOAST_POSITION;
+    }
+
+    if (isset($filtered['toast_width_preset'])) {
+      $widthRaw = is_scalar($filtered['toast_width_preset']) ? strtolower(trim((string) $filtered['toast_width_preset'])) : '';
+      $allowedWidths = ['tiny', 'narrow', 'normal', 'large', 'larger', 'full-width'];
+      $filtered['toast_width_preset'] = in_array($widthRaw, $allowedWidths, true)
+        ? $widthRaw
+        : UserPreferenceDefaults::DEFAULT_TOAST_WIDTH_PRESET;
+    }
+
+    if (isset($filtered['toast_font_size'])) {
+      $filtered['toast_font_size'] = (string) max(-5, min(5, is_numeric($filtered['toast_font_size']) ? (int) $filtered['toast_font_size'] : 0));
+    }
+
     return $filtered;
   }
 
@@ -1278,6 +1410,24 @@ class SettingsController
       }
       if (!in_array($filtered['calendar_autofocus'], ['first', 'today', 'last'], true)) {
         $filtered['calendar_autofocus'] = 'today';
+      }
+    }
+
+    if (isset($filtered['calendar_day_name_format'])) {
+      $dayNameFormat = is_scalar($filtered['calendar_day_name_format'])
+        ? strtolower(trim((string) $filtered['calendar_day_name_format']))
+        : '';
+      $filtered['calendar_day_name_format'] = in_array($dayNameFormat, ['narrow', 'short', 'long'], true)
+        ? $dayNameFormat
+        : UserPreferenceDefaults::DEFAULT_CALENDAR_DAY_NAME_FORMAT;
+    }
+
+    if (isset($filtered['calendar_day_name_position'])) {
+      if ('center' === $filtered['calendar_day_name_position']) {
+        $filtered['calendar_day_name_position'] = 'middle';
+      }
+      if (!in_array($filtered['calendar_day_name_position'], ['left', 'middle', 'right'], true)) {
+        $filtered['calendar_day_name_position'] = UserPreferenceDefaults::DEFAULT_CALENDAR_DAY_NAME_POSITION;
       }
     }
 
@@ -1299,6 +1449,28 @@ class SettingsController
       }
     }
 
+    if (isset($filtered['calendar_week_start'])) {
+      $weekStart = is_scalar($filtered['calendar_week_start']) ? trim((string) $filtered['calendar_week_start']) : '';
+      $filtered['calendar_week_start'] = $weekStart === '1' ? '1' : '0';
+    }
+
+    if (isset($filtered['calendar_default_view'])) {
+      $view = is_scalar($filtered['calendar_default_view']) ? strtolower(trim((string) $filtered['calendar_default_view'])) : '';
+      if (!in_array($view, ['month', 'week', 'pay_period'], true)) {
+        unset($filtered['calendar_default_view']);
+      } else {
+        $filtered['calendar_default_view'] = $view;
+      }
+    }
+
+    foreach (['calendar_show_gross_badge', 'calendar_show_net_badge', 'calendar_show_deductions_badge', 'calendar_highlight_pay_period'] as $boolField) {
+      if (isset($filtered[$boolField])) {
+        $raw = $filtered[$boolField];
+        $value = is_scalar($raw) ? strtolower(trim((string) $raw)) : '';
+        $filtered[$boolField] = in_array($value, ['1', 'true'], true) ? '1' : '0';
+      }
+    }
+
     // Validate editing_grace_days range
     if (isset($filtered['editing_grace_days'])) {
       $graceRaw = $filtered['editing_grace_days'];
@@ -1310,6 +1482,30 @@ class SettingsController
         $filtered['editing_grace_days'] = (string) max($minDays, min($maxDays, $graceDays));
       } else {
         $filtered['editing_grace_days'] = (string) $graceDays;
+      }
+    }
+
+    return $filtered;
+  }
+
+  /**
+   * Normalize audio/TTS preference values.
+   *
+   * @param array<string, mixed> $filtered
+   * @return array<string, mixed>
+   */
+  private static function normalizeAudioPreferences(array $filtered): array
+  {
+    if (isset($filtered['voice_volume'])) {
+      $raw = is_scalar($filtered['voice_volume']) ? trim((string) $filtered['voice_volume']) : '';
+      if (preg_match('/^\d+$/', $raw) === 1) {
+        $percent = max(0, min(100, (int) $raw));
+        $filtered['voice_volume'] = (string) round($percent / 100, 2);
+      } elseif (is_numeric($raw)) {
+        $volume = (float) $raw;
+        $filtered['voice_volume'] = (string) round(max(0.0, min(1.0, $volume)), 2);
+      } else {
+        $filtered['voice_volume'] = UserPreferenceDefaults::DEFAULT_VOICE_VOLUME;
       }
     }
 
@@ -1349,6 +1545,28 @@ class SettingsController
       $filtered['overlay_sidebar_timeout_seconds'] = ($timeout >= 0 && $timeout <= 30)
         ? (string) $timeout
         : UserPreferenceDefaults::DEFAULT_OVERLAY_SIDEBAR_TIMEOUT_SECONDS;
+    }
+
+    if (isset($filtered['nav_proximity'])) {
+      $proximityRaw = is_scalar($filtered['nav_proximity']) ? strtolower(trim((string) $filtered['nav_proximity'])) : '';
+      $filtered['nav_proximity'] = in_array($proximityRaw, ['on', 'off'], true)
+        ? $proximityRaw
+        : UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY;
+    }
+
+    if (isset($filtered['nav_overlay'])) {
+      $overlayRaw = is_scalar($filtered['nav_overlay']) ? strtolower(trim((string) $filtered['nav_overlay'])) : '';
+      $filtered['nav_overlay'] = in_array($overlayRaw, ['overlay', 'push'], true)
+        ? $overlayRaw
+        : UserPreferenceDefaults::DEFAULT_NAV_OVERLAY;
+    }
+
+    if (isset($filtered['nav_proximity_px'])) {
+      $pxRaw = $filtered['nav_proximity_px'];
+      $px = is_numeric($pxRaw) ? (int) $pxRaw : -1;
+      $filtered['nav_proximity_px'] = ($px >= 0 && $px <= 600)
+        ? (string) $px
+        : UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY_PX;
     }
 
     return $filtered;
@@ -1486,5 +1704,185 @@ class SettingsController
 
     return $filtered;
   }
-}
 
+  /**
+   * @param array<string, mixed> $filtered
+   * @return array<string, mixed>
+   */
+  private static function normalizeExtendedPreferences(array $filtered): array
+  {
+    if (isset($filtered['accent_preset'])) {
+      $preset = is_scalar($filtered['accent_preset']) ? strtolower(trim((string) $filtered['accent_preset'])) : '';
+      $allowed = ['default', 'ocean', 'forest', 'sunset', 'slate'];
+      $filtered['accent_preset'] = in_array($preset, $allowed, true)
+        ? $preset
+        : UserPreferenceDefaults::DEFAULT_ACCENT_PRESET;
+    }
+
+    if (isset($filtered['high_contrast_enabled'])) {
+      $raw = $filtered['high_contrast_enabled'];
+      $filtered['high_contrast_enabled'] = is_scalar($raw) && trim((string) $raw) === '1' ? '1' : '0';
+    }
+
+    if (isset($filtered['reduced_motion_enabled'])) {
+      $value = is_scalar($filtered['reduced_motion_enabled']) ? strtolower(trim((string) $filtered['reduced_motion_enabled'])) : '';
+      $filtered['reduced_motion_enabled'] = in_array($value, ['off', 'on', 'system'], true)
+        ? $value
+        : UserPreferenceDefaults::DEFAULT_REDUCED_MOTION_ENABLED;
+    }
+
+    if (isset($filtered['sr_verbosity'])) {
+      $value = is_scalar($filtered['sr_verbosity']) ? strtolower(trim((string) $filtered['sr_verbosity'])) : '';
+      $filtered['sr_verbosity'] = in_array($value, ['minimal', 'standard', 'verbose'], true)
+        ? $value
+        : UserPreferenceDefaults::DEFAULT_SR_VERBOSITY;
+    }
+
+    if (isset($filtered['keyboard_shortcuts_hint'])) {
+      $value = is_scalar($filtered['keyboard_shortcuts_hint']) ? strtolower(trim((string) $filtered['keyboard_shortcuts_hint'])) : '';
+      $filtered['keyboard_shortcuts_hint'] = in_array($value, ['off', 'first_visit', 'always'], true)
+        ? $value
+        : UserPreferenceDefaults::DEFAULT_KEYBOARD_SHORTCUTS_HINT;
+    }
+
+    foreach (['require_reauth_export', 'require_reauth_import', 'export_encrypt_preference'] as $flag) {
+      if (isset($filtered[$flag])) {
+        $raw = $filtered[$flag];
+        $filtered[$flag] = is_scalar($raw) && trim((string) $raw) === '1' ? '1' : '0';
+      }
+    }
+
+    if (isset($filtered['debug_ttl_minutes'])) {
+      $minutes = is_numeric($filtered['debug_ttl_minutes']) ? (int) $filtered['debug_ttl_minutes'] : 0;
+      $filtered['debug_ttl_minutes'] = in_array($minutes, [0, 15, 30, 60, 240], true)
+        ? (string) $minutes
+        : UserPreferenceDefaults::DEFAULT_DEBUG_TTL_MINUTES;
+    }
+
+    return $filtered;
+  }
+
+  /**
+   * @param array<string, mixed> $filtered
+   * @return array<string, mixed>
+   */
+  private static function applyDebugTtlSideEffects(array $filtered): array
+  {
+    $debugFields = ['debug_console_enabled', 'debug_fine_grained_enabled', 'debug_network_enabled'];
+    $enabling = false;
+    foreach ($debugFields as $field) {
+      $raw = $filtered[$field] ?? null;
+      if (is_scalar($raw) && trim((string) $raw) === '1') {
+        $enabling = true;
+        break;
+      }
+    }
+
+    if (!$enabling) {
+      return $filtered;
+    }
+
+    $ttlRaw = $filtered['debug_ttl_minutes'] ?? UserPreferenceDefaults::DEFAULT_DEBUG_TTL_MINUTES;
+    $ttlMinutes = is_numeric($ttlRaw) ? (int) $ttlRaw : (int) UserPreferenceDefaults::DEFAULT_DEBUG_TTL_MINUTES;
+
+    if ($ttlMinutes > 0) {
+      $filtered['debug_enabled_until'] = (string) (time() + ($ttlMinutes * 60));
+    } else {
+      $filtered['debug_enabled_until'] = '';
+    }
+
+    return $filtered;
+  }
+
+  private static function expireDebugPreferencesIfNeeded(User $user): void
+  {
+    $untilRaw = trim($user->debug_enabled_until);
+    if ($untilRaw === '' || !ctype_digit($untilRaw)) {
+      return;
+    }
+
+    if ((int) $untilRaw > time()) {
+      return;
+    }
+
+    $user->updateSettings([
+      'debug_console_enabled' => '0',
+      'debug_fine_grained_enabled' => '0',
+      'debug_network_enabled' => '0',
+      'debug_enabled_until' => '',
+    ]);
+  }
+
+  private static function hasRecentPasskeyStepUp(): bool
+  {
+    $sessionHash = Authentication::getSessionHashFromCookie();
+    if ($sessionHash === null || $sessionHash === '') {
+      return false;
+    }
+
+    $strength = strtolower((string) Database::hget(Keys::SESSION . ':' . $sessionHash, 'auth_strength'));
+    if ($strength === 'strong') {
+      return true;
+    }
+
+    $stepUpTimestamp = (int) Database::hget(Keys::SESSION . ':' . $sessionHash, 'passkey_stepup_at');
+    if ($stepUpTimestamp <= 0) {
+      return false;
+    }
+
+    $maxAge = (int) SystemConfig::get('email_change_stepup_max_age_seconds');
+    if ($maxAge <= 0) {
+      $maxAge = 900;
+    }
+
+    return (time() - $stepUpTimestamp) <= $maxAge;
+  }
+
+  /**
+   * @param array<string, mixed> $entry
+   */
+  private static function appendExportHistory(string $userUUID, array $entry): void
+  {
+    if ($userUUID === '') {
+      return;
+    }
+
+    $key = Keys::USER . ':' . $userUUID . ':export_history';
+    $line = json_encode($entry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if (!is_string($line)) {
+      return;
+    }
+
+    Database::getInstance()->client->lPush($key, $line);
+    Database::getInstance()->client->lTrim($key, 0, 19);
+  }
+
+  /**
+   * @return array<int, array<string, mixed>>
+   */
+  private static function readExportHistory(string $userUUID): array
+  {
+    if ($userUUID === '') {
+      return [];
+    }
+
+    $key = Keys::USER . ':' . $userUUID . ':export_history';
+    $lines = Database::getInstance()->client->lRange($key, 0, 19);
+    if (!is_array($lines)) {
+      return [];
+    }
+
+    $history = [];
+    foreach ($lines as $line) {
+      if (!is_string($line) || $line === '') {
+        continue;
+      }
+      $decoded = json_decode($line, true);
+      if (is_array($decoded)) {
+        $history[] = $decoded;
+      }
+    }
+
+    return $history;
+  }
+}

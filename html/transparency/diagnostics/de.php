@@ -55,7 +55,7 @@ require_once HTML.'/header.php';
       <p>
         Wenn Sie auf ein Problem stoßen und dem Support mehr Kontext mitteilen möchten, können
         Sie zusätzliche Diagnosen unter
-        <a href="/settings/">Einstellungen → Debugging (Optional)</a> aktivieren.
+        <a href="/settings/diagnostics/">Einstellungen → Debugging (Optional)</a> aktivieren.
         Jede Einstellung ist unabhängig; Sie können nur die relevante aktivieren.
         Alle drei sind standardmäßig <strong>Deaktiviert</strong>.
       </p>
@@ -219,7 +219,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         Browser-Cookies. Sie folgen Ihrem Konto auf allen Geräten und Sitzungen und sind
         standardmäßig für jedes Konto — einschließlich neuer Konten — <strong>Deaktiviert</strong>.
         Sie können sie jederzeit unter
-        <a href="/settings/">Einstellungen → Debugging (Optional)</a> ändern.
+        <a href="/settings/diagnostics/">Einstellungen → Debugging (Optional)</a> ändern.
       </p>
       <p>
         Das Deaktivieren einer Einstellung tritt beim nächsten Seitenladen sofort in Kraft.

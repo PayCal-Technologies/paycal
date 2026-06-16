@@ -889,30 +889,41 @@ document.addEventListener("DOMContentLoaded", async () =>
       row.className = 'site_earnings_row';
 
       PC.setHTML(row, `
-        <div class="flex f_space_between f_center site_earnings_header">
-          <div class="site_name_bold">
+        <div class="site_earnings_header">
+          <div class="site_earnings_title_group">
+            <div class="site_name_bold site_earnings_title">
             ${site.site_name}
-            ${site.site_status === 'archived' ? `<span class="site_archived_badge"> ${SITES_T.SITES_ARCHIVED_BADGE}</span>` : ''}
+            </div>
+            ${site.site_status === 'archived' ? `<span class="site_archived_badge">${SITES_T.SITES_ARCHIVED_BADGE}</span>` : ''}
           </div>
           <div class="site_earnings_amount">
             ${formatCurrencyLocale(site.total_earnings)}
           </div>
         </div>
-        
-        <div class="site_earnings_bar">
-          <div class="site_earnings_bar_fill" data-width="${roundedPercentage}"></div>
-        </div>
-        
-        <div class="flex f_space_between site_earnings_details">
-          <span>${sitesFormatMessage(SITES_T.SITES_HOURS_REG_OT, {
+
+        <div class="site_earnings_metrics">
+          <span class="site_earnings_metric">
+            <span class="site_earnings_metric_label">${SITES_T.HOURS}</span>
+            <span class="site_earnings_metric_value">${sitesFormatMessage(SITES_T.SITES_HOURS_REG_OT, {
             hours: formatNumberLocale(site.total_hours, 1, 1),
             regular: formatNumberLocale(site.regular_hours, 1, 1),
             overtime: formatNumberLocale(site.overtime_hours, 1, 1),
           })}</span>
-          <span>${sitesFormatMessage(SITES_T.SITES_DAYS_PERCENT, {
-            days: formatNumberLocale(site.work_days, 0, 0),
-            percent: formatNumberLocale(percentage, 1, 1),
-          })}</span>
+          </span>
+          <span class="site_earnings_metric">
+            <span class="site_earnings_metric_label">${SITES_T.DAYS}</span>
+            <span class="site_earnings_metric_value">${formatNumberLocale(site.work_days, 0, 0)}</span>
+          </span>
+        </div>
+
+        <div class="site_earnings_budget">
+          <div class="site_earnings_budget_header">
+            <span>${SITES_T.EARNINGS}</span>
+            <span>${formatNumberLocale(percentage, 1, 1)}%</span>
+          </div>
+          <div class="site_earnings_bar">
+            <div class="site_earnings_bar_fill" data-width="${roundedPercentage}"></div>
+          </div>
         </div>
       `);
 
@@ -1616,5 +1627,3 @@ document.addEventListener("DOMContentLoaded", async () =>
     }
   }
 });
-
-

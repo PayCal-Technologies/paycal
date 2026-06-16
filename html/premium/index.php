@@ -11,7 +11,7 @@ use PayCal\Domain\Strings;
  * Purpose: Conversion-oriented upgrade page explaining Premium value, team
  * features, pricing, and FAQ. Accessible to both authenticated and guest users.
  *
- * The CTA buttons route authenticated users to /profile#panel-billing and
+ * The CTA buttons route authenticated users to /settings/account/#panel-billing and
  * unauthenticated users to /auth to create an account first.
  */
 $currentPage  = 'PAGE_PREMIUM';
@@ -32,7 +32,7 @@ if (function_exists('premium_i18n') === false) {
 }
 
 $isAuthenticated = Authentication::getCookie() !== '';
-$ctaHref         = $isAuthenticated ? '/profile#panel-billing' : '/auth';
+$ctaHref         = $isAuthenticated ? '/settings/account/#panel-billing' : '/auth';
 
 \PayCal\Observability\Lens::boot('premium');
 

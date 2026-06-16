@@ -22,7 +22,7 @@ namespace PayCal\Domain;
 
 class DataGrid
 {
-  private const MAX_COLUMN_CLASS_COUNT = 10;
+  private const MAX_COLUMN_CLASS_COUNT = 12;
   private const MIN_MONTH = 1;
   private const MAX_MONTH = 12;
 
@@ -120,230 +120,6 @@ class DataGrid
     return $out;
   }
 
-  /**
-   * Build CSS grid track list for column layout (fills container width).
-   */
-  private function buildColumnTemplate(bool $hasRowActions): string
-  {
-    $columnCount = count($this->columns);
-    if (0 === $columnCount) {
-      return $hasRowActions ? 'max-content' : 'minmax(0, 1fr)';
-    }
-
-    $tracks = [];
-    $hasExplicitWidth = false;
-
-    foreach ($this->columns as $column) {
-      $width = self::toString($column['width'] ?? '');
-      if ('' !== $width) {
-        $hasExplicitWidth = true;
-        $tracks[] = $width;
-      } else {
-        $tracks[] = 'minmax(0, 1fr)';
-      }
-    }
-
-    if ($hasRowActions) {
-      $tracks[] = 'max-content';
-    }
-
-    if (!$hasExplicitWidth) {
-      $flexTrack = 'minmax(0, 1fr)';
-      $flexTracks = array_fill(0, $columnCount, $flexTrack);
-
-      return implode(' ', $flexTracks).($hasRowActions ? ' max-content' : '');
-    }
-
-    return implode(' ', $tracks);
-  }
-
-  /**
-   * @param array<string, mixed> $column
-   */
-  private function columnClassSuffix(array $column): string
-  {
-    $columnKey = self::toString($column['key'] ?? '');
-
-    return '' !== $columnKey
-      ? preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey)) ?? ''
-      : '';
-  }
-
-  /**
-   * @param array<string, mixed> $column
-   */
-  private function headingClass(array $column): string
-  {
-    $class = 'datagrid_heading';
-    $suffix = $this->columnClassSuffix($column);
-    if ('' !== $suffix) {
-      $class .= ' datagrid_col_'.$suffix;
-    }
-
-    $columnAlign = self::toString($column['align'] ?? '');
-    if ('' !== $columnAlign) {
-      $class .= ' datagrid_align_'.$columnAlign;
-    }
-
-    return $class;
-  }
-
-  /**
-   * @param array<string, mixed> $column
-   */
-  private function itemClass(array $column): string
-  {
-    $class = 'datagrid_item';
-    $suffix = $this->columnClassSuffix($column);
-    if ('' !== $suffix) {
-      $class .= ' datagrid_col_'.$suffix;
-    }
-
-    $columnAlign = self::toString($column['align'] ?? '');
-    if ('' !== $columnAlign) {
-      $class .= ' datagrid_align_'.$columnAlign;
-    }
-
-    if (!empty($column['noEllipsis'])) {
-      $class .= ' datagrid_no_ellipsis';
-    }
-
-    return $class;
-  }
-
-  /**
-   * TODO: Document resolvePager.
-   */
-  private function resolvePager(mixed $pager): ?PagerInterface
-  {
-    return $pager instanceof PagerInterface ? $pager : null;
-  }
-
-  /**
-   * @return array{start: int, end: int, total: int, totalPages: int}|null
-   */
-  private function paginationMetrics(?PagerInterface $pager): ?array
-  {
-    if (null === $pager) {
-      return null;
-    }
-
-    $total = $pager->getTotal();
-    $page = $pager->getPage();
-    $pageSize = max(1, $pager->getPageSize());
-    $start = 0 === $total ? 0 : (($page - 1) * $pageSize) + 1;
-    $end = min($page * $pageSize, $total);
-
-    return [
-      'start' => $start,
-      'end' => $end,
-      'total' => $total,
-      'totalPages' => $pager->getTotalPages(),
-    ];
-  }
-
-  /**
-   * @return list<int|string>
-   */
-  private function buildPageNumberWindow(int $currentPage, int $totalPages): array
-  {
-    if ($totalPages <= 1) {
-      return $totalPages > 0 ? [1] : [];
-    }
-
-    if ($totalPages <= 7) {
-      $pages = [];
-      for ($i = 1; $i <= $totalPages; $i++) {
-        $pages[] = $i;
-      }
-
-      return $pages;
-    }
-
-    $pages = [1];
-    $left = max(2, $currentPage - 1);
-    $right = min($totalPages - 1, $currentPage + 1);
-
-    if ($left > 2) {
-      $pages[] = '…';
-    }
-
-    for ($i = $left; $i <= $right; $i++) {
-      $pages[] = $i;
-    }
-
-    if ($right < $totalPages - 1) {
-      $pages[] = '…';
-    }
-
-    $pages[] = $totalPages;
-
-    return $pages;
-  }
-
-  /**
-   * @param array<string, string> $i18n
-   */
-  private function renderPaginationBar(?PagerInterface $pager, array $i18n, string $position): string
-  {
-    if (null === $pager) {
-      return '';
-    }
-
-    $metrics = $this->paginationMetrics($pager);
-    if (null === $metrics) {
-      return '';
-    }
-
-    $itemLabel = self::toString($this->meta['itemLabel'] ?? 'items', 'items');
-    $paginationAria = self::toString($i18n['DATAGRID_PAGINATION_ARIA'] ?? 'Grid pagination', 'Grid pagination');
-    $previousLabel = self::toString($i18n['PREVIOUS'] ?? 'Previous', 'Previous');
-    $nextLabel = self::toString($i18n['NEXT'] ?? 'Next', 'Next');
-
-    ob_start();
-    ?>
-    <nav class="datagrid_pager datagrid_pagination_<?php echo $this->escape($position); ?>" role="navigation" aria-label="<?php echo $this->escape($paginationAria); ?>">
-      <p class="datagrid_pagination_info">
-        <?php if (0 === $metrics['total']) { ?>
-          <?php echo $this->escape(sprintf('No %s found', $itemLabel)); ?>
-        <?php } else { ?>
-          <?php echo $this->escape(sprintf('Showing %d–%d of %d %s', $metrics['start'], $metrics['end'], $metrics['total'], $itemLabel)); ?>
-        <?php } ?>
-      </p>
-      <?php if ($pager->hasPagination()) { ?>
-        <div class="datagrid_pagination_nav">
-          <button type="button" class="datagrid_pagination_btn" data-direction="prev"<?php echo $pager->hasPrev() ? '' : ' disabled'; ?>>
-            ← <?php echo $this->escape($previousLabel); ?>
-          </button>
-          <?php foreach ($this->buildPageNumberWindow($pager->getPage(), $metrics['totalPages']) as $pageNumber) {
-            if ('…' === $pageNumber) { ?>
-              <span class="datagrid_pagination_ellipsis" aria-hidden="true">…</span>
-            <?php continue;
-            }
-
-            $pageInt = self::toInt($pageNumber, 1);
-            $isCurrent = $pageInt === $pager->getPage();
-            $pageClass = 'datagrid_pagination_btn datagrid_pagination_page'.($isCurrent ? ' datagrid_pagination_page_active' : '');
-          ?>
-            <button
-              type="button"
-              class="<?php echo $this->escape($pageClass); ?>"
-              data-page="<?php echo $pageInt; ?>"
-              <?php echo $isCurrent ? 'aria-current="page"' : ''; ?>
-              <?php echo $isCurrent ? 'disabled' : ''; ?>
-            ><?php echo $pageInt; ?></button>
-          <?php } ?>
-          <button type="button" class="datagrid_pagination_btn" data-direction="next"<?php echo $pager->hasNext() ? '' : ' disabled'; ?>>
-            <?php echo $this->escape($nextLabel); ?> →
-          </button>
-        </div>
-      <?php } ?>
-    </nav>
-    <?php
-
-    return (string) ob_get_clean();
-  }
-
   /** @param array<string, mixed> $config */
   public function __construct(array $config)
   {
@@ -399,26 +175,25 @@ class DataGrid
     $i18nKeys = [
       'DATAGRID_DATA_GRID',
       'DATAGRID_CALENDAR_MONTH_NAVIGATION',
-      'DATAGRID_PAGINATION_ARIA',
+      'DATAGRID_COLUMN_VISIBILITY_ARIA',
       'ACTION',
       'SEARCH',
-      'PREVIOUS',
-      'NEXT',
       'DATAGRID_NO_ENTRIES_FOUND',
-      'DATAGRID_FULLSCREEN_ENTER',
-      'DATAGRID_FULLSCREEN_EXIT',
     ];
     foreach ($i18nKeys as $key) {
       $i18n[$key] = Strings::i18n($key);
     }
 
-    $pagerInterface = null;
-
+    $pagerInstance = null;
     if (null !== $pager) {
       if (is_array($pager) && isset($pager['page'])) {
         $page = self::toInt($pager['page'], 1);
       } elseif (is_object($pager) && method_exists($pager, 'getPage')) {
         $page = self::toInt($pager->getPage(), 1);
+      }
+
+      if ($pager instanceof PagerInterface) {
+        $pagerInstance = $pager;
       }
 
       if (is_object($pager) && method_exists($pager, 'getRows')) {
@@ -427,11 +202,12 @@ class DataGrid
           $rows = self::listAssoc($pagerRows);
         }
       }
-
-      $pagerInterface = $this->resolvePager($pager);
     }
 
-    $paginationMetrics = $this->paginationMetrics($pagerInterface);
+    $totalPages = $pagerInstance instanceof PagerInterface
+      ? $pagerInstance->getTotalPages()
+      : self::toInt($this->meta['totalPages'] ?? 1, 1);
+
     $rowActions = self::listAssoc($this->meta['rowActions'] ?? []);
     $controls = self::listAssoc($this->meta['controls'] ?? []);
     $controlsTrailingHtml = self::toString($this->meta['controlsTrailingHtml'] ?? '', '');
@@ -446,6 +222,9 @@ class DataGrid
     $chromeClass = !empty($this->meta['noChrome']) ? ' datagrid_no_chrome' : '';
     $descriptionId = trim(self::toString($this->meta['descriptionId'] ?? ''));
     $rowActionsHeaderLabel = self::toString($this->meta['rowActionsHeaderLabel'] ?? 'Actions', 'Actions');
+    $toolbarLayout = self::toString($this->meta['toolbarLayout'] ?? '', '');
+    $mergedSearchPaginationToolbar = 'search_pagination' === $toolbarLayout
+      && !empty($this->meta['searchEnabled']);
     
     // Apply rowAdapter if provided (optional row data transformation)
     $rowAdapter = $this->meta['rowAdapter'] ?? null;
@@ -465,20 +244,11 @@ class DataGrid
       }, $rows);
     }
 
-    $columnResizeEnabled = !empty($this->meta['columnResizeEnabled']);
-    $virtualScrollEnabled = !empty($this->meta['virtualScrollEnabled']);
-    $columnTemplate = $this->buildColumnTemplate(!empty($rowActions));
-    $paginationAttrs = '';
-    if (null !== $paginationMetrics) {
-      $paginationAttrs = ' data-total-pages="'.$paginationMetrics['totalPages'].'"'
-        .' data-pagination-start="'.$paginationMetrics['start'].'"'
-        .' data-pagination-end="'.$paginationMetrics['end'].'"'
-        .' data-pagination-total="'.$paginationMetrics['total'].'"';
-    }
-
     ob_start();
     ?>
-    <div id="<?php echo $this->escape($this->id); ?>" class="datagrid <?php echo $this->escape($columnClass); ?> <?php echo $this->escape($layoutClass.$chromeClass); ?>" data-grid="<?php echo $this->escape($this->id); ?>" data-page="<?php echo $page; ?>" data-year="<?php echo $this->escape(self::toString($this->meta['year'] ?? date('Y'))); ?>" data-month="<?php echo $this->escape(self::toString($this->meta['month'] ?? date('m'))); ?>" data-autofocus="<?php echo $this->escape(self::toString($this->meta['autofocus'] ?? 'current')); ?>" data-date-label-position="<?php echo $this->escape(self::toString($this->meta['dateLabelPosition'] ?? 'left')); ?>" data-work-entry-position="<?php echo $this->escape(self::toString($this->meta['workEntryPosition'] ?? 'left')); ?>" data-column-template="<?php echo $this->escape($columnTemplate); ?>"<?php echo $paginationAttrs; ?><?php echo $virtualScrollEnabled ? ' data-virtualize="1"' : ''; ?><?php echo $columnResizeEnabled ? ' data-column-resize="1"' : ''; ?> role="region" aria-label="<?php echo $this->escape(self::toString($this->meta['title'] ?? $this->id, $i18n['DATAGRID_DATA_GRID'])); ?>"<?php echo '' !== $descriptionId ? ' aria-describedby="' . $this->escape($descriptionId) . '"' : ''; ?>>
+    <?php $columnVisibilityEnabled = !empty($this->meta['columnVisibilityEnabled']); ?>
+    <div id="<?php echo $this->escape($this->id); ?>" class="datagrid <?php echo $this->escape($columnClass); ?> <?php echo $this->escape($layoutClass.$chromeClass); ?>" data-grid="<?php echo $this->escape($this->id); ?>" data-page="<?php echo $page; ?>" data-total-pages="<?php echo $totalPages; ?>" data-year="<?php echo $this->escape(self::toString($this->meta['year'] ?? date('Y'))); ?>" data-month="<?php echo $this->escape(self::toString($this->meta['month'] ?? date('m'))); ?>" data-autofocus="<?php echo $this->escape(self::toString($this->meta['autofocus'] ?? 'current')); ?>" data-date-label-position="<?php echo $this->escape(self::toString($this->meta['dateLabelPosition'] ?? 'left')); ?>" data-work-entry-position="<?php echo $this->escape(self::toString($this->meta['workEntryPosition'] ?? 'left')); ?>"<?php echo $columnVisibilityEnabled ? ' data-column-visibility="1"' : ''; ?> role="region" aria-label="<?php echo $this->escape(self::toString($this->meta['title'] ?? $this->id, $i18n['DATAGRID_DATA_GRID'])); ?>"<?php echo '' !== $descriptionId ? ' aria-describedby="' . $this->escape($descriptionId) . '"' : ''; ?>>
+      <?php if (!empty($controls) || (!empty($this->meta['searchEnabled']) && !$mergedSearchPaginationToolbar)) { ?>
       <div class="datagrid_controls" role="navigation" aria-label="<?php echo $this->escape($i18n['DATAGRID_CALENDAR_MONTH_NAVIGATION']); ?>">
         <?php foreach ($controls as $control) {
           $controlType = self::toString($control['type'] ?? 'secondary', 'secondary');
@@ -496,31 +266,99 @@ class DataGrid
           </button>
         <?php } ?>
 
-        <div class="datagrid_controls_end">
-          <?php if (!empty($this->meta['searchEnabled'])) { ?>
-            <input
-              type="search"
-              class="datagrid_search"
-              placeholder="<?php echo $this->escape(self::toString($this->meta['searchPlaceholder'] ?? $i18n['SEARCH'], $i18n['SEARCH'])); ?>"
-              value="<?php echo $this->escape(self::toString($this->meta['search'] ?? '')); ?>"
-            >
-          <?php } ?>
+        <?php if (!empty($this->meta['searchEnabled']) && !$mergedSearchPaginationToolbar) { ?>
+          <input
+            type="search"
+            class="datagrid_search"
+            placeholder="<?php echo $this->escape(self::toString($this->meta['searchPlaceholder'] ?? $i18n['SEARCH'], $i18n['SEARCH'])); ?>"
+            value="<?php echo $this->escape(self::toString($this->meta['search'] ?? '')); ?>"
+          >
+        <?php } ?>
+      </div>
+      <?php } ?>
+
+      <?php if ($mergedSearchPaginationToolbar) {
+        echo $this->renderMergedSearchPaginationToolbar($pagerInstance);
+      } else {
+        echo $this->renderPagination($pagerInstance, 'top');
+      } ?>
+
+      <?php if ($columnVisibilityEnabled) {
+        $toggleableColumns = array_values(array_filter(
+          $this->columns,
+          static fn (array $column): bool => !empty($column['toggleable']) && '' !== self::toString($column['key'] ?? ''),
+        ));
+        if ($toggleableColumns !== []) {
+          $columnVisibilityMode = self::toString($this->meta['columnVisibilityMode'] ?? 'strip', 'strip');
+          $columnVisibilityAria = $i18n['DATAGRID_COLUMN_VISIBILITY_ARIA'];
+          if ('menu' === $columnVisibilityMode) {
+            $menuId = $this->id . '_column_menu_panel';
+      ?>
+        <div class="datagrid_column_menu">
           <button
             type="button"
-            class="datagrid_icon_button datagrid_fullscreen_toggle"
-            data-action="toggle-fullscreen"
+            class="datagrid_column_menu_toggle"
             aria-expanded="false"
-            aria-label="<?php echo $this->escape($i18n['DATAGRID_FULLSCREEN_ENTER']); ?>"
-            data-label-enter="<?php echo $this->escape($i18n['DATAGRID_FULLSCREEN_ENTER']); ?>"
-            data-label-exit="<?php echo $this->escape($i18n['DATAGRID_FULLSCREEN_EXIT']); ?>"
+            aria-controls="<?php echo $this->escape($menuId); ?>"
           >
-            <span class="datagrid_fullscreen_icon datagrid_fullscreen_icon_expand" aria-hidden="true">⤢</span>
-            <span class="datagrid_fullscreen_icon datagrid_fullscreen_icon_collapse" aria-hidden="true">⤡</span>
+            <?php echo $this->escape(Strings::i18n('VIEW')); ?>
           </button>
+          <div
+            id="<?php echo $this->escape($menuId); ?>"
+            class="datagrid_column_menu_panel"
+            role="group"
+            aria-label="<?php echo $this->escape($columnVisibilityAria); ?>"
+            hidden
+          >
+            <?php foreach ($toggleableColumns as $column) {
+              $columnKey = self::toString($column['key'] ?? '');
+              $columnLabel = self::toString($column['label'] ?? $columnKey);
+              $defaultVisible = !array_key_exists('defaultVisible', $column) || !empty($column['defaultVisible']);
+              $toggleId = $this->id . '_col_toggle_' . preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey));
+            ?>
+              <label class="datagrid_column_toggle" for="<?php echo $this->escape($toggleId); ?>">
+                <input
+                  type="checkbox"
+                  class="datagrid_column_toggle_input"
+                  id="<?php echo $this->escape($toggleId); ?>"
+                  data-col-key="<?php echo $this->escape($columnKey); ?>"
+                  <?php echo $defaultVisible ? 'checked' : ''; ?>
+                >
+                <span class="datagrid_column_toggle_label"><?php echo $this->escape($columnLabel); ?></span>
+              </label>
+            <?php } ?>
+            <span class="datagrid_column_strip_status visually_hidden" role="status" aria-live="polite" aria-atomic="true"></span>
+          </div>
         </div>
-      </div>
-
-      <?php echo $this->renderPaginationBar($pagerInterface, $i18n, 'top'); ?>
+      <?php } else { ?>
+        <div
+          class="datagrid_column_strip"
+          role="group"
+          aria-label="<?php echo $this->escape($columnVisibilityAria); ?>"
+        >
+          <?php foreach ($toggleableColumns as $column) {
+            $columnKey = self::toString($column['key'] ?? '');
+            $columnLabel = self::toString($column['label'] ?? $columnKey);
+            $defaultVisible = !array_key_exists('defaultVisible', $column) || !empty($column['defaultVisible']);
+            $toggleId = $this->id . '_col_toggle_' . preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey));
+          ?>
+            <label class="datagrid_column_toggle" for="<?php echo $this->escape($toggleId); ?>">
+              <input
+                type="checkbox"
+                class="datagrid_column_toggle_input"
+                id="<?php echo $this->escape($toggleId); ?>"
+                data-col-key="<?php echo $this->escape($columnKey); ?>"
+                <?php echo $defaultVisible ? 'checked' : ''; ?>
+              >
+              <span class="datagrid_column_toggle_label"><?php echo $this->escape($columnLabel); ?></span>
+            </label>
+          <?php } ?>
+          <span class="datagrid_column_strip_status visually_hidden" role="status" aria-live="polite" aria-atomic="true"></span>
+        </div>
+      <?php
+          }
+        }
+      } ?>
 
       <div class="datagrid_table" role="grid" aria-colcount="<?php echo $totalColumnCount; ?>" aria-rowcount="<?php echo $rowCount + 1; ?>">
         <div class="datagrid_header_row" role="rowgroup">
@@ -530,7 +368,14 @@ class DataGrid
               $columnKey = self::toString($column['key'] ?? '');
               $columnLabel = self::toString($column['label'] ?? '');
               $columnHeaderId = $this->id.'_col_'.($columnIndex + 1);
-              $headingClass = $this->headingClass($column);
+              $columnAlign = self::toString($column['align'] ?? '');
+              $headingClass = 'datagrid_heading';
+              if ('' !== $columnKey) {
+                $headingClass .= ' datagrid_col_' . preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey));
+              }
+              if ('' !== $columnAlign) {
+                $headingClass .= ' datagrid_align_' . $columnAlign;
+              }
             ?>
               <div class="<?php echo $this->escape($headingClass); ?>" role="columnheader" id="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>">
                 <?php if ($isSortable) { ?>
@@ -539,9 +384,6 @@ class DataGrid
                   </button>
                 <?php } else { ?>
                   <?php echo $this->escape($columnLabel); ?>
-                <?php } ?>
-                <?php if ($columnResizeEnabled && '' !== $columnKey) { ?>
-                  <span class="datagrid_col_resize" data-resize-col="<?php echo $this->escape($columnKey); ?>" aria-hidden="true" tabindex="-1"></span>
                 <?php } ?>
               </div>
             <?php } ?>
@@ -573,9 +415,17 @@ class DataGrid
               <div class="datagrid_row_content">
                 <?php foreach ($this->columns as $columnIndex => $column) {
                   $columnKey = self::toString($column['key'] ?? '');
+                  $columnLabel = self::toString($column['label'] ?? '');
                   $value = ('' !== $columnKey) ? ($row[$columnKey] ?? '') : '';
                   $columnHeaderId = $this->id.'_col_'.($columnIndex + 1);
-                  $itemClass = $this->itemClass($column);
+                  $columnAlign = self::toString($column['align'] ?? '');
+                  $itemClass = 'datagrid_item';
+                  if ('' !== $columnKey) {
+                    $itemClass .= ' datagrid_col_' . preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey));
+                  }
+                  if ('' !== $columnAlign) {
+                    $itemClass .= ' datagrid_align_' . $columnAlign;
+                  }
 
                   // Apply compute function if provided
                   $compute = $column['compute'] ?? null;
@@ -584,7 +434,11 @@ class DataGrid
                   }
                 ?>
                   <div class="<?php echo $this->escape($itemClass); ?>" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>" data-col-label="<?php echo $this->escape($columnLabel); ?>">
-                    <?php echo $this->escape(self::toString($value)); ?>
+                    <?php if (!empty($column['rawHtml'])) { ?>
+                      <?php echo self::toString($value); ?>
+                    <?php } else { ?>
+                      <?php echo $this->escape(self::toString($value)); ?>
+                    <?php } ?>
                   </div>
                 <?php } ?>
 
@@ -617,7 +471,139 @@ class DataGrid
         </div>
       </div>
 
-      <?php echo $this->renderPaginationBar($pagerInterface, $i18n, 'bottom'); ?>
+      <?php if (!$mergedSearchPaginationToolbar) {
+        echo $this->renderPagination($pagerInstance, 'bottom');
+      } ?>
+    </div>
+    <?php
+
+    return (string) ob_get_clean();
+  }
+
+  /**
+   * @return array{start: int, end: int, total: int, rangeLabel: string, previousLabel: string, nextLabel: string}|null
+   */
+  private function paginationContext(?PagerInterface $pager): ?array
+  {
+    if (!$pager instanceof PagerInterface) {
+      return null;
+    }
+
+    $start = $pager->getTotal() === 0 ? 0 : (($pager->getPage() - 1) * $pager->getPageSize()) + 1;
+    $end = min($pager->getPage() * $pager->getPageSize(), $pager->getTotal());
+    $total = $pager->getTotal();
+    $itemLabel = self::toString(
+      $this->meta['itemLabel'] ?? Strings::i18n('DATAGRID_ITEM_LABEL_ENTRIES'),
+      Strings::i18n('DATAGRID_ITEM_LABEL_ENTRIES'),
+    );
+
+    return [
+      'start' => $start,
+      'end' => $end,
+      'total' => $total,
+      'rangeLabel' => sprintf(Strings::i18n('DATAGRID_PAGINATION_RANGE'), $start, $end, $total, $itemLabel),
+      'previousLabel' => Strings::i18n('PREVIOUS'),
+      'nextLabel' => Strings::i18n('NEXT'),
+    ];
+  }
+
+  /**
+   * Render search, range info, and prev/next on a single toolbar row.
+   */
+  private function renderMergedSearchPaginationToolbar(?PagerInterface $pager): string
+  {
+    $i18nSearch = Strings::i18n('SEARCH');
+    $pagination = $this->paginationContext($pager);
+    $arrowsOnly = !empty($this->meta['paginationArrowsOnly']);
+
+    ob_start();
+    ?>
+    <div
+      class="datagrid_toolbar datagrid_toolbar_search_pagination"
+      role="navigation"
+      aria-label="<?php echo $this->escape(Strings::i18n('DATAGRID_DATA_GRID')); ?>"
+      <?php if (null !== $pagination && $pager instanceof PagerInterface) { ?>
+      data-pagination-start="<?php echo $pagination['start']; ?>"
+      data-pagination-end="<?php echo $pagination['end']; ?>"
+      data-pagination-total="<?php echo $pagination['total']; ?>"
+      <?php } ?>
+    >
+      <div class="datagrid_toolbar_start">
+        <input
+          type="search"
+          class="datagrid_search"
+          placeholder="<?php echo $this->escape(self::toString($this->meta['searchPlaceholder'] ?? $i18nSearch, $i18nSearch)); ?>"
+          value="<?php echo $this->escape(self::toString($this->meta['search'] ?? '')); ?>"
+        >
+      </div>
+      <?php if (null !== $pagination && $pager instanceof PagerInterface) { ?>
+      <div class="datagrid_toolbar_center">
+        <span class="datagrid_page datagrid_page_info" role="status"><?php echo $this->escape($pagination['rangeLabel']); ?></span>
+      </div>
+      <div class="datagrid_toolbar_end datagrid_pagination" role="group" aria-label="<?php echo $this->escape(Strings::i18n('DATAGRID_DATA_GRID')); ?>">
+        <button
+          type="button"
+          class="datagrid_pagination_btn<?php echo $arrowsOnly ? ' datagrid_pagination_btn_icon' : ''; ?>"
+          data-direction="prev"
+          aria-label="<?php echo $this->escape($pagination['previousLabel']); ?>"
+          <?php echo $pager->hasPrev() ? '' : 'disabled'; ?>
+        ><?php echo $arrowsOnly ? '←' : '← ' . $this->escape($pagination['previousLabel']); ?></button>
+        <button
+          type="button"
+          class="datagrid_pagination_btn<?php echo $arrowsOnly ? ' datagrid_pagination_btn_icon' : ''; ?>"
+          data-direction="next"
+          aria-label="<?php echo $this->escape($pagination['nextLabel']); ?>"
+          <?php echo $pager->hasNext() ? '' : 'disabled'; ?>
+        ><?php echo $arrowsOnly ? '→' : $this->escape($pagination['nextLabel']) . ' →'; ?></button>
+      </div>
+      <?php } ?>
+    </div>
+    <?php
+
+    return (string) ob_get_clean();
+  }
+
+  /**
+   * Render prev/next pagination controls when the pager spans multiple pages.
+   */
+  private function renderPagination(?PagerInterface $pager, string $position): string
+  {
+    if (!$pager instanceof PagerInterface || !$pager->hasPagination()) {
+      return '';
+    }
+
+    $pagination = $this->paginationContext($pager);
+    if (null === $pagination) {
+      return '';
+    }
+
+    $arrowsOnly = !empty($this->meta['paginationArrowsOnly']);
+
+    ob_start();
+    ?>
+    <div
+      class="datagrid_pagination datagrid_pagination_<?php echo $this->escape($position); ?>"
+      role="navigation"
+      aria-label="<?php echo $this->escape(Strings::i18n('DATAGRID_DATA_GRID')); ?>"
+      data-pagination-start="<?php echo $pagination['start']; ?>"
+      data-pagination-end="<?php echo $pagination['end']; ?>"
+      data-pagination-total="<?php echo $pagination['total']; ?>"
+    >
+      <button
+        type="button"
+        class="datagrid_pagination_btn<?php echo $arrowsOnly ? ' datagrid_pagination_btn_icon' : ''; ?>"
+        data-direction="prev"
+        aria-label="<?php echo $this->escape($pagination['previousLabel']); ?>"
+        <?php echo $pager->hasPrev() ? '' : 'disabled'; ?>
+      ><?php echo $arrowsOnly ? '←' : '← ' . $this->escape($pagination['previousLabel']); ?></button>
+      <span class="datagrid_page datagrid_page_info" role="status"><?php echo $this->escape($pagination['rangeLabel']); ?></span>
+      <button
+        type="button"
+        class="datagrid_pagination_btn<?php echo $arrowsOnly ? ' datagrid_pagination_btn_icon' : ''; ?>"
+        data-direction="next"
+        aria-label="<?php echo $this->escape($pagination['nextLabel']); ?>"
+        <?php echo $pager->hasNext() ? '' : 'disabled'; ?>
+      ><?php echo $arrowsOnly ? '→' : $this->escape($pagination['nextLabel']) . ' →'; ?></button>
     </div>
     <?php
 
@@ -672,11 +658,34 @@ class DataGrid
     // Get positioning from config (set at DataGrid initialization based on context needs)
     $dateLabelPosition = self::toString($this->meta['dateLabelPosition'] ?? 'left', 'left');
     $workEntryPosition = self::toString($this->meta['workEntryPosition'] ?? 'left', 'left');
+    $dayNameFormat = self::toString($this->meta['dayNameFormat'] ?? 'short', 'short');
+    if (!in_array($dayNameFormat, ['narrow', 'short', 'long'], true)) {
+      $dayNameFormat = 'short';
+    }
+    $dayNamePosition = self::toString($this->meta['dayNamePosition'] ?? 'middle', 'middle');
+    if ('center' === $dayNamePosition) {
+      $dayNamePosition = 'middle';
+    }
+    if (!in_array($dayNamePosition, ['left', 'middle', 'right'], true)) {
+      $dayNamePosition = 'middle';
+    }
     
     // Map position values to CSS class suffixes (middle -> center)
     $dateLabelClass = ('middle' === $dateLabelPosition) ? 'center' : $dateLabelPosition;
     $workEntryClass = ('middle' === $workEntryPosition) ? 'center' : $workEntryPosition;
-    
+    $dayNamePositionClass = ('middle' === $dayNamePosition) ? 'center' : $dayNamePosition;
+    $dateLabelPositionClass = in_array($dateLabelClass, ['left', 'center', 'right'], true) ? $dateLabelClass : 'left';
+    $dayNamePositionClass = in_array($dayNamePositionClass, ['left', 'center', 'right'], true) ? $dayNamePositionClass : 'center';
+    $workEntryFieldsRaw = $this->meta['workEntryFields'] ?? null;
+    $workEntryFieldsMeta = null;
+    if (is_array($workEntryFieldsRaw)) {
+      $workEntryFieldsMeta = [];
+      foreach ($workEntryFieldsRaw as $key => $value) {
+        $workEntryFieldsMeta[(string) $key] = $value;
+      }
+    }
+    $workEntryFieldPrefs = CalendarCellDisplay::workEntryFieldPrefsFromMeta($workEntryFieldsMeta);
+
     // Apply rowAdapter if provided
     $rowAdapter = $this->meta['rowAdapter'] ?? null;
     if (is_callable($rowAdapter)) {
@@ -732,24 +741,79 @@ class DataGrid
     $currentMonthValue = sprintf('%04d-%02d', $year, $month);
     $chromeClass = !empty($this->meta['noChrome']) ? ' datagrid_no_chrome' : '';
     $descriptionId = trim(self::toString($this->meta['descriptionId'] ?? 'calendar-grid-instructions'));
+    $suppressMonthNavigation = !empty($this->meta['suppressMonthNavigation']);
+    $headingText = self::toString($this->meta['headingText'] ?? '', '');
+    $headingId = self::toString($this->meta['headingId'] ?? '', '');
+    $beforeWeekdayHeadersHtml = self::toString($this->meta['beforeWeekdayHeadersHtml'] ?? '', '');
+    $compactNavigationRaw = $this->meta['compactNavigation'] ?? null;
+    $compactNavigation = is_array($compactNavigationRaw) ? $compactNavigationRaw : [];
+    $compactNavMode = self::toString($compactNavigation['mode'] ?? '', '');
+    $compactNavPrevAction = self::toString($compactNavigation['prevAction'] ?? 'prev-range', 'prev-range');
+    $compactNavNextAction = self::toString($compactNavigation['nextAction'] ?? 'next-range', 'next-range');
+    $compactNavPickerAction = self::toString($compactNavigation['pickerAction'] ?? 'open-range-picker', 'open-range-picker');
+    $compactNavPickerId = self::toString($compactNavigation['pickerId'] ?? '', '');
+    $compactNavPickerLabel = self::toString($compactNavigation['pickerLabel'] ?? '', '');
+    $compactNavPickerAria = self::toString($compactNavigation['pickerAriaLabel'] ?? $compactNavPickerLabel, $compactNavPickerLabel);
+    $compactNavPrevAnchor = self::toString($compactNavigation['prevAnchor'] ?? '', '');
+    $compactNavNextAnchor = self::toString($compactNavigation['nextAnchor'] ?? '', '');
+    $compactNavCurrentAnchor = self::toString($compactNavigation['currentAnchor'] ?? '', '');
+    $compactNavPrevAria = self::toString($compactNavigation['prevAriaLabel'] ?? '', '');
+    $compactNavNextAria = self::toString($compactNavigation['nextAriaLabel'] ?? '', '');
+    $gridLabelledBy = $compactNavPickerId !== '' ? $compactNavPickerId : 'cal_picker_button';
+    $gridRangeAnchorAttr = $compactNavCurrentAnchor !== ''
+      ? ' data-range-anchor="' . $this->escape($compactNavCurrentAnchor) . '"'
+      : '';
+    $gridViewModeAttr = $compactNavMode !== ''
+      ? ' data-view-mode="' . $this->escape($compactNavMode) . '"'
+      : '';
+    $hasControlStrip = $beforeWeekdayHeadersHtml !== ''
+      || $compactNavigation !== []
+      || !$suppressMonthNavigation
+      || $headingText !== ''
+      || $controls !== []
+      || $controlsTrailingHtml !== '';
     
     ?>
-    <div id="<?php echo $this->escape($this->id); ?>" class="datagrid datagrid_layout_month<?php echo $this->escape($chromeClass); ?>" data-grid="<?php echo $this->escape($this->id); ?>" data-page="<?php echo $page; ?>" data-year="<?php echo $this->escape((string) $year); ?>" data-month="<?php echo $this->escape((string) $month); ?>" data-autofocus="<?php echo $this->escape(self::toString($this->meta['autofocus'] ?? 'today', 'today')); ?>" data-date-label-position="<?php echo $this->escape(self::toString($this->meta['dateLabelPosition'] ?? 'left', 'left')); ?>" data-work-entry-position="<?php echo $this->escape(self::toString($this->meta['workEntryPosition'] ?? 'left', 'left')); ?>" data-lockboundary="<?php echo $this->escape(self::toString($this->meta['lockBoundary'] ?? '')); ?>">
+    <div id="<?php echo $this->escape($this->id); ?>" class="datagrid datagrid_layout_month datagrid_date_label_<?php echo $this->escape($dateLabelPositionClass); ?> datagrid_day_heading_<?php echo $this->escape($dayNamePositionClass); ?><?php echo $this->escape($chromeClass); ?>" data-grid="<?php echo $this->escape($this->id); ?>" data-page="<?php echo $page; ?>" data-year="<?php echo $this->escape((string) $year); ?>" data-month="<?php echo $this->escape((string) $month); ?>" data-autofocus="<?php echo $this->escape(self::toString($this->meta['autofocus'] ?? 'today', 'today')); ?>" data-date-label-position="<?php echo $this->escape(self::toString($this->meta['dateLabelPosition'] ?? 'left', 'left')); ?>" data-day-heading-position="<?php echo $this->escape($dayNamePosition); ?>" data-work-entry-position="<?php echo $this->escape(self::toString($this->meta['workEntryPosition'] ?? 'left', 'left')); ?>" data-lockboundary="<?php echo $this->escape(self::toString($this->meta['lockBoundary'] ?? '')); ?>"<?php echo $gridRangeAnchorAttr . $gridViewModeAttr; ?>>
+      <?php if ($hasControlStrip) { ?>
       <div class="datagrid_controls">
+        <?php if ($beforeWeekdayHeadersHtml !== '') { ?>
+          <?php echo $beforeWeekdayHeadersHtml; ?>
+        <?php } ?>
+        <?php if ($compactNavigation !== []) { ?>
         <button
           type="button"
-          class="datagrid_control"
-          data-action="prev-month"
-          data-month="<?php echo $prevMonth; ?>"
-          data-year="<?php echo $prevYear; ?>"
-          aria-label="<?php echo $this->escape($monthLanguage !== ''
-            ? Strings::i18n('DATAGRID_PREVIOUS_MONTH_ARIA', $monthLanguage)
-            : Strings::i18n('DATAGRID_PREVIOUS_MONTH_ARIA')); ?>"
+          <?php if ($compactNavPickerId !== '') { ?>id="<?php echo $this->escape($compactNavPickerId); ?>" <?php } ?>
+          class="calendar-v2-month-title"
+          data-action="<?php echo $this->escape($compactNavPickerAction); ?>"
+          data-anchor="<?php echo $this->escape($compactNavCurrentAnchor); ?>"
+          aria-label="<?php echo htmlspecialchars($compactNavPickerAria, ENT_QUOTES, 'UTF-8'); ?>"
+          aria-keyshortcuts="ALT+\\"
+          accesskey="\\"
+        ><?php echo htmlspecialchars($compactNavPickerLabel, ENT_QUOTES, 'UTF-8'); ?></button>
+        <button
+          type="button"
+          class="datagrid_control datagrid_control_icon"
+          data-action="<?php echo $this->escape($compactNavPrevAction); ?>"
+          data-anchor="<?php echo $this->escape($compactNavPrevAnchor); ?>"
+          aria-label="<?php echo $this->escape($compactNavPrevAria); ?>"
           aria-keyshortcuts="[ PageUp"
           accesskey="["
         >
-          ← <?php echo $i18n['PREVIOUS']; ?>
+          <span aria-hidden="true">&lt;</span>
         </button>
+        <button
+          type="button"
+          class="datagrid_control datagrid_control_icon"
+          data-action="<?php echo $this->escape($compactNavNextAction); ?>"
+          data-anchor="<?php echo $this->escape($compactNavNextAnchor); ?>"
+          aria-label="<?php echo $this->escape($compactNavNextAria); ?>"
+          aria-keyshortcuts="] PageDown"
+          accesskey="]"
+        >
+          <span aria-hidden="true">&gt;</span>
+        </button>
+        <?php } elseif (!$suppressMonthNavigation) { ?>
         <button
           type="button"
           id="cal_picker_button"
@@ -763,7 +827,21 @@ class DataGrid
         ><?php echo htmlspecialchars($currentMonthName, ENT_QUOTES, 'UTF-8'); ?></button>
         <button
           type="button"
-          class="datagrid_control"
+          class="datagrid_control datagrid_control_icon"
+          data-action="prev-month"
+          data-month="<?php echo $prevMonth; ?>"
+          data-year="<?php echo $prevYear; ?>"
+          aria-label="<?php echo $this->escape($monthLanguage !== ''
+            ? Strings::i18n('DATAGRID_PREVIOUS_MONTH_ARIA', $monthLanguage)
+            : Strings::i18n('DATAGRID_PREVIOUS_MONTH_ARIA')); ?>"
+          aria-keyshortcuts="[ PageUp"
+          accesskey="["
+        >
+          <span aria-hidden="true">&lt;</span>
+        </button>
+        <button
+          type="button"
+          class="datagrid_control datagrid_control_icon"
           data-action="next-month"
           data-month="<?php echo $nextMonth; ?>"
           data-year="<?php echo $nextYear; ?>"
@@ -773,8 +851,14 @@ class DataGrid
           aria-keyshortcuts="] PageDown"
           accesskey="]"
         >
-          <?php echo $i18n['NEXT']; ?> →
+          <span aria-hidden="true">&gt;</span>
         </button>
+        <?php } elseif ($headingText !== '') { ?>
+        <div
+          <?php if ($headingId !== '') { ?>id="<?php echo $this->escape($headingId); ?>" <?php } ?>
+          class="calendar-v2-month-title calendar-v2-view-heading"
+        ><?php echo htmlspecialchars($headingText, ENT_QUOTES, 'UTF-8'); ?></div>
+        <?php } ?>
         <?php foreach ($controls as $control) {
           $controlType = self::toString($control['type'] ?? 'secondary', 'secondary');
           $controlClass = 'datagrid_control';
@@ -794,11 +878,12 @@ class DataGrid
           <div class="datagrid_controls_trailing"><?php echo $controlsTrailingHtml; ?></div>
         <?php } ?>
       </div>
+      <?php } ?>
 
       <!-- Weekday Headers (Sun-Sat) -->
-      <div class="calendar-v2-weekday-headers" aria-hidden="true">
+      <div class="calendar-v2-weekday-headers calendar-v2-weekday-headers_<?php echo $this->escape($dayNamePositionClass); ?>" aria-hidden="true">
         <?php foreach (Strings::generateWeekDayLabels($monthLocaleTag !== '' ? $monthLocaleTag : null) as $dayLabel) {
-          $dayName = self::toString($dayLabel['short'], '');
+          $dayName = self::toString($dayLabel[$dayNameFormat], '');
           if ($dayName === '') {
             continue;
           }
@@ -809,7 +894,7 @@ class DataGrid
 
       <!-- Month calendar grid with 7 columns (Sun-Sat) -->
       <?php $monthRowCount = (int) ceil(max(count($rows), 1) / 7); ?>
-      <div class="datagrid_month_grid" role="grid" aria-labelledby="cal_picker_button" aria-describedby="<?php echo $this->escape($descriptionId); ?>" aria-colcount="7" aria-rowcount="<?php echo $monthRowCount; ?>">
+      <div class="datagrid_month_grid" role="grid" aria-labelledby="<?php echo $this->escape($gridLabelledBy); ?>" aria-describedby="<?php echo $this->escape($descriptionId); ?>" aria-colcount="7" aria-rowcount="<?php echo $monthRowCount; ?>">
         <?php 
         $today = date('Y-m-d');
         $lockBoundary = self::toString($this->meta['lockBoundary'] ?? '');
@@ -844,23 +929,33 @@ class DataGrid
           if ($isLocked) {
             $cellClasses .= ' datagrid_month_cell_locked';
           }
+
+          $cellExtraClasses = self::toString($row['cell_extra_classes'] ?? '');
+          if ($cellExtraClasses !== '') {
+            $cellClasses .= ' ' . $cellExtraClasses;
+          }
           
           // Prepare work entries data for JavaScript
           $workEntries = is_array($row['work_entries'] ?? null) ? $row['work_entries'] : [];
           $workEntriesEncoded = json_encode($workEntries);
           $workEntriesJson = htmlspecialchars($workEntriesEncoded !== false ? $workEntriesEncoded : '[]', ENT_QUOTES, 'UTF-8');
           $dateAriaLabel = Strings::formatDateAria($dateId, $dateAriaFormat);
+          $formatHours = static function ($h): string {
+            $num = (float) $h;
+            return self::formatCompactNumber($num);
+          };
+          $totalHoursValue = self::toFloat($row['total_hours'] ?? 0);
         ?>
-          <div class="<?php echo $this->escape($cellClasses); ?>"<?php echo $isToday ? ' aria-current="date"' : ''; ?><?php echo $isLocked ? ' aria-disabled="true"' : ''; ?> data-id="<?php echo $this->escape($dateId); ?>" data-date="<?php echo $this->escape($dateId); ?>" data-date-aria="<?php echo $this->escape($dateAriaLabel); ?>" data-locked="<?php echo $isLocked ? '1' : '0'; ?>" data-work-entries="<?php echo $workEntriesJson; ?>">
-            <div class="datagrid_month_cell_header datagrid_month_cell_header_<?php echo $this->escape($dateLabelClass); ?>" aria-hidden="true">
-              <?php 
+          <div class="<?php echo $this->escape($cellClasses); ?>"<?php echo $isToday ? ' aria-current="date"' : ''; ?><?php echo $isLocked ? ' aria-disabled="true"' : ''; ?> data-id="<?php echo $this->escape($dateId); ?>" data-date="<?php echo $this->escape($dateId); ?>" data-date-aria="<?php echo $this->escape($dateAriaLabel); ?>" data-locked="<?php echo $isLocked ? '1' : '0'; ?>" data-work-entries="<?php echo $workEntriesJson; ?>"<?php echo $totalHoursValue > 0 ? ' data-total-hours="' . $this->escape($formatHours($totalHoursValue)) . '"' : ''; ?>>
+            <div class="datagrid_month_cell_header datagrid_month_cell_header_<?php echo $this->escape($dateLabelPositionClass); ?>" aria-hidden="true">
+              <span class="datagrid_month_cell_day datagrid_month_cell_day_<?php echo $this->escape($dateLabelPositionClass); ?>"><?php
               try {
                 $dt = new \DateTime($dateId);
                 echo htmlspecialchars($dt->format('d'), ENT_QUOTES, 'UTF-8');
               } catch (\Exception $e) {
                 echo htmlspecialchars($dateId, ENT_QUOTES, 'UTF-8');
               }
-              ?>
+              ?></span>
             </div>
             <div class="datagrid_month_cell_content">
               <?php 
@@ -883,42 +978,39 @@ class DataGrid
                   $siteName = self::toString($entry['site_name'] ?? $entry['n'] ?? '');
                   $regularRaw = $entry['regular_hours'] ?? $entry['regular'] ?? $entry['r'] ?? null;
                   $overtimeRaw = $entry['overtime_hours'] ?? $entry['overtime'] ?? $entry['o'] ?? null;
-                  $hoursRaw = $entry['hours'] ?? $entry['h'] ?? 0;
-                  $regularHours = self::toFloat($regularRaw ?? ((null === $overtimeRaw) ? $hoursRaw : 0));
+                  $hoursRaw = $entry['hours'] ?? $entry['h'] ?? null;
+                  $regularHours = self::toFloat($regularRaw ?? ((null === $overtimeRaw) ? ($hoursRaw ?? 0) : 0));
                   $overtimeHours = self::toFloat($overtimeRaw ?? 0);
+                  $entryHours = self::toFloat($hoursRaw !== null ? $hoursRaw : ($regularHours + $overtimeHours));
                   $livingOut = self::toFloat($entry['living_out_allowance'] ?? $entry['living_out'] ?? $entry['loa'] ?? $entry['l'] ?? 0);
                   $travelHours = self::toFloat($entry['travel_hours'] ?? $entry['travel'] ?? $entry['t'] ?? 0);
-                  $siteNameForAria = '' !== trim($siteName) ? $siteName : 'Work entry';
+                  $siteNameForAria = '' !== trim($siteName) ? $siteName : $i18n['CALENDAR_WORK_ENTRY_LABEL'];
                   
-                  // Format hours to 2 decimal places, always show including zeros
-                  $formatHours = static function ($h): string {
-                    $num = (float) $h;
-                    return self::formatCompactNumber($num);
-                  };
+                  $displayFields = CalendarCellDisplay::buildWorkEntryDisplayFields(
+                    $regularHours,
+                    $overtimeHours,
+                    $livingOut,
+                    $travelHours,
+                    $workEntryFieldPrefs,
+                    $isEncryptedPlaceholder,
+                    static fn(float $value): string => $formatHours($value),
+                    $entryHours,
+                  );
+                  $fields = $displayFields['fields'];
                   $spokenMetrics = $isEncryptedPlaceholder
-                    ? ['Encrypted work details are unavailable in this view']
-                    : [
-                        sprintf('%s regular hours', $formatHours($regularHours)),
-                        sprintf('%s overtime hours', $formatHours($overtimeHours)),
-                        sprintf('%s living out allowance', $formatHours($livingOut)),
-                        sprintf('%s travel hours', $formatHours($travelHours)),
-                      ];
+                    ? [$i18n['CALENDAR_ENCRYPTED_DETAILS_UNAVAILABLE']]
+                    : $displayFields['spokenMetrics'];
                   $spokenSummary = AriaEcho::cadence($spokenMetrics, ', ');
-                  $entryAria = AriaEcho::cadence(sprintf('%s on %s. %s.', $siteNameForAria, $dateAriaLabel, $spokenSummary));
+                  $entryLead = $spokenSummary !== ''
+                    ? sprintf('%s on %s. %s.', $siteNameForAria, $dateAriaLabel, $spokenSummary)
+                    : sprintf('%s on %s.', $siteNameForAria, $dateAriaLabel);
+                  $entryAria = AriaEcho::cadence($entryLead);
               ?>
                   <div class="work work_<?php echo $this->escape($workEntryClass); ?>" aria-label="<?php echo $this->escape($entryAria); ?>">
-                    <strong><?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?></strong><br />
-                    <?php 
-                    $fields = $isEncryptedPlaceholder
-                      ? ['--', '--', '--', '--']
-                      : [
-                          $formatHours($regularHours),
-                          $formatHours($overtimeHours),
-                          $formatHours($livingOut),
-                          $formatHours($travelHours),
-                        ];
-
-                    echo implode('&nbsp;/&nbsp;', $fields);
+                    <strong><?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?></strong><?php
+                    if ($fields !== []) {
+                      echo '<br />' . implode('&nbsp;/&nbsp;', $fields);
+                    }
                     ?>
                   </div>
               <?php
@@ -976,27 +1068,20 @@ class DataGrid
   }
 
   /**
-   * Enable user-resizable columns (widths persist in localStorage via dg_col_*_w_* classes).
-   */
-  public function enableColumnResize(): void
-  {
-    $this->meta['columnResizeEnabled'] = true;
-  }
-
-  /**
-   * Enable client-side row windowing for large single-page result sets.
-   */
-  public function enableVirtualScroll(): void
-  {
-    $this->meta['virtualScrollEnabled'] = true;
-  }
-
-  /**
    * Enable the column visibility control strip between toolbar and headers.
    */
   public function enableColumnVisibility(): void
   {
     $this->meta['columnVisibilityEnabled'] = true;
+  }
+
+  /**
+   * Render column visibility as either a visible strip or a compact menu.
+   */
+  public function setColumnVisibilityMode(string $mode): void
+  {
+    $normalized = strtolower(trim($mode));
+    $this->meta['columnVisibilityMode'] = 'menu' === $normalized ? 'menu' : 'strip';
   }
 
   /**
@@ -1038,7 +1123,7 @@ class DataGrid
   public function enableSearch(?string $placeholder = null): void
   {
     $this->meta['searchEnabled'] = true;
-    $this->meta['searchPlaceholder'] = $placeholder ?? 'Search…';
+    $this->meta['searchPlaceholder'] = $placeholder ?? Strings::i18n('DATAGRID_SEARCH_PLACEHOLDER');
   }
 
   /**
@@ -1067,6 +1152,7 @@ class DataGrid
 
   /**
    * Merge search and top pagination into one toolbar row.
+   * Layout: search (left) | range info (center) | prev/next (right).
    */
   public function setToolbarLayout(string $layout): void
   {
@@ -1121,5 +1207,3 @@ class DataGrid
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
   }
 }
-
-

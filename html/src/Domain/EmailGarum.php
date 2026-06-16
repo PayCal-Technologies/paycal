@@ -667,7 +667,7 @@ class EmailGarum
     $subject = '[PayCal] Business Access Invite (Batch ' . $normalizedBatchCode . ')';
 
     $baseUrl = Environment::appBaseURL();
-    $acceptUrl = rtrim($baseUrl, '/') . '/profile/?org_invite_token=' . urlencode($inviteToken);
+    $acceptUrl = rtrim($baseUrl, '/') . '/settings/account/?org_invite_token=' . urlencode($inviteToken);
     $scopeList = implode(', ', $scopes);
 
     $templateData = [
@@ -882,5 +882,4 @@ class EmailGarum
     return $code;
   }
 }
-
 

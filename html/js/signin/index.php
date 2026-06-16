@@ -437,7 +437,7 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
     setPasskeyStatus(AUTH_T.AUTH_JS_SUCCESS_REDIRECTING);
     hideAuthBanner();
     window.location.href = preferPhoneFlow
-      ? '/settings/?passkey_onboarding=1#panel-passkeys'
+      ? '/settings/security/?passkey_onboarding=1'
       : '/';
   } catch (error) {
     const msg = error?.message || AUTH_T.AUTH_JS_SIGNIN_FAILED;

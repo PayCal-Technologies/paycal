@@ -55,7 +55,7 @@ require_once HTML.'/header.php';
       <p>
         Se você encontrar um problema e quiser compartilhar mais contexto com o suporte, pode
         habilitar diagnósticos adicionais em
-        <a href="/settings/">Configurações → Depuração (Opcional)</a>.
+        <a href="/settings/diagnostics/">Configurações → Depuração (Opcional)</a>.
         Cada configuração é independente; você pode ativar apenas a relevante.
         As três estão <strong>Desativadas</strong> por padrão.
       </p>
@@ -220,7 +220,7 @@ ERROR 1: Uncaught TypeError in calendar renderer</pre>
         como cookies do navegador. Elas seguem sua conta em todos os dispositivos e sessões e
         estão <strong>Desativadas</strong> por padrão para cada conta — incluindo novas contas.
         Você pode alterá-las a qualquer momento em
-        <a href="/settings/">Configurações → Depuração (Opcional)</a>.
+        <a href="/settings/diagnostics/">Configurações → Depuração (Opcional)</a>.
       </p>
       <p>
         Desativar uma configuração tem efeito imediato no próximo carregamento de página.

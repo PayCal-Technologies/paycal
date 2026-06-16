@@ -328,7 +328,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
 
         <!-- ── Right column: Business Planning ────────────────────── -->
         <div class='edit_site_col edit_site_col_advanced'>
-          <h3 class='edit_site_col_heading'>&#128202; <?php echo site_editor_i18n('SITES_BUSINESS_PLANNING_HEADING'); ?></h3>
+          <h3 class='edit_site_col_heading'>&#128202; <?php echo site_editor_i18n('BUSINESS_PLANNING'); ?></h3>
 
           <!-- Org Planning — only shown when site is linked to a managed org -->
           <section id='edit_site_org_planning' hidden>

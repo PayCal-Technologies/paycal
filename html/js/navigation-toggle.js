@@ -366,20 +366,32 @@ export default (() => {
 
       syncAccessibleState();
 
-      // Load proximity preference ('1' = on by default).
-      proximityEnabled = (localStorage.getItem(PROXIMITY_STORAGE_KEY) ?? '1') !== '0';
+      // Load proximity preference from server config; fall back to legacy localStorage during migration.
+      const coreConfig = typeof window !== 'undefined' ? window.PayCalCore?.config : undefined;
+      const configProximity = coreConfig?.nav_proximity;
+      if (configProximity === 'on' || configProximity === 'off') {
+        proximityEnabled = configProximity === 'on';
+      } else {
+        proximityEnabled = (localStorage.getItem(PROXIMITY_STORAGE_KEY) ?? '1') !== '0';
+      }
 
-      // Load proximity distance preference (default 200 px, clamped 0–600).
-      const storedPx = parseInt(localStorage.getItem(PROXIMITY_PX_STORAGE_KEY) ?? '200', 10);
-      proximityPx = Number.isFinite(storedPx) ? Math.min(600, Math.max(0, storedPx)) : 200;
+      const configPx = Number(coreConfig?.nav_proximity_px);
+      if (Number.isFinite(configPx)) {
+        proximityPx = Math.min(600, Math.max(0, Math.round(configPx)));
+      } else {
+        const storedPx = parseInt(localStorage.getItem(PROXIMITY_PX_STORAGE_KEY) ?? '200', 10);
+        proximityPx = Number.isFinite(storedPx) ? Math.min(600, Math.max(0, storedPx)) : 200;
+      }
 
-      // Load overlay preference ('0' = push model by default).
-      overlayMode = (localStorage.getItem(OVERLAY_STORAGE_KEY) ?? '0') === '1';
+      const configOverlay = coreConfig?.nav_overlay;
+      if (configOverlay === 'overlay' || configOverlay === 'push') {
+        overlayMode = configOverlay === 'overlay';
+      } else {
+        overlayMode = (localStorage.getItem(OVERLAY_STORAGE_KEY) ?? '0') === '1';
+      }
       document.body.classList.toggle('nav-overlay-mode', overlayMode);
 
-      const configTimeout = typeof window !== 'undefined'
-        ? window.PayCalCore?.config?.overlay_sidebar_timeout_seconds
-        : undefined;
+      const configTimeout = coreConfig?.overlay_sidebar_timeout_seconds;
       const parsedTimeout = Number(configTimeout);
       overlaySidebarTimeoutSeconds = Number.isFinite(parsedTimeout) ? parsedTimeout : 5;
 
@@ -441,7 +453,6 @@ export default (() => {
      */
     setProximityEnabled(enabled) {
       proximityEnabled = Boolean(enabled);
-      localStorage.setItem(PROXIMITY_STORAGE_KEY, proximityEnabled ? '1' : '0');
       // If disabling while hover had opened the sidebar, collapse it.
       if (!proximityEnabled && hoverOpened) {
         hoverOpened = false;
@@ -461,7 +472,6 @@ export default (() => {
      */
     setProximityPx(px) {
       proximityPx = Math.min(600, Math.max(0, Math.round(Number(px) || 0)));
-      localStorage.setItem(PROXIMITY_PX_STORAGE_KEY, String(proximityPx));
     },
 
     /** Returns current proximity trigger distance in px (for settings UI). */
@@ -477,7 +487,6 @@ export default (() => {
      */
     setOverlayMode(enabled) {
       overlayMode = Boolean(enabled);
-      localStorage.setItem(OVERLAY_STORAGE_KEY, overlayMode ? '1' : '0');
       document.body.classList.toggle('nav-overlay-mode', overlayMode);
       if (overlayMode && state === 'pinned') {
         resetOverlayIdleTimer();

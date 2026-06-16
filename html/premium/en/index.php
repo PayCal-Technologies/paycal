@@ -3,7 +3,7 @@
  * Premium landing page — English template.
  *
  * Variables provided by parent controller (premium/index.php):
- *   $ctaHref         string  URL for upgrade CTA (/profile#panel-billing or /auth)
+ *   $ctaHref         string  URL for upgrade CTA (/settings/account/#panel-billing or /auth)
  *   $isAuthenticated bool    Whether the current visitor is signed in
  */
 

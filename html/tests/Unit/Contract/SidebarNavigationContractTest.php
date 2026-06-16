@@ -122,7 +122,7 @@ final class SidebarNavigationContractTest extends TestCase
   }
 
   #[Test]
-  public function paycalGroupIncludesSitesReportsProfileAndSettings(): void
+  public function paycalGroupIncludesSitesReportsAndSettings(): void
   {
     $navigation = Render::buildSidebarNavigation(false, false);
     $paycalGroup = $this->groupById($navigation, 'paycal');
@@ -130,7 +130,7 @@ final class SidebarNavigationContractTest extends TestCase
 
     $this->assertContains(Page::SITES->value, $pages);
     $this->assertContains(Page::REPORTS->value, $pages);
-    $this->assertContains(Page::PROFILE->value, $pages);
+    $this->assertNotContains(Page::PROFILE->value, $pages);
     $this->assertContains('PAGE_SETTINGS', $pages);
     $this->assertNotContains(Page::EARNINGS->value, $pages);
     $this->assertNotContains(Page::INDEX->value, $pages);

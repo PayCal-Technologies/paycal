@@ -158,19 +158,7 @@ class Calendar
     $tz = $user->timezone;
     $zone = new \DateTimeZone($tz);
     $now = new \DateTimeImmutable('now', $zone);
-    $scheduled = PayPeriodGenerator::resolveForDate($user, $now);
-    if (null !== $scheduled) {
-      return $scheduled;
-    }
-
-    $frequency = PayPeriodGenerator::resolveFrequency($user);
-    $anchor = $user->pay_anchor ?? 'Monday';
-    $epoch = null;
-    if ($frequency === PayFrequency::BIWEEKLY && !empty($user->pay_epoch)) {
-      $epoch = new \DateTimeImmutable($user->pay_epoch, $zone);
-    }
-
-    return PayPeriods::fromDate($now, $frequency, $anchor, $epoch, $tz);
+    return PayPeriodGenerator::resolveForDateOrCompute($user, $now);
   }
 }
 

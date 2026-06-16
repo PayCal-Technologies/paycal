@@ -146,6 +146,36 @@ final class CalendarLocaleTest extends TestCase
   }
 
   #[Test]
+  public function generateWeekDayLabelsProvidesNarrowShortAndLongLabels(): void
+  {
+    $labels = Strings::generateWeekDayLabels('en_US');
+
+    $this->assertCount(7, $labels);
+    $this->assertSame('S', $labels[0]['narrow']);
+    $this->assertSame('Sun', $labels[0]['short']);
+    $this->assertSame('Sunday', $labels[0]['long']);
+    $this->assertSame('M', $labels[1]['narrow']);
+    $this->assertSame('Mon', $labels[1]['short']);
+    $this->assertSame('Monday', $labels[1]['long']);
+  }
+
+  #[Test]
+  public function generateWeekDayLabelsUsesLocaleAwareLongAndNarrowNames(): void
+  {
+    if (!class_exists('\IntlDateFormatter')) {
+      $this->markTestSkipped('IntlDateFormatter extension is required.');
+    }
+
+    $labels = Strings::generateWeekDayLabels('fr');
+
+    $this->assertMatchesRegularExpression('/^lun\.?$/ui', $labels[1]['short']);
+    $this->assertMatchesRegularExpression('/^lundi$/ui', $labels[1]['long']);
+    $this->assertStringNotContainsString('Mon', $labels[1]['short']);
+    $this->assertStringNotContainsString('Monday', $labels[1]['long']);
+    $this->assertNotSame($labels[1]['short'], $labels[1]['narrow']);
+  }
+
+  #[Test]
   public function frenchPreviousStringUsesCorrectAccent(): void
   {
     $this->assertSame('Précédent', Strings::i18n('PREVIOUS', 'fr'));
@@ -175,8 +205,12 @@ final class CalendarLocaleTest extends TestCase
 
     $html = $grid->table();
 
-    $this->assertStringContainsString('Précédent', $html);
-    $this->assertStringContainsString('Suivant', $html);
+    $this->assertStringContainsString('<span aria-hidden="true">&lt;</span>', $html);
+    $this->assertStringContainsString('<span aria-hidden="true">&gt;</span>', $html);
+    $this->assertStringContainsString('aria-label="Previous month ([ or Page Up)"', $html);
+    $this->assertStringContainsString('aria-label="Next month (] or Page Down)"', $html);
+    $this->assertStringNotContainsString('← Précédent', $html);
+    $this->assertStringNotContainsString('Suivant →', $html);
     $this->assertStringContainsString('calendar-v2-weekday-headers', $html);
     $this->assertMatchesRegularExpression('/juin/u', $html);
     $this->assertStringNotContainsString('>Sun<', $html);
@@ -200,8 +234,9 @@ final class CalendarLocaleTest extends TestCase
     $this->assertStringContainsString("'Living Out Allowance'", $calendarJs);
     $this->assertStringContainsString("calendarI18n('DELETE'", $calendarJs);
     $this->assertStringContainsString('CALENDAR_MODAL_SELECT_SITE', $calendarJs);
-    $this->assertStringContainsString('__CALENDAR_I18N__', $index);
-    $this->assertStringContainsString('window.__CALENDAR_I18N__', $index);
+    $this->assertStringContainsString('id="calendar-page-i18n"', $index);
+    $this->assertStringContainsString('type="application/json"', $index);
+    $this->assertStringContainsString('calendar-page-i18n', $calendarJs);
     $this->assertStringContainsString('formatCalendarLocaleDate', $calendarJs);
     $this->assertStringNotContainsString('>LOA<', $calendarJs);
 
