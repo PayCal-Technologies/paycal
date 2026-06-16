@@ -3937,3 +3937,12 @@ SETTINGS_TOAST_WIDTH_LARGER Larger
 SETTINGS_TOAST_WIDTH_NARROW Narrow
 SETTINGS_TOAST_WIDTH_NORMAL Normal
 SETTINGS_TOAST_WIDTH_TINY Tiny
+BUSINESS_PUBLIC_PREVIEW_NAME PayCal Business
+BUSINESS_PUBLIC_PREVIEW_LEAD Business workspaces are available in the full PayCal app.
+BUSINESS_PUBLIC_PREVIEW_DETAILS Business profile details are available after signing in with Business access.
+BUSINESS_PUBLIC_PREVIEW_MEMBERS Business member tools are available after signing in with Business access.
+BUSINESS_PUBLIC_PREVIEW_SITES Business site tools are available after signing in with Business access.
+BUSINESS_PUBLIC_PREVIEW_PAYROLL Business payroll settings are available after signing in with Business access.
+BUSINESS_PUBLIC_PREVIEW_REPORTS Business reports are available after signing in with Business access.
+BUSINESS_PUBLIC_PREVIEW_AUDIT Business audit tools are available after signing in with Business access.
+PUBLIC_EXTENSION_DISCLAIMER This public preview does not expose private business data.

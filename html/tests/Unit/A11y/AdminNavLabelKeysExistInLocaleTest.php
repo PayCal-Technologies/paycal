@@ -128,6 +128,35 @@ final class AdminNavLabelKeysExistInLocaleTest extends TestCase
   }
 
   #[Test]
+  public function publicBusinessPreviewKeysAreTranslatedInAllLocales(): void
+  {
+    $locales = ['de', 'en', 'es', 'fr', 'hi', 'it', 'nl', 'pt', 'tl', 'tr'];
+    $requiredKeys = [
+      'BUSINESS_PUBLIC_PREVIEW_NAME',
+      'BUSINESS_PUBLIC_PREVIEW_LEAD',
+      'BUSINESS_PUBLIC_PREVIEW_DETAILS',
+      'BUSINESS_PUBLIC_PREVIEW_MEMBERS',
+      'BUSINESS_PUBLIC_PREVIEW_SITES',
+      'BUSINESS_PUBLIC_PREVIEW_PAYROLL',
+      'BUSINESS_PUBLIC_PREVIEW_REPORTS',
+      'BUSINESS_PUBLIC_PREVIEW_AUDIT',
+      'PUBLIC_EXTENSION_DISCLAIMER',
+    ];
+
+    foreach ($locales as $locale) {
+      $strings = (string) file_get_contents($this->projectRoot() . '/strings/' . $locale . '.txt');
+
+      foreach ($requiredKeys as $requiredKey) {
+        $this->assertMatchesRegularExpression(
+          '/^' . preg_quote($requiredKey, '/') . ' .+/m',
+          $strings,
+          sprintf('Missing or empty %s in %s.txt', $requiredKey, $locale),
+        );
+      }
+    }
+  }
+
+  #[Test]
   public function calendarIndexMainLandmarkUsesTranslatedPageLabel(): void
   {
     $indexPage = (string) file_get_contents($this->projectRoot() . '/html/index.php');

@@ -4254,3 +4254,12 @@ YEAR_TO_DATE Year To Date
 YEAR_TO_DATE_EARNINGS Year To Date Earnings
 YOUR_EMAIL Email
 YOUR_NAME Name
+BUSINESS_PUBLIC_PREVIEW_NAME PayCal Business
+BUSINESS_PUBLIC_PREVIEW_LEAD Business workspaces are available in the full PayCal app.
+BUSINESS_PUBLIC_PREVIEW_DETAILS Business profile details are available after signing in with Business access.
+BUSINESS_PUBLIC_PREVIEW_MEMBERS Business member tools are available after signing in with Business access.
+BUSINESS_PUBLIC_PREVIEW_SITES Business site tools are available after signing in with Business access.
+BUSINESS_PUBLIC_PREVIEW_PAYROLL Business payroll settings are available after signing in with Business access.
+BUSINESS_PUBLIC_PREVIEW_REPORTS Business reports are available after signing in with Business access.
+BUSINESS_PUBLIC_PREVIEW_AUDIT Business audit tools are available after signing in with Business access.
+PUBLIC_EXTENSION_DISCLAIMER This public preview does not expose private business data.
