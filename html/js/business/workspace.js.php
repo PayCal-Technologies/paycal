@@ -297,6 +297,21 @@
     businesses_editor_contact_cto_email: 'contact_cto_email',
     businesses_editor_contact_cto_phone: 'contact_cto_phone',
     businesses_editor_contact_cto_role: 'contact_cto_role',
+    businesses_editor_contact_support_name: 'contact_support_name',
+    businesses_editor_contact_support_image_url: 'contact_support_image_url',
+    businesses_editor_contact_support_email: 'contact_support_email',
+    businesses_editor_contact_support_phone: 'contact_support_phone',
+    businesses_editor_contact_support_role: 'contact_support_role',
+    businesses_editor_contact_operations_name: 'contact_operations_name',
+    businesses_editor_contact_operations_image_url: 'contact_operations_image_url',
+    businesses_editor_contact_operations_email: 'contact_operations_email',
+    businesses_editor_contact_operations_phone: 'contact_operations_phone',
+    businesses_editor_contact_operations_role: 'contact_operations_role',
+    businesses_editor_contact_manager_name: 'contact_manager_name',
+    businesses_editor_contact_manager_image_url: 'contact_manager_image_url',
+    businesses_editor_contact_manager_email: 'contact_manager_email',
+    businesses_editor_contact_manager_phone: 'contact_manager_phone',
+    businesses_editor_contact_manager_role: 'contact_manager_role',
     businesses_editor_contact_custom_json: 'contact_custom_json',
   };
 
@@ -1766,10 +1781,6 @@
 
   const saveOrganizationSettings = async (source = 'auto', refreshAfterSave = false) => {
     if (state.selectedBusinessId === '' || state.editorHydrating) {
-      return false;
-    }
-
-    if (blockPremiumActionWhenLocked()) {
       return false;
     }
 
@@ -10285,4 +10296,3 @@
       finalizeBusinessReportsLensPerfSummary('Performance Summary');
     }
   };
-

@@ -1080,7 +1080,7 @@ body[data-nav-primary-position='right'] #page_header.nav_component--header .nav_
 
 body[data-nav-primary-position='left'] #page_header.nav_component--header .nav_menu--primary a:focus-visible,
 body[data-nav-primary-position='right'] #page_header.nav_component--header .nav_menu--primary a:focus-visible {
-  outline: 2px solid var(--color-focus-ring, var(--color-text));
+  outline: 2px solid var(--color-focus-ring, #0096d6);
   outline-offset: -2px;
 }
 
@@ -1772,7 +1772,7 @@ body:not(.nav-collapsed) #page_header.nav_component--header [role='button'] {
   body[data-nav-primary-position='left']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible:focus-visible,
   body[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible:focus,
   body[data-nav-primary-position='right']:has(#page_header.nav_component--header:not(.nav_component--public)) .sidebar_toggle_accessible:focus-visible {
-    outline: 2px solid var(--color-focus-ring, var(--color-text));
+    outline: 2px solid var(--color-focus-ring, #0096d6);
     outline-offset: 2px;
   }
 

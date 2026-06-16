@@ -194,7 +194,7 @@ body.page-calendar #calendar-v2-root.calendar_full_bleed.panel {
 }
 
 .calendar_view_pills:focus-within {
-  outline: 2px solid var(--color-focus-ring, var(--button-primary-text));
+  outline: 2px solid var(--color-focus-ring, #0096d6);
   outline-offset: 1px;
   border-radius: 999px;
 }
@@ -557,8 +557,8 @@ button.cal_menu_selected:focus-visible {
   color: var(--cal-day-fore);
 }
 .cal_day:focus-visible {
-  border: 2px solid var(--color-focus-ring);
-  outline: 2px solid var(--color-focus-ring);
+  border: 2px solid var(--color-focus-ring, #0096d6);
+  outline: 2px solid var(--color-focus-ring, #0096d6);
 }
 
 .work {

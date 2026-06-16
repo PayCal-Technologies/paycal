@@ -74,6 +74,10 @@ function buildSummaryCardsHtml(state, config, formatHelpers) {
   const projection = state?.forecast_state?.projection_result?.summary_cards ?? {};
   const confidence = state?.forecast_state?.confidence ?? 'low';
   const confidenceLabel = getI18nLabel(config, CONFIDENCE_KEYS[confidence] || '', confidence);
+  const ytdGrossCents = Math.max(0, Number(state?.forecast_state?.ytd_context?.gross_cents) || 0);
+  const progressLabel = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_PROGRESS_LABEL', 'YTD vs forecast'));
+  const currentLabel = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_PROGRESS_CURRENT', 'Current'));
+  const forecastLabel = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_PROGRESS_FORECAST', 'Forecast'));
 
   return Object.entries(SUMMARY_CARD_KEYS).map(([key, labelKey]) => {
     const card = projection[key] ?? {};
@@ -84,6 +88,11 @@ function buildSummaryCardsHtml(state, config, formatHelpers) {
     const grossLabel = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_CARD_GROSS', 'Gross'));
     const hoursLabel = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_CARD_HOURS', 'Hours'));
     const confidenceField = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_CARD_CONFIDENCE', 'Confidence'));
+    const grossCents = Math.max(0, Number(card.gross_cents) || 0);
+    const progressMax = Math.max(1, grossCents);
+    const progressValue = Math.max(0, Math.min(progressMax, ytdGrossCents));
+    const progressPct = progressMax > 0 ? Math.round((progressValue / progressMax) * 100) : 0;
+    const progressText = `${currentLabel} ${formatHelpers.formatCurrency(progressValue / 100)} / ${forecastLabel} ${gross}`;
 
     return `<article class="forecast-summary-card" aria-label="${title}">
       <h3 class="forecast-summary-card__title">${title}</h3>
@@ -93,6 +102,13 @@ function buildSummaryCardsHtml(state, config, formatHelpers) {
         <div><dt>${hoursLabel}</dt><dd>${hours}</dd></div>
         <div><dt>${confidenceField}</dt><dd>${escapeHtml(confidenceLabel)}</dd></div>
       </dl>
+      <div class="forecast-summary-card__progress">
+        <div class="forecast-summary-card__progress-label">
+          <span>${progressLabel}</span>
+          <strong>${progressPct}%</strong>
+        </div>
+        <progress class="forecast-summary-card__progress-bar" max="${progressMax}" value="${progressValue}" aria-label="${escapeHtml(progressText)}"></progress>
+      </div>
     </article>`;
   }).join('');
 }

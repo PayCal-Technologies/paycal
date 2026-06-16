@@ -763,6 +763,45 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   font-weight: 600;
 }
 
+.forecast-summary-card__progress {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.forecast-summary-card__progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.76rem;
+  color: var(--text-muted, var(--color-text-muted));
+}
+
+.forecast-summary-card__progress-bar {
+  width: 100%;
+  height: 0.42rem;
+  overflow: hidden;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border-muted, rgba(255, 255, 255, 0.18)) 70%, transparent);
+}
+
+.forecast-summary-card__progress-bar::-webkit-progress-bar {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border-muted, rgba(255, 255, 255, 0.18)) 70%, transparent);
+}
+
+.forecast-summary-card__progress-bar::-webkit-progress-value {
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary, #3b82f6), var(--color-success, #22c55e));
+}
+
+.forecast-summary-card__progress-bar::-moz-progress-bar {
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary, #3b82f6), var(--color-success, #22c55e));
+}
+
 .forecast-workspace__main,
 .forecast-workspace__aside {
   display: flex;
@@ -852,7 +891,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 .forecast-scenario-card:focus-visible {
-  outline: 2px solid var(--primary, #3b82f6);
+  outline: 2px solid var(--color-focus-ring, #0096d6);
   outline-offset: 2px;
 }
 
@@ -1647,7 +1686,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .earnings_team_grid_row--clickable:focus-visible {
   background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-focus-ring, #0096d6);
   outline-offset: -2px;
 }
 

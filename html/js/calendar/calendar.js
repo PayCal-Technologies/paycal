@@ -5252,7 +5252,11 @@
         const placeholderAria = escapeText(window.PayCalAriaEcho.cadence(
           spokenSiteName ? `${spokenSiteName}. ${encryptedUnavailable}` : encryptedUnavailable
         ));
-        return `<div class="work work_${posClass}" aria-label="${placeholderAria}"><strong>${siteName}</strong>${placeholderFieldsMarkup}</div>`;
+        const placeholderSiteColorSource = entry.site_color || entry.siteColor || entry.sc || entry.c;
+        const placeholderSiteColorRaw = placeholderSiteColorSource ? String(placeholderSiteColorSource).toUpperCase() : '';
+        const placeholderSiteColorValid = /^#[0-9A-Fa-f]{6}$/i.test(placeholderSiteColorRaw);
+        const placeholderSiteColorAttr = placeholderSiteColorValid ? ` data-site-color="${escapeText(placeholderSiteColorRaw)}"` : '';
+        return `<div class="work work_${posClass}"${placeholderSiteColorAttr} aria-label="${placeholderAria}"><strong>${siteName}</strong>${placeholderFieldsMarkup}</div>`;
       }
 
       const regularRaw = entry.regular_hours ?? entry.r;
@@ -5288,7 +5292,8 @@
         spokenSummary ? `${lead}. ${spokenSummary}.` : `${lead}.`
       ));
 
-      const siteColorRaw = entry.site_color ? String(entry.site_color).toUpperCase() : '';
+      const siteColorSource = entry.site_color || entry.siteColor || entry.sc || entry.c;
+      const siteColorRaw = siteColorSource ? String(siteColorSource).toUpperCase() : '';
       const siteColorValid = /^#[0-9A-Fa-f]{6}$/i.test(siteColorRaw);
       const siteColorAttr = siteColorValid ? ` data-site-color="${escapeText(siteColorRaw)}"` : '';
       const fieldsMarkup = fields.length > 0 ? `<br />${fields.join('&nbsp;/&nbsp;')}` : '';
