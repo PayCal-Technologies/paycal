@@ -1595,7 +1595,7 @@ body:not(.nav-collapsed) #page_header.nav_component--header [role='button'] {
   }
 
   body[data-nav-viewport-compact]:not(.calendar-screenmode-minimal):has(#page_header.nav_component--header:not(.nav_component--public)) #main {
-    padding-top: var(--pad-sm) !important;
+    padding: 0 !important;
   }
 
   body[data-nav-viewport-compact]:not(.calendar-screenmode-minimal):has(#page_header.nav_component--header:not(.nav_component--public)) #page_footer {
@@ -1612,6 +1612,8 @@ body:not(.nav-collapsed) #page_header.nav_component--header [role='button'] {
   body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header:not(.nav_component--public),
   body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header:not(.nav_component--public) {
     transform: translateY(-100%);
+    visibility: hidden;
+    opacity: 0;
     cursor: default;
     pointer-events: none;
   }
@@ -1620,6 +1622,8 @@ body:not(.nav-collapsed) #page_header.nav_component--header [role='button'] {
   body.nav-pinned[data-nav-primary-position='left'] #page_header.nav_component--header:not(.nav_component--public),
   body.nav-pinned[data-nav-primary-position='right'] #page_header.nav_component--header:not(.nav_component--public) {
     transform: translateX(0);
+    visibility: visible;
+    opacity: 1;
     z-index: 10002;
     box-shadow: none;
     cursor: default;

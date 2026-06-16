@@ -510,7 +510,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 @media (max-width: 768px) {
   #main {
     padding-block: var(--pad-sm) !important;
-    padding-inline: var(--page-edge-inline) !important;
+    padding-inline: var(--pad-sm) !important;
     box-sizing: border-box;
     min-width: 0;
   }
@@ -530,8 +530,20 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     min-width: 0;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    padding: 5px !important;
+    padding: 0 !important;
     box-sizing: border-box;
+  }
+
+  body[data-nav-viewport-compact]:has(#page_header.nav_component--header:not(.nav_component--public)) #main {
+    padding: 0 !important;
+  }
+
+  body[data-nav-viewport-compact]:has(#page_header.nav_component--header:not(.nav_component--public)) .panel,
+  body[data-nav-viewport-compact]:has(#page_header.nav_component--header:not(.nav_component--public)) #main > section.panel,
+  body[data-nav-viewport-compact]:has(#page_header.nav_component--header:not(.nav_component--public)) .sites_main_container > section.panel {
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
   }
 
   .panel > *,
