@@ -47,7 +47,7 @@ foreach ($i18nKeys as $key) {
 
       <h2><?php echo $i18n['ABOUT_EN_SECTION_FREE_PREMIUM']; ?></h2>
       <p>PayCal works fully for individuals at no cost.</p>
-      <p>Businesses can choose to upgrade to a Premium plan for shared features.</p>
+      <p>Premium adds deeper personal planning, while Business adds shared workspaces, member visibility, and aggregate payroll analysis.</p>
 
       <table class="table" aria-label="<?php echo $i18n['ABOUT_EN_TABLE_ARIA_FREE_PREMIUM']; ?>">
         <thead>
@@ -62,12 +62,12 @@ foreach ($i18nKeys as $key) {
             <td>Personal work tracking, earnings estimates, pay-period visibility, and exports</td>
           </tr>
           <tr>
-            <td>Premium (Businesses)</td>
-            <td>Shared access, business management, and advanced workflows</td>
+            <td>Premium + Business</td>
+            <td>Premium planning tools plus Business workspace controls, member visibility, and aggregate analysis</td>
           </tr>
           <tr>
             <td>Pricing</td>
-            <td>$4.99 CAD/month per business</td>
+            <td><a href="/pricing/">See current Free, Premium, and Business pricing</a></td>
           </tr>
         </tbody>
       </table>
@@ -94,7 +94,7 @@ foreach ($i18nKeys as $key) {
       <h2><?php echo $i18n['ABOUT_EN_SECTION_WHO_ITS_FOR']; ?></h2>
       <ul class="doc-fact-list">
         <li><strong>Individuals:</strong> Track your work and pay history for free</li>
-        <li><strong>Businesses:</strong> Use Premium for shared access and coordination</li>
+        <li><strong>Businesses:</strong> Use Business for shared access and coordination</li>
       </ul>
 
       <h2><?php echo $i18n['ABOUT_EN_SECTION_SECURITY_PRIVACY']; ?></h2>
@@ -123,7 +123,7 @@ foreach ($i18nKeys as $key) {
       </ul>
 
       <h2><?php echo $i18n['ABOUT_EN_SECTION_BILLING_SUPPORT']; ?></h2>
-      <p>Premium subscriptions are processed by Stripe.</p>
+      <p>Paid subscriptions are processed by Stripe.</p>
       <p>For billing support, visit <a href="https://support.stripe.com/" target="_blank" rel="noopener noreferrer">Stripe support</a> or <a href="/contact/">contact us</a> for general questions.</p>
     </section>
   </section>

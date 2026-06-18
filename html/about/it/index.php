@@ -25,11 +25,11 @@
       <p>PayCal è uno strumento di tracciamento payroll che mostra i guadagni, stima le trattenute e mantiene organizzati i dati di lavoro.</p>
       <p>È gratuito per uso personale ed è progettato per rendere i periodi paga più chiari prima del giorno di pagamento.</p>
 
-      <h2>Gratis e Premium</h2>
+      <h2>Gratis, Premium e Business</h2>
       <p>PayCal funziona completamente per i singoli senza costi.</p>
-      <p>Le organizzazioni possono scegliere di passare a un piano Premium con funzionalità condivise.</p>
+      <p>Premium aggiunge pianificazione personale avanzata, mentre Business aggiunge spazi condivisi, visibilità sui membri e analisi aggregata del payroll.</p>
 
-      <table class="table" aria-label="Confronto piani Gratis e Premium">
+      <table class="table" aria-label="Confronto piani Gratis, Premium e Business">
         <thead>
           <tr>
             <th scope="col">Piano</th>
@@ -42,12 +42,12 @@
             <td>Tracciamento personale del lavoro, stime guadagni, visibilità periodi paga ed esportazioni</td>
           </tr>
           <tr>
-            <td>Premium (Organizzazioni)</td>
-            <td>Accesso condiviso, gestione team e workflow avanzati</td>
+            <td>Premium + Business</td>
+            <td>Strumenti Premium di pianificazione e controlli Business per spazi condivisi, membri e analisi aggregata</td>
           </tr>
           <tr>
             <td>Prezzo</td>
-            <td>4,99 CAD/mese per organizzazione</td>
+            <td><a href="/pricing/">Vedi i prezzi attuali di Gratis, Premium e Business</a></td>
           </tr>
         </tbody>
       </table>

@@ -25,11 +25,11 @@
       <p>PayCal, kazançlarınızı gösteren, kesintileri tahmin eden ve iş verilerinizi düzenli tutan bir bordro takip aracıdır.</p>
       <p>Kişisel kullanım için ücretsizdir ve maaş gününden önce ödeme dönemlerini daha anlaşılır hale getirmek için tasarlanmıştır.</p>
 
-      <h2>Ücretsiz ve Premium</h2>
+      <h2>Ücretsiz, Premium ve Business</h2>
       <p>PayCal bireyler için ücretsiz olarak tam işlevle çalışır.</p>
-      <p>Kuruluşlar, paylaşımlı özellikler için isteğe bağlı olarak Premium plana geçebilir.</p>
+      <p>Premium daha derin kişisel planlama ekler; Business ise paylaşımlı çalışma alanları, üye görünürlüğü ve toplu bordro analizi ekler.</p>
 
-      <table class="table" aria-label="Ücretsiz ve Premium plan karşılaştırması">
+      <table class="table" aria-label="Ücretsiz, Premium ve Business plan karşılaştırması">
         <thead>
           <tr>
             <th scope="col">Plan</th>
@@ -42,12 +42,12 @@
             <td>Kişisel iş takibi, kazanç tahminleri, ödeme dönemi görünürlüğü ve dışa aktarma</td>
           </tr>
           <tr>
-            <td>Premium (Kuruluşlar)</td>
-            <td>Paylaşımlı erişim, ekip yönetimi ve gelişmiş iş akışları</td>
+            <td>Premium + Business</td>
+            <td>Premium planlama araçları ve Business çalışma alanı kontrolleri, üye görünürlüğü ve toplu analiz</td>
           </tr>
           <tr>
             <td>Fiyat</td>
-            <td>Kuruluş başına aylık 4,99 CAD</td>
+            <td><a href="/pricing/">Güncel Ücretsiz, Premium ve Business fiyatlarını görüntüle</a></td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +74,7 @@
       <h2>Kimin İçin</h2>
       <ul class="doc-fact-list">
         <li><strong>Bireyler:</strong> İşini ve ödeme geçmişini ücretsiz takip et</li>
-        <li><strong>Ekipler:</strong> Paylaşımlı erişim ve koordinasyon için Premium kullan</li>
+        <li><strong>Ekipler:</strong> Paylaşımlı erişim ve koordinasyon için Business kullan</li>
       </ul>
 
       <h2>Güvenlik ve Gizlilik</h2>

@@ -25,11 +25,11 @@
       <p>PayCal is een payroll-trackingtool die je inkomsten toont, inhoudingen schat en je werkgegevens georganiseerd houdt.</p>
       <p>Het is gratis voor persoonlijk gebruik en ontworpen om loonperiodes duidelijker te maken vóór betaaldag.</p>
 
-      <h2>Gratis en Premium</h2>
+      <h2>Gratis, Premium en Business</h2>
       <p>PayCal werkt volledig voor individuen zonder kosten.</p>
-      <p>Organisaties kunnen kiezen om te upgraden naar Premium voor gedeelde functies.</p>
+      <p>Premium voegt diepere persoonlijke planning toe; Business voegt gedeelde werkruimten, ledenzichtbaarheid en geaggregeerde payrollanalyse toe.</p>
 
-      <table class="table" aria-label="Vergelijking Gratis en Premium">
+      <table class="table" aria-label="Vergelijking Gratis, Premium en Business">
         <thead>
           <tr>
             <th scope="col">Plan</th>
@@ -42,12 +42,12 @@
             <td>Persoonlijke werktracking, inkomstenramingen, zicht op loonperiodes en exports</td>
           </tr>
           <tr>
-            <td>Premium (Organisaties)</td>
-            <td>Gedeelde toegang, teambeheer en geavanceerde workflows</td>
+            <td>Premium + Business</td>
+            <td>Premium-planning plus Business-werkruimtebeheer, ledenzichtbaarheid en geaggregeerde analyse</td>
           </tr>
           <tr>
             <td>Prijs</td>
-            <td>$4.99 CAD/maand per organisatie</td>
+            <td><a href="/pricing/">Bekijk actuele prijzen voor Gratis, Premium en Business</a></td>
           </tr>
         </tbody>
       </table>
@@ -103,7 +103,7 @@
       </ul>
 
       <h2>Facturatie en ondersteuning</h2>
-      <p>Premium-abonnementen worden verwerkt via Stripe.</p>
+      <p>Betaalde abonnementen worden verwerkt via Stripe.</p>
       <p>Voor facturatieondersteuning bezoek <a href="https://support.stripe.com/" target="_blank" rel="noopener noreferrer">Stripe support</a> of <a href="/contact/" aria-label="neem contact met ons op">neem contact met ons op</a> voor algemene vragen.</p>
       </section>
   </section>

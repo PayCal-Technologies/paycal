@@ -471,7 +471,7 @@ final class OrganizationDiscoveryService
     }
 
     if ($this->hasReachedMemberLimit($orgId)) {
-      return $this->fail('Organization has reached the maximum member limit of 1,000. Please remove members or contact us for enterprise limits.');
+      return $this->fail('Organization has reached the maximum limit of 100 active members total, including the owner. Please remove members or contact us for enterprise limits.');
     }
 
     $normalizedBatchCode = $this->normalizeBatchCode($batchCode);
@@ -3283,14 +3283,14 @@ final class OrganizationDiscoveryService
 
   /**
    * Check if organization has reached the member limit.
-   * Premium tier allows up to 1,000 members per organization.
+   * Legacy organization tier allows up to 100 members per organization.
    *
    * @param string $orgId
    * @return bool True if the org has reached its member limit
    */
   private function hasReachedMemberLimit(string $orgId): bool
   {
-    $maxMembers = Subscription::PREMIUM->maxMembersPerOrg();
+    $maxMembers = Subscription::BUSINESS->maxMembersPerOrg();
     $currentMembers = $this->getOrganizationMemberCount($orgId);
     return $currentMembers >= $maxMembers;
   }
@@ -5017,5 +5017,3 @@ final class OrganizationDiscoveryService
     ];
   }
 }
-
-

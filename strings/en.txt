@@ -8,14 +8,14 @@
 ABOUT_EN_SECTION_ABOUT_PAYCAL About PayCal
 ABOUT_EN_SECTION_ACCESSIBILITY Accessibility
 ABOUT_EN_SECTION_BILLING_SUPPORT Billing and Support
-ABOUT_EN_SECTION_FREE_PREMIUM Free and Premium
+ABOUT_EN_SECTION_FREE_PREMIUM Free, Premium, and Business
 ABOUT_EN_SECTION_KEY_FEATURES Key Features
 ABOUT_EN_SECTION_SECURITY_PRIVACY Security and Privacy
 ABOUT_EN_SECTION_TRANSPARENCY Transparency
 ABOUT_EN_SECTION_WHAT_IT_HELPS_WITH What It Helps With
 ABOUT_EN_SECTION_WHAT_PAYCAL_IS What PayCal Is
 ABOUT_EN_SECTION_WHO_ITS_FOR Who It's For
-ABOUT_EN_TABLE_ARIA_FREE_PREMIUM Free and Premium plan comparison
+ABOUT_EN_TABLE_ARIA_FREE_PREMIUM Free, Premium, and Business plan comparison
 ABOUT_EN_TABLE_PLAN Plan
 ABOUT_EN_TABLE_WHAT_YOU_GET What you get
 ABOUT_OVERVIEW_ARIA About overview
@@ -450,7 +450,7 @@ BUSINESSES_API_BULK_IMPORT_SESSION_DOES_NOT_BELONG_TO_THIS_BUSINESS Bulk import 
 BUSINESSES_API_BULK_IMPORT_SESSION_DOES_NOT_BELONG_TO_THIS_USER Bulk import session does not belong to this user.
 BUSINESSES_API_BULK_IMPORT_SESSION_NOT_FOUND_OR_EXPIRED Bulk import session not found or expired.
 BUSINESSES_API_BUSINESS_ALREADY_EXISTS Business already exists.
-BUSINESSES_API_BUSINESS_HAS_REACHED_THE_MAXIMUM_MEMBER_LIMIT_OF_1_000_P Business has reached the maximum member limit of 1,000. Please remove members or contact us for enterprise limits.
+BUSINESSES_API_BUSINESS_HAS_REACHED_THE_MAXIMUM_MEMBER_LIMIT_OF_1_000_P Business has reached the maximum limit of 100 active members total, including the owner. Please remove members or contact us for enterprise limits.
 BUSINESSES_API_BUSINESS_ID_IS_REQUIRED Business id is required.
 BUSINESSES_API_BUSINESS_NOT_FOUND Business not found.
 BUSINESSES_API_BUSINESS_NOT_FOUND_FOR_INVITE Business not found for invite.
@@ -2667,7 +2667,7 @@ PREMIUM_PAGE_CTA_COMPARE Compare Plans
 PREMIUM_PAGE_CTA_UPGRADE Create My Business
 PREMIUM_PAGE_FAQ_A1 No. Personal payroll tracking remains free.
 PREMIUM_PAGE_FAQ_A2 The Business tier allows you to create and manage your business and team.
-PREMIUM_PAGE_FAQ_A3 No. Business tier pricing is per business.
+PREMIUM_PAGE_FAQ_A3 Business is a separate workspace plan. See current pricing at https://paycal.app/pricing/.
 PREMIUM_PAGE_FAQ_A4 Yes.
 PREMIUM_PAGE_FAQ_A5 Yes. Workers can still track their own hours and records for free.
 PREMIUM_PAGE_FAQ_Q1 Is Premium required to use PayCal?
@@ -2691,7 +2691,7 @@ PREMIUM_PAGE_ORG_FEATURE3_TITLE Shared Payroll Visibility
 PREMIUM_PAGE_ORG_FEATURE4_BODY Built with encryption-first architecture and worker privacy in mind.
 PREMIUM_PAGE_ORG_FEATURE4_TITLE Secure Team Collaboration
 PREMIUM_PAGE_PREMIUM_TAGLINE Built for managers, small businesses, contractors, and growing teams.
-PREMIUM_PAGE_PRICE_NOTE $4.99 CAD/month per business. Cancel anytime.
+PREMIUM_PAGE_PRICE_NOTE Premium is $4.99 CAD/month. Business pricing is listed at https://paycal.app/pricing/.
 PREMIUM_PAGE_PRICING_NOTE No contracts. Cancel anytime. Full Premium access the moment you upgrade.
 PREMIUM_PAGE_PRICING_TITLE Simple pricing.
 PREMIUM_PAGE_STRIPE_LINK Contact PayCal support

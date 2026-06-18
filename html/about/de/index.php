@@ -25,11 +25,11 @@
       <p>PayCal ist ein Tool zur Lohnverfolgung, das Einnahmen anzeigt, Abzüge schätzt und Arbeitsdaten übersichtlich organisiert.</p>
       <p>Für die private Nutzung ist PayCal kostenlos und wurde entwickelt, um Abrechnungszeiträume schon vor dem Zahltag verständlicher zu machen.</p>
 
-      <h2>Kostenlos und Premium</h2>
+      <h2>Kostenlos, Premium und Business</h2>
       <p>PayCal funktioniert für Einzelpersonen vollständig kostenlos.</p>
-      <p>Organisationen können optional auf einen Premium-Plan mit gemeinsamen Funktionen upgraden.</p>
+      <p>Premium ergänzt erweiterte persönliche Planung; Business ergänzt gemeinsame Arbeitsbereiche, Mitgliederübersicht und aggregierte Lohnanalyse.</p>
 
-      <table class="table" aria-label="Vergleich von Free und Premium">
+      <table class="table" aria-label="Vergleich von Free, Premium und Business">
         <thead>
           <tr>
             <th scope="col">Plan</th>
@@ -42,12 +42,12 @@
             <td>Persönliche Arbeitserfassung, Verdienstschätzungen, Abrechnungsübersicht und Exporte</td>
           </tr>
           <tr>
-            <td>Premium (Organisationen)</td>
-            <td>Gemeinsamer Zugriff, Teamverwaltung und erweiterte Workflows</td>
+            <td>Premium + Business</td>
+            <td>Premium-Planung plus Business-Arbeitsbereiche, Mitgliederübersicht und aggregierte Analyse</td>
           </tr>
           <tr>
             <td>Preis</td>
-            <td>4,99 CAD/Monat pro Organisation</td>
+            <td><a href="/pricing/">Aktuelle Preise für Free, Premium und Business ansehen</a></td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +74,7 @@
       <h2>Für wen es ist</h2>
       <ul class="doc-fact-list">
         <li><strong>Einzelpersonen:</strong> Arbeit und Gehaltshistorie kostenlos erfassen</li>
-        <li><strong>Teams:</strong> Premium für gemeinsamen Zugriff und Koordination nutzen</li>
+        <li><strong>Teams:</strong> Business für gemeinsamen Zugriff und Koordination nutzen</li>
       </ul>
 
       <h2>Sicherheit und Datenschutz</h2>
@@ -103,7 +103,7 @@
       </ul>
 
       <h2>Abrechnung und Support</h2>
-      <p>Premium-Abonnements werden über Stripe verarbeitet.</p>
+      <p>Kostenpflichtige Abonnements werden über Stripe verarbeitet.</p>
       <p>Für Abrechnungsfragen besuchen Sie <a href="https://support.stripe.com/" target="_blank" rel="noopener noreferrer">Stripe Support</a> oder <a href="/contact/" aria-label="Kontakt aufnehmen">kontaktieren Sie uns</a> für allgemeine Fragen.</p>
      </section>
   </section>

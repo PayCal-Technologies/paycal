@@ -25,11 +25,11 @@
       <p>Ang PayCal ay payroll tracking tool na nagpapakita ng kita, tumatantiya ng deductions, at inaayos ang iyong work data.</p>
       <p>Libre ito para sa personal na gamit at ginawa para mas madaling maunawaan ang pay periods bago ang payday.</p>
 
-      <h2>Libre at Premium</h2>
+      <h2>Libre, Premium, at Business</h2>
       <p>Ganap na gumagana ang PayCal para sa mga indibidwal nang walang bayad.</p>
-      <p>Maaaring pumili ang mga business na mag-upgrade sa Premium plan para sa shared features.</p>
+      <p>Nagdaragdag ang Premium ng mas malalim na personal planning, habang ang Business ay nagdaragdag ng shared workspaces, member visibility, at aggregate payroll analysis.</p>
 
-      <table class="table" aria-label="Paghahambing ng Libre at Premium na plano">
+      <table class="table" aria-label="Paghahambing ng Libre, Premium, at Business na plano">
         <thead>
           <tr>
             <th scope="col">Plano</th>
@@ -42,12 +42,12 @@
             <td>Personal na work tracking, earnings estimates, pay-period visibility, at exports</td>
           </tr>
           <tr>
-            <td>Premium (Businesses)</td>
-            <td>Shared access, team management, at advanced workflows</td>
+            <td>Premium + Business</td>
+            <td>Premium planning tools plus Business workspace controls, member visibility, at aggregate analysis</td>
           </tr>
           <tr>
             <td>Presyo</td>
-            <td>$4.99 CAD/buwan bawat business</td>
+            <td><a href="/pricing/">Tingnan ang kasalukuyang presyo ng Libre, Premium, at Business</a></td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +74,7 @@
       <h2>Para Kanino Ito</h2>
       <ul class="doc-fact-list">
         <li><strong>Individuals:</strong> I-track nang libre ang iyong work at pay history</li>
-        <li><strong>Teams:</strong> Gamitin ang Premium para sa shared access at coordination</li>
+        <li><strong>Teams:</strong> Gamitin ang Business para sa shared access at coordination</li>
       </ul>
 
       <h2>Seguridad at Privacy</h2>

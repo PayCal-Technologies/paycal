@@ -25,11 +25,11 @@
       <p>PayCal es una herramienta de seguimiento de nómina que muestra tus ingresos, estima deducciones y mantiene organizados tus datos de trabajo.</p>
       <p>Es gratis para uso personal y está diseñada para hacer que los períodos de pago sean más claros antes del día de cobro.</p>
 
-      <h2>Gratis y Premium</h2>
+      <h2>Gratis, Premium y Business</h2>
       <p>PayCal funciona completamente para personas individuales sin costo.</p>
-      <p>Las organizaciones pueden elegir actualizar a un plan Premium con funciones compartidas.</p>
+      <p>Premium agrega planificación personal avanzada, mientras Business agrega espacios compartidos, visibilidad de miembros y análisis agregado de nómina.</p>
 
-      <table class="table" aria-label="Comparación de planes Gratis y Premium">
+      <table class="table" aria-label="Comparación de planes Gratis, Premium y Business">
         <thead>
           <tr>
             <th scope="col">Plan</th>
@@ -42,12 +42,12 @@
             <td>Seguimiento personal del trabajo, estimaciones de ingresos, visibilidad de períodos de pago y exportaciones</td>
           </tr>
           <tr>
-            <td>Premium (Organizaciones)</td>
-            <td>Acceso compartido, gestión de equipos y flujos de trabajo avanzados</td>
+            <td>Premium + Business</td>
+            <td>Herramientas de planificación Premium y controles Business para espacios compartidos, miembros y análisis agregado</td>
           </tr>
           <tr>
             <td>Precio</td>
-            <td>$4.99 CAD/mes por organización</td>
+            <td><a href="/pricing/">Ver precios actuales de Gratis, Premium y Business</a></td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +74,7 @@
       <h2>Para quién es</h2>
       <ul class="doc-fact-list">
         <li><strong>Personas individuales:</strong> Sigue tu trabajo e historial de pagos gratis</li>
-        <li><strong>Equipos:</strong> Usa Premium para acceso compartido y coordinación</li>
+        <li><strong>Equipos:</strong> Usa Business para acceso compartido y coordinación</li>
       </ul>
 
       <h2>Seguridad y privacidad</h2>
@@ -103,7 +103,7 @@
       </ul>
 
       <h2>Facturación y soporte</h2>
-      <p>Las suscripciones Premium se procesan con Stripe.</p>
+      <p>Las suscripciones pagas se procesan con Stripe.</p>
       <p>Para soporte de facturación, visita <a href="https://support.stripe.com/" target="_blank" rel="noopener noreferrer">Stripe support</a> o <a href="/contact/" aria-label="contáctenos">contáctenos</a> para consultas generales.</p>
       </section>
   </section>

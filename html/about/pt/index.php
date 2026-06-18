@@ -25,11 +25,11 @@
       <p>O PayCal é uma ferramenta de acompanhamento de folha que mostra ganhos, estima descontos e mantém os dados de trabalho organizados.</p>
       <p>É gratuito para uso pessoal e foi criado para tornar os períodos de pagamento mais fáceis de entender antes do dia do pagamento.</p>
 
-      <h2>Gratuito e Premium</h2>
+      <h2>Gratuito, Premium e Business</h2>
       <p>O PayCal funciona plenamente para indivíduos sem custo.</p>
-      <p>As organizações podem optar por fazer upgrade para o plano Premium com recursos compartilhados.</p>
+      <p>Premium adiciona planejamento pessoal avançado, enquanto Business adiciona espaços compartilhados, visibilidade de membros e análise agregada da folha.</p>
 
-      <table class="table" aria-label="Comparação entre planos Gratuito e Premium">
+      <table class="table" aria-label="Comparação entre planos Gratuito, Premium e Business">
         <thead>
           <tr>
             <th scope="col">Plano</th>
@@ -42,12 +42,12 @@
             <td>Acompanhamento pessoal, estimativas de ganhos, visibilidade de períodos e exportações</td>
           </tr>
           <tr>
-            <td>Premium (Organizações)</td>
-            <td>Acesso compartilhado, gestão de equipe e fluxos avançados</td>
+            <td>Premium + Business</td>
+            <td>Ferramentas Premium de planejamento e controles Business para espaços compartilhados, membros e análise agregada</td>
           </tr>
           <tr>
             <td>Preço</td>
-            <td>$4.99 CAD/mês por organização</td>
+            <td><a href="/pricing/">Ver preços atuais de Gratuito, Premium e Business</a></td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +74,7 @@
       <h2>Para quem é</h2>
       <ul class="doc-fact-list">
         <li><strong>Indivíduos:</strong> Acompanhe trabalho e histórico de pagamento grátis</li>
-        <li><strong>Equipes:</strong> Use Premium para acesso compartilhado e coordenação</li>
+        <li><strong>Equipes:</strong> Use Business para acesso compartilhado e coordenação</li>
       </ul>
 
       <h2>Segurança e privacidade</h2>
@@ -103,7 +103,7 @@
       </ul>
 
       <h2>Cobrança e suporte</h2>
-      <p>As assinaturas Premium são processadas pela Stripe.</p>
+      <p>As assinaturas pagas são processadas pela Stripe.</p>
       <p>Para suporte de cobrança, visite <a href="https://support.stripe.com/" target="_blank" rel="noopener noreferrer">Stripe support</a> ou <a href="/contact/" aria-label="entre em contato conosco">entre em contato</a> para dúvidas gerais.</p>
       </section>
   </section>

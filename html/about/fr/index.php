@@ -25,11 +25,11 @@
       <p>PayCal est un outil de suivi de paie qui affiche vos revenus, estime les retenues et organise vos données de travail.</p>
       <p>Le service est gratuit pour un usage personnel et conçu pour rendre les périodes de paie plus compréhensibles avant le jour de paiement.</p>
 
-      <h2>Gratuit et Premium</h2>
+      <h2>Gratuit, Premium et Business</h2>
       <p>PayCal fonctionne entièrement pour les particuliers sans frais.</p>
-      <p>Les organisations peuvent choisir de passer à une offre Premium pour des fonctionnalités partagées.</p>
+      <p>Premium ajoute une planification personnelle avancée, tandis que Business ajoute des espaces partagés, la visibilité des membres et l’analyse agrégée de la paie.</p>
 
-      <table class="table" aria-label="Comparaison des plans Gratuit et Premium">
+      <table class="table" aria-label="Comparaison des plans Gratuit, Premium et Business">
         <thead>
           <tr>
             <th scope="col">Plan</th>
@@ -42,12 +42,12 @@
             <td>Suivi personnel du travail, estimations de revenus, visibilité des périodes de paie et exportations</td>
           </tr>
           <tr>
-            <td>Premium (Organisations)</td>
-            <td>Accès partagé, gestion d'équipe et workflows avancés</td>
+            <td>Premium + Business</td>
+            <td>Outils de planification Premium et contrôles Business pour espaces partagés, membres et analyse agrégée</td>
           </tr>
           <tr>
             <td>Tarif</td>
-            <td>4,99 CAD/mois par organisation</td>
+            <td><a href="/pricing/">Voir les tarifs actuels Gratuit, Premium et Business</a></td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +74,7 @@
       <h2>Pour qui</h2>
       <ul class="doc-fact-list">
         <li><strong>Particuliers :</strong> Suivez gratuitement votre travail et votre historique de paie</li>
-        <li><strong>Équipes :</strong> Utilisez Premium pour l'accès partagé et la coordination</li>
+        <li><strong>Équipes :</strong> Utilisez Business pour l’accès partagé et la coordination</li>
       </ul>
 
       <h2>Sécurité et confidentialité</h2>
@@ -103,7 +103,7 @@
       </ul>
 
       <h2>Facturation et support</h2>
-      <p>Les abonnements Premium sont traités par Stripe.</p>
+      <p>Les abonnements payants sont traités par Stripe.</p>
       <p>Pour l'aide à la facturation, consultez <a href="https://support.stripe.com/" target="_blank" rel="noopener noreferrer">Stripe support</a> ou <a href="/contact/" aria-label="nous contacter">contactez-nous</a> pour toute question générale.</p>
      </section>
   </section>
