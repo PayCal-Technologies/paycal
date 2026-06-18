@@ -4026,15 +4026,16 @@ final class BusinessDiscoveryService
       ];
       $relationships[] = $relationshipEntry;
 
+      $status = (string) ($relationship['status'] ?? '');
       $member = $profiles[$memberUUID] ?? null;
-      if ($member instanceof User) {
+      if ($status === self::MEMBERSHIP_STATE_ACTIVE && $member instanceof User) {
         $members[] = [
           'uuid' => $memberUUID,
           'user_uuid' => $memberUUID,
           'full_name' => $member->full_name,
           'email' => $member->email,
           'role' => $role,
-          'status' => (string) ($relationship['status'] ?? ''),
+          'status' => $status,
           'scopes' => $relationshipEntry['scopes'],
           'created_at' => (string) ($relationship['created_at'] ?? ''),
           'accepted_at' => (string) ($relationship['accepted_at'] ?? ''),
