@@ -149,6 +149,16 @@ final class SidebarNavigationContractTest extends TestCase
   }
 
   #[Test]
+  public function paycalGroupHeadingReflectsBusinessTier(): void
+  {
+    $premiumNavigation = Render::buildSidebarNavigation(true, false);
+    $businessNavigation = Render::buildSidebarNavigation(true, false, true);
+
+    $this->assertSame('PayCal Premium', $this->groupById($premiumNavigation, 'paycal')['heading']['name']);
+    $this->assertSame('PayCal Business', $this->groupById($businessNavigation, 'paycal')['heading']['name']);
+  }
+
+  #[Test]
   public function sidebarNavigationHasPaycalAndBusinessGroupsOnly(): void
   {
     $navigation = Render::buildSidebarNavigation(true, false);

@@ -396,12 +396,12 @@ class Render
    *
    * @return array{groups: array<int, array{id: string, visible: bool, heading: array<string, string>, links: array<int, array<string, string>>}>}
    */
-  public static function buildSidebarNavigation(bool $isPremiumMember = false, bool $isAdmin = false): array
+  public static function buildSidebarNavigation(bool $isPremiumMember = false, bool $isAdmin = false, bool $isBusinessTier = false): array
   {
-    $showBusiness = $isPremiumMember || $isAdmin;
+    $showBusiness = $isPremiumMember || $isBusinessTier || $isAdmin;
 
     $paycalLinks = array_merge(
-      self::buildNavLinks([Page::SITES, Page::REPORTS], $isPremiumMember),
+      self::buildNavLinks([Page::SITES, Page::REPORTS], $isPremiumMember || $isBusinessTier),
       [self::settingsNavLink()]
     );
 
@@ -414,7 +414,7 @@ class Render
         Page::BUSINESS_PAYROLL,
         Page::BUSINESS_REPORTS,
         Page::BUSINESS_AUDIT,
-      ], $isPremiumMember);
+      ], $isPremiumMember || $isBusinessTier);
       $businessLinks = self::applyBusinessDetailsSidebarLabel($businessLinks);
     }
 
@@ -423,7 +423,7 @@ class Render
         [
           'id' => 'paycal',
           'visible' => true,
-          'heading' => self::paycalGroupHeadingLink($isPremiumMember),
+          'heading' => self::paycalGroupHeadingLink($isPremiumMember, $isBusinessTier),
           'links' => $paycalLinks,
         ],
         [
@@ -454,11 +454,15 @@ class Render
   /**
    * @return array<string, string>
    */
-  private static function paycalGroupHeadingLink(bool $isPremiumMember = false): array
+  private static function paycalGroupHeadingLink(bool $isPremiumMember = false, bool $isBusinessTier = false): array
   {
     $paycalName = (string) Strings::i18n('NAV_SECTION_PAYCAL');
     $paycalAriaLabel = (string) Strings::i18n('PAYCAL');
-    if ($isPremiumMember) {
+
+    if ($isBusinessTier) {
+      $paycalName .= ' Business';
+      $paycalAriaLabel .= ' Business';
+    } elseif ($isPremiumMember) {
       $paycalName .= ' Premium';
       $paycalAriaLabel .= ' Premium';
     }

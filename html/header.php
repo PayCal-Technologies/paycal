@@ -558,8 +558,9 @@ echo Render::template('keyboard-shortcuts', $renders);
   /** PRIMARY NAVIGATION BAR - Build navigation pages */
   $userUUIDForNav = User::currentUUID();
   $hasPremiumSubscriptionForNav = $userUUIDForNav !== '' && SubscriptionGate::hasActivePremium($userUUIDForNav);
+  $hasBusinessSubscriptionForNav = $userUUIDForNav !== '' && SubscriptionGate::hasActiveBusiness($userUUIDForNav);
   $isAdminForNav = User::isAdmin();
-  $sidebarNavigation = Render::buildSidebarNavigation($hasPremiumSubscriptionForNav, $isAdminForNav);
+  $sidebarNavigation = Render::buildSidebarNavigation($hasPremiumSubscriptionForNav, $isAdminForNav, $hasBusinessSubscriptionForNav);
 
   $sideNavIcons = [
     'settings' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false"><path d="M19.14 12.94c.04-.31.06-.62.06-.94s-.02-.63-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.1 7.1 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.49-.42h-3.84a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.7 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.05.31-.07.63-.07.95s.02.63.07.94L2.82 14.53a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.4 1.05.72 1.63.95l.36 2.54c.04.24.25.42.49.42h3.84c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.13-.55 1.63-.95l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.57zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>',
