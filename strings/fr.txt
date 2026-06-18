@@ -2706,7 +2706,7 @@ ORGANIZATIONS_DISCOVERY_HELP Find sites that can be linked to the selected organ
 ORGANIZATIONS_DISCOVERY_RESULTS_ARIA Organization discovery results
 ORGANIZATIONS_DISCOVERY_RUNNING Running discovery...
 ORGANIZATIONS_DISCOVERY_SR Discovery results list. Review suggestions and use link actions to attach sites to the selected organization.
-ORGANIZATIONS_DISCOVERY_UNAVAILABLE Discovery can still be run, but linking actions require organization management access.
+ORGANIZATIONS_DISCOVERY_UNAVAILABLE Discovery can still be run, but linking actions require business management access.
 ORGANIZATIONS_EDITOR_ARIA Edit organization details, pay period settings, and member invites for the selected organization.
 ORGANIZATIONS_EDITOR_DETAILS_H3 Organization Details
 ORGANIZATIONS_EDITOR_DETAILS_NOTICE Discovery notice: all organization profile fields in this section are publicly discoverable except Notes and pay configuration fields (default wage, pay period frequency, pay period start, pay period length, and grace days).
@@ -2726,7 +2726,7 @@ ORGANIZATIONS_FREE_AUDIT_ARIA My organization audit timeline
 ORGANIZATIONS_FREE_AUDIT_EMPTY No audit events found for this profile yet.
 ORGANIZATIONS_FREE_AUDIT_PANEL_HELP Audit events related to your profile in the current organization.
 ORGANIZATIONS_FREE_AUDIT_SR Audit timeline related to your current profile. Each row includes time, event type, actor, and details.
-ORGANIZATIONS_FREE_INTRO_HELP Search for organizations to connect with, or review your current membership below. Creating and managing organizations requires Premium.
+ORGANIZATIONS_FREE_INTRO_HELP Search for organizations to connect with, or review your current membership below. Creating and managing business workspaces requires Business.
 ORGANIZATIONS_FREE_INTRO_PANEL_HELP Organization discovery and membership overview.
 ORGANIZATIONS_FREE_INTRO_TITLE Find Your Organization
 ORGANIZATIONS_GRID_ARIA Organizations results
@@ -2796,7 +2796,7 @@ ORGANIZATIONS_LOADING Loading organizations...
 ORGANIZATIONS_LOADING_ACCOUNT_ACTIVITY Loading account activity...
 ORGANIZATIONS_LOADING_DETAILS Loading organization details...
 ORGANIZATIONS_LOCATION_UNAVAILABLE Location unavailable
-ORGANIZATIONS_MANAGE_ACCESS_UNAVAILABLE Invite and ownership actions require organization management access.
+ORGANIZATIONS_MANAGE_ACCESS_UNAVAILABLE Invite and ownership actions require business management access.
 ORGANIZATIONS_MEMBER_ACCESS_MANAGE_DENIED Your current role cannot manage invites, member access, or role changes. Ask an organization owner/coordinator.
 ORGANIZATIONS_MEMBER_HELP Share work data with an organization.
 ORGANIZATIONS_MEMBER_INVITE_NEEDS_PERSONAL_ORG Profile organization record not found. Refresh and try again.
@@ -2852,8 +2852,8 @@ ORGANIZATIONS_PENDING_INVITES Pending Invites
 ORGANIZATIONS_PP_PREVIEW_ARIA Upcoming pay periods
 ORGANIZATIONS_PP_SR Upcoming pay periods grid. Adjust controls above to update the schedule preview.
 ORGANIZATIONS_PP_TITLE Pay Period
-ORGANIZATIONS_PREMIUM_ADMIN_LOCKED Premium is required to manage shared organizations you do not own.
-ORGANIZATIONS_PREMIUM_ADMIN_LOCKED_DETAILED Upgrade to Premium to manage shared organizations where you are not the owner. Organization owners and elevated staff can continue without Premium.
+ORGANIZATIONS_PREMIUM_ADMIN_LOCKED Business is required to manage shared business workspaces you do not own.
+ORGANIZATIONS_PREMIUM_ADMIN_LOCKED_DETAILED Upgrade to Business to manage shared business workspaces where you are not the owner. Business owners and elevated staff can continue without Business.
 ORGANIZATIONS_PREMIUM_LOCKED Premium locked
 ORGANIZATIONS_PREMIUM_NOTICE_SELECT Select an organization to manage invites, discovery, and ownership controls.
 ORGANIZATIONS_PREMIUM_NOTICE_SELF_SELECTED Self organization selected.
@@ -2936,7 +2936,7 @@ ORGANIZATIONS_TAB_DETAILS Organization Details
 ORGANIZATIONS_TAX_ID Tax ID
 ORGANIZATIONS_TAX_ID_PLACEHOLDER Business tax identifier
 ORGANIZATIONS_TIMEZONE Timezone
-ORGANIZATIONS_TRANSFER_NOTICE Transfer ownership is available only for shared organizations you own.
+ORGANIZATIONS_TRANSFER_NOTICE Transfer ownership is available only for shared business workspaces you own.
 ORGANIZATIONS_TRANSFER_OWNERSHIP Transfer Ownership
 ORGANIZATIONS_TRANSFER_SELECT_MEMBER Select a member to transfer ownership.
 ORGANIZATIONS_TRANSFER_TARGET_ARIA Transfer ownership target
@@ -3013,7 +3013,7 @@ PREFERENCES Préférences
 PREMIUM_PAGE_COL_FEATURE Feature
 PREMIUM_PAGE_COL_FREE Free
 PREMIUM_PAGE_COL_PREMIUM Premium
-PREMIUM_PAGE_COMPARE_TITLE Free vs Premium
+PREMIUM_PAGE_COMPARE_TITLE Free, Premium, and Business
 PREMIUM_PAGE_CTA_COMPARE Compare Plans
 PREMIUM_PAGE_CTA_UPGRADE Create My Business
 PREMIUM_PAGE_FAQ_A1 No. Personal payroll tracking remains free.
@@ -3041,13 +3041,13 @@ PREMIUM_PAGE_ORG_FEATURE3_TITLE Shared Payroll Visibility
 PREMIUM_PAGE_ORG_FEATURE4_BODY Built with encryption-first architecture and worker privacy in mind.
 PREMIUM_PAGE_ORG_FEATURE4_TITLE Secure Team Collaboration
 PREMIUM_PAGE_ORGS_TITLE Business Tier Features
-PREMIUM_PAGE_PREMIUM_TAGLINE Built for managers, small businesses, contractors, and growing teams.
+PREMIUM_PAGE_PREMIUM_TAGLINE Premium supports personal planning; Business supports managers, small businesses, contractors, and growing teams.
 PREMIUM_PAGE_PRICE_NOTE Premium is $4.99 CAD/month. Business pricing is listed at https://paycal.app/pricing/.
-PREMIUM_PAGE_PRICING_NOTE No contracts. Cancel anytime. Full Premium access the moment you upgrade.
+PREMIUM_PAGE_PRICING_NOTE No contracts. Cancel anytime. Premium and Business activate when you upgrade.
 PREMIUM_PAGE_PRICING_TITLE Simple pricing.
 PREMIUM_PAGE_STRIPE_LINK Contact PayCal support
 PREMIUM_PAGE_STRIPE_NOTE Secure billing powered by Stripe. Questions?
-PREMIUM_PAGE_TITLE Premium — PayCal
+PREMIUM_PAGE_TITLE Pricing — PayCal
 PREMIUM_PAGE_TRUST_ACCESS_BODY Built to remain usable and understandable for everyone.
 PREMIUM_PAGE_TRUST_ACCESS_TITLE Accessible
 PREMIUM_PAGE_TRUST_PRIVATE_BODY Worker information is handled with privacy-focused controls.
@@ -3065,7 +3065,7 @@ PREMIUM_PAGE_WHO_CONTRACTOR_BODY Organize crews, projects, and work periods with
 PREMIUM_PAGE_WHO_CONTRACTOR_TITLE Contractors
 PREMIUM_PAGE_WHO_TEAMS_BODY Assign roles and scale your organization as your team grows.
 PREMIUM_PAGE_WHO_TEAMS_TITLE Growing Teams
-PREMIUM_PAGE_WHO_TITLE Who Premium is for
+PREMIUM_PAGE_WHO_TITLE Who Business is for
 PREVIOUS Précédent
 PREVIOUS_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -900 600 600" width="24"><path d="m 432 -480 l 156 156 q 11 11 11 28 t -11 28 q -11 11 -28 11 t -28 -11 L 348 -452 q -6 -6 -8.5 -13 t -2.5 -15 q 0 -8 2.5 -15 t 8.5 -13 l 184 -184 q 11 -11 28 -11 t 28 11 q 11 11 11 28 t -11 28 L 432 -480 Z"/></svg>
 PRIMARY Principal
@@ -3097,8 +3097,8 @@ PROFILE_BILLING_ENABLE_BUSINESS Enable Business
 PROFILE_BILLING_ENABLE_PREMIUM Enable Premium
 PROFILE_BILLING_EXPLORE_BUTTON Explore Premium
 PROFILE_BILLING_FREE_ARIA Current free plan details
-PROFILE_BILLING_FREE_HELP Track your own work hours, earnings, and pay periods at no cost. Upgrade to Premium to unlock team features, organization management, payroll tools, and advanced insights.
-PROFILE_BILLING_FREE_HELP_LOCAL You are on Free. Enable Premium to try businesses and collaboration features locally.
+PROFILE_BILLING_FREE_HELP Track your own work hours, earnings, and pay periods at no cost. Upgrade to Business to unlock team features, business management, payroll tools, and advanced insights.
+PROFILE_BILLING_FREE_HELP_LOCAL You are on Free. Enable Business to try business and collaboration features locally.
 PROFILE_BILLING_FREE_PLAN Current Plan: Free
 PROFILE_BILLING_MATRIX_ARIA Compare PayCal subscription tiers
 PROFILE_BILLING_MATRIX_INTRO Choose the plan that fits how you use PayCal.

@@ -2662,7 +2662,7 @@ PREFERENCES Preferences
 PREMIUM_PAGE_COL_FEATURE Feature
 PREMIUM_PAGE_COL_FREE Free
 PREMIUM_PAGE_COL_PREMIUM Premium
-PREMIUM_PAGE_COMPARE_TITLE Free vs Premium
+PREMIUM_PAGE_COMPARE_TITLE Free, Premium, and Business
 PREMIUM_PAGE_CTA_COMPARE Compare Plans
 PREMIUM_PAGE_CTA_UPGRADE Create My Business
 PREMIUM_PAGE_FAQ_A1 No. Personal payroll tracking remains free.
@@ -2690,13 +2690,13 @@ PREMIUM_PAGE_ORG_FEATURE3_BODY Keep payroll records organized across your busine
 PREMIUM_PAGE_ORG_FEATURE3_TITLE Shared Payroll Visibility
 PREMIUM_PAGE_ORG_FEATURE4_BODY Built with encryption-first architecture and worker privacy in mind.
 PREMIUM_PAGE_ORG_FEATURE4_TITLE Secure Team Collaboration
-PREMIUM_PAGE_PREMIUM_TAGLINE Built for managers, small businesses, contractors, and growing teams.
+PREMIUM_PAGE_PREMIUM_TAGLINE Premium supports personal planning; Business supports managers, small businesses, contractors, and growing teams.
 PREMIUM_PAGE_PRICE_NOTE Premium is $4.99 CAD/month. Business pricing is listed at https://paycal.app/pricing/.
-PREMIUM_PAGE_PRICING_NOTE No contracts. Cancel anytime. Full Premium access the moment you upgrade.
+PREMIUM_PAGE_PRICING_NOTE No contracts. Cancel anytime. Premium and Business activate when you upgrade.
 PREMIUM_PAGE_PRICING_TITLE Simple pricing.
 PREMIUM_PAGE_STRIPE_LINK Contact PayCal support
 PREMIUM_PAGE_STRIPE_NOTE Secure billing powered by Stripe. Questions?
-PREMIUM_PAGE_TITLE Premium — PayCal
+PREMIUM_PAGE_TITLE Pricing — PayCal
 PREMIUM_PAGE_TRUST_ACCESS_BODY Built to remain usable and understandable for everyone.
 PREMIUM_PAGE_TRUST_ACCESS_TITLE Accessible
 PREMIUM_PAGE_TRUST_PRIVATE_BODY Worker information is handled with privacy-focused controls.
@@ -2714,7 +2714,7 @@ PREMIUM_PAGE_WHO_CONTRACTOR_BODY Organize crews, projects, and work periods with
 PREMIUM_PAGE_WHO_CONTRACTOR_TITLE Contractors
 PREMIUM_PAGE_WHO_TEAMS_BODY Assign roles and scale your business as your team grows.
 PREMIUM_PAGE_WHO_TEAMS_TITLE Growing Teams
-PREMIUM_PAGE_WHO_TITLE Who Premium is for
+PREMIUM_PAGE_WHO_TITLE Who Business is for
 PREVIOUS Previous
 PREVIOUS_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -900 600 600" width="24"><path d="m 432 -480 l 156 156 q 11 11 11 28 t -11 28 q -11 11 -28 11 t -28 -11 L 348 -452 q -6 -6 -8.5 -13 t -2.5 -15 q 0 -8 2.5 -15 t 8.5 -13 l 184 -184 q 11 -11 28 -11 t 28 11 q 11 11 11 28 t -11 28 L 432 -480 Z"/></svg>
 PRIMARY Primary
@@ -2746,8 +2746,8 @@ PROFILE_BILLING_ENABLE_BUSINESS Enable Business
 PROFILE_BILLING_ENABLE_PREMIUM Enable Premium
 PROFILE_BILLING_EXPLORE_BUTTON Explore Premium
 PROFILE_BILLING_FREE_ARIA Current free plan details
-PROFILE_BILLING_FREE_HELP Track your own work hours, earnings, and pay periods at no cost. Upgrade to Premium to unlock team features, business management, payroll tools, and advanced insights.
-PROFILE_BILLING_FREE_HELP_LOCAL You are on Free. Enable Premium to try businesses and collaboration features locally.
+PROFILE_BILLING_FREE_HELP Track your own work hours, earnings, and pay periods at no cost. Upgrade to Business to unlock team features, business management, payroll tools, and advanced insights.
+PROFILE_BILLING_FREE_HELP_LOCAL You are on Free. Enable Business to try business and collaboration features locally.
 PROFILE_BILLING_FREE_PLAN Current Plan: Free
 PROFILE_BILLING_MATRIX_ARIA Compare PayCal subscription tiers
 PROFILE_BILLING_MATRIX_INTRO Choose the plan that fits how you use PayCal.

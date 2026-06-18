@@ -4352,7 +4352,7 @@ final class BusinessDiscoveryService
 
   /**
    * Check if business has reached the member limit.
-   * Business tier allows up to 100 members per business.
+   * Business tier allows up to 100 active members total, including the owner.
    *
    * @param string $businessId
    * @return bool True if the org has reached its member limit

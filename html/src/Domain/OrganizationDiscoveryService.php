@@ -3206,8 +3206,8 @@ final class OrganizationDiscoveryService
   }
 
   /**
-   * Check if user can access premium organization features.
-   * Premium tier grants access to shared org creation and management.
+   * Check if user can access shared organization features.
+   * Business tier grants access to shared org creation and management.
    * Admins always have access (legacy system role).
    *
    * @return bool
@@ -3224,8 +3224,8 @@ final class OrganizationDiscoveryService
       return true;
     }
 
-    // Check if user has active Premium subscription
-    return SubscriptionRepository::isPremiumActive($userUUID);
+    // Check if user has active Business subscription
+    return SubscriptionRepository::isBusinessActive($userUUID);
   }
 
   /** @param array<string, mixed> $organization */
@@ -3267,7 +3267,7 @@ final class OrganizationDiscoveryService
   /** @return array{success: bool, message: string, data: array<string, mixed>} */
   private function premiumSubscriptionRequired(): array
   {
-    return $this->fail('Premium subscription required. Upgrade to PayCal Premium to create and manage shared organizations linked to your profile.');
+    return $this->fail('Business subscription required. Upgrade to PayCal Business to create and manage shared organizations linked to your profile.');
   }
 
   /**
@@ -3283,7 +3283,7 @@ final class OrganizationDiscoveryService
 
   /**
    * Check if organization has reached the member limit.
-   * Legacy organization tier allows up to 100 members per organization.
+   * Legacy organization tier allows up to 100 active members total, including the owner.
    *
    * @param string $orgId
    * @return bool True if the org has reached its member limit
