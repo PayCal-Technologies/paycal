@@ -43,7 +43,7 @@ if (!$isAuthenticated) {
 }
 
 /** Public pages that don't require authentication */
-$publicPages = ['PAGE_SIGNIN', 'PAGE_REGISTER', 'PAGE_CONTACT', 'PAGE_AUTH', 'PAGE_ABOUT', 'PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA', 'PAGE_PREMIUM'];
+$publicPages = ['PAGE_SIGNIN', 'PAGE_REGISTER', 'PAGE_CONTACT', 'PAGE_AUTH', 'PAGE_ABOUT', 'PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA', 'PAGE_PRICING', 'PAGE_STATUS'];
 
 if (!$isAuthenticated && !in_array($currentPage, $publicPages, true)) {
   Security::sendCoreSecurityHeaders();
@@ -81,7 +81,8 @@ if (!isset($pageTitle) || $pageTitle === '') {
     'PAGE_BUSINESS_REPORTS' => Strings::headerI18n('BUSINESS_NAV_REPORTS').' - ['.$siteName.']',
     'PAGE_FORECAST' => 'Crew Forecast - ['.$siteName.']',
     'PAGE_PROFILE' => Strings::headerI18n('PROFILE').' - ['.$siteName.']',
-    'PAGE_PREMIUM' => Strings::headerI18n('PREMIUM_PAGE_TITLE').' - ['.$siteName.']',
+    'PAGE_PRICING' => 'Pricing - ['.$siteName.']',
+    'PAGE_STATUS' => 'Status - ['.$siteName.']',
     'PAGE_ADMIN' => Strings::headerI18n('ADMIN').' - ['.$siteName.']',
     'PAGE_TESTS' => Strings::headerI18n('TESTS').' - ['.$siteName.']',
     'PAGE_TRANSPARENCY' => Strings::headerI18n('TRANSPARENCY').' - ['.$siteName.']',
@@ -89,8 +90,12 @@ if (!isset($pageTitle) || $pageTitle === '') {
   };
 }
 
-$metaDescription = Strings::headerI18n('META_DESCRIPTION');
-$metaDescriptionLong = Strings::headerI18n('META_DESCRIPTION_LONG');
+$metaDescription = isset($pageMetaDescription) && is_string($pageMetaDescription) && trim($pageMetaDescription) !== ''
+  ? trim($pageMetaDescription)
+  : Strings::headerI18n('META_DESCRIPTION');
+$metaDescriptionLong = isset($pageMetaDescriptionLong) && is_string($pageMetaDescriptionLong) && trim($pageMetaDescriptionLong) !== ''
+  ? trim($pageMetaDescriptionLong)
+  : Strings::headerI18n('META_DESCRIPTION_LONG');
 $requestUriRaw = $_SERVER['REQUEST_URI'] ?? '/';
 $requestUriForStructuredData = is_scalar($requestUriRaw) ? (string) $requestUriRaw : '/';
 $requestPathRaw = parse_url($requestUriForStructuredData, PHP_URL_PATH);
@@ -329,6 +334,19 @@ $headContext = [
   'jsonLdDocument' => $jsonLdDocument,
 ];
 
+foreach ([
+  'socialTitle' => $pageSocialTitle ?? null,
+  'ogDescription' => $pageOgDescription ?? null,
+  'twitterTitle' => $pageTwitterTitle ?? null,
+  'twitterDescription' => $pageTwitterDescription ?? null,
+  'dcTitle' => $pageDcTitle ?? null,
+  'dcDescription' => $pageDcDescription ?? null,
+] as $metaKey => $metaValue) {
+  if (is_string($metaValue) && trim($metaValue) !== '') {
+    $headContext[$metaKey] = trim($metaValue);
+  }
+}
+
 echo PageHeadRenderer::renderIdentityMeta($headContext);
 echo PageHeadRenderer::renderRelations($headContext);
 echo PageHeadRenderer::renderRobotsMeta();
@@ -403,6 +421,9 @@ if (!is_string($mobilePageLabel) || trim($mobilePageLabel) === '') {
 <?php } ?>
 
 <?php if ($isAuthenticated) { ?>
+<button id="public_beta_echo_banner" class="public_beta_echo_banner" type="button" data-signal-open>
+  <span>Thanks for participating in our Public Beta! :D Click anywhere on this bar or hit <kbd>Shift</kbd> + <kbd>Esc</kbd> to send feedback.</span>
+</button>
 <?php
   $renders = [
       '__KEYBOARD_SHORTCUTS__'              => Strings::headerI18n('KEYBOARD_SHORTCUTS'),
@@ -478,6 +499,170 @@ if (!is_string($mobilePageLabel) || trim($mobilePageLabel) === '') {
 echo Render::template('keyboard-shortcuts', $renders);
 ?>
 
+<?php
+  $signalUser = User::current();
+  $signalIsAdmin = User::isAdmin();
+  $signalConsoleAllowed = $signalIsAdmin && (
+    Environment::devSecurityDisabled()
+    || (string) ($signalUser->debug_console_enabled ?? '') === '1'
+    || (string) ($signalUser->debug_fine_grained_enabled ?? '') === '1'
+  );
+  $signalRole = is_object($signalUser->auth_level ?? null) && isset($signalUser->auth_level->value)
+    ? (string) $signalUser->auth_level->value
+    : ($signalIsAdmin ? 'admin' : 'user');
+?>
+<section
+  id="signal_panel"
+  class="signal_panel"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="signal_panel_title"
+  data-admin="<?php echo $signalIsAdmin ? '1' : '0'; ?>"
+  data-console="<?php echo $signalConsoleAllowed ? '1' : '0'; ?>"
+  data-user-role="<?php echo htmlspecialchars($signalRole, ENT_QUOTES, 'UTF-8'); ?>"
+  data-language="<?php echo htmlspecialchars((string) ($signalUser->language ?? 'en'), ENT_QUOTES, 'UTF-8'); ?>"
+  data-theme="<?php echo htmlspecialchars((string) ($signalUser->theme ?? '') . '/' . (string) ($signalUser->variant ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+  hidden
+>
+  <div class="signal_panel_head" data-signal-drag-handle>
+    <div>
+      <h2 id="signal_panel_title">Signal Panel</h2>
+      <p>Echo captures feedback from the page you are on.</p>
+    </div>
+    <button type="button" class="signal_panel_close" data-signal-close aria-label="Close Signal Panel">&times;</button>
+  </div>
+
+  <div class="signal_panel_tabs" role="tablist" aria-label="Signal Panel modes">
+    <button type="button" id="signal_tab_feedback" class="signal_panel_tab active" role="tab" aria-selected="true" aria-controls="signal_feedback_panel" data-signal-tab="feedback">Feedback</button>
+    <?php if ($signalIsAdmin) { ?>
+    <button type="button" id="signal_tab_diagnostics" class="signal_panel_tab" role="tab" aria-selected="false" aria-controls="signal_diagnostics_panel" data-signal-tab="diagnostics">Diagnostics</button>
+    <?php } ?>
+    <?php if ($signalConsoleAllowed) { ?>
+    <button type="button" id="signal_tab_console" class="signal_panel_tab" role="tab" aria-selected="false" aria-controls="signal_console_panel" data-signal-tab="console">Console</button>
+    <?php } ?>
+  </div>
+
+  <div class="signal_panel_body">
+    <form id="signal_feedback_panel" class="signal_panel_page active" role="tabpanel" aria-labelledby="signal_tab_feedback" data-signal-page="feedback">
+      <div class="signal_field">
+        <label for="signal_feedback_topic">Topic</label>
+        <input id="signal_feedback_topic" name="topic" type="text" maxlength="120" required autocomplete="off" placeholder="Short one-line title">
+      </div>
+      <div class="signal_field">
+        <label for="signal_feedback_notes">What happened / what should improve?</label>
+        <textarea id="signal_feedback_notes" name="notes" maxlength="4000" required rows="5"></textarea>
+      </div>
+      <fieldset class="signal_field">
+        <legend>Category</legend>
+        <div class="signal_chip_grid" data-signal-category>
+          <button type="button" class="signal_chip active" data-value="bug">Bug</button>
+          <button type="button" class="signal_chip" data-value="confusing">Confusing</button>
+          <button type="button" class="signal_chip" data-value="missing_feature">Missing Feature</button>
+          <button type="button" class="signal_chip" data-value="ui_layout">UI / Layout</button>
+          <button type="button" class="signal_chip" data-value="accessibility">Accessibility</button>
+          <button type="button" class="signal_chip" data-value="payroll_calculation">Payroll / Calculation</button>
+          <button type="button" class="signal_chip" data-value="calendar">Calendar</button>
+          <button type="button" class="signal_chip" data-value="business">Business</button>
+          <button type="button" class="signal_chip" data-value="privacy_trust">Privacy / Trust</button>
+          <button type="button" class="signal_chip" data-value="performance">Performance</button>
+          <button type="button" class="signal_chip" data-value="content_copy">Content / Copy</button>
+          <button type="button" class="signal_chip" data-value="praise">Praise</button>
+        </div>
+      </fieldset>
+      <div class="signal_field">
+        <label for="signal_feedback_tags">Tags</label>
+        <input id="signal_feedback_tags" name="tags" type="text" maxlength="240" placeholder="Optional keywords, comma separated">
+      </div>
+      <fieldset class="signal_field">
+        <legend>Pain Point</legend>
+        <div class="signal_checkbox_grid">
+          <label><input type="checkbox" name="pain_points" value="got_stuck"> I got stuck</label>
+          <label><input type="checkbox" name="pain_points" value="expected_different"> I expected something different</label>
+          <label><input type="checkbox" name="pain_points" value="looks_wrong"> Something looks wrong</label>
+          <label><input type="checkbox" name="pain_points" value="dont_trust_result"> I don't trust the result</label>
+          <label><input type="checkbox" name="pain_points" value="too_slow"> This is too slow</label>
+          <label><input type="checkbox" name="pain_points" value="could_not_find"> I could not find what I needed</label>
+          <label><input type="checkbox" name="pain_points" value="need_explained"> I need this explained better</label>
+          <label><input type="checkbox" name="pain_points" value="need_on_mobile"> I need this on mobile</label>
+        </div>
+      </fieldset>
+      <fieldset class="signal_field">
+        <legend>Severity</legend>
+        <div class="signal_radio_row">
+          <label><input type="radio" name="severity" value="low"> Low</label>
+          <label><input type="radio" name="severity" value="medium" checked> Medium</label>
+          <label><input type="radio" name="severity" value="high"> High</label>
+          <label><input type="radio" name="severity" value="blocking"> Blocking</label>
+        </div>
+      </fieldset>
+      <section class="signal_context" aria-label="Page Context">
+        <h3>Page Context</h3>
+        <dl>
+          <dt>Path</dt><dd data-signal-context="path">/</dd>
+          <dt>Page</dt><dd data-signal-context="title">PayCal</dd>
+          <dt>Role</dt><dd data-signal-context="role"><?php echo htmlspecialchars($signalRole, ENT_QUOTES, 'UTF-8'); ?></dd>
+        </dl>
+      </section>
+      <label class="signal_snapshot"><input type="checkbox" name="include_diagnostics" checked> Include safe diagnostic snapshot</label>
+      <p class="signal_privacy_note">Diagnostic snapshot excludes payroll values and private form contents.</p>
+      <p class="signal_feedback_status" role="status" aria-live="polite" data-signal-status></p>
+      <div class="signal_actions">
+        <button type="submit" class="btn btn_primary">Submit Feedback</button>
+        <button type="button" class="btn btn_cancel" data-signal-close>Cancel</button>
+      </div>
+    </form>
+
+    <?php if ($signalIsAdmin) { ?>
+    <section id="signal_diagnostics_panel" class="signal_panel_page" role="tabpanel" aria-labelledby="signal_tab_diagnostics" data-signal-page="diagnostics" hidden>
+      <section id="user_identity_section" class="dashboard-section" aria-label="<?php echo Strings::headerI18n('DASHBOARD_SESSION_IDENTITY'); ?>">
+        <h2 class="dashboard-section-title"><?php echo Strings::headerI18n('DASHBOARD_SESSION_IDENTITY'); ?></h2>
+        <div id="user_identity_content" class="dashboard-section-content dashboard-identity-grid">
+          <span class="dashboard-identity-label">Name</span>
+          <span class="dashboard-identity-value"><?php echo htmlspecialchars(User::current()->full_name, ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="dashboard-identity-label">UUID</span>
+          <span class="dashboard-identity-value dashboard-identity-mono"><?php echo htmlspecialchars(User::currentUUID(), ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="dashboard-identity-label">Auth Level</span>
+          <span class="dashboard-identity-value"><?php echo htmlspecialchars($signalRole, ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="dashboard-identity-label">Email</span>
+          <span class="dashboard-identity-value"><?php echo User::current()->email_verified ? 'verified' : 'unverified'; ?></span>
+          <span class="dashboard-identity-label">Theme</span>
+          <span class="dashboard-identity-value dashboard-identity-mono"><?php echo htmlspecialchars(User::current()->theme . ' / ' . User::current()->variant, ENT_QUOTES, 'UTF-8'); ?></span>
+        </div>
+      </section>
+      <section id="lens_metrics_section" class="dashboard-section" aria-label="<?php echo Strings::headerI18n('DASHBOARD_LENS_METRICS'); ?>">
+        <h2 class="dashboard-section-title"><?php echo Strings::headerI18n('DASHBOARD_LENS_METRICS'); ?></h2>
+        <div id="lens_metrics_content" class="dashboard-section-content">
+          <p class="dashboard-empty"><?php echo Strings::headerI18n('DASHBOARD_LOADING_BACKEND_METRICS'); ?></p>
+        </div>
+      </section>
+      <section id="ws_heartbeat_section" class="dashboard-section" aria-label="<?php echo Strings::headerI18n('DASHBOARD_WEB_STATUS_HEARTBEAT'); ?>">
+        <h2 class="dashboard-section-title"><?php echo Strings::headerI18n('DASHBOARD_WEB_STATUS'); ?></h2>
+        <div id="ws_heartbeat_content" class="dashboard-section-content">
+          <p class="dashboard-empty"><?php echo Strings::headerI18n('DASHBOARD_HEARTBEAT_IDLE'); ?></p>
+        </div>
+      </section>
+      <section id="pw_metrics_section" class="pw-metrics-section" aria-label="<?php echo Strings::headerI18n('DASHBOARD_PHANTOM_WING_METRICS'); ?>">
+        <h2 class="pw-metrics-title"><?php echo Strings::headerI18n('DASHBOARD_PHANTOM_WING_METRICS'); ?></h2>
+        <div id="pw_metrics_content" class="pw-metrics-content">
+          <p class="pw-metrics-empty"><?php echo Strings::headerI18n('DASHBOARD_NO_METRICS_YET'); ?></p>
+        </div>
+      </section>
+    </section>
+    <?php } ?>
+
+    <?php if ($signalConsoleAllowed) { ?>
+    <section id="signal_console_panel" class="signal_panel_page signal_console_page" role="tabpanel" aria-labelledby="signal_tab_console" data-signal-page="console" hidden>
+      <div class="signal_console_toolbar">
+        <button type="button" class="btn btn_secondary" data-signal-console-refresh>Refresh</button>
+        <button type="button" class="btn btn_secondary" data-signal-console-copy>Copy JSON</button>
+      </div>
+      <pre id="signal_console_output" class="signal_console_output" tabindex="0">Console data loads when opened.</pre>
+    </section>
+    <?php } ?>
+  </div>
+  <div id="signal_panel_resize" class="signal_panel_resize" role="separator" aria-label="<?php echo Strings::headerI18n('DASHBOARD_RESIZE_GRIP_ARIA'); ?>"></div>
+</section>
+
 <dialog id="modal_signout" aria-modal="true" aria-labelledby="modal_signout_title" aria-describedby="modal_signout_aria modal_signout_meta">
   <div class="modal_aria visually_hidden">
     <span id="modal_signout_aria"><?php echo Strings::headerI18n('SIGN_OUT_DIALOG_DESCRIPTION'); ?></span>
@@ -503,55 +688,6 @@ echo Render::template('keyboard-shortcuts', $renders);
   </form>
 </dialog>
 
-<?php if (User::isAdmin()) { ?>
-<div id="dashboard">
-  <div id="dashboardHeader" aria-roledescription="draggable">
-    <span><?php echo Strings::headerI18n('DASHBOARD'); ?></span>
-    <button id="dashboardCloseButton" aria-label="<?php echo Strings::headerI18n('DASHBOARD_CLOSE_ARIA'); ?>">✕</button>
-  </div>
-
-  <div id="dashboardBody">
-    <section id="user_identity_section" class="dashboard-section" aria-label="<?php echo Strings::headerI18n('DASHBOARD_SESSION_IDENTITY'); ?>">
-      <h2 class="dashboard-section-title"><?php echo Strings::headerI18n('DASHBOARD_SESSION_IDENTITY'); ?></h2>
-      <div id="user_identity_content" class="dashboard-section-content dashboard-identity-grid">
-        <span class="dashboard-identity-label">Name</span>
-        <span class="dashboard-identity-value"><?php echo htmlspecialchars(User::current()->full_name, ENT_QUOTES, 'UTF-8'); ?></span>
-        <span class="dashboard-identity-label">UUID</span>
-        <span class="dashboard-identity-value dashboard-identity-mono"><?php echo htmlspecialchars(User::currentUUID(), ENT_QUOTES, 'UTF-8'); ?></span>
-        <span class="dashboard-identity-label">Auth Level</span>
-        <span class="dashboard-identity-value"><?php echo htmlspecialchars(User::current()->auth_level->value, ENT_QUOTES, 'UTF-8'); ?></span>
-        <span class="dashboard-identity-label">Email</span>
-        <span class="dashboard-identity-value"><?php echo User::current()->email_verified ? 'verified' : 'unverified'; ?></span>
-        <span class="dashboard-identity-label">Theme</span>
-        <span class="dashboard-identity-value dashboard-identity-mono"><?php echo htmlspecialchars(User::current()->theme . ' / ' . User::current()->variant, ENT_QUOTES, 'UTF-8'); ?></span>
-      </div>
-    </section>
-
-    <section id="lens_metrics_section" class="dashboard-section" aria-label="<?php echo Strings::headerI18n('DASHBOARD_LENS_METRICS'); ?>">
-      <h2 class="dashboard-section-title"><?php echo Strings::headerI18n('DASHBOARD_LENS_METRICS'); ?></h2>
-      <div id="lens_metrics_content" class="dashboard-section-content">
-        <p class="dashboard-empty"><?php echo Strings::headerI18n('DASHBOARD_LOADING_BACKEND_METRICS'); ?></p>
-      </div>
-    </section>
-
-    <section id="ws_heartbeat_section" class="dashboard-section" aria-label="<?php echo Strings::headerI18n('DASHBOARD_WEB_STATUS_HEARTBEAT'); ?>">
-      <h2 class="dashboard-section-title"><?php echo Strings::headerI18n('DASHBOARD_WEB_STATUS'); ?></h2>
-      <div id="ws_heartbeat_content" class="dashboard-section-content">
-        <p class="dashboard-empty"><?php echo Strings::headerI18n('DASHBOARD_HEARTBEAT_IDLE'); ?></p>
-      </div>
-    </section>
-
-    <section id="pw_metrics_section" class="pw-metrics-section" aria-label="<?php echo Strings::headerI18n('DASHBOARD_PHANTOM_WING_METRICS'); ?>">
-      <h2 class="pw-metrics-title"><?php echo Strings::headerI18n('DASHBOARD_PHANTOM_WING_METRICS'); ?></h2>
-      <div id="pw_metrics_content" class="pw-metrics-content">
-        <p class="pw-metrics-empty"><?php echo Strings::headerI18n('DASHBOARD_NO_METRICS_YET'); ?></p>
-      </div>
-    </section>
-  </div>
-
-  <div id="dashboardResizeGrip" role="separator" aria-label="<?php echo Strings::headerI18n('DASHBOARD_RESIZE_GRIP_ARIA'); ?>"></div>
-</div>
-<?php } // end isAdmin ?>
 <?php } // end $isAuthenticated ?>
 
 <?php if ($isAuthenticated) {
@@ -559,8 +695,25 @@ echo Render::template('keyboard-shortcuts', $renders);
   $userUUIDForNav = User::currentUUID();
   $hasPremiumSubscriptionForNav = $userUUIDForNav !== '' && SubscriptionGate::hasActivePremium($userUUIDForNav);
   $hasBusinessSubscriptionForNav = $userUUIDForNav !== '' && SubscriptionGate::hasActiveBusiness($userUUIDForNav);
+  $hasActiveBusinessMembershipForNav = false;
+  if ($userUUIDForNav !== '') {
+    foreach (BusinessMemberRepository::forUser($userUUIDForNav) as $membershipForNav) {
+      if ((string) ($membershipForNav['status'] ?? '') === 'active') {
+        $hasActiveBusinessMembershipForNav = true;
+        break;
+      }
+    }
+  }
   $isAdminForNav = User::isAdmin();
-  $sidebarNavigation = Render::buildSidebarNavigation($hasPremiumSubscriptionForNav, $isAdminForNav, $hasBusinessSubscriptionForNav);
+  $showRegularBusinessLeafForNav = !$isAdminForNav && !$hasBusinessSubscriptionForNav;
+  $showBusinessWorkspaceForNav = $isAdminForNav || $hasBusinessSubscriptionForNav;
+  $sidebarNavigation = Render::buildSidebarNavigation(
+    $hasPremiumSubscriptionForNav,
+    $isAdminForNav,
+    false,
+    $showBusinessWorkspaceForNav,
+    $hasBusinessSubscriptionForNav,
+  );
 
   $sideNavIcons = [
     'settings' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false"><path d="M19.14 12.94c.04-.31.06-.62.06-.94s-.02-.63-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.1 7.1 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.49-.42h-3.84a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.7 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.05.31-.07.63-.07.95s.02.63.07.94L2.82 14.53a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.4 1.05.72 1.63.95l.36 2.54c.04.24.25.42.49.42h3.84c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.13-.55 1.63-.95l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.57zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>',
@@ -623,13 +776,20 @@ echo Render::template('keyboard-shortcuts', $renders);
                 $isActive = \PayCal\Domain\AdminSurface::navItemIsActive($adminNavItem, $requestPath);
                 $iconKey = $adminNavItem['icon'];
                 $iconSvg = $sideNavIcons[$iconKey] ?? $sideNavIcons['admin'];
-                $label = Strings::headerI18n($adminNavItem['label_key']);
+                $label = $adminNavItem['label_key'] === 'ADMIN_FEEDBACK'
+                  ? 'Feedback'
+                  : Strings::headerI18n($adminNavItem['label_key']);
               ?>
               <a class="nav_admin_item<?php echo $isActive ? ' active' : ''; ?>" role="menuitem" href="<?php echo htmlspecialchars($adminNavItem['href'], ENT_QUOTES, 'UTF-8'); ?>"<?php echo $isActive ? " aria-current='page'" : ''; ?>><span class="nav_icon nav_icon--side"><?php echo $iconSvg; ?></span><span class="nav_label"><?php echo $label; ?></span></a>
               <?php } ?>
             </div>
           </li>
         <?php } ?>
+        <?php if ($showRegularBusinessLeafForNav) {
+          echo Render::renderNavLinks([
+            Render::regularBusinessNavLink($hasActiveBusinessMembershipForNav),
+          ], (string) $currentPage);
+        } ?>
           <li class="pages"><a href="/help/" data-help-trigger="true" data-nav-shortcut="h" aria-keyshortcuts="h" accesskey="h"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['shortcuts']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('KEYBOARD'); ?></span></a></li>
 <?php } // end $isAuthenticated nav ?>
 <?php if (!$isAuthenticated) {

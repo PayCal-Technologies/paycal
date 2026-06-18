@@ -30,7 +30,7 @@ final class BusinessWorkspaceCache
   public const SEGMENT_MEMBER_WORK = 'member_work';
 
   /**
-   * Members indexed for a business in Redis (business:members SET size).
+   * Active members indexed for a business in Redis (business:members SET size).
    */
   public static function indexedMemberCount(string $businessId): int
   {

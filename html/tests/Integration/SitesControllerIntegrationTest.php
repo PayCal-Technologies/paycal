@@ -268,7 +268,7 @@ final class SitesControllerIntegrationTest extends TestCase
                 'auth_level' => (string) AuthLevel::USER->value,
             ]);
             Database::hset(Keys::USER_SUBSCRIPTION . ':' . $ownerUUID, [
-                'tier' => 'premium',
+                'tier' => 'business',
                 'status' => 'active',
             ]);
 
@@ -287,7 +287,10 @@ final class SitesControllerIntegrationTest extends TestCase
                 'scopes' => 'sites.write,sites.read,work.read',
                 'updated_at' => date('c'),
             ]);
+            Database::sadd(Keys::BUSINESS_MEMBERS . ':' . $orgId, $this->testUserUUID);
+            Database::sadd(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId, $this->testUserUUID);
             Database::sadd(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
+            Database::sadd(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->testUserUUID, $orgId);
 
             $_POST = [
                 'owner_uuid' => $ownerUUID,
@@ -316,7 +319,10 @@ final class SitesControllerIntegrationTest extends TestCase
 
             $service->leaveBusiness($ownerUUID, $orgId);
             Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
+            Database::srem(Keys::BUSINESS_MEMBERS . ':' . $orgId, $this->testUserUUID);
+            Database::srem(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId, $this->testUserUUID);
             Database::srem(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
+            Database::srem(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->testUserUUID, $orgId);
         } finally {
             if ($createdSiteId !== '') {
                 Database::unlink(Keys::SITE . ':' . $ownerUUID . ':' . $createdSiteId);
@@ -341,7 +347,7 @@ final class SitesControllerIntegrationTest extends TestCase
                 'auth_level' => (string) AuthLevel::USER->value,
             ]);
             Database::hset(Keys::USER_SUBSCRIPTION . ':' . $ownerUUID, [
-                'tier' => 'premium',
+                'tier' => 'business',
                 'status' => 'active',
             ]);
 
@@ -360,7 +366,10 @@ final class SitesControllerIntegrationTest extends TestCase
                 'scopes' => 'work.read,sites.read',
                 'updated_at' => date('c'),
             ]);
+            Database::sadd(Keys::BUSINESS_MEMBERS . ':' . $orgId, $this->testUserUUID);
+            Database::sadd(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId, $this->testUserUUID);
             Database::sadd(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
+            Database::sadd(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->testUserUUID, $orgId);
 
             $_POST = [
                 'owner_uuid' => $ownerUUID,
@@ -384,7 +393,10 @@ final class SitesControllerIntegrationTest extends TestCase
 
             $service->leaveBusiness($ownerUUID, $orgId);
             Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
+            Database::srem(Keys::BUSINESS_MEMBERS . ':' . $orgId, $this->testUserUUID);
+            Database::srem(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId, $this->testUserUUID);
             Database::srem(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
+            Database::srem(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->testUserUUID, $orgId);
         } finally {
             Database::unlink(Keys::USER_SUBSCRIPTION . ':' . $ownerUUID);
             Database::unlink(Keys::USER . ':' . $ownerUUID);

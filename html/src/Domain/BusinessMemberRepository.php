@@ -38,7 +38,8 @@ use PayCal\Domain\Constants\Keys;
  *
  * Key layout (read-only mirrors of what ODS writes):
  *   organization:relationship:{orgId}:{userUUID}  – HASH: role, status, scopes, user_uuid, updated_at
- *   organization:user:{userUUID}                  – SET of orgIds the user belongs to
+ *   organization:user:{userUUID}                  – SET of active orgIds the user belongs to
+ *   organization:relationships:user:{userUUID}    – SET of non-terminal org relationship ids
  *
  * @category   Domain
  * @package    PayCal\Domain
@@ -184,7 +185,7 @@ final class BusinessMemberRepository
   /**
    * List all organization memberships for a single user.
    * Useful for "which orgs is this user in, and in what role?"
-   * Uses the organization:user:{uuid} reverse-index SET.
+   * Uses active membership plus relationship reverse-index SETs.
    *
    * @param  string $userUUID
    * @return array<int, array{org_id: string, role: string, status: string, scopes: list<string>, updated_at: string}>
@@ -195,23 +196,24 @@ final class BusinessMemberRepository
       return [];
     }
 
-    $orgIds = Database::smembers(Keys::BUSINESS_USER . ':' . $userUUID);
+    $orgIds = array_merge(
+      Database::smembers(Keys::BUSINESS_USER . ':' . $userUUID),
+      Database::smembers(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $userUUID),
+    );
+    $orgIds = array_values(array_unique(array_filter(
+      array_map(static fn (mixed $value): string => trim((string) $value), $orgIds),
+      static fn (string $value): bool => $value !== ''
+    )));
     if ([] === $orgIds) {
       return [];
     }
 
     $relationshipKeys = [];
     foreach ($orgIds as $orgId) {
-      $orgId = (string) $orgId;
-      if ($orgId === '') {
-        continue;
-      }
       $relationshipKeys[$orgId] = Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $userUUID;
     }
 
-    $relationshipHashes = $relationshipKeys !== []
-      ? Database::pipelineHgetall(array_values($relationshipKeys))
-      : [];
+    $relationshipHashes = Database::pipelineHgetall(array_values($relationshipKeys));
 
     $memberships = [];
 

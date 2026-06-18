@@ -64,6 +64,8 @@ final class BusinessDiscoveryService
   public const MEMBERSHIP_STATE_PENDING = 'pending';
   public const MEMBERSHIP_STATE_SUSPENDED = 'suspended';
   public const MEMBERSHIP_STATE_REVOKED = 'revoked';
+  public const MEMBERSHIP_STATE_REJECTED = 'rejected';
+  public const MEMBERSHIP_STATE_EXPIRED = 'expired';
 
   public const ENCRYPTION_MODE_PERSONAL = 'personal';
   public const ENCRYPTION_MODE_BUSINESS = 'business';
@@ -83,6 +85,8 @@ final class BusinessDiscoveryService
   private const BULK_IMPORT_PREPARE_TTL_SECONDS = 1200;
   private const BULK_IMPORT_CHALLENGE_TTL_SECONDS = 600;
   private const BULK_IMPORT_CHALLENGE_MAX_ATTEMPTS = 5;
+  private const SCOPE_PRESET_VERSION = '1';
+  private const SCOPE_POLICY_VERSION = '2026-06-18';
 
   /**
    * TODO: Document isDelegatedWorkMode.
@@ -200,6 +204,8 @@ final class BusinessDiscoveryService
       self::MEMBERSHIP_STATE_CONSENTED => true,
       self::MEMBERSHIP_STATE_ACTIVE => true,
       self::MEMBERSHIP_STATE_REVOKED => true,
+      self::MEMBERSHIP_STATE_REJECTED => true,
+      self::MEMBERSHIP_STATE_EXPIRED => true,
       'withdrawn' => true,
     ],
     self::MEMBERSHIP_STATE_CONSENTED => [
@@ -216,8 +222,10 @@ final class BusinessDiscoveryService
       self::MEMBERSHIP_STATE_ACTIVE => true,
       self::MEMBERSHIP_STATE_REVOKED => true,
     ],
-    self::MEMBERSHIP_STATE_REVOKED   => [self::MEMBERSHIP_STATE_ACTIVE => true],
-    'withdrawn'                      => [self::MEMBERSHIP_STATE_ACTIVE => true],
+    self::MEMBERSHIP_STATE_REVOKED   => [self::MEMBERSHIP_STATE_PENDING => true],
+    self::MEMBERSHIP_STATE_REJECTED  => [self::MEMBERSHIP_STATE_PENDING => true],
+    self::MEMBERSHIP_STATE_EXPIRED   => [self::MEMBERSHIP_STATE_PENDING => true],
+    'withdrawn'                      => [self::MEMBERSHIP_STATE_PENDING => true],
   ];
 
   /**
@@ -472,7 +480,7 @@ final class BusinessDiscoveryService
     $notificationSummary = (new BusinessNotificationService())->summarizeUnreadForUser($userUUID);
     $unreadByOrg = $notificationSummary['by_org'];
 
-    $businessIds = Database::smembers(Keys::BUSINESS_USER . ':' . $userUUID);
+    $businessIds = $this->relationshipBusinessIdsForUser($userUUID);
 
     $businesses = [];
     foreach ($businessIds as $businessId) {
@@ -622,6 +630,13 @@ final class BusinessDiscoveryService
     $expiresAt = date('c', time() + 7 * 24 * 3600);
 
     $inviteUUID = UserRepository::getUUIDFromEmail($email);
+    if ($inviteUUID !== '') {
+      $existingRelationship = $this->relationship($businessId, $inviteUUID);
+      $existingStatus = (string) ($existingRelationship['status'] ?? '');
+      if (in_array($existingStatus, [self::MEMBERSHIP_STATE_ACTIVE, self::MEMBERSHIP_STATE_PENDING, self::MEMBERSHIP_STATE_CONSENTED], true)) {
+        return $this->fail(Strings::i18n('BUSINESSES_API_YOU_ALREADY_HAVE_ACTIVE_ACCESS_TO_THIS_BUSINESS'));
+      }
+    }
 
     Database::hset(Keys::BUSINESS_INVITE . ':' . $inviteId, [
       'invite_id' => $inviteId,
@@ -640,6 +655,16 @@ final class BusinessDiscoveryService
     Database::set(Keys::BUSINESS_INVITE_TOKEN . ':' . $token, $inviteId, 7 * 24 * 3600);
     Database::sadd(Keys::BUSINESS_INVITE_EMAIL . ':' . $email, $inviteId);
     Database::sadd(Keys::BUSINESS_INVITE_ORG . ':' . $businessId, $inviteId);
+
+    if ($inviteUUID !== '') {
+      $this->setRelationship($businessId, $inviteUUID, [
+        'role' => 'member',
+        'status' => self::MEMBERSHIP_STATE_PENDING,
+        'scopes' => implode(',', $normalizedScopes),
+        'invited_by' => $actorUUID,
+        'created_at' => $timestamp,
+      ]);
+    }
 
     BusinessDashboardMetrics::recordPendingInviteCreated($businessId);
 
@@ -1206,6 +1231,14 @@ final class BusinessDiscoveryService
     Database::sadd(Keys::BUSINESS_ACCESS_REQUEST_REQUESTER . ':' . $requesterUUID, $requestId);
     Database::set($activeKey, $requestId, 14 * 24 * 3600);
 
+    $this->setRelationship($businessId, $requesterUUID, [
+      'role' => 'member',
+      'status' => self::MEMBERSHIP_STATE_PENDING,
+      'scopes' => implode(',', $this->normalizeScopes(self::ACCESS_REQUEST_DEFAULT_SCOPES)),
+      'requested_by' => $requesterUUID,
+      'created_at' => $createdAt,
+    ]);
+
     BusinessDashboardMetrics::recordPendingRequestCreated($businessId);
 
     $this->appendAuditEvent($businessId, 'access.requested', $requesterUUID, [
@@ -1645,6 +1678,14 @@ final class BusinessDiscoveryService
 
     if ($requesterUUID !== '') {
       Database::unlink($this->accessRequestActiveKey($businessId, $requesterUUID));
+      $relationship = $this->relationship($businessId, $requesterUUID);
+      if ((string) ($relationship['status'] ?? '') === self::MEMBERSHIP_STATE_PENDING) {
+        $this->setRelationship($businessId, $requesterUUID, [
+          'status' => self::MEMBERSHIP_STATE_REJECTED,
+          'rejected_by' => $actorUUID,
+          'rejected_at' => $timestamp,
+        ]);
+      }
     }
 
     BusinessDashboardMetrics::recordPendingRequestResolved($businessId);
@@ -1706,6 +1747,18 @@ final class BusinessDiscoveryService
       'revoked_at' => date('c'),
     ]);
 
+    $inviteeUUID = (string) ($invite['invitee_uuid'] ?? '');
+    if ($inviteeUUID !== '') {
+      $relationship = $this->relationship($businessId, $inviteeUUID);
+      if ((string) ($relationship['status'] ?? '') === self::MEMBERSHIP_STATE_PENDING) {
+        $this->setRelationship($businessId, $inviteeUUID, [
+          'status' => self::MEMBERSHIP_STATE_REVOKED,
+          'revoked_by' => $actorUUID,
+          'revoked_at' => date('c'),
+        ]);
+      }
+    }
+
     BusinessDashboardMetrics::recordPendingInviteResolved($businessId);
 
     $this->appendAuditEvent($businessId, 'invite.revoked', $actorUUID, [
@@ -1749,6 +1802,15 @@ final class BusinessDiscoveryService
     $expiresAt = strtotime((string) ($invite['expires_at'] ?? ''));
     if (false === $expiresAt || $expiresAt < time()) {
       Database::hset($inviteKey, ['status' => 'expired']);
+      if ($inviteeBound !== '') {
+        $relationship = $this->relationship((string) ($invite['business_id'] ?? ''), $inviteeBound);
+        if ((string) ($relationship['status'] ?? '') === self::MEMBERSHIP_STATE_PENDING) {
+          $this->setRelationship((string) ($invite['business_id'] ?? ''), $inviteeBound, [
+            'status' => self::MEMBERSHIP_STATE_EXPIRED,
+            'expired_at' => date('c'),
+          ]);
+        }
+      }
       return $this->fail(Strings::i18n('BUSINESSES_API_INVITE_HAS_EXPIRED'));
     }
 
@@ -1763,11 +1825,6 @@ final class BusinessDiscoveryService
       if (!$domainGate['success']) {
         return $domainGate;
       }
-    }
-
-    $gate = $this->requireAdminPreviewOrSelfOrg($inviteeUUID, $businessId);
-    if (null !== $gate) {
-      return $gate;
     }
 
     $consentId = '';
@@ -4221,11 +4278,8 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * Check if user can access premium business features.
-   * Premium tier grants access to shared org creation and management.
-   * Admins always have access (legacy system role).
-   *
-   * @return bool
+   * Check if the user can access shared business creation and management.
+   * Business tier grants access; admins and managers keep legacy elevated access.
    */
   private function canAccessPremiumFeatures(string $userUUID): bool
   {
@@ -4297,7 +4351,7 @@ final class BusinessDiscoveryService
 
   /**
    * Check if business has reached the member limit.
-   * Business tier allows up to 1,000 members per business.
+   * Business tier allows up to 100 members per business.
    *
    * @param string $businessId
    * @return bool True if the org has reached its member limit
@@ -5601,6 +5655,11 @@ final class BusinessDiscoveryService
       $relationship['role'] = $newRole;
     }
 
+    if (array_key_exists('role', $relationship) || array_key_exists('scopes', $relationship)) {
+      $relationship['scope_preset_version'] = self::SCOPE_PRESET_VERSION;
+      $relationship['scope_policy_version'] = self::SCOPE_POLICY_VERSION;
+    }
+
     $existing      = $this->relationship($businessId, $userUUID);
     $currentStatus = (string) ($existing['status'] ?? '');
     $newStatus     = (string) ($relationship['status'] ?? $currentStatus);
@@ -5627,23 +5686,67 @@ final class BusinessDiscoveryService
       $fields['updated_at'] = date('c');
     }
 
-    $liveStatuses = ['active' => true, 'pending' => true];
-    $isNowLive    = isset($liveStatuses[$newStatus]);
-    $wasLive      = isset($liveStatuses[$currentStatus]);
+    $activeStatuses = [self::MEMBERSHIP_STATE_ACTIVE => true];
+    $indexedRelationshipStatuses = [
+      self::MEMBERSHIP_STATE_ACTIVE => true,
+      self::MEMBERSHIP_STATE_CONSENTED => true,
+      self::MEMBERSHIP_STATE_PENDING => true,
+    ];
+    $pendingStatuses = [self::MEMBERSHIP_STATE_PENDING => true];
 
-    $relKey     = $this->relationshipKey($businessId, $userUUID);
+    $isNowActive = isset($activeStatuses[$newStatus]);
+    $wasActive = isset($activeStatuses[$currentStatus]);
+    $isNowIndexedRelationship = isset($indexedRelationshipStatuses[$newStatus]);
+    $wasIndexedRelationship = isset($indexedRelationshipStatuses[$currentStatus]);
+    $isNowPending = isset($pendingStatuses[$newStatus]);
+    $wasPending = isset($pendingStatuses[$currentStatus]);
+
+    $relKey = $this->relationshipKey($businessId, $userUUID);
     $membersKey = Keys::BUSINESS_MEMBERS . ':' . $businessId;
-    $userKey    = Keys::BUSINESS_USER . ':' . $userUUID;
+    $userKey = Keys::BUSINESS_USER . ':' . $userUUID;
+    $relationshipsKey = Keys::BUSINESS_RELATIONSHIPS . ':' . $businessId;
+    $relationshipsUserKey = Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $userUUID;
+    $pendingKey = Keys::BUSINESS_PENDING . ':' . $businessId;
 
-    Database::transaction(static function (\Redis $r) use ($relKey, $membersKey, $userKey, $businessId, $userUUID, $fields, $isNowLive, $wasLive): void {
+    Database::transaction(static function (\Redis $r) use (
+      $relKey,
+      $membersKey,
+      $userKey,
+      $relationshipsKey,
+      $relationshipsUserKey,
+      $pendingKey,
+      $businessId,
+      $userUUID,
+      $fields,
+      $isNowActive,
+      $wasActive,
+      $isNowIndexedRelationship,
+      $wasIndexedRelationship,
+      $isNowPending,
+      $wasPending,
+    ): void {
       $r->hMSet($relKey, $fields);
 
-      if ($isNowLive && !$wasLive) {
+      if ($isNowActive && !$wasActive) {
         $r->sAdd($membersKey, $userUUID);
         $r->sAdd($userKey, $businessId);
-      } elseif (!$isNowLive && $wasLive) {
+      } elseif (!$isNowActive && $wasActive) {
         $r->sRem($membersKey, $userUUID);
         $r->sRem($userKey, $businessId);
+      }
+
+      if ($isNowIndexedRelationship && !$wasIndexedRelationship) {
+        $r->sAdd($relationshipsKey, $userUUID);
+        $r->sAdd($relationshipsUserKey, $businessId);
+      } elseif (!$isNowIndexedRelationship && $wasIndexedRelationship) {
+        $r->sRem($relationshipsKey, $userUUID);
+        $r->sRem($relationshipsUserKey, $businessId);
+      }
+
+      if ($isNowPending && !$wasPending) {
+        $r->sAdd($pendingKey, $userUUID);
+      } elseif (!$isNowPending && $wasPending) {
+        $r->sRem($pendingKey, $userUUID);
       }
     });
 
@@ -5699,6 +5802,28 @@ final class BusinessDiscoveryService
   private function relationship(string $businessId, string $userUUID): array
   {
     return Database::hgetall($this->relationshipKey($businessId, $userUUID));
+  }
+
+  /** @return list<string> */
+  private function relationshipBusinessIdsForUser(string $userUUID): array
+  {
+    $userUUID = trim($userUUID);
+    if ($userUUID === '') {
+      return [];
+    }
+
+    $ids = array_merge(
+      Database::smembers(Keys::BUSINESS_USER . ':' . $userUUID),
+      Database::smembers(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $userUUID),
+    );
+
+    $ids = array_values(array_unique(array_filter(
+      array_map(static fn (mixed $value): string => trim((string) $value), $ids),
+      static fn (string $value): bool => $value !== ''
+    )));
+    sort($ids, SORT_STRING);
+
+    return $ids;
   }
 
   /**
@@ -6119,4 +6244,3 @@ final class BusinessDiscoveryService
     ];
   }
 }
-

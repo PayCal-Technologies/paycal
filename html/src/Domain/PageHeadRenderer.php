@@ -20,9 +20,19 @@ final class PageHeadRenderer
     'PAGE_FAQ' => 'content',
     'PAGE_HELP' => 'help',
     'PAGE_INDEX' => 'calendar',
+    'PAGE_JOIN_BUSINESS' => 'business',
+    'PAGE_MY_BUSINESS' => 'business',
     'PAGE_POLICIES' => 'content',
     'PAGE_ADMIN' => 'admin',
     'PAGE_SETTINGS' => 'settings',
+    'PAGE_SETTINGS_ACCOUNT' => 'settings',
+    'PAGE_SETTINGS_SUBSCRIPTION' => 'settings',
+    'PAGE_SETTINGS_CALENDAR' => 'settings',
+    'PAGE_SETTINGS_APPEARANCE' => 'settings',
+    'PAGE_SETTINGS_ACCESSIBILITY' => 'settings',
+    'PAGE_SETTINGS_SECURITY' => 'settings',
+    'PAGE_SETTINGS_DATA' => 'settings',
+    'PAGE_SETTINGS_DIAGNOSTICS' => 'settings',
     'PAGE_SITES' => 'sites',
     'PAGE_BUSINESSES' => 'business',
     'PAGE_BUSINESS_DASHBOARD' => 'business',
@@ -36,7 +46,8 @@ final class PageHeadRenderer
     'PAGE_PROFILE' => 'profile',
     'PAGE_TESTS' => 'admin',
     'PAGE_TRANSPARENCY' => 'transparency',
-    'PAGE_PREMIUM' => 'premium',
+    'PAGE_STATUS' => 'transparency',
+    'PAGE_PRICING' => 'pricing',
     'PAGE_PAYPERIODS' => 'payperiods',
     'PAGE_AUTH' => 'auth',
   ];
@@ -138,12 +149,22 @@ HTML;
    * @param array{
    *   metaDescription: string,
    *   canonicalPath: string,
+   *   socialTitle?: string,
+   *   ogDescription?: string,
+   *   twitterTitle?: string,
+   *   twitterDescription?: string,
    * } $context
    */
   public static function renderSocialMeta(array $context): string
   {
-    $metaTitle = htmlspecialchars(Strings::headerI18n('META_TITLE'), ENT_QUOTES, 'UTF-8');
-    $metaDescription = htmlspecialchars((string) $context['metaDescription'], ENT_QUOTES, 'UTF-8');
+    $metaTitleRaw = (string) ($context['socialTitle'] ?? Strings::headerI18n('META_TITLE'));
+    $ogDescriptionRaw = (string) ($context['ogDescription'] ?? $context['metaDescription']);
+    $twitterTitleRaw = (string) ($context['twitterTitle'] ?? $metaTitleRaw);
+    $twitterDescriptionRaw = (string) ($context['twitterDescription'] ?? $ogDescriptionRaw);
+    $metaTitle = htmlspecialchars($metaTitleRaw, ENT_QUOTES, 'UTF-8');
+    $ogDescription = htmlspecialchars($ogDescriptionRaw, ENT_QUOTES, 'UTF-8');
+    $twitterTitle = htmlspecialchars($twitterTitleRaw, ENT_QUOTES, 'UTF-8');
+    $twitterDescription = htmlspecialchars($twitterDescriptionRaw, ENT_QUOTES, 'UTF-8');
     $canonicalUrl = htmlspecialchars(Environment::publicMetadataURL((string) $context['canonicalPath']), ENT_QUOTES, 'UTF-8');
     $publicBase = htmlspecialchars(Environment::publicMetadataBaseURL(), ENT_QUOTES, 'UTF-8');
     $socialImage = htmlspecialchars(Environment::publicMetadataURL('favicon.ico'), ENT_QUOTES, 'UTF-8');
@@ -152,11 +173,11 @@ HTML;
   <meta property="og:locale" content="en_CA">
   <meta property="og:site_name" content="PayCal">
   <meta property="og:title" content="{$metaTitle}">
-  <meta property="og:description" content="{$metaDescription}">
+  <meta property="og:description" content="{$ogDescription}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{$canonicalUrl}">
-  <meta name="twitter:title" content="{$metaTitle}">
-  <meta name="twitter:description" content="{$metaDescription}">
+  <meta name="twitter:title" content="{$twitterTitle}">
+  <meta name="twitter:description" content="{$twitterDescription}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@paycal_app">
   <meta name="twitter:url" content="{$canonicalUrl}">
@@ -171,13 +192,15 @@ HTML;
    * @param array{
    *   pageLanguage: string,
    *   metaDescriptionLong: string,
+   *   dcTitle?: string,
+   *   dcDescription?: string,
    * } $context
    */
   public static function renderDublinCoreMeta(array $context): string
   {
     $pageLanguage = htmlspecialchars((string) $context['pageLanguage'], ENT_QUOTES, 'UTF-8');
-    $metaTitle = htmlspecialchars(Strings::headerI18n('META_TITLE'), ENT_QUOTES, 'UTF-8');
-    $metaDescriptionLong = htmlspecialchars((string) $context['metaDescriptionLong'], ENT_QUOTES, 'UTF-8');
+    $metaTitle = htmlspecialchars((string) ($context['dcTitle'] ?? Strings::headerI18n('META_TITLE')), ENT_QUOTES, 'UTF-8');
+    $metaDescriptionLong = htmlspecialchars((string) ($context['dcDescription'] ?? $context['metaDescriptionLong']), ENT_QUOTES, 'UTF-8');
     $englishTag = htmlspecialchars(Strings::headerI18n('ENGLISH'), ENT_QUOTES, 'UTF-8');
     $today = self::today();
 
@@ -206,6 +229,14 @@ HTML;
 HTML;
   }
 
+  private static function cssVersion(string $baseVersion, string $cssEndpoint): string
+  {
+    $path = dirname(__DIR__, 2) . '/css/' . trim($cssEndpoint, '/') . '/index.php';
+    $mtime = is_file($path) ? (string) filemtime($path) : '';
+
+    return $mtime !== '' ? $baseVersion . '-' . $mtime : $baseVersion;
+  }
+
   /**
    * @param array{
    *   cspNonce: string,
@@ -220,30 +251,39 @@ HTML;
   public static function renderStylesheets(array $context): string
   {
     $cspNonce = htmlspecialchars((string) $context['cspNonce'], ENT_QUOTES, 'UTF-8');
-    $cssVersion = htmlspecialchars((string) $context['cssVersion'], ENT_QUOTES, 'UTF-8');
-    $pageFile = htmlspecialchars((string) $context['pageFile'], ENT_QUOTES, 'UTF-8');
+    $baseCssVersion = (string) $context['cssVersion'];
+    $cssVersion = htmlspecialchars(self::cssVersion($baseCssVersion, ''), ENT_QUOTES, 'UTF-8');
+    $navigationCssVersion = htmlspecialchars(self::cssVersion($baseCssVersion, 'navigation'), ENT_QUOTES, 'UTF-8');
+    $utilitiesCssVersion = htmlspecialchars(self::cssVersion($baseCssVersion, 'utilities'), ENT_QUOTES, 'UTF-8');
+    $datagridCssVersion = htmlspecialchars(self::cssVersion($baseCssVersion, 'datagrid'), ENT_QUOTES, 'UTF-8');
+    $pageFileRaw = (string) $context['pageFile'];
+    $pageFile = htmlspecialchars($pageFileRaw, ENT_QUOTES, 'UTF-8');
+    $pageCssVersion = htmlspecialchars(self::cssVersion($baseCssVersion, $pageFileRaw), ENT_QUOTES, 'UTF-8');
+    $responsiveCssVersion = htmlspecialchars(self::cssVersion($baseCssVersion, 'responsive'), ENT_QUOTES, 'UTF-8');
     $cssBase = htmlspecialchars(Environment::appURL('css/'), ENT_QUOTES, 'UTF-8');
 
     $html = <<<HTML
   <link rel="stylesheet" fetchpriority="high" href="{$cssBase}?v={$cssVersion}" nonce="{$cspNonce}">
-  <link rel="stylesheet" href="{$cssBase}navigation/?v={$cssVersion}" nonce="{$cspNonce}">
-  <link rel="stylesheet" href="{$cssBase}utilities/?v={$cssVersion}" nonce="{$cspNonce}">
-  <link rel="stylesheet" href="{$cssBase}datagrid/?v={$cssVersion}" nonce="{$cspNonce}">
-  <link rel="stylesheet" href="{$cssBase}{$pageFile}/?v={$cssVersion}" nonce="{$cspNonce}">
+  <link rel="stylesheet" href="{$cssBase}navigation/?v={$navigationCssVersion}" nonce="{$cspNonce}">
+  <link rel="stylesheet" href="{$cssBase}utilities/?v={$utilitiesCssVersion}" nonce="{$cspNonce}">
+  <link rel="stylesheet" href="{$cssBase}datagrid/?v={$datagridCssVersion}" nonce="{$cspNonce}">
+  <link rel="stylesheet" href="{$cssBase}{$pageFile}/?v={$pageCssVersion}" nonce="{$cspNonce}">
 
 HTML;
 
     if ($context['loadPhantomWing']) {
-      $html .= "  <link rel=\"stylesheet\" href=\"{$cssBase}phantomwing/?v={$cssVersion}\" nonce=\"{$cspNonce}\">\n";
+      $phantomWingCssVersion = htmlspecialchars(self::cssVersion($baseCssVersion, 'phantomwing'), ENT_QUOTES, 'UTF-8');
+      $html .= "  <link rel=\"stylesheet\" href=\"{$cssBase}phantomwing/?v={$phantomWingCssVersion}\" nonce=\"{$cspNonce}\">\n";
     }
 
     $html .= <<<HTML
-  <link rel="stylesheet" href="{$cssBase}responsive/?v={$cssVersion}" nonce="{$cspNonce}">
+  <link rel="stylesheet" href="{$cssBase}responsive/?v={$responsiveCssVersion}" nonce="{$cspNonce}">
 
 HTML;
 
-    if (in_array((string) $context['currentPage'], ['PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_ABOUT', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA'], true)) {
-      $html .= "  <link rel=\"stylesheet\" href=\"{$cssBase}content-views/?v={$cssVersion}\" nonce=\"{$cspNonce}\">\n";
+    if (in_array((string) $context['currentPage'], ['PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_STATUS', 'PAGE_ABOUT', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA'], true)) {
+      $contentViewsCssVersion = htmlspecialchars(self::cssVersion($baseCssVersion, 'content-views'), ENT_QUOTES, 'UTF-8');
+      $html .= "  <link rel=\"stylesheet\" href=\"{$cssBase}content-views/?v={$contentViewsCssVersion}\" nonce=\"{$cspNonce}\">\n";
     }
 
     return $html;

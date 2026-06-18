@@ -31,9 +31,12 @@ final class BusinessMemberRepositoryIntegrationTest extends TestCase
     $this->seedUser($this->memberA, $this->memberAEmail, 'Alice Active');
     $this->seedUser($this->memberB, $this->memberBEmail, 'Bob Pending');
 
-    Database::sadd(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->memberA, $this->memberB);
+    Database::sadd(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->memberA);
+    Database::sadd(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $this->memberA, $this->memberB);
+    Database::sadd(Keys::BUSINESS_PENDING . ':' . $this->businessId, $this->memberB);
     Database::sadd(Keys::BUSINESS_USER . ':' . $this->memberA, $this->businessId);
-    Database::sadd(Keys::BUSINESS_USER . ':' . $this->memberB, $this->businessId);
+    Database::sadd(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->memberA, $this->businessId);
+    Database::sadd(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->memberB, $this->businessId);
 
     Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->memberA, [
       'user_uuid' => $this->memberA,
@@ -54,10 +57,14 @@ final class BusinessMemberRepositoryIntegrationTest extends TestCase
   protected function tearDown(): void
   {
     Database::unlink(Keys::BUSINESS_MEMBERS . ':' . $this->businessId);
+    Database::unlink(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId);
+    Database::unlink(Keys::BUSINESS_PENDING . ':' . $this->businessId);
     Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->memberA);
     Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->memberB);
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->memberA);
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->memberB);
+    Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->memberA);
+    Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->memberB);
 
     foreach ([$this->memberA => $this->memberAEmail, $this->memberB => $this->memberBEmail] as $uuid => $email) {
       Database::unlink(Keys::USER . ':' . $uuid);
@@ -76,6 +83,17 @@ final class BusinessMemberRepositoryIntegrationTest extends TestCase
     $this->assertSame($this->memberA, $members[0]['user']->user_uuid);
     $this->assertSame('member', $members[0]['role']);
     $this->assertSame(['sites.read'], $members[0]['scopes']);
+  }
+
+  public function testForBusinessDoesNotTreatPendingRelationshipsAsMembers(): void
+  {
+    $members = BusinessMemberRepository::forBusiness($this->businessId);
+
+    $this->assertCount(1, $members);
+    $this->assertSame($this->memberA, $members[0]['user']->user_uuid);
+    $this->assertSame(1, Database::scard(Keys::BUSINESS_MEMBERS . ':' . $this->businessId));
+    $this->assertSame(2, Database::scard(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId));
+    $this->assertSame(1, Database::scard(Keys::BUSINESS_PENDING . ':' . $this->businessId));
   }
 
   public function testForUserReturnsAllMemberships(): void

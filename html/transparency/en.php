@@ -240,6 +240,23 @@ require_once HTML.'/header.php';
         </section>
 
         <section class="doc-section">
+          <h2>How PayCal Keeps Business Membership Accurate and Auditable</h2>
+
+          <p class="doc-article-meta">Published: <time datetime="2026-06-18">2026-06-18</time></p>
+          <p>
+            This article explains how PayCal separates canonical relationship lifecycle records
+            from derived Redis indexes, how we found and repaired index drift, and why ownership
+            authority is reported rather than auto-fixed.
+          </p>
+          <ul class="doc-fact-list">
+            <li>Relationship hashes are canonical; active member and pending workflow indexes are derived</li>
+            <li>Pending, revoked, rejected, expired, and withdrawn users are not treated as active members</li>
+            <li>The audit/fix command repaired known Redis index drift and ended with drift=0, owner=0, other=0</li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/redis-relationship-reconciliation-2026-06/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
           <h2>SOC 2 Compliance at PayCal</h2>
           <p class="doc-article-meta">Published: <time datetime="2026-04-13">2026-04-13</time></p>
           <p>

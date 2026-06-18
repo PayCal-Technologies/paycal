@@ -18,6 +18,7 @@ $i18nKeys = [
   'GITHUB',
   'TRANSPARENCY',
   'POLICIES',
+  'STATUS',
   'FOOTER',
   'SECONDARY',
   'PAGES',
@@ -75,25 +76,23 @@ $navLinks = [
         'access_key' => (string) 'l',
         'icon' => (string) '',
         'extra_attrs' => "target='_blank' rel='noopener noreferrer'"],
+    ['page' => (string) 'PAGE_PRICING',
+        'name' => (string) Strings::html('PRICING'),
+        'href' => Environment::appURL('pricing/'),
+        'arialabel' => 'Pricing',
+        'access_key' => (string) '',
+        'icon' => (string) ''],
+    ['page' => (string) 'PAGE_STATUS',
+        'name' => (string) Strings::html('STATUS'),
+        'href' => Environment::appURL('status/'),
+        'arialabel' => (string) $i18n['STATUS'],
+        'access_key' => (string) '',
+        'icon' => (string) ''],
     ['page' => (string) 'PAGE_TRANSPARENCY',
         'name' => (string) Strings::html('TRANSPARENCY_HTML'),
         'href' => 'https://paycaltech.com/transparency/',
         'arialabel' => (string) $i18n['TRANSPARENCY'],
         'access_key' => (string) 't',
-        'icon' => (string) '',
-        'extra_attrs' => "target='_blank' rel='noopener noreferrer'"],
-    ['page' => (string) 'PAGE_PRICING',
-        'name' => (string) Strings::html('PRICING'),
-        'href' => 'https://paycaltech.com/pricing/',
-        'arialabel' => 'Pricing',
-        'access_key' => (string) '',
-        'icon' => (string) '',
-        'extra_attrs' => "target='_blank' rel='noopener noreferrer'"],
-    ['page' => (string) 'PAGE_LANGUAGE_COVERAGE',
-        'name' => (string) Strings::html('LANGUAGE_COVERAGE'),
-        'href' => 'https://paycaltech.com/language-coverage/',
-        'arialabel' => 'Language Coverage',
-        'access_key' => (string) '',
         'icon' => (string) '',
         'extra_attrs' => "target='_blank' rel='noopener noreferrer'"],
 ];
@@ -105,26 +104,6 @@ if ($isAuthenticated) {
   echo Render::jsScript('-');
   echo Render::jsScript('encryption');
   echo Render::jsScript('org-dek-auto-bootstrap');
-}
-
-$extensionDisclaimerPath = __DIR__ . '/extensions/_partials/extension_disclaimer.php';
-if (is_file($extensionDisclaimerPath)) {
-  $requestUriRaw = $_SERVER['REQUEST_URI'] ?? '';
-  $requestPathOnly = parse_url(is_scalar($requestUriRaw) ? (string) $requestUriRaw : '', PHP_URL_PATH);
-  $normalizedRequestPath = rtrim(is_string($requestPathOnly) ? $requestPathOnly : '', '/');
-  if ($normalizedRequestPath === '') {
-    $normalizedRequestPath = '/';
-  }
-
-  if (
-    AdminSurface::isEnabled()
-    && (
-      str_starts_with($normalizedRequestPath, '/admin')
-      || str_starts_with($normalizedRequestPath, '/tests')
-    )
-  ) {
-    require $extensionDisclaimerPath;
-  }
 }
 
 
@@ -196,32 +175,28 @@ $peakMemoryBytes = memory_get_peak_usage();
 $peakMemoryMB = $peakMemoryBytes / (1024 * 1024);
 $formattedPeakMemoryUsage = Strings::formatLocalizedNumber($peakMemoryMB, 2, 2).' MB';
 
-$userAgent = is_string($_SERVER['HTTP_USER_AGENT'] ?? null) ? $_SERVER['HTTP_USER_AGENT'] : '';
-$acceptLanguage = is_string($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? null) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '';
-$ipAddress = Browser::getIp();
-$device = Browser::getDevice();
-$os = Browser::getOs();
-$browser = Browser::getBrowser();
-$appVersion = Environment::appVersion();
-$redisRLine = Environment::appEnv() !== "prod"
-  ? sprintf(
-      "%s:%s (db %s)",
-      Environment::redisServer(),
-      Environment::redisReadPort(),
-      Environment::redisDb()
-    )
-  : "";
+if (in_array(Environment::appEnv(), ['dev', 'mac', 'local', 'test'], true)) {
+  $userAgent = is_string($_SERVER['HTTP_USER_AGENT'] ?? null) ? $_SERVER['HTTP_USER_AGENT'] : '';
+  $acceptLanguage = is_string($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? null) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '';
+  $ipAddress = Browser::getIp();
+  $device = Browser::getDevice();
+  $os = Browser::getOs();
+  $browser = Browser::getBrowser();
+  $appVersion = Environment::appVersion();
+  $redisRLine = sprintf(
+    "%s:%s (db %s)",
+    Environment::redisServer(),
+    Environment::redisReadPort(),
+    Environment::redisDb()
+  );
+  $redisWLine = sprintf(
+    "%s:%s (db %s)",
+    Environment::redisServer(),
+    Environment::redisWritePort(),
+    Environment::redisDb()
+  );
 
-$redisWLine = Environment::appEnv() !== "prod"
-  ? sprintf(
-      "%s:%s (db %s)",
-      Environment::redisServer(),
-      Environment::redisWritePort(),
-      Environment::redisDb()
-    )
-  : "";
-
-echo <<<HTML
+  echo <<<HTML
 	<!--
 	  Render   : {$timeTaken}
 	  Memory   : {$formattedMemoryUsage}
@@ -238,6 +213,7 @@ echo <<<HTML
 
 
 HTML;
+}
 
 $lensPageRaw = (string) $currentPage;
 $lensPageMap = [

@@ -23,11 +23,29 @@ Categories:
   checks:readme-version
   checks:policy-meta
   checks:test-boundaries
+  checks:public-health [public-repo-path]
+  ops:github-branch-protection [public|private|both]  # public safety only; no required Actions
   checks:composer-state
   checks:dependency-security
   checks:semantic-diff [--cached|--base-ref REF --head-ref REF] [--paths-file FILE]
   checks:staged-sensitive
   checks:public-promotion-scope [git-range]
+  checks:ledger-private
+  release:candidate [--allow-dirty]
+  release:promote <dev|prod> [sha] [--reason TEXT]
+  release:evidence [--target prod.paycal.app]
+  ledger:candidate <product> [--allow-dirty]
+  ledger:promote <product> <target> [sha] [--reason TEXT]
+  ledger:desired <product> <target>
+  ledger:status <product> <target>
+  ledger:rollback <product> <target>
+  ledger:init-product <product>
+  deploy:desired <dev|prod>
+  deploy:manifest <dev|prod>
+  deploy:record-receipt <dev|prod> [--requested-sha SHA] [--checked-out-sha SHA]
+  deploy:record-runtime <dev|prod> [--runtime-sha SHA]
+  deploy:status [dev|prod]
+  deploy:rollback <dev|prod>
   checks:soc2-control-map [path-to-map]
   checks:soc2-evidence-freshness [max-age-days] [path-to-map]
   checks:soc2-change-management [git-range]
@@ -41,6 +59,7 @@ Categories:
   soc2:package [YYYY-MM] [output-zip-path]
   crypto:census
   crypto:migrate-plaintext
+  business:relationships:audit [--business businessId] [--fix] [--json]
   refactor:fix-headers
   refactor:dedupe-uses
   migrate:redis-field-names
@@ -59,6 +78,10 @@ Examples:
   scripts/paycal checks:semantic-diff --base-ref origin/main --head-ref HEAD
   scripts/paycal checks:staged-sensitive
   scripts/paycal checks:public-promotion-scope main...HEAD
+  scripts/paycal checks:ledger-private
+  scripts/paycal release:candidate
+  scripts/paycal release:promote prod --reason "June production release"
+  scripts/paycal deploy:status prod
   scripts/paycal checks:soc2-control-map
   scripts/paycal checks:soc2-evidence-freshness 35
   scripts/paycal checks:soc2-change-management main...HEAD
@@ -72,6 +95,7 @@ Examples:
   scripts/paycal checks:edge
   scripts/paycal crypto:census --json
   scripts/paycal crypto:migrate-plaintext --dry-run
+  scripts/paycal business:relationships:audit --json
   scripts/paycal tests:affected origin/main HEAD
 EOF
 }
@@ -107,6 +131,12 @@ case "${cmd}" in
   checks:test-boundaries)
     exec php "${SCRIPT_DIR}/test/check-test-repo-boundaries.php" "$@"
     ;;
+  checks:public-health)
+    exec "${SCRIPT_DIR}/check-public-repo-health.sh" "$@"
+    ;;
+  ops:github-branch-protection)
+    exec "${SCRIPT_DIR}/apply-github-branch-protection.sh" "$@"
+    ;;
   checks:staged-sensitive)
     exec "${SCRIPT_DIR}/hooks/check-staged-sensitive.sh" "$@"
     ;;
@@ -121,6 +151,60 @@ case "${cmd}" in
     ;;
   checks:public-promotion-scope)
     exec "${SCRIPT_DIR}/check-public-promotion-scope.sh" "$@"
+    ;;
+  checks:ledger-private)
+    exec "${SCRIPT_DIR}/check-release-ledger-private.sh" "$@"
+    ;;
+  release:candidate)
+    exec php "${SCRIPT_DIR}/release-ledger.php" candidate "$@"
+    ;;
+  release:promote)
+    exec php "${SCRIPT_DIR}/release-ledger.php" promote "$@"
+    ;;
+  release:evidence)
+    exec php "${SCRIPT_DIR}/release-ledger.php" evidence "$@"
+    ;;
+  ledger:candidate)
+    product="${1:-}"
+    if [ -z "${product}" ]; then
+      paycal_log "fatal" "usage: scripts/paycal ledger:candidate <product> [args]"
+      exit 2
+    fi
+    shift
+    exec php "${SCRIPT_DIR}/release-ledger.php" candidate --product "${product}" "$@"
+    ;;
+  ledger:promote)
+    exec php "${SCRIPT_DIR}/release-ledger.php" promote "$@"
+    ;;
+  ledger:desired)
+    exec php "${SCRIPT_DIR}/release-ledger.php" desired "$@"
+    ;;
+  ledger:status)
+    exec php "${SCRIPT_DIR}/release-ledger.php" status "$@"
+    ;;
+  ledger:rollback)
+    exec php "${SCRIPT_DIR}/release-ledger.php" rollback "$@"
+    ;;
+  ledger:init-product)
+    exec php "${SCRIPT_DIR}/release-ledger.php" init-product "$@"
+    ;;
+  deploy:desired)
+    exec php "${SCRIPT_DIR}/release-ledger.php" desired "$@"
+    ;;
+  deploy:manifest)
+    exec php "${SCRIPT_DIR}/release-ledger.php" manifest "$@"
+    ;;
+  deploy:record-receipt)
+    exec php "${SCRIPT_DIR}/release-ledger.php" record-receipt "$@"
+    ;;
+  deploy:record-runtime)
+    exec php "${SCRIPT_DIR}/release-ledger.php" record-runtime "$@"
+    ;;
+  deploy:status)
+    exec php "${SCRIPT_DIR}/release-ledger.php" status "$@"
+    ;;
+  deploy:rollback)
+    exec php "${SCRIPT_DIR}/release-ledger.php" rollback "$@"
     ;;
   checks:soc2-control-map)
     exec "${SCRIPT_DIR}/soc2-validate-control-map.sh" "$@"
@@ -160,6 +244,9 @@ case "${cmd}" in
     ;;
   crypto:migrate-plaintext)
     exec php "${REPO_ROOT}/copilot-scripts/crypto-migrate-plaintext.php" "$@"
+    ;;
+  business:relationships:audit)
+    exec php "${SCRIPT_DIR}/business-relationships-audit.php" "$@"
     ;;
   refactor:fix-headers)
     exec php "${SCRIPT_DIR}/fix-php-headers.php" "$@"

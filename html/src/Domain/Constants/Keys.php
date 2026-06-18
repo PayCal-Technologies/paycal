@@ -94,6 +94,9 @@ final class Keys
   public const BUSINESS_SITE           = 'business:site';
   public const BUSINESS_SITE_SETTINGS  = 'business:site_settings';
   public const BUSINESS_MEMBERS        = 'business:members';
+  public const BUSINESS_RELATIONSHIPS  = 'business:relationships';
+  public const BUSINESS_RELATIONSHIPS_USER = 'business:relationships:user';
+  public const BUSINESS_PENDING        = 'business:pending';
   public const BUSINESS_RELATIONSHIP   = 'business:relationship';
   public const BUSINESS_INVITE         = 'business:invite';
   public const BUSINESS_INVITE_EMAIL   = 'business:invite:email';
@@ -765,4 +768,3 @@ final class Keys
     return self::businessNotificationChannelUser($userUUID);
   }
 }
-

@@ -313,6 +313,24 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   margin: 0.5rem 0;
 }
 
+.doc-section .doc-list {
+  margin: 1rem 0;
+  padding-left: 2.75rem;
+}
+
+.doc-section ol.doc-list {
+  list-style-position: outside;
+}
+
+.doc-section .doc-list li {
+  padding-left: 0.2rem;
+}
+
+.doc-section .doc-list li::marker {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
 .doc-table {
   width: 100%;
   border-collapse: collapse;
@@ -352,6 +370,87 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   overflow-x: auto;
   margin: 1.5rem 0;
   border: 1px solid var(--panel-border);
+}
+
+.doc-code-block {
+  margin: 1.25rem 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--panel-border) 78%, var(--color-primary));
+  border-left: 4px solid var(--color-primary);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--panel-bg) 84%, black);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 16%, transparent);
+}
+
+.doc-code-block[data-label]::before {
+  display: block;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--panel-border);
+  background: color-mix(in srgb, var(--color-primary) 16%, var(--panel-bg));
+  color: var(--color-primary);
+  content: attr(data-label);
+  font-family: var(--sans-serif);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.doc-code-block pre {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+}
+
+.doc-code-block code,
+.doc-article code {
+  font-family: var(--monospace);
+}
+
+.doc-article :not(pre) > code {
+  padding: 0.1rem 0.32rem;
+  border: 1px solid color-mix(in srgb, var(--panel-border) 80%, var(--color-primary));
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--panel-bg) 86%, var(--color-primary) 14%);
+  color: var(--color-primary);
+  font-size: 0.92em;
+}
+
+.operator-command-list {
+  display: grid;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.operator-command {
+  margin: 0;
+}
+
+.operator-command p {
+  margin: 0 0 0.65rem 0;
+  color: var(--text-color);
+  font-weight: 700;
+}
+
+.relationship-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.relationship-evidence-grid .subject-example-cutout {
+  margin: 0;
+}
+
+.relationship-evidence-grid strong {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.relationship-evidence-grid code {
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .doc-badge {
@@ -761,6 +860,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
   .doc-panel-grid--responsive-3 {
     padding: 0;
+  }
+
+  .relationship-evidence-grid {
+    grid-template-columns: 1fr;
   }
 
   .doc-article-header h1 {

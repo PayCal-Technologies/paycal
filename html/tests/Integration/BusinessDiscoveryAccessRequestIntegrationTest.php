@@ -4,6 +4,7 @@ namespace Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
 use PayCal\Domain\Config\SystemConfig;
+use PayCal\Domain\BusinessDashboardMetrics;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Database;
 use PayCal\Domain\Enums\AuthLevel;
@@ -46,7 +47,7 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
     $this->seedUser($this->secondRequesterUUID, $this->secondRequesterEmail);
 
     Database::hset(Keys::USER_SUBSCRIPTION . ':' . $this->ownerUUID, [
-      'tier' => 'premium',
+      'tier' => 'business',
       'status' => 'active',
     ]);
 
@@ -78,6 +79,9 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
 
       Database::unlink(Keys::BUSINESS_SITE . ':' . $orgId);
       Database::unlink(Keys::BUSINESS_INVITE_ORG . ':' . $orgId);
+      Database::unlink(Keys::BUSINESS_MEMBERS . ':' . $orgId);
+      Database::unlink(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId);
+      Database::unlink(Keys::BUSINESS_PENDING . ':' . $orgId);
       Database::unlink(Keys::BUSINESS . ':' . $orgId);
       Database::unlink(Keys::BUSINESS_SETTINGS . ':' . $orgId);
       Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->ownerUUID);
@@ -91,6 +95,9 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->ownerUUID);
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->requesterUUID);
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->secondRequesterUUID);
+    Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->ownerUUID);
+    Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->requesterUUID);
+    Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->secondRequesterUUID);
     Database::unlink(Keys::BUSINESS_ACCESS_REQUEST_REQUESTER . ':' . $this->requesterUUID);
     Database::unlink(Keys::BUSINESS_ACCESS_REQUEST_REQUESTER . ':' . $this->secondRequesterUUID);
 
@@ -125,6 +132,13 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
     $this->assertSame('active', (string) ($relationship['status'] ?? ''));
     $this->assertSame('member', (string) ($relationship['role'] ?? ''));
     $this->assertSame('sites.read,work.read', (string) ($relationship['scopes'] ?? ''));
+    $this->assertSame('1', (string) ($relationship['scope_preset_version'] ?? ''));
+    $this->assertSame('2026-06-18', (string) ($relationship['scope_policy_version'] ?? ''));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->requesterUUID));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_USER . ':' . $this->requesterUUID, $this->businessId));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $this->requesterUUID));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->requesterUUID, $this->businessId));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_PENDING . ':' . $this->businessId, $this->requesterUUID));
 
     $history = $this->service->listAccessRequestHistory($this->ownerUUID, $this->businessId);
     $this->assertTrue($history['success']);
@@ -141,7 +155,29 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
     $this->assertGreaterThanOrEqual(1, $approvedMetric);
   }
 
-  public function testRejectAccessRequestKeepsRelationshipAbsent(): void
+  public function testPendingRelationshipIsIndexedButNotCountedAsActiveMember(): void
+  {
+    $method = new \ReflectionMethod(BusinessDiscoveryService::class, 'setRelationship');
+    $method->invoke($this->service, $this->businessId, $this->secondRequesterUUID, [
+      'role' => 'member',
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_PENDING,
+      'scopes' => 'sites.read,work.read',
+      'created_at' => date('c'),
+    ]);
+
+    $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->secondRequesterUUID);
+    $this->assertSame('pending', (string) ($relationship['status'] ?? ''));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->secondRequesterUUID));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $this->secondRequesterUUID));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_PENDING . ':' . $this->businessId, $this->secondRequesterUUID));
+
+    $metrics = BusinessDashboardMetrics::forBusiness($this->businessId, true);
+    $this->assertSame(1, $metrics['members']);
+  }
+
+  public function testRejectAccessRequestMarksPendingRelationshipRejected(): void
   {
     $day = date('Y-m-d');
     $requested = $this->service->requestAccessByOwnerEmail($this->secondRequesterUUID, $this->ownerEmail);
@@ -154,7 +190,12 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
     $this->assertTrue($rejected['success']);
 
     $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->secondRequesterUUID);
-    $this->assertSame([], $relationship);
+    $this->assertSame('rejected', (string) ($relationship['status'] ?? ''));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->secondRequesterUUID));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $this->secondRequesterUUID));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_PENDING . ':' . $this->businessId, $this->secondRequesterUUID));
 
     $history = $this->service->listAccessRequestHistory($this->ownerUUID, $this->businessId);
     $this->assertTrue($history['success']);

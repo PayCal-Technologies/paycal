@@ -158,7 +158,7 @@ final class BusinessMembersCacheTest extends TestCase
     $setRelationshipPos = strpos($source, 'private function setRelationship');
     $this->assertNotFalse($setRelationshipPos);
 
-    $body = substr($source, $setRelationshipPos, 3000);
+    $body = substr($source, $setRelationshipPos, 5000);
     $this->assertStringContainsString('BusinessWorkspaceCache::invalidate', $body);
   }
 }

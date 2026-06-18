@@ -21,6 +21,7 @@ use PayCal\Domain\ForecastScenario;
 use PayCal\Domain\Enums\SiteStatus;
 use PayCal\Domain\RequestGuard;
 use PayCal\Domain\Response;
+use PayCal\Domain\SubscriptionGate;
 use PayCal\Domain\TimestampFormatter;
 use PayCal\Domain\User;
 use PayCal\Domain\UserRepository;
@@ -107,6 +108,30 @@ final class BusinessDiscoveryController
     Authentication::abortIfUnauthenticated();
   }
 
+  private static function canUseBusinessWorkspace(): bool
+  {
+    if (User::isAdmin()) {
+      return true;
+    }
+
+    $userUUID = User::currentUUID();
+
+    return $userUUID !== '' && SubscriptionGate::hasActiveBusiness($userUUID);
+  }
+
+  private static function requireBusinessWorkspace(string $operation): bool
+  {
+    if (self::canUseBusinessWorkspace()) {
+      return true;
+    }
+
+    Response::error('[OrgC] Business workspace access requires PayCal Business.', [
+      'operation' => $operation,
+    ], HttpStatus::HTTP_FORBIDDEN);
+
+    return false;
+  }
+
   /**
    * POST businesses/create
    *
@@ -155,6 +180,10 @@ final class BusinessDiscoveryController
    */
   public function listForCurrentUser(): void
   {
+    if (!self::requireBusinessWorkspace('businesses.list')) {
+      return;
+    }
+
     $service = new BusinessDiscoveryService();
     $result = $service->listForUser(User::currentUUID());
 
@@ -194,6 +223,10 @@ final class BusinessDiscoveryController
    */
   public function listGrid(): void
   {
+    if (!self::requireBusinessWorkspace('businesses.grid')) {
+      return;
+    }
+
     $service = new BusinessDiscoveryService();
     $result = $service->listForUser(User::currentUUID());
 
@@ -2839,5 +2872,4 @@ final class BusinessDiscoveryController
     }
   }
 }
-
 
