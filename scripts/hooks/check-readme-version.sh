@@ -47,7 +47,7 @@ check_recent_release_blurb() {
   blurb_lines="$(
     awk -v ver="${version_tag}" '
       BEGIN { in_releases=0; in_section=0 }
-      /^# Recent Releases/ { in_releases=1 }
+      /^#{1,3} Recent Releases/ { in_releases=1 }
       !in_releases { next }
       in_releases && /^## v[0-9]+\.[0-9]+\.[0-9]+ / {
         if (in_section) { exit }
@@ -85,6 +85,18 @@ count_test_files() {
   find "${path}" -name '*Test.php' -type f | wc -l | tr -d '[:space:]'
 }
 
+count_suite_files() {
+  local config="$1"
+  local suite="$2"
+
+  vendor/bin/phpunit --configuration "${config}" --testsuite "${suite}" --list-tests \
+    | sed -n '/^ - /p' \
+    | awk -F'::' '{print $1}' \
+    | sort -u \
+    | wc -l \
+    | tr -d '[:space:]'
+}
+
 format_inventory_number() {
   local value="$1"
   local out=""
@@ -119,10 +131,24 @@ check_suite_inventory() {
   manual_files="$(count_test_files "${repo_root}/html/tests/Manual")"
   total_files=$((unit_files + integration_files + contract_files + soc2_files + exploit_files + manual_files))
 
+  local suite_unit suite_integration suite_contract suite_soc2 suite_timezone suite_accessibility suite_exploits
+  suite_unit="$(count_suite_files "${config}" "PayCal Unit")"
+  suite_integration="$(count_suite_files "${config}" "PayCal Integration")"
+  suite_contract="$(count_suite_files "${config}" "PayCal Contract")"
+  suite_soc2="$(count_suite_files "${config}" "PayCal Soc2")"
+  suite_timezone="$(count_suite_files "${config}" "PayCal Timezone")"
+  suite_accessibility="$(count_suite_files "${config}" "PayCal Accessibility")"
+  suite_exploits="$(count_suite_files "${config}" "PayCal Exploits")"
+
   local expected_badge="tests-${listed_tests}%20listed-blue"
   local expected_listed="- **${listed_tests_label} listed tests**"
-  local expected_files="- **${total_files} test files**"
-  local expected_categories="- **${unit_files} Unit**, **${integration_files} Integration**, **${contract_files} Contract**, **${soc2_files} SOC2**, **${exploit_files} Exploit**, **${manual_files} Manual**"
+  local expected_files="- **${total_files} repository test files**"
+  local expected_categories
+  if [[ "${config}" == "phpunit.public.xml" ]]; then
+    expected_categories="- **Active public suite file split:** **${suite_unit} Unit**, **${suite_integration} Integration**, **${suite_contract} Contract**, **${suite_timezone} Timezone**, **${suite_accessibility} Accessibility**"
+  else
+    expected_categories="- **Active suite file split:** **${suite_unit} Unit**, **${suite_integration} Integration**, **${suite_contract} Contract**, **${suite_soc2} SOC2**, **${suite_timezone} Timezone**, **${suite_accessibility} Accessibility**, **${suite_exploits} Exploit**"
+  fi
   local expected_config="via \`./vendor/bin/phpunit --configuration ${config} --list-tests\`"
 
   local ok=0

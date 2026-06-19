@@ -1,183 +1,279 @@
-# PayCal™
+# PayCal
 
-**Privacy-first payroll tracking with zero-knowledge encryption and passkey authentication**
+Privacy-first payroll, work-entry, reporting, and business-member payroll visibility.
 
-PayCal™ is a payroll tracking platform focused on transparency, accessibility, and strong privacy protections. Earnings data is encrypted client-side before it reaches the server, and authentication relies entirely on modern passkeys instead of passwords.
-
-The goal is simple: make pay easier to understand while keeping personal financial data private.
+PayCal helps workers understand pay, taxes, sites, pay periods, and business-shared work data while keeping sensitive work records behind passkey authentication, encrypted envelopes, explicit consent, and audit trails.
 
 Latest documented release: **v1.058.000**
 
-[![Test
-Suite](https://img.shields.io/badge/tests-2151%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2151%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
----
+## Contents
 
-# Table of Contents
-
-- Security Architecture
-- Core Features
+- Current Release
+- What PayCal Does
+- Security And Privacy Model
+- Business Protected Work Data
+- Product Surface
 - System Components
-- Test Coverage
-- Technology Stack
-- Getting Started
+- Transparency Hub
+- Localization
+- Test And Quality Gates
+- Developer Commands
 - Recent Releases
 - Documentation
-- Contributing
 - License
 
----
+## Current Release
 
-# Security Architecture
+Version `1.058.000` is a protected business work-data lifecycle hardening release.
 
-## Passkey Authentication
+The current platform boundary is:
 
-PayCal uses **WebAuthn / FIDO2 passkeys** instead of passwords.
+> Protected business member work rows may only originate from `BusinessProtectedDataAccess`.
 
-Key characteristics:
+This release closes the lifecycle around:
 
-- Passwordless authentication
-- Hardware-backed private keys (TPM, Secure Enclave, security keys)
-- Multi-credential support
-- Cross-device passkey registration
-- UX protections against accidental lockout (requires ≥2 passkeys before deletion)
+- actor authority
+- active business membership
+- target member consent
+- active org DEK wrap
+- encrypted envelope context
+- business visibility policy
+- protected read/report/export paths
+- requested, started, completed, failed, and denied audit events
+- revocation and cache purge behavior
+- architecture tests that block direct protected-row materialization outside the canonical gate
 
-Passkeys help protect against phishing and credential reuse attacks.
+Release tags:
 
----
+- `v1.058.000`
+- `private/v1.058.000`
+- `public/v1.058.000`
 
-## Zero-Knowledge Encryption
+## What PayCal Does
 
-Sensitive work entries are encrypted **in the browser before transmission**.  
-The server stores only encrypted data.
+PayCal includes:
 
-### Encryption Design
+- encrypted work-entry tracking
+- calendar-based time, site, and wage entry
+- Canadian payroll and tax calculations
+- daily, monthly, yearly, pay-period, and forecast reporting
+- CSV/TXT browser convenience exports
+- server-rendered XLSX/PDF report exports
+- business workspaces for shared payroll visibility
+- member, site, payroll, report, and audit business subpages
+- pricing and subscription gates for Public, Premium, and Business tiers
+- passkey-based account access
+- optional federated sign-in/linking support for configured identity providers
+- recovery-email and email-change verification flows
+- account data portability with export, prepare-import, and commit-import stages
+- accessibility, localization, transparency, and security documentation surfaces
 
-| Component | Description |
-|-----------|-------------|
-| DEK | 256-bit AES-GCM Data Encryption Key generated client-side |
-| KEK | Key Encryption Key derived from passkey credential ID and server salt |
-| Work entries | Encrypted with DEK using AES-GCM |
-| Key wrapping | DEK wrapped with KEK and stored server-side |
+## Security And Privacy Model
 
-### Security Characteristics
+### Authentication
 
-- Client-side encryption via Web Crypto API
-- Server stores only ciphertext envelopes
-- Authenticated encryption prevents tampering
-- Deterministic KEK derivation for passkey recovery
+PayCal uses WebAuthn/FIDO2 passkeys instead of passwords.
 
-### Threat Model Coverage
+Important account controls include:
 
-| Scenario | Protection |
-|---------|------------|
-| Network interception | TLS + encrypted payloads |
-| Database breach | Ciphertext-only storage |
-| Unauthorized access | Passkey authentication required |
-| Password attacks | Not applicable (no passwords) |
+- passwordless sign-in
+- multi-credential passkey support
+- account recovery by verified recovery email
+- email-change verification across old and new inboxes
+- step-up checks around sensitive mutations
+- rate limiting and structured denial handling
 
----
+### Encryption
 
-# Core Features
+Sensitive work data is stored as encrypted envelopes. The platform uses:
 
-## Work Entry Management
+- client-side Web Crypto
+- AES-GCM data encryption keys
+- passkey-derived key wrapping for personal work data
+- organization/business shared DEK wrap records for consented business visibility
+- envelope context validation before protected business rows can be read
 
-- Encrypted calendar interface for logging work hours
-- Configurable historical record locking (0–3 day grace period)
-- Multi-site wage tracking
-- Instant earnings preview calculations
+### Runtime Defenses
 
-## Payroll and Tax
+PayCal includes layered runtime controls:
 
-- Canadian federal and provincial tax support
-- CPP and EI deduction calculations
-- Pay period options:
-  - Weekly
-  - Bi‑weekly
-  - Semi‑monthly
-  - Monthly
-- CSV export for payroll processing
+- `RequestGuard` for request policy enforcement
+- `SecurityLog` and business audit events for structured traceability
+- `WorkEntryLockService` for historical record lock rules
+- `Guardian` for TrustedHTML and DOM sink governance
+- `ShadowTalon` for global PHP fault handling
+- `Phantom Wing` for client telemetry
+- `Lens` for controlled diagnostics and performance instrumentation
+- `EmailGarum` for transactional email coordination
+- `AriaEcho` for assistive UI narration
+- extension runtime manifests for billing, admin, SOC2, earnings, and business-signal surfaces
 
-## Security Controls
+The Superheroes system map is published at `/transparency/superheroes/`.
 
-- Redis-based rate limiting
-- Structured audit logging
-- Multi-layer historical record lock enforcement
-- Server‑validated encrypted work entries
-- Superheros privileged role governance for administrative and audit operations
+## Business Protected Work Data
 
-## Account Security and Recovery
+Business protected work data follows this lifecycle:
 
-- Recovery-email based account ownership verification
-- Passwordless email-change flow with dual inbox confirmation
-- Step-up sensitive-action guards for account mutation paths
-- 6-character verification code consistency across backend and UI
+```text
+identity -> membership -> consent -> DEK wrap -> envelope -> visibility -> read -> report/export -> audit -> revoke -> cache purge
+```
 
-## Accessibility and UX
+The canonical protected read path is:
 
-- WCAG 2.1 AA accessibility support
-- Keyboard navigation and screen reader compatibility
-- Internationalization (10 languages)
-- Optional audio feedback
-- Mobile‑friendly responsive design
-- Dark and light themes
-- Automated route-level WCAG regression scans via `npm run test:a11y:wcag`
-- Strict accessibility gate option via `npm run test:a11y:wcag:strict`
-- Automated reflow/text-spacing regression scans via `npm run test:a11y:reflow`
-- Strict reflow/text-spacing gate option via `npm run test:a11y:reflow:strict`
-- Automated theme contrast/focus matrix report via `npm run test:a11y:contrast`
-- Strict contrast gate option via `npm run test:a11y:contrast:strict`
-- ARIA contract suite (PHPUnit) via `npm run test:aria:unit`
-- ARIA behavior smoke suite (Playwright) via `npm run test:aria:smoke`
-- WCAG smoke sweep suite (Playwright) via `npm run test:wcag:smoke`
-- Lazy section loading on earnings view (DOMContentLoaded: -88.93% on real data)
-- HTTP/3 (QUIC) support with Alt-Svc advertisement
-- Network security header and transport policy article at `/transparency/network-capabilities/`
+```text
+BusinessProtectedDataAccess
+```
 
----
+Report/export and cache consumers must receive protected rows from that gate. The release includes regression coverage for:
 
-# System Components
+- forged business/member export payload rejection
+- generic PDF/XLSX personal-only export behavior
+- server-side report row re-read before XLSX/PDF rendering
+- payroll package isolation from the generic exporter
+- revoked member denial through stale cache paths
+- business workspace/member/team earnings cache invalidation
+- 100-member audit batch coherence
+- architecture-level blocking of raw `MemberWorkEntriesFetcher` business use
 
-PayCal organizes functionality into clearly scoped components.
+CSV/TXT/ZIP browser artifacts remain convenience exports. Evidence-grade server-rendered exports use authorized server-side rows.
 
-## Email and Verification
+## Product Surface
 
-| Component | Role |
-|-----------|------|
-| EmailGarum | Transactional email coordination |
-| EmailTransport | SMTP delivery layer |
-| EmailVerificationController | Verification workflow handling |
+### Personal Workspace
 
-## Security
+- calendar work-entry UI
+- sites and wages
+- pay periods
+- earnings dashboards
+- forecast workspace
+- reports under `/reports/`
+- settings, profile, security, passkeys, recovery email, and account lifecycle
 
-| Component | Role |
-|-----------|------|
-| ShadowTalon | Global PHP fault guardian with dedicated daily rotating logs |
-| Guardian | TrustedHTML protection for DOM operations |
-| RequestGuard | Request policy enforcement |
-| RateLimiter | Abuse prevention |
-| SecurityLog | Structured audit events |
-| WorkEntryLockService | Historical record locking |
+### Business Workspace
 
-## Observability and Client Core
+Business routes are under `/business/` and `/api/v1/businesses/...`.
 
-| Component | Role |
-|-----------|------|
-| Phantom Wing | Client telemetry and error collection |
-| Lens | Controlled diagnostics layer |
-| PayCalCore | Shared browser utilities |
+Current business subpages include:
 
----
+- dashboard
+- details
+- members
+- sites
+- payroll
+- reports
+- audit
+- compliance support pages
 
-# Test Coverage
+Business capabilities include:
+
+- create/list business workspaces
+- invite members
+- request access to discoverable businesses
+- approve/reject access requests
+- manage member roles and revocation
+- view member report dialogs through protected reads
+- export member XLSX/PDF reports through server-side authorization
+- link/create/unlink business-visible sites
+- manage payroll/site settings
+- bootstrap business encryption for active members
+- inspect business and member audit timelines
+
+### Admin, SOC, And Transparency
+
+The repository includes admin and governance surfaces for:
+
+- language editor and language dashboard
+- user roles
+- admin/security controls
+- SOC and SOC2 status pages
+- release ledger status
+- Transparency Hub articles
+
+## System Components
+
+Source code is organized primarily under:
+
+- `html/src/Domain/` for domain services, repositories, renderers, policies, and infrastructure adapters
+- `html/src/Controllers/` for HTTP/API controllers
+- `html/js/` for browser modules
+- `html/business/` for business workspace pages and partials
+- `html/extensions/` for runtime extension manifests, hooks, and overrides
+- `html/tests/` for PHPUnit suites
+- `strings/` for localization files
+- `docs/` and `html/transparency/` for internal and public documentation
+
+Key current domain components include:
+
+- `BusinessProtectedDataAccess`
+- `BusinessMemberReportExportService`
+- `BusinessMemberReportsService`
+- `BusinessDiscoveryService`
+- `BusinessWorkspaceCache`
+- `BusinessWorkspaceWarmer`
+- `BusinessWorkVisibilityPolicy`
+- `BusinessMemberReportCatalog`
+- `MemberWorkEntriesFetcher`
+- `EarningsPdf`
+- `Xlsx`
+- `SubscriptionGate`
+- `SubscriptionRepository`
+- `StripeBillingService`
+- `FederatedAuth`
+- `WorkEntry`
+- `WorkEntryLockService`
+- `SecurityLog`
+- `SystemAuditPolicy`
+- `html/extensions/runtime.php`
+
+## Transparency Hub
+
+Public transparency pages include articles for:
+
+- protected business work data: `/transparency/protected-work-data-2026-06/`
+- Superheroes system map: `/transparency/superheroes/`
+- business membership
+- members performance
+- network capabilities
+- authentication hardening
+- diagnostics
+- dependency CI
+- verification governance
+- SOC2
+- testing
+- security audit
+- taxes
+- accessibility
+
+## Localization
+
+PayCal currently ships 10 active language files:
+
+- `de`
+- `en`
+- `es`
+- `fr`
+- `hi`
+- `it`
+- `nl`
+- `pt`
+- `tl`
+- `tr`
+
+Localization source files live in `strings/`. Backup files such as `*.bak` are not counted as active languages.
+
+## Test And Quality Gates
 
 Suite inventory (as of 2026-06-19):
 
 - **2,151 listed tests**
-- **244 test files**
-- **135 Unit**, **62 Integration**, **35 Contract**, **8 SOC2**, **2 Exploit**, **2 Manual**
+- **244 repository test files**
+- **Active public suite file split:** **122 Unit**, **62 Integration**, **35 Contract**, **1 Timezone**, **12 Accessibility**
+- **SOC2 and Exploit suites are present in the tree but excluded from the public PHPUnit profile**
+- **2 Manual verification files**
 
 Latest validation snapshot (2026-06-19):
 
@@ -185,511 +281,128 @@ Latest validation snapshot (2026-06-19):
 - **0 failures**
 - **0 errors**
 - **PHPStan Level 9 clean**
-- **Public repository health gate clean**
+- **JavaScript security check clean**
+- **Public repository health gate clean** via `bash scripts/check-public-repo-health.sh /private/var/www/paycal`
 
 ### Test Categories
 
-| Type | Description |
-|------|-------------|
-| Unit tests (135 files) | Domain logic and service-layer behavior, including security, accessibility, and fault-surface safety checks |
-| Integration tests (62 files) | Full-stack workflows including encryption/passkey, auth/account lifecycle, email, and controller/API behavior |
-| Contract tests (35 files) | API and persistence boundary guarantees |
-| SOC2 tests (8 files) | Control, evidence, monitoring, and audit-readiness invariants |
-| Exploit tests (2 files) | Regression probes for known abuse and bypass classes |
-| Manual tests (2 files) | Operator verification scripts for complex scenarios |
+| Configured public suite | Files | Purpose |
+|------|------:|---------|
+| PayCal Unit | 122 | Domain, service, renderer, policy, and invariant behavior |
+| PayCal Integration | 62 | Controller/API flows, auth, encryption, account lifecycle, and cross-service behavior |
+| PayCal Contract | 35 | Stable API, route, manifest, persistence, and architecture boundaries |
+| PayCal Timezone | 1 | Timezone-sensitive pay-period behavior |
+| PayCal Accessibility | 12 | ARIA, WCAG, keyboard, and accessibility contracts |
 
-Current inventory reflects the active PHPUnit suite layout in `phpunit.public.xml` as re-evaluated on 2026-06-19 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`.
+Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-06-19 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes public-excluded SOC2/Exploit files and the two manual verification files.
 
-### Run Tests
+## Developer Commands
+
+Run commands from the repository root.
+
+### PHP Quality
 
 ```bash
-cd html
+composer run phpstan
+composer run phpstan:strict
+composer run format:check
+composer run quality:semantic-diff
+composer run security:audit
+```
+
+### PHP Tests
+
+```bash
 composer run test
+composer run test:quick
 composer run test:unit
 composer run test:integration
 composer run test:contract
-composer run test:quick
-composer run test:junit
-composer run test:coverage
+composer run test:soc2
+composer run test:compliance
 composer run test:knockknock
 composer run test:affected
 ```
 
-Direct PHPUnit equivalents:
+Useful direct PHPUnit commands:
 
 ```bash
-cd html
-./vendor/bin/phpunit --configuration phpunit.xml tests/Unit tests/Integration tests/Contract
-./vendor/bin/phpunit --configuration phpunit.xml --testsuite "PayCal Unit"
-./vendor/bin/phpunit --configuration phpunit.xml --testsuite "PayCal Integration"
-./vendor/bin/phpunit --configuration phpunit.xml --testsuite "PayCal Contract"
-./vendor/bin/phpunit --configuration phpunit.xml --log-junit ../junit.xml tests/Unit tests/Integration tests/Contract
+vendor/bin/phpunit --configuration phpunit.xml
+vendor/bin/phpunit --configuration phpunit.xml --testsuite "PayCal Unit"
+vendor/bin/phpunit --configuration phpunit.xml --testsuite "PayCal Integration"
+vendor/bin/phpunit --configuration phpunit.xml --testsuite "PayCal Contract"
+vendor/bin/phpunit --configuration phpunit.xml --group soc2
 ```
 
-Live email template sweep (opt-in, real SMTP):
+### JavaScript And Accessibility
 
 ```bash
-cd html
-PAYCAL_RUN_LIVE_EMAIL_SWEEP=1 PAYCAL_LIVE_EMAIL_RECIPIENT=you@example.com \
-  ./vendor/bin/phpunit --configuration phpunit.xml tests/Integration/LiveEmailTemplateSweepTest.php
-```
-
-Optional UI smoke tests (manual, non-blocking):
-
-```bash
-# one-time browser install
-npm run test:smoke:ui:install
-
-# headless smoke run against local/dev URL
+npm run test:js
 npm run test:smoke:ui
-
-# headed mode for interactive debugging
-npm run test:smoke:ui:headed
+npm run test:aria:unit
+npm run test:aria:smoke
+npm run test:wcag:smoke
+npm run test:a11y:all
+npm run test:a11y:contrast
 ```
 
-Notes:
-
-- Smoke specs that touch authenticated pages assume an already-authenticated browser session.
-- Not part of git hooks and not required for PR merge gates.
-- Override target host with `PAYCAL_SMOKE_BASE_URL`, for example:
-  - `PAYCAL_SMOKE_BASE_URL=https://dev.paycal.local npm run test:smoke:ui`
-
-Static analysis:
-
-- PHPStan Level 9
-- Zero baseline suppressions
-- Pre‑commit validation
-
----
-
-# Technology Stack
-
-## Backend
-
-- PHP 8.4+
-- Redis 7.x
-- WebAuthn via `lbuchs/WebAuthn`
-
-## Frontend
-
-- Vanilla JavaScript
-- Web Crypto API
-- WebAuthn API
-- Standards‑based CSS
-
-## Infrastructure
-
-- Redis‑backed sessions
-- Strict Content Security Policy
-- Git‑based deployment workflows
-
----
-
-# Getting Started
-
-## Requirements
-
-- PHP 8.4+
-- Redis 7.x
-- Modern browser with WebAuthn support
-
-## Installation
-
-```bash
-git clone https://github.com/PayCal-Technologies/paycal.git
-cd paycal/html
-
-composer install --no-dev --optimize-autoloader
-
-cp config.example.php config.php
-# edit Redis settings
-
-./vendor/bin/phpunit -c phpunit.xml
-
-php -S localhost:8000
-```
-
-## Native Quick Start (Recommended)
-
-```bash
-cd <REPO_ROOT>
-
-# start local stack
-bash scripts/native-up.sh
-
-# run diagnostics
-bash scripts/native-diagnostics.sh
-
-# open interactive helper menu
-bash scripts/native-menu.sh menu
-```
-
-Useful URLs:
-
-- `https://dev.paycal.local/auth/`
-
-Useful native commands:
-
-```bash
-# stop local native services
-bash scripts/native-down.sh
-
-# repair redis launchagent conflicts if needed
-bash scripts/native-fix-redis-launchagent.sh
-```
-
-## First Run
-
-1. Navigate to `/auth/?auth_tab=register`
-2. Create an account using a passkey
-3. The browser generates a DEK client‑side
-4. The DEK is wrapped using a passkey‑derived KEK
-5. Begin logging work hours
-
----
-
-# Recent Releases
+## Recent Releases
 
 ## v1.058.000 (2026-06-19)
 
 **Release Focus:** Protected business work data lifecycle hardening
 
 - Hardened PayCal Business protected work data so business member work rows can only be materialized through the canonical protected access gate.
+- Closed legacy export bypasses for forged business/member markers and moved XLSX/PDF exports to server-side authorized row rendering.
 - Enforced actor authority, active membership, consent, DEK wrap, encrypted envelope, business visibility, audit, revocation, and cache behavior with focused regression tests.
-- Closed legacy business export bypass paths and labeled CSV/TXT as browser convenience artifacts while preserving server-authorized PDF/XLSX exports.
-- Published a public Transparency Hub article for the protected-work-data boundary release.
+- Added architecture tests preventing direct business use of raw protected work fetchers.
+- Published the protected-work-data Transparency Hub article.
 - Verified with full PHPUnit: 2,274 tests, 18,892 assertions, 31 skipped.
-
-- See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
-
 
 ## v1.057.006 (2026-06-15)
 
 **Release Focus:** Mobile sidebar hamburger icon visibility fix
 
-- See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
-
+- Restored mobile sidebar toggle visibility across compact layouts.
 
 ## v1.057.005 (2026-06-15)
 
 **Release Focus:** Mobile sidebar navigation and compact page-title bar
 
-- See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
-
+- Refined mobile navigation behavior and compact page-title presentation.
 
 ## v1.057.004 (2026-06-15)
 
-**Release Focus:** docs(governance): reframe GitHub as passive storage, local CI authoritative
+**Release Focus:** Governance documentation cleanup
 
-- See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
-
+- Reframed GitHub as passive storage and local CI as the authoritative release gate.
 
 ## v1.057.000 (2026-06-12)
 
 **Release Focus:** Business IA launch, three-tier billing, Argus observability, trust/listing moderation, and members workspace polish
 
-- Shipped Public / Premium / Business billing tiers with profile billing matrix UX, Stripe checkout integration, and tier-gated business capabilities.
-- Added business trust, visibility, and listing-submission moderation with admin review console, search-index eligibility, and audit ledger events.
-- Introduced Argus observability control panel with trace packages, investigation presets, capture scope, mandatory expiry, `trace_id` timelines, and admin toasts.
-- Rebuilt business workspace IA (organization → business rename) with governance, payroll, sites, reports, members, and audit subpages plus pending-members accordion.
-- Consolidated earnings under `/reports/`, redesigned forecast workspace, expanded i18n across business/calendar/earnings surfaces, and hardened members grid Redis cache performance.
-- Documented production deploy hygiene: preserve server `.env`, sync vendor via `composer install`, reload services after promotion.
+- Shipped Public, Premium, and Business billing tiers.
+- Rebuilt business workspace IA with dashboard, details, members, sites, payroll, reports, and audit pages.
+- Added business trust, visibility, listing submission moderation, and members grid performance work.
+- Expanded transparency, localization, diagnostics, and deployment reliability documentation.
 
-See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
+Historical release detail lives in:
 
-## v1.056.000 (2026-06-07)
+- `docs/CHANGELOG.md`
+- `docs/v1.changelog.md`
 
-- Strengthened organization earnings reliability: added site-resolution diagnostics, fallback SLO warnings, unlinked-site guard rails, and contract tests to prevent silent zero-value team rows when org-site links are misconfigured.
-- Expanded organization governance surfaces: shipped `/soc` auditor portal with `SUPERADMIN` gate, introduced `AUDITOR` role, and added `/admin/user-roles/` management workflows.
-- Completed platform-wide accessibility/i18n pass for org and earnings experiences: ARIA semantics updates, modal/tab contracts, and localized status/clipboard messaging.
-- Enforced stricter frontend CSP posture: removed inline styles from sites earnings skeleton and added regression tests preventing inline style attribute reintroduction.
-- Added ownership-model consolidation policy and resolver infrastructure for user/org site linkage normalization, with diagnostics-first observability in earnings.
-- Continued security and SOC2 operational hardening: webhook security model tightening, telemetry/privacy threshold updates, and backup/reliability evidence improvements.
+## Documentation
 
-## v1.055.000 (2026-05-12)
+Useful documentation entry points:
 
-- Completed two rounds of deep security sweeps: host-header injection, open redirect, CORS enforcement, TOCTOU race conditions, IP-spoofing, dev-flag guards, chain-hash integrity, API route-map disclosure, exception-detail leakage, and rate-limiter key upgrade (MD5 → sha256).
-- Centralized core security headers into `Security::sendCoreSecurityHeaders()`; replaced `exec()` with `proc_open` argument-array in SOC2 script runner; scoped calendar work clipboard from sessionStorage to in-memory IIFE.
-- Hardened Redis layer: replaced all non-atomic `hset+expire` with `hsetex`, added `pconnect`, atomic `GETDEL` token consumption, `WAIT` replica confirmation, and fixed TOCTOU counter/dedup races.
-- Added admin audit trail, mirrored 13 org governance events into TheLedger, and converted SOC2 dashboard tables to shared DataGrid component.
-- Added `/premium` upgrade landing page with outcome-focused copy and updated billing profile UX.
-- Migrated all hardcoded `px` font-sizes to rem design tokens across calendar, datagrid, common, help, organizations, and settings CSS; renamed density preference to Spacing throughout.
-- Added language editor and audit dashboard under `/admin/`; localized auth-recover, help, organizations, profile, security, and sites pages.
-- Added ContentView doc-page text/PDF view system and May 2026 transparency hardening disclosure.
-- Upgraded PHPUnit 12 → 13; replaced `vlucas/phpdotenv` with first-party `Infrastructure\Env\Dotenv`; removed unused packages; hardened GitHub Actions (SHA pinning, permissions, daily dependabot, PHPStan CI job, gitleaks scanning).
+- `docs/CHANGELOG.md`
+- `docs/v1.changelog.md`
+- `docs/internal/SITE_OWNERSHIP_CONSOLIDATION_POLICY.md`
+- `docs/security/ORG_SHARED_ENCRYPTION_IMPLEMENTATION_SPEC.md`
+- `docs/security/ORG_SHARED_ENCRYPTION_TASK_BREAKDOWN.md`
+- `docs/engineering/formatter-policy.md`
+- `html/transparency/`
 
-## v1.054.000 (2026-05-04)
+## License
 
-- Introduced SOC2 v2 DSL pipeline with CC1–CC9 control test suites, monthly evidence bundle (2026-04), Type I packet index, and public Trust Hub page (`/security/`).
-- Enforced deterministic E2EE week reconciliation in calendar to prevent stale split fields from contaminating range totals.
-- Migrated all `innerHTML` assignments in admin/earnings/organizations JS files to `Guardian.setHTML()` / `textContent = ''` to satisfy JS security gate.
-- Fixed breadcrumb contrast violation for light-primary themes: `color: white` → `color: var(--button-primary-text, white)`.
-- Added Transparency Hub link to `/help/` intro and per-section read-more labels on `/transparency/` hub for accessibility navigation compliance.
-- Updated ESLint config: `caughtErrorsIgnorePattern` for intentionally-ignored catch parameters; removed stale imports and unused variables across JS files.
-
-## v1.053.000 (2026-04-18)
-
-- Added live calendar earnings hover tooltip showing per-day pay totals inline on the calendar grid.
-- Applied breadcrumb styling enhancements: ticket-stub shaped borders, clip-path fix removing unintended left notches on leading elements, and increased box-shadow prominence (2px → 3px).
-
-## v1.052.000 (2026-04-15)
-
-- Added safe formatter release guardrails: `format:check`, `format:fix`, and `quality:semantic-diff` composer scripts, plus `scripts/paycal checks:semantic-diff` support.
-- Added `scripts/check-semantic-diff.php` to detect suspicious formatter-like rewrites such as guard collapse, temp-var narrowing removal, call-signature mutation, and control-flow simplification.
-- Hardened `scripts/hooks/pre-commit.sh` with staged PHP lint, staged semantic diff scanning, existing PHPStan/docblock gates, safe formatter dry-run enforcement, and reliable temp-file cleanup.
-- Added `docs/engineering/formatter-policy.md` as the canonical policy document for allowed autofix, forbidden autofix, protected shapes, and review rules.
-- Wired formatter policy and semantic diff enforcement into GitHub Actions for PHPUnit and PHPStan so CI enforces the same style-vs-semantics boundary as local hooks.
-
-## v1.051.000 (2026-04-11)
-
-- Added settings page jump-navigation with anchor links to all 6 panels (Calendar, Style, Audio, Passkeys, Security, Data Portability) using token-based CSS variables.
-- Added import commit confirmation gate: "Commit Import" now opens a confirmation dialog displaying staged record counts before destructive write.
-
-## v1.050.000 (2026-04-11)
-
-- Added account data portability (export/import) to settings page with checksummed schema-versioned JSON payloads, staging via Redis, and three supporting integration tests.
-- Removed legacy `wrapped_dek_passkey` single-field migration; tightened DEK credential resolution to require active session credential match.
-- Hardened Sync Dev script with split `LOCAL_PATH`/`REMOTE_PATH` and corrected `.vscode/tasks.json` relative path.
-- Applied PHPStan Level 9 fixes across `SettingsController`, `EarningsController`, `SitesController`, and `Earnings`.
-
-## v1.049.000 (2026-04-09)
-
-- Expanded transparency governance surfaces by adding publication timestamps across hub and article pages in all maintained locales, with matching styling updates for consistent chronology rendering.
-- Hardened verification resend reliability and observability with explicit pipeline/stage logs, transport-failure security logs, Redis-timeout classification, configured-sender enforcement, and code-only fallback when link email delivery fails.
-- Improved account and shell UX with verification resend cooldown alignment, busy-state feedback treatment, authenticated-header cleanup, and navigation/language tray refinements.
-- Advanced organizations workflows with role-scope/manager-control refinements, notification and panel UX updates, service/controller hardening, and synchronized English/French string updates.
-- Consolidated earnings parity and dashboard follow-through across backend calculations, controller/data flow cleanup, extension hook parity, view/template updates, CSS/JS adjustments, and targeted integration/unit coverage expansions.
-- Completed release hygiene synchronization for `VERSION`, `README.md`, `docs/CHANGELOG.md`, `docs/v1.changelog.md`, and `ai-notes/PAYCAL_SOURCE_OF_TRUTH.md`.
-- Recomputed live test inventory from the active suite and filesystem: **1,479 listed tests** across **161 test files** (`70 Unit / 53 Integration / 30 Contract / 2 Manual`).
-- Validated this release line with full PHPUnit, PHPStan level 9 strict analysis, JS quality gate, and full accessibility stack.
-
-## v1.048.000 (2026-04-07)
-
-- Added consent-bound organization DEK wrap lifecycle enforcement, including membership/consent validation, wrap revocation, and strict org envelope metadata validation paths.
-- Expanded earnings runtime and UX behavior with extension follow-through (historical intelligence/piegraphs), theme parity cleanup, localized numeric formatting, and export hardening (REF code generation, route/JSON validation, audit logging).
-- Added passkey mismatch recovery flow and related auth error-path fixes; migrated organizations delegate semantics to member across backend/UI/tests/strings.
-- Added opt-in diagnostics controls (default-off), polished settings/admin/shell UX (footer rhythm, nav ordering, keyboard shortcut labels), and updated branding with the new PayCal shield treatment in header and home icon surfaces.
-- Added calendar root month permalinks, updated public media delivery to YouTube embed/frame-source flow, and captured routing/ops follow-through (FastCGI blog path notes and private KnockKnock report routing defaults).
-- Strengthened release quality controls with docblock gate enforcement and policy/hardening updates, then validated release commits with PHPStan level 9 and focused suite execution.
-
-## v1.047.001 (2026-04-03)
-
-- Added compact sidebar interaction refinements for small screens, including outside-content click collapse behavior and tightened spacing cadence.
-- Improved footer presentation with centered trademark copy and balanced wrapping treatment.
-- Hardened language switcher flyout behavior so full locale options remain reachable near viewport edges.
-- Added `100svh` minimum block sizing for footer shell behavior on small viewport-height devices.
-- Captured server-side IP address and browser/user-agent details on all contact submissions to aid spam triage.
-
-## v1.047.000 (2026-04-03)
-
-- Expanded localization across auth, blog, help, transparency, and shared navigation with `?l=` language override/propagation, translated blog article bodies, and localized verification UI modules.
-- Completed extension runtime separation with isolated bootstrap/hook/capability bridges, override scaffolding under `html/extensions/`, admin extension-boundary extraction, and published extension-system transparency/docs.
-- Added Stripe webhook queue processing, queue monitoring/alerting, richer webhook failure telemetry, DataGrid-backed Stripe admin tables, and Stripe billing smoke coverage.
-- Added browser-driven test administration with `/api/tests/run.php` and `/api/tests/results.php`, live result streaming/download UI, stop/cancel controls, and `PHP_BINARY`/workspace-root execution hardening.
-- Hardened calendar editor recovery/DEK bootstrap plus auth, recovery, verification, and organization failure handling, and refreshed native ops/health-monitor tooling.
-
-## v1.046.000 (2026-03-31)
-
-- Launched markdown-backed blog system with clean routes: `/blog/`, `/blog/{slug}/`, and `/blog/tags/{tag}/`.
-- Added `BlogRepository` parsing/rendering pipeline for frontmatter, snippets, filtering, pagination, and previous/next navigation.
-- Added filesystem tag indexes (`html/blog/tags/*.tag`) that map tags to markdown filenames for deterministic tag filtering.
-- Added shared-shell integration (header/footer navigation + page mapping) and blog-specific stylesheet endpoint.
-- Added backward-compatible redirect from legacy `?slug=` blog URLs to canonical clean slug URLs.
-
-## v1.045.000 (2026-03-31)
-
-- Hardened redirect/request boundaries and billing mutation security behavior in active billing flows.
-- Tightened CSRF-sensitive billing controller validation and aligned core billing JS request handling.
-- Updated localization strings to keep billing/security state messaging consistent with backend enforcement.
-- Published `docs/security/APPSEC_SWEEP_2026-03-31.md` with security sweep scope, findings, and closure evidence.
-
-## v1.044.002 (2026-03-26)
-
-- Re-evaluated and documented the current PHPUnit suite state: **1,246 tests**, **7,018 assertions**, **26 skipped**, with runner status surfaced (`1 warning`, `8 deprecations`).
-- Refreshed README test inventory to match current suite structure (**124 files**: `62 Unit / 52 Integration / 8 Contract / 2 Manual`).
-- Added release documentation for ShadowTalon runtime observability enhancement: structured `[ShadowTalonRef]` capture and Lens error telemetry fanout.
-- Synchronized release metadata for the `1.044.002` patch line (`VERSION`, README, rolling changelogs).
-
-## v1.044.001 (2026-03-26)
-
-- Completed organization access-request lifecycle end-to-end: request submission, owner listing, approve/reject routes, and owner-facing editor actions.
-- Added organization signal fanout seam (`OrganizationSignalHooks`) so core emits normalized events while optional extension hooks can persist owner-scoped signal rows.
-- Hardened organization cleanup to remove access-request records, requester/org indexes, and active requester pointers on organization deletion.
-- Added service and controller integration coverage for access-request submit/approve/reject flows and response-contract behavior.
-
-## v1.043.021 (2026-03-25)
-
-- Consolidated profile and billing UX flows with cleaner free vs premium state handling and stricter network response contracts.
-- Removed a legacy `innerHTML` decode sink in organizations JS to keep security sink enforcement green.
-- Hardened account deletion confirmation by requiring `DELETE MY ACCOUNT` consistently across UI and backend validation.
-- Updated profile/organization language to reflect profile-linked external organizations and simplified request/delegate controls.
-- Completed `/mis` release hygiene sync across version/changelog/README/source-of-truth metadata.
-- Added release/governance discovery links on transparency, help, policies, and about pages.
-
-## v1.043.001 (2026-03-24)
-
-- Release metadata and transparency synchronization for the `1.043.x` line.
-- Added public transparency articles for testing framework and backend/framework change tracking.
-- Updated security-audit and verification-governance transparency pages to the 2026-03-24 verification state.
-- Documented Guardian sanitizer test refactor as configuration-anchored coverage.
-
-## v1.043.000 (2026-03-24)
-
-- Expanded security test coverage for CSP report ingestion, capability token lifecycle controls, and Guardian hardening.
-- Added `AccessibilityHelper` domain utilities for ARIA patterns, screen-reader support, and keyboard/focus behavior.
-- Finalized security audit handoff updates for controls E-I and aligned release evidence artifacts.
-
-## v1.042.000 (2026-03-24)
-
-- Completed BRS-01 through BRS-05 security hardening: CSP nonce/strict-dynamic policy, capability tokens, credential bridge removal, runtime integrity monitor, and Guardian sanitizer expansion.
-
-## v1.041.000 (2026-03-23)
-
-- Security phase-closure PASS release with lifecycle hardening and transparency publication.
-
-## v1.039.000 (2026-03-23)
-
-- Consolidated internal working notes under repo-root `ai-notes/`, moved test/reference markdown out of `html/`, and aligned release/source-of-truth documentation to the new layout.
-- Simplified public authentication routing so `/auth/` is the single sign-in and registration entry point, with registration handled through `/auth/?auth_tab=register` and legacy shims removed.
-- Hardened the live `html/internal/opcache-reset/` maintenance endpoint to require an authenticated admin user and `POST` requests.
-
-## v1.038.001 (2026-03-23)
-
-- Release cleanup sweep for the `1.038.x` line: bumped `VERSION`, synchronized README/changelog metadata, and published a new live source-of-truth note under `ai-notes/`.
-- Refreshed documented test inventory to **1,134 listed tests** across **104 files** (`52 Unit / 46 Integration / 4 Contract / 2 Manual`).
-- Updated WCAG contrast reporting totals to **2,040 checks**, with all **68 themes** still passing at **0 failures** and **0 unresolved**.
-- Refreshed dev verification tooling through Composer lock updates, including `infection/infection` `^0.32` plus current locked `phpstan/phpstan` and `phpunit/phpunit` patch versions.
-
-## v1.037.000 (2026-03-22)
-
-- Introduced Organizations model replacing Teams: per-scope access control, invite lifecycle, org creation/site-linking/audit trail, personal org provisioned on first passkey login, and org invite email templates. All 13 i18n files updated. `TeamController`, `Team`, `TeamService` and all `TEAM_*` constants removed.
-- Added six role-based radius design tokens (`--radius-button/control/panel/dialog/cell/article`) applied across all 66 themes so corner shapes can be tuned per-role independently.
-- Normalized dialog system: 32px circular close button, shared `data-dialog-close-on-backdrop` backdrop delegation, keyboard shortcuts modal restructured to 44rem cap with centered close button, close labels standardized to "Close" across all modals.
-- Converted calendar entry modal to native `<dialog>` with Escape/backdrop/button delegation; replaced year button list with `<datalist>` year picker; added `ensureDialogAria()` auto-wiring for dialogs missing ARIA attributes.
-
-## v1.036.002 (2026-03-20)
-
-- Release hygiene sweep for the `1.036.x` line: synchronized `VERSION`, README release notes, rolling changelog, and Git tags.
-- Ignored generated KnockKnock test output so local verification artifacts no longer dirty the working tree.
-
-## v1.036.001 (2026-03-20)
-
-- Contact workflow refresh with shared templating, safer keyboard handling, clearer localized support copy, and improved cross-theme form contrast.
-- Outbound email standardization with repo-level template resolution fixes, professionalized HTML/text templates, and automated render plus live-send sweep coverage.
-
-## v1.035.000 (2026-03-19)
-
-- Redis Tier-0 reliability controls and release groundwork.
-- Passwordless email-change flow with recovery-email verification and dual code checks
-- Recovery-email endpoint/template completion with 6-character code standardization
-- Settings/admin UX refinements (Edit Details modal, passkey panel polish, admin security dashboards)
-- No-cache hardening for `/settings` and settings page assets to prevent stale sensitive UI
-
-## v1.034.000 (2026-03-18)
-
-- Release cut and documentation alignment for the 1.034 line.
-
-## v1.033.000 (2026-03-17)
-
-- Account security and UX hardening.
-
-## v1.032.000 (2026-03-09)
-
-Metrics and layout infrastructure
-
-- Admin metrics dashboard and public transparency metrics page
-- Session lifecycle metrics and privacy-bound telemetry rollups
-- Public/authenticated reusable layout system with strict CSP separation
-
-## v1.030.000 (2026‑03‑09)
-
-Email and verification improvements
-
-- Email system refactored (`EmailTransport`, `EmailGarum`)
-- Verification flow improvements
-- Redis TTL handling fixes
-- Guardian TrustedHTML integration
-
-## v1.029.000 (2026‑03‑07)
-
-Encrypted‑only enforcement
-
-- Removed plaintext fallback paths
-- Server‑side envelope validation
-- Improved IP normalization for logs and rate limiting
-
-## v1.028.000 (2026‑03‑07)
-
-Security improvements
-
-- Lock boundary caching fixes
-- Telemetry endpoint hardening
-- Repository mutation gateway
-
-Full changelog:
-
-- docs/CHANGELOG.md
-- docs/v1.changelog.md
-
----
-
-# Documentation
-
-| Document | Description |
-|----------|-------------|
-| ENCRYPTION_SECURITY_AUDIT.md | Encryption architecture |
-| ARCHITECTURE.md | System design |
-| INTEGRITY_ARCHITECTURE.md | Data integrity guarantees |
-| RATE_LIMITING_ARCHITECTURE_GUIDE.md | Rate limiting design |
-| docs/DEVELOPER_PHILOSOPHY.md | Developer-first architecture and implementation philosophy |
-| docs/RELEASE_NOTES_1_043_021.md | Public release notes for the profile, billing, and governance discoverability release |
-| docs/RELEASE_NOTES_1_043_000.md | Public release notes for security and testing workstreams |
-| docs/SECURITY_TRANSPARENCY_REPORT_Q1_2026.md | Public Q1 2026 security and transparency posture report |
-
-Developer references:
-
-- docs/DEVELOPER_PHILOSOPHY.md
-- CONTRIBUTING.md
-- coding-standards.md
-- GIT_VERSIONING_QUICK_REFERENCE.md
-- .github/skills/mis/SKILL.md (`/mis` slash command for release hygiene sweeps)
-
----
-
-# Contributing
-
-Contributions are welcome.
-
-General expectations:
-
-- PHP 8.4 strict typing
-- PHPStan Level 9 compliance
-- Accessible HTML
-- CSP‑compatible styling
-- Framework‑free JavaScript
-- Redis persistence conventions
-
-Development workflow:
-
-```bash
-composer install
-composer run test
-composer run phpstan
-composer run cs-fix
-```
-
----
-
-# License
-
-Copyright (C) 2026 PayCal Technologies Inc. All rights reserved.
-
-See **LICENSE.txt** for full terms.
-
----
-
-**PayCal™** · PayCal Technologies Inc.
-
-Privacy‑first payroll tracking designed to make pay easier to understand while preserving strong data privacy.
-
-PayCal is a trademark of PayCal Technologies Inc. pending registration (CIPO).
+Proprietary. See `LICENSE.txt`.
