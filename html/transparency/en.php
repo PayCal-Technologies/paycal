@@ -224,42 +224,42 @@ require_once HTML.'/header.php';
         </section>
 
         <section class="doc-section">
-          <h2>Business Membership and Role Philosophy</h2>
+          <h2>Business Connections and Role Philosophy</h2>
 
-          <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time></p>
+          <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time></p>
           <p>
-            This article explains the Business &lt;-&gt; Member model, role policy changes,
-            and the capability/scope philosophy used to keep collaboration permissions auditable.
+            This article explains business Connections, role policy, membership state,
+            consent boundaries, and the capability/scope philosophy used to keep collaboration auditable.
           </p>
           <ul class="doc-fact-list">
-            <li>Documents relationship lifecycle semantics for invites, access requests, approval, and revocation</li>
+            <li>Documents connection lifecycle semantics for invites, access requests, approval, and revocation</li>
+            <li>Separates identity links from membership, consent, and explicit grants</li>
             <li>Publishes current role posture (owner, manager, contributor, member, viewer)</li>
-            <li>Clarifies the principle of backend policy as source of truth with UI as projection only</li>
           </ul>
           <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/business-membership/'); ?>"><?php echo $readMoreLabel; ?></a></p>
         </section>
 
         <section class="doc-section">
-          <h2>How PayCal Keeps Business Membership Accurate and Auditable</h2>
+          <h2>How PayCal Keeps Business Connections Accurate and Auditable</h2>
 
-          <p class="doc-article-meta">Published: <time datetime="2026-06-18">2026-06-18</time></p>
+          <p class="doc-article-meta">Published: <time datetime="2026-06-18">2026-06-18</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time></p>
           <p>
-            This article explains how PayCal separates canonical relationship lifecycle records
+            This article explains how PayCal separates canonical connection lifecycle records
             from derived Redis indexes, how we found and repaired index drift, and why ownership
             authority is reported rather than auto-fixed.
           </p>
           <ul class="doc-fact-list">
-            <li>Relationship hashes are canonical; active member and pending workflow indexes are derived</li>
+            <li>Connection hashes are canonical; active member and pending workflow indexes are derived</li>
             <li>Pending, revoked, rejected, expired, and withdrawn users are not treated as active members</li>
             <li>The audit/fix command repaired known Redis index drift and ended with drift=0, owner=0, other=0</li>
           </ul>
-          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/redis-relationship-reconciliation-2026-06/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/redis-connections-reconciliation-2026-06/'); ?>"><?php echo $readMoreLabel; ?></a></p>
         </section>
 
         <section class="doc-section">
           <h2>How PayCal Hardened Protected Business Work Data</h2>
 
-          <p class="doc-article-meta">Published: <time datetime="2026-06-19">2026-06-19</time></p>
+          <p class="doc-article-meta">Published: <time datetime="2026-06-19">2026-06-19</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time></p>
           <p>
             This article explains PayCal's June 2026 protected-work-data boundary
             hardening: business member work rows now originate through one canonical
@@ -272,6 +272,24 @@ require_once HTML.'/header.php';
             <li>Full release verification passed: 2,274 tests and 18,892 assertions</li>
           </ul>
           <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/protected-work-data-2026-06/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
+          <h2>Settings Navigation and Appearance Remediation</h2>
+
+          <p class="doc-article-meta">Published: <time datetime="2026-06-19">2026-06-19</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time></p>
+          <p>
+            This article explains PayCal's June 2026 remediation of settings
+            sidebar behavior, grouped navigation, accent color controls,
+            notification position semantics, and contrast-tested settings nav
+            states.
+          </p>
+          <ul class="doc-fact-list">
+            <li>Sidebar hover now uses bounded intent timing with cancellation on pointer exit, document leave, and window blur</li>
+            <li>Accent selection now uses 16 spectrum swatches, shared accent tokens, popovers, and a live preview window</li>
+            <li>Regression coverage now guards controller normalization, rendered settings controls, sidebar contracts, and accent tokens</li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/settings-remediation-2026-06-19/'); ?>"><?php echo $readMoreLabel; ?></a></p>
         </section>
 
         <section class="doc-section">

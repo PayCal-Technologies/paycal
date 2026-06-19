@@ -215,6 +215,20 @@ final class SettingsPageTest extends TestCase
   }
 
   #[Test]
+  public function navProximityDelayHasConservativeSliderValues(): void
+  {
+    $fieldName = 'nav_proximity_delay_ms';
+    $min = 200;
+    $max = 3000;
+    $step = 200;
+
+    $this->assertSame(200, $min, "{$fieldName} slider minimum should be 200ms");
+    $this->assertSame(3000, $max, "{$fieldName} slider maximum should be 3000ms");
+    $this->assertSame(200, $step, "{$fieldName} slider step should be 200ms");
+    $this->assertSame('400', \PayCal\Domain\UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY_DELAY_MS);
+  }
+
+  #[Test]
   public function languagePickerFieldName(): void
   {
     $fieldName = 'language';

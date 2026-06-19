@@ -392,22 +392,24 @@ final class SettingsControllerTest extends TestCase
       'nav_proximity' => 'ON',
       'nav_overlay' => 'overlay',
       'nav_proximity_px' => '250',
+      'nav_proximity_delay_ms' => '600',
     ]);
 
     $this->assertSame('on', $result['nav_proximity']);
     $this->assertSame('overlay', $result['nav_overlay']);
     $this->assertSame('250', $result['nav_proximity_px']);
+    $this->assertSame('600', $result['nav_proximity_delay_ms']);
   }
 
   #[Test]
   public function normalizeStyleKeepsValidToastPreferences(): void
   {
     $result = $this->normalizeStyle([
-      'toast_position' => 'upper-right',
+      'toast_position' => 'top-right',
       'toast_font_size' => '3',
     ]);
 
-    $this->assertSame('upper-right', $result['toast_position']);
+    $this->assertSame('top-right', $result['toast_position']);
     $this->assertSame('3', $result['toast_font_size']);
   }
 

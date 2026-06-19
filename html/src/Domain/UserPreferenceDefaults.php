@@ -60,8 +60,8 @@ final class UserPreferenceDefaults
    */
   public const DEFAULT_HELP_POPUP_TIMEOUT_SECONDS = '8';
 
-  /** Toast anchor: upper-left, upper-center, upper-right, lower-left, lower-center, lower-right. */
-  public const DEFAULT_TOAST_POSITION = 'lower-center';
+  /** Toast anchor: top-left, top-center, top-right, bottom-left, bottom-center, bottom-right. */
+  public const DEFAULT_TOAST_POSITION = 'bottom-center';
 
   /** Toast width preset: tiny, narrow, normal, large, larger, full-width. */
   public const DEFAULT_TOAST_WIDTH_PRESET = 'normal';
@@ -77,6 +77,9 @@ final class UserPreferenceDefaults
 
   /** Sidebar proximity trigger distance in px (0–600). */
   public const DEFAULT_NAV_PROXIMITY_PX = '200';
+
+  /** Sidebar proximity trigger delay in ms (200–3000). */
+  public const DEFAULT_NAV_PROXIMITY_DELAY_MS = '400';
 
   /**
    * Default primary navigation position.
@@ -154,7 +157,25 @@ final class UserPreferenceDefaults
   /** Default calendar view: month, week, or pay_period. */
   public const DEFAULT_CALENDAR_DEFAULT_VIEW = 'month';
 
-  public const DEFAULT_ACCENT_PRESET = 'default';
+  public const DEFAULT_ACCENT_PRESET = 'blue';
+  public const ACCENT_PRESETS = [
+    'red' => ['label' => 'Red', 'hex' => '#EF4444'],
+    'orange' => ['label' => 'Orange', 'hex' => '#F97316'],
+    'amber' => ['label' => 'Amber', 'hex' => '#F59E0B'],
+    'yellow' => ['label' => 'Yellow', 'hex' => '#EAB308'],
+    'lime' => ['label' => 'Lime', 'hex' => '#84CC16'],
+    'green' => ['label' => 'Green', 'hex' => '#22C55E'],
+    'emerald' => ['label' => 'Emerald', 'hex' => '#10B981'],
+    'teal' => ['label' => 'Teal', 'hex' => '#14B8A6'],
+    'cyan' => ['label' => 'Cyan', 'hex' => '#06B6D4'],
+    'sky' => ['label' => 'Sky', 'hex' => '#0EA5E9'],
+    'blue' => ['label' => 'Blue', 'hex' => '#3B82F6'],
+    'indigo' => ['label' => 'Indigo', 'hex' => '#6366F1'],
+    'violet' => ['label' => 'Violet', 'hex' => '#8B5CF6'],
+    'purple' => ['label' => 'Purple', 'hex' => '#A855F7'],
+    'fuchsia' => ['label' => 'Fuchsia', 'hex' => '#D946EF'],
+    'rose' => ['label' => 'Rose', 'hex' => '#F43F5E'],
+  ];
   public const DEFAULT_HIGH_CONTRAST_ENABLED = '0';
   public const DEFAULT_REDUCED_MOTION_ENABLED = 'system';
   public const DEFAULT_SR_VERBOSITY = 'standard';
@@ -220,4 +241,12 @@ final class UserPreferenceDefaults
    * '3' = 3 days grace period (maximum)
    */
   public const DEFAULT_EDITING_GRACE_DAYS = '1';
+
+  /**
+   * @return array<string, array{label: string, hex: string}>
+   */
+  public static function accentPresets(): array
+  {
+    return self::ACCENT_PRESETS;
+  }
 }

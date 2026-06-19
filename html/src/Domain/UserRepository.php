@@ -620,6 +620,9 @@ final class UserRepository
       case 'nav_proximity_px':
         $user->nav_proximity_px = $value;
         return;
+      case 'nav_proximity_delay_ms':
+        $user->nav_proximity_delay_ms = $value;
+        return;
       case 'overlay_sidebar_timeout_seconds':
         $user->overlay_sidebar_timeout_seconds = $value;
         return;

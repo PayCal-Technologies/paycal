@@ -8,13 +8,13 @@ $toastFontSize = $user->getToastFontSize();
 $toastFontSizeLabel = $formatSliderStepDisplayPx($toastFontSize, 1.125, 0.75);
 
 $toastPositions = [
-  'upper-left',
-  'upper-center',
-  'upper-right',
-  'lower-left',
-  'lower-center',
-  'lower-right',
   'full-top',
+  'top-left',
+  'top-center',
+  'top-right',
+  'bottom-left',
+  'bottom-center',
+  'bottom-right',
   'full-bottom',
 ];
 
@@ -28,14 +28,15 @@ $toastPositions = [
     <div class="flex f_baseline w100">
       <label class="w25"><?php echo settings_index_i18n('SETTINGS_TOAST_POSITION_LABEL'); ?></label>
       <div class="w75">
-        <div class="radio_group pill_group settings_toast_position_grid" role="radiogroup" aria-label="<?php echo settings_index_i18n('SETTINGS_TOAST_POSITION_LABEL'); ?>" data-hover-help="<?php echo settings_index_i18n('SETTINGS_TOAST_POSITION_HOVER'); ?>">
+        <div class="settings_toast_position_picker" role="radiogroup" aria-label="<?php echo settings_index_i18n('SETTINGS_TOAST_POSITION_LABEL'); ?>" data-hover-help="<?php echo settings_index_i18n('SETTINGS_TOAST_POSITION_HOVER'); ?>">
           <?php foreach ($toastPositions as $position) {
             $positionKey = strtoupper(str_replace('-', '_', $position));
+            $positionClass = str_replace('-', '_', $position);
             ?>
-            <input class="radio" type="radio" id="toast_position_<?php echo $position; ?>" name="toast_position" value="<?php echo $position; ?>"<?php if ($toastPosition === $position) {
+            <input class="settings_toast_position_radio" type="radio" id="toast_position_<?php echo $position; ?>" name="toast_position" value="<?php echo $position; ?>"<?php if ($toastPosition === $position) {
               echo ' checked';
             } ?>>
-            <label for="toast_position_<?php echo $position; ?>"><?php echo settings_index_i18n('SETTINGS_TOAST_POSITION_' . $positionKey); ?></label>
+            <label class="settings_toast_position_option settings_toast_position_option--<?php echo $positionClass; ?>" for="toast_position_<?php echo $position; ?>"><?php echo settings_index_i18n('SETTINGS_TOAST_POSITION_' . $positionKey); ?></label>
           <?php } ?>
         </div>
       </div>

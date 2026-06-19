@@ -89,6 +89,7 @@ $i18nKeys = [
   'SETTINGS_JS_TOAST_POSITION_UPDATED',
   'SETTINGS_JS_TOAST_SIZE_UPDATED',
   'SETTINGS_JS_NAV_DISTANCE_UPDATED',
+  'SETTINGS_JS_NAV_TRIGGER_UPDATED',
   'SETTINGS_JS_TOGGLE_ON',
   'SETTINGS_JS_TOGGLE_OFF',
   'SETTINGS_JS_PROXIMITY_FMT',
@@ -2814,19 +2815,59 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  const accentPresetSelect = document.getElementById('accent_preset');
-  if (accentPresetSelect instanceof HTMLSelectElement) {
-    accentPresetSelect.addEventListener('change', () => {
-      const preset = accentPresetSelect.value;
+  const accentPresetInput = document.getElementById('accent_preset');
+  const accentPresetSwatches = document.getElementById('accent_preset_swatches');
+  const accentPresetPreviewLabel = document.getElementById('accent_preset_preview_label');
+  if (accentPresetInput instanceof HTMLInputElement && accentPresetSwatches instanceof HTMLElement) {
+    const updateAccentLabel = swatch => {
+      if (!(accentPresetPreviewLabel instanceof HTMLElement) || !(swatch instanceof HTMLElement)) { return; }
+      const label = swatch.dataset.label || swatch.dataset.preset || '';
+      accentPresetPreviewLabel.textContent = label;
+    };
+    const restoreSelectedAccentLabel = () => {
+      const selected = accentPresetSwatches.querySelector('.settings_accent_swatch.is-selected');
+      if (selected instanceof HTMLElement) updateAccentLabel(selected);
+    };
+    accentPresetSwatches.addEventListener('mouseover', event => {
+      const swatch = event.target instanceof Element ? event.target.closest('.settings_accent_swatch') : null;
+      if (swatch instanceof HTMLElement) updateAccentLabel(swatch);
+    });
+    accentPresetSwatches.addEventListener('focusin', event => {
+      const swatch = event.target instanceof Element ? event.target.closest('.settings_accent_swatch') : null;
+      if (swatch instanceof HTMLElement) updateAccentLabel(swatch);
+    });
+    accentPresetSwatches.addEventListener('mouseleave', restoreSelectedAccentLabel);
+    accentPresetSwatches.addEventListener('focusout', () => {
+      window.setTimeout(restoreSelectedAccentLabel, 0);
+    });
+    accentPresetSwatches.addEventListener('click', event => {
+      const swatch = event.target instanceof Element ? event.target.closest('.settings_accent_swatch') : null;
+      if (!(swatch instanceof HTMLElement) || !swatch.dataset.preset) { return; }
+      const preset = swatch.dataset.preset;
+      const label = swatch.dataset.label || preset;
+      const previousPreset = accentPresetInput.value || document.documentElement.getAttribute('data-accent-preset') || '';
+      accentPresetInput.value = preset;
+      accentPresetSwatches.querySelectorAll('.settings_accent_swatch').forEach(option => {
+        const selected = option === swatch;
+        option.classList.toggle('is-selected', selected);
+        option.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      });
+      updateAccentLabel(swatch);
+      document.documentElement.setAttribute('data-accent-preset', preset);
       const formData = new FormData();
       formData.append('accent_preset', preset);
       appendSettingsCsrfToken(formData);
 
       PC.updateResource('settings/style', formData).then(() => {
-        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_ACCENT_UPDATED_FMT, { preset }), 'save', 3000, true);
-        document.documentElement.setAttribute('data-accent-preset', preset);
+        markSettingsAutosaveTargetSaved(swatch);
+        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_ACCENT_UPDATED_FMT, { preset: label }), 'save', 3000, true);
         refreshCoreStylesheet();
-      }).catch(error => PW.error(error));
+      }).catch(error => {
+        if (previousPreset !== '') {
+          document.documentElement.setAttribute('data-accent-preset', previousPreset);
+        }
+        PW.error(error);
+      });
     });
   }
 
@@ -2986,15 +3027,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     const onRadio  = PC.query('#nav_proximity_on');
     const offRadio = PC.query('#nav_proximity_off');
     const distanceSlider = PC.query('#nav_proximity_px');
+    const triggerSlider = PC.query('#nav_proximity_delay_ms');
     if (!onRadio || !offRadio) return;
 
-    const syncProximityDistanceEnabled = (enabled) => {
+    const syncProximityControlsEnabled = (enabled) => {
       if (distanceSlider instanceof HTMLInputElement) {
         distanceSlider.disabled = !enabled;
       }
+      if (triggerSlider instanceof HTMLInputElement) {
+        triggerSlider.disabled = !enabled;
+      }
     };
 
-    syncProximityDistanceEnabled(onRadio.checked);
+    syncProximityControlsEnabled(onRadio.checked);
 
     [onRadio, offRadio].forEach(radio => {
       radio.addEventListener('change', () => {
@@ -3002,7 +3047,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const value = enabled ? 'on' : 'off';
         submitSidebarPreference({ nav_proximity: value }, formatSettingsMessage(SETTINGS_T.SETTINGS_JS_PROXIMITY_FMT, { state: enabled ? SETTINGS_T.SETTINGS_JS_TOGGLE_ON : SETTINGS_T.SETTINGS_JS_TOGGLE_OFF }), () => {
           if (navToggle) navToggle.setProximityEnabled(enabled);
-          syncProximityDistanceEnabled(enabled);
+          syncProximityControlsEnabled(enabled);
         });
       });
     });
@@ -3026,6 +3071,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       const px = parseInt(slider.value, 10) || 0;
       submitSidebarPreference({ nav_proximity_px: px }, SETTINGS_T.SETTINGS_JS_NAV_DISTANCE_UPDATED, () => {
         if (navToggle) navToggle.setProximityPx(px);
+      });
+    });
+
+    if (slider instanceof HTMLInputElement && onRadio instanceof HTMLInputElement && !onRadio.checked) {
+      slider.disabled = true;
+    }
+  })();
+
+  /* Sidebar proximity trigger-delay slider (server persisted) */
+  (() => {
+    const navToggle = (typeof window !== 'undefined' && window.NavToggle) ? window.NavToggle : null;
+    const slider   = PC.query('#nav_proximity_delay_ms');
+    const output   = PC.query('#nav_proximity_delay_ms_output');
+    const onRadio  = PC.query('#nav_proximity_on');
+    if (!slider || !output) return;
+
+    slider.addEventListener('input', () => {
+      const delayMs = parseInt(slider.value, 10) || 400;
+      output.value = `${delayMs} ms`;
+      slider.setAttribute('aria-valuenow', String(delayMs));
+      if (navToggle) navToggle.setProximityDelayMs(delayMs);
+    });
+
+    slider.addEventListener('change', () => {
+      const delayMs = parseInt(slider.value, 10) || 400;
+      submitSidebarPreference({ nav_proximity_delay_ms: delayMs }, SETTINGS_T.SETTINGS_JS_NAV_TRIGGER_UPDATED, () => {
+        if (navToggle) navToggle.setProximityDelayMs(delayMs);
       });
     });
 

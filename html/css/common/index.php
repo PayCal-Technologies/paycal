@@ -359,21 +359,66 @@ html[data-a11y-reduced-motion="on"] *::after {
   }
 }
 
-html[data-accent-preset="ocean"] {
-  --accent-color: #0ea5e9;
-}
+<?php
+$accentContrastColor = static function (string $hex): string {
+  $hex = ltrim($hex, '#');
+  if (strlen($hex) !== 6) {
+    return '#FFFFFF';
+  }
 
-html[data-accent-preset="forest"] {
-  --accent-color: #16a34a;
-}
+  $red = hexdec(substr($hex, 0, 2));
+  $green = hexdec(substr($hex, 2, 2));
+  $blue = hexdec(substr($hex, 4, 2));
+  $luma = (($red * 299) + ($green * 587) + ($blue * 114)) / 1000;
 
-html[data-accent-preset="sunset"] {
-  --accent-color: #ea580c;
-}
+  return $luma > 150 ? '#111827' : '#FFFFFF';
+};
 
-html[data-accent-preset="slate"] {
-  --accent-color: #64748b;
+$emitAccentPresetCss = static function (string $accentKey, string $accentHex) use ($accentContrastColor): void {
+  $accentKeyAttr = htmlspecialchars($accentKey, ENT_QUOTES, 'UTF-8');
+  $accentContrast = $accentContrastColor($accentHex);
+  echo "html[data-accent-preset=\"{$accentKeyAttr}\"] {\n";
+  echo "  --accent-color: {$accentHex};\n";
+  echo "  --accent-contrast-color: {$accentContrast};\n";
+  echo "  --color-accent: var(--accent-color);\n";
+  echo "  --color-focus-ring: color-mix(in srgb, var(--accent-color) 78%, white);\n";
+  echo "  --color-selection: color-mix(in srgb, var(--accent-color) 32%, transparent);\n";
+  echo "  --color-highlight: color-mix(in srgb, var(--accent-color) 20%, transparent);\n";
+  echo "  --button-border-active: color-mix(in srgb, var(--accent-color) 72%, var(--button-border, transparent));\n";
+  echo "  --button-primary-bg: var(--accent-color);\n";
+  echo "  --button-primary-bg-hover: color-mix(in srgb, var(--accent-color) 86%, white);\n";
+  echo "  --button-primary-bg-active: color-mix(in srgb, var(--accent-color) 82%, black);\n";
+  echo "  --button-primary-text: var(--accent-contrast-color);\n";
+  echo "  --btn-selected-back: color-mix(in srgb, var(--accent-color) 18%, var(--color-surface-strong, transparent));\n";
+  echo "  --btn-selected-border: color-mix(in srgb, var(--accent-color) 62%, var(--panel-border, transparent));\n";
+  echo "  --panel-head-text: var(--accent-color);\n";
+  echo "  --heading-accent-color: var(--accent-color);\n";
+  echo "  --calendar-day-today: color-mix(in srgb, var(--accent-color) 16%, var(--calendar-day-bg, transparent));\n";
+  echo "  --calendar-day-selected: color-mix(in srgb, var(--accent-color) 28%, var(--calendar-day-bg, transparent));\n";
+  echo "  --calendar-event-bg: color-mix(in srgb, var(--accent-color) 18%, var(--calendar-day-bg, transparent));\n";
+  echo "  --calendar-range-bg: color-mix(in srgb, var(--accent-color) 20%, transparent);\n";
+  echo "}\n\n";
+};
+
+foreach (UserPreferenceDefaults::accentPresets() as $accentKey => $accentSpec) {
+  $accentHex = strtoupper((string) ($accentSpec['hex'] ?? ''));
+  if ($accentHex === '') {
+    continue;
+  }
+  $emitAccentPresetCss((string) $accentKey, $accentHex);
 }
+?>
+
+<?php $accentSwatchIndex = 0; foreach (UserPreferenceDefaults::accentPresets() as $accentKey => $accentSpec) {
+  $accentHex = strtoupper((string) ($accentSpec['hex'] ?? ''));
+  if ($accentHex === '') {
+    $accentHex = 'var(--color-primary)';
+  }
+  echo ".settings_accent_swatch[data-accent-idx=\"{$accentSwatchIndex}\"] {\n";
+  echo "  background: {$accentHex};\n";
+  echo "}\n\n";
+  $accentSwatchIndex++;
+} ?>
 
 <?php
 
@@ -1625,7 +1670,7 @@ body[data-toast-font-size='<?php echo $toastFontSizeStep; ?>'] {
 }
 <?php } ?>
 
-body[data-toast-position='upper-left'] .status.visible {
+body[data-toast-position='top-left'] .status.visible {
   top: calc(env(safe-area-inset-top, 0px) + var(--pad-lg));
   bottom: auto;
   left: var(--pad-lg);
@@ -1633,7 +1678,7 @@ body[data-toast-position='upper-left'] .status.visible {
   transform: none;
 }
 
-body[data-toast-position='upper-center'] .status.visible {
+body[data-toast-position='top-center'] .status.visible {
   top: calc(env(safe-area-inset-top, 0px) + var(--pad-lg));
   bottom: auto;
   left: 50%;
@@ -1641,7 +1686,7 @@ body[data-toast-position='upper-center'] .status.visible {
   transform: translateX(-50%);
 }
 
-body[data-toast-position='upper-right'] .status.visible {
+body[data-toast-position='top-right'] .status.visible {
   top: calc(env(safe-area-inset-top, 0px) + var(--pad-lg));
   bottom: auto;
   left: auto;
@@ -1649,7 +1694,7 @@ body[data-toast-position='upper-right'] .status.visible {
   transform: none;
 }
 
-body[data-toast-position='lower-left'] .status.visible {
+body[data-toast-position='bottom-left'] .status.visible {
   top: auto;
   bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad-lg));
   left: var(--pad-lg);
@@ -1657,7 +1702,7 @@ body[data-toast-position='lower-left'] .status.visible {
   transform: none;
 }
 
-body[data-toast-position='lower-center'] .status.visible {
+body[data-toast-position='bottom-center'] .status.visible {
   top: auto;
   bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad-lg));
   left: 50%;
@@ -1665,7 +1710,7 @@ body[data-toast-position='lower-center'] .status.visible {
   transform: translateX(-50%);
 }
 
-body[data-toast-position='lower-right'] .status.visible {
+body[data-toast-position='bottom-right'] .status.visible {
   top: auto;
   bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad-lg));
   left: auto;

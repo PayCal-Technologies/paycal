@@ -821,6 +821,9 @@ echo Render::template('keyboard-shortcuts', $renders);
             Render::regularBusinessNavLink($hasActiveBusinessMembershipForNav),
           ], (string) $currentPage);
         } ?>
+        <?php echo Render::renderNavLinks([
+          Render::settingsUtilityNavLink(),
+        ], (string) $currentPage); ?>
           <li class="pages"><a href="/help/" data-help-trigger="true" data-nav-shortcut="h" aria-keyshortcuts="h" accesskey="h"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['shortcuts']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('KEYBOARD'); ?></span></a></li>
 <?php } // end $isAuthenticated nav ?>
 <?php if (!$isAuthenticated) {

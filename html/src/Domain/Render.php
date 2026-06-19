@@ -400,10 +400,7 @@ class Render
   {
     $showBusiness = $isPremiumMember || $isBusinessTier || $isAdmin;
 
-    $paycalLinks = array_merge(
-      self::buildNavLinks([Page::SITES, Page::REPORTS], $isPremiumMember || $isBusinessTier),
-      [self::settingsNavLink()]
-    );
+    $paycalLinks = self::buildNavLinks([Page::SITES, Page::REPORTS], $isPremiumMember || $isBusinessTier);
 
     $businessLinks = [];
     if ($showBusiness) {
@@ -439,7 +436,7 @@ class Render
   /**
    * @return array<string, string>
    */
-  private static function settingsNavLink(): array
+  public static function settingsUtilityNavLink(): array
   {
     return [
       'page' => 'PAGE_SETTINGS',
@@ -448,6 +445,7 @@ class Render
       'arialabel' => (string) Strings::i18n('SETTINGS'),
       'access_key' => 'e',
       'icon' => (string) Strings::html('SETTINGS_SVG'),
+      'item_class' => 'pages nav_sidebar_bottom_start',
     ];
   }
 

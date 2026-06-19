@@ -15,6 +15,12 @@ This master changelog provides a high-level overview of major version milestones
 
 ## Version 1.x
 
+### [1.059.000] - 2026-06-19
+**Settings remediation transparency release**
+- Publishes the settings remediation transparency report covering sidebar hover behavior, grouped navigation, accent controls, notification position semantics, and settings nav contrast.
+- Documents the remediation rationale, bugs discovered, policies going forward, and guardrails installed across settings behavior.
+- Records the focused regression suites for controller normalization, rendered settings contracts, sidebar navigation behavior, accent tokens, and live appearance previews.
+
 ### [1.058.000] - 2026-06-19
 **Protected business work data lifecycle hardening**
 - Enforced a single canonical protected access gate before business member work rows can be read, reported, exported, cached, or audited.

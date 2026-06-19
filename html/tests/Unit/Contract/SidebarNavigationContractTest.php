@@ -122,16 +122,17 @@ final class SidebarNavigationContractTest extends TestCase
   }
 
   #[Test]
-  public function paycalGroupIncludesSitesReportsAndSettings(): void
+  public function paycalGroupIncludesPersonalNavigationOnly(): void
   {
     $navigation = Render::buildSidebarNavigation(false, false);
     $paycalGroup = $this->groupById($navigation, 'paycal');
     $pages = array_column($paycalGroup['links'], 'page');
 
+    $this->assertSame([Page::SITES->value, Page::REPORTS->value], $pages);
     $this->assertContains(Page::SITES->value, $pages);
     $this->assertContains(Page::REPORTS->value, $pages);
     $this->assertNotContains(Page::PROFILE->value, $pages);
-    $this->assertContains('PAGE_SETTINGS', $pages);
+    $this->assertNotContains('PAGE_SETTINGS', $pages);
     $this->assertNotContains(Page::EARNINGS->value, $pages);
     $this->assertNotContains(Page::INDEX->value, $pages);
     $this->assertNotContains(Page::BUSINESS_DASHBOARD->value, $pages);
@@ -187,7 +188,31 @@ final class SidebarNavigationContractTest extends TestCase
 
     $this->assertStringContainsString('Render::buildSidebarNavigation(', $header);
     $this->assertStringContainsString('Render::renderSidebarNavigation(', $header);
+    $this->assertStringContainsString('Render::settingsUtilityNavLink()', $header);
     $this->assertStringNotContainsString('Page::BUSINESSES, Page::PROFILE', $header);
+
+    $businessLeafOffset = strpos($header, 'Render::regularBusinessNavLink($hasActiveBusinessMembershipForNav)');
+    $settingsOffset = strpos($header, 'Render::settingsUtilityNavLink()');
+    $keyboardOffset = strpos($header, "Strings::headerI18n('KEYBOARD')");
+    $signoutOffset = strpos($header, 'id="call_signout_modal"');
+    $this->assertNotFalse($businessLeafOffset);
+    $this->assertNotFalse($settingsOffset);
+    $this->assertNotFalse($keyboardOffset);
+    $this->assertNotFalse($signoutOffset);
+    $this->assertLessThan($settingsOffset, $businessLeafOffset);
+    $this->assertLessThan($keyboardOffset, $settingsOffset);
+    $this->assertLessThan($signoutOffset, $keyboardOffset);
+    $this->assertStringNotContainsString('pages nav_sidebar_bottom_start"><a href="/help/"', $header);
+  }
+
+  #[Test]
+  public function settingsUtilityLinkGoesToAccessibilityAndStartsBottomGroup(): void
+  {
+    $settingsLink = Render::settingsUtilityNavLink();
+
+    $this->assertSame('/settings/account/', $settingsLink['href']);
+    $this->assertSame('e', $settingsLink['access_key']);
+    $this->assertSame('pages nav_sidebar_bottom_start', $settingsLink['item_class']);
   }
 
   #[Test]
@@ -224,9 +249,44 @@ final class SidebarNavigationContractTest extends TestCase
   public function sidebarRendererUsesGroupHeadingAndSublinkClasses(): void
   {
     $render = $this->readProjectFile('src/Domain/Render.php');
+    $navigationCss = $this->readProjectFile('css/navigation/index.php');
 
     $this->assertStringContainsString('nav_group_heading', $render);
     $this->assertStringContainsString('nav_sublink', $render);
+    $this->assertStringContainsString('item_class', $render);
+    $this->assertStringContainsString('--nav-block-size: 36px;', $navigationCss);
+    $this->assertStringContainsString('--nav-sidebar-group-gap: 1.3rem;', $navigationCss);
+    $this->assertStringContainsString('li.nav_sidebar_bottom_start', $navigationCss);
+    $this->assertStringContainsString('height: var(--nav-block-size);', $navigationCss);
+    $this->assertStringContainsString('width: var(--nav-icon-size);', $navigationCss);
+  }
+
+  #[Test]
+  public function sidebarGroupingLayoutAppliesInCollapsedAndExpandedStates(): void
+  {
+    $navigationCss = $this->readProjectFile('css/navigation/index.php');
+
+    $this->assertStringContainsString('li.nav_group_heading:not(:first-child)', $navigationCss);
+    $this->assertStringContainsString('li.nav_sidebar_bottom_start', $navigationCss);
+    $this->assertStringContainsString('margin-top: auto;', $navigationCss);
+    $this->assertStringContainsString('height: 100% !important;', $navigationCss);
+    $this->assertStringContainsString('min-height: 100% !important;', $navigationCss);
+    $this->assertStringContainsString('flex: 0 0 var(--nav-block-size)', $navigationCss);
+    $this->assertStringContainsString('width: var(--nav-collapsed-strip-size)', $navigationCss);
+  }
+
+  #[Test]
+  public function proximitySidebarRevealRequiresHoverIntentDelay(): void
+  {
+    $navigationJs = $this->readProjectFile('js/navigation-toggle.js');
+
+    $this->assertStringContainsString('DEFAULT_PROXIMITY_REVEAL_DELAY_MS = 400', $navigationJs);
+    $this->assertStringContainsString('MIN_PROXIMITY_REVEAL_DELAY_MS = 200', $navigationJs);
+    $this->assertStringContainsString('MAX_PROXIMITY_REVEAL_DELAY_MS = 3000', $navigationJs);
+    $this->assertStringContainsString('proximityIntentTimer = setTimeout', $navigationJs);
+    $this->assertStringContainsString('coreConfig?.nav_proximity_delay_ms', $navigationJs);
+    $this->assertStringContainsString("document.addEventListener('mouseleave', closeProximityHover);", $navigationJs);
+    $this->assertStringContainsString("window.addEventListener('blur', closeProximityHover);", $navigationJs);
   }
 
   /**

@@ -21,7 +21,7 @@ final class SettingsBacklogPartialContractTest extends TestCase
       'panel_calendar_work_defaults.php' => ['default_site_id', 'default_hours', 'default_travel_hours'],
       'panel_appearance_theme.php' => ['id="density_preset_', 'accent_preset'],
       'panel_appearance_notifications.php' => ['help_popup_timeout_seconds', 'toast_position', 'toast_font_size', 'full-top', 'full-bottom'],
-      'panel_appearance_sidebar.php' => ['nav_proximity', 'nav_overlay', 'nav_proximity_px', 'overlay_sidebar_timeout_seconds'],
+      'panel_appearance_sidebar.php' => ['nav_proximity', 'nav_overlay', 'nav_proximity_px', 'nav_proximity_delay_ms', 'overlay_sidebar_timeout_seconds'],
       'panel_accessibility_extras.php' => ['id="sr_verbosity_', 'settings_show_keyboard_shortcuts_btn', 'high_contrast_enabled_on', 'name="reduced_motion_enabled"'],
       'panel_security_sessions.php' => ['settings_sessions_list', 'settings_revoke_other_sessions_btn'],
       'panel_security_sensitive.php' => ['require_reauth_export', 'require_reauth_import'],

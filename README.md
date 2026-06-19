@@ -4,9 +4,9 @@ Privacy-first payroll, work-entry, reporting, and business-member payroll visibi
 
 PayCal helps workers understand pay, taxes, sites, pay periods, and business-shared work data while keeping sensitive work records behind passkey authentication, encrypted envelopes, explicit consent, and audit trails.
 
-Latest documented release: **v1.058.000**
+Latest documented release: **v1.059.000**
 
-[![Test Suite](https://img.shields.io/badge/tests-2151%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2156%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -28,30 +28,29 @@ Latest documented release: **v1.058.000**
 
 ## Current Release
 
-Version `1.058.000` is a protected business work-data lifecycle hardening release.
+Version `1.059.000` is a settings navigation and appearance remediation release.
 
-The current platform boundary is:
+The current settings quality boundary is:
 
-> Protected business member work rows may only originate from `BusinessProtectedDataAccess`.
+> Settings controls must be predictable, visibly connected to the interface they configure, bounded by persisted defaults, and covered by regression tests.
 
 This release closes the lifecycle around:
 
-- actor authority
-- active business membership
-- target member consent
-- active org DEK wrap
-- encrypted envelope context
-- business visibility policy
-- protected read/report/export paths
-- requested, started, completed, failed, and denied audit events
-- revocation and cache purge behavior
-- architecture tests that block direct protected-row materialization outside the canonical gate
+- delayed sidebar hover intent and cancellation
+- grouped sidebar navigation across collapsed and expanded states
+- bottom-anchored Settings, Help, and Sign Out utility actions
+- 16 spectrum accent swatches with hover popovers
+- shared accent tokens and live appearance preview feedback
+- Theme and Mode layout consistency
+- canonical top/bottom notification position values
+- contrast-tested settings nav hover, active, and focus states
+- contract tests that block regressions in the settings UI boundary
 
 Release tags:
 
-- `v1.058.000`
-- `private/v1.058.000`
-- `public/v1.058.000`
+- `v1.059.000`
+- `private/v1.059.000`
+- `public/v1.059.000`
 
 ## What PayCal Does
 
@@ -269,7 +268,7 @@ Localization source files live in `strings/`. Backup files such as `*.bak` are n
 
 Suite inventory (as of 2026-06-19):
 
-- **2,151 listed tests**
+- **2,156 listed tests**
 - **244 repository test files**
 - **Active public suite file split:** **122 Unit**, **62 Integration**, **35 Contract**, **1 Timezone**, **12 Accessibility**
 - **SOC2 and Exploit suites are present in the tree but excluded from the public PHPUnit profile**
@@ -345,6 +344,18 @@ npm run test:a11y:contrast
 ```
 
 ## Recent Releases
+
+## v1.059.000 (2026-06-19)
+
+**Release Focus:** Settings remediation transparency release
+
+- Published the settings remediation Transparency Hub article.
+- Added bounded sidebar hover Trigger timing with cancellation on pointer exit, document leave, and window blur.
+- Rebuilt sidebar grouping so Personal, Business, and Utility actions stay visually consistent in collapsed and expanded states.
+- Replaced the accent dropdown with 16 spectrum swatches, hover popovers, shared accent tokens, and a live preview window.
+- Rebuilt notification position selection around canonical top/bottom values and a spatial picker layout.
+- Fixed settings nav hover, active, and focus states with WCAG contrast checks.
+- Verified with focused settings contract tests and public quick gate coverage.
 
 ## v1.058.000 (2026-06-19)
 

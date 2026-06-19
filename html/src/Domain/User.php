@@ -125,6 +125,7 @@ final class User
   public string $nav_proximity                       = UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY;
   public string $nav_overlay                         = UserPreferenceDefaults::DEFAULT_NAV_OVERLAY;
   public string $nav_proximity_px                    = UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY_PX;
+  public string $nav_proximity_delay_ms              = UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY_DELAY_MS;
   public string $overlay_sidebar_timeout_seconds     = UserPreferenceDefaults::DEFAULT_OVERLAY_SIDEBAR_TIMEOUT_SECONDS;
   public string $calendar_autofocus                  = UserPreferenceDefaults::DEFAULT_CALENDAR_AUTOFOCUS;
   public string $calendar_audio_labels               = UserPreferenceDefaults::DEFAULT_CALENDAR_AUDIO_LABELS;
@@ -622,7 +623,7 @@ final class User
   public function getToastPosition(): string
   {
     $value = strtolower(trim($this->toast_position));
-    $allowed = ['upper-left', 'upper-center', 'upper-right', 'lower-left', 'lower-center', 'lower-right', 'full-top', 'full-bottom'];
+    $allowed = ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right', 'full-top', 'full-bottom'];
 
     return in_array($value, $allowed, true)
       ? $value
@@ -681,6 +682,19 @@ final class User
     $value = (int) $this->nav_proximity_px;
     if ($value < 0 || $value > 600) {
       return (int) UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY_PX;
+    }
+
+    return $value;
+  }
+
+  /**
+   * Sidebar proximity trigger delay in ms (200–3000).
+   */
+  public function getNavProximityDelayMs(): int
+  {
+    $value = (int) $this->nav_proximity_delay_ms;
+    if ($value < 200 || $value > 3000) {
+      return (int) UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY_DELAY_MS;
     }
 
     return $value;

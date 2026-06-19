@@ -214,6 +214,7 @@ const PayCalCore = (() => {
     nav_proximity : <?php echo json_encode($user->isNavProximityEnabled() ? 'on' : 'off', JSON_UNESCAPED_UNICODE); ?>,
     nav_overlay : <?php echo json_encode($user->isNavOverlayMode() ? 'overlay' : 'push', JSON_UNESCAPED_UNICODE); ?>,
     nav_proximity_px : <?php echo (int) $user->getNavProximityPx(); ?>,
+    nav_proximity_delay_ms : <?php echo (int) $user->getNavProximityDelayMs(); ?>,
     languages            : { <?php
       $langEntries = [];
       foreach (\PayCal\Domain\Language::AVAILABLE as $code => $name) {

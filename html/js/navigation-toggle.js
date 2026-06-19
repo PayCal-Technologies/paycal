@@ -8,7 +8,10 @@
  * Proximity hover: auto-reveals sidebar when cursor nears the sidebar edge.
  * Controlled by PROXIMITY_STORAGE_KEY ('0' = off, '1' = on, default on).
  * Trigger distance controlled by PROXIMITY_PX_STORAGE_KEY (px, default 200, range 0-600).
- * Call NavToggle.setProximityEnabled(bool) / setProximityPx(number) from the settings UI.
+ * Trigger delay controlled by PayCalCore.config.nav_proximity_delay_ms (default 400, range 200-3000).
+ * Reveal is delayed slightly so accidental edge passes do not open the sidebar.
+ * Call NavToggle.setProximityEnabled(bool), setProximityPx(number), or setProximityDelayMs(number)
+ * from the settings UI.
  * Overlay auto-collapse timeout is controlled by overlay_sidebar_timeout_seconds in PayCalCore.config
  * (0 = never). Call NavToggle.setOverlaySidebarTimeout(number) from the settings UI.
  */
@@ -22,6 +25,9 @@ export default (() => {
   const DEFAULT_ANNOUNCE_EXPANDED = '';
   const DEFAULT_ANNOUNCE_COLLAPSED = '';
   const COMPACT_DRAWER_MAX_PX = 768;
+  const DEFAULT_PROXIMITY_REVEAL_DELAY_MS = 400;
+  const MIN_PROXIMITY_REVEAL_DELAY_MS = 200;
+  const MAX_PROXIMITY_REVEAL_DELAY_MS = 3000;
 
   let nav, primaryNav, status, main, toggle, skipLink;
   let state       = 'collapsed';
@@ -29,8 +35,10 @@ export default (() => {
   let responsiveFrame = null;
   let hoverOpened = false;       // true only when proximity-hover opened the sidebar
   let proximityFrame = null;     // rAF handle for mousemove throttling
+  let proximityIntentTimer = null; // delayed hover-open guard
   let proximityEnabled = true;   // runtime flag; synced from localStorage on init
   let proximityPx = 200;         // trigger distance in px; synced from localStorage on init
+  let proximityRevealDelayMs = DEFAULT_PROXIMITY_REVEAL_DELAY_MS;
   let overlayMode = false;       // runtime flag; synced from localStorage on init
   let overlaySidebarTimeoutSeconds = 5; // synced from PayCalCore.config on init
   let overlayIdleTimer = null;   // auto-collapse after pointer idle in overlay mode
@@ -86,6 +94,31 @@ export default (() => {
       clearTimeout(overlayIdleTimer);
       overlayIdleTimer = null;
     }
+  }
+
+  function clearProximityIntentTimer() {
+    if (proximityIntentTimer !== null) {
+      clearTimeout(proximityIntentTimer);
+      proximityIntentTimer = null;
+    }
+  }
+
+  function closeProximityHover() {
+    clearProximityIntentTimer();
+    if (state === 'pinned' && hoverOpened) {
+      hoverOpened = false;
+      collapse(false, true);
+    }
+  }
+
+  function normalizeProximityRevealDelayMs(ms) {
+    const parsed = Number(ms);
+    if (!Number.isFinite(parsed)) return DEFAULT_PROXIMITY_REVEAL_DELAY_MS;
+
+    return Math.min(
+      MAX_PROXIMITY_REVEAL_DELAY_MS,
+      Math.max(MIN_PROXIMITY_REVEAL_DELAY_MS, Math.round(parsed))
+    );
   }
 
   function shouldApplyOverlayTimeout() {
@@ -237,6 +270,23 @@ export default (() => {
     ));
   }
 
+  function isPointerInViewport(event) {
+    return event.clientX >= 0
+      && event.clientY >= 0
+      && event.clientX <= window.innerWidth
+      && event.clientY <= window.innerHeight;
+  }
+
+  function isPointerNearSidebar(event) {
+    if (!isSidebarMode() || !isPointerInViewport(event)) return false;
+
+    const rect = nav.getBoundingClientRect();
+    const pos = document.body.getAttribute('data-nav-primary-position');
+    return pos === 'right'
+      ? event.clientX >= rect.left - proximityPx
+      : event.clientX <= rect.right + proximityPx;
+  }
+
   return {
     init() {
       nav  = document.getElementById('page_header');
@@ -383,6 +433,8 @@ export default (() => {
         proximityPx = Number.isFinite(storedPx) ? Math.min(600, Math.max(0, storedPx)) : 200;
       }
 
+      proximityRevealDelayMs = normalizeProximityRevealDelayMs(coreConfig?.nav_proximity_delay_ms);
+
       const configOverlay = coreConfig?.nav_overlay;
       if (configOverlay === 'overlay' || configOverlay === 'push') {
         overlayMode = configOverlay === 'overlay';
@@ -424,21 +476,34 @@ export default (() => {
           proximityFrame = null;
           if (!isSidebarMode()) return;
 
-          const rect = nav.getBoundingClientRect();
-          const pos  = document.body.getAttribute('data-nav-primary-position');
-          const near = pos === 'right'
-            ? e.clientX >= rect.left - proximityPx
-            : e.clientX <= rect.right + proximityPx;
+          const near = isPointerNearSidebar(e);
 
           if (near && state === 'collapsed') {
-            hoverOpened = true;
-            pin(true);
+            if (proximityIntentTimer !== null) return;
+            proximityIntentTimer = setTimeout(() => {
+              proximityIntentTimer = null;
+              if (!proximityEnabled || isCompactDrawerViewport()) return;
+              if (state !== 'collapsed' || !isPointerNearSidebar(e)) return;
+
+              hoverOpened = true;
+              pin(true);
+            }, proximityRevealDelayMs);
           } else if (!near && state === 'pinned' && hoverOpened) {
+            clearProximityIntentTimer();
             hoverOpened = false;
             collapse(false, true);
+          } else if (!near) {
+            clearProximityIntentTimer();
           }
         });
       }, { passive: true });
+
+      document.addEventListener('mouseleave', closeProximityHover);
+      document.addEventListener('mouseout', (event) => {
+        if (event.relatedTarget === null) closeProximityHover();
+      });
+      window.addEventListener('blur', closeProximityHover);
+      window.addEventListener('resize', clearProximityIntentTimer, { passive: true });
 
       // Remove pre-hydration collapsed shim after persisted state is applied.
       requestAnimationFrame(() => {
@@ -454,6 +519,7 @@ export default (() => {
     setProximityEnabled(enabled) {
       proximityEnabled = Boolean(enabled);
       // If disabling while hover had opened the sidebar, collapse it.
+      if (!proximityEnabled) clearProximityIntentTimer();
       if (!proximityEnabled && hoverOpened) {
         hoverOpened = false;
         collapse(false, true);
@@ -472,11 +538,26 @@ export default (() => {
      */
     setProximityPx(px) {
       proximityPx = Math.min(600, Math.max(0, Math.round(Number(px) || 0)));
+      clearProximityIntentTimer();
     },
 
     /** Returns current proximity trigger distance in px (for settings UI). */
     getProximityPx() {
       return proximityPx;
+    },
+
+    /**
+     * Set proximity reveal delay in milliseconds.
+     * @param {number} ms integer 200–3000
+     */
+    setProximityDelayMs(ms) {
+      proximityRevealDelayMs = normalizeProximityRevealDelayMs(ms);
+      clearProximityIntentTimer();
+    },
+
+    /** Returns current proximity reveal delay in ms (for settings UI). */
+    getProximityDelayMs() {
+      return proximityRevealDelayMs;
     },
 
     /**

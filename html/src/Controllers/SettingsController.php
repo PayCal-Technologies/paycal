@@ -1375,7 +1375,7 @@ class SettingsController
 
     if (isset($filtered['toast_position'])) {
       $positionRaw = is_scalar($filtered['toast_position']) ? strtolower(trim((string) $filtered['toast_position'])) : '';
-      $allowedPositions = ['upper-left', 'upper-center', 'upper-right', 'lower-left', 'lower-center', 'lower-right', 'full-top', 'full-bottom'];
+      $allowedPositions = ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right', 'full-top', 'full-bottom'];
       $filtered['toast_position'] = in_array($positionRaw, $allowedPositions, true)
         ? $positionRaw
         : UserPreferenceDefaults::DEFAULT_TOAST_POSITION;
@@ -1569,6 +1569,14 @@ class SettingsController
         : UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY_PX;
     }
 
+    if (isset($filtered['nav_proximity_delay_ms'])) {
+      $delayRaw = $filtered['nav_proximity_delay_ms'];
+      $delayMs = is_numeric($delayRaw) ? (int) $delayRaw : -1;
+      $filtered['nav_proximity_delay_ms'] = ($delayMs >= 200 && $delayMs <= 3000)
+        ? (string) $delayMs
+        : UserPreferenceDefaults::DEFAULT_NAV_PROXIMITY_DELAY_MS;
+    }
+
     return $filtered;
   }
 
@@ -1713,7 +1721,7 @@ class SettingsController
   {
     if (isset($filtered['accent_preset'])) {
       $preset = is_scalar($filtered['accent_preset']) ? strtolower(trim((string) $filtered['accent_preset'])) : '';
-      $allowed = ['default', 'ocean', 'forest', 'sunset', 'slate'];
+      $allowed = array_keys(UserPreferenceDefaults::accentPresets());
       $filtered['accent_preset'] = in_array($preset, $allowed, true)
         ? $preset
         : UserPreferenceDefaults::DEFAULT_ACCENT_PRESET;

@@ -78,6 +78,7 @@ enum UserFields: string
   case NAV_PROXIMITY = 'nav_proximity';
   case NAV_OVERLAY = 'nav_overlay';
   case NAV_PROXIMITY_PX = 'nav_proximity_px';
+  case NAV_PROXIMITY_DELAY_MS = 'nav_proximity_delay_ms';
   case OVERLAY_SIDEBAR_TIMEOUT_SECONDS = 'overlay_sidebar_timeout_seconds';
 
   case CALENDAR_AUTOFOCUS = 'calendar_autofocus';

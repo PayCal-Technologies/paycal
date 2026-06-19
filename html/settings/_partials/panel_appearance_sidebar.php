@@ -5,6 +5,7 @@ namespace PayCal\Domain;
 $navProximityEnabled = $user->isNavProximityEnabled();
 $navOverlayMode = $user->isNavOverlayMode();
 $navProximityPx = $user->getNavProximityPx();
+$navProximityDelayMs = $user->getNavProximityDelayMs();
 $overlaySidebarTimeout = $user->getOverlaySidebarTimeoutSeconds();
 
 ?>
@@ -83,6 +84,31 @@ $overlaySidebarTimeout = $user->getOverlaySidebarTimeoutSeconds();
             } ?>
           >
           <output for="nav_proximity_px" id="nav_proximity_px_output"><?php echo $navProximityPx; ?> px</output>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex f_baseline w100" id="nav_proximity_delay_ms_row">
+      <label class="w25" for="nav_proximity_delay_ms"><?php echo settings_index_i18n('SETTINGS_NAV_TRIGGER_LABEL'); ?></label>
+      <div class="w75">
+        <div class="proximity_slider_wrap" data-hover-help="<?php echo settings_index_i18n('SETTINGS_NAV_TRIGGER_HOVER'); ?>">
+          <input
+            type="range"
+            id="nav_proximity_delay_ms"
+            name="nav_proximity_delay_ms"
+            min="200"
+            max="3000"
+            step="200"
+            value="<?php echo $navProximityDelayMs; ?>"
+            aria-valuemin="200"
+            aria-valuemax="3000"
+            aria-valuenow="<?php echo $navProximityDelayMs; ?>"
+            aria-label="<?php echo settings_index_i18n('SETTINGS_NAV_TRIGGER_LABEL'); ?>"
+            <?php if (!$navProximityEnabled) {
+              echo 'disabled';
+            } ?>
+          >
+          <output for="nav_proximity_delay_ms" id="nav_proximity_delay_ms_output"><?php echo $navProximityDelayMs; ?> ms</output>
         </div>
       </div>
     </div>

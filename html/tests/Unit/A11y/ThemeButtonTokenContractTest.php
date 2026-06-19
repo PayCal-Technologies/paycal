@@ -88,4 +88,29 @@ final class ThemeButtonTokenContractTest extends TestCase
 
     $this->assertGreaterThan(45, $checked, 'Expected to validate semantic tokens for the recent theme conversion scope.');
   }
+
+  #[Test]
+  public function accentPresetSwatchesUseCentralPresetTokens(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $defaults = (string) file_get_contents($projectRoot . '/html/src/Domain/UserPreferenceDefaults.php');
+    $settings = (string) file_get_contents($projectRoot . '/html/settings/_partials/panel_appearance_theme.php');
+    $controller = (string) file_get_contents($projectRoot . '/html/src/Controllers/SettingsController.php');
+    $commonCss = (string) file_get_contents($projectRoot . '/html/css/common/index.php');
+
+    $this->assertStringContainsString('public const ACCENT_PRESETS = [', $defaults);
+    $this->assertStringContainsString("public const DEFAULT_ACCENT_PRESET = 'blue';", $defaults);
+    $this->assertStringContainsString("'red' => ['label' => 'Red', 'hex' => '#EF4444']", $defaults);
+    $this->assertStringContainsString("'blue' => ['label' => 'Blue', 'hex' => '#3B82F6']", $defaults);
+    $this->assertStringContainsString("'rose' => ['label' => 'Rose', 'hex' => '#F43F5E']", $defaults);
+    $this->assertSame(16, substr_count($defaults, "'hex' =>"), 'Accent presets should stay intentionally smaller than the 20 site-color swatches.');
+    $this->assertStringContainsString('$accentPresets = UserPreferenceDefaults::accentPresets();', $settings);
+    $this->assertStringContainsString('id="accent_preset_swatches"', $settings);
+    $this->assertStringContainsString('id="accent_preset_preview"', $settings);
+    $this->assertStringContainsString('$allowed = array_keys(UserPreferenceDefaults::accentPresets());', $controller);
+    $this->assertStringContainsString('.settings_accent_swatch[data-accent-idx=', $commonCss);
+    $this->assertStringContainsString('--color-accent: var(--accent-color);', $commonCss);
+    $this->assertStringContainsString('--calendar-day-selected:', $commonCss);
+    $this->assertStringContainsString('background: {$accentHex};', $commonCss);
+  }
 }

@@ -116,6 +116,7 @@ header('Expires: 0');
   align-items: center;
   min-height: 0;
   padding: 0.4rem 0.65rem;
+  background-color: transparent;
   text-decoration: none;
   color: color-mix(in srgb, var(--panel-text) 78%, transparent);
   border-bottom: 2px solid transparent;
@@ -124,11 +125,14 @@ header('Expires: 0');
   font-size: var(--font-sm);
   font-weight: 500;
   line-height: 1.2;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .settings_subnav_tab:hover,
+.settings_subnav_tab:active,
 .settings_subnav_tab:focus-visible {
+  background-color: color-mix(in srgb, var(--color-accent, #3b82f6) 16%, var(--panel-bg, transparent));
+  border-bottom-color: color-mix(in srgb, var(--color-accent, #3b82f6) 56%, transparent);
   color: var(--panel-text);
 }
 
@@ -140,8 +144,20 @@ header('Expires: 0');
 .settings_subnav_tab--active,
 .settings_subnav_tab[aria-current='page'] {
   border-bottom-color: var(--color-accent, currentColor);
+  background-color: transparent;
   color: var(--panel-text);
   font-weight: 600;
+}
+
+.settings_subnav_tab--active:hover,
+.settings_subnav_tab--active:active,
+.settings_subnav_tab--active:focus-visible,
+.settings_subnav_tab[aria-current='page']:hover,
+.settings_subnav_tab[aria-current='page']:active,
+.settings_subnav_tab[aria-current='page']:focus-visible {
+  background-color: color-mix(in srgb, var(--color-accent, #3b82f6) 18%, var(--panel-bg, transparent));
+  border-bottom-color: var(--color-accent, currentColor);
+  color: var(--panel-text);
 }
 
 .settings_page_content {
@@ -270,6 +286,247 @@ header('Expires: 0');
   flex-wrap: wrap;
   gap: var(--gap-sm);
   align-items: center;
+}
+
+#main section.panel form > .settings_theme_mode_row {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) minmax(7rem, 12rem);
+  gap: var(--gap-sm);
+  align-items: end;
+}
+
+.settings_theme_mode_field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--settings-form-label-gap);
+  min-width: 0;
+}
+
+.settings_theme_mode_field > select {
+  width: 100%;
+  min-width: 0;
+}
+
+.settings_theme_mode_label {
+  margin: 0;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.settings_accent_picker {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.settings_accent_swatches {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 0.45rem;
+  align-items: center;
+  padding-top: 0.15rem;
+  isolation: isolate;
+}
+
+.settings_accent_swatch {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 1.75rem;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--panel-text, currentColor) 18%, transparent);
+  transition: transform 0.1s ease, border-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+.settings_accent_swatch:hover {
+  z-index: 1;
+  transform: scale(1.2);
+}
+
+.settings_accent_swatch::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.45rem);
+  z-index: 2;
+  max-width: 12rem;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--panel-border, currentColor);
+  border-radius: 5px;
+  background: var(--panel-bg, #111);
+  color: var(--panel-text, #fff);
+  font-size: var(--font-xs, 0.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  transform: translateX(-50%) translateY(0.2rem);
+  transition: opacity 0.1s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.settings_accent_swatch:hover::after,
+.settings_accent_swatch:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%);
+}
+
+.settings_accent_swatch:focus-visible {
+  outline: 2px solid var(--color-primary, #4a9eff);
+  outline-offset: 2px;
+}
+
+.settings_accent_swatch.is-selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--color-primary, #4a9eff);
+}
+
+.settings_accent_preview {
+  margin-top: var(--gap-sm);
+}
+
+.settings_accent_preview_window {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent-color, var(--color-accent, #3b82f6)) 42%, var(--panel-border, #333));
+  border-radius: var(--radius-panel, 8px);
+  background: var(--panel-bg, #171b1f);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-color, var(--color-accent, #3b82f6)) 12%, transparent);
+}
+
+.settings_accent_preview_titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  padding: 0.45rem 0.6rem;
+  background: color-mix(in srgb, var(--accent-color, var(--color-accent, #3b82f6)) 18%, var(--panel-head-bg, #222));
+  color: var(--panel-text, #fff);
+  font-size: var(--font-xs, 0.75rem);
+  font-weight: 700;
+}
+
+.settings_accent_preview_titlebar span {
+  color: var(--accent-color, var(--color-accent, #3b82f6));
+  font-size: var(--font-sm);
+  line-height: 1.2;
+}
+
+.settings_accent_preview_body {
+  display: grid;
+  grid-template-columns: minmax(5rem, 0.8fr) minmax(8rem, 1.25fr) auto;
+  gap: var(--gap-sm);
+  align-items: stretch;
+  padding: var(--gap-sm);
+}
+
+.settings_accent_preview_calendar,
+.settings_accent_preview_report,
+.settings_accent_preview_controls {
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--accent-color, var(--color-accent, #3b82f6)) 28%, var(--panel-border, #333));
+  border-radius: var(--radius-control, 6px);
+  background: color-mix(in srgb, var(--accent-color, var(--color-accent, #3b82f6)) 8%, var(--panel-bg, #171b1f));
+}
+
+.settings_accent_preview_calendar {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: 0.55rem;
+}
+
+.settings_accent_preview_day {
+  display: grid;
+  place-items: center;
+  min-height: 3rem;
+  border-radius: var(--radius-cell, 6px);
+  background: color-mix(in srgb, var(--accent-color, var(--color-accent, #3b82f6)) 28%, var(--calendar-day-bg, transparent));
+  color: var(--panel-text, #fff);
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.settings_accent_preview_shift {
+  margin-top: 0.45rem;
+  padding: 0.25rem 0.4rem;
+  border-inline-start: 3px solid var(--accent-color, var(--color-accent, #3b82f6));
+  background: color-mix(in srgb, var(--accent-color, var(--color-accent, #3b82f6)) 18%, transparent);
+  font-size: var(--font-xs, 0.75rem);
+  font-weight: 700;
+}
+
+.settings_accent_preview_report {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.65rem;
+}
+
+.settings_accent_preview_report_title {
+  color: color-mix(in srgb, var(--panel-text, #fff) 72%, transparent);
+  font-size: var(--font-xs, 0.75rem);
+  font-weight: 700;
+}
+
+.settings_accent_preview_report_value {
+  color: var(--accent-color, var(--color-accent, #3b82f6));
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.settings_accent_preview_bar {
+  height: 0.45rem;
+  overflow: hidden;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--panel-text, #fff) 12%, transparent);
+}
+
+.settings_accent_preview_bar span {
+  display: block;
+  width: 68%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-color, var(--color-accent, #3b82f6));
+}
+
+.settings_accent_preview_controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem;
+}
+
+.settings_accent_preview_button {
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--accent-color, var(--color-accent, #3b82f6)) 70%, transparent);
+  border-radius: var(--radius-button, 6px);
+  background: var(--accent-color, var(--color-accent, #3b82f6));
+  color: var(--accent-contrast-color, #fff);
+  font: inherit;
+  font-weight: 800;
+}
+
+.settings_accent_preview_pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--accent-color, var(--color-accent, #3b82f6)) 55%, var(--panel-border, #333));
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--accent-color, var(--color-accent, #3b82f6)) 18%, transparent);
+  color: var(--panel-text, #fff);
+  font-size: var(--font-xs, 0.75rem);
+  font-weight: 700;
 }
 
 #main section.panel form input:not([type='radio']):not([type='checkbox']):not([type='range']):not([type='hidden']),
@@ -474,23 +731,81 @@ header('Expires: 0');
   transition: var(--short-transition) all ease;
 }
 
-.settings_toast_position_grid {
+.settings_toast_position_picker {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    "full-top full-top full-top"
+    "top-left top-center top-right"
+    "bottom-left bottom-center bottom-right"
+    "full-bottom full-bottom full-bottom";
+  gap: 0.35rem;
+  margin-top: var(--gap-xs);
+  padding: var(--pad-sm);
+  border: 1px solid var(--panel-border);
   border-radius: var(--radius-panel, var(--border-radius));
+  background: color-mix(in srgb, var(--panel-border) 18%, transparent);
+  box-sizing: border-box;
 }
 
-.settings_toast_position_grid .radio + label {
-  flex: unset;
+.settings_toast_position_radio {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.settings_toast_position_option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 0;
+  min-height: var(--settings-control-height);
+  padding: var(--pad-sm) var(--pad-md);
+  border: 0;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--panel-border) 32%, transparent);
+  color: var(--button-text, inherit);
+  cursor: pointer;
+  font-weight: 600;
+  line-height: 1.2;
   text-align: center;
   white-space: normal;
+  transition: var(--short-transition) all ease;
 }
 
-@media (max-width: 640px) {
-  .settings_toast_position_grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.settings_toast_position_option--full_top { grid-area: full-top; }
+.settings_toast_position_option--top_left { grid-area: top-left; }
+.settings_toast_position_option--top_center { grid-area: top-center; }
+.settings_toast_position_option--top_right { grid-area: top-right; }
+.settings_toast_position_option--bottom_left { grid-area: bottom-left; }
+.settings_toast_position_option--bottom_center { grid-area: bottom-center; }
+.settings_toast_position_option--bottom_right { grid-area: bottom-right; }
+.settings_toast_position_option--full_bottom { grid-area: full-bottom; }
+
+.settings_toast_position_radio:hover + .settings_toast_position_option,
+.settings_toast_position_radio:focus + .settings_toast_position_option,
+.settings_toast_position_option:hover {
+  border-color: var(--button-border-active);
+  background-color: color-mix(in srgb, var(--button-bg-hover, var(--button-bg)) 72%, transparent);
+  color: var(--button-text-hover, var(--button-text));
+}
+
+.settings_toast_position_radio:focus-visible + .settings_toast_position_option {
+  outline: 2px solid var(--color-focus-ring, #0096d6);
+  outline-offset: 2px;
+}
+
+.settings_toast_position_radio:checked + .settings_toast_position_option,
+.settings_toast_position_radio:active + .settings_toast_position_option {
+  border-color: var(--btn-selected-border, var(--button-border-active));
+  background-color: var(--btn-selected-back, var(--button-bg-active));
+  color: var(--btn-selected-fore, var(--button-text));
 }
 
 #panel-style .radio_group.pill_group .radio + label,
@@ -1686,6 +2001,7 @@ header('Expires: 0');
   #main section.panel form > .flex.f_baseline.w100 > .w75 > .calendar_badge_pills,
   #main section.panel form > .flex.f_baseline.w100 > .w75 > .security_slider_row,
   #main section.panel form > .flex.f_baseline.w100 > .w75 > .proximity_slider_wrap,
+  #main section.panel form > .flex.f_baseline.w100 > .w75 > .settings_accent_swatches,
   #main section.panel form > .flex.f_baseline.w100 > .w75 > select,
   #main section.panel form > .flex.f_baseline.w100 > .w75 > input,
   #main section.panel form > .flex.f_baseline.w100 > .w75 > textarea {
@@ -1693,6 +2009,18 @@ header('Expires: 0');
     max-width: 100%;
     min-width: 0;
     box-sizing: border-box;
+  }
+
+  .settings_accent_swatches {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  .settings_accent_preview_body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #main section.panel form > .settings_theme_mode_row {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .item_pair {

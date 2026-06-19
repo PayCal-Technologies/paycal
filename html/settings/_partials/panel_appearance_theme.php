@@ -3,6 +3,11 @@
 namespace PayCal\Domain;
 
 $accentPreset = strtolower(trim((string) ($user->accent_preset ?? UserPreferenceDefaults::DEFAULT_ACCENT_PRESET)));
+$accentPresets = UserPreferenceDefaults::accentPresets();
+if (!array_key_exists($accentPreset, $accentPresets)) {
+  $accentPreset = UserPreferenceDefaults::DEFAULT_ACCENT_PRESET;
+}
+$accentPresetLabel = (string) ($accentPresets[$accentPreset]['label'] ?? $accentPresets[UserPreferenceDefaults::DEFAULT_ACCENT_PRESET]['label']);
 $densityPreset = 'comfortable';
 if ($textSliderValue <= -2 && $spacingSliderValue <= -3) {
   $densityPreset = 'compact';
@@ -17,9 +22,10 @@ if ($textSliderValue <= -2 && $spacingSliderValue <= -3) {
     <input type="hidden" name="csrf_token" value="<?php echo $csrfNonce; ?>">
     <h2 class="heading-accent settings_card_title"><?php echo settings_index_i18n('SETTINGS_APPEARANCE_THEME_TITLE'); ?></h2>
 
-    <div class="flex f_baseline w100">
-      <label for="theme_picker" class="w25"><?php echo settings_index_i18n('THEME'); ?></label>
-      <select id="theme_picker" name="theme" class="w50" aria-label="<?php echo settings_index_i18n('THEME_PICKER'); ?>" data-hover-help="Theme controls color palette and overall visual mood.">
+    <div class="flex f_baseline w100 settings_theme_mode_row">
+      <div class="settings_theme_mode_field settings_theme_mode_field--theme">
+        <label for="theme_picker" class="settings_theme_mode_label"><?php echo settings_index_i18n('THEME'); ?></label>
+        <select id="theme_picker" name="theme" aria-label="<?php echo settings_index_i18n('THEME_PICKER'); ?>" data-hover-help="Theme controls color palette and overall visual mood.">
         <option value="choose" disabled selected><?php echo settings_index_i18n('CHOOSE_A_THEME'); ?></option>
         <option value="" disabled>------ Core ------</option>
         <option value="paycal_blue"<?php if (in_array(($user->theme ?? 'paycal_blue'), ['paycal_blue'], true)) echo ' selected'; ?>>PayCal Blue</option>
@@ -68,21 +74,58 @@ if ($textSliderValue <= -2 && $spacingSliderValue <= -3) {
         <option value="win95"<?php if (($user->theme ?? 'paycal') === 'win95') echo ' selected'; ?>>Windows 95</option>
         <option value="win98"<?php if (($user->theme ?? 'paycal') === 'win98') echo ' selected'; ?>>Windows 98</option>
         <option value="winxp"<?php if (($user->theme ?? 'paycal') === 'winxp') echo ' selected'; ?>>Windows XP</option>
-      </select>
-      <label for="variant_picker" class="visually_hidden"><?php echo settings_index_i18n('VARIANT'); ?></label>
-      <select id="variant_picker" name="variant" class="w25" aria-label="<?php echo settings_index_i18n('VARIANT_PICKER'); ?>" data-hover-help="Variant switches between light and dark treatment.">
-        <option value="light"<?php if (($user->variant ?? 'dark') === 'light') echo ' selected'; ?>><?php echo settings_index_i18n('LIGHT'); ?></option>
-        <option value="dark"<?php if (($user->variant ?? 'dark') === 'dark') echo ' selected'; ?>><?php echo settings_index_i18n('DARK'); ?></option>
-      </select>
+        </select>
+      </div>
+      <div class="settings_theme_mode_field settings_theme_mode_field--mode">
+        <label for="variant_picker" class="settings_theme_mode_label"><?php echo settings_index_i18n('VARIANT'); ?></label>
+        <select id="variant_picker" name="variant" aria-label="<?php echo settings_index_i18n('VARIANT_PICKER'); ?>" data-hover-help="Mode switches between light and dark treatment.">
+          <option value="light"<?php if (($user->variant ?? 'dark') === 'light') echo ' selected'; ?>><?php echo settings_index_i18n('LIGHT'); ?></option>
+          <option value="dark"<?php if (($user->variant ?? 'dark') === 'dark') echo ' selected'; ?>><?php echo settings_index_i18n('DARK'); ?></option>
+        </select>
+      </div>
     </div>
 
     <div class="flex f_baseline w100">
       <label for="accent_preset" class="w25"><?php echo settings_index_i18n('SETTINGS_ACCENT_PRESET_LABEL'); ?></label>
-      <select id="accent_preset" name="accent_preset" class="w75" aria-label="<?php echo settings_index_i18n('SETTINGS_ACCENT_PRESET_LABEL'); ?>">
-        <?php foreach (['default' => 'Default', 'ocean' => 'Ocean', 'forest' => 'Forest', 'sunset' => 'Sunset', 'slate' => 'Slate'] as $value => $label) { ?>
-          <option value="<?php echo $value; ?>"<?php if ($accentPreset === $value) { echo ' selected'; } ?>><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></option>
-        <?php } ?>
-      </select>
+      <div class="settings_accent_picker w75">
+        <input type="hidden" id="accent_preset" name="accent_preset" value="<?php echo htmlspecialchars($accentPreset, ENT_QUOTES, 'UTF-8'); ?>">
+        <div class="settings_accent_swatches" id="accent_preset_swatches" role="group" aria-label="<?php echo settings_index_i18n('SETTINGS_ACCENT_PRESET_LABEL'); ?>">
+        <?php $accentIndex = 0; foreach ($accentPresets as $value => $accent) { ?>
+          <button
+            type="button"
+            class="settings_accent_swatch<?php if ($accentPreset === $value) { echo ' is-selected'; } ?>"
+            data-accent-idx="<?php echo $accentIndex; ?>"
+            data-preset="<?php echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); ?>"
+            data-label="<?php echo htmlspecialchars((string) $accent['label'], ENT_QUOTES, 'UTF-8'); ?>"
+            aria-label="<?php echo htmlspecialchars((string) $accent['label'], ENT_QUOTES, 'UTF-8'); ?>"
+            aria-pressed="<?php echo $accentPreset === $value ? 'true' : 'false'; ?>"
+            title="<?php echo htmlspecialchars((string) $accent['label'], ENT_QUOTES, 'UTF-8'); ?>"
+          ></button>
+        <?php $accentIndex++; } ?>
+        </div>
+        <div class="settings_accent_preview" id="accent_preset_preview" aria-label="Accent preview">
+          <div class="settings_accent_preview_window">
+            <div class="settings_accent_preview_titlebar">
+              <span id="accent_preset_preview_label"><?php echo htmlspecialchars($accentPresetLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+            </div>
+            <div class="settings_accent_preview_body">
+              <div class="settings_accent_preview_calendar" aria-hidden="true">
+                <div class="settings_accent_preview_day">19</div>
+                <div class="settings_accent_preview_shift">8h</div>
+              </div>
+              <div class="settings_accent_preview_report" aria-hidden="true">
+                <div class="settings_accent_preview_report_title">Earnings</div>
+                <div class="settings_accent_preview_report_value">$1,842.50</div>
+                <div class="settings_accent_preview_bar"><span></span></div>
+              </div>
+              <div class="settings_accent_preview_controls" aria-hidden="true">
+                <button type="button" class="settings_accent_preview_button">Save</button>
+                <span class="settings_accent_preview_pill">Selected</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="flex f_baseline w100">
