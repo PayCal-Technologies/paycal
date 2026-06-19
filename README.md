@@ -9,7 +9,7 @@ The goal is simple: make pay easier to understand while keeping personal financi
 Latest documented release: **v1.058.000**
 
 [![Test
-Suite](https://img.shields.io/badge/tests-1574%20listed-blue)](html/tests/)
+Suite](https://img.shields.io/badge/tests-2151%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -106,6 +106,7 @@ The server stores only encrypted data.
 - Structured audit logging
 - Multi-layer historical record lock enforcement
 - Server‑validated encrypted work entries
+- Superheros privileged role governance for administrative and audit operations
 
 ## Account Security and Recovery
 
@@ -118,7 +119,7 @@ The server stores only encrypted data.
 
 - WCAG 2.1 AA accessibility support
 - Keyboard navigation and screen reader compatibility
-- Internationalization (11 languages)
+- Internationalization (10 languages)
 - Optional audio feedback
 - Mobile‑friendly responsive design
 - Dark and light themes
@@ -172,28 +173,32 @@ PayCal organizes functionality into clearly scoped components.
 
 # Test Coverage
 
-Suite inventory (as of 2026-05-12):
+Suite inventory (as of 2026-06-19):
 
-- **1,574 listed tests**
-- **170 test files**
-- **80 Unit**, **57 Integration**, **31 Contract**, **2 Manual**
+- **2,151 listed tests**
+- **244 test files**
+- **135 Unit**, **62 Integration**, **35 Contract**, **8 SOC2**, **2 Exploit**, **2 Manual**
 
-Latest validation snapshot (2026-05-12):
+Latest validation snapshot (2026-06-19):
 
-- **0 test failures**
-- **0 test errors**
+- **1,306 public quick tests**, **7,642 assertions**
+- **0 failures**
+- **0 errors**
 - **PHPStan Level 9 clean**
+- **Public repository health gate clean**
 
 ### Test Categories
 
 | Type | Description |
 |------|-------------|
-| Unit tests (80 files) | Domain logic and service-layer behavior, including security, accessibility, and fault-surface safety checks |
-| Integration tests (57 files) | Full-stack workflows including encryption/passkey, auth/account lifecycle, email, and controller/API behavior |
-| Contract tests (31 files) | API and persistence boundary guarantees |
+| Unit tests (135 files) | Domain logic and service-layer behavior, including security, accessibility, and fault-surface safety checks |
+| Integration tests (62 files) | Full-stack workflows including encryption/passkey, auth/account lifecycle, email, and controller/API behavior |
+| Contract tests (35 files) | API and persistence boundary guarantees |
+| SOC2 tests (8 files) | Control, evidence, monitoring, and audit-readiness invariants |
+| Exploit tests (2 files) | Regression probes for known abuse and bypass classes |
 | Manual tests (2 files) | Operator verification scripts for complex scenarios |
 
-Current inventory reflects the active PHPUnit suite layout in `phpunit.xml` as re-evaluated on 2026-05-12 via `./vendor/bin/phpunit --configuration phpunit.xml --list-tests`.
+Current inventory reflects the active PHPUnit suite layout in `phpunit.public.xml` as re-evaluated on 2026-06-19 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`.
 
 ### Run Tests
 
