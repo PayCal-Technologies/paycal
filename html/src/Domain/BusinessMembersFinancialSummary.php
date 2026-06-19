@@ -32,6 +32,7 @@ final class BusinessMembersFinancialSummary
     bool $fresh = false,
     bool $materializeLockedSnapshots = false,
     bool $cacheOnly = false,
+    string $actorUUID = '',
   ): array {
     $businessId = trim($businessId);
     if ($businessId === '') {
@@ -55,7 +56,7 @@ final class BusinessMembersFinancialSummary
       return [];
     }
 
-    if (!$fresh) {
+    if (!$fresh && $actorUUID === '') {
       $cached = BusinessMembersCache::get($businessId, $year);
       if ($cached !== null) {
         $summaries = [];
@@ -92,8 +93,18 @@ final class BusinessMembersFinancialSummary
 
     $summaries = [];
     $cachedMemberWork = BusinessWorkspaceCache::getMemberWork($businessId);
+    $protectedGate = new BusinessProtectedDataAccess();
     foreach (array_chunk(array_keys($memberSet), self::MEMBER_FETCH_BATCH_SIZE) as $batch) {
-      $workEntriesByMember = self::resolveBatchWorkEntries($batch, $cachedMemberWork);
+      $workEntriesByMember = $actorUUID !== ''
+        ? $protectedGate->readMembersWork(
+          $actorUUID,
+          $businessId,
+          $batch,
+          null,
+          false,
+          'business.members.financial_summary',
+        )
+        : self::resolveBatchWorkEntries($batch, $cachedMemberWork);
       foreach ($batch as $memberUuid) {
         $relationship = $relationshipsByMember[$memberUuid] ?? [];
         $memberWork = $workEntriesByMember[$memberUuid] ?? [];
@@ -141,7 +152,9 @@ final class BusinessMembersFinancialSummary
       }
     }
 
-    BusinessMembersCache::put($businessId, $year, $summaries);
+    if ($actorUUID === '') {
+      BusinessMembersCache::put($businessId, $year, $summaries);
+    }
 
     return $summaries;
   }
@@ -386,28 +399,34 @@ final class BusinessMembersFinancialSummary
   private static function resolveBatchWorkEntries(array $batch, ?array $cachedMemberWork): array
   {
     if ($cachedMemberWork === null) {
-      return MemberWorkEntriesFetcher::fetchForMembers($batch);
+      return self::emptyWorkEntriesForMembers($batch);
     }
 
     $resolved = [];
-    $missing = [];
     foreach ($batch as $memberUuid) {
       $entries = $cachedMemberWork[$memberUuid] ?? null;
       if (is_array($entries)) {
         $resolved[$memberUuid] = $entries;
       } else {
-        $missing[] = $memberUuid;
-      }
-    }
-
-    if ($missing !== []) {
-      $fetched = MemberWorkEntriesFetcher::fetchForMembers($missing);
-      foreach ($fetched as $memberUuid => $entries) {
-        $resolved[$memberUuid] = $entries;
+        $resolved[$memberUuid] = [];
       }
     }
 
     return $resolved;
+  }
+
+  /**
+   * @param list<string> $memberUuids
+   * @return array<string, array<string, array<string, string>>>
+   */
+  private static function emptyWorkEntriesForMembers(array $memberUuids): array
+  {
+    $empty = [];
+    foreach ($memberUuids as $memberUuid) {
+      $empty[$memberUuid] = [];
+    }
+
+    return $empty;
   }
 
   /**

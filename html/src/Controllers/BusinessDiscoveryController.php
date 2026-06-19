@@ -12,6 +12,7 @@ use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Infrastructure\Audit\BusinessAuditControlTestService;
 use PayCal\Domain\BusinessDiscoveryService;
+use PayCal\Domain\BusinessMemberReportExportService;
 use PayCal\Domain\BusinessMemberReportsService;
 use PayCal\Domain\BusinessMembersGridRenderer;
 use PayCal\Domain\BusinessSitesGridRenderer;
@@ -629,6 +630,175 @@ final class BusinessDiscoveryController
     }
 
     Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST businesses/{businessId}/members/reports/audit
+   *
+   * Records a business audit event after a selected-member report batch runs.
+   */
+  #[Route('businesses/{businessId}/members/reports/audit', ['POST'])]
+  public function recordMemberReportsAudit(string $businessId): void
+  {
+    if (!self::requireBusinessWorkspace('member_reports.audit')) {
+      return;
+    }
+
+    $businessId = InputSanitizer::sanitizeString($businessId);
+    $allowedStrings = [
+      'report_key',
+      'report_scope',
+      'year',
+      'format',
+      'delivery',
+      'member_count',
+      'succeeded',
+      'failed',
+      'duration_ms',
+      'generated_at',
+      'event_phase',
+      'result',
+      'reason',
+      'generation_path',
+      'trust_level',
+    ];
+    $filtered = RequestGuard::filterPost($allowedStrings, ['member_uuids']);
+    if (false === $filtered) {
+      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $access = (new BusinessDiscoveryService())->listRelationships(User::currentUUID(), $businessId);
+    if (!$access['success']) {
+      Response::error('[OrgC] Business access denied.', $access['data'], self::serviceFailureHttpStatus($access));
+      return;
+    }
+
+    $scalar = static function (mixed $value): string {
+      return is_scalar($value) ? trim((string) $value) : '';
+    };
+    $memberUuids = [];
+    if (is_array($filtered['member_uuids'] ?? null)) {
+      foreach ($filtered['member_uuids'] as $memberUuid) {
+        if (is_scalar($memberUuid)) {
+          $memberUuidClean = trim(InputSanitizer::sanitizeString((string) $memberUuid));
+          if ($memberUuidClean !== '') {
+            $memberUuids[] = $memberUuidClean;
+          }
+        }
+      }
+    }
+
+    $eventPhase = strtolower($scalar($filtered['event_phase'] ?? 'completed'));
+    $eventType = match ($eventPhase) {
+      'requested', 'request' => 'business.member.report.export.requested',
+      'started', 'start' => 'business.member.report.export.started',
+      'denied', 'deny' => 'business.member.report.export.denied',
+      'failed', 'failure' => 'business.member.report.export.failed',
+      'completed', 'complete' => 'business.member.report.export.completed',
+      default => 'business.member.report.export.completed',
+    };
+
+    (new BusinessDiscoveryService())->appendBusinessAuditEvent(
+      $businessId,
+      $eventType,
+      User::currentUUID(),
+      [
+        'report_key' => $scalar($filtered['report_key'] ?? ''),
+        'report_scope' => $scalar($filtered['report_scope'] ?? ''),
+        'year' => $scalar($filtered['year'] ?? ''),
+        'format' => $scalar($filtered['format'] ?? ''),
+        'delivery' => $scalar($filtered['delivery'] ?? ''),
+        'member_count' => $scalar($filtered['member_count'] ?? ''),
+        'succeeded' => $scalar($filtered['succeeded'] ?? ''),
+        'failed' => $scalar($filtered['failed'] ?? ''),
+        'duration_ms' => $scalar($filtered['duration_ms'] ?? ''),
+        'generated_at' => $scalar($filtered['generated_at'] ?? ''),
+        'member_uuids' => $memberUuids,
+        'result' => $scalar($filtered['result'] ?? $eventPhase),
+        'reason' => $scalar($filtered['reason'] ?? ''),
+        'generation_path' => $scalar($filtered['generation_path'] ?? ''),
+        'trust_level' => $scalar($filtered['trust_level'] ?? ''),
+      ],
+    );
+
+    Response::success('[OrgC] Report batch audit recorded.', [], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST businesses/{businessId}/members/{memberUUID}/reports/export/{format}
+   *
+   * Generates protected member XLSX/PDF exports from server-side gated work rows.
+   */
+  #[Route('businesses/{businessId}/members/{memberUUID}/reports/export/{format}', ['POST'])]
+  public function exportMemberReport(string $businessId, string $memberUUID, string $format): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    $businessId = InputSanitizer::sanitizeString($businessId);
+    $memberUUID = InputSanitizer::sanitizeString($memberUUID);
+    $format = InputSanitizer::sanitizeString($format);
+
+    $postData = [];
+    $body = file_get_contents('php://input');
+    if (is_string($body) && trim($body) !== '') {
+      try {
+        $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+      } catch (\JsonException) {
+        Response::error('[OrgC] Invalid JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
+        return;
+      }
+
+      if (!is_array($decoded)) {
+        Response::error('[OrgC] JSON payload must be an object.', [], HttpStatus::HTTP_BAD_REQUEST);
+        return;
+      }
+      $postData = $decoded;
+    }
+
+    $scope = isset($postData['scope']) && is_scalar($postData['scope'])
+      ? trim((string) $postData['scope'])
+      : 'yearly';
+    $year = isset($postData['year']) && is_numeric($postData['year'])
+      ? (int) $postData['year']
+      : (int) date('Y');
+
+    $result = (new BusinessMemberReportExportService())->exportMemberReport(
+      User::currentUUID(),
+      $businessId,
+      $memberUUID,
+      $scope,
+      $format,
+      $year,
+    );
+
+    if (!$result['success']) {
+      $reason = $result['reason'];
+      $status = match ($reason) {
+        'invalid_scope', 'invalid_format', 'missing_context' => HttpStatus::HTTP_BAD_REQUEST,
+        'no_export_rows' => HttpStatus::HTTP_UNPROCESSABLE,
+        default => HttpStatus::HTTP_FORBIDDEN,
+      };
+
+      Response::error('[OrgC] ' . $result['message'], $result['data'], $status);
+      return;
+    }
+
+    $bytes = isset($result['data']['bytes']) && is_string($result['data']['bytes'])
+      ? $result['data']['bytes']
+      : '';
+    $mime = isset($result['data']['mime']) && is_scalar($result['data']['mime'])
+      ? (string) $result['data']['mime']
+      : 'application/octet-stream';
+    $filename = isset($result['data']['filename']) && is_scalar($result['data']['filename'])
+      ? (string) $result['data']['filename']
+      : 'paycal-member-report.' . strtolower($format);
+
+    http_response_code(HttpStatus::HTTP_OK);
+    header('Content-Type: ' . $mime);
+    header('Content-Disposition: attachment; filename="' . addslashes($filename) . '"; filename*=UTF-8\'\'' . rawurlencode($filename));
+    header('Cache-Control: no-store, max-age=0');
+    echo $bytes;
   }
 
   /**
@@ -2872,4 +3042,3 @@ final class BusinessDiscoveryController
     }
   }
 }
-

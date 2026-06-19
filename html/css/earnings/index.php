@@ -79,6 +79,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   margin: 0 0 0.6rem;
 }
 
+.earnings_export_note {
+  margin: -0.25rem 0 0.75rem;
+  color: var(--text-muted, #6b7280);
+  font-size: 0.875rem;
+}
+
 .hover_help_tooltip {
   position: fixed;
   z-index: 1400;
@@ -725,6 +731,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   border-radius: 0.65rem;
   padding: 0.85rem 1rem;
   background: var(--bg-elevated, rgba(255, 255, 255, 0.03));
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+[data-forecast-status="updating"] .forecast-summary-card {
+  animation: forecastHorizonShift 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .forecast-summary-card__title {
@@ -958,6 +969,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   height: 100%;
   border-radius: 999px;
   background: var(--primary, #3b82f6);
+  transition: width 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: forecastTimelineFill 620ms ease-out both;
 }
 
 .forecast-timeline__bar--w-1 { width: 8.33%; }
@@ -1021,7 +1034,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   width: 0%;
   height: 100%;
   background: var(--primary);
-  transition: width 0.3s ease;
+  transform-origin: left center;
+  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: siteEarningsFillConfirm 680ms ease-out both;
 }
 
 /* Width data attributes for earnings bars */
@@ -1050,6 +1065,43 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .site_earnings_bar_fill[data-width="90"] { width: 90%; }
 .site_earnings_bar_fill[data-width="95"] { width: 95%; }
 .site_earnings_bar_fill[data-width="100"] { width: 100%; }
+
+@keyframes siteEarningsFillConfirm {
+  0% {
+    transform: scaleX(0.96);
+    opacity: 0.82;
+  }
+  70% {
+    transform: scaleX(1.015);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes forecastTimelineFill {
+  from {
+    transform: scaleX(0.92);
+    opacity: 0.76;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes forecastHorizonShift {
+  0% {
+    transform: translateX(-3px);
+  }
+  45% {
+    transform: translateX(3px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
 .totals_summary {
   padding: var(--pad-md);
   border-radius: var(--border-radius);

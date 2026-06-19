@@ -6,7 +6,7 @@ PayCal™ is a payroll tracking platform focused on transparency, accessibility,
 
 The goal is simple: make pay easier to understand while keeping personal financial data private.
 
-Latest documented release: **v1.057.006**
+Latest documented release: **v1.058.000**
 
 [![Test
 Suite](https://img.shields.io/badge/tests-1574%20listed-blue)](html/tests/)
@@ -344,6 +344,19 @@ bash scripts/native-fix-redis-launchagent.sh
 ---
 
 # Recent Releases
+
+## v1.058.000 (2026-06-19)
+
+**Release Focus:** Protected business work data lifecycle hardening
+
+- Hardened PayCal Business protected work data so business member work rows can only be materialized through the canonical protected access gate.
+- Enforced actor authority, active membership, consent, DEK wrap, encrypted envelope, business visibility, audit, revocation, and cache behavior with focused regression tests.
+- Closed legacy business export bypass paths and labeled CSV/TXT as browser convenience artifacts while preserving server-authorized PDF/XLSX exports.
+- Published a public Transparency Hub article for the protected-work-data boundary release.
+- Verified with full PHPUnit: 2,274 tests, 18,892 assertions, 31 skipped.
+
+- See `docs/CHANGELOG.md` and `docs/v1.changelog.md` for concise technical release notes.
+
 
 ## v1.057.006 (2026-06-15)
 

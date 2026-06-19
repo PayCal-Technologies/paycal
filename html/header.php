@@ -749,6 +749,36 @@ echo Render::template('keyboard-shortcuts', $renders);
   }
 } // end $isAuthenticated ?>
 
+<svg class="pc_icon_sprite" xmlns="http://www.w3.org/2000/svg" hidden aria-hidden="true" focusable="false">
+  <symbol id="pc-icon-business" viewBox="0 0 24 24">
+    <path d="M7 21V6.5A1.5 1.5 0 0 1 8.5 5h7A1.5 1.5 0 0 1 17 6.5V21" />
+    <path d="M5 21h14" />
+    <path d="M9.5 8.5h1" />
+    <path d="M13.5 8.5h1" />
+    <path d="M9.5 12h1" />
+    <path d="M13.5 12h1" />
+    <path d="M9.5 15.5h1" />
+    <path d="M13.5 15.5h1" />
+  </symbol>
+  <symbol id="pc-icon-details" viewBox="0 0 24 24">
+    <rect x="4" y="6" width="16" height="12" rx="2" />
+    <circle cx="9" cy="12" r="2" />
+    <path d="M7 16c.5-1.4 3.5-1.4 4 0" />
+    <path d="M14 10h3" />
+    <path d="M14 14h4" />
+  </symbol>
+  <symbol id="pc-icon-members" viewBox="0 0 24 24">
+    <circle cx="9" cy="9" r="3" />
+    <path d="M4.5 18c.8-3 8.2-3 9 0" />
+    <circle cx="16.5" cy="10.5" r="2.25" />
+    <path d="M14.5 17.5c1.4-1.7 4.4-1.7 5 0" />
+  </symbol>
+  <symbol id="pc-icon-audit" viewBox="0 0 24 24">
+    <path d="M12 3.5 18 6v5.5c0 4-2.5 7.2-6 8.8-3.5-1.6-6-4.8-6-8.8V6l6-2.5Z" />
+    <path d="m9 12 2 2 4-4" />
+  </symbol>
+</svg>
+
 <header id="page_header" class="nav_component nav_component--header<?php echo !$isAuthenticated ? ' nav_component--public' : ''; ?>" role="banner" aria-label="<?php echo Strings::headerI18n('HEADER'); ?>">
   <nav id="primary_navigation" class="nav_menu nav_menu--primary" role="navigation" aria-label="<?php echo Strings::headerI18n('PRIMARY'); ?>">
     <ul aria-label="<?php echo Strings::headerI18n('PAGES'); ?>">
@@ -776,9 +806,10 @@ echo Render::template('keyboard-shortcuts', $renders);
                 $isActive = \PayCal\Domain\AdminSurface::navItemIsActive($adminNavItem, $requestPath);
                 $iconKey = $adminNavItem['icon'];
                 $iconSvg = $sideNavIcons[$iconKey] ?? $sideNavIcons['admin'];
-                $label = $adminNavItem['label_key'] === 'ADMIN_FEEDBACK'
-                  ? 'Feedback'
-                  : Strings::headerI18n($adminNavItem['label_key']);
+                $label = Strings::headerI18n($adminNavItem['label_key']);
+                if ($adminNavItem['label_key'] === 'ADMIN_FEEDBACK' && $label === 'ADMIN_FEEDBACK') {
+                  $label = 'Feedback';
+                }
               ?>
               <a class="nav_admin_item<?php echo $isActive ? ' active' : ''; ?>" role="menuitem" href="<?php echo htmlspecialchars($adminNavItem['href'], ENT_QUOTES, 'UTF-8'); ?>"<?php echo $isActive ? " aria-current='page'" : ''; ?>><span class="nav_icon nav_icon--side"><?php echo $iconSvg; ?></span><span class="nav_label"><?php echo $label; ?></span></a>
               <?php } ?>

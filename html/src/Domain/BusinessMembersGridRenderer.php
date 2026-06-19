@@ -131,7 +131,10 @@ final class BusinessMembersGridRenderer
       ? $result['data']['members']
       : [];
 
-    $html = $this->renderMembers($members, array_merge($options, ['business_id' => $businessId]));
+    $html = $this->renderMembers($members, array_merge($options, [
+      'actor_uuid' => $actorUUID,
+      'business_id' => $businessId,
+    ]));
 
     return [
       'success' => true,
@@ -169,6 +172,7 @@ final class BusinessMembersGridRenderer
     }
 
     $businessId = $this->optionString($options, 'business_id');
+    $actorUUID = $this->optionString($options, 'actor_uuid');
     $memberUuids = [];
     foreach ($members as $member) {
       if (!is_array($member)) {
@@ -194,6 +198,7 @@ final class BusinessMembersGridRenderer
         $fresh,
         false,
         $financialCacheOnly,
+        $actorUUID,
       )
       : [];
 

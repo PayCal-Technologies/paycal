@@ -1182,6 +1182,18 @@ class EarningsController
       return;
     }
 
+    if (!self::exportPayloadIsPersonalToCurrentUser($postData)) {
+      \PayCal\Infrastructure\Telemetry\SecurityLog::log('earnings_export', [
+        'scope' => $scope,
+        'format' => 'xlsx',
+        'year' => $year,
+        'result' => 'denied',
+        'reason' => 'non_personal_export_payload',
+      ]);
+      Response::error('[EC] Export payload is not authorized for this user.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
     $fileSuffix = ($scope === 'payperiod' && $startDate !== '' && $endDate !== '')
       ? "{$startDate}_to_{$endDate}"
       : (string) $year;
@@ -1262,6 +1274,18 @@ class EarningsController
       return;
     }
 
+    if (!self::exportPayloadIsPersonalToCurrentUser($postData)) {
+      \PayCal\Infrastructure\Telemetry\SecurityLog::log('earnings_export', [
+        'scope' => $scope,
+        'format' => 'pdf',
+        'year' => $year,
+        'result' => 'denied',
+        'reason' => 'non_personal_export_payload',
+      ]);
+      Response::error('[EC] Export payload is not authorized for this user.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
     $fileSuffix = ($scope === 'payperiod' && $startDate !== '' && $endDate !== '')
       ? "{$startDate}_to_{$endDate}"
       : (string) $year;
@@ -1287,6 +1311,89 @@ class EarningsController
     header('Content-Disposition: attachment; filename="' . $filename . '"; filename*=UTF-8\'\''. $encoded);
     header('Cache-Control: max-age=0');
     echo $pdf;
+  }
+
+  /**
+   * @param array<string, mixed> $payload
+   */
+  private static function exportPayloadIsPersonalToCurrentUser(array $payload): bool
+  {
+    $currentUUID = trim(User::currentUUID());
+    if ($currentUUID === '') {
+      return false;
+    }
+
+    if (self::containsBusinessExportMarker($payload)) {
+      return false;
+    }
+
+    $report = is_array($payload['report'] ?? null) ? $payload['report'] : [];
+    $meta = is_array($report['meta'] ?? null) ? $report['meta'] : [];
+    $employee = isset($meta['employee']) && is_scalar($meta['employee'])
+      ? trim((string) $meta['employee'])
+      : '';
+
+    return $employee !== '' && hash_equals($currentUUID, $employee);
+  }
+
+  /** @param array<string|int, mixed> $payload */
+  private static function containsBusinessExportMarker(array $payload, int $depth = 0): bool
+  {
+    if ($depth > 5) {
+      return false;
+    }
+
+    $businessMarkerKeys = [
+      'business_id' => true,
+      'business_uuid' => true,
+      'org_id' => true,
+      'organization_id' => true,
+      'member_uuid' => true,
+      'target_member_uuid' => true,
+      'business_member_uuid' => true,
+      'protected_business_export' => true,
+      'business_scope' => true,
+      'encrypted_blob' => true,
+      'org_envelope' => true,
+      'generation_path' => true,
+      'trust_level' => true,
+    ];
+
+    foreach ($payload as $key => $value) {
+      $normalizedKey = is_string($key) ? strtolower(trim($key)) : '';
+      if ($normalizedKey !== '') {
+        if (isset($businessMarkerKeys[$normalizedKey]) && self::hasMarkerValue($value)) {
+          return true;
+        }
+
+        if (
+          in_array($normalizedKey, ['source', 'report_source', 'export_source'], true)
+          && is_scalar($value)
+          && str_contains(strtolower((string) $value), 'business')
+        ) {
+          return true;
+        }
+      }
+
+      if (is_array($value) && self::containsBusinessExportMarker($value, $depth + 1)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private static function hasMarkerValue(mixed $value): bool
+  {
+    if (is_array($value)) {
+      return $value !== [];
+    }
+
+    if (is_scalar($value)) {
+      return trim((string) $value) !== '';
+    }
+
+    return $value !== null;
   }
 
   /**
@@ -1340,5 +1447,3 @@ class EarningsController
     Response::success('[EC] Forecast preview calculated.', $state);
   }
 }
-
-

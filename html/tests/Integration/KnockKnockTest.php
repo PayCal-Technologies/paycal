@@ -22,9 +22,17 @@ final class KnockKnockTest extends TestCase
   public function sweepKnownUrlsForUnauthenticatedLeaks(): void
   {
     $baseURL = $this->baseURL();
+    $identity = $this->request($baseURL . '/auth/', 'GET', 6);
 
-    if (!$this->isReachable($baseURL . '/auth/')) {
+    if ($identity['status'] <= 0) {
       $this->markTestSkipped('KnockKnock skipped: cannot reach ' . $baseURL . ' (set KNOCKKNOCK_BASE_URL if needed).');
+    }
+
+    if (!$this->isPayCalIdentity($identity)) {
+      $this->markTestSkipped(
+        'KnockKnock skipped: ' . $baseURL . ' is reachable but does not look like PayCal. '
+        . 'Set KNOCKKNOCK_BASE_URL to the active PayCal vhost before running the leak sweep.'
+      );
     }
 
     $targets = $this->collectTargets();
@@ -223,10 +231,16 @@ final class KnockKnockTest extends TestCase
     return rtrim($url, '/');
   }
 
-  private function isReachable(string $url): bool
+  /**
+   * @param array{status: int, location: string, sample: string, reason: string} $result
+   */
+  private function isPayCalIdentity(array $result): bool
   {
-    $result = $this->request($url, 'GET', 6);
-    return $result['status'] > 0;
+    $sample = strtolower($result['sample']);
+
+    return str_contains($sample, 'paycal')
+      || str_contains($sample, 'paycal.app')
+      || str_contains($sample, 'paycal technologies');
   }
 
   /**
@@ -467,7 +481,7 @@ final class KnockKnockTest extends TestCase
       && (str_contains($sampleLower, '/signin') || str_contains($sampleLower, 'name="password"'));
 
     $publicPagePrefixes = [
-      '/', '/about/', '/auth/', '/blog/', '/contact/', '/faq/', '/help/', '/language-coverage/', '/media/', '/policies/', '/premium/', '/security/', '/soc2/', '/transparency/', '/verify/'
+      '/', '/about/', '/auth/', '/blog/', '/contact/', '/faq/', '/help/', '/language-coverage/', '/media/', '/policies/', '/pricing/', '/security/', '/soc2/', '/status/', '/transparency/', '/verify/'
     ];
 
     $publicPageExact = [
@@ -475,6 +489,7 @@ final class KnockKnockTest extends TestCase
     ];
 
     $publicAPIPrefixes = [
+      '/api/v1/auth/providers',
       '/api/v1/auth/recovery/cancel',
       '/api/v1/auth/passkey/send-recovery-email',  // intentionally public: serves unauthenticated passkey recovery flow
       '/api/v1/health',

@@ -150,9 +150,9 @@ final class BusinessWorkspaceWarmer
       $segments['roster'] = self::warmRoster($businessId);
       $segments['sites'] = self::warmSites($businessId, $actorUUID);
       $segments['site_settings'] = self::warmSiteSettings($businessId, $year);
-      $segments['member_work'] = self::warmMemberWork($businessId);
-      $segments['member_summaries'] = self::warmMemberSummaries($businessId, $year);
-      $segments['team_earnings'] = self::warmTeamEarnings($businessId, $year);
+      $segments['member_work'] = self::warmMemberWork($businessId, $actorUUID);
+      $segments['member_summaries'] = self::warmMemberSummaries($businessId, $actorUUID, $year);
+      $segments['team_earnings'] = self::warmTeamEarnings($businessId, $actorUUID, $year);
 
       $durationMs = round((microtime(true) - $startedAt) * 1000, 2);
       Lens::timeEnd('Business workspace cache warm');
@@ -448,7 +448,7 @@ final class BusinessWorkspaceWarmer
   /**
    * @return array{status: string, detail?: string}
    */
-  private static function warmMemberWork(string $businessId): array
+  private static function warmMemberWork(string $businessId, string $actorUUID): array
   {
     if (BusinessWorkspaceCache::getMemberWork($businessId) !== null) {
       return ['status' => 'hit'];
@@ -461,14 +461,26 @@ final class BusinessWorkspaceWarmer
     }
 
     $entriesByMember = [];
+    $protectedGate = new BusinessProtectedDataAccess();
     foreach (array_chunk($memberUuids, MemberWorkEntriesFetcher::MEMBER_FETCH_BATCH_SIZE) as $batch) {
       $entriesByMember = array_replace(
         $entriesByMember,
-        MemberWorkEntriesFetcher::fetchForMembers($batch),
+        $protectedGate->readMembersWork(
+          $actorUUID,
+          $businessId,
+          $batch,
+          null,
+          false,
+          'business.workspace.member_work.warm',
+        ),
       );
     }
 
     BusinessWorkspaceCache::putMemberWork($businessId, $entriesByMember);
+    (new BusinessDiscoveryService())->appendBusinessAuditEvent($businessId, 'business.workspace.member_work.warmed', $actorUUID, [
+      'member_count' => (string) count($entriesByMember),
+      'result' => 'allowed',
+    ]);
 
     return ['status' => 'warmed', 'detail' => (string) count($entriesByMember)];
   }
@@ -476,7 +488,7 @@ final class BusinessWorkspaceWarmer
   /**
    * @return array{status: string, detail?: string}
    */
-  private static function warmMemberSummaries(string $businessId, int $year): array
+  private static function warmMemberSummaries(string $businessId, string $actorUUID, int $year): array
   {
     if (BusinessMembersCache::get($businessId, $year) !== null) {
       return ['status' => 'hit'];
@@ -500,6 +512,8 @@ final class BusinessWorkspaceWarmer
       $year,
       false,
       true,
+      false,
+      $actorUUID,
     );
 
     return ['status' => 'warmed', 'detail' => (string) count($memberUuids)];
@@ -508,14 +522,16 @@ final class BusinessWorkspaceWarmer
   /**
    * @return array{status: string, detail?: string}
    */
-  private static function warmTeamEarnings(string $businessId, int $year): array
+  private static function warmTeamEarnings(string $businessId, string $actorUUID, int $year): array
   {
     if (BusinessWorkspaceCache::getTeamEarnings($businessId, $year) !== null) {
       return ['status' => 'hit'];
     }
 
-    $snapshot = TeamEarningsSnapshotBuilder::build($businessId, $year);
-    BusinessWorkspaceCache::putTeamEarnings($businessId, $year, $snapshot);
+    $snapshot = TeamEarningsSnapshotBuilder::build($businessId, $year, $actorUUID);
+    if ($actorUUID === '') {
+      BusinessWorkspaceCache::putTeamEarnings($businessId, $year, $snapshot);
+    }
 
     return [
       'status' => 'warmed',

@@ -1,0 +1,441 @@
+<?php declare(strict_types=1);
+
+use PayCal\Domain\BusinessDiscoveryService;
+use PayCal\Domain\BusinessMembersCache;
+use PayCal\Domain\BusinessMembersFinancialSummary;
+use PayCal\Domain\BusinessMemberReportExportService;
+use PayCal\Domain\BusinessProtectedDataAccess;
+use PayCal\Domain\BusinessWorkspaceCache;
+use PayCal\Domain\Config\SystemConfig;
+use PayCal\Domain\Constants\Keys;
+use PayCal\Domain\Database;
+use PayCal\Domain\TeamEarningsSnapshotBuilder;
+use PayCal\Infrastructure\Business\BusinessEncryptionService;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
+
+/**
+ * @internal
+ */
+#[Group('unit')]
+final class BusinessMemberReportExportServiceTest extends TestCase
+{
+  private string $suffix = '';
+  private string $businessId = '';
+  private string $ownerUUID = '';
+  private string $memberUUID = '';
+  private string $siteId = '';
+  private string $consentId = '';
+  private string $credentialId = '';
+  private string $dekId = '';
+  private bool $originalOrgEncryptionEnabled = false;
+
+  protected function setUp(): void
+  {
+    parent::setUp();
+
+    $this->suffix = bin2hex(random_bytes(4));
+    $this->businessId = 'biz_export_' . $this->suffix;
+    $this->ownerUUID = 'owner_export_' . $this->suffix;
+    $this->memberUUID = 'member_export_' . $this->suffix;
+    $this->siteId = 'site_export_' . $this->suffix;
+    $this->consentId = 'consent_export_' . $this->suffix;
+    $this->credentialId = 'cred_export_' . $this->suffix;
+    $this->dekId = 'dek_export_' . $this->suffix;
+    $this->originalOrgEncryptionEnabled = (bool) SystemConfig::get('org_shared_encryption_enabled');
+    SystemConfig::set('org_shared_encryption_enabled', true);
+
+    $this->seedBusiness();
+    $this->seedConsentAndWrap();
+    $this->seedWorkEntry();
+  }
+
+  protected function tearDown(): void
+  {
+    $this->clearBusinessAuditEvents();
+
+    foreach (Database::scanKeys('*' . $this->suffix . '*') as $key) {
+      Database::unlink((string) $key);
+    }
+
+    SystemConfig::set('org_shared_encryption_enabled', $this->originalOrgEncryptionEnabled);
+    parent::tearDown();
+  }
+
+  #[Test]
+  public function protectedMemberXlsxExportBuildsFromServerSideGate(): void
+  {
+    $result = (new BusinessMemberReportExportService())->exportMemberReport(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->memberUUID,
+      'yearly',
+      'xlsx',
+      2026,
+    );
+
+    $this->assertTrue($result['success']);
+    $this->assertSame('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', $result['data']['mime']);
+    $this->assertStringStartsWith('PK', $result['data']['bytes']);
+    $this->assertSame(1, $result['data']['entry_count']);
+  }
+
+  #[Test]
+  public function protectedMemberPdfExportBuildsFromServerSideGate(): void
+  {
+    $result = (new BusinessMemberReportExportService())->exportMemberReport(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->memberUUID,
+      'daily',
+      'pdf',
+      2026,
+    );
+
+    $this->assertTrue($result['success']);
+    $this->assertSame('application/pdf', $result['data']['mime']);
+    $this->assertStringStartsWith('%PDF', $result['data']['bytes']);
+  }
+
+  #[Test]
+  public function protectedMemberExportDeniesWhenWrapIsMissing(): void
+  {
+    $this->clearBusinessAuditEvents();
+    Database::unlink(Keys::businessDekWrap(
+      $this->businessId,
+      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+      'v1',
+      $this->memberUUID,
+      $this->credentialId,
+    ));
+
+    $result = (new BusinessMemberReportExportService())->exportMemberReport(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->memberUUID,
+      'yearly',
+      'xlsx',
+      2026,
+    );
+
+    $this->assertFalse($result['success']);
+    $this->assertSame('missing_consent_or_wrap', $result['reason']);
+
+    $eventTypes = $this->businessExportAuditEventTypes();
+    $this->assertContains('business.member.report.export.requested', $eventTypes);
+    $this->assertContains('business.member.report.export.denied', $eventTypes);
+    $this->assertNotContains('business.member.report.export.started', $eventTypes);
+    $this->assertNotContains('business.member.report.export.completed', $eventTypes);
+    $this->assertNotContains('business.member.report.export.failed', $eventTypes);
+  }
+
+  #[Test]
+  public function protectedMemberExportAuditsRequestedStartedAndCompleted(): void
+  {
+    $this->clearBusinessAuditEvents();
+
+    $result = (new BusinessMemberReportExportService())->exportMemberReport(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->memberUUID,
+      'yearly',
+      'xlsx',
+      2026,
+    );
+
+    $this->assertTrue($result['success']);
+
+    $eventTypes = $this->businessExportAuditEventTypes();
+    $this->assertContains('business.member.report.export.requested', $eventTypes);
+    $this->assertContains('business.member.report.export.started', $eventTypes);
+    $this->assertContains('business.member.report.export.completed', $eventTypes);
+    $this->assertNotContains('business.member.report.export.denied', $eventTypes);
+    $this->assertNotContains('business.member.report.export.failed', $eventTypes);
+  }
+
+  #[Test]
+  public function revokeAfterCacheDeniesReadsExportsSummariesAndTeamEarnings(): void
+  {
+    $initialRead = (new BusinessProtectedDataAccess())->readMemberWork(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->memberUUID,
+      2026,
+    );
+    $this->assertTrue($initialRead['success']);
+
+    $initialExport = (new BusinessMemberReportExportService())->exportMemberReport(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->memberUUID,
+      'yearly',
+      'xlsx',
+      2026,
+    );
+    $this->assertTrue($initialExport['success']);
+
+    $this->seedStaleProtectedCaches();
+
+    Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->memberUUID, [
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_REVOKED,
+    ]);
+    Database::hset(Keys::businessConsent($this->consentId), [
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_REVOKED,
+    ]);
+    Database::hset(Keys::businessDekWrap(
+      $this->businessId,
+      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+      'v1',
+      $this->memberUUID,
+      $this->credentialId,
+    ), [
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_REVOKED,
+    ]);
+
+    $postRevokeRead = (new BusinessProtectedDataAccess())->readMemberWork(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->memberUUID,
+      2026,
+    );
+    $this->assertFalse($postRevokeRead['success']);
+    $this->assertSame('target_membership_inactive', $postRevokeRead['reason']);
+
+    $postRevokePdf = (new BusinessMemberReportExportService())->exportMemberReport(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->memberUUID,
+      'daily',
+      'pdf',
+      2026,
+    );
+    $this->assertFalse($postRevokePdf['success']);
+    $this->assertSame('target_membership_inactive', $postRevokePdf['reason']);
+
+    $postRevokeXlsx = (new BusinessMemberReportExportService())->exportMemberReport(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->memberUUID,
+      'yearly',
+      'xlsx',
+      2026,
+    );
+    $this->assertFalse($postRevokeXlsx['success']);
+    $this->assertSame('target_membership_inactive', $postRevokeXlsx['reason']);
+
+    $summary = (new BusinessMembersFinancialSummary())->forBusinessMembers(
+      $this->businessId,
+      [$this->memberUUID],
+      2026,
+      false,
+      false,
+      false,
+      $this->ownerUUID,
+    );
+    $this->assertSame(0.0, $summary[$this->memberUUID]['ytd_gross'] ?? null);
+    $this->assertSame(0.0, $summary[$this->memberUUID]['total_hours'] ?? null);
+
+    $teamSnapshot = TeamEarningsSnapshotBuilder::build($this->businessId, 2026, $this->ownerUUID);
+    $this->assertSame([], $teamSnapshot['teamEarningsRows']);
+    $this->assertSame(0.0, $teamSnapshot['teamEarningsTotals']['gross']);
+  }
+
+  #[Test]
+  public function revokeRelationshipPurgesProtectedCaches(): void
+  {
+    $this->seedStaleProtectedCaches();
+    $this->assertNotNull(BusinessWorkspaceCache::getMemberWork($this->businessId));
+    $this->assertNotNull(BusinessMembersCache::get($this->businessId, 2026));
+    $this->assertNotNull(BusinessWorkspaceCache::getTeamEarnings($this->businessId, 2026));
+
+    $result = (new BusinessDiscoveryService())->revokeRelationship(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->memberUUID,
+    );
+
+    $this->assertTrue($result['success']);
+    $this->assertNull(BusinessWorkspaceCache::getMemberWork($this->businessId));
+    $this->assertNull(BusinessMembersCache::get($this->businessId, 2026));
+    $this->assertNull(BusinessWorkspaceCache::getTeamEarnings($this->businessId, 2026));
+  }
+
+  private function seedStaleProtectedCaches(): void
+  {
+    $workKey = Keys::WORK . ':' . $this->memberUUID . ':2026-01-02:' . $this->siteId;
+    $entry = Database::hgetall($workKey);
+
+    BusinessWorkspaceCache::putMemberWork($this->businessId, [
+      $this->memberUUID => [$workKey => $entry],
+    ]);
+    BusinessMembersCache::put($this->businessId, 2026, [
+      $this->memberUUID => [
+        'ytd_gross' => 9999.99,
+        'total_hours' => 999.0,
+        'reg_hours' => 999.0,
+        'ot_hours' => 0.0,
+        'trailing_baseline' => 999.0,
+      ],
+    ]);
+    BusinessWorkspaceCache::putTeamEarnings($this->businessId, 2026, [
+      'teamEarningsRows' => [[
+        'member_uuid' => $this->memberUUID,
+        'name' => 'Stale Member',
+        'gross' => 9999.99,
+      ]],
+      'teamEarningsTotals' => ['reg_hours' => 999.0, 'ot_hours' => 0.0, 'gross' => 9999.99, 'net' => 9999.99],
+      'teamSiteMatchStats' => ['match_owner_and_site' => 1, 'match_unique_site_id' => 0, 'match_site_name' => 0, 'included_unlinked' => 0],
+      'teamSiteDropSamples' => [],
+      'teamSiteFallbackWarn' => false,
+      'teamUnlinkedOnlyWarn' => false,
+      'teamUnlinkedOnlyCount' => 0,
+      'orgSiteData' => [],
+      'memberLoaTotals' => [],
+      'memberWeeklyH' => [],
+      'memberDays' => [],
+    ]);
+  }
+
+  /**
+   * @return list<string>
+   */
+  private function businessExportAuditEventTypes(): array
+  {
+    $types = [];
+    foreach (Database::smembers(Keys::BUSINESS_AUDIT . ':' . $this->businessId) as $eventId) {
+      $event = Database::hgetall(Keys::BUSINESS_AUDIT_EVENT . ':' . (string) $eventId);
+      $eventType = (string) ($event['event_type'] ?? '');
+      if (str_starts_with($eventType, 'business.member.report.export.')) {
+        $types[] = $eventType;
+      }
+    }
+
+    sort($types);
+
+    return $types;
+  }
+
+  private function clearBusinessAuditEvents(): void
+  {
+    $auditKey = Keys::BUSINESS_AUDIT . ':' . $this->businessId;
+    foreach (Database::smembers($auditKey) as $eventId) {
+      Database::unlink(Keys::BUSINESS_AUDIT_EVENT . ':' . (string) $eventId);
+    }
+    Database::unlink($auditKey);
+  }
+
+  private function seedBusiness(): void
+  {
+    Database::hset(Keys::USER . ':' . $this->ownerUUID, [
+      'user_uuid' => $this->ownerUUID,
+      'email' => $this->ownerUUID . '@example.com',
+      'full_name' => 'Owner Export',
+      'email_verified' => '1',
+      'auth_level' => '1',
+    ]);
+    Database::hset(Keys::USER . ':' . $this->memberUUID, [
+      'user_uuid' => $this->memberUUID,
+      'email' => $this->memberUUID . '@example.com',
+      'full_name' => 'Member Export',
+      'email_verified' => '1',
+      'auth_level' => '1',
+      'province' => 'AB',
+    ]);
+
+    Database::hset(Keys::BUSINESS . ':' . $this->businessId, [
+      'business_id' => $this->businessId,
+      'owner_uuid' => $this->ownerUUID,
+      'status' => 'active',
+    ]);
+
+    Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->ownerUUID, [
+      'business_id' => $this->businessId,
+      'user_uuid' => $this->ownerUUID,
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+      'role' => 'owner',
+    ]);
+
+    Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->memberUUID, [
+      'business_id' => $this->businessId,
+      'user_uuid' => $this->memberUUID,
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+      'role' => 'contributor',
+      'scopes' => 'work.read,work.scope.org',
+    ]);
+
+    Database::sadd(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->memberUUID);
+    Database::sadd(Keys::BUSINESS_USER . ':' . $this->memberUUID, $this->businessId);
+
+    Database::hset(Keys::SITE . ':' . $this->ownerUUID . ':' . $this->siteId, [
+      'site_id' => $this->siteId,
+      'site_name' => 'Org Site',
+      'ownership_scope' => BusinessDiscoveryService::BUSINESS_SITE_OWNERSHIP_BUSINESS,
+      'business_managed' => '1',
+      'business_id' => $this->businessId,
+    ]);
+
+    Database::sadd(Keys::BUSINESS_SITE . ':' . $this->businessId, $this->ownerUUID . ':' . $this->siteId);
+  }
+
+  private function seedConsentAndWrap(): void
+  {
+    Database::hset(Keys::businessConsent($this->consentId), [
+      'consent_id' => $this->consentId,
+      'org_id' => $this->businessId,
+      'user_uuid' => $this->memberUUID,
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+      'accepted_at' => date('c'),
+    ]);
+    Database::sadd(Keys::businessConsentsByOrg($this->businessId), $this->consentId);
+    Database::sadd(Keys::businessConsentsByUser($this->memberUUID), $this->consentId);
+
+    $store = (new BusinessEncryptionService())->storeOrgDekWrap(
+      $this->businessId,
+      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+      'v1',
+      $this->memberUUID,
+      $this->credentialId,
+      'wrapped-dek',
+      $this->consentId,
+      'hkdf-passkey-v1',
+      $this->dekId,
+    );
+
+    $this->assertTrue($store['success']);
+  }
+
+  private function seedWorkEntry(): void
+  {
+    Database::hset(Keys::WORK . ':' . $this->memberUUID . ':2026-01-02:' . $this->siteId, [
+      'date' => '2026-01-02',
+      'site_id' => $this->siteId,
+      'site_name' => 'Org Site',
+      'site_owner_uuid' => $this->ownerUUID,
+      'wage' => '50',
+      'hours' => '8',
+      'regular_hours' => '8',
+      'overtime_hours' => '0',
+      'gross' => '400',
+      'net' => '320',
+      'encrypted_blob' => $this->encryptedBlob(),
+    ]);
+  }
+
+  private function encryptedBlob(): string
+  {
+    return base64_encode((string) json_encode([
+      'ciphertext' => base64_encode('ciphertext'),
+      'nonce' => base64_encode('nonce'),
+      'aad' => 'aad',
+      'meta' => [
+        'encryption_mode' => 'organization',
+        'org_id' => $this->businessId,
+        'segment' => BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+        'key_version' => 'v1',
+        'dek_id' => $this->dekId,
+        'needs_rewrap' => 'false',
+      ],
+    ]));
+  }
+}
