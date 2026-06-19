@@ -683,6 +683,57 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertNotContains('settings.updated', $eventTypes);
   }
 
+  public function testRecordMemberReportsAuditHandlesBulkHundredMemberBatch(): void
+  {
+    $memberUuids = [];
+    for ($index = 1; $index <= 100; $index++) {
+      $memberUuids[] = sprintf('bulk-member-%03d-%s', $index, substr($this->businessId, -6));
+    }
+
+    $payload = $this->invokeControllerRoute('recordMemberReportsAudit', $this->businessId, 'POST', [
+      'report_key' => 'bulk_member_reports',
+      'report_scope' => 'yearly',
+      'year' => '2026',
+      'format' => 'zip',
+      'delivery' => 'zip',
+      'member_count' => '100',
+      'succeeded' => '97',
+      'failed' => '3',
+      'duration_ms' => '12345',
+      'generated_at' => '2026-06-18T12:00:00+00:00',
+      'event_phase' => 'completed',
+      'result' => 'completed',
+      'reason' => '',
+      'generation_path' => 'mixed_server_authorized_and_browser_convenience',
+      'trust_level' => 'mixed_package_server_authorized_pdf_and_browser_convenience_csv',
+      'member_uuids' => $memberUuids,
+    ]);
+
+    $this->assertSame('success', $payload['status'] ?? null, json_encode($payload));
+    $this->assertSame(200, $payload['__http_code'] ?? null, json_encode($payload));
+
+    $event = $this->latestBusinessAuditEventOfType('business.member.report.export.completed');
+    $this->assertSame($this->ownerUUID, (string) ($event['actor_uuid'] ?? ''));
+
+    $details = json_decode((string) ($event['details'] ?? '{}'), true);
+    $this->assertIsArray($details);
+    $this->assertSame('bulk_member_reports', (string) ($details['report_key'] ?? ''));
+    $this->assertSame('yearly', (string) ($details['report_scope'] ?? ''));
+    $this->assertSame('2026', (string) ($details['year'] ?? ''));
+    $this->assertSame('zip', (string) ($details['format'] ?? ''));
+    $this->assertSame('100', (string) ($details['member_count'] ?? ''));
+    $this->assertSame('97', (string) ($details['succeeded'] ?? ''));
+    $this->assertSame('3', (string) ($details['failed'] ?? ''));
+    $this->assertSame('completed', (string) ($details['result'] ?? ''));
+    $this->assertSame('mixed_server_authorized_and_browser_convenience', (string) ($details['generation_path'] ?? ''));
+    $this->assertSame('mixed_package_server_authorized_pdf_and_browser_convenience_csv', (string) ($details['trust_level'] ?? ''));
+
+    $recordedMembers = array_values(array_filter(explode(',', (string) ($details['member_uuids'] ?? ''))));
+    $this->assertCount(100, $recordedMembers);
+    $this->assertSame($memberUuids[0], $recordedMembers[0]);
+    $this->assertSame($memberUuids[99], $recordedMembers[99]);
+  }
+
   public function testUpdateRelationshipRoleRouteUpdatesRoleAndScopes(): void
   {
     $requested = $this->service->requestAccessByOwnerEmail($this->requesterUUID, $this->ownerEmail);
@@ -1130,7 +1181,31 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
   }
 
   /**
-   * @param array<string, string> $post
+   * @return array<string, string>
+   */
+  private function latestBusinessAuditEventOfType(string $eventType): array
+  {
+    $matches = [];
+    foreach (Database::smembers(Keys::BUSINESS_AUDIT . ':' . $this->businessId) as $eventId) {
+      $event = Database::hgetall(Keys::BUSINESS_AUDIT_EVENT . ':' . $eventId);
+      if ((string) ($event['event_type'] ?? '') === $eventType) {
+        $matches[] = $event;
+      }
+    }
+
+    $this->assertNotSame([], $matches, 'Expected audit event type ' . $eventType . ' for business ' . $this->businessId);
+    usort($matches, static function (array $left, array $right): int {
+      return strcmp((string) ($left['created_at'] ?? ''), (string) ($right['created_at'] ?? ''));
+    });
+
+    /** @var array<string, string> $latest */
+    $latest = $matches[count($matches) - 1];
+
+    return $latest;
+  }
+
+  /**
+   * @param array<string, mixed> $post
    * @return array<string, mixed>
    */
   private function invokeControllerRoute(

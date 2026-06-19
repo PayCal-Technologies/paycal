@@ -24,7 +24,7 @@ final class TeamEarningsSnapshotBuilder
    *   memberDays: array<string, list<string>>
    * }
    */
-  public static function build(string $businessId, int $year): array
+  public static function build(string $businessId, int $year, string $actorUUID = ''): array
   {
     $businessId = trim($businessId);
     $empty = self::emptySnapshot();
@@ -65,6 +65,7 @@ final class TeamEarningsSnapshotBuilder
     $teamWorkHgetallCount = 0;
     $memberBatchSize = MemberWorkEntriesFetcher::MEMBER_FETCH_BATCH_SIZE;
     $cachedMemberWork = BusinessWorkspaceCache::getMemberWork($businessId);
+    $protectedGate = new BusinessProtectedDataAccess();
 
     foreach (array_chunk($orgMembers, $memberBatchSize) as $memberBatch) {
       $batchUuids = [];
@@ -73,7 +74,16 @@ final class TeamEarningsSnapshotBuilder
       }
 
       $teamWorkScanCount += count($batchUuids) * 2;
-      $workEntriesByMember = self::resolveMemberWorkBatch($batchUuids, $year, $cachedMemberWork);
+      $workEntriesByMember = $actorUUID !== ''
+        ? $protectedGate->readMembersWork(
+          $actorUUID,
+          $businessId,
+          $batchUuids,
+          $year,
+          false,
+          'business.team_earnings.snapshot',
+        )
+        : self::resolveMemberWorkBatch($batchUuids, $year, $cachedMemberWork);
 
       foreach ($memberBatch as $memberEntry) {
         $memberUser = $memberEntry['user'];
@@ -116,6 +126,7 @@ final class TeamEarningsSnapshotBuilder
                 'site_name' => (string) ($entry['site_name'] ?? ''),
               ];
             }
+            continue;
           } elseif ($matchStrategy === 'owner_and_site') {
             $teamSiteMatchStats['match_owner_and_site']++;
           } elseif ($matchStrategy === 'unique_site_id') {
@@ -310,11 +321,10 @@ final class TeamEarningsSnapshotBuilder
   ): array {
     if ($cachedMemberWork !== null) {
       $fromCache = [];
-      $missing = [];
       foreach ($batchUuids as $memberUuid) {
         $entries = $cachedMemberWork[$memberUuid] ?? null;
         if (!is_array($entries)) {
-          $missing[] = $memberUuid;
+          $fromCache[$memberUuid] = [];
           continue;
         }
 
@@ -333,19 +343,15 @@ final class TeamEarningsSnapshotBuilder
         $fromCache[$memberUuid] = $filtered;
       }
 
-      if ($missing === []) {
-        return $fromCache;
-      }
-
-      $fetched = MemberWorkEntriesFetcher::fetchForMembers($missing, $year);
-      foreach ($fetched as $memberUuid => $entries) {
-        $fromCache[$memberUuid] = $entries;
-      }
-
       return $fromCache;
     }
 
-    return MemberWorkEntriesFetcher::fetchForMembers($batchUuids, $year);
+    $empty = [];
+    foreach ($batchUuids as $memberUuid) {
+      $empty[$memberUuid] = [];
+    }
+
+    return $empty;
   }
 
   /**

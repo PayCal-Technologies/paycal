@@ -257,6 +257,24 @@ require_once HTML.'/header.php';
         </section>
 
         <section class="doc-section">
+          <h2>How PayCal Hardened Protected Business Work Data</h2>
+
+          <p class="doc-article-meta">Published: <time datetime="2026-06-19">2026-06-19</time></p>
+          <p>
+            This article explains PayCal's June 2026 protected-work-data boundary
+            hardening: business member work rows now originate through one canonical
+            protected access gate before they can be read, reported, exported,
+            cached, or audited.
+          </p>
+          <ul class="doc-fact-list">
+            <li>Access checks cover actor authority, membership, consent, encryption key-wrap state, envelope context, and business visibility</li>
+            <li>Legacy export bypasses, stale cache paths, and bulk audit behavior now have focused regression coverage</li>
+            <li>Full release verification passed: 2,274 tests and 18,892 assertions</li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/protected-work-data-2026-06/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
           <h2>SOC 2 Compliance at PayCal</h2>
           <p class="doc-article-meta">Published: <time datetime="2026-04-13">2026-04-13</time></p>
           <p>

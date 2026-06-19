@@ -36,14 +36,19 @@ $memberDays_      = [];
 
 if (($selectedOrgId ?? '') !== '') {
   Lens::timeStart('Team Earnings: resolve snapshot');
-  $cachedSnapshot = BusinessWorkspaceCache::getTeamEarnings($selectedOrgId, $teamEarningsYear);
+  $teamEarningsActorUUID = trim((string) ($userUUID ?? User::currentUUID()));
+  $cachedSnapshot = $teamEarningsActorUUID === ''
+    ? BusinessWorkspaceCache::getTeamEarnings($selectedOrgId, $teamEarningsYear)
+    : null;
   if ($cachedSnapshot !== null) {
     Lens::add('Team Earnings: snapshot source', ['source' => 'workspace_cache']);
     TeamEarningsSnapshotBuilder::applySnapshot($cachedSnapshot);
   } else {
     Lens::add('Team Earnings: snapshot source', ['source' => 'live_build']);
-    $snapshot = TeamEarningsSnapshotBuilder::build($selectedOrgId, $teamEarningsYear);
-    BusinessWorkspaceCache::putTeamEarnings($selectedOrgId, $teamEarningsYear, $snapshot);
+    $snapshot = TeamEarningsSnapshotBuilder::build($selectedOrgId, $teamEarningsYear, $teamEarningsActorUUID);
+    if ($teamEarningsActorUUID === '') {
+      BusinessWorkspaceCache::putTeamEarnings($selectedOrgId, $teamEarningsYear, $snapshot);
+    }
     TeamEarningsSnapshotBuilder::applySnapshot($snapshot);
   }
   Lens::timeEnd('Team Earnings: resolve snapshot');

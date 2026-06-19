@@ -1,27 +1,7 @@
-<?php declare(strict_types=1);
-
+<?php
 namespace PayCal\Domain;
 
-require_once '../../config.php';
-
-if (function_exists(__NAMESPACE__ . '\\org_js_index_i18n') === false) {
-  function org_js_index_i18n(string $key): string
-  {
-    static $cache = [];
-    if (array_key_exists($key, $cache) === false) {
-      $cache[$key] = Strings::i18n($key);
-    }
-
-    return $cache[$key];
-  }
-}
-
-Authentication::abortIfUnauthenticated();
-
-CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
-Javascript::renderDocBlock();
-
+require_once __DIR__ . '/_bootstrap.php';
 ?>
   const EDITOR_SENSITIVE_FIELD_IDS = [
     'businesses_editor_type',
@@ -72,6 +52,11 @@ Javascript::renderDocBlock();
     browserGrid: document.getElementById('businesses-browser-grid'),
     browserPanelStatus: document.getElementById('businesses_browser_panel_status'),
     browserGridStatus: document.getElementById('businesses_browser_grid_sr_status'),
+    browserProfileDialog: document.getElementById('businesses_browser_profile_dialog'),
+    browserProfileTitle: document.getElementById('businesses_browser_profile_title'),
+    browserProfileBody: document.getElementById('businesses_browser_profile_body'),
+    browserProfileConnect: document.getElementById('businesses_browser_profile_connect'),
+    browserProfileStatus: document.getElementById('businesses_browser_profile_status'),
     currentPanel: document.getElementById('businesses_current_panel'),
     currentSummary: document.getElementById('businesses_current_summary'),
     currentMeta: document.getElementById('businesses_current_meta'),
@@ -85,6 +70,9 @@ Javascript::renderDocBlock();
     membershipConsentClose: document.getElementById('businesses_membership_consent_close'),
     membershipConsentCancel: document.getElementById('businesses_membership_consent_cancel'),
     membershipConsentAction: document.getElementById('businesses_membership_consent_action'),
+    membershipConsentCurrentAck: document.getElementById('businesses_membership_consent_current_ack'),
+    membershipConsentCurrentVersion: document.getElementById('businesses_membership_consent_current_version'),
+    membershipConsentCurrentSharing: document.getElementById('businesses_membership_consent_current_sharing'),
     membershipConsentDisclaimer: document.getElementById('businesses_membership_consent_disclaimer'),
     membershipConsentAcknowledge: document.getElementById('businesses_membership_consent_ack'),
     membershipConsentError: document.getElementById('businesses_membership_consent_error'),
@@ -234,6 +222,44 @@ Javascript::renderDocBlock();
   };
 
   let liveToastTimerId = null;
+  let lastAutosaveTarget = null;
+
+  const rememberAutosaveTarget = (target) => {
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const field = target.closest('input, select, textarea');
+    if (!(field instanceof HTMLElement) || !String(field.id || '').startsWith('businesses_')) {
+      return;
+    }
+
+    lastAutosaveTarget = field;
+  };
+
+  const markAutosaveTargetSaved = () => {
+    const field = lastAutosaveTarget instanceof HTMLElement && document.contains(lastAutosaveTarget)
+      ? lastAutosaveTarget
+      : null;
+    const target = field?.closest('.form-field, .item_pair, .businesses_field, .settings_field') || field;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    window.clearTimeout(Number(target.dataset.autosaveShimmerTimer || 0));
+    target.classList.remove('is-autosaved');
+    target.dataset.autosaveShimmer = 'saved';
+    target.classList.add('is-autosaved');
+    target.dataset.autosaveShimmerTimer = String(window.setTimeout(() => {
+      target.classList.remove('is-autosaved');
+      delete target.dataset.autosaveShimmer;
+      delete target.dataset.autosaveShimmerTimer;
+    }, 950));
+  };
+
+  document.addEventListener('input', (event) => rememberAutosaveTarget(event.target), true);
+  document.addEventListener('change', (event) => rememberAutosaveTarget(event.target), true);
+
   const showBusinessesToast = (message, type = 'save', durationMs = 2600, sticky = true) => {
     const text = String(message || '').trim();
     if (text === '') {
@@ -1416,6 +1442,64 @@ Javascript::renderDocBlock();
       .join('|');
   };
 
+  const summarizeOrganizationPayloadForDiagnostics = (payload, signature = '') => {
+    const payloadObject = payload && typeof payload === 'object' ? payload : {};
+    const keys = Object.keys(payloadObject);
+    const settingsCache = state.editorSettingsCache && typeof state.editorSettingsCache === 'object'
+      ? state.editorSettingsCache
+      : {};
+
+    const changedKeys = keys.filter((key) => {
+      const nextValue = String(payloadObject[key] ?? '');
+      const previousValue = key === 'name'
+        ? String(settingsCache.name ?? getSelectedBusiness()?.name ?? '')
+        : String(settingsCache[key] ?? '');
+      return nextValue !== previousValue;
+    });
+
+    return {
+      payload_key_count: keys.length,
+      payload_name_length: String(payloadObject.name || '').length,
+      payload_timezone_present: String(payloadObject.timezone || '').trim() !== '',
+      payload_currency_present: String(payloadObject.currency || '').trim() !== '',
+      payload_signature_length: String(signature || '').length,
+      payload_signature_changed: String(signature || '') !== String(state.organizationLastSavedSignature || ''),
+      changed_keys: changedKeys.slice(0, 24),
+      changed_key_count: changedKeys.length,
+    };
+  };
+
+  const emitBusinessDetailsAutosaveDiagnostic = (eventName, detail = {}, level = 'log') => {
+    if (resolveBusinessSubPage() !== 'details') {
+      return;
+    }
+
+    const payload = {
+      source: String(detail.source || ''),
+      refresh_after_save: Boolean(detail.refresh_after_save),
+      selected_business_id_present: String(state.selectedBusinessId || '').trim() !== '',
+      editor_hydrating: Boolean(state.editorHydrating),
+      organization_save_in_flight: Boolean(state.organizationSaveInFlight),
+      organization_pending_source: String(state.organizationSavePendingSource || ''),
+      organization_signature_present: String(state.organizationLastSavedSignature || '') !== '',
+      ...detail,
+    };
+
+    if (typeof pushBusinessDetailsDiagnostic === 'function') {
+      pushBusinessDetailsDiagnostic(eventName, payload, level);
+      return;
+    }
+
+    const message = `[Business Details][autosave] ${eventName}`;
+    if (level === 'error') {
+      PW.error(message, payload);
+    } else if (level === 'warn') {
+      PW.warn(message, payload);
+    } else {
+      PW.log(message, payload);
+    }
+  };
+
   const saveBusinessEditorSettings = async (source = 'manual', refreshAfterSave = false) => {
     if (resolveBusinessSubPage() === 'details') {
       return saveOrganizationSettings(source, refreshAfterSave);
@@ -1454,6 +1538,7 @@ Javascript::renderDocBlock();
         toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_CONTACT_CARD_SAVED')); ?>';
       }
       showBusinessesToast(toastMessage, 'save', source === 'manual' ? 5000 : 2600, true);
+      markAutosaveTargetSaved();
       if (refreshAfterSave) {
         await refreshIndex(state.selectedBusinessId, true);
       }
@@ -1474,15 +1559,36 @@ Javascript::renderDocBlock();
 
   const scheduleEditorAutoSave = (delayMs = 600, source = 'auto') => {
     const subPage = resolveBusinessSubPage();
-    if (state.editorHydrating || subPage === 'payroll') {
+    if (state.editorHydrating) {
+      emitBusinessDetailsAutosaveDiagnostic('autosave-skip-hydrating', {
+        source,
+        delay_ms: delayMs,
+      }, 'warn');
+      return;
+    }
+
+    if (subPage === 'payroll') {
       return;
     }
 
     if (state.editorAutoSaveTimerId !== null) {
       window.clearTimeout(state.editorAutoSaveTimerId);
+      emitBusinessDetailsAutosaveDiagnostic('autosave-reschedule', {
+        source,
+        delay_ms: delayMs,
+      });
     }
 
+    emitBusinessDetailsAutosaveDiagnostic('autosave-scheduled', {
+      source,
+      delay_ms: delayMs,
+    });
+
     state.editorAutoSaveTimerId = window.setTimeout(() => {
+      emitBusinessDetailsAutosaveDiagnostic('autosave-timer-fired', {
+        source,
+        delay_ms: delayMs,
+      });
       saveBusinessEditorSettings(source, false).catch((error) => PW.error(error));
     }, delayMs);
   };
@@ -1783,6 +1889,7 @@ Javascript::renderDocBlock();
       state.payrollLastSavedSignature = signature;
       state.editorLastSavedSignature = signature;
       showBusinessesToast(T.payrollSaved, 'save', source === 'manual' ? 5000 : 2600, true);
+      markAutosaveTargetSaved();
       setPayrollStatus(T.payrollSaved, 'success');
       if (refreshAfterSave) {
         await refreshIndex(state.selectedBusinessId, false);
@@ -1804,17 +1911,51 @@ Javascript::renderDocBlock();
   };
 
   const saveOrganizationSettings = async (source = 'auto', refreshAfterSave = false) => {
-    if (state.selectedBusinessId === '' || state.editorHydrating) {
+    emitBusinessDetailsAutosaveDiagnostic('save-start', {
+      source,
+      refresh_after_save: refreshAfterSave,
+    });
+
+    if (state.selectedBusinessId === '') {
+      emitBusinessDetailsAutosaveDiagnostic('save-skip-no-business-id', {
+        source,
+        refresh_after_save: refreshAfterSave,
+      }, 'warn');
+      return false;
+    }
+
+    if (state.editorHydrating) {
+      emitBusinessDetailsAutosaveDiagnostic('save-skip-hydrating', {
+        source,
+        refresh_after_save: refreshAfterSave,
+      }, 'warn');
       return false;
     }
 
     const payload = collectOrganizationPayload();
     const signature = buildEditorPayloadSignature(payload);
+    const payloadSummary = summarizeOrganizationPayloadForDiagnostics(payload, signature);
+    emitBusinessDetailsAutosaveDiagnostic('save-payload-collected', {
+      source,
+      refresh_after_save: refreshAfterSave,
+      ...payloadSummary,
+    });
+
     if (signature === state.organizationLastSavedSignature) {
+      emitBusinessDetailsAutosaveDiagnostic('save-skip-no-changes', {
+        source,
+        refresh_after_save: refreshAfterSave,
+        ...payloadSummary,
+      });
       return false;
     }
 
     if (payload.name.length < 2) {
+      emitBusinessDetailsAutosaveDiagnostic('save-skip-name-too-short', {
+        source,
+        refresh_after_save: refreshAfterSave,
+        ...payloadSummary,
+      }, 'warn');
       setOrganizationStatus(T.nameMin, 'error');
       showBusinessesToast(T.nameMin, 'error', 7000, true);
       return false;
@@ -1822,12 +1963,25 @@ Javascript::renderDocBlock();
 
     if (state.organizationSaveInFlight) {
       state.organizationSavePendingSource = source;
+      emitBusinessDetailsAutosaveDiagnostic('save-queued-in-flight', {
+        source,
+        refresh_after_save: refreshAfterSave,
+        pending_source: source,
+        ...payloadSummary,
+      }, 'warn');
       return false;
     }
 
     state.organizationSaveInFlight = true;
+    emitBusinessDetailsAutosaveDiagnostic('request-start', {
+      source,
+      refresh_after_save: refreshAfterSave,
+      ...payloadSummary,
+    });
+    const requestStartedAt = performance.now();
     try {
-      await postForm(`/api/v1/businesses/${encodeURIComponent(state.selectedBusinessId)}/settings/update`, payload);
+      const responseData = await postForm(`/api/v1/businesses/${encodeURIComponent(state.selectedBusinessId)}/settings/update`, payload);
+      const requestDurationMs = Math.round(performance.now() - requestStartedAt);
       state.organizationLastSavedSignature = signature;
       state.editorLastSavedSignature = signature;
       let toastMessage = T.organizationSaved;
@@ -1841,6 +1995,15 @@ Javascript::renderDocBlock();
       if (toastMessage !== '') {
         showBusinessesToast(toastMessage, 'save', 2600, true);
       }
+      markAutosaveTargetSaved();
+      emitBusinessDetailsAutosaveDiagnostic('request-success', {
+        source,
+        refresh_after_save: refreshAfterSave,
+        request_duration_ms: requestDurationMs,
+        response_key_count: responseData && typeof responseData === 'object' ? Object.keys(responseData).length : 0,
+        toast_message_present: toastMessage !== '',
+        ...payloadSummary,
+      });
       setOrganizationStatus('');
       if (refreshAfterSave) {
         await refreshIndex(state.selectedBusinessId, false);
@@ -1851,6 +2014,15 @@ Javascript::renderDocBlock();
       return true;
     } catch (error) {
       const message = error instanceof Error && error.message ? error.message : T.organizationSaveFailed;
+      emitBusinessDetailsAutosaveDiagnostic('request-failed', {
+        source,
+        refresh_after_save: refreshAfterSave,
+        request_duration_ms: Math.round(performance.now() - requestStartedAt),
+        error_message: message,
+        error_status: Number(error?.status || 0),
+        error_data_keys: error?.data && typeof error.data === 'object' ? Object.keys(error.data) : [],
+        ...payloadSummary,
+      }, 'error');
       setOrganizationStatus(message, 'error');
       showBusinessesToast(message, 'error', 7000, true);
       return false;
@@ -1859,16 +2031,34 @@ Javascript::renderDocBlock();
       if (state.organizationSavePendingSource !== '') {
         const pending = state.organizationSavePendingSource;
         state.organizationSavePendingSource = '';
+        emitBusinessDetailsAutosaveDiagnostic('save-replay-pending', {
+          source: pending,
+          refresh_after_save: false,
+        });
         saveOrganizationSettings(pending, false).catch((error) => PW.error(error));
       }
     }
   };
 
   const openDetailsPage = async (businessId) => {
+    emitBusinessDetailsAutosaveDiagnostic('open-details-start', {
+      business_id_present: String(businessId || '').trim() !== '',
+    });
+
     const business = findBusiness(businessId);
     if (!business) {
+      emitBusinessDetailsAutosaveDiagnostic('open-details-missing-business', {
+        business_id_present: String(businessId || '').trim() !== '',
+      }, 'warn');
       setOrganizationStatus(T.organizationNoBusiness, 'error');
       return;
+    }
+
+    const perf = typeof resolveBusinessDetailsLensPerf === 'function'
+      ? resolveBusinessDetailsLensPerf()
+      : null;
+    if (perf?.isEnabled()) {
+      perf.start('openDetailsPage');
     }
 
     stopDiscoveryPolling();
@@ -1876,17 +2066,34 @@ Javascript::renderDocBlock();
     state.selectedBusinessId = businessId;
     setEditorMeta(business);
     closeContactImagePopover();
+    emitBusinessDetailsAutosaveDiagnostic('open-details-business-selected', {
+      business_id_present: String(businessId || '').trim() !== '',
+      business_found: true,
+    });
 
     try {
       await loadBusinessSettings(businessId);
       state.organizationLastSavedSignature = buildEditorPayloadSignature(collectOrganizationPayload());
       setOrganizationStatus('');
       bindOrganizationContactPanelEvents();
+      emitBusinessDetailsAutosaveDiagnostic('open-details-ready', {
+        business_id_present: String(businessId || '').trim() !== '',
+        organization_signature_present: String(state.organizationLastSavedSignature || '') !== '',
+      });
     } catch (error) {
       PW.error(error);
       const message = error instanceof Error && error.message ? error.message : T.loadDefaultsFailed;
+      emitBusinessDetailsAutosaveDiagnostic('open-details-failed', {
+        business_id_present: String(businessId || '').trim() !== '',
+        error_message: message,
+        error_status: Number(error?.status || 0),
+      }, 'error');
       setOrganizationStatus(message, 'error');
       PC.showToast(message, 'error', 7000, true);
+    } finally {
+      if (perf?.isEnabled()) {
+        perf.end('openDetailsPage', { ranked: false });
+      }
     }
   };
 
@@ -3294,6 +3501,107 @@ Javascript::renderDocBlock();
     }
   };
 
+  const setBrowserProfileStatus = (message, isError = true) => {
+    if (!(elements.browserProfileStatus instanceof HTMLElement)) {
+      return;
+    }
+
+    const text = String(message || '');
+    elements.browserProfileStatus.textContent = text;
+    elements.browserProfileStatus.classList.toggle('hidden', text === '');
+    elements.browserProfileStatus.classList.toggle('form_error', isError);
+    elements.browserProfileStatus.classList.toggle('help_text', !isError);
+  };
+
+  const formatBrowserProfileLocation = (profile) => {
+    const city = String(profile?.address_city || '').trim();
+    const province = String(profile?.address_region || '').trim();
+    const countryRaw = String(profile?.address_country || '').trim();
+    const country = countryRaw === '' ? 'Canada' : countryRaw;
+    const cityProvince = [city, province].filter((part) => part !== '').join(' ');
+
+    return [cityProvince, country].filter((part) => part !== '').join(', ');
+  };
+
+  const formatBrowserProfileWebsite = (rawValue) => {
+    const rawWebsite = String(rawValue || '').trim();
+    if (rawWebsite === '') {
+      return '';
+    }
+
+    const websiteText = rawWebsite.replace(/^https?:\/\//i, '').replace(/\/$/, '');
+    const websiteHref = /^https?:\/\//i.test(rawWebsite) ? rawWebsite : `https://${rawWebsite}`;
+
+    return `<a href="${safeText(websiteHref)}" target="_blank" rel="noopener noreferrer">${safeText(websiteText)}</a>`;
+  };
+
+  const renderBrowserProfileDialog = (row) => {
+    if (!(elements.browserProfileBody instanceof HTMLElement)) {
+      return;
+    }
+
+    const profile = row?.publicProfile && typeof row.publicProfile === 'object' ? row.publicProfile : {};
+    const businessName = String(row?.businessName || '').trim() || 'Business profile';
+    const ownerName = String(row?.ownerName || '').trim();
+    const ownerEmail = String(row?.email || '').trim();
+    const location = formatBrowserProfileLocation(profile);
+    const websiteMarkup = formatBrowserProfileWebsite(profile.website);
+    const employeeCount = String(profile.employee_count || '').trim();
+    const contactEmail = String(profile.contact_email || '').trim();
+    const contactPhone = formatPhoneDisplayValue(String(profile.contact_phone || '').trim());
+    const rows = [
+      ['Business', businessName],
+      ['Location', location],
+      ['Industry', String(profile.industry || '').trim()],
+      ['Website', websiteMarkup],
+      ['Owner', ownerName],
+      ['Owner email', ownerEmail],
+      ['Contact email', contactEmail],
+      ['Contact phone', contactPhone],
+      ['Employees', employeeCount],
+      ['Support hours', String(profile.support_hours || '').trim()],
+    ].filter(([, value]) => String(value || '').trim() !== '');
+
+    if (elements.browserProfileTitle instanceof HTMLElement) {
+      elements.browserProfileTitle.textContent = businessName;
+    }
+
+    Guardian.setHTML(elements.browserProfileBody, `
+      <dl class="businesses_browser_profile_grid">
+        ${rows.map(([label, value]) => {
+          const renderedValue = label === 'Website' ? String(value || '') : safeText(value);
+          return `<dt>${safeText(label)}</dt><dd>${renderedValue}</dd>`;
+        }).join('')}
+      </dl>
+    `);
+
+    if (elements.browserProfileConnect instanceof HTMLButtonElement) {
+      elements.browserProfileConnect.dataset.key = String(row?.key || '');
+      elements.browserProfileConnect.disabled = ownerEmail === '';
+    }
+
+    setBrowserProfileStatus('');
+  };
+
+  const openBrowserProfileDialog = (key) => {
+    const row = state.browserLastResults.find((candidate) => String(candidate?.key || '') === String(key || ''));
+    if (!row || !(elements.browserProfileDialog instanceof HTMLDialogElement)) {
+      return;
+    }
+
+    state.browserSelectedResultKey = String(row.key || '');
+    renderBrowserProfileDialog(row);
+    if (!elements.browserProfileDialog.open) {
+      elements.browserProfileDialog.showModal();
+    }
+  };
+
+  const closeBrowserProfileDialog = () => {
+    if (elements.browserProfileDialog instanceof HTMLDialogElement && elements.browserProfileDialog.open) {
+      elements.browserProfileDialog.close();
+    }
+  };
+
   const renderBrowserGrid = (container, rows, emptyMessage) => {
     if (!(container instanceof HTMLElement)) {
       return;
@@ -3313,23 +3621,9 @@ Javascript::renderDocBlock();
       const businessText = row.businessName === '' ? '<?php echo addslashes(org_js_index_i18n('BUSINESSES_UNKNOWN_NAME')); ?>' : row.businessName;
       const profile = row.publicProfile && typeof row.publicProfile === 'object' ? row.publicProfile : {};
 
-      const city = String(profile.address_city || '').trim();
-      const province = String(profile.address_region || '').trim();
-      const countryRaw = String(profile.address_country || '').trim();
-      const country = countryRaw === '' ? 'Canada' : countryRaw;
-      const cityProvince = [city, province]
-        .filter((part) => part !== '')
-        .join(' ');
-      const locationLine = [cityProvince, country]
-        .filter((part) => part !== '')
-        .join(', ');
+      const locationLine = formatBrowserProfileLocation(profile);
 
       const industry = String(profile.industry || '').trim();
-      const rawWebsite = String(profile.website || '').trim();
-      const websiteText = rawWebsite.replace(/^https?:\/\//i, '').replace(/\/$/, '');
-      const websiteHref = rawWebsite === ''
-        ? ''
-        : (/^https?:\/\//i.test(rawWebsite) ? rawWebsite : `https://${rawWebsite}`);
       const employeeCountRaw = String(profile.employee_count || '').trim();
       const employeeCount = /^\d+$/.test(employeeCountRaw)
         ? `${employeeCountRaw} ${employeeCountRaw === '1' ? 'employee' : 'employees'}`
@@ -3339,9 +3633,9 @@ Javascript::renderDocBlock();
       const ownerEmailDisplay = String(row.email || '').trim() === '' ? '<?php echo addslashes(org_js_index_i18n('BUSINESSES_NO_EMAIL_AVAILABLE')); ?>' : String(row.email || '').trim();
       const industryDisplay = industry === '' ? '<?php echo addslashes(org_js_index_i18n('BUSINESSES_INDUSTRY_UNAVAILABLE')); ?>' : industry;
       const employeesDisplay = employeeCount === '' ? '<?php echo addslashes(org_js_index_i18n('BUSINESSES_EMPLOYEES_UNAVAILABLE')); ?>' : employeeCount;
-      const websiteDisplay = websiteHref === ''
+      const websiteDisplay = formatBrowserProfileWebsite(profile.website) === ''
         ? '<?php echo addslashes(org_js_index_i18n('BUSINESSES_WEBSITE_UNAVAILABLE')); ?>'
-        : `<a href="${safeText(websiteHref)}" target="_blank" rel="noopener noreferrer">${safeText(websiteText)}</a>`;
+        : formatBrowserProfileWebsite(profile.website);
       const supportDisplay = supportHours === '' ? '<?php echo addslashes(org_js_index_i18n('BUSINESSES_SUPPORT_HOURS_UNAVAILABLE')); ?>' : safeText(supportHours);
 
       return `
@@ -3360,12 +3654,10 @@ Javascript::renderDocBlock();
           <section class="businesses_browser_card_footer">
             <button
               type="button"
-              class="btn btn_primary btn_sm businesses_browser_row_action"
-              data-browser-action="connect"
-              data-email="${safeText(row.email)}"
-              data-org-name="${safeText(row.businessName)}"
-              data-owner-name="${safeText(row.ownerName)}"
-            ><?php echo addslashes(org_js_index_i18n('BUSINESSES_REQUEST_JOIN_BTN')); ?></button>
+              class="btn btn_secondary btn_sm businesses_browser_row_action"
+              data-browser-action="profile"
+              data-key="${safeText(row.key)}"
+            >View profile</button>
           </section>
         </article>
       `;
@@ -3416,6 +3708,7 @@ Javascript::renderDocBlock();
 
     await postForm('/api/v1/businesses/access/request', {
       owner_email: normalizedEmail,
+      access_level: state.requestAccessLevel || 'readonly',
     });
 
     const businessLabel = String(businessName || '').trim();
@@ -4552,6 +4845,7 @@ Javascript::renderDocBlock();
         ? T.payPeriodStartUpdated
         : T.profileSettingsSaved;
       PC.showToast(successMessage, 'save');
+      markAutosaveTargetSaved();
     } catch (error) {
       PW.error(error);
       debugLog('[savePersonalBusinessSettings] Error caught:', {
@@ -5320,6 +5614,11 @@ Javascript::renderDocBlock();
       ? payload.settings
       : {};
 
+    emitBusinessDetailsAutosaveDiagnostic('hydrate-start', {
+      business_present: Boolean(business),
+      settings_key_count: Object.keys(settings).length,
+    });
+
     renderOwnerSummary(payload, business);
 
     if (elements.name instanceof HTMLInputElement) {
@@ -5378,6 +5677,15 @@ Javascript::renderDocBlock();
     if (resolveBusinessSubPage() === 'payroll') {
       state.payrollLastSavedSignature = payloadSignature;
     }
+
+    emitBusinessDetailsAutosaveDiagnostic('hydrate-complete', {
+      business_present: Boolean(business),
+      settings_key_count: Object.keys(settings).length,
+      ...summarizeOrganizationPayloadForDiagnostics(
+        resolveBusinessSubPage() === 'details' ? collectOrganizationPayload() : {},
+        payloadSignature,
+      ),
+    });
   };
 
   const formatInviteTimestamp = (value) => {
@@ -6699,10 +7007,30 @@ Javascript::renderDocBlock();
   };
 
   const loadBusinessSettings = async (businessId) => {
-    const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(businessId)}/settings`);
-    const business = findBusiness(businessId);
-    hydrateSettings(payload, business);
-    return payload;
+    emitBusinessDetailsAutosaveDiagnostic('settings-load-start', {
+      business_id_present: String(businessId || '').trim() !== '',
+    });
+    const requestStartedAt = performance.now();
+    try {
+      const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(businessId)}/settings`);
+      emitBusinessDetailsAutosaveDiagnostic('settings-load-success', {
+        business_id_present: String(businessId || '').trim() !== '',
+        request_duration_ms: Math.round(performance.now() - requestStartedAt),
+        payload_key_count: payload && typeof payload === 'object' ? Object.keys(payload).length : 0,
+        settings_key_count: payload?.settings && typeof payload.settings === 'object' ? Object.keys(payload.settings).length : 0,
+      });
+      const business = findBusiness(businessId);
+      hydrateSettings(payload, business);
+      return payload;
+    } catch (error) {
+      emitBusinessDetailsAutosaveDiagnostic('settings-load-failed', {
+        business_id_present: String(businessId || '').trim() !== '',
+        request_duration_ms: Math.round(performance.now() - requestStartedAt),
+        error_message: error instanceof Error && error.message ? error.message : T.loadDefaultsFailed,
+        error_status: Number(error?.status || 0),
+      }, 'error');
+      throw error;
+    }
   };
 
 
@@ -7544,6 +7872,25 @@ Javascript::renderDocBlock();
 
     elements.membershipConsentAcknowledge.checked = false;
     elements.membershipConsentDisclaimer.value = '';
+
+    const refreshMembershipConsentMatrix = () => {
+      const consented = elements.membershipConsentAcknowledge.checked;
+      if (elements.membershipConsentCurrentAck instanceof HTMLElement) {
+        elements.membershipConsentCurrentAck.textContent = consented
+          ? 'Granted when you continue.'
+          : 'Not granted.';
+      }
+      if (elements.membershipConsentCurrentVersion instanceof HTMLElement) {
+        elements.membershipConsentCurrentVersion.textContent = 'v1';
+      }
+      if (elements.membershipConsentCurrentSharing instanceof HTMLElement) {
+        elements.membershipConsentCurrentSharing.textContent = consented
+          ? 'Enabled only while membership, consent, credential, and envelope checks pass.'
+          : 'Disabled until you consent.';
+      }
+    };
+
+    refreshMembershipConsentMatrix();
     if (elements.membershipConsentAction instanceof HTMLElement) {
       elements.membershipConsentAction.textContent = String(actionLabel || T.membershipConsentIntro);
     }
@@ -7605,6 +7952,7 @@ Javascript::renderDocBlock();
 
       const cleanup = () => {
         elements.membershipConsentForm?.removeEventListener('submit', onSubmit);
+        elements.membershipConsentAcknowledge?.removeEventListener('change', refreshMembershipConsentMatrix);
         elements.membershipConsentCancel?.removeEventListener('click', onCancelClick);
         elements.membershipConsentClose?.removeEventListener('click', onCancelClick);
         elements.membershipConsentDialog?.removeEventListener('click', onDialogClick);
@@ -7612,6 +7960,7 @@ Javascript::renderDocBlock();
       };
 
       elements.membershipConsentForm.addEventListener('submit', onSubmit);
+      elements.membershipConsentAcknowledge.addEventListener('change', refreshMembershipConsentMatrix);
       elements.membershipConsentCancel?.addEventListener('click', onCancelClick);
       elements.membershipConsentClose?.addEventListener('click', onCancelClick);
       elements.membershipConsentDialog.addEventListener('click', onDialogClick);
@@ -8688,25 +9037,42 @@ Javascript::renderDocBlock();
     });
     const handleBrowserGridAction = (event) => {
       const target = event.target instanceof Element
-        ? event.target.closest('[data-browser-action="connect"]')
+        ? event.target.closest('[data-browser-action="profile"]')
         : null;
       if (!(target instanceof HTMLButtonElement)) {
         return;
       }
 
-      const email = String(target.dataset.email || '').trim();
-      const businessName = String(target.dataset.orgName || '').trim();
-      const ownerName = String(target.dataset.ownerName || '').trim();
+      openBrowserProfileDialog(String(target.dataset.key || ''));
+    };
 
-      connectToBusinessFromBrowser(email, businessName, ownerName).catch((error) => {
+    const handleBrowserProfileConnect = () => {
+      const key = String(elements.browserProfileConnect?.dataset?.key || state.browserSelectedResultKey || '');
+      const row = state.browserLastResults.find((candidate) => String(candidate?.key || '') === key);
+      if (!row) {
+        return;
+      }
+
+      connectToBusinessFromBrowser(row.email, row.businessName, row.ownerName).then(() => {
+        setBrowserProfileStatus('Access request sent.', false);
+        closeBrowserProfileDialog();
+      }).catch((error) => {
         PW.error(error);
         const message = error instanceof Error && error.message ? error.message : T.requestJoinFailed;
+        setBrowserProfileStatus(message, true);
         setBrowserPanelStatus(message);
         setDiscoveryPanelStatus(message);
         PC.showToast(message, 'error', 7000, true);
       });
     };
+
     elements.browserGrid?.addEventListener('click', handleBrowserGridAction);
+    elements.browserProfileConnect?.addEventListener('click', handleBrowserProfileConnect);
+    document.querySelectorAll('[data-dialog-close="businesses_browser_profile_dialog"]').forEach((button) => {
+      button.addEventListener('click', () => {
+        closeBrowserProfileDialog();
+      });
+    });
     elements.currentInfoLink?.addEventListener('click', () => {
       openCurrentBusinessDetailsDialog();
     });
@@ -10252,12 +10618,15 @@ Javascript::renderDocBlock();
   const initialize = async () => {
     const subPage = resolveBusinessSubPage();
     const membersPerf = subPage === 'members' ? resolveMembersLensPerf() : null;
+    const detailsPerf = subPage === 'details' && typeof resolveBusinessDetailsLensPerf === 'function'
+      ? resolveBusinessDetailsLensPerf()
+      : null;
 
     const runInitialize = async () => {
       bindEvents();
       syncBusinessWorkspaceElementRefs();
 
-      if (subPage === '' && elements.browserGrid instanceof HTMLElement) {
+      if (elements.browserGrid instanceof HTMLElement) {
         initializeBusinessBrowser();
       }
 
@@ -10269,6 +10638,10 @@ Javascript::renderDocBlock();
       const inviteToken = String(params.get('org_invite_token') || '').trim();
       if (inviteToken !== '') {
         await acceptBusinessInviteToken(inviteToken);
+      }
+
+      if (subPage === 'join') {
+        return;
       }
 
       await refreshIndex();
@@ -10296,15 +10669,21 @@ Javascript::renderDocBlock();
       }
     };
 
-    if (membersPerf?.isEnabled()) {
+    if (membersPerf?.isEnabled() || detailsPerf?.isEnabled()) {
       try {
         await runInitialize();
       } finally {
         if (typeof finalizeBusinessMembersLensPerfSummary === 'function') {
           finalizeBusinessMembersLensPerfSummary('Performance Summary');
-        } else {
+        } else if (membersPerf?.isEnabled()) {
           membersPerf.markHydrationComplete();
           membersPerf.summarize('Performance Summary');
+        }
+        if (typeof finalizeBusinessDetailsLensPerfSummary === 'function') {
+          finalizeBusinessDetailsLensPerfSummary('Autosave Path Summary');
+        } else if (detailsPerf?.isEnabled()) {
+          detailsPerf.markHydrationComplete();
+          detailsPerf.summarize('Autosave Path Summary');
         }
       }
       return;
@@ -10318,5 +10697,9 @@ Javascript::renderDocBlock();
 
     if (subPage === 'reports' && typeof finalizeBusinessReportsLensPerfSummary === 'function') {
       finalizeBusinessReportsLensPerfSummary('Performance Summary');
+    }
+
+    if (subPage === 'details' && typeof finalizeBusinessDetailsLensPerfSummary === 'function') {
+      finalizeBusinessDetailsLensPerfSummary('Autosave Path Summary');
     }
   };

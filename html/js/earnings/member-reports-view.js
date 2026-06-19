@@ -15,7 +15,6 @@ import { resolveUserLocale } from '/js/earnings/locale.js';
 import { initForecastWorkspace } from '/js/earnings/forecast-calculator.js';
 
 const GRAPH_PREFIX = 'member_reports_line_graph_';
-const PIE_PREFIX = 'member_reports_piegraphs_';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -93,7 +92,7 @@ function extractDailyPayload(jsonResponse) {
   const dataCandidate = (jsonResponse.data && typeof jsonResponse.data === 'object')
     ? jsonResponse.data
     : (() => {
-        const { status, message, ...rest } = jsonResponse;
+        const { status: _status, message: _message, ...rest } = jsonResponse;
         return rest;
       })();
   const normalized = {};
@@ -251,6 +250,9 @@ export function initMemberReportsEarningsView(container, options = {}) {
   const showToast = typeof options.showToast === 'function' ? options.showToast : () => {};
   const userLocale = String(config.USER_LOCALE || resolveUserLocale()).trim() || resolveUserLocale();
   const apiBase = `/api/v1/businesses/${encodeURIComponent(businessId)}/members/${encodeURIComponent(memberUuid)}/reports`;
+  const protectedExportEndpoint = (format) => (
+    `${apiBase}/export/${encodeURIComponent(format)}`
+  );
   const getElement = (id) => root.querySelector(`#${CSS.escape(id)}`) || document.getElementById(id);
   const formatHelpers = createEarningsFormatHelpers({ locale: userLocale });
   const trendChartOptions = {
@@ -543,11 +545,36 @@ export function initMemberReportsEarningsView(container, options = {}) {
     try {
       button.disabled = true;
       button.textContent = '...';
+      const fileSuffix = String(year);
+      if (format === 'xlsx' || format === 'pdf') {
+        const response = await fetch(protectedExportEndpoint(format), {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scope, year: Number(year) }),
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Export failed (${response.status}): ${text}`);
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `paycal-member-${scope}-${fileSuffix}.${format}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+
       const dailyPayload = await fetchDailyYearData(Number(year));
       const rows = EarningsExport.buildDetailedRows(dailyPayload);
       if (!rows.length) {
         throw new Error('No earnings records found for this export range.');
       }
+      const browserConvenienceSuffix = `${fileSuffix}-browser-convenience`;
       const reportParams = {
         year: Number(year),
         employee: memberUuid,
@@ -565,25 +592,20 @@ export function initMemberReportsEarningsView(container, options = {}) {
       } else {
         throw new Error(`Unsupported export scope: ${scope}`);
       }
-      const fileSuffix = String(year);
       if (format === 'csv') {
         const csv = scope === 'yearly'
           ? EarningsExport.generateYearlyCsv(rows, report)
           : scope === 'monthly'
             ? EarningsExport.generateMonthlyCsv(rows, report)
             : EarningsExport.generateDailyCsv(rows, report);
-        EarningsExport.downloadTextFile(csv, `paycal-member-${scope}-${fileSuffix}.csv`, 'text/csv;charset=utf-8');
+        EarningsExport.downloadTextFile(csv, `paycal-member-${scope}-${browserConvenienceSuffix}.csv`, 'text/csv;charset=utf-8');
       } else if (format === 'txt') {
         const txt = scope === 'yearly'
           ? EarningsExport.generateYearlyTxt(rows, report)
           : scope === 'monthly'
             ? EarningsExport.generateMonthlyTxt(rows, report)
             : EarningsExport.generateDailyTxt(rows, report);
-        EarningsExport.downloadTextFile(txt, `paycal-member-${scope}-${fileSuffix}.txt`, 'text/plain;charset=utf-8');
-      } else if (format === 'xlsx') {
-        await EarningsExport.downloadXlsxFile(scope, rows, report, `paycal-member-${scope}-${fileSuffix}.xlsx`);
-      } else if (format === 'pdf') {
-        await EarningsExport.downloadPdfServerSide(scope, rows, report, `paycal-member-${scope}-${fileSuffix}.pdf`);
+        EarningsExport.downloadTextFile(txt, `paycal-member-${scope}-${browserConvenienceSuffix}.txt`, 'text/plain;charset=utf-8');
       }
     } catch (error) {
       showToast(formatI18n(config, 'EARNINGS_EXPORT_FAILED_FMT', 'Export failed: {message}', { message: error.message }));

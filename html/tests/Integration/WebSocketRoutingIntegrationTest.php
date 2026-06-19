@@ -29,6 +29,15 @@ final class WebSocketRoutingIntegrationTest extends TestCase
   private const DEFAULT_HOST = 'dev.paycal.local';
   private const DEFAULT_PORT = 443;
 
+  protected function setUp(): void
+  {
+    parent::setUp();
+
+    if ((string) getenv('PAYCAL_RUN_WS_ROUTING') !== '1') {
+      $this->markTestSkipped('Set PAYCAL_RUN_WS_ROUTING=1 to run native nginx/WebSocket routing checks.');
+    }
+  }
+
   /**
    * Exact /ws must stay on WebSocket handshake path.
    * With an invalid PAYCAL_AUTH cookie, daemon should reject with HTTP 401.

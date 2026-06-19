@@ -353,7 +353,27 @@ final class BusinessMemberReportsService
     }
 
     $memberUser = User::getByUUID($memberUUID);
-    $workSnapshot = $this->collectMemberBusinessWork($memberUUID, $businessId);
+    $protectedRead = (new BusinessProtectedDataAccess())->readMemberWork(
+      $actorUUID,
+      $businessId,
+      $memberUUID,
+      null,
+      null,
+      true,
+      'business.member.reports',
+    );
+    if (!$protectedRead['success']) {
+      return [
+        'success' => false,
+        'message' => $protectedRead['message'],
+        'data' => ['reason' => $protectedRead['reason']],
+      ];
+    }
+
+    $protectedEntries = $protectedRead['data']['entries'] ?? [];
+    $workSnapshot = $this->collectMemberBusinessWork(
+      $this->normalizeProtectedEntries($protectedEntries),
+    );
     $years = $workSnapshot['years'];
     if ($years === []) {
       $years = [$year];
@@ -418,32 +438,15 @@ final class BusinessMemberReportsService
   }
 
   /**
-   * @return array<string, array<string, string>>
-   */
-  private static function resolveMemberWorkEntries(string $memberUUID, string $businessId): array
-  {
-    $businessId = trim($businessId);
-    if ($businessId !== '') {
-      $cachedMemberWork = BusinessWorkspaceCache::getMemberWork($businessId);
-      if ($cachedMemberWork !== null && isset($cachedMemberWork[$memberUUID])) {
-        return $cachedMemberWork[$memberUUID];
-      }
-    }
-
-    return MemberWorkEntriesFetcher::fetchForMembers([$memberUUID])[$memberUUID] ?? [];
-  }
-
-  /**
+   * @param array<string, array<string, string>> $workEntries
    * @return MemberWorkSnapshot
    */
-  private function collectMemberBusinessWork(string $memberUUID, string $businessId): array
+  private function collectMemberBusinessWork(array $workEntries): array
   {
     /** @var array<int, MemberYearAccumulator> $byYear */
     $byYear = [];
     /** @var array<int, int> $grossByYearCents */
     $grossByYearCents = [];
-
-    $workEntries = self::resolveMemberWorkEntries($memberUUID, $businessId);
 
     foreach ($workEntries as $workKey => $entry) {
       $keyParts = explode(':', $workKey);
@@ -597,6 +600,34 @@ final class BusinessMemberReportsService
   }
 
   /**
+   * @param mixed $entries
+   * @return array<string, array<string, string>>
+   */
+  private function normalizeProtectedEntries(mixed $entries): array
+  {
+    if (!is_array($entries)) {
+      return [];
+    }
+
+    $normalized = [];
+    foreach ($entries as $workKey => $entry) {
+      if (!is_string($workKey) || !is_array($entry)) {
+        continue;
+      }
+
+      $row = [];
+      foreach ($entry as $key => $value) {
+        if (is_string($key) && is_scalar($value)) {
+          $row[$key] = (string) $value;
+        }
+      }
+      $normalized[$workKey] = $row;
+    }
+
+    return $normalized;
+  }
+
+  /**
    * @param list<int> $years
    * @param MemberWorkSnapshot $workSnapshot
    */
@@ -640,6 +671,7 @@ final class BusinessMemberReportsService
       $tXT = htmlspecialchars(Strings::i18n('TXT'), ENT_QUOTES, 'UTF-8');
       $pDF = htmlspecialchars(Strings::i18n('PDF'), ENT_QUOTES, 'UTF-8');
       $xLSX = 'XLSX';
+      $browserConvenienceExports = htmlspecialchars('CSV/TXT are browser convenience exports.', ENT_QUOTES, 'UTF-8');
       $lineGraphTitle = htmlspecialchars(Strings::i18n('EARNINGS_TREND_CHART_FOR') . ' ' . $year, ENT_QUOTES, 'UTF-8');
       $lineGraphDesc = htmlspecialchars(Strings::i18n('EARNINGS_TREND_CHART_DESC') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
       $lineGraphStatus = htmlspecialchars(Strings::i18n('EARNINGS_TREND_CHART_LOADING_FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
@@ -681,6 +713,7 @@ final class BusinessMemberReportsService
       <button type="button" class="paycal_export_btn" data-member-export-scope="yearly" data-member-export-format="txt" data-member-export-year="{$year}">{$tXT}</button> &sdot;
       <button type="button" class="paycal_export_btn" data-member-export-scope="yearly" data-member-export-format="pdf" data-member-export-year="{$year}">{$pDF}</button>
     </div>
+    <p class="earnings_export_note">{$browserConvenienceExports}</p>
     <div id="member_reports_ytd_{$year}" class="earnings_async_slot" data-earnings-slot="ytd" data-earnings-year="{$year}">{$this->buildAsyncSkeletonGrid(3, 5)}</div>
   </section>
 
@@ -697,6 +730,7 @@ final class BusinessMemberReportsService
       <button type="button" class="paycal_export_btn" data-member-export-scope="monthly" data-member-export-format="txt" data-member-export-year="{$year}">{$tXT}</button> &sdot;
       <button type="button" class="paycal_export_btn" data-member-export-scope="monthly" data-member-export-format="pdf" data-member-export-year="{$year}">{$pDF}</button>
     </div>
+    <p class="earnings_export_note">{$browserConvenienceExports}</p>
     <div id="member_reports_monthly_{$year}" class="earnings_async_slot" data-earnings-slot="monthly" data-earnings-year="{$year}">{$this->buildAsyncSkeletonGrid(11, 6)}</div>
   </section>
 
@@ -708,6 +742,7 @@ final class BusinessMemberReportsService
       <button type="button" class="paycal_export_btn" data-member-export-scope="daily" data-member-export-format="txt" data-member-export-year="{$year}">{$tXT}</button> &sdot;
       <button type="button" class="paycal_export_btn" data-member-export-scope="daily" data-member-export-format="pdf" data-member-export-year="{$year}">{$pDF}</button>
     </div>
+    <p class="earnings_export_note">{$browserConvenienceExports}</p>
     <div class="visually_hidden">
       <p id="member_reports_daily_{$year}_sr_instructions">{$dailyGridInstructions}</p>
       <p id="member_reports_daily_{$year}_sr_context">{$dailyGridContext}</p>

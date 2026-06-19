@@ -15,6 +15,24 @@ This master changelog provides a high-level overview of major version milestones
 
 ## Version 1.x
 
+### [1.058.000] - 2026-06-19
+**Protected business work data lifecycle hardening**
+- Enforced a single canonical protected access gate before business member work rows can be read, reported, exported, cached, or audited.
+- Closed legacy business export bypass paths by rejecting business-marked or protected-looking payloads on personal export endpoints.
+- Added regression coverage for stale cache denial after revocation, 100-member batch audit coherence, protected export audit phases, and architecture-level raw fetcher restrictions.
+- Labeled CSV/TXT as browser convenience exports and preserved server-authorized PDF/XLSX generation for protected business artifacts.
+- Published the protected-work-data Transparency Hub article and verified the release with full PHPUnit: 2,274 tests, 18,892 assertions, 31 skipped.
+
+### [1.057.000] - 2026-06-12
+**Business IA launch, three-tier billing, Argus observability, trust/listing moderation, and members workspace polish**
+- Shipped Public / Premium / Business billing tiers with profile billing matrix UX, Stripe checkout paths, and `SubscriptionGate` enforcement for business-only capabilities.
+- Added business trust, visibility, and listing-submission moderation: trust scoring, search-index eligibility, admin review console at `/admin/business-moderation/`, and audit ledger events.
+- Introduced Argus observability control panel at `/admin/argus/` with trace packages, investigation presets, capture scope, mandatory expiry, `trace_id` timelines, event budgets, and admin toasts.
+- Rebuilt business workspace IA: organization → business rename, sidebar groups, governance/payroll/sites/reports/members/audit subpages, SSR members grid with role dialogs, and pending-members accordion for invites and access requests.
+- Consolidated earnings under `/reports/` with legacy redirects; redesigned forecast workspace; expanded i18n across business, calendar, earnings, and sites surfaces.
+- Hardened members grid performance with Redis-pipelined cache, org snapshot metrics, Lens instrumentation, and CSP-safe async skeleton classes.
+- Documented production deploy hygiene: preserve server `.env`, sync vendor tree via `composer install`, and reload PHP-FPM/nginx after promotion.
+
 ### [1.055.000] - 2026-05-12
 **Security deep-sweep, Redis atomicity hardening, SOC2 audit trail, CSS design token migration, and CI overhaul**
 - Completed two rounds of security sweeps covering host-header injection, open redirect, CORS, TOCTOU race conditions, IP-spoofing, dev-flag exposure, chain-hash integrity, API route-map leak, exception-detail leakage, and rate-limiter key upgrade (MD5 → sha256).

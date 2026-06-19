@@ -5647,6 +5647,7 @@ final class BusinessDiscoveryService
   /** @param array<string, string> $relationship */
   private function setRelationship(string $businessId, string $userUUID, array $relationship): void
   {
+    // Keep BusinessWorkspaceCache::invalidate in this mutation funnel.
     $newRole = strtolower(trim((string) ($relationship['role'] ?? '')));
     if ($newRole !== '' && !isset(self::VALID_ORG_ROLES[$newRole])) {
       throw new InvalidArgumentException("Invalid org role: {$newRole}");
@@ -5661,9 +5662,30 @@ final class BusinessDiscoveryService
       $relationship['scope_policy_version'] = self::SCOPE_POLICY_VERSION;
     }
 
-    $existing      = $this->relationship($businessId, $userUUID);
+    $existing = $this->relationship($businessId, $userUUID);
     $currentStatus = (string) ($existing['status'] ?? '');
-    $newStatus     = (string) ($relationship['status'] ?? $currentStatus);
+    $newStatus = (string) ($relationship['status'] ?? $currentStatus);
+    $effectiveRole = $newRole !== '' ? $newRole : strtolower(trim((string) ($existing['role'] ?? '')));
+
+    if (
+      (bool) SystemConfig::get('org_shared_encryption_enabled')
+      && $newStatus === self::MEMBERSHIP_STATE_ACTIVE
+      && $currentStatus !== self::MEMBERSHIP_STATE_ACTIVE
+      && $effectiveRole !== 'owner'
+    ) {
+      if ($currentStatus !== self::MEMBERSHIP_STATE_CONSENTED) {
+        throw new InvalidArgumentException(
+          "Invalid relationship activation: '{$currentStatus}' must transition through consented"
+        );
+      }
+
+      $consentId = is_scalar($relationship['consent_id'] ?? null)
+        ? trim((string) $relationship['consent_id'])
+        : '';
+      if (!$this->isConsentValidForWrap($businessId, $userUUID, $consentId)) {
+        throw new InvalidArgumentException('Invalid relationship activation: active consent is required');
+      }
+    }
 
     if ($currentStatus !== $newStatus) {
       $allowed = self::RELATIONSHIP_TRANSITIONS[$currentStatus] ?? [];
@@ -6161,7 +6183,7 @@ final class BusinessDiscoveryService
    * @param string               $businessId     Business ID.
    * @param string               $eventType Dot-separated event type (e.g. 'membership.revoked').
    * @param string               $actorUUID UUID of the actor generating the event.
-   * @param array<string, scalar> $details   Supplemental key→value event details.
+   * @param array<string, scalar|array<mixed>> $details   Supplemental key→value event details.
    */
   public function appendBusinessAuditEvent(string $businessId, string $eventType, string $actorUUID, array $details = []): void
   {
