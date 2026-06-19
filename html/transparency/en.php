@@ -275,19 +275,19 @@ require_once HTML.'/header.php';
         </section>
 
         <section class="doc-section">
-          <h2>Settings Navigation and Appearance Remediation</h2>
+          <h2>June 2026 Remediation Report</h2>
 
           <p class="doc-article-meta">Published: <time datetime="2026-06-19">2026-06-19</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time></p>
           <p>
-            This article explains PayCal's June 2026 remediation of settings
-            sidebar behavior, grouped navigation, accent color controls,
-            notification position semantics, and contrast-tested settings nav
-            states.
+            This article explains PayCal's June 2026 remediation across protected
+            work-data boundaries, Redis drift, route and method compatibility,
+            crypto/plaintext migration readiness, pay-period DST correctness,
+            security findings, and settings controls.
           </p>
           <ul class="doc-fact-list">
-            <li>Sidebar hover now uses bounded intent timing with cancellation on pointer exit, document leave, and window blur</li>
-            <li>Accent selection now uses 16 spectrum swatches, shared accent tokens, popovers, and a live preview window</li>
-            <li>Regression coverage now guards controller normalization, rendered settings controls, sidebar contracts, and accent tokens</li>
+            <li>Fixed a real biweekly pay-period DST bug that could affect earnings grouping and lazy report rendering</li>
+            <li>Removed stale route shims, aliases, redirects, methods, classes, and Redis compatibility branches where audits proved them safe to retire</li>
+            <li>Documented the protected-data, crypto/plaintext, Redis, security, settings, and pay-period tests now guarding the release</li>
           </ul>
           <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/settings-remediation-2026-06-19/'); ?>"><?php echo $readMoreLabel; ?></a></p>
         </section>

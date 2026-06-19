@@ -28,14 +28,20 @@ Latest documented release: **v1.059.000**
 
 ## Current Release
 
-Version `1.059.000` is a settings navigation and appearance remediation release.
+Version `1.059.000` is the June 2026 remediation transparency release.
 
-The current settings quality boundary is:
+The current remediation boundary is:
 
-> Settings controls must be predictable, visibly connected to the interface they configure, bounded by persisted defaults, and covered by regression tests.
+> Protected data, compatibility cleanup, date math, Redis migrations, security findings, and durable settings preferences must be proven by audits, bounded behavior, and regression tests before old assumptions are removed.
 
 This release closes the lifecycle around:
 
+- protected business work-data access, export, revocation, cache, and audit guardrails
+- the biweekly pay-period DST bug that could affect earnings grouping and lazy report rendering
+- route shims, redirects, method aliases, placeholder classes, generated TODO noise, and stale compatibility paths
+- Redis connection-index drift, relationship/metaphor migration, field-name compatibility checks, and fake-persona audit tagging
+- crypto/passkey compatibility telemetry, plaintext work-entry audit tooling, and guarded compatibility decisions
+- closed security findings for IP handling, CORS, constant-time comparisons, dev security flags, chain hashes, rate-limit keys, and admin test output
 - delayed sidebar hover intent and cancellation
 - grouped sidebar navigation across collapsed and expanded states
 - bottom-anchored Settings, Help, and Sign Out utility actions
@@ -347,15 +353,15 @@ npm run test:a11y:contrast
 
 ## v1.059.000 (2026-06-19)
 
-**Release Focus:** Settings remediation transparency release
+**Release Focus:** June 2026 remediation transparency release
 
-- Published the settings remediation Transparency Hub article.
-- Added bounded sidebar hover Trigger timing with cancellation on pointer exit, document leave, and window blur.
-- Rebuilt sidebar grouping so Personal, Business, and Utility actions stay visually consistent in collapsed and expanded states.
-- Replaced the accent dropdown with 16 spectrum swatches, hover popovers, shared accent tokens, and a live preview window.
-- Rebuilt notification position selection around canonical top/bottom values and a spatial picker layout.
-- Fixed settings nav hover, active, and focus states with WCAG contrast checks.
-- Verified with focused settings contract tests and public quick gate coverage.
+- Published the June 2026 remediation Transparency Hub article covering protected work-data boundaries, compatibility cleanup, Redis drift, crypto/plaintext readiness, pay-period DST correctness, security findings, and settings controls.
+- Fixed the biweekly pay-period DST bug by switching period navigation to calendar-day differences; added the America/Edmonton spring DST regression and re-enabled the affected lazy earnings render test.
+- Removed stale route shims, redirects, API aliases, method wrappers, placeholder classes, generated TODO noise, and compatibility branches where audits proved them safe to retire.
+- Repaired Redis connection-index drift, migrated old relationship/metaphor data, replaced stale Redis field-migration tooling, and documented checkpoint/verification results.
+- Added crypto/passkey compatibility telemetry, plaintext work-entry audit tooling, work-entry alias audit evidence, and snapshot backfill verification while keeping real-user plaintext compatibility guarded.
+- Added bounded sidebar hover Trigger timing, grouped sidebar navigation, 16 accent swatches, live appearance preview feedback, canonical notification position values, and contrast-tested settings nav states.
+- Verified with protected-data, pay-period, Redis/connection, crypto/plaintext, security, settings, and public quick-gate coverage.
 
 ## v1.058.000 (2026-06-19)
 
