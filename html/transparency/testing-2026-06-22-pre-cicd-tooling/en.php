@@ -60,7 +60,7 @@ require_once HTML.'/header.php';
   <header class="doc-article-header">
     <h1><?php echo $i18n['TRANSPARENCY_TESTING_GOVERNANCE_PAGE_TITLE']; ?></h1>
     <p class="deck"><?php echo $i18n['TRANSPARENCY_TESTING_GOVERNANCE_DECK']; ?></p>
-    <p class="doc-article-meta">Published: <time datetime="2026-03-24">2026-03-24</time> &middot; Last updated: <time datetime="2026-06-22">2026-06-22</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-03-24">2026-03-24</time></p>
   </header>
 
   <div class="doc-article-body">
@@ -68,21 +68,10 @@ require_once HTML.'/header.php';
       <h2><?php echo $i18n['TRANSPARENCY_TESTING_VERIFICATION_METADATA_TITLE']; ?></h2>
       <ul class="doc-fact-list">
         <li><strong>Route:</strong> <code>/transparency/testing/</code></li>
-        <li><strong>Last verified:</strong> <time datetime="2026-06-22">2026-06-22</time></li>
-        <li><strong>Next review due:</strong> <time datetime="2026-09-22">2026-09-22</time></li>
+        <li><strong>Last verified:</strong> <time datetime="2026-03-24">2026-03-24</time></li>
+        <li><strong>Next review due:</strong> <time datetime="2026-06-24">2026-06-24</time></li>
         <li><strong>Current suite inventory:</strong> <?php echo $i18n['TRANSPARENCY_TESTING_CURRENT_SUITE_INVENTORY_VALUE']; ?></li>
-        <li><strong>Previous version:</strong> <a href="<?php echo transparency_href('/transparency/testing-2026-06-22-pre-cicd-tooling/'); ?>">Testing and Validation Governance before the CI/CD tooling article update</a></li>
       </ul>
-    </section>
-
-    <section class="doc-section success">
-      <h2>CI/CD Relationship</h2>
-      <p>
-        This page focuses on test inventory and release validation policy. The wider
-        release machinery, including local hooks, policy-meta, PHPStan, GitHub Actions,
-        public promotion, and portability commitments, is documented in
-        <a href="<?php echo transparency_href('/transparency/ci-cd-tooling-2026-06/'); ?>">CI/CD Tooling and Release Governance</a>.
-      </p>
     </section>
 
     <section class="doc-section">
@@ -150,7 +139,7 @@ require_once HTML.'/header.php';
         <li>Transparency pages under <code>/transparency/</code> (public explanation)</li>
       </ul>
       <p><?php echo $i18n['TRANSPARENCY_TESTING_PUBLIC_TRACEABILITY_TEXT_2']; ?></p>
-      <p>For npm lockfile policy and CI gate mapping details, see <a href="<?php echo transparency_href('/transparency/dependency-ci/'); ?>"><code>/transparency/dependency-ci/</code></a>. For the complete CI/CD model, see <a href="<?php echo transparency_href('/transparency/ci-cd-tooling-2026-06/'); ?>"><code>/transparency/ci-cd-tooling-2026-06/</code></a>.</p>
+      <p>For npm lockfile policy and CI gate mapping details, see <a href="<?php echo transparency_href('/transparency/dependency-ci/'); ?>"><code>/transparency/dependency-ci/</code></a>.</p>
     </section>
   </div>
 </article>

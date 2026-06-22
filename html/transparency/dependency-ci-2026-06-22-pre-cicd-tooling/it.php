@@ -67,7 +67,7 @@ require_once HTML.'/header.php';
   <header class="doc-article-header">
     <h1><?php echo $i18n['TRANSPARENCY_DEPENDENCY_CI_PAGE_TITLE']; ?></h1>
     <p class="deck"><?php echo $i18n['TRANSPARENCY_DEPENDENCY_CI_DECK']; ?></p>
-    <p class="doc-article-meta">Published: <time datetime="2026-03-31">2026-03-31</time> &middot; Last updated: <time datetime="2026-06-22">2026-06-22</time></p>
+<p class="doc-article-meta">Published: <time datetime="2026-03-31">2026-03-31</time></p>
   </header>
 
   <div class="doc-article-body">
@@ -75,21 +75,10 @@ require_once HTML.'/header.php';
       <h2><?php echo $i18n['TRANSPARENCY_DEPENDENCY_CI_VERIFICATION_METADATA_TITLE']; ?></h2>
       <ul class="doc-fact-list">
         <li><strong><?php echo $i18n['TRANSPARENCY_DEPENDENCY_CI_ROUTE_LABEL']; ?></strong> <code>/transparency/dependency-ci/</code></li>
-        <li><strong><?php echo $i18n['TRANSPARENCY_DEPENDENCY_CI_LAST_VERIFIED_LABEL']; ?></strong> <time datetime="2026-06-22">2026-06-22</time></li>
-        <li><strong><?php echo $i18n['TRANSPARENCY_DEPENDENCY_CI_NEXT_REVIEW_LABEL']; ?></strong> <time datetime="2026-09-22">2026-09-22</time></li>
+        <li><strong><?php echo $i18n['TRANSPARENCY_DEPENDENCY_CI_LAST_VERIFIED_LABEL']; ?></strong> <time datetime="2026-03-31">2026-03-31</time></li>
+        <li><strong><?php echo $i18n['TRANSPARENCY_DEPENDENCY_CI_NEXT_REVIEW_LABEL']; ?></strong> <time datetime="2026-06-30">2026-06-30</time></li>
         <li><strong><?php echo $i18n['TRANSPARENCY_DEPENDENCY_CI_SCOPE_LABEL']; ?></strong> <?php echo $i18n['TRANSPARENCY_DEPENDENCY_CI_SCOPE_VALUE']; ?></li>
-        <li><strong>Previous version:</strong> <a href="<?php echo transparency_href('/transparency/dependency-ci-2026-06-22-pre-cicd-tooling/'); ?>">Dependency and CI/CD Governance before the CI/CD tooling article update</a></li>
       </ul>
-    </section>
-
-    <section class="doc-section success">
-      <h2>June 2026 CI/CD Tooling Update</h2>
-      <p>
-        This page remains the dependency and JavaScript CI gate reference. For the
-        complete CI/CD operating model, including local hooks, policy-meta checks,
-        PHPStan/PHPUnit gates, public promotion, and portability work, see
-        <a href="<?php echo transparency_href('/transparency/ci-cd-tooling-2026-06/'); ?>">CI/CD Tooling and Release Governance</a>.
-      </p>
     </section>
 
     <section class="doc-section">
@@ -180,7 +169,7 @@ npm run test:a11y:all
 cat .github/workflows/javascript.yml
 cat .github/workflows/phpunit.yml
 cat .github/workflows/phpstan.yml</pre>
-      <p>Related transparency pages: <a href="<?php echo transparency_href('/transparency/ci-cd-tooling-2026-06/'); ?>">CI/CD Tooling and Release Governance</a>, <a href="<?php echo transparency_href('/transparency/testing/'); ?>">Testing and Validation Governance</a>, and <a href="<?php echo transparency_href('/transparency/verification-governance/'); ?>">Verification and Governance</a>.</p>
+      <p>Related transparency pages: <a href="<?php echo transparency_href('/transparency/testing/'); ?>">Testing and Validation Governance</a> and <a href="<?php echo transparency_href('/transparency/verification-governance/'); ?>">Verification and Governance</a>.</p>
     </section>
   </div>
 </article>

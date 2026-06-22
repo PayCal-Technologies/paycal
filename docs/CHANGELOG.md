@@ -19,6 +19,7 @@ This master changelog provides a high-level overview of major version milestones
 **CI/CD tooling transparency**
 - Published the CI/CD Tooling and Release Governance Transparency Hub article at `/transparency/ci-cd-tooling-2026-06/`.
 - Documented PayCal's local-authoritative CI/CD model, hook gates, policy-meta checks, remote workflow posture, dependency/version controls, public promotion boundaries, and portability commitments.
+- Updated related Transparency Hub articles (`dependency-ci`, `testing`, `verification-governance`, and `php-packages`) with previous-version archive links and cross-links to the new CI/CD tooling article.
 
 ### [1.059.000] - 2026-06-19
 **June 2026 remediation transparency release**

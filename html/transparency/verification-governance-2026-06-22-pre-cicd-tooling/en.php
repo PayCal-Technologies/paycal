@@ -70,7 +70,7 @@ require_once HTML.'/header.php';
   <header class="doc-article-header">
     <h1><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_PAGE_TITLE']; ?></h1>
     <p class="deck"><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_DECK']; ?></p>
-    <p class="doc-article-meta">Published: <time datetime="2026-03-20">2026-03-20</time> &middot; Last updated: <time datetime="2026-06-22">2026-06-22</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-03-20">2026-03-20</time></p>
   </header>
 
   <div class="doc-article-body">
@@ -87,10 +87,9 @@ require_once HTML.'/header.php';
           <h3><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_ROUTE_METADATA_TITLE']; ?></h3>
           <ul class="doc-fact-list">
             <li><strong><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_ROUTE_LABEL']; ?></strong> <code>/transparency/verification-governance/</code></li>
-            <li><strong><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_LAST_VERIFIED_LABEL']; ?></strong> <time datetime="2026-06-22">2026-06-22</time></li>
-            <li><strong><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_NEXT_REVIEW_LABEL']; ?></strong> <time datetime="2026-09-22">2026-09-22</time></li>
+            <li><strong><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_LAST_VERIFIED_LABEL']; ?></strong> <time datetime="2026-03-24">2026-03-24</time></li>
+            <li><strong><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_NEXT_REVIEW_LABEL']; ?></strong> <time datetime="2026-06-24">2026-06-24</time></li>
             <li><strong><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFICATION_SCOPE_LABEL']; ?></strong> <?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_VERIFICATION_SCOPE_VALUE']; ?></li>
-            <li><strong>Previous version:</strong> <a href="<?php echo transparency_href('/transparency/verification-governance-2026-06-22-pre-cicd-tooling/'); ?>">Verification and Governance before the CI/CD tooling article update</a></li>
           </ul>
         </div>
         <div>
@@ -124,7 +123,6 @@ require_once HTML.'/header.php';
     <section class="doc-section">
       <h2><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_CI_PIPELINE_TITLE']; ?></h2>
       <p><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_CI_PIPELINE_TEXT_1']; ?></p>
-      <p>For the current end-to-end CI/CD operating model, see <a href="<?php echo transparency_href('/transparency/ci-cd-tooling-2026-06/'); ?>">CI/CD Tooling and Release Governance</a>.</p>
       <ul class="doc-fact-list">
         <li><code>.github/workflows/phpunit.yml</code> Stage 2: <code>composer run test:all</code> (unit + integration + contract).</li>
         <li><code>.github/workflows/phpunit.yml</code> Stage 3: <code>composer run test:random</code> (order-randomized).</li>
@@ -181,7 +179,7 @@ cd html
 composer run test:all
 composer run test:random
 composer run test:coverage</pre>
-      <p><strong><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_LAST_UPDATED_LABEL']; ?></strong> June 22, 2026.</p>
+      <p><strong><?php echo $i18n['TRANSPARENCY_VERIFICATION_GOVERNANCE_LAST_UPDATED_LABEL']; ?></strong> March 24, 2026.</p>
     </section>
   </div>
 </article>

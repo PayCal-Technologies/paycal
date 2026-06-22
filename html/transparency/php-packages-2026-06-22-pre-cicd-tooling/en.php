@@ -69,7 +69,7 @@ require_once HTML.'/header.php';
   <header class="doc-article-header">
     <h1><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_PAGE_TITLE']; ?></h1>
     <p class="deck"><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_DECK']; ?></p>
-    <p class="doc-article-meta">Published: <time datetime="2026-05-07">2026-05-07</time> &middot; Last updated: <time datetime="2026-06-22">2026-06-22</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-05-07">2026-05-07</time></p>
   </header>
 
   <div class="doc-article-body">
@@ -77,10 +77,9 @@ require_once HTML.'/header.php';
       <h2><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_VERIFICATION_METADATA_TITLE']; ?></h2>
       <ul class="doc-fact-list">
         <li><strong><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_ROUTE_LABEL']; ?></strong> <code>/transparency/php-packages/</code></li>
-        <li><strong><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_LAST_VERIFIED_LABEL']; ?></strong> <time datetime="2026-06-22">2026-06-22</time></li>
-        <li><strong><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_NEXT_REVIEW_LABEL']; ?></strong> <time datetime="2026-09-22">2026-09-22</time></li>
+        <li><strong><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_LAST_VERIFIED_LABEL']; ?></strong> <time datetime="2026-05-07">2026-05-07</time></li>
+        <li><strong><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_NEXT_REVIEW_LABEL']; ?></strong> <time datetime="2026-08-07">2026-08-07</time></li>
         <li><strong><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_SCOPE_LABEL']; ?></strong> <?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_SCOPE_VALUE']; ?></li>
-        <li><strong>Previous version:</strong> <a href="<?php echo transparency_href('/transparency/php-packages-2026-06-22-pre-cicd-tooling/'); ?>">PHP Package Dependency Transparency before the CI/CD tooling article update</a></li>
       </ul>
     </section>
 
@@ -181,7 +180,6 @@ require_once HTML.'/header.php';
     <section class="doc-section success">
       <h2><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_CICD_GATE_TITLE']; ?></h2>
       <p><?php echo $i18n['TRANSPARENCY_PHP_PACKAGES_CICD_GATE_TEXT_1']; ?></p>
-      <p>For the broader CI/CD operating model beyond PHP packages, see <a href="<?php echo transparency_href('/transparency/ci-cd-tooling-2026-06/'); ?>">CI/CD Tooling and Release Governance</a>.</p>
       <ul class="doc-fact-list">
         <li><code>.github/workflows/phpstan.yml</code>: PHPStan Level 9 on PHP 8.4 and 8.5, includes <code>format:check</code>.</li>
         <li><code>.github/workflows/phpunit.yml</code>: fast gate (PHP 8.4) → full validation (PHP 8.5) → deep verification (scheduled).</li>
@@ -203,7 +201,7 @@ composer show
 
 # Inspect first-party .env loader (replaced vlucas/phpdotenv)
 cat html/src/Infrastructure/Env/Dotenv.php</pre>
-      <p>Related transparency pages: <a href="<?php echo transparency_href('/transparency/ci-cd-tooling-2026-06/'); ?>">CI/CD Tooling and Release Governance</a>, <a href="<?php echo transparency_href('/transparency/dependency-ci/'); ?>">Dependency and CI/CD Governance</a>, and <a href="<?php echo transparency_href('/transparency/framework-backend/'); ?>">Framework and Backend Change Ledger</a>.</p>
+      <p>Related transparency pages: <a href="<?php echo transparency_href('/transparency/dependency-ci/'); ?>">Dependency and CI/CD Governance</a> and <a href="<?php echo transparency_href('/transparency/framework-backend/'); ?>">Framework and Backend Change Ledger</a>.</p>
     </section>
   </div>
 </article>
