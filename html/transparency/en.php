@@ -360,6 +360,24 @@ require_once HTML.'/header.php';
         </section>
 
         <section class="doc-section">
+          <h2>CI/CD Tooling and Release Governance</h2>
+
+            <p class="doc-article-meta">Published: <time datetime="2026-06-22">2026-06-22</time></p>
+          <p>
+            This article explains PayCal's local-authoritative CI/CD model:
+            versioned hooks, policy-meta checks, PHPStan, quick tests, mutation
+            testing, optional GitHub Actions evidence, and portability work that
+            keeps development independent of one machine.
+          </p>
+          <ul class="doc-fact-list">
+            <li>Local hooks decide commit and push readiness before code leaves the workstation</li>
+            <li>Hosted workflows provide independent evidence with pinned runtimes and SHA-pinned actions</li>
+            <li>Portability rules avoid Mac-only assumptions where general development tooling can be machine-independent</li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/ci-cd-tooling-2026-06/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
           <h2><?php echo $i18n['TRANSPARENCY_HUB_PHP_PACKAGES_TITLE']; ?></h2>
 
             <p class="doc-article-meta">Published: <time datetime="2026-05-07">2026-05-07</time></p>

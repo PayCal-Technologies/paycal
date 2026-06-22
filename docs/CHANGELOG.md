@@ -15,6 +15,11 @@ This master changelog provides a high-level overview of major version milestones
 
 ## Version 1.x
 
+### [Unreleased] - 2026-06-22
+**CI/CD tooling transparency**
+- Published the CI/CD Tooling and Release Governance Transparency Hub article at `/transparency/ci-cd-tooling-2026-06/`.
+- Documented PayCal's local-authoritative CI/CD model, hook gates, policy-meta checks, remote workflow posture, dependency/version controls, public promotion boundaries, and portability commitments.
+
 ### [1.059.000] - 2026-06-19
 **June 2026 remediation transparency release**
 - Publishes the June 2026 remediation report covering protected work-data boundaries, route and method compatibility cleanup, Redis drift, crypto/plaintext readiness, pay-period DST correctness, security findings, and settings controls.
