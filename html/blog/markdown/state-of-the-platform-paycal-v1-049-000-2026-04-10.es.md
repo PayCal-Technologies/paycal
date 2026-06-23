@@ -67,9 +67,9 @@ Orphaned Work Recovery detecta registros no vinculados tras eliminaciones de sit
 
 ## Nivel Premium: colaboración sin compromisos
 
-Las funciones premium para organizaciones ofrecen mayor control operativo sin sacrificar la privacidad individual.
+Las funciones premium para negocios ofrecen mayor control operativo sin sacrificar la privacidad individual.
 
-◆ Organization Hub para flujos de empleadores y equipos
+◆ Business Hub para flujos de empleadores y equipos
 ◆ Modelo refinado de alcance de roles con permisos granulares
 ◆ Vistas de calendario delegadas para supervisión de gestión
 ◆ DEK Auto-Bootstrap para preparación de cifrado inmediata al visitar la página

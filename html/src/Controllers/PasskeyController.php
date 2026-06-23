@@ -16,13 +16,14 @@ use PayCal\Domain\Enums\FormTTL;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
-use PayCal\Domain\OrganizationDiscoveryService;
+use PayCal\Domain\BusinessDiscoveryService;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
 use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Domain\User;
 use PayCal\Domain\UserRepository;
 use PayCal\Domain\RecoveryKey;
+use PayCal\Observability\AuthTrace;
 use PayCal\Observability\Lens;
 
 /**
@@ -91,23 +92,36 @@ final class PasskeyController
     $inviteCode = $this->scalarString($body['inviteCode'] ?? '');
     $deviceName = InputSanitizer::sanitizeString($this->scalarString($body['deviceName'] ?? 'Passkey'));
 
+    AuthTrace::signupStart('requested', [
+      'email_token' => AuthTrace::emailToken($email),
+      'invite_required' => trim(Environment::inviteCode()) !== '' ? 'true' : 'false',
+    ]);
+
     if ($fullName === '' || mb_strlen($fullName) < 2) {
+      AuthTrace::signupRejected('start', 'invalid_full_name');
       Response::error('Full name is required.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
     if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      AuthTrace::signupRejected('start', 'invalid_email');
       Response::error('Valid email is required.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
     $expectedInviteCode = trim(Environment::inviteCode());
     if ($expectedInviteCode !== '' && !hash_equals($expectedInviteCode, trim($inviteCode))) {
+      AuthTrace::signupRejected('start', 'invalid_invite_code', [
+        'email_token' => AuthTrace::emailToken($email),
+      ]);
       Response::error('Invalid invite code.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
     if (UserRepository::emailExists($email)) {
+      AuthTrace::signupRejected('start', 'email_already_registered', [
+        'email_token' => AuthTrace::emailToken($email),
+      ]);
       Response::error('Email is already registered.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
@@ -139,6 +153,11 @@ final class PasskeyController
       'created_at' => (string) time(),
     ], self::CHALLENGE_TTL_SECONDS);
 
+    AuthTrace::signupStart('challenge_created', [
+      'email_token' => AuthTrace::emailToken($email),
+      'challenge_id_prefix' => substr($challengeId, 0, 8),
+    ]);
+
     Response::success('[PASSKEY] Signup challenge created.', [
       'challengeId' => $challengeId,
       'publicKey' => $createArgs->publicKey,
@@ -161,13 +180,21 @@ final class PasskeyController
     $body = $this->jsonBody();
     $challengeId = $this->scalarString($body['challengeId'] ?? '');
     if ($challengeId === '') {
+      AuthTrace::signupRejected('finish', 'missing_challenge_id');
       Response::error('Signup failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
+    AuthTrace::signupStart('finish_requested', [
+      'challenge_id_prefix' => substr($challengeId, 0, 8),
+    ]);
+
     $challengeKey = $this->signupChallengeKey($challengeId);
     $challengeData = Database::hgetall($challengeKey);
     if ([] === $challengeData) {
+      AuthTrace::signupRejected('finish', 'challenge_expired_or_missing', [
+        'challenge_id_prefix' => substr($challengeId, 0, 8),
+      ]);
       Response::error('Signup failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
@@ -179,11 +206,17 @@ final class PasskeyController
     $challengeBinary = $this->decodeB64Url($this->scalarString($challengeData['challenge'] ?? ''));
 
     if ($email === '' || $fullName === '' || $challengeBinary === null) {
+      AuthTrace::signupRejected('finish', 'invalid_challenge_payload', [
+        'email_token' => AuthTrace::emailToken($email),
+      ]);
       Response::error('Signup failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
     if (UserRepository::emailExists($email)) {
+      AuthTrace::signupRejected('finish', 'email_already_registered', [
+        'email_token' => AuthTrace::emailToken($email),
+      ]);
       Response::error('Email is already registered.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
@@ -194,6 +227,9 @@ final class PasskeyController
     $attestationObject = $this->decodeB64Url($this->scalarString($responseData['attestationObject'] ?? ''));
 
     if ($clientDataJSON === null || $attestationObject === null) {
+      AuthTrace::signupRejected('finish', 'malformed_credential', [
+        'email_token' => AuthTrace::emailToken($email),
+      ]);
       Response::error('Signup failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
@@ -206,11 +242,17 @@ final class PasskeyController
       $publicKeyPem = (string) $result->credentialPublicKey;
       $signCount = (int) ($result->signatureCounter ?? 0);
     } catch (WebAuthnException) {
+      AuthTrace::signupRejected('finish', 'webauthn_process_create_failed', [
+        'email_token' => AuthTrace::emailToken($email),
+      ]);
       Response::error('Signup failed.', [], HttpStatus::HTTP_FORBIDDEN);
       return;
     }
 
     if (Database::exists($this->credentialKey($credentialId))) {
+      AuthTrace::signupRejected('finish', 'credential_already_exists', [
+        'email_token' => AuthTrace::emailToken($email),
+      ]);
       Response::error('Signup failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
@@ -250,21 +292,27 @@ final class PasskeyController
       'last_auth_method' => 'passkey',
     ]);
 
-    $organizationService = new OrganizationDiscoveryService();
-    $organizationService->ensurePersonalOrganization($userUUID);
+    $businessService = new BusinessDiscoveryService();
+    $businessService->ensurePersonalBusiness($userUUID);
 
     $sessionHash = bin2hex(random_bytes(self::SECRET_BYTES));
     Authentication::setSession($sessionHash, $userUUID);
     Database::hset(Keys::SESSION . ':' . $sessionHash, [
       'auth_method' => 'passkey',
       'auth_strength' => 'strong',
+      'credential_id' => $credentialId,
+      'passkey_stepup_at' => $now,
     ]);
     Authentication::setCookie($sessionHash);
     UserRepository::touchLastSignin($userUUID);
 
+    AuthTrace::signupCompleted([
+      'email_token' => AuthTrace::emailToken($email),
+      'credential_id_prefix' => substr($credentialId, 0, 12),
+    ]);
+
     SecurityLog::log('passkey_signup_success', [
-      'user_uuid' => $userUUID,
-      'credential_id' => $credentialId,
+      'credential_id_prefix' => substr($credentialId, 0, 12),
     ]);
     try {
       \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.passkey.signup_success', $userUUID, [
@@ -274,6 +322,12 @@ final class PasskeyController
     }
 
     $verificationStatus = $this->sendVerificationEmailIfNeeded($userUUID);
+    AuthTrace::signupVerificationEmail([
+      'attempted' => $verificationStatus['attempted'] ? 'true' : 'false',
+      'sent' => $verificationStatus['sent'] ? 'true' : 'false',
+      'reason' => $verificationStatus['reason'],
+      'email_token' => AuthTrace::emailToken($email),
+    ]);
 
     Response::success('[PASSKEY] Signup successful.', [
       'user_uuid' => $userUUID,
@@ -449,6 +503,7 @@ final class PasskeyController
     ]);
     Database::sadd($this->userCredentialsKey($expectedUserUUID), $credentialId);
     Database::hset(Keys::USER . ':' . $expectedUserUUID, ['webauthn_enabled' => '1']);
+    $sessionPromoted = $this->promoteCurrentSessionToPasskeyCredential($expectedUserUUID, $credentialId, $now);
 
     SecurityLog::log('passkey_registered', [
       'user_uuid' => $expectedUserUUID,
@@ -468,9 +523,10 @@ final class PasskeyController
     Response::success('[PASSKEY] Registration complete.', [
       'credentialId' => $credentialId,
       'deviceName' => $deviceName,
-        'verification_email_attempted' => $verificationStatus['attempted'],
-        'verification_email_sent' => $verificationStatus['sent'],
-        'verification_email_reason' => $verificationStatus['reason'],
+      'sessionCredentialUpdated' => $sessionPromoted,
+      'verification_email_attempted' => $verificationStatus['attempted'],
+      'verification_email_sent' => $verificationStatus['sent'],
+      'verification_email_reason' => $verificationStatus['reason'],
     ]);
   }
 
@@ -496,16 +552,25 @@ final class PasskeyController
 
     if (!$discoverable) {
       if ('' === $email) {
-        Response::error('Email is required.', [], HttpStatus::HTTP_BAD_REQUEST);
-        return;
-      }
+        if (Authentication::validateAndTouchSession()) {
+          $currentUserUUID = User::currentUUID();
+          if ($this->isValidUserUUID($currentUserUUID)) {
+            $userUUID = $currentUserUUID;
+          }
+        }
 
-      $userUUID = UserRepository::getUUIDFromEmail($email);
-      if ('' === $userUUID || !$this->isValidUserUUID($userUUID)) {
-        \PayCal\Observability\Lens::add('[PASSKEY] Login email not found', ['email_hash' => hash('sha256', $email)]);
-        // Return same body as "no credentials" to prevent account enumeration.
-        Response::error('Authentication failed.', ['error' => 'passkey_invalid'], HttpStatus::HTTP_UNAUTHORIZED);
-        return;
+        if ('' === $userUUID) {
+          Response::error('Email is required.', [], HttpStatus::HTTP_BAD_REQUEST);
+          return;
+        }
+      } else {
+        $userUUID = UserRepository::getUUIDFromEmail($email);
+        if ('' === $userUUID || !$this->isValidUserUUID($userUUID)) {
+          \PayCal\Observability\Lens::add('[PASSKEY] Login email not found', ['email_hash' => hash('sha256', $email)]);
+          // Return same body as "no credentials" to prevent account enumeration.
+          Response::error('Authentication failed.', ['error' => 'passkey_invalid'], HttpStatus::HTTP_UNAUTHORIZED);
+          return;
+        }
       }
 
       $credentialIds = $this->credentialIdBinaries($userUUID);
@@ -687,6 +752,7 @@ final class PasskeyController
       'auth_method' => 'passkey',
       'auth_strength' => 'strong',
       'credential_id' => $credentialId,
+      'passkey_stepup_at' => (string) time(),
     ]);
     Authentication::setCookie($sessionHash);
     UserRepository::touchLastSignin($expectedUserUUID);
@@ -1174,6 +1240,47 @@ final class PasskeyController
   }
 
   /**
+   * Bind the current authenticated session to a newly verified passkey credential.
+   */
+  private function promoteCurrentSessionToPasskeyCredential(string $userUUID, string $credentialId, string $now): bool
+  {
+    if (!$this->isValidUserUUID($userUUID) || $credentialId === '') {
+      return false;
+    }
+
+    if (Database::sismember($this->userCredentialsKey($userUUID), $credentialId) !== 1) {
+      return false;
+    }
+
+    $sessionHash = Authentication::getSessionHashFromCookie();
+    if ($sessionHash === null) {
+      return false;
+    }
+
+    $sessionKey = Keys::SESSION . ':' . $sessionHash;
+    $sessionUserUUID = $this->scalarString(Database::hget($sessionKey, 'user_uuid'));
+    if ($sessionUserUUID === '' || !hash_equals($userUUID, $sessionUserUUID)) {
+      return false;
+    }
+
+    Database::hset($sessionKey, [
+      'auth_method' => 'passkey',
+      'auth_strength' => 'strong',
+      'credential_id' => $credentialId,
+      'passkey_stepup_at' => $now,
+      'recovery_pending' => '0',
+    ]);
+
+    Database::hset(Keys::USER . ':' . $userUUID, [
+      'webauthn_enabled' => '1',
+      'password_only_risk' => '0',
+      'last_auth_method' => 'passkey',
+    ]);
+
+    return true;
+  }
+
+  /**
    * Validate that the user UUID refers to a first-party user record.
    *
    * @param string $userUUID User UUID candidate
@@ -1231,6 +1338,7 @@ final class PasskeyController
     }
 
     if ($count > self::LIMIT_PER_MINUTE_IP) {
+      AuthTrace::rateLimited($endpoint);
       SecurityLog::logRateLimitTriggered('ip:passkey', $clientIP . ':' . $endpoint, max(0, self::LIMIT_PER_MINUTE_IP - $count));
       Response::error('Too many attempts. Please retry shortly.', [], HttpStatus::HTTP_TOO_MANY_REQUESTS);
       return false;
@@ -1282,6 +1390,7 @@ final class PasskeyController
 
     $user = User::getByUUID($userUUID);
     if ($user === null) {
+      AuthTrace::signupVerificationEmail(['reason' => 'user_not_found', 'attempted' => 'false', 'sent' => 'false']);
       Lens::add('Passkey verification send skipped: user not found', [
         'user_uuid' => $userUUID,
       ], 'passkey_verification');
@@ -1290,6 +1399,7 @@ final class PasskeyController
 
     // Skip if already verified
     if ($user->email_verified) {
+      AuthTrace::signupVerificationEmail(['reason' => 'already_verified', 'attempted' => 'false', 'sent' => 'false']);
       Lens::add('Passkey verification send skipped: already verified', [
         'user_uuid' => $userUUID,
       ], 'passkey_verification');
@@ -1364,5 +1474,3 @@ final class PasskeyController
     return ['attempted' => true, 'sent' => false, 'reason' => 'send_failed'];
   }
 }
-
-

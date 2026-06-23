@@ -79,6 +79,17 @@ final class Environment
   private static bool   $devAllowInlineScripts = false;
   private static bool   $encryptionEnabled = false;
   private static bool   $devSecurityDisabled = false;
+  private static bool   $authFederatedSigninEnabled = false;
+  private static bool   $authFederatedSigninLocalOnly = true;
+  private static bool   $authFederatedAutoCreateLocal = false;
+  private static bool   $authProviderGoogleEnabled = false;
+  private static bool   $authProviderAppleEnabled = false;
+  private static bool   $authProviderMicrosoftEnabled = false;
+  private static bool   $authProviderFedcmEnabled = false;
+  private static string $authGoogleClientId = '';
+  private static string $authGoogleClientSecret = '';
+  private static string $authAppleClientId = '';
+  private static string $authMicrosoftClientId = '';
   /**
    * @param array<string, string> $env
    */
@@ -110,6 +121,17 @@ final class Environment
     self::$inviteCode             = $env["PC_INVITE_CODE"] ?? self::logMissingString("PC_INVITE_CODE", "");
     self::$devAllowInlineScripts  = isset($env["DEV_ALLOW_INLINE_SCRIPTS"]) ? self::toBool($env["DEV_ALLOW_INLINE_SCRIPTS"]) : false;
     self::$devSecurityDisabled    = isset($env["DEV_SECURITY_DISABLED"]) ? self::toBool($env["DEV_SECURITY_DISABLED"]) : false;
+    self::$authFederatedSigninEnabled   = isset($env["PAYCAL_AUTH_FEDERATED_SIGNIN_ENABLED"]) ? self::toBool($env["PAYCAL_AUTH_FEDERATED_SIGNIN_ENABLED"]) : false;
+    self::$authFederatedSigninLocalOnly = isset($env["PAYCAL_AUTH_FEDERATED_SIGNIN_LOCAL_ONLY"]) ? self::toBool($env["PAYCAL_AUTH_FEDERATED_SIGNIN_LOCAL_ONLY"]) : true;
+    self::$authFederatedAutoCreateLocal = isset($env["PAYCAL_AUTH_FEDERATED_AUTO_CREATE_LOCAL"]) ? self::toBool($env["PAYCAL_AUTH_FEDERATED_AUTO_CREATE_LOCAL"]) : false;
+    self::$authProviderGoogleEnabled    = isset($env["PAYCAL_AUTH_PROVIDER_GOOGLE_ENABLED"]) ? self::toBool($env["PAYCAL_AUTH_PROVIDER_GOOGLE_ENABLED"]) : false;
+    self::$authProviderAppleEnabled     = isset($env["PAYCAL_AUTH_PROVIDER_APPLE_ENABLED"]) ? self::toBool($env["PAYCAL_AUTH_PROVIDER_APPLE_ENABLED"]) : false;
+    self::$authProviderMicrosoftEnabled = isset($env["PAYCAL_AUTH_PROVIDER_MICROSOFT_ENABLED"]) ? self::toBool($env["PAYCAL_AUTH_PROVIDER_MICROSOFT_ENABLED"]) : false;
+    self::$authProviderFedcmEnabled     = isset($env["PAYCAL_AUTH_PROVIDER_FEDCM_ENABLED"]) ? self::toBool($env["PAYCAL_AUTH_PROVIDER_FEDCM_ENABLED"]) : false;
+    self::$authGoogleClientId           = trim((string) ($env["PAYCAL_AUTH_GOOGLE_CLIENT_ID"] ?? ''));
+    self::$authGoogleClientSecret       = trim((string) ($env["PAYCAL_AUTH_GOOGLE_CLIENT_SECRET"] ?? ''));
+    self::$authAppleClientId            = trim((string) ($env["PAYCAL_AUTH_APPLE_CLIENT_ID"] ?? ''));
+    self::$authMicrosoftClientId        = trim((string) ($env["PAYCAL_AUTH_MICROSOFT_CLIENT_ID"] ?? ''));
     // Guard: DEV_* overrides are only honored in non-production environments
     $knownDevEnvs = ['mac', 'dev', 'local', 'test'];
     if (!in_array(self::$appEnv, $knownDevEnvs, true)) {
@@ -304,6 +326,50 @@ final class Environment
    */
   public static function devSecurityDisabled()  : bool   { return self::$devSecurityDisabled; }
   /**
+   * Handles authFederatedSigninEnabled operation.
+   */
+  public static function authFederatedSigninEnabled(): bool { return self::$authFederatedSigninEnabled; }
+  /**
+   * Handles authFederatedSigninLocalOnly operation.
+   */
+  public static function authFederatedSigninLocalOnly(): bool { return self::$authFederatedSigninLocalOnly; }
+  /**
+   * Handles authFederatedAutoCreateLocal operation.
+   */
+  public static function authFederatedAutoCreateLocal(): bool { return self::$authFederatedAutoCreateLocal; }
+  /**
+   * Handles authProviderGoogleEnabled operation.
+   */
+  public static function authProviderGoogleEnabled(): bool { return self::$authProviderGoogleEnabled; }
+  /**
+   * Handles authProviderAppleEnabled operation.
+   */
+  public static function authProviderAppleEnabled(): bool { return self::$authProviderAppleEnabled; }
+  /**
+   * Handles authProviderMicrosoftEnabled operation.
+   */
+  public static function authProviderMicrosoftEnabled(): bool { return self::$authProviderMicrosoftEnabled; }
+  /**
+   * Handles authProviderFedcmEnabled operation.
+   */
+  public static function authProviderFedcmEnabled(): bool { return self::$authProviderFedcmEnabled; }
+  /**
+   * Handles authGoogleClientId operation.
+   */
+  public static function authGoogleClientId(): string { return self::$authGoogleClientId; }
+  /**
+   * Handles authGoogleClientSecret operation.
+   */
+  public static function authGoogleClientSecret(): string { return self::$authGoogleClientSecret; }
+  /**
+   * Handles authAppleClientId operation.
+   */
+  public static function authAppleClientId(): string { return self::$authAppleClientId; }
+  /**
+   * Handles authMicrosoftClientId operation.
+   */
+  public static function authMicrosoftClientId(): string { return self::$authMicrosoftClientId; }
+  /**
    * Convert environment variable string to boolean.
    *
    * @param string $value
@@ -443,5 +509,3 @@ final class Environment
     return dirname(__DIR__, 4);
   }
 }
-
-

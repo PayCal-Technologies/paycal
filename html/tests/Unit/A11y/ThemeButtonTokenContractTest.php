@@ -90,6 +90,21 @@ final class ThemeButtonTokenContractTest extends TestCase
   }
 
   #[Test]
+  public function nativeSelectCustomizationUsesProgressiveEnhancementAndThemeTokens(): void
+  {
+    $commonCss = (string) file_get_contents(dirname(__DIR__, 3) . '/css/common/index.php');
+
+    $this->assertStringContainsString('@supports (appearance: base-select)', $commonCss);
+    $this->assertStringContainsString('select:not([multiple])::picker(select)', $commonCss);
+    $this->assertStringContainsString('select:not([multiple])::picker-icon', $commonCss);
+    $this->assertStringContainsString('select:not([multiple]) option::checkmark', $commonCss);
+    $this->assertStringContainsString('display: inline-flex;', $commonCss);
+    $this->assertStringContainsString('background: var(--dialog-back, var(--panel-bg));', $commonCss);
+    $this->assertStringContainsString('border-color: var(--button-border-active);', $commonCss);
+    $this->assertStringContainsString('background: var(--button-bg-hover);', $commonCss);
+  }
+
+  #[Test]
   public function accentPresetSwatchesUseCentralPresetTokens(): void
   {
     $projectRoot = dirname(__DIR__, 4);
@@ -97,13 +112,14 @@ final class ThemeButtonTokenContractTest extends TestCase
     $settings = (string) file_get_contents($projectRoot . '/html/settings/_partials/panel_appearance_theme.php');
     $controller = (string) file_get_contents($projectRoot . '/html/src/Controllers/SettingsController.php');
     $commonCss = (string) file_get_contents($projectRoot . '/html/css/common/index.php');
+    $tokensCss = (string) file_get_contents($projectRoot . '/html/css/tokens/index.php');
 
     $this->assertStringContainsString('public const ACCENT_PRESETS = [', $defaults);
     $this->assertStringContainsString("public const DEFAULT_ACCENT_PRESET = 'blue';", $defaults);
     $this->assertStringContainsString("'red' => ['label' => 'Red', 'hex' => '#EF4444']", $defaults);
     $this->assertStringContainsString("'blue' => ['label' => 'Blue', 'hex' => '#3B82F6']", $defaults);
     $this->assertStringContainsString("'rose' => ['label' => 'Rose', 'hex' => '#F43F5E']", $defaults);
-    $this->assertSame(16, substr_count($defaults, "'hex' =>"), 'Accent presets should stay intentionally smaller than the 20 site-color swatches.');
+    $this->assertSame(48, substr_count($defaults, "'hex' =>"), 'Accent presets should stay aligned to two 24-column rows.');
     $this->assertStringContainsString('$accentPresets = UserPreferenceDefaults::accentPresets();', $settings);
     $this->assertStringContainsString('id="accent_preset_swatches"', $settings);
     $this->assertStringContainsString('id="accent_preset_preview"', $settings);
@@ -112,5 +128,11 @@ final class ThemeButtonTokenContractTest extends TestCase
     $this->assertStringContainsString('--color-accent: var(--accent-color);', $commonCss);
     $this->assertStringContainsString('--calendar-day-selected:', $commonCss);
     $this->assertStringContainsString('background: {$accentHex};', $commonCss);
+    $this->assertStringContainsString('id="depth_preset_', $settings);
+    $this->assertStringContainsString("public const DEFAULT_DEPTH = 'standard';", $defaults);
+    $this->assertStringContainsString("case DEPTH = 'depth';", (string) file_get_contents($projectRoot . '/html/src/Domain/UserFields.php'));
+    $this->assertStringContainsString('--depth-panel-shadow:', $tokensCss);
+    $this->assertStringContainsString('html[data-depth="flat"]', $tokensCss);
+    $this->assertStringContainsString('box-shadow: var(--depth-panel-shadow', $commonCss);
   }
 }

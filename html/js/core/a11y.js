@@ -103,6 +103,7 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
     
     state.modal_is_active = true;
     el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-hidden', 'false');
     
     const firstFocusable = el.querySelector('a[href], input, button, textarea, select, [tabindex]:not([tabindex="-1"])');
     if (firstFocusable) firstFocusable.focus();
@@ -113,7 +114,6 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
       } catch {}
     }
     
-    el.setAttribute('aria-hidden', 'false');
   }
 
   /**
@@ -125,6 +125,12 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
   function closeModal(id, text = "") {
     const el = getElementFn(id);
     if (!el) return;
+
+    const active = document.activeElement;
+    const focusWasInside = active instanceof HTMLElement && el.contains(active);
+    if (focusWasInside) {
+      active.blur();
+    }
     
     if (el instanceof HTMLDialogElement) {
       if (el.open) el.close();
@@ -133,7 +139,9 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
       el.classList.remove('display-flex');
     }
     
-    el.setAttribute('aria-hidden', 'true');
+    if (!(document.activeElement instanceof HTMLElement) || !el.contains(document.activeElement)) {
+      el.setAttribute('aria-hidden', 'true');
+    }
     state.modal_is_active = !!queryFn('dialog[open]');
     
     if (!state.modal_is_active && state.lastFocused && typeof state.lastFocused.focus === 'function') {

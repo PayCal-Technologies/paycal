@@ -3,29 +3,9 @@
  */
 
 import { createEarningsFormatHelpers } from '/js/earnings/format.js';
-import { resolveUserLocale } from '/js/earnings/locale.js';
-
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function getI18nLabel(config, key, fallback = '') {
-  const value = String(config?.[key] ?? '').trim();
-  return value !== '' ? value : fallback;
-}
-
-function formatI18n(config, key, fallback, params = {}) {
-  let label = getI18nLabel(config, key, fallback);
-  Object.entries(params).forEach(([paramKey, paramValue]) => {
-    label = label.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramValue));
-  });
-  return label;
-}
+import { resolveUserLocale } from '/js/core/locale.js';
+import { escapeHtml } from '/js/core/escape.js';
+import { formatI18n, getI18nLabel } from '/js/core/template.js';
 
 function centsToInputDollars(cents) {
   const numeric = Number(cents);
@@ -256,7 +236,7 @@ function renderWorkspace(root, state, config, formatHelpers, activeScenario) {
   const scenariosTitle = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_SCENARIOS_TITLE', 'Scenario Comparison'));
   const assumptionsTitle = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_ASSUMPTIONS_TITLE', 'Assumptions'));
 
-  root.innerHTML = `<div class="forecast-workspace__grid">
+  window.Guardian.setHTML(root, `<div class="forecast-workspace__grid">
     <div class="forecast-workspace__summary" aria-live="polite">${buildSummaryCardsHtml(state, config, formatHelpers)}</div>
     <div class="forecast-workspace__main">
       ${buildCalculatorFormHtml(state, config)}
@@ -273,7 +253,7 @@ function renderWorkspace(root, state, config, formatHelpers, activeScenario) {
       ${buildTimelineHtml(state, config, formatHelpers)}
     </aside>
     <p class="forecast_estimate_disclaimer">${disclaimer}</p>
-  </div>`;
+  </div>`);
 }
 
 function readOverridesFromForm(form) {
@@ -393,19 +373,28 @@ export function initForecastWorkspace(container, options = {}) {
   };
 
   const requestPreview = async (overrides = {}, scenario = activeScenario) => {
-    const response = await fetch(previewUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify({ overrides, scenario }),
-    });
-    const payload = await response.json();
-    if (!response.ok || payload?.status !== 'success') {
-      throw new Error(payload?.message || getI18nLabel(config, 'EARNINGS_FORECAST_PREVIEW_FAILED', 'Preview failed.'));
+    mount.dataset.forecastStatus = 'updating';
+    try {
+      const response = await fetch(previewUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ overrides, scenario }),
+      });
+      const payload = await response.json();
+      if (!response.ok || payload?.status !== 'success') {
+        throw new Error(payload?.message || getI18nLabel(config, 'EARNINGS_FORECAST_PREVIEW_FAILED', 'Preview failed.'));
+      }
+      state = payload.data && typeof payload.data === 'object' ? payload.data : payload;
+      activeScenario = scenario;
+      paint();
+    } finally {
+      window.setTimeout(() => {
+        if (mount.dataset.forecastStatus === 'updating') {
+          delete mount.dataset.forecastStatus;
+        }
+      }, 620);
     }
-    state = payload.data && typeof payload.data === 'object' ? payload.data : payload;
-    activeScenario = scenario;
-    paint();
   };
 
   const schedulePreview = () => {

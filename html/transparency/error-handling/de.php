@@ -127,7 +127,6 @@ try {
             <li><code>html/js/auth-recovery/index.php</code> (4 catches)</li>
             <li><code>html/js/signin/index.php</code> (2 catches)</li>
             <li><code>html/js/signin/verification-reminder.js</code> (2 catches)</li>
-            <li><code>html/js/signin/verification-status-banner.js</code> (1 catch)</li>
             <li><code>html/js/settings/index.php</code> (8+ catches)</li>
           </ul>
         </div>

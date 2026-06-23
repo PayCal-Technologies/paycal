@@ -166,10 +166,11 @@ final class StripeBillingService
    *
    * @param string $userUUID  Authenticated user UUID.
    * @param string $returnURL URL the portal redirects to after the user exits.
+   * @param string $userEmail Authenticated user email used to recover missing Stripe IDs.
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
-  public function createPortalSession(string $userUUID, string $returnURL): array
+  public function createPortalSession(string $userUUID, string $returnURL, string $userEmail = ''): array
   {
     $secretKey = $this->requireEnv('STRIPE_SECRET_KEY');
     if ($secretKey === '') {
@@ -180,12 +181,36 @@ final class StripeBillingService
     $subscriptionId = is_scalar($subscription['id'] ?? null) ? (string) $subscription['id'] : '';
     $customerId = is_scalar($subscription['customer_id'] ?? null) ? trim((string) $subscription['customer_id']) : '';
 
-    if ($subscriptionId === '' && $customerId === '') {
-      return $this->fail('No active Stripe subscription found for this user.');
-    }
-
     try {
       $client = new StripeClient($secretKey);
+
+      if ($subscriptionId === '' && $customerId === '') {
+        $customerId = $this->resolveCanonicalCustomerIdByEmail($secretKey, $userEmail);
+        if ($customerId !== '') {
+          SubscriptionRepository::storeStripeCustomerId($userUUID, $customerId);
+        }
+      }
+
+      if ($subscriptionId === '' && $customerId !== '') {
+        $subscriptionId = $this->resolveActiveSubscriptionId($secretKey, $customerId);
+        if ($subscriptionId !== '') {
+          $stripeSubscription = $client->subscriptions->retrieve($subscriptionId, []);
+          $periodEnd = $this->extractPeriodEndUnixTime($stripeSubscription);
+          $plan = $this->resolvePlanFromStripeSubscription($stripeSubscription);
+          $this->applyActiveSubscriptionUpgrade(
+            $userUUID,
+            $subscriptionId,
+            $customerId,
+            $periodEnd > 0 ? $periodEnd : null,
+            $plan,
+          );
+        }
+      }
+
+      if ($subscriptionId === '' && $customerId === '') {
+        return $this->fail('No Stripe customer found for this user.');
+      }
+
       if ($customerId === '') {
         $customerId = $this->resolvePortalCustomerId($secretKey, $subscriptionId);
 
@@ -312,8 +337,7 @@ final class StripeBillingService
     }
 
     try {
-      // @phpstan-ignore-next-line Guard clause above ensures customerId exists when subscriptionId is empty.
-      if ($subscriptionId === '' && $customerId !== null) {
+      if ($subscriptionId === '') {
         $subscriptionId = $this->resolveActiveSubscriptionId($secretKey, $customerId);
       }
 
@@ -331,6 +355,223 @@ final class StripeBillingService
       ]);
     } catch (\Throwable $e) {
       return $this->fail('Failed to cancel Stripe subscription.', [
+        'error' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  /**
+   * Change the active Stripe subscription to another PayCal plan.
+   *
+   * Stripe expects an existing subscription item ID when switching prices; if
+   * the item ID is omitted, Stripe adds the new price alongside the old one.
+   *
+   * @param string $userUUID Authenticated user UUID.
+   * @param string $plan Target plan: premium or business.
+   * @param string $prorationBehavior Stripe proration behavior.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
+  public function changeSubscriptionPlan(string $userUUID, string $plan, string $prorationBehavior = 'create_prorations'): array
+  {
+    $plan = strtolower(trim($plan)) === 'business' ? 'business' : 'premium';
+    $priceEnvKey = $plan === 'business' ? 'STRIPE_BUSINESS_PRICE_ID' : 'STRIPE_PREMIUM_PRICE_ID';
+    $paycalPlan = $plan === 'business' ? 'business_flat' : 'premium_flat';
+
+    $priceId = $this->requireEnv($priceEnvKey);
+    if ($priceId === '') {
+      return $this->fail('Stripe ' . ucfirst($plan) . ' price ID is not configured.');
+    }
+
+    $secretKey = $this->requireEnv('STRIPE_SECRET_KEY');
+    if ($secretKey === '') {
+      return $this->fail('Stripe secret key is not configured.');
+    }
+
+    $subscription = SubscriptionRepository::get($userUUID);
+    $subscriptionId = is_scalar($subscription['id'] ?? null) ? trim((string) $subscription['id']) : '';
+    $customerId = null;
+    if (is_scalar($subscription['customer_id'] ?? null)) {
+      $customerId = trim((string) $subscription['customer_id']);
+      if ($customerId === '') {
+        $customerId = null;
+      }
+    }
+
+    if ($subscriptionId === '' && $customerId === null) {
+      return $this->fail('No Stripe subscription identifiers are available for plan change.');
+    }
+
+    $allowedProrationBehaviors = ['always_invoice', 'create_prorations', 'none'];
+    if (!in_array($prorationBehavior, $allowedProrationBehaviors, true)) {
+      $prorationBehavior = 'create_prorations';
+    }
+
+    try {
+      $client = new StripeClient($secretKey);
+
+      if ($subscriptionId === '') {
+        $subscriptionId = $this->resolveActiveSubscriptionId($secretKey, $customerId);
+      }
+
+      if ($subscriptionId === '') {
+        return $this->fail('Unable to resolve Stripe subscription for plan change.');
+      }
+
+      $stripeSubscription = $client->subscriptions->retrieve($subscriptionId, [
+        'expand' => ['items.data.price'],
+      ]);
+
+      $subscriptionItem = $this->resolveSubscriptionItemForPlanChange($stripeSubscription);
+      $subscriptionItemId = is_object($subscriptionItem) && is_scalar($subscriptionItem->id ?? null)
+        ? trim((string) $subscriptionItem->id)
+        : '';
+
+      if ($subscriptionItemId === '') {
+        return $this->fail('Unable to resolve Stripe subscription item for plan change.');
+      }
+
+      $quantity = 1;
+      if (is_object($subscriptionItem) && is_scalar($subscriptionItem->quantity ?? null)) {
+        $quantity = max(1, (int) $subscriptionItem->quantity);
+      }
+
+      $updated = $client->subscriptions->update($subscriptionId, [
+        'items' => [[
+          'id' => $subscriptionItemId,
+          'price' => $priceId,
+          'quantity' => $quantity,
+        ]],
+        'proration_behavior' => $prorationBehavior,
+        'metadata' => [
+          'user_uuid' => $userUUID,
+          'paycal_plan' => $paycalPlan,
+        ],
+      ]);
+
+      $stripeCustomerId = $this->extractCustomerId($updated) ?? $customerId;
+      $periodEnd = $this->extractPeriodEndUnixTime($updated);
+      $this->applyActiveSubscriptionUpgrade($userUUID, $subscriptionId, $stripeCustomerId, $periodEnd, $plan);
+
+      return $this->ok('Stripe subscription plan changed.', [
+        'subscription_id' => $subscriptionId,
+        'subscription_item_id' => $subscriptionItemId,
+        'customer_id' => (string) ($stripeCustomerId ?? ''),
+        'tier' => $plan,
+        'plan' => $plan,
+        'price_id' => $priceId,
+        'proration_behavior' => $prorationBehavior,
+      ]);
+    } catch (\Throwable $e) {
+      return $this->fail('Failed to change Stripe subscription plan.', [
+        'error' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  /**
+   * Create a Stripe-hosted portal flow for confirming a paid plan change.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
+  public function createPlanChangePortalSession(string $userUUID, string $plan, string $returnURL, string $userEmail = ''): array
+  {
+    $plan = strtolower(trim($plan)) === 'business' ? 'business' : 'premium';
+    $priceEnvKey = $plan === 'business' ? 'STRIPE_BUSINESS_PRICE_ID' : 'STRIPE_PREMIUM_PRICE_ID';
+    $priceId = $this->requireEnv($priceEnvKey);
+    if ($priceId === '') {
+      return $this->fail('Stripe ' . ucfirst($plan) . ' price ID is not configured.');
+    }
+
+    $secretKey = $this->requireEnv('STRIPE_SECRET_KEY');
+    if ($secretKey === '') {
+      return $this->fail('Stripe secret key is not configured.');
+    }
+
+    try {
+      $client = new StripeClient($secretKey);
+      $subscription = SubscriptionRepository::get($userUUID);
+      $subscriptionId = is_scalar($subscription['id'] ?? null) ? trim((string) $subscription['id']) : '';
+      $customerId = is_scalar($subscription['customer_id'] ?? null) ? trim((string) $subscription['customer_id']) : '';
+
+      if ($subscriptionId === '' && $customerId === '') {
+        $customerId = $this->resolveCanonicalCustomerIdByEmail($secretKey, $userEmail);
+        if ($customerId !== '') {
+          SubscriptionRepository::storeStripeCustomerId($userUUID, $customerId);
+        }
+      }
+
+      if ($subscriptionId === '' && $customerId !== '') {
+        $subscriptionId = $this->resolveActiveSubscriptionId($secretKey, $customerId);
+      }
+
+      if ($subscriptionId === '') {
+        return $this->fail('Unable to resolve Stripe subscription for plan change portal.');
+      }
+
+      $stripeSubscription = $client->subscriptions->retrieve($subscriptionId, [
+        'expand' => ['items.data.price'],
+      ]);
+
+      if ($customerId === '') {
+        $customerId = $this->extractCustomerId($stripeSubscription) ?? '';
+        if ($customerId !== '') {
+          SubscriptionRepository::storeStripeCustomerId($userUUID, $customerId);
+        }
+      }
+
+      if ($customerId === '') {
+        return $this->fail('Unable to resolve Stripe customer for plan change portal.');
+      }
+
+      $subscriptionItem = $this->resolveSubscriptionItemForPlanChange($stripeSubscription);
+      $subscriptionItemId = is_object($subscriptionItem) && is_scalar($subscriptionItem->id ?? null)
+        ? trim((string) $subscriptionItem->id)
+        : '';
+
+      if ($subscriptionItemId === '') {
+        return $this->fail('Unable to resolve Stripe subscription item for plan change portal.');
+      }
+
+      $quantity = 1;
+      if (is_object($subscriptionItem) && is_scalar($subscriptionItem->quantity ?? null)) {
+        $quantity = max(1, (int) $subscriptionItem->quantity);
+      }
+
+      $configurationId = $this->resolvePortalPlanChangeConfigurationId($secretKey, $priceId);
+      $portalSession = $client->billingPortal->sessions->create([
+        'customer' => $customerId,
+        'return_url' => $returnURL,
+        'configuration' => $configurationId,
+        'flow_data' => [
+          'type' => 'subscription_update_confirm',
+          'after_completion' => [
+            'type' => 'redirect',
+            'redirect' => [
+              'return_url' => $returnURL,
+            ],
+          ],
+          'subscription_update_confirm' => [
+            'subscription' => $subscriptionId,
+            'items' => [[
+              'id' => $subscriptionItemId,
+              'price' => $priceId,
+              'quantity' => $quantity,
+            ]],
+          ],
+        ],
+      ]);
+
+      return $this->ok('Stripe plan change portal session created.', [
+        'portal_url' => trim((string) ($portalSession->url ?? '')),
+        'plan' => $plan,
+        'subscription_id' => $subscriptionId,
+        'subscription_item_id' => $subscriptionItemId,
+        'customer_id' => $customerId,
+        'price_id' => $priceId,
+      ]);
+    } catch (\Throwable $e) {
+      return $this->fail('Failed to create Stripe plan change portal session.', [
         'error' => $e->getMessage(),
       ]);
     }
@@ -1492,6 +1733,17 @@ final class StripeBillingService
       $this->incrementWebhookTelemetry($metric . ':' . $this->normalizeMetricLabel($eventType));
     }
 
+    $successMetrics = ['processed', 'duplicate'];
+    $isSuccess = in_array($metric, $successMetrics, true);
+    $diagnosticName = $isSuccess ? 'stripe.webhook_verified' : 'stripe.webhook_failed';
+    $severity = $isSuccess
+      ? \PayCal\Observability\DiagnosticSeverity::Info
+      : \PayCal\Observability\DiagnosticSeverity::Warn;
+
+    \PayCal\Observability\Argus::emit($diagnosticName, $severity, array_merge(
+      ['metric' => $metric],
+      $this->normalizeLogContext($context),
+    ));
   }
 
   /** @param array<string, mixed> $context */
@@ -1564,7 +1816,7 @@ final class StripeBillingService
   }
 
   /**
-   * TODO: Document applyActiveSubscriptionUpgrade.
+   * Apply active subscription upgrade.
    */
   private function applyActiveSubscriptionUpgrade(
     string $userUUID,
@@ -1637,6 +1889,134 @@ final class StripeBillingService
     return is_scalar($price) ? trim((string) $price) : '';
   }
 
+  /** @param object $subscription */
+  private function resolveSubscriptionItemForPlanChange(object $subscription): ?object
+  {
+    if (!isset($subscription->items) || !is_object($subscription->items)) {
+      return null;
+    }
+
+    $data = $subscription->items->data ?? null;
+    if (!is_array($data) || $data === []) {
+      return null;
+    }
+
+    $knownPriceIds = array_filter([
+      trim($this->requireEnv('STRIPE_PREMIUM_PRICE_ID')),
+      trim($this->requireEnv('STRIPE_BUSINESS_PRICE_ID')),
+    ], static fn (string $priceId): bool => $priceId !== '');
+
+    foreach ($data as $item) {
+      if (!is_object($item)) {
+        continue;
+      }
+
+      $priceId = '';
+      $price = $item->price ?? null;
+      if (is_object($price) && is_scalar($price->id ?? null)) {
+        $priceId = trim((string) $price->id);
+      } elseif (is_scalar($price)) {
+        $priceId = trim((string) $price);
+      }
+
+      if ($priceId !== '' && in_array($priceId, $knownPriceIds, true)) {
+        return $item;
+      }
+    }
+
+    foreach ($data as $item) {
+      if (is_object($item)) {
+        return $item;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Resolve portal plan change configuration id.
+   */
+  private function resolvePortalPlanChangeConfigurationId(string $secretKey, string $targetPriceId): string
+  {
+    $client = new StripeClient($secretKey);
+    $metadataName = 'paycal_plan_change_v1';
+
+    $configurations = $client->billingPortal->configurations->all([
+      'active' => true,
+      'limit' => 100,
+    ]);
+
+    foreach ($configurations->data as $configuration) {
+      $marker = $configuration->metadata->paycal_configuration ?? '';
+      if (is_scalar($marker) && trim((string) $marker) === $metadataName && is_scalar($configuration->id ?? null)) {
+        return trim((string) $configuration->id);
+      }
+    }
+
+    $productEntries = $this->buildPortalSubscriptionUpdateProducts($secretKey, $targetPriceId);
+    $configuration = $client->billingPortal->configurations->create([
+      'name' => 'PayCal plan changes',
+      'features' => [
+        'customer_update' => [
+          'enabled' => true,
+          'allowed_updates' => ['email', 'tax_id'],
+        ],
+        'invoice_history' => [
+          'enabled' => true,
+        ],
+        'payment_method_update' => [
+          'enabled' => true,
+        ],
+        'subscription_update' => [
+          'enabled' => true,
+          'default_allowed_updates' => ['price'],
+          'proration_behavior' => 'create_prorations',
+          'products' => $productEntries,
+        ],
+      ],
+      'metadata' => [
+        'paycal_configuration' => $metadataName,
+      ],
+    ]);
+
+    return trim((string) ($configuration->id ?? ''));
+  }
+
+  /**
+   * @return array<int, array{product: string, prices: array<int, string>}>
+   */
+  private function buildPortalSubscriptionUpdateProducts(string $secretKey, string $targetPriceId): array
+  {
+    $priceIds = array_values(array_filter([
+      trim($this->requireEnv('STRIPE_PREMIUM_PRICE_ID')),
+      trim($this->requireEnv('STRIPE_BUSINESS_PRICE_ID')),
+      trim($targetPriceId),
+    ], static fn (string $priceId): bool => $priceId !== ''));
+
+    $client = new StripeClient($secretKey);
+    $pricesByProduct = [];
+    foreach (array_unique($priceIds) as $priceId) {
+      $price = $client->prices->retrieve($priceId, []);
+      $productId = is_scalar($price->product ?? null) ? trim((string) $price->product) : '';
+      if ($productId === '') {
+        continue;
+      }
+
+      $pricesByProduct[$productId] ??= [];
+      $pricesByProduct[$productId][] = $priceId;
+    }
+
+    $products = [];
+    foreach ($pricesByProduct as $productId => $productPriceIds) {
+      $products[] = [
+        'product' => $productId,
+        'prices' => array_values(array_unique($productPriceIds)),
+      ];
+    }
+
+    return $products;
+  }
+
   /**
    * @param array<string, mixed> $data
    * @return array{success: bool, message: string, data: array<string, mixed>}
@@ -1655,5 +2035,3 @@ final class StripeBillingService
     return ['success' => false, 'message' => $message, 'data' => $data];
   }
 }
-
-

@@ -16,7 +16,7 @@ use PayCal\Domain\Config\SystemConfig;
  * membership, consent, and credential-binding constraints.
  *
  * Developer notes:
- * - This service sits on security-sensitive org encryption flows.
+ * - This service sits on security-sensitive business encryption flows.
  * - Preserve consent validation and membership checks as first-class behavior,
  *   not optional caller responsibilities.
  *
@@ -43,8 +43,8 @@ use PayCal\Domain\Config\SystemConfig;
 final class BusinessEncryptionService
 {
   /** @return array{success: bool, message: string, data: array<string, mixed>} */
-  public function storeOrgDekWrap(
-    string $orgId,
+  public function storeBusinessDekWrap(
+    string $businessId,
     string $segment,
     string $version,
     string $userUUID,
@@ -54,7 +54,7 @@ final class BusinessEncryptionService
     string $kdfProfile = 'hkdf-passkey-v1',
     string $dekId = ''
   ): array {
-    $orgId = trim(InputSanitizer::sanitizeString($orgId));
+    $businessId = trim(InputSanitizer::sanitizeString($businessId));
     $segment = trim(InputSanitizer::sanitizeString($segment));
     $version = trim(InputSanitizer::sanitizeString($version));
     $userUUID = trim(InputSanitizer::sanitizeString($userUUID));
@@ -63,31 +63,31 @@ final class BusinessEncryptionService
     $consentId = trim(InputSanitizer::sanitizeString($consentId));
     $dekId = trim(InputSanitizer::sanitizeString($dekId));
 
-    if ($orgId === '' || $segment === '' || $version === '' || $userUUID === '' || $credentialId === '' || $wrappedDek === '') {
+    if ($businessId === '' || $segment === '' || $version === '' || $userUUID === '' || $credentialId === '' || $wrappedDek === '') {
       return $this->fail('All wrap fields are required.');
     }
 
     if ($dekId === '') {
-      $dekId = 'org-dek:' . $orgId . ':' . $segment . ':' . $userUUID . ':v' . $version;
+      $dekId = 'business-dek:' . $businessId . ':' . $segment . ':' . $userUUID . ':v' . $version;
     }
 
     if (!$this->isValidSegment($segment)) {
-      return $this->fail('Invalid org DEK segment.');
+      return $this->fail('Invalid business DEK segment.');
     }
 
-    if (!$this->isMembershipActive($orgId, $userUUID)) {
-      return $this->fail('Only active members can receive org DEK wraps.');
+    if (!$this->isMembershipActive($businessId, $userUUID)) {
+      return $this->fail('Only active members can receive business DEK wraps.');
     }
 
-    if (!$this->isConsentBindingValid($orgId, $userUUID, $consentId)) {
+    if (!$this->isConsentBindingValid($businessId, $userUUID, $consentId)) {
       return $this->fail('A valid active consent binding is required for wrap creation.');
     }
 
-    $key = Keys::businessDekWrap($orgId, $segment, $version, $userUUID, $credentialId);
+    $key = Keys::businessDekWrap($businessId, $segment, $version, $userUUID, $credentialId);
     $timestamp = date('c');
 
     Database::hset($key, [
-      'org_id' => $orgId,
+      'business_id' => $businessId,
       'segment' => $segment,
       'key_version' => $version,
       'user_uuid' => $userUUID,
@@ -101,9 +101,9 @@ final class BusinessEncryptionService
       'updated_at' => $timestamp,
     ]);
 
-    return $this->ok('Org DEK wrap stored.', [
+    return $this->ok('Business DEK wrap stored.', [
       'wrap_key' => $key,
-      'org_id' => $orgId,
+      'business_id' => $businessId,
       'segment' => $segment,
       'key_version' => $version,
       'user_uuid' => $userUUID,
@@ -115,7 +115,7 @@ final class BusinessEncryptionService
 
   /** @return array{success: bool, message: string, data: array<string, mixed>} */
   public function resolveActiveWrapForUnwrap(
-    string $orgId,
+    string $businessId,
     string $segment,
     string $version,
     string $userUUID,
@@ -123,7 +123,7 @@ final class BusinessEncryptionService
     string $consentId = '',
     string $expectedDekId = ''
   ): array {
-    $orgId = trim(InputSanitizer::sanitizeString($orgId));
+    $businessId = trim(InputSanitizer::sanitizeString($businessId));
     $segment = trim(InputSanitizer::sanitizeString($segment));
     $version = trim(InputSanitizer::sanitizeString($version));
     $userUUID = trim(InputSanitizer::sanitizeString($userUUID));
@@ -131,53 +131,53 @@ final class BusinessEncryptionService
     $consentId = trim(InputSanitizer::sanitizeString($consentId));
     $expectedDekId = trim(InputSanitizer::sanitizeString($expectedDekId));
 
-    if ($orgId === '' || $segment === '' || $version === '' || $userUUID === '' || $credentialId === '') {
-      $this->incrementOrgUnwrapDeniedCounter('missing_wrap');
+    if ($businessId === '' || $segment === '' || $version === '' || $userUUID === '' || $credentialId === '') {
+      $this->incrementBusinessUnwrapDeniedCounter('missing_wrap');
       return $this->fail('Wrap lookup fields are required.');
     }
 
-    if (!$this->isMembershipActive($orgId, $userUUID)) {
-      $this->incrementOrgUnwrapDeniedCounter('inactive_membership');
+    if (!$this->isMembershipActive($businessId, $userUUID)) {
+      $this->incrementBusinessUnwrapDeniedCounter('inactive_membership');
       return $this->fail('Membership is not active; unwrap denied.');
     }
 
-    $key = Keys::businessDekWrap($orgId, $segment, $version, $userUUID, $credentialId);
+    $key = Keys::businessDekWrap($businessId, $segment, $version, $userUUID, $credentialId);
     $wrap = Database::hgetall($key);
     if ($wrap === []) {
-      $this->incrementOrgUnwrapDeniedCounter('missing_wrap');
-      return $this->fail('Org DEK wrap not found.');
+      $this->incrementBusinessUnwrapDeniedCounter('missing_wrap');
+      return $this->fail('Business DEK wrap not found.');
     }
 
     if ((string) ($wrap['status'] ?? '') !== BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
-      $this->incrementOrgUnwrapDeniedCounter('inactive_membership');
-      return $this->fail('Org DEK wrap is inactive.');
+      $this->incrementBusinessUnwrapDeniedCounter('inactive_membership');
+      return $this->fail('Business DEK wrap is inactive.');
     }
 
     $wrapConsentId = trim((string) ($wrap['consent_id'] ?? ''));
     if ($wrapConsentId === '') {
-      $this->incrementOrgUnwrapDeniedCounter('no_consent');
-      return $this->fail('Org DEK wrap is missing consent binding.');
+      $this->incrementBusinessUnwrapDeniedCounter('no_consent');
+      return $this->fail('Business DEK wrap is missing consent binding.');
     }
 
     if ($consentId !== '' && $consentId !== $wrapConsentId) {
-      $this->incrementOrgUnwrapDeniedCounter('no_consent');
+      $this->incrementBusinessUnwrapDeniedCounter('no_consent');
       return $this->fail('Provided consent_id does not match wrap binding.');
     }
 
-    if (!$this->isConsentBindingValid($orgId, $userUUID, $wrapConsentId)) {
-      $this->incrementOrgUnwrapDeniedCounter('no_consent');
+    if (!$this->isConsentBindingValid($businessId, $userUUID, $wrapConsentId)) {
+      $this->incrementBusinessUnwrapDeniedCounter('no_consent');
       return $this->fail('Consent binding is invalid or inactive; unwrap denied.');
     }
 
     if ($expectedDekId !== '') {
       $actualDekId = trim((string) ($wrap['dek_id'] ?? ''));
       if ($actualDekId === '' || $actualDekId !== $expectedDekId) {
-        $this->incrementOrgUnwrapDeniedCounter('dek_mismatch');
-        return $this->fail('Org DEK wrap does not match the envelope DEK id.');
+        $this->incrementBusinessUnwrapDeniedCounter('dek_mismatch');
+        return $this->fail('Business DEK wrap does not match the envelope DEK id.');
       }
     }
 
-    return $this->ok('Org DEK wrap resolved for active unwrap.', [
+    return $this->ok('Business DEK wrap resolved for active unwrap.', [
       'wrap_key' => $key,
       'wrapped_dek' => (string) ($wrap['wrapped_dek'] ?? ''),
       'kdf_profile' => (string) ($wrap['kdf_profile'] ?? ''),
@@ -190,17 +190,17 @@ final class BusinessEncryptionService
   }
 
   /** @return array{success: bool, message: string, data: array<string, mixed>} */
-  public function revokeWrapsForMembership(string $orgId, string $userUUID, string $reason = 'membership_revoked'): array
+  public function revokeWrapsForMembership(string $businessId, string $userUUID, string $reason = 'membership_revoked'): array
   {
-    $orgId = trim(InputSanitizer::sanitizeString($orgId));
+    $businessId = trim(InputSanitizer::sanitizeString($businessId));
     $userUUID = trim(InputSanitizer::sanitizeString($userUUID));
     $reason = trim(InputSanitizer::sanitizeString($reason));
 
-    if ($orgId === '' || $userUUID === '') {
-      return $this->fail('Organization id and user id are required for wrap revocation.');
+    if ($businessId === '' || $userUUID === '') {
+      return $this->fail('Business id and user id are required for wrap revocation.');
     }
 
-    $pattern = Keys::BUSINESS_DEK_WRAP . ':' . $orgId . ':*:*:' . $userUUID . ':*';
+    $pattern = Keys::BUSINESS_DEK_WRAP . ':' . $businessId . ':*:*:' . $userUUID . ':*';
     $keys = Database::scanKeys($pattern);
     $revokedCount = 0;
     $timestamp = date('c');
@@ -219,8 +219,8 @@ final class BusinessEncryptionService
       $revokedCount += 1;
     }
 
-    return $this->ok('Org DEK wraps revoked for membership.', [
-      'organization_id' => $orgId,
+    return $this->ok('Business DEK wraps revoked for membership.', [
+      'business_id' => $businessId,
       'user_uuid' => $userUUID,
       'revoked_wrap_count' => $revokedCount,
       'reason' => $reason,
@@ -228,16 +228,16 @@ final class BusinessEncryptionService
   }
 
   /** @return array{success: bool, message: string, data: array<string, mixed>} */
-  public function revokeWrapsForOrganization(string $orgId, string $reason = 'organization_removed'): array
+  public function revokeWrapsForBusiness(string $businessId, string $reason = 'business_removed'): array
   {
-    $orgId = trim(InputSanitizer::sanitizeString($orgId));
+    $businessId = trim(InputSanitizer::sanitizeString($businessId));
     $reason = trim(InputSanitizer::sanitizeString($reason));
 
-    if ($orgId === '') {
-      return $this->fail('Organization id is required for org-wide wrap revocation.');
+    if ($businessId === '') {
+      return $this->fail('Business id is required for business-wide wrap revocation.');
     }
 
-    $pattern = Keys::BUSINESS_DEK_WRAP . ':' . $orgId . ':*';
+    $pattern = Keys::BUSINESS_DEK_WRAP . ':' . $businessId . ':*';
     $keys = Database::scanKeys($pattern);
     $revokedCount = 0;
     $timestamp = date('c');
@@ -256,42 +256,42 @@ final class BusinessEncryptionService
       $revokedCount += 1;
     }
 
-    return $this->ok('Org DEK wraps revoked for organization.', [
-      'organization_id' => $orgId,
+    return $this->ok('Business DEK wraps revoked for business.', [
+      'business_id' => $businessId,
       'revoked_wrap_count' => $revokedCount,
       'reason' => $reason,
     ]);
   }
 
   /**
-   * Validate supported organization DEK segments.
+   * Validate supported business DEK segments.
    */
   private function isValidSegment(string $segment): bool
   {
     return in_array(
       $segment,
       [
-        BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
-        BusinessDiscoveryService::ORG_DEK_SEGMENT_ARCHIVE,
+        BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
+        BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_ARCHIVE,
       ],
       true
     );
   }
 
   /**
-   * Check whether the membership relationship is currently active.
+   * Check whether the business connection is currently active.
    */
-  private function isMembershipActive(string $orgId, string $userUUID): bool
+  private function isMembershipActive(string $businessId, string $userUUID): bool
   {
-    $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $userUUID);
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $userUUID);
 
-    return (string) ($relationship['status'] ?? '') === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE;
+    return (string) ($connection['status'] ?? '') === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE;
   }
 
   /**
-   * Check whether the stored consent binding still matches the user and organization.
+   * Check whether the stored consent binding still matches the user and business.
    */
-  private function isConsentBindingValid(string $orgId, string $userUUID, string $consentId): bool
+  private function isConsentBindingValid(string $businessId, string $userUUID, string $consentId): bool
   {
     if ($consentId === '') {
       return false;
@@ -302,15 +302,15 @@ final class BusinessEncryptionService
       return false;
     }
 
-    return (string) ($consent['org_id'] ?? '') === $orgId
+    return (string) ($consent['business_id'] ?? '') === $businessId
       && (string) ($consent['user_uuid'] ?? '') === $userUUID
       && (string) ($consent['status'] ?? '') === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE;
   }
 
   /**
-   * Increment telemetry for denied organization unwrap attempts.
+   * Increment telemetry for denied business unwrap attempts.
    */
-  private function incrementOrgUnwrapDeniedCounter(string $reason): void
+  private function incrementBusinessUnwrapDeniedCounter(string $reason): void
   {
     $reason = trim(InputSanitizer::sanitizeString($reason));
     if ($reason === '') {
@@ -319,9 +319,9 @@ final class BusinessEncryptionService
 
     try {
       $v = SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
-      Database::incr("telemetry:encryption:{$v}:org:unwrap_denied_{$reason}");
+      Database::incr("telemetry:encryption:{$v}:business:unwrap_denied_{$reason}");
     } catch (\Throwable $e) {
-      Log::debug('Org unwrap denied telemetry increment failed: ' . $e->getMessage());
+      Log::debug('Business unwrap denied telemetry increment failed: ' . $e->getMessage());
     }
   }
 

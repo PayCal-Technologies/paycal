@@ -295,7 +295,7 @@ if (ContentView::isDocPage($currentPage)) {
 }
 
 ?><!DOCTYPE html><!-- Hello there. -->
-<html lang="<?php echo htmlspecialchars((string) $pageLanguage, ENT_QUOTES, 'UTF-8'); ?>" dir="ltr" prefix="og: http://ogp.me/ns#" data-os="<?php echo htmlspecialchars($platformToken, ENT_QUOTES, 'UTF-8'); ?>" data-a11y-animated-images="system" data-a11y-link-underlines="true" data-a11y-dyslexia-typography="<?php echo htmlspecialchars((string) (User::current()->dyslexia_typography ?? UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY), ENT_QUOTES, 'UTF-8'); ?>" data-a11y-high-contrast="<?php echo htmlspecialchars((string) (User::current()->high_contrast_enabled ?? UserPreferenceDefaults::DEFAULT_HIGH_CONTRAST_ENABLED), ENT_QUOTES, 'UTF-8'); ?>" data-a11y-reduced-motion="<?php echo htmlspecialchars((string) (User::current()->reduced_motion_enabled ?? UserPreferenceDefaults::DEFAULT_REDUCED_MOTION_ENABLED), ENT_QUOTES, 'UTF-8'); ?>" data-accent-preset="<?php echo htmlspecialchars((string) (User::current()->accent_preset ?? UserPreferenceDefaults::DEFAULT_ACCENT_PRESET), ENT_QUOTES, 'UTF-8'); ?>">
+<html lang="<?php echo htmlspecialchars((string) $pageLanguage, ENT_QUOTES, 'UTF-8'); ?>" dir="ltr" prefix="og: http://ogp.me/ns#" data-os="<?php echo htmlspecialchars($platformToken, ENT_QUOTES, 'UTF-8'); ?>" data-a11y-animated-images="system" data-a11y-link-underlines="true" data-a11y-dyslexia-typography="<?php echo htmlspecialchars((string) (User::current()->dyslexia_typography ?? UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY), ENT_QUOTES, 'UTF-8'); ?>" data-a11y-high-contrast="<?php echo htmlspecialchars((string) (User::current()->high_contrast_enabled ?? UserPreferenceDefaults::DEFAULT_HIGH_CONTRAST_ENABLED), ENT_QUOTES, 'UTF-8'); ?>" data-a11y-reduced-motion="<?php echo htmlspecialchars((string) (User::current()->reduced_motion_enabled ?? UserPreferenceDefaults::DEFAULT_REDUCED_MOTION_ENABLED), ENT_QUOTES, 'UTF-8'); ?>" data-accent-preset="<?php echo htmlspecialchars((string) (User::current()->accent_preset ?? UserPreferenceDefaults::DEFAULT_ACCENT_PRESET), ENT_QUOTES, 'UTF-8'); ?>" data-depth="<?php echo htmlspecialchars((string) User::current()->depth, ENT_QUOTES, 'UTF-8'); ?>">
 
 <!--
   _______   ______    ___________          _______   __  ___  __   __       __       ______
@@ -371,6 +371,9 @@ $navPrimaryPosition = strtolower((string) ($userForNav->nav_position_primary ?? 
 if (!in_array($navPrimaryPosition, $allowedNavPositions, true)) {
   $navPrimaryPosition = UserPreferenceDefaults::DEFAULT_NAV_POSITION_PRIMARY;
 }
+if (!$isAuthenticated) {
+  $navPrimaryPosition = 'top';
+}
 
 $navInitialStateRaw = strtolower((string) ($userForNav->nav_state_primary ?? ''));
 $navInitialState = in_array($navInitialStateRaw, ['collapsed', 'pinned'], true)
@@ -380,6 +383,7 @@ $navInitialState = in_array($navInitialStateRaw, ['collapsed', 'pinned'], true)
 $isSidePrimaryNav = in_array($navPrimaryPosition, ['left', 'right'], true);
 $activeLanguageForNav = Language::resolveFromQuery('l');
 $languageNavHtml = Render::languageNav($activeLanguageForNav);
+$publicLanguageBarHtml = Render::publicLanguageBar($activeLanguageForNav);
 $bodyClassNames = array_values(array_filter([
   ($currentPage ?? '') === 'PAGE_INDEX' ? 'page-calendar' : '',
 ]));
@@ -422,7 +426,7 @@ if (!is_string($mobilePageLabel) || trim($mobilePageLabel) === '') {
 
 <?php if ($isAuthenticated) { ?>
 <button id="public_beta_echo_banner" class="public_beta_echo_banner" type="button" data-signal-open>
-  <span>Thanks for participating in our Public Beta! :D Click anywhere on this bar or hit <kbd>Shift</kbd> + <kbd>Esc</kbd> to send feedback.</span>
+  <span>Thanks for joining our Public Beta! <kbd>Shift</kbd> + <kbd>Esc</kbd> to send feedback.</span>
 </button>
 <?php
   $renders = [
@@ -773,6 +777,13 @@ echo Render::template('keyboard-shortcuts', $renders);
     <circle cx="16.5" cy="10.5" r="2.25" />
     <path d="M14.5 17.5c1.4-1.7 4.4-1.7 5 0" />
   </symbol>
+  <symbol id="pc-icon-groups" viewBox="0 0 24 24">
+    <rect x="9" y="3" width="6" height="5" rx="1" />
+    <rect x="3" y="16" width="6" height="5" rx="1" />
+    <rect x="15" y="16" width="6" height="5" rx="1" />
+    <path d="M12 8v4" />
+    <path d="M6 16v-2h12v2" />
+  </symbol>
   <symbol id="pc-icon-audit" viewBox="0 0 24 24">
     <path d="M12 3.5 18 6v5.5c0 4-2.5 7.2-6 8.8-3.5-1.6-6-4.8-6-8.8V6l6-2.5Z" />
     <path d="m9 12 2 2 4-4" />
@@ -783,7 +794,9 @@ echo Render::template('keyboard-shortcuts', $renders);
   <nav id="primary_navigation" class="nav_menu nav_menu--primary" role="navigation" aria-label="<?php echo Strings::headerI18n('PRIMARY'); ?>">
     <ul aria-label="<?php echo Strings::headerI18n('PAGES'); ?>">
 <?php if (!$isAuthenticated) { ?>
-  <li class="pages"><a href="/" aria-label="<?php echo htmlspecialchars(Strings::headerI18n('PAYCAL'), ENT_QUOTES, 'UTF-8'); ?>"><span class="nav_icon pages nav_brand_mark" aria-hidden="true"><img class="nav_brand_mark_base" src="/img/paycal-shield.png?v=<?php echo rawurlencode(Environment::appVersion()); ?>" alt="" width="34" height="34" decoding="async"><span class="nav_brand_mark_tint"></span></span><span class="nav_label"><?php echo Strings::html('PAYCAL_HTML_PUBLIC'); ?></span></a></li>
+  <li class="pages public_brand"><a href="/" aria-label="PayCal">PayCal</a></li>
+  <li class="pages public_language_cluster"><?php echo $publicLanguageBarHtml; ?></li>
+  <li class="pages public_appearance_slot"><button class="public_appearance_button" type="button" aria-label="Appearance" disabled><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="12" cy="16" r="7"></circle><path d="M16 9a7 7 0 0 0 0 14 8 8 0 1 1 0-14Z"></path><circle cx="24" cy="9" r="3"></circle><path d="M24 2v3M24 13v3M17 9h3M28 9h3M19 4l2 2M28 4l-2 2M19 14l2-2M28 14l-2-2"></path></svg></button></li>
 <?php } else {
     echo Render::renderSidebarNavigation($sidebarNavigation, (string) $currentPage);
 ?>
@@ -818,17 +831,12 @@ echo Render::template('keyboard-shortcuts', $renders);
         <?php } ?>
         <?php if ($showRegularBusinessLeafForNav) {
           echo Render::renderNavLinks([
-            Render::regularBusinessNavLink($hasActiveBusinessMembershipForNav),
+            Render::regularConnectionsNavLink($hasActiveBusinessMembershipForNav),
           ], (string) $currentPage);
         } ?>
-        <?php echo Render::renderNavLinks([
-          Render::settingsUtilityNavLink(),
-        ], (string) $currentPage); ?>
+        <?php echo Render::renderNavLinks([Render::settingsUtilityNavLink()], (string) $currentPage); ?>
           <li class="pages"><a href="/help/" data-help-trigger="true" data-nav-shortcut="h" aria-keyshortcuts="h" accesskey="h"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['shortcuts']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('KEYBOARD'); ?></span></a></li>
 <?php } // end $isAuthenticated nav ?>
-<?php if (!$isAuthenticated) {
-  echo $languageNavHtml;
-} ?>
 <?php if ($isAuthenticated) { ?>
       <li class="pages nav_signout"><a href="/signout/" id="call_signout_modal"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['signout']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('SIGN_OUT'); ?></span></a></li>
 <?php } ?>

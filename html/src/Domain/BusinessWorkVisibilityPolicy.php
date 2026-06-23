@@ -24,7 +24,7 @@ final class BusinessWorkVisibilityPolicy
    * Hard invariant gate: org financial snapshots/aggregates require payroll-visible
    * membership and at least one org-owned org-only site on the business.
    *
-   * @param array<string, string> $relationship
+   * @param array<string, string> $connection
    * @param array<string, array{
    *   site_owner_uuid: string,
    *   site_id: string,
@@ -34,14 +34,14 @@ final class BusinessWorkVisibilityPolicy
   public static function canAggregateForOrg(
     string $businessId,
     string $memberUuid,
-    array $relationship,
+    array $connection,
     array $orgSiteIndex = [],
   ): bool {
-    return self::evaluateOrgAggregation($businessId, $memberUuid, $relationship, $orgSiteIndex)['allowed'];
+    return self::evaluateOrgAggregation($businessId, $memberUuid, $connection, $orgSiteIndex)['allowed'];
   }
 
   /**
-   * @param array<string, string> $relationship
+   * @param array<string, string> $connection
    * @param array<string, array{
    *   site_owner_uuid: string,
    *   site_id: string,
@@ -52,7 +52,7 @@ final class BusinessWorkVisibilityPolicy
   public static function evaluateOrgAggregation(
     string $businessId,
     string $memberUuid,
-    array $relationship,
+    array $connection,
     array $orgSiteIndex = [],
   ): array {
     $businessId = trim($businessId);
@@ -61,7 +61,7 @@ final class BusinessWorkVisibilityPolicy
       return ['allowed' => false, 'reason' => self::REFUSAL_NO_ORG_OWNERSHIP];
     }
 
-    if (!self::relationshipPermitsPayrollVisibility($relationship)) {
+    if (!self::connectionPermitsPayrollVisibility($connection)) {
       return ['allowed' => false, 'reason' => self::REFUSAL_PAYROLL_VISIBILITY];
     }
 
@@ -83,15 +83,15 @@ final class BusinessWorkVisibilityPolicy
   }
 
   /**
-   * @param array<string, string> $relationship
+   * @param array<string, string> $connection
    */
-  public static function relationshipPermitsPayrollVisibility(array $relationship): bool
+  public static function connectionPermitsPayrollVisibility(array $connection): bool
   {
-    if ($relationship === []) {
+    if ($connection === []) {
       return false;
     }
 
-    $status = strtolower(trim((string) ($relationship['status'] ?? '')));
+    $status = strtolower(trim((string) ($connection['status'] ?? '')));
     if (!in_array($status, [
       BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
       BusinessDiscoveryService::MEMBERSHIP_STATE_CONSENTED,
@@ -99,14 +99,18 @@ final class BusinessWorkVisibilityPolicy
       return false;
     }
 
-    $role = strtolower(trim((string) ($relationship['role'] ?? '')));
+    $role = strtolower(trim((string) ($connection['role'] ?? '')));
     if (in_array($role, ['owner', 'coordinator'], true)) {
       return true;
     }
 
-    $scopes = self::scopeMap((string) ($relationship['scopes'] ?? ''));
+    $scopes = self::scopeMap((string) ($connection['scopes'] ?? ''));
+    if (isset($scopes['all'])) {
+      return true;
+    }
 
-    return isset($scopes['work.read']) && isset($scopes['work.scope.org']);
+    return isset($scopes['work.read'])
+      && (isset($scopes['work.scope.business']) || isset($scopes['work.scope.self']));
   }
 
   /**
@@ -161,7 +165,7 @@ final class BusinessWorkVisibilityPolicy
    *   site_id: string,
    *   site_hash: array<string, string>
    * }> $orgSiteIndex
-   * @param array<string, string> $relationship
+   * @param array<string, string> $connection
    * @return array{allowed: bool, reason: string}
    */
   public static function evaluateWorkEntry(
@@ -170,10 +174,11 @@ final class BusinessWorkVisibilityPolicy
     string $memberUuid,
     string $workKey,
     array $entry,
-    array $relationship,
+    array $connection,
     array $orgSiteIndex,
+    bool $allowMemberLinkedSites = false,
   ): array {
-    if (!self::relationshipPermitsPayrollVisibility($relationship)) {
+    if (!self::connectionPermitsPayrollVisibility($connection)) {
       return ['allowed' => false, 'reason' => self::REFUSAL_PAYROLL_VISIBILITY];
     }
 
@@ -189,6 +194,13 @@ final class BusinessWorkVisibilityPolicy
     $siteContext = $orgSiteIndex[$siteId];
     $siteOwnerUuid = $siteContext['site_owner_uuid'];
     $siteHash = $siteContext['site_hash'];
+
+    if (
+      $allowMemberLinkedSites
+      && self::siteIsBusinessLinkedForMemberReport($businessId, $memberUuid, $siteHash)
+    ) {
+      return ['allowed' => true, 'reason' => ''];
+    }
 
     $ownershipScope = strtolower(trim((string) ($siteHash['ownership_scope'] ?? '')));
     if ($ownershipScope === BusinessDiscoveryService::BUSINESS_SITE_OWNERSHIP_LINKED) {
@@ -283,6 +295,135 @@ final class BusinessWorkVisibilityPolicy
     }
 
     return $index;
+  }
+
+  /**
+   * Build site context for protected member reports.
+   *
+   * This includes strict org-owned/org-only sites plus sites explicitly linked
+   * to the selected business. Org aggregate callers should continue using
+   * buildOrgSiteIndex().
+   *
+   * @return array<string, array{
+   *   site_owner_uuid: string,
+   *   site_id: string,
+   *   site_hash: array<string, string>
+   * }>
+   */
+  public static function buildMemberReportSiteIndex(string $businessId, string $memberUuid): array
+  {
+    $businessId = trim($businessId);
+    $memberUuid = trim($memberUuid);
+    if ($businessId === '' || $memberUuid === '') {
+      return [];
+    }
+
+    $business = Database::hgetall(Keys::BUSINESS . ':' . $businessId);
+    $businessOwnerUuid = trim((string) ($business['owner_uuid'] ?? ''));
+
+    $index = [];
+    foreach (self::businessSiteEntries($businessId) as $entry) {
+      $siteId = $entry['site_id'];
+      $siteOwnerUuid = $entry['site_owner_uuid'];
+      $siteHash = $entry['site_hash'];
+
+      if (
+        self::siteIsOrgOwnedOrgOnly($businessId, $businessOwnerUuid, $siteOwnerUuid, $siteHash)
+        || self::siteIsBusinessLinkedForMemberReport($businessId, $memberUuid, $siteHash)
+      ) {
+        $index[$siteId] = [
+          'site_owner_uuid' => $siteOwnerUuid,
+          'site_id' => $siteId,
+          'site_hash' => $siteHash,
+        ];
+      }
+    }
+
+    return $index;
+  }
+
+  /**
+   * @return list<array{site_owner_uuid: string, site_id: string, site_hash: array<string, string>}>
+   */
+  private static function businessSiteEntries(string $businessId): array
+  {
+    $entries = [];
+    $sitesRaw = BusinessWorkspaceCache::getSitesRaw($businessId);
+    if ($sitesRaw !== null) {
+      return $sitesRaw['entries'];
+    }
+
+    $siteRefs = Database::smembers(Keys::BUSINESS_SITE . ':' . $businessId);
+    $siteKeys = [];
+    foreach ($siteRefs as $ref) {
+      $ref = (string) $ref;
+      $parts = explode(':', $ref, 2);
+      if (count($parts) !== 2) {
+        continue;
+      }
+      [$ownerUUID, $siteId] = $parts;
+      $siteKeys[$ref] = Keys::SITE . ':' . $ownerUUID . ':' . $siteId;
+    }
+
+    $siteHashes = $siteKeys !== [] ? Database::pipelineHgetall(array_values($siteKeys)) : [];
+    foreach ($siteRefs as $ref) {
+      $ref = (string) $ref;
+      $parts = explode(':', $ref, 2);
+      if (count($parts) !== 2) {
+        continue;
+      }
+      [$ownerUUID, $siteId] = $parts;
+      $siteKey = $siteKeys[$ref] ?? '';
+      if ($siteKey === '') {
+        continue;
+      }
+      $siteHash = $siteHashes[$siteKey] ?? [];
+      if ($siteHash === []) {
+        continue;
+      }
+
+      $entries[] = [
+        'site_owner_uuid' => $ownerUUID,
+        'site_id' => $siteId,
+        'site_hash' => $siteHash,
+      ];
+    }
+
+    return $entries;
+  }
+
+  /**
+   * Member report visibility allows business-linked sites.
+   *
+   * This is intentionally narrower than org aggregation: the site must be
+   * explicitly associated with the selected business, but it does not have to
+   * live under the target member's site namespace. Business sites often remain
+   * owned by the business profile while member work rows carry only the site id.
+   *
+   * @param array<string, string> $siteHash
+   */
+  private static function siteIsBusinessLinkedForMemberReport(
+    string $businessId,
+    string $memberUuid,
+    array $siteHash,
+  ): bool {
+    $businessId = trim($businessId);
+    $memberUuid = trim($memberUuid);
+    if ($businessId === '' || $memberUuid === '') {
+      return false;
+    }
+
+    $ownershipScope = strtolower(trim((string) ($siteHash['ownership_scope'] ?? '')));
+    if ($ownershipScope === BusinessDiscoveryService::BUSINESS_SITE_OWNERSHIP_SHARED) {
+      return false;
+    }
+
+    $storedBusinessId = trim((string) ($siteHash['business_id'] ?? ''));
+    if ($storedBusinessId === '') {
+      $storedBusinessId = trim((string) ($siteHash['organization_id'] ?? ''));
+    }
+
+    return $storedBusinessId === $businessId;
   }
 
   /**

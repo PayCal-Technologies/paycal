@@ -49,10 +49,24 @@ export function detectRegExpEscape() {
   return typeof RegExp.escape === 'function';
 }
 
+export function isWebAuthnCapableBrowser({ requireSecureContext = true } = {}) {
+  const hasPublicKeyCredential = typeof window !== 'undefined'
+    && typeof window.PublicKeyCredential !== 'undefined';
+  const credentials = typeof navigator !== 'undefined' ? navigator.credentials : null;
+  const hasCredentialsApi = credentials !== undefined && credentials !== null;
+  const hasGet = hasCredentialsApi && typeof credentials.get === 'function';
+  const hasCreate = hasCredentialsApi && typeof credentials.create === 'function';
+  const secureContext = requireSecureContext === false
+    || (typeof window !== 'undefined' && window.isSecureContext === true);
+
+  return secureContext && hasPublicKeyCredential && hasCredentialsApi && hasGet && hasCreate;
+}
+
 export const capabilities = Object.freeze({
   uint8arrayBase64: detectUint8ArrayBase64(),
   setMethods: detectSetMethods(),
   regexpEscape: detectRegExpEscape(),
+  webAuthn: isWebAuthnCapableBrowser(),
 });
 
 export default capabilities;

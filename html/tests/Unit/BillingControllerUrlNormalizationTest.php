@@ -110,6 +110,22 @@ final class BillingControllerUrlNormalizationTest extends TestCase
     );
   }
 
+  public function testAppendQueryParamReplacesExistingBillingStatus(): void
+  {
+    $controller = new BillingController();
+    $method = new \ReflectionMethod(BillingController::class, 'appendQueryParam');
+
+    $this->assertSame(
+      'https://dev.paycal.local/settings/subscription/?billing=delayed',
+      $method->invoke($controller, 'https://dev.paycal.local/settings/subscription/?billing=success', 'billing', 'delayed')
+    );
+
+    $this->assertSame(
+      'https://dev.paycal.local/settings/subscription/?billing=delayed#panel-billing',
+      $method->invoke($controller, 'https://dev.paycal.local/settings/subscription/?billing=success#panel-billing', 'billing', 'delayed')
+    );
+  }
+
   private function invokeNormalize(mixed $value, string $fallbackPath): string
   {
     $controller = new BillingController();

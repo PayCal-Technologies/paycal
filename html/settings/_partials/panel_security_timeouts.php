@@ -7,7 +7,7 @@ namespace PayCal\Domain;
   <form id="account_security_timeout_form" method="POST" action="<?php echo Environment::appURL('api/v1/account/security/update/'); ?>" aria-label="<?php echo settings_index_i18n('SETTINGS_TIMEOUT_FORM_ARIA'); ?>">
     <input class="visually_hidden" type="text" name="username" value="NOTUSED" autocomplete="username" hidden tabindex="-1" aria-hidden="true">
     <input type="hidden" name="csrf_token" value="<?php echo $csrfNonce; ?>">
-    <h2 class="heading-accent"><?php echo settings_index_i18n('SETTINGS_SECTION_SECURITY'); ?></h2>
+    <h2 class="heading-accent settings_card_title"><?php echo settings_index_i18n('SETTINGS_SECTION_SECURITY'); ?></h2>
     <p class="help_text"><?php echo settings_index_i18n('SETTINGS_SECURITY_SESSION_TIMING_HELP'); ?></p>
 
     <div class="security_level_card">

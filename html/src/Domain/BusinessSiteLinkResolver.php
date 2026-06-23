@@ -18,7 +18,8 @@ final class BusinessSiteLinkResolver
    * @return array{
    *   ref_set: array<string, true>,
    *   id_refs: array<string, list<string>>,
-   *   normalized_name_set: array<string, true>
+   *   normalized_name_set: array<string, true>,
+   *   normalized_name_refs: array<string, list<string>>
    * }
    */
   public static function buildContext(string $orgId): array
@@ -31,6 +32,8 @@ final class BusinessSiteLinkResolver
     $orgSiteIdRefs = [];
     /** @var array<string, true> $orgSiteNameSet */
     $orgSiteNameSet = [];
+    /** @var array<string, list<string>> $orgSiteNameRefs */
+    $orgSiteNameRefs = [];
 
     foreach ($orgSiteRefs as $siteRefRaw) {
       $siteRef = (string) $siteRefRaw;
@@ -55,6 +58,10 @@ final class BusinessSiteLinkResolver
       $siteNameNormalized = self::normalizeSiteName($siteNameRaw);
       if ($siteNameNormalized !== '') {
         $orgSiteNameSet[$siteNameNormalized] = true;
+        if (!isset($orgSiteNameRefs[$siteNameNormalized])) {
+          $orgSiteNameRefs[$siteNameNormalized] = [];
+        }
+        $orgSiteNameRefs[$siteNameNormalized][] = $siteRef;
       }
     }
 
@@ -62,6 +69,7 @@ final class BusinessSiteLinkResolver
       'ref_set' => $orgSiteRefSet,
       'id_refs' => $orgSiteIdRefs,
       'normalized_name_set' => $orgSiteNameSet,
+      'normalized_name_refs' => $orgSiteNameRefs,
     ];
   }
 
@@ -107,6 +115,44 @@ final class BusinessSiteLinkResolver
     }
 
     return 'no_match';
+  }
+
+  /**
+   * Resolve the canonical business site reference for a successful match.
+   *
+    * @param array{
+    *   ref_set: array<string, true>,
+    *   id_refs: array<string, list<string>>,
+    *   normalized_name_set: array<string, true>,
+    *   normalized_name_refs?: array<string, list<string>>
+    * } $context
+   */
+  public static function resolveMatchedSiteRef(
+    array $context,
+    string $matchStrategy,
+    string $siteId,
+    string $siteOwnerUUID,
+    string $entrySiteName
+  ): string {
+    if ($matchStrategy === 'owner_and_site') {
+      $siteRef = $siteOwnerUUID . ':' . $siteId;
+      return isset($context['ref_set'][$siteRef]) ? $siteRef : '';
+    }
+
+    if ($matchStrategy === 'unique_site_id') {
+      $refs = $context['id_refs'][$siteId] ?? [];
+      return count($refs) === 1 ? (string) $refs[0] : '';
+    }
+
+    if ($matchStrategy === 'site_name') {
+      $normalized = self::normalizeSiteName($entrySiteName);
+      $refs = is_array($context['normalized_name_refs'] ?? null)
+        ? ($context['normalized_name_refs'][$normalized] ?? [])
+        : [];
+      return count($refs) === 1 ? (string) $refs[0] : '';
+    }
+
+    return '';
   }
 
   /**

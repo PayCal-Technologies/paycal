@@ -51,7 +51,7 @@ WCAG AA minimum: **4.5:1** | AAA: **7.0:1**
 | mint_dark | theme | `#25392f` | `#25392f` | `#e8f4ee` | `#e8f4ee` | 10.91:1 | 🟢 AAA |
 | mint_light | theme | `#f4fbf6` | `#f4fbf6` | `#1d3b2d` | `#1d3b2d` | 11.64:1 | 🟢 AAA |
 | navigation | base fallback | `var(--color-surface)` | `#1c252c` | `var(--color-text)` | `#e7edf1` | 13.17:1 | 🟢 AAA |
-| organizations | base fallback | `var(--color-surface)` | `#1c252c` | `var(--color-text)` | `#e7edf1` | 13.17:1 | 🟢 AAA |
+| businesses | base fallback | `var(--color-surface)` | `#1c252c` | `var(--color-text)` | `#e7edf1` | 13.17:1 | 🟢 AAA |
 | paycal_black_dark | base fallback | `var(--color-surface)` | `#232f36` | `var(--color-text)` | `#eaeff2` | 11.84:1 | 🟢 AAA |
 | paycal_black_light | theme | `var(--foundation-paper-000)` | `#eef2f5` | `var(--color-text)` | `#263238` | 11.69:1 | 🟢 AAA |
 | paycal_blue_dark | base fallback | `var(--color-surface)` | `#121b2d` | `var(--color-text)` | `#f4f8ff` | 16.16:1 | 🟢 AAA |

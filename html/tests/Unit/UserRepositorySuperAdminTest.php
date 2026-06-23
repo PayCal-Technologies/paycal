@@ -47,9 +47,7 @@ final class UserRepositorySuperAdminTest extends TestCase
     Database::unlink(Keys::USER . ':' . $this->uuidB);
 
     Database::unlink(Keys::EMAIL . ':' . $this->emailA);
-    Database::unlink(Keys::EMAIL . $this->emailA);
     Database::unlink(Keys::EMAIL . ':' . $this->emailB);
-    Database::unlink(Keys::EMAIL . $this->emailB);
 
     foreach ($this->preExistingSuperAdmins as $uuid) {
       Database::hset(Keys::USER . ':' . $uuid, ['auth_level' => AuthLevel::SUPERADMIN->value]);
@@ -91,14 +89,14 @@ final class UserRepositorySuperAdminTest extends TestCase
     $this->assertSame(AuthLevel::SUPERADMIN->value, (string) Database::hget(Keys::USER . ':' . $this->uuidB, 'auth_level'));
   }
 
-  public function testGetByUUIDBackfillsVariantFromLegacyThemeMode(): void
+  public function testGetByUUIDHydratesVariant(): void
   {
     Database::hset(Keys::USER . ':' . $this->uuidA, [
       'user_uuid' => $this->uuidA,
       'email' => $this->emailA,
       'auth_level' => AuthLevel::SUPERADMIN->value,
       'theme' => 'win10',
-      'theme_mode' => 'dark',
+      'variant' => 'dark',
     ]);
 
     $user = UserRepository::getByUUID($this->uuidA);

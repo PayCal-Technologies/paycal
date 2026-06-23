@@ -40,7 +40,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
   protected function tearDown(): void
   {
     Database::unlink(Keys::BUSINESS . ':' . $this->businessId);
-    Database::unlink(Keys::orgLockedPeriodMetrics($this->businessId, $this->year));
+    Database::unlink(Keys::businessLockedPeriodMetrics($this->businessId, $this->year));
     Database::unlink(Keys::BUSINESS_SITE . ':' . $this->businessId);
     Database::unlink(Keys::SITE . ':' . $this->ownerUuid . ':site-org');
     Database::unlink(Keys::SITE . ':' . $this->memberUuid . ':site-personal');
@@ -60,7 +60,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
   {
     $this->seedPersonalSite();
     $this->seedLockBoundary('2026-06-01');
-    $relationship = $this->payrollVisibleRelationship();
+    $connection = $this->payrollVisibleConnection();
     $workEntries = [
       'work:' . $this->memberUuid . ':2026-01-10:site-personal' => [
         'regular_hours' => '8',
@@ -73,7 +73,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
     $this->assertFalse(BusinessWorkVisibilityPolicy::canAggregateForOrg(
       $this->businessId,
       $this->memberUuid,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     ));
 
@@ -83,7 +83,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
       $this->memberUuid,
       $this->year,
       $workEntries,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
 
@@ -95,7 +95,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
   {
     $this->seedSharedSite();
     $this->seedLockBoundary('2026-06-01');
-    $relationship = $this->payrollVisibleRelationship();
+    $connection = $this->payrollVisibleConnection();
     $workEntries = [
       'work:' . $this->memberUuid . ':2026-01-10:site-shared' => [
         'regular_hours' => '8',
@@ -108,7 +108,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
     $this->assertFalse(BusinessWorkVisibilityPolicy::canAggregateForOrg(
       $this->businessId,
       $this->memberUuid,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     ));
 
@@ -118,7 +118,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
       $this->memberUuid,
       $this->year,
       $workEntries,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
 
@@ -130,7 +130,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
   {
     $this->seedSiteMissingOwnerMetadata();
     $this->seedLockBoundary('2026-06-01');
-    $relationship = $this->payrollVisibleRelationship();
+    $connection = $this->payrollVisibleConnection();
     $workEntries = [
       'work:' . $this->memberUuid . ':2026-01-10:site-org' => [
         'regular_hours' => '8',
@@ -143,7 +143,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
     $this->assertFalse(BusinessWorkVisibilityPolicy::canAggregateForOrg(
       $this->businessId,
       $this->memberUuid,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     ));
 
@@ -153,7 +153,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
       $this->memberUuid,
       $this->year,
       $workEntries,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
 
@@ -165,7 +165,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
   {
     $this->seedLinkedOrgSite();
     $this->seedLockBoundary('2026-06-01');
-    $relationship = $this->payrollVisibleRelationship();
+    $connection = $this->payrollVisibleConnection();
     $workEntries = [
       'work:' . $this->memberUuid . ':2026-01-10:site-linked' => [
         'regular_hours' => '8',
@@ -178,7 +178,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
     $this->assertFalse(BusinessWorkVisibilityPolicy::canAggregateForOrg(
       $this->businessId,
       $this->memberUuid,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     ));
 
@@ -188,7 +188,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
       $this->memberUuid,
       $this->year,
       $workEntries,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
 
@@ -196,14 +196,14 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
   }
 
   #[Test]
-  public function refusesSnapshotForRevokedRelationships(): void
+  public function refusesSnapshotForRevokedConnections(): void
   {
     $this->seedOrgOwnedSite();
     $this->seedLockBoundary('2026-06-01');
-    $relationship = [
+    $connection = [
       'status' => 'revoked',
       'role' => 'contributor',
-      'scopes' => 'work.read,work.scope.org',
+      'scopes' => 'work.read,work.scope.business',
     ];
     $workEntries = [
       'work:' . $this->memberUuid . ':2026-01-10:site-org' => [
@@ -217,7 +217,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
     $this->assertFalse(BusinessWorkVisibilityPolicy::canAggregateForOrg(
       $this->businessId,
       $this->memberUuid,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     ));
 
@@ -227,7 +227,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
       $this->memberUuid,
       $this->year,
       $workEntries,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
 
@@ -239,7 +239,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
   {
     $this->seedOrgOwnedSite();
     $this->seedLockBoundary('2026-06-01');
-    $relationship = $this->payrollVisibleRelationship();
+    $connection = $this->payrollVisibleConnection();
     $workEntries = [
       'work:' . $this->memberUuid . ':2026-01-10:site-org' => [
         'regular_hours' => '8',
@@ -252,7 +252,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
     $this->assertTrue(BusinessWorkVisibilityPolicy::canAggregateForOrg(
       $this->businessId,
       $this->memberUuid,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     ));
 
@@ -262,7 +262,7 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
       $this->memberUuid,
       $this->year,
       $workEntries,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
 
@@ -281,12 +281,12 @@ final class OrgLockedPeriodSnapshotTest extends TestCase
   /**
    * @return array<string, string>
    */
-  private function payrollVisibleRelationship(): array
+  private function payrollVisibleConnection(): array
   {
     return [
       'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
       'role' => 'contributor',
-      'scopes' => 'work.read,work.scope.org',
+      'scopes' => 'work.read,work.scope.business',
     ];
   }
 

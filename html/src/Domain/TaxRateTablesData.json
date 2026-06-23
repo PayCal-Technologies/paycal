@@ -181,7 +181,7 @@
             [
                 18144000,
                 25848200,
-                2929
+                2900
             ],
             [
                 25848200,
@@ -2041,13 +2041,18 @@
                 ],
                 [
                     10689000,
-                    14225000,
+                    14252000,
                     1762
                 ],
                 [
-                    14225000,
-                    9223372036854775807,
+                    14252000,
+                    20000000,
                     1900
+                ],
+                [
+                    20000000,
+                    9223372036854775807,
+                    2000
                 ]
             ]
         },
@@ -2534,11 +2539,6 @@
                 ],
                 [
                     18144000,
-                    25848200,
-                    1293
-                ],
-                [
-                    25848200,
                     50000000,
                     1280
                 ],
@@ -2548,6 +2548,80 @@
                     1500
                 ]
             ]
+        }
+    },
+    "salesTaxExemptions": {
+        "indigenousStatus": {
+            "Alberta": {
+                "gst": {
+                    "rateBasisPoints": 500,
+                    "eligible": true,
+                    "pointOfSale": true,
+                    "notes": "GST/HST relief can apply for eligible purchases by registered First Nations individuals when statutory delivery or reserve-location conditions are met."
+                },
+                "pst": {
+                    "rateBasisPoints": 0,
+                    "eligible": false,
+                    "pointOfSale": false,
+                    "notes": "Alberta has no provincial sales tax."
+                }
+            },
+            "British Columbia": {
+                "gst": {
+                    "rateBasisPoints": 500,
+                    "eligible": true,
+                    "pointOfSale": true,
+                    "notes": "GST relief can apply when delivery or reserve-location conditions are met."
+                },
+                "pst": {
+                    "rateBasisPoints": 700,
+                    "eligible": true,
+                    "pointOfSale": true,
+                    "notes": "BC PST has status Indian relief rules that can apply at sale when statutory identity and location or delivery conditions are met."
+                }
+            },
+            "Ontario": {
+                "gst": {
+                    "rateBasisPoints": 500,
+                    "eligible": true,
+                    "pointOfSale": true,
+                    "notes": "The federal GST portion of HST can be relieved when statutory delivery or reserve-location conditions are met."
+                },
+                "pst": {
+                    "rateBasisPoints": 800,
+                    "eligible": true,
+                    "pointOfSale": true,
+                    "notes": "Ontario relief is administered against the provincial HST component for qualifying off-reserve purchases by eligible First Nations purchasers."
+                }
+            },
+            "Saskatchewan": {
+                "gst": {
+                    "rateBasisPoints": 500,
+                    "eligible": true,
+                    "pointOfSale": true,
+                    "notes": "GST relief can apply when statutory delivery or reserve-location conditions are met."
+                },
+                "pst": {
+                    "rateBasisPoints": 600,
+                    "eligible": true,
+                    "pointOfSale": true,
+                    "notes": "Saskatchewan PST relief can apply to eligible First Nations purchasers under provincial exemption conditions."
+                }
+            },
+            "Manitoba": {
+                "gst": {
+                    "rateBasisPoints": 500,
+                    "eligible": true,
+                    "pointOfSale": true,
+                    "notes": "GST relief can apply when statutory delivery or reserve-location conditions are met."
+                },
+                "pst": {
+                    "rateBasisPoints": 700,
+                    "eligible": true,
+                    "pointOfSale": true,
+                    "notes": "Manitoba RST relief can apply to eligible status Indian purchasers under provincial exemption conditions."
+                }
+            }
         }
     }
 }

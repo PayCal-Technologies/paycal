@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use PayCal\Domain\Database;
 use PayCal\Domain\Config\EncryptionConfig;
 use PayCal\Domain\Constants\Keys;
+use PayCal\Domain\PlaintextWorkEntryCaptureService;
 use PayCal\Domain\WorkEntry;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -58,8 +59,9 @@ final class WorkEntryEncryptionTest extends TestCase
         'd' => $workDate,
         's' => $siteID,
         'h' => 8,
-        'l' => 0,
-        't' => 0,
+        'l' => 5,
+        't' => 1,
+        'w' => 25,
         'encrypted_blob' => base64_encode($envelope),
     ];
     $workEntryKey = D_WORK.":{$userUUID}:{$workDate}:{$siteID}";
@@ -75,6 +77,13 @@ final class WorkEntryEncryptionTest extends TestCase
     $stored = Database::hgetall($workEntryKey);
     $this->assertArrayHasKey('encrypted_blob', $stored);
     $this->assertSame($workDetails['encrypted_blob'], $stored['encrypted_blob']);
+    $this->assertSame('25.00', $stored['wage']);
+    $this->assertSame('200.00', $stored['regular_amount']);
+    $this->assertSame('0.00', $stored['overtime_amount']);
+    $this->assertSame('25.00', $stored['travel_amount']);
+    $this->assertSame('5.00', $stored['living_out_amount']);
+    $this->assertSame('230.00', $stored['gross']);
+    $this->assertSame('1', $stored['earnings_snapshot_version']);
 
     // Clean up
     Database::del($workEntryKey);
@@ -180,6 +189,78 @@ final class WorkEntryEncryptionTest extends TestCase
       $this->assertNull($result);
     } finally {
       EncryptionConfig::setRequired(false);
+      Database::del($workKey);
+      Database::del($siteKey);
+      Database::del(Keys::USER . ':' . $userUUID);
+    }
+  }
+
+  public function testPlaintextCaptureEncryptsLegacyRowsAndRemovesRawFields(): void
+  {
+    $suffix = bin2hex(random_bytes(4));
+    $userUUID = 'Ucapture' . $suffix;
+    $workDate = date('Y-m-d');
+    $siteID = 'S' . strtoupper(substr($suffix . 'ABCDEF123', 0, 9));
+    $siteKey = D_SITE . ":{$userUUID}:{$siteID}";
+    $workKey = D_WORK . ":{$userUUID}:{$workDate}:{$siteID}";
+
+    $this->setupTestUser($userUUID);
+    Database::hset($siteKey, [
+      'site_name' => 'Capture Site',
+      'wage' => '30.00',
+      'status' => 'active',
+    ]);
+    Database::hset($workKey, [
+      'date' => $workDate,
+      'site_id' => $siteID,
+      'site_name' => 'Capture Site',
+      'hours' => '8.00',
+      'regular_hours' => '8.00',
+      'overtime_hours' => '0.00',
+      'living_out_allowance' => '10.00',
+      'travel_hours' => '1.00',
+      'wage' => '30.00',
+      'tax' => '12.34',
+      'net' => '200.00',
+      'other' => '99.99',
+    ]);
+
+    try {
+      $service = new PlaintextWorkEntryCaptureService();
+      $pending = $service->listPending($userUUID, 10);
+      $this->assertTrue($pending['success']);
+      $this->assertCount(1, $pending['data']['entries']);
+      $capture = $pending['data']['entries'][0];
+
+      $blob = base64_encode((string) json_encode([
+        'version' => 1,
+        'ciphertext' => base64_encode('capture-ciphertext'),
+        'nonce' => base64_encode('capture-nonce'),
+        'aad' => $siteID,
+      ]));
+      $finalized = $service->finalize($userUUID, [[
+        'key' => $capture['key'],
+        'capture_token' => $capture['capture_token'],
+        'encrypted_blob' => $blob,
+      ]]);
+
+      $this->assertTrue($finalized['success']);
+      $this->assertSame(1, $finalized['data']['encrypted']);
+
+      $stored = Database::hgetall($workKey);
+      $this->assertSame($blob, $stored['encrypted_blob'] ?? '');
+      $this->assertSame('30.00', $stored['wage'] ?? '');
+      $this->assertSame('280.00', $stored['gross'] ?? '');
+      $this->assertArrayHasKey('plaintext_captured_at', $stored);
+      $this->assertArrayNotHasKey('date', $stored);
+      $this->assertArrayNotHasKey('site_id', $stored);
+      $this->assertArrayNotHasKey('tax', $stored);
+      $this->assertArrayNotHasKey('net', $stored);
+      $this->assertArrayNotHasKey('other', $stored);
+
+      $after = $service->listPending($userUUID, 10);
+      $this->assertSame([], $after['data']['entries']);
+    } finally {
       Database::del($workKey);
       Database::del($siteKey);
       Database::del(Keys::USER . ':' . $userUUID);

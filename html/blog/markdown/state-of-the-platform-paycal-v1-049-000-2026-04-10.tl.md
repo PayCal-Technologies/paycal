@@ -67,10 +67,10 @@ Nakikita ng Orphaned Work Recovery ang unlinked work records matapos ang site de
 
 ## Premium: collaboration na walang kompromiso
 
-Nagbibigay ang Premium organization features ng mas malakas na operational control habang pinapanatili ang privacy boundaries ng bawat user.
+Nagbibigay ang Premium business features ng mas malakas na operational control habang pinapanatili ang privacy boundaries ng bawat user.
 
-◆ Organization Hub para sa employer at team workflows
-◆ Refined org role scope model na may granular permissions
+◆ Business Hub para sa employer at team workflows
+◆ Refined business role scope model na may granular permissions
 ◆ Delegated calendar views para sa managerial oversight
 ◆ DEK Auto-Bootstrap para sa agarang encryption readiness pagbisita ng miyembro
 

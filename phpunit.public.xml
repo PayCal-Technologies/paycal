@@ -9,6 +9,7 @@
         <testsuite name="PayCal Unit">
             <directory>html/tests/Unit</directory>
             <exclude>html/tests/Unit/A11y</exclude>
+            <exclude>html/tests/Unit/Soc2SurfaceTest.php</exclude>
             <exclude>html/tests/Unit/PayPeriodsTest.php</exclude>
         </testsuite>
         <testsuite name="PayCal Integration">
@@ -16,12 +17,16 @@
         </testsuite>
         <testsuite name="PayCal Contract">
             <directory>html/tests/Contract</directory>
+            <exclude>html/tests/Contract/AdminPageSurfaceGateContractTest.php</exclude>
+            <exclude>html/tests/Contract/ArgusTraceGateContractTest.php</exclude>
+            <exclude>html/tests/Contract/Soc2SurfaceManifestContractTest.php</exclude>
         </testsuite>
         <testsuite name="PayCal Timezone">
             <file>html/tests/Unit/PayPeriodsTest.php</file>
         </testsuite>
         <testsuite name="PayCal Accessibility">
             <directory>html/tests/Unit/A11y</directory>
+            <exclude>html/tests/Unit/A11y/G4PublicDocsAdminA11yContractTest.php</exclude>
         </testsuite>
     </testsuites>
     <source>

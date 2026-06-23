@@ -66,6 +66,53 @@
   --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.28);
   --shadow-lg: 0 16px 38px rgba(0, 0, 0, 0.36);
 
+  /* Z-axis depth harness. Keep component CSS pointed at these tokens. */
+  --depth-highlight: inset 0 2px 0 rgba(255, 255, 255, 0.09);
+  --depth-inset: inset 0 2px 6px rgba(0, 0, 0, 0.38);
+  --depth-panel-shadow: 0 18px 45px rgba(0, 0, 0, 0.34), var(--depth-highlight);
+  --depth-surface-shadow: var(--shadow-md), var(--depth-highlight);
+  --depth-control-shadow: 0 3px 11px rgba(0, 0, 0, 0.32), var(--depth-highlight);
+  --depth-control-shadow-hover: 0 11px 24px rgba(0, 0, 0, 0.38), var(--depth-highlight);
+  --depth-control-shadow-active: var(--depth-inset);
+  --depth-track-shadow: var(--depth-inset);
+  --depth-dialog-shadow: var(--shadow-lg), var(--depth-highlight);
+  --depth-focus-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 35%, transparent);
+}
+
+html[data-depth="flat"] {
+  --depth-highlight: none;
+  --depth-inset: none;
+  --depth-panel-shadow: none;
+  --depth-surface-shadow: none;
+  --depth-control-shadow: none;
+  --depth-control-shadow-hover: none;
+  --depth-control-shadow-active: none;
+  --depth-track-shadow: none;
+  --depth-dialog-shadow: none;
+  --depth-focus-shadow: 0 0 0 2px color-mix(in srgb, var(--color-focus-ring) 55%, transparent);
+}
+
+html[data-depth="low"] {
+  --depth-panel-shadow: 0 4px 12px rgba(0, 0, 0, 0.14), var(--depth-highlight);
+  --depth-surface-shadow: var(--shadow-sm), var(--depth-highlight);
+  --depth-control-shadow: 0 1px 3px rgba(0, 0, 0, 0.16), var(--depth-highlight);
+  --depth-control-shadow-hover: 0 3px 8px rgba(0, 0, 0, 0.20), var(--depth-highlight);
+  --depth-track-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.24);
+  --depth-dialog-shadow: var(--shadow-md), var(--depth-highlight);
+}
+
+html[data-depth="high"] {
+  --depth-highlight: inset 0 2px 0 rgba(255, 255, 255, 0.12);
+  --depth-panel-shadow: 0 27px 66px rgba(0, 0, 0, 0.43), var(--depth-highlight);
+  --depth-surface-shadow: var(--shadow-lg), var(--depth-highlight);
+  --depth-control-shadow: 0 9px 24px rgba(0, 0, 0, 0.40), var(--depth-highlight);
+  --depth-control-shadow-hover: 0 15px 36px rgba(0, 0, 0, 0.47), var(--depth-highlight);
+  --depth-track-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.52);
+  --depth-dialog-shadow: 0 36px 96px rgba(0, 0, 0, 0.52), var(--depth-highlight);
+}
+
+:root {
+
   /* Component token defaults */
   --button-bg: var(--color-surface-strong);
   --button-bg-hover: color-mix(in srgb, var(--button-bg) 72%, white);

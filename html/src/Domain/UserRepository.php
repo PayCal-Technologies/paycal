@@ -77,7 +77,7 @@ final class UserRepository
         continue;
       }
 
-      if (in_array($property, ['calendar_show_gross_badge', 'calendar_show_net_badge', 'calendar_show_deductions_badge', 'calendar_highlight_pay_period'], true)) {
+      if (in_array($property, ['calendar_show_gross_badge', 'calendar_show_net_badge', 'calendar_show_deductions_badge', 'calendar_highlight_pay_period', 'indigenous_tax_exemption_eligible', 'lives_on_reserve'], true)) {
         $u->{$property} = (bool) (int) $value;
 
         continue;
@@ -130,13 +130,6 @@ final class UserRepository
       $u->{$property} = (string) $value;
     }
 
-    if (!array_key_exists('variant', $fields) && array_key_exists('theme_mode', $fields)) {
-      $legacyVariant = (string) $fields['theme_mode'];
-      if ($legacyVariant !== '') {
-        $u->variant = $legacyVariant;
-      }
-    }
-
     if (isset($fields['auth_level']))
       $u->auth_level = self::normalizeAuthLevel((string) $fields['auth_level']);
 
@@ -144,14 +137,14 @@ final class UserRepository
   }
 
 
-      /**
+  /**
    * Sets user preferences.
    * @param string    $userUUID        User UUID
    * @param string    $passwordHash    Password Hash
-       * @param string    $email           Email Address
+   * @param string    $email           Email Address
    * @param AuthLevel $authLevel       User Authorization level (unverified, user, admin, etc...)
    * @param string    $fullName        Full name (John Smith)
-   * @param string    $lastSessionHash Last Session hash (TODO: convert to datetime?)
+   * @param string    $lastSessionHash Last session hash
    * @param string    $phone           Phone number
    */
   public static function setUser(
@@ -220,25 +213,26 @@ final class UserRepository
 
     $timestamp = strval(time());
     $sanitizedEmail = InputSanitizer::sanitizeEmail($email);
+    $canonicalEmail = InputSanitizer::canonicalEmailIdentity($sanitizedEmail);
     $emailKey = Keys::EMAIL . ':' . $sanitizedEmail;
-    $legacyEmailKey = Keys::EMAIL . $sanitizedEmail;
+    $canonicalEmailKey = Keys::EMAIL . ':' . $canonicalEmail;
 
-    // Legacy key format omitted ':' (e.g. emailuser@example.com). Do not write it.
-    Database::unlink($legacyEmailKey);
+    $fields = [
+      'user_uuid'     => $userUUID,
+      'created'       => $timestamp,
+      'last_modified' => $timestamp,
+    ];
 
     if ($maintenance) {
-      Database::hsetex($emailKey, [
-        'user_uuid'     => $userUUID,
-        'created'       => $timestamp,
-        'last_modified' => $timestamp,
-      ], FormTTL::ONE_DAY->value);
-      Database::unlink($legacyEmailKey);
+      Database::hsetex($emailKey, $fields, FormTTL::ONE_DAY->value);
+      if ($canonicalEmail !== '' && $canonicalEmail !== $sanitizedEmail) {
+        Database::hsetex($canonicalEmailKey, $fields, FormTTL::ONE_DAY->value);
+      }
     } else {
-      Database::hset($emailKey, [
-        'user_uuid'     => $userUUID,
-        'created'       => $timestamp,
-        'last_modified' => $timestamp,
-      ]);
+      Database::hset($emailKey, $fields);
+      if ($canonicalEmail !== '' && $canonicalEmail !== $sanitizedEmail) {
+        Database::hset($canonicalEmailKey, $fields);
+      }
     }
   }
 
@@ -272,36 +266,23 @@ final class UserRepository
       return '';
 
     $sanitizedEmail = InputSanitizer::sanitizeEmail($email);
-    $key = Keys::EMAIL . ":" . $sanitizedEmail;
-    $legacyKey = Keys::EMAIL . $sanitizedEmail;
+    $canonicalEmail = InputSanitizer::canonicalEmailIdentity($sanitizedEmail);
+    $keys = [Keys::EMAIL . ":" . $sanitizedEmail];
+    if ($canonicalEmail !== '' && $canonicalEmail !== $sanitizedEmail) {
+      $keys[] = Keys::EMAIL . ":" . $canonicalEmail;
+    }
     $field = 'user_uuid';
-    $userUUID = (string) Database::hget($key, $field);
-    if ($userUUID !== '' && Database::exists(Keys::USER . ':' . $userUUID)) {
-      return $userUUID;
-    }
 
-    // Self-heal orphaned email index entries from historical delete flows.
-    if ($userUUID !== '') {
-      Database::unlink($key);
-    }
-
-    $legacyUUID = (string) Database::hget($legacyKey, $field);
-    if ($legacyUUID !== '' && Database::exists(Keys::USER . ':' . $legacyUUID)) {
-      // Self-heal: migrate legacy key to canonical email:<address> shape.
-      $timestamp = strval(time());
-      Database::hset($key, [
-        'user_uuid' => $legacyUUID,
-        'last_modified' => $timestamp,
-      ]);
-      if ((string) Database::hget($key, 'created') === '') {
-        Database::hset($key, ['created' => $timestamp]);
+    foreach ($keys as $key) {
+      $userUUID = (string) Database::hget($key, $field);
+      if ($userUUID !== '' && Database::exists(Keys::USER . ':' . $userUUID)) {
+        return $userUUID;
       }
-      Database::unlink($legacyKey);
-      return $legacyUUID;
-    }
 
-    if ($legacyUUID !== '') {
-      Database::unlink($legacyKey);
+      // Self-heal orphaned email index entries from historical delete flows.
+      if ($userUUID !== '') {
+        Database::unlink($key);
+      }
     }
 
     return '';
@@ -320,11 +301,14 @@ final class UserRepository
       return false;
 
     $sanitizedEmail = InputSanitizer::sanitizeEmail($email);
+    $canonicalEmail = InputSanitizer::canonicalEmailIdentity($sanitizedEmail);
 
     $keys = [
       Keys::EMAIL . ':' . $sanitizedEmail,
-      Keys::EMAIL . $sanitizedEmail,
     ];
+    if ($canonicalEmail !== '' && $canonicalEmail !== $sanitizedEmail) {
+      $keys[] = Keys::EMAIL . ':' . $canonicalEmail;
+    }
 
     foreach ($keys as $emailKey) {
       if (!Database::exists($emailKey)) {
@@ -333,18 +317,6 @@ final class UserRepository
 
       $userUUID = (string) Database::hget($emailKey, 'user_uuid');
       if ($userUUID !== '' && Database::exists(Keys::USER . ':' . $userUUID)) {
-        if ($emailKey === Keys::EMAIL . $sanitizedEmail) {
-          $canonicalKey = Keys::EMAIL . ':' . $sanitizedEmail;
-          $timestamp = strval(time());
-          Database::hset($canonicalKey, [
-            'user_uuid' => $userUUID,
-            'last_modified' => $timestamp,
-          ]);
-          if ((string) Database::hget($canonicalKey, 'created') === '') {
-            Database::hset($canonicalKey, ['created' => $timestamp]);
-          }
-          Database::unlink($emailKey);
-        }
         return true;
       }
 
@@ -497,6 +469,11 @@ final class UserRepository
         continue;
       }
 
+      if (in_array($field, ['calendar_show_gross_badge', 'calendar_show_net_badge', 'calendar_show_deductions_badge', 'calendar_highlight_pay_period', 'indigenous_tax_exemption_eligible', 'lives_on_reserve'], true)) {
+        $user->{$field} = (bool) (int) $rawValue;
+        continue;
+      }
+
       // All other user fields are stored as strings in Redis.
       self::assignStringField($user, $field, (string) $rawValue);
     }
@@ -569,6 +546,9 @@ final class UserRepository
       case 'wrapped_dek_recovery':
         $user->wrapped_dek_recovery = $value;
         return;
+      case 'recovery_key_updated_at':
+        $user->recovery_key_updated_at = $value;
+        return;
       case 'recovery_proof_key':
         $user->recovery_proof_key = $value;
         return;
@@ -589,6 +569,9 @@ final class UserRepository
         return;
       case 'spacing':
         $user->spacing = ($value === 'compact') ? 'tight' : $value;
+        return;
+      case 'depth':
+        $user->depth = $value;
         return;
       case 'dyslexia_typography':
         $user->dyslexia_typography = $value;
@@ -737,6 +720,15 @@ final class UserRepository
       case 'province':
         $user->province = $value;
         return;
+      case 'indigenous_tax_exemption_eligible':
+        $user->indigenous_tax_exemption_eligible = (bool) (int) $value;
+        return;
+      case 'lives_on_reserve':
+        $user->lives_on_reserve = (bool) (int) $value;
+        return;
+      case 'reserve_name':
+        $user->reserve_name = $value;
+        return;
       case 'timezone':
         $user->timezone = $value;
         return;
@@ -802,4 +794,3 @@ final class UserRepository
     return AuthLevel::GUEST;
   }
 }
-

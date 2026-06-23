@@ -67,9 +67,9 @@ Orphaned Work Recovery detecteert ontkoppelde werkrecords na site-verwijderingen
 
 ## Premium: samenwerking zonder compromis
 
-Premium-organisatiefuncties bieden sterkere operationele controle zonder individuele privacy in te leveren.
+Premium-businessfuncties bieden sterkere operationele controle zonder individuele privacy in te leveren.
 
-◆ Organization Hub voor werkgevers- en teamworkflows
+◆ Business Hub voor werkgevers- en teamworkflows
 ◆ Verfijnd rolmodel met granulaire rechten
 ◆ Gedelegeerde kalenderweergaven voor managementtoezicht
 ◆ DEK Auto-Bootstrap voor directe encryptiegereedheid bij paginabezoek

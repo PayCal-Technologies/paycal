@@ -578,7 +578,6 @@ button.cal_menu_selected:focus-visible {
   white-space: nowrap;
   color: var(--work-fore);
   overflow-x: hidden;
-  animation: slide var(--zero-transition) forwards;
 }
 
 .work_row {
@@ -1153,6 +1152,16 @@ button.cal_menu_selected:focus-visible {
   transition: background-color 120ms ease, box-shadow 120ms ease;
 }
 
+.datagrid_month_cell::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: inset 0 0 0 2px transparent;
+}
+
 .datagrid_month_cell:hover {
   background: var(--calendar-day-hover, color-mix(in srgb, var(--button-primary-bg) 12%, var(--panel-bg)));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--calendar-border, var(--panel-border)) 72%, transparent);
@@ -1165,6 +1174,31 @@ button.cal_menu_selected:focus-visible {
   /* Inset ring avoids reflow while keeping all four sides visible at grid edges. */
   box-shadow: inset 0 0 0 1px var(--color-focus-ring, #0096d6) !important;
   background: var(--calendar-day-focus, color-mix(in srgb, var(--panel-bg) 88%, var(--panel-text) 12%));
+}
+
+.datagrid_month_grid .datagrid_month_cell:focus-visible::after {
+  animation: calendarFocusRipple 420ms ease-out;
+  box-shadow: inset 0 0 0 2px var(--color-focus-ring, #0096d6);
+}
+
+.datagrid_month_cell.calendar_cell_save_pending {
+  background: color-mix(in srgb, var(--color-primary, #0096d6) 7%, var(--panel-bg));
+}
+
+.datagrid_month_cell.calendar_cell_save_pending::after {
+  opacity: 1;
+  animation: calendarSavePending 1150ms ease-in-out infinite;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-primary, #0096d6) 55%, transparent);
+}
+
+.datagrid_month_cell.calendar_cell_save_committed::after {
+  animation: calendarSaveCommitted 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-success, #2e7d32) 72%, transparent);
+}
+
+.datagrid_month_cell.calendar_cell_save_error::after {
+  animation: calendarSaveErrorFlash 1200ms ease-out;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-danger, #c62828) 72%, transparent);
 }
 
 .datagrid_month_cell[data-selected="true"],
@@ -1323,6 +1357,8 @@ button.cal_menu_selected:focus-visible {
 
 .calendar_day_hover_tooltip {
   position: fixed;
+  top: var(--calendar-hover-tooltip-top, 0px);
+  left: var(--calendar-hover-tooltip-left, 0px);
   z-index: 12000;
   pointer-events: none;
   min-width: 140px;
@@ -1933,6 +1969,10 @@ button.cal_menu_selected:focus-visible {
   display: none;
 }
 
+.datagrid_month_cell.calendar_cell_save_committed .datagrid_month_cell_content .work {
+  animation: calendarWorkEntryLockIn 520ms ease-out both;
+}
+
 /* Responsive: show line breaks on smaller screens */
 @media (max-width: 1024px) {
   .datagrid_month_cell_content .work {
@@ -2309,9 +2349,15 @@ button.cal_menu_selected:focus-visible {
   }
 
   .datagrid_month_cell_content {
-    gap: 6px;
-    flex: 1;
+    gap: 4px;
+    flex: 0 1 auto;
+    max-height: min(48dvh, calc(100% - 5rem));
     overflow-y: auto;
+  }
+
+  .datagrid_month_cell > .calendar_earnings_badges {
+    flex: 0 0 auto;
+    margin-top: 0.25rem;
   }
 
   /* Strip controls bar bottom margin */
@@ -2335,3 +2381,94 @@ foreach (SiteColorPalette::pickerPalette() as $pc) {
   echo "}\n";
 }
 ?>
+
+.work-entry-row:focus-within {
+  background: color-mix(in srgb, var(--color-primary, #0096d6) 8%, transparent);
+  box-shadow: inset 3px 0 0 var(--color-focus-ring, #0096d6);
+}
+
+body[data-runtime-risk-state="locked"] #calendar-v2-root #calendar-grid,
+body[data-runtime-risk-state="terminated"] #calendar-v2-root #calendar-grid {
+  pointer-events: none;
+  filter: blur(2px) saturate(0.55);
+  transform: scale(0.985);
+  transform-origin: center;
+  transition: filter 140ms ease, transform 140ms ease, opacity 140ms ease;
+}
+
+body[data-runtime-risk-state="locked"] #calendar-v2-root::after,
+body[data-runtime-risk-state="terminated"] #calendar-v2-root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--panel-text, #fff) 8%, transparent), transparent),
+    color-mix(in srgb, var(--panel-bg, #111) 24%, transparent);
+  animation: calendarVaultClose 260ms ease-out both;
+  z-index: 30;
+}
+
+@keyframes calendarFocusRipple {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.97);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.035);
+  }
+}
+
+@keyframes calendarSavePending {
+  0%, 100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes calendarSaveCommitted {
+  0% {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.018);
+  }
+}
+
+@keyframes calendarSaveErrorFlash {
+  0%, 35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes calendarWorkEntryLockIn {
+  0% {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-success, #2e7d32) 65%, transparent);
+  }
+  100% {
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+}
+
+@keyframes calendarVaultClose {
+  from {
+    opacity: 0;
+    transform: scaleX(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}

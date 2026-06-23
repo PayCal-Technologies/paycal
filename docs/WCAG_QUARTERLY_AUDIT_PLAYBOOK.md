@@ -27,7 +27,7 @@ Provide a repeatable quarterly process to validate WCAG 2.1 AA behavior, capture
    - `npm run test:a11y:phpunit:suite`
 2. Run manual keyboard smoke checklist (`html/tests/ACCESSIBILITY_REGRESSION_WORKFLOW.md`).
 3. Run manual VoiceOver sweep on:
-   - `/`, `/auth/`, `/settings/`, `/sites/`, `/organizations/`, `/help/`, `/transparency/accessibility/`
+   - `/`, `/auth/`, `/settings/`, `/sites/`, `/business/`, `/help/`, `/transparency/accessibility/`
 4. Log each issue using `.github/ISSUE_TEMPLATE/accessibility-defect.yml`.
 
 ### Week 2: Remediation + Sign-off

@@ -67,10 +67,10 @@ Orphaned Work Recovery detects unlinked work records after site deletions and su
 
 ## Premium Tier: Collaboration Without Compromise
 
-Premium organization features now provide stronger operational control while preserving user-level privacy boundaries.
+Premium business features now provide stronger operational control while preserving user-level privacy boundaries.
 
-◆ Organization Hub linking for employer and team workflows
-◆ Refined org role scope model for granular permissions
+◆ Business Hub linking for employer and team workflows
+◆ Refined business role scope model for granular permissions
 ◆ Delegated calendar visibility for managerial oversight
 ◆ DEK Auto-Bootstrap for immediate encryption readiness on page visit
 

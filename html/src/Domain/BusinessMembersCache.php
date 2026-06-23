@@ -15,10 +15,10 @@ use PayCal\Domain\Constants\Keys;
  *   (full work-history aggregation per member). This cache stores the
  *   computed per-member summaries under business:cache:members:{businessId}.
  * - Membership and site-link mutations invalidate eagerly (DEL via
- *   setRelationship and link/unlink). Work-entry edits invalidate only
+ *   setConnection and link/unlink). Work-entry edits invalidate only
  *   financial segments (member work + this key) via invalidateFinancialData.
  * - Member identity/ACL data is intentionally NOT cached: every request
- *   still runs the gated BusinessDiscoveryService::listRelationships path.
+ *   still runs the gated BusinessDiscoveryService::listConnections path.
  *
  * @category   Domain
  * @package    PayCal\Domain

@@ -2,7 +2,7 @@
  * Shared pie graph dataset, locale formatting, and SVG rendering for earnings views.
  */
 
-import { resolveUserLocale } from '/js/earnings/locale.js';
+import { resolveUserLocale } from '/js/core/locale.js';
 
 function defaultEscapeHtml(value) {
   return String(value ?? '')
@@ -70,23 +70,18 @@ export function createPieGraphHelpers(options = {}) {
 
   const pieSegmentsFromTotals = (totals, palette) => {
     const colors = palette || {};
+    const normalizedTotals = normalizeCompositionTotals(totals);
     return [
-      {
-        key: 'gross',
-        label: labels.gross,
-        value: Math.max(0, Number(totals?.gross || 0)),
-        color: String(colors.gross || '#1e4778'),
-      },
       {
         key: 'net',
         label: labels.net,
-        value: Math.max(0, Number(totals?.net || 0)),
+        value: normalizedTotals.net,
         color: String(colors.net || '#8bb7e6'),
       },
       {
         key: 'deductions',
         label: labels.deductions,
-        value: Math.max(0, Number(totals?.deductions || 0)),
+        value: normalizedTotals.deductions,
         color: String(colors.deductions || '#f2d2a6'),
       },
     ];
@@ -98,7 +93,8 @@ export function createPieGraphHelpers(options = {}) {
     }
 
     const segments = pieSegmentsFromTotals(totals, palette);
-    const total = segments.reduce((sum, seg) => sum + seg.value, 0);
+    const normalizedTotals = normalizeCompositionTotals(totals);
+    const total = normalizedTotals.gross;
     svgEl.textContent = '';
 
     if (!Number.isFinite(total) || total <= 0) {
@@ -114,8 +110,7 @@ export function createPieGraphHelpers(options = {}) {
     const cx = 120;
     const cy = 120;
     const r = 90;
-    const grossRatio = segments[0].value / total;
-    let start = Math.PI - (grossRatio * Math.PI);
+    let start = -Math.PI / 2;
     const parts = [];
 
     segments.forEach((seg) => {
@@ -157,6 +152,9 @@ export function createPieGraphHelpers(options = {}) {
     totalText.setAttribute('text-anchor', 'middle');
     totalText.setAttribute('class', 'earnings_piegraphs_total');
     totalText.textContent = formatPieAmount(total);
+    const totalTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    totalTitle.textContent = `${labels.gross}: ${formatPieAmount(total)}`;
+    totalText.appendChild(totalTitle);
     svgEl.appendChild(totalText);
 
     if (guardian && typeof guardian.setHTML === 'function') {
@@ -198,10 +196,31 @@ export function createPieGraphHelpers(options = {}) {
     locale,
     formatPieAmount,
     formatPiePercent,
+    normalizeCompositionTotals,
     monthLabelFromKey,
     pieSegmentsFromTotals,
     renderPieSvg,
   };
+}
+
+export function normalizeCompositionTotals(totals) {
+  const gross = Math.max(0, Number(totals?.gross || 0));
+  let deductions = Math.max(0, Number(totals?.deductions || 0));
+  let net = Math.max(0, Number(totals?.net || 0));
+
+  if (gross > 0 && deductions > 0 && net <= 0) {
+    net = Math.max(0, gross - deductions);
+  } else if (gross > 0 && net > 0 && deductions <= 0) {
+    deductions = Math.max(0, gross - net);
+  } else if (gross > 0 && Math.abs((net + deductions) - gross) > 0.01) {
+    if (deductions > 0) {
+      net = Math.max(0, gross - deductions);
+    } else {
+      deductions = Math.max(0, gross - net);
+    }
+  }
+
+  return { gross, deductions, net };
 }
 
 export function buildPieGraphDataset(dailyPayload) {
@@ -213,21 +232,23 @@ export function buildPieGraphDataset(dailyPayload) {
       return;
     }
 
-    const gross = parseMoneyLike(record.gross);
-    const deductions = parseMoneyLike(record.deductions ?? record.tax);
-    const net = parseMoneyLike(record.net);
+    const rowTotals = normalizeCompositionTotals({
+      gross: parseMoneyLike(record.gross),
+      deductions: parseMoneyLike(record.deductions ?? record.tax),
+      net: parseMoneyLike(record.net),
+    });
     const monthKey = String(dateKey).slice(0, 7);
 
-    ytd.gross += gross;
-    ytd.deductions += deductions;
-    ytd.net += net;
+    ytd.gross += rowTotals.gross;
+    ytd.deductions += rowTotals.deductions;
+    ytd.net += rowTotals.net;
 
     if (!monthly[monthKey]) {
       monthly[monthKey] = { gross: 0, deductions: 0, net: 0 };
     }
-    monthly[monthKey].gross += gross;
-    monthly[monthKey].deductions += deductions;
-    monthly[monthKey].net += net;
+    monthly[monthKey].gross += rowTotals.gross;
+    monthly[monthKey].deductions += rowTotals.deductions;
+    monthly[monthKey].net += rowTotals.net;
   });
 
   return { ytd, monthly };

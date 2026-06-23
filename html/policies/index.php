@@ -12,5 +12,7 @@
  * PHP version 8.4.16
  */
 
-header('Location: https://paycaltech.com/policies/', true, 301);
+$targetOrigin = 'https://paycaltech.com';
+
+header('Location: ' . $targetOrigin . '/policies/', true, 301);
 exit;

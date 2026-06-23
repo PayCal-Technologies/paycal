@@ -171,7 +171,8 @@ final class MonthlyBreakdownForensicTest extends TestCase
       $snapshot,
     );
     $this->assertIsString($html);
-    $this->assertStringContainsString('aria-rowcount="12"', (string) $html);
+    $this->assertStringContainsString('aria-rowcount="13"', (string) $html);
+    $this->assertSame(12, preg_match_all('/data-id="2026-\d{2}"/', (string) $html));
   }
 
   #[Test]
@@ -198,7 +199,7 @@ final class MonthlyBreakdownForensicTest extends TestCase
       $snapshot,
     );
     $this->assertStringContainsString(
-      ForensicTaxSupport::formatTemplateCurrency($expected['deductions'] / 100),
+      ForensicTaxSupport::formatDataGridCurrency($expected['deductions'] / 100),
       $html,
     );
     $this->assertGreaterThan(0, $expected['deductions']);
@@ -274,9 +275,9 @@ final class MonthlyBreakdownForensicTest extends TestCase
       $user,
     );
 
-    $this->assertStringContainsString(ForensicTaxSupport::formatTemplateCurrency(7040.0), $html);
+    $this->assertStringContainsString(ForensicTaxSupport::formatDataGridCurrency(7040.0), $html);
     $this->assertStringContainsString(
-      ForensicTaxSupport::formatTemplateCurrency($expected['2026-01']['deductions'] / 100),
+      ForensicTaxSupport::formatDataGridCurrency($expected['2026-01']['deductions'] / 100),
       $html,
     );
     $this->assertGreaterThan(0, $expected['2026-01']['deductions']);

@@ -11,8 +11,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 ?>
 
 .reports_page_shell {
-  max-width: min(80vw, 720px);
-  margin: 0 auto 2rem;
+  max-width: var(--app-content-width, 100%);
+  margin: 0 0 2rem;
 }
 
 .reports_page_title {

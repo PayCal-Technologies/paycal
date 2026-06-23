@@ -7,7 +7,7 @@ namespace PayCal\Domain\Config;
  *
  * Purpose: Canonical 32-color palette for site identification across the PayCal UI.
  *          Colors are used for calendar badges, datagrid row accents, earnings
- *          charts, organization planning indicators, and PDF/export labels.
+ *          charts, business planning indicators, and PDF/export labels.
  *
  * Why this exists:
  * - Centralizes palette definition so the admin panel, swatch picker, and any
@@ -15,7 +15,7 @@ namespace PayCal\Domain\Config;
  * - Avoids native <input type="color"> which is not themeable and varies by OS.
  * - 32 curated colors keep choices intentional without overwhelming users.
  *
- * Palette organization — 4 rows × 8 colors:
+ * Palette layout — 4 rows × 8 colors:
  *   Row 1: Blues & Cyans
  *   Row 2: Greens
  *   Row 3: Yellows, Oranges & Reds
@@ -132,9 +132,11 @@ final class SiteColorPalette
      */
     public static function labelFor(string $hex): ?string
     {
-        foreach (self::palette() as $entry) {
-            if (strtoupper($entry['hex']) === strtoupper($hex)) {
-                return $entry['label'];
+        foreach ([self::pickerPalette(), self::palette()] as $palette) {
+            foreach ($palette as $entry) {
+                if (strtoupper($entry['hex']) === strtoupper($hex)) {
+                    return $entry['label'];
+                }
             }
         }
         return null;

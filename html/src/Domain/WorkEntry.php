@@ -20,9 +20,9 @@ use PayCal\Domain\Enums\SiteStatus;
  * - Controllers should not invent their own work-entry validation rules.
  *   Add or change field rules here so reads, writes, and tests stay aligned.
  * - This file sits close to persistence concerns, so changes can affect
- *   historical locking, organization envelope metadata, and reporting.
+ *   historical locking, business envelope metadata, and reporting.
  * - Keep normalization behavior deterministic; silent shape changes here ripple
- *   into calendar, earnings, exports, and org-scoped flows.
+ *   into calendar, earnings, exports, and business-scoped flows.
  * - When adding fields, review downstream serializers and repositories rather
  *   than assuming unused fields are harmless.
  *
@@ -140,11 +140,11 @@ class WorkEntry
       }
     }
 
-    $strictOrgEnvelope = (bool) SystemConfig::get('org_shared_encryption_enforce_strict_envelope');
-    if ($strictOrgEnvelope) {
-      $orgEnvelopeValidation = self::validateOrganizationEnvelopeMetadata($envelope);
-      if (!$orgEnvelopeValidation['valid']) {
-        return $orgEnvelopeValidation;
+    $strictBusinessEnvelope = (bool) SystemConfig::get('business_shared_encryption_enforce_strict_envelope');
+    if ($strictBusinessEnvelope) {
+      $businessEnvelopeValidation = self::validateBusinessEnvelopeMetadata($envelope);
+      if (!$businessEnvelopeValidation['valid']) {
+        return $businessEnvelopeValidation;
       }
     }
 
@@ -152,19 +152,19 @@ class WorkEntry
   }
 
   /**
-   * Validate that an encrypted blob is org-mode and matches request context.
+   * Validate that an encrypted blob is business mode and matches request context.
    *
    * @return array{valid: bool, error: string}
    */
-  public static function validateOrganizationEnvelopeContext(
+  public static function validateBusinessEnvelopeContext(
     string $blob,
-    string $expectedOrgId,
+    string $expectedBusinessId,
     string $expectedSegment = 'current_period'
   ): array {
-    $expectedOrgId = trim((string) $expectedOrgId);
+    $expectedBusinessId = trim((string) $expectedBusinessId);
     $expectedSegment = trim((string) $expectedSegment);
-    if ($expectedOrgId === '') {
-      return ['valid' => false, 'error' => 'missing_expected_org_id'];
+    if ($expectedBusinessId === '') {
+      return ['valid' => false, 'error' => 'missing_expected_business_id'];
     }
     if ($expectedSegment === '') {
       $expectedSegment = 'current_period';
@@ -185,23 +185,23 @@ class WorkEntry
     $modeRaw = $meta['encryption_mode'] ?? ($envelope['encryption_mode'] ?? null);
     $mode = is_scalar($modeRaw) ? trim((string) $modeRaw) : '';
     if (!BusinessDiscoveryService::isBusinessEncryptionMode($mode)) {
-      return ['valid' => false, 'error' => 'org_mode_required'];
+      return ['valid' => false, 'error' => 'business_mode_required'];
     }
 
-    $orgIdRaw = $meta['org_id'] ?? ($envelope['org_id'] ?? null);
+    $businessIdRaw = $meta['business_id'] ?? ($envelope['business_id'] ?? null);
     $segmentRaw = $meta['segment'] ?? ($envelope['segment'] ?? null);
     $keyVersionRaw = $meta['key_version'] ?? ($envelope['key_version'] ?? null);
 
-    $orgId = is_scalar($orgIdRaw) ? trim((string) $orgIdRaw) : '';
+    $businessId = is_scalar($businessIdRaw) ? trim((string) $businessIdRaw) : '';
     $segment = is_scalar($segmentRaw) ? trim((string) $segmentRaw) : '';
     $keyVersion = is_scalar($keyVersionRaw) ? trim((string) $keyVersionRaw) : '';
 
-    if ($orgId === '' || $segment === '' || $keyVersion === '') {
-      return ['valid' => false, 'error' => 'missing_org_context_fields'];
+    if ($businessId === '' || $segment === '' || $keyVersion === '') {
+      return ['valid' => false, 'error' => 'missing_business_context_fields'];
     }
 
-    if ($orgId !== $expectedOrgId) {
-      return ['valid' => false, 'error' => 'org_id_mismatch'];
+    if ($businessId !== $expectedBusinessId) {
+      return ['valid' => false, 'error' => 'business_id_mismatch'];
     }
 
     if ($segment !== $expectedSegment) {
@@ -212,15 +212,15 @@ class WorkEntry
   }
 
   /**
-   * Validate org-mode envelope metadata.
+   * Validate business-mode envelope metadata.
    *
-   * This is intentionally tolerant for non-org payloads.
-   * Strict field checks run only when encryption_mode=organization.
+   * This is intentionally tolerant for non-business payloads.
+   * Strict field checks run only when encryption_mode uses the business envelope value.
    *
    * @param array<string, mixed> $envelope
    * @return array{valid: bool, error: string}
    */
-  private static function validateOrganizationEnvelopeMetadata(array $envelope): array
+  private static function validateBusinessEnvelopeMetadata(array $envelope): array
   {
     $metaRaw = $envelope['meta'] ?? null;
     $meta = is_array($metaRaw) ? $metaRaw : [];
@@ -236,11 +236,11 @@ class WorkEntry
       return ['valid' => false, 'error' => 'invalid_encryption_mode'];
     }
 
-    $requiredOrgFields = ['org_id', 'segment', 'key_version', 'dek_id', 'needs_rewrap'];
-    foreach ($requiredOrgFields as $field) {
+    $requiredBusinessFields = ['business_id', 'segment', 'key_version', 'dek_id', 'needs_rewrap'];
+    foreach ($requiredBusinessFields as $field) {
       $value = $meta[$field] ?? ($envelope[$field] ?? null);
       if (!is_scalar($value) || trim((string) $value) === '') {
-        return ['valid' => false, 'error' => "missing_org_meta_{$field}"];
+        return ['valid' => false, 'error' => "missing_business_meta_{$field}"];
       }
     }
 
@@ -280,6 +280,11 @@ class WorkEntry
       'travel_hours' => ['t'],
       'wage' => ['w'],
       'gross' => ['g'],
+      'regular_amount' => [],
+      'overtime_amount' => [],
+      'travel_amount' => [],
+      'living_out_amount' => [],
+      'earnings_snapshot_version' => [],
       'tax' => ['tx'],
       'net' => [],
     ];
@@ -424,6 +429,41 @@ class WorkEntry
     $this->travelHours = $travelHours;
     $this->cost = $cost;
     $this->notes = $notes;
+  }
+
+  /**
+   * Build the stable per-entry earnings snapshot used by calendar and reports.
+   *
+   * Taxes and net pay are intentionally excluded because they depend on payroll
+   * policy and year-specific rules. These fields are simple facts of the entry.
+   *
+   * @return array{regular_amount: float, overtime_amount: float, travel_amount: float, living_out_amount: float, gross: float}
+   */
+  public static function calculateEarningsSnapshot(
+    float $regularHours,
+    float $overtimeHours,
+    float $travelHours,
+    float $livingOutAllowance,
+    float $wage
+  ): array {
+    $regularHours = max(0.0, $regularHours);
+    $overtimeHours = max(0.0, $overtimeHours);
+    $travelHours = max(0.0, $travelHours);
+    $livingOutAllowance = max(0.0, $livingOutAllowance);
+    $wage = max(0.0, $wage);
+
+    $regularAmount = round($regularHours * $wage, 2);
+    $overtimeAmount = round($overtimeHours * $wage * 1.5, 2);
+    $travelAmount = round($travelHours * $wage, 2);
+    $livingOutAmount = round($livingOutAllowance, 2);
+
+    return [
+      'regular_amount' => $regularAmount,
+      'overtime_amount' => $overtimeAmount,
+      'travel_amount' => $travelAmount,
+      'living_out_amount' => $livingOutAmount,
+      'gross' => round($regularAmount + $overtimeAmount + $travelAmount + $livingOutAmount, 2),
+    ];
   }
 
   /**
@@ -627,6 +667,13 @@ class WorkEntry
     $travelHours = self::validateHours((float) ($workDetails['travel_hours'] ?? 0));
     $wage = (float) ($workDetails['wage'] ?? 0);
     $siteColor = self::resolveSiteColorForWorkEntry($userUUID, $siteID);
+    $earningsSnapshot = self::calculateEarningsSnapshot(
+      $regularHours,
+      $overtimeHours,
+      $travelHours,
+      $livingOutAllowance,
+      $wage
+    );
 
     $fieldsToStore = [
       'encrypted_blob' => $blob,
@@ -638,6 +685,12 @@ class WorkEntry
       'living_out_allowance' => number_format($livingOutAllowance, 2, '.', ''),
       'travel_hours' => number_format($travelHours, 2, '.', ''),
       'wage' => number_format($wage, 2, '.', ''),
+      'regular_amount' => number_format($earningsSnapshot['regular_amount'], 2, '.', ''),
+      'overtime_amount' => number_format($earningsSnapshot['overtime_amount'], 2, '.', ''),
+      'travel_amount' => number_format($earningsSnapshot['travel_amount'], 2, '.', ''),
+      'living_out_amount' => number_format($earningsSnapshot['living_out_amount'], 2, '.', ''),
+      'gross' => number_format($earningsSnapshot['gross'], 2, '.', ''),
+      'earnings_snapshot_version' => '1',
     ];
     Log::debug('WorkEntry::updateWorkEntry storing');
     $isNewEntry = !Database::exists($workEntryKey);
@@ -669,8 +722,8 @@ class WorkEntry
 
   /**
    * Resolve site_color for a work-entry save.
-   * Priority: self-owned site key first, then linked organization site refs
-   * for active org memberships (cross-owner linking support).
+   * Priority: self-owned site key first, then linked business site refs
+   * for active business memberships (cross-owner linking support).
    */
   private static function resolveSiteColorForWorkEntry(string $userUUID, string $siteID): string
   {
@@ -685,12 +738,12 @@ class WorkEntry
     $memberships = BusinessMemberRepository::forUser($userUUID);
     foreach ($memberships as $membership) {
       $status = (string) $membership['status'];
-      $orgId = (string) $membership['org_id'];
-      if ($status !== 'active' || $orgId === '') {
+      $businessId = (string) $membership['org_id'];
+      if ($status !== 'active' || $businessId === '') {
         continue;
       }
 
-      $siteRefs = Database::smembers(Keys::BUSINESS_SITE . ':' . $orgId);
+      $siteRefs = Database::smembers(Keys::BUSINESS_SITE . ':' . $businessId);
       foreach ($siteRefs as $siteRefRaw) {
         $siteRef = (string) $siteRefRaw;
         $parts = explode(':', $siteRef, 2);
@@ -805,9 +858,13 @@ class WorkEntry
       'living_out_allowance' => is_numeric($normalized['living_out_allowance'] ?? null) ? (float) $normalized['living_out_allowance'] : 0.0,
       'travel_hours' => is_numeric($normalized['travel_hours'] ?? null) ? (float) $normalized['travel_hours'] : 0.0,
       'wage' => is_numeric($normalized['wage'] ?? null) ? (float) $normalized['wage'] : 0.0,
+      'regular_amount' => is_numeric($normalized['regular_amount'] ?? null) ? (float) $normalized['regular_amount'] : 0.0,
+      'overtime_amount' => is_numeric($normalized['overtime_amount'] ?? null) ? (float) $normalized['overtime_amount'] : 0.0,
+      'travel_amount' => is_numeric($normalized['travel_amount'] ?? null) ? (float) $normalized['travel_amount'] : 0.0,
+      'living_out_amount' => is_numeric($normalized['living_out_amount'] ?? null) ? (float) $normalized['living_out_amount'] : 0.0,
+      'gross' => is_numeric($normalized['gross'] ?? null) ? (float) $normalized['gross'] : 0.0,
+      'earnings_snapshot_version' => is_numeric($normalized['earnings_snapshot_version'] ?? null) ? (int) $normalized['earnings_snapshot_version'] : 0,
       'encrypted_blob' => $blob,
     ];
   }
 }
-
-

@@ -16,6 +16,18 @@ $pageLabel = Strings::i18n('ADMIN_STRIPE_DASHBOARD');
 Authentication::redirectHomeIfUnauthenticated();
 AdminSurface::redirectHomeIfPageUnavailable('/admin/stripe/');
 
+if (function_exists('admin_stripe_i18n') === false) {
+  function admin_stripe_i18n(string $key): string
+  {
+    static $cache = [];
+    if (array_key_exists($key, $cache) === false) {
+      $cache[$key] = Strings::i18n($key);
+    }
+
+    return $cache[$key];
+  }
+}
+
 /**
  * @param array<string, mixed> $arr
  * @return array<string, mixed>
@@ -91,9 +103,9 @@ foreach ($billingWebhookRecentThirtyDays as $row) {
 $eventTypesGrid = new DataGrid([
   'id' => 'stripe-event-types-grid',
   'columns' => [
-    ['key' => 'event_type', 'label' => 'Event Type', 'sortable' => false],
-    ['key' => 'processed', 'label' => 'Processed', 'sortable' => false],
-    ['key' => 'duplicate', 'label' => 'Duplicate', 'sortable' => false],
+    ['key' => 'event_type', 'label' => admin_stripe_i18n('ADMIN_STRIPE_EVENT_TYPE'), 'sortable' => false],
+    ['key' => 'processed', 'label' => admin_stripe_i18n('ADMIN_STRIPE_PROCESSED'), 'sortable' => false],
+    ['key' => 'duplicate', 'label' => admin_stripe_i18n('ADMIN_STRIPE_DUPLICATE_LOWER'), 'sortable' => false],
   ],
   'rows' => $eventTypesRows,
   'meta' => [
@@ -105,11 +117,11 @@ $eventTypesGrid = new DataGrid([
 $sevenDayGrid = new DataGrid([
   'id' => 'stripe-7day-trend-grid',
   'columns' => [
-    ['key' => 'date', 'label' => 'Date', 'sortable' => false],
-    ['key' => 'processed', 'label' => 'Processed', 'sortable' => false],
-    ['key' => 'duplicate', 'label' => 'Duplicate', 'sortable' => false],
-    ['key' => 'verify_fail', 'label' => 'Verify Fail', 'sortable' => false],
-    ['key' => 'rejected', 'label' => 'Rejected', 'sortable' => false],
+    ['key' => 'date', 'label' => admin_stripe_i18n('DATE'), 'sortable' => false],
+    ['key' => 'processed', 'label' => admin_stripe_i18n('ADMIN_STRIPE_PROCESSED'), 'sortable' => false],
+    ['key' => 'duplicate', 'label' => admin_stripe_i18n('ADMIN_STRIPE_DUPLICATE_LOWER'), 'sortable' => false],
+    ['key' => 'verify_fail', 'label' => admin_stripe_i18n('ADMIN_STRIPE_VERIFY_FAIL_LOWER'), 'sortable' => false],
+    ['key' => 'rejected', 'label' => admin_stripe_i18n('ADMIN_STRIPE_REJECTED_LOWER'), 'sortable' => false],
   ],
   'rows' => $sevenDayRows,
   'meta' => [
@@ -121,11 +133,11 @@ $sevenDayGrid = new DataGrid([
 $thirtyDayGrid = new DataGrid([
   'id' => 'stripe-30day-trend-grid',
   'columns' => [
-    ['key' => 'date', 'label' => 'Date', 'sortable' => false],
-    ['key' => 'processed', 'label' => 'Processed', 'sortable' => false],
-    ['key' => 'duplicate', 'label' => 'Duplicate', 'sortable' => false],
-    ['key' => 'verify_fail', 'label' => 'Verify Fail', 'sortable' => false],
-    ['key' => 'rejected', 'label' => 'Rejected', 'sortable' => false],
+    ['key' => 'date', 'label' => admin_stripe_i18n('DATE'), 'sortable' => false],
+    ['key' => 'processed', 'label' => admin_stripe_i18n('ADMIN_STRIPE_PROCESSED'), 'sortable' => false],
+    ['key' => 'duplicate', 'label' => admin_stripe_i18n('ADMIN_STRIPE_DUPLICATE_LOWER'), 'sortable' => false],
+    ['key' => 'verify_fail', 'label' => admin_stripe_i18n('ADMIN_STRIPE_VERIFY_FAIL_LOWER'), 'sortable' => false],
+    ['key' => 'rejected', 'label' => admin_stripe_i18n('ADMIN_STRIPE_REJECTED_LOWER'), 'sortable' => false],
   ],
   'rows' => $thirtyDayRows,
   'meta' => [
@@ -140,83 +152,83 @@ $cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
 $cspNonce = is_scalar($cspNonceRaw) ? (string) $cspNonceRaw : '';
 echo '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL('admin/metrics'), ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL;
 ?>
-<section class="metrics-dashboard" aria-label="Stripe billing dashboard">
+<section class="metrics-dashboard" aria-label="<?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_BILLING_DASHBOARD_ARIA'), ENT_QUOTES, 'UTF-8') ?>">
   <div class="metric-card">
-    <h1><?= htmlspecialchars(Strings::i18n('ADMIN_STRIPE_DASHBOARD'), ENT_QUOTES, 'UTF-8') ?></h1>
-    <p>Admin-only overview of webhook processing health and event coverage for <?= htmlspecialchars($summaryDate, ENT_QUOTES, 'UTF-8') ?>.</p>
+    <h1><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_DASHBOARD'), ENT_QUOTES, 'UTF-8') ?></h1>
+    <p><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_OVERVIEW_PREFIX'), ENT_QUOTES, 'UTF-8') ?> <?= htmlspecialchars($summaryDate, ENT_QUOTES, 'UTF-8') ?>.</p>
     <div class="metric-row">
-      <span class="metric-label">Processed</span>
+      <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_PROCESSED'), ENT_QUOTES, 'UTF-8') ?></span>
       <span class="metric-value success"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'processed', 0)) ?></span>
     </div>
     <div class="metric-row">
-      <span class="metric-label">Duplicates</span>
+      <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_DUPLICATES'), ENT_QUOTES, 'UTF-8') ?></span>
       <span class="metric-value"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'duplicate', 0)) ?></span>
     </div>
     <div class="metric-row">
-      <span class="metric-label">Verification Failed</span>
+      <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_VERIFICATION_FAILED'), ENT_QUOTES, 'UTF-8') ?></span>
       <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'verification_failed', 0)) ?></span>
     </div>
     <div class="metric-row">
-      <span class="metric-label">Rejected Events</span>
+      <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_REJECTED_EVENTS'), ENT_QUOTES, 'UTF-8') ?></span>
       <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'event_rejected', 0)) ?></span>
     </div>
     <div class="metric-row">
-      <span class="metric-label">Empty Payloads</span>
+      <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_EMPTY_PAYLOADS'), ENT_QUOTES, 'UTF-8') ?></span>
       <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'payload_empty', 0)) ?></span>
     </div>
     <div class="metric-row">
-      <span class="metric-label">Missing Signatures</span>
+      <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_MISSING_SIGNATURES'), ENT_QUOTES, 'UTF-8') ?></span>
       <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'signature_missing', 0)) ?></span>
     </div>
     <div class="metric-row">
-      <span class="metric-label">Stripe Secret Missing</span>
+      <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_SECRET_MISSING'), ENT_QUOTES, 'UTF-8') ?></span>
       <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'secret_key_missing', 0)) ?></span>
     </div>
     <div class="metric-row">
-      <span class="metric-label">Webhook Secret Missing</span>
+      <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_WEBHOOK_SECRET_MISSING'), ENT_QUOTES, 'UTF-8') ?></span>
       <span class="metric-value danger"><?= formatStripeNumber(getIntValue($billingWebhookOutcomes, 'webhook_secret_missing', 0)) ?></span>
     </div>
   </div>
 
   <div class="metric-card">
-    <h2>Webhook Event Types</h2>
+    <h2><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_WEBHOOK_EVENT_TYPES'), ENT_QUOTES, 'UTF-8') ?></h2>
     <?php echo $eventTypesGrid->table(); ?>
   </div>
 
   <div class="metric-card">
-    <h2>7-Day Trend</h2>
+    <h2><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_7_DAY_TREND'), ENT_QUOTES, 'UTF-8') ?></h2>
     <?php echo $sevenDayGrid->table(); ?>
   </div>
 
   <div class="metric-card">
-    <h2>30-Day Trend</h2>
+    <h2><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_30_DAY_TREND'), ENT_QUOTES, 'UTF-8') ?></h2>
     <p>
-      Total processed: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'processed', 0)) ?></strong> /
-      duplicate: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'duplicate', 0)) ?></strong> /
-      verification failed: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'verification_failed', 0)) ?></strong> /
-      rejected: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'event_rejected', 0)) ?></strong>
+      <?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_TOTAL_PROCESSED'), ENT_QUOTES, 'UTF-8') ?>: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'processed', 0)) ?></strong> /
+      <?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_DUPLICATE_LOWER'), ENT_QUOTES, 'UTF-8') ?>: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'duplicate', 0)) ?></strong> /
+      <?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_VERIFICATION_FAILED_LOWER'), ENT_QUOTES, 'UTF-8') ?>: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'verification_failed', 0)) ?></strong> /
+      <?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_REJECTED_LOWER'), ENT_QUOTES, 'UTF-8') ?>: <strong><?= formatStripeNumber(getIntValue($billingWebhookRollingThirtyTotals, 'event_rejected', 0)) ?></strong>
     </p>
     <?php echo $thirtyDayGrid->table(); ?>
   </div>
 
   <div class="metric-card">
-    <h2>Actions</h2>
+    <h2><?= htmlspecialchars(admin_stripe_i18n('ACTIONS'), ENT_QUOTES, 'UTF-8') ?></h2>
     <div class="metrics-grid">
       <div class="metric-row">
-        <span class="metric-label">Admin Overview</span>
-        <span class="metric-value"><a href="/admin/" class="btn btn_secondary">Back to Admin</a></span>
+        <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_ADMIN_OVERVIEW'), ENT_QUOTES, 'UTF-8') ?></span>
+        <span class="metric-value"><a href="/admin/" class="btn btn_secondary"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_BACK_TO_ADMIN'), ENT_QUOTES, 'UTF-8') ?></a></span>
       </div>
       <div class="metric-row">
-        <span class="metric-label">Platform Metrics</span>
-        <span class="metric-value"><a href="/admin/metrics/" class="btn btn_secondary">Open Metrics</a></span>
+        <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_PLATFORM_METRICS'), ENT_QUOTES, 'UTF-8') ?></span>
+        <span class="metric-value"><a href="/admin/metrics/" class="btn btn_secondary"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_OPEN_METRICS'), ENT_QUOTES, 'UTF-8') ?></a></span>
       </div>
       <div class="metric-row">
-        <span class="metric-label">Stripe Dashboard</span>
-        <span class="metric-value"><a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="btn btn_secondary">Open Stripe (External)</a></span>
+        <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_DASHBOARD'), ENT_QUOTES, 'UTF-8') ?></span>
+        <span class="metric-value"><a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="btn btn_secondary"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_OPEN_STRIPE_EXTERNAL'), ENT_QUOTES, 'UTF-8') ?></a></span>
       </div>
       <div class="metric-row">
-        <span class="metric-label">Raw Telemetry API</span>
-        <span class="metric-value"><a href="/api/v1/billing/telemetry" class="btn btn_primary">View JSON</a></span>
+        <span class="metric-label"><?= htmlspecialchars(admin_stripe_i18n('ADMIN_STRIPE_RAW_TELEMETRY_API'), ENT_QUOTES, 'UTF-8') ?></span>
+        <span class="metric-value"><a href="/api/v1/billing/telemetry" class="btn btn_primary"><?= htmlspecialchars(admin_stripe_i18n('VIEW_JSON'), ENT_QUOTES, 'UTF-8') ?></a></span>
       </div>
     </div>
   </div>

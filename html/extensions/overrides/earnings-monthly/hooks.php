@@ -3,7 +3,7 @@
 namespace PayCal\Extensions\Overrides\EarningsMonthly;
 
 use PayCal\Domain\Earnings;
-use PayCal\Domain\Render;
+use PayCal\Domain\DataGrid;
 use PayCal\Domain\Strings;
 use PayCal\Domain\Taxes;
 use PayCal\Domain\User;
@@ -39,7 +39,7 @@ final class Hooks
     }
 
     $tax = new Taxes('Alberta', $year);
-    $monthsHTML = [];
+    $rows = [];
 
     $previousGrossCents = 0;
     $previousFederalTax = 0;
@@ -91,23 +91,21 @@ final class Hooks
       $monthTotalTaxCents = $taxTotal - $previousTaxTotalCents;
       $monthNetCents = $netCents - ($previousGrossCents - $previousTaxTotalCents);
 
-      $renderMonth = [
-        '__MONTH_ID__' => sprintf('%04d-%02d', $year, $month),
-        '__MONTH_NAME__' => Strings::formatLocalizedShortMonth($year, $month),
-        '__REGULAR_HOURS__' => Strings::formatLocalizedNumber($monthRegularHours, 2, 2),
-        '__OVERTIME_HOURS__' => Strings::formatLocalizedNumber($monthOvertimeHours, 2, 2),
-        '__GROSS__' => Strings::formatLocalizedNumber($monthGrossCents / 100, 2, 2),
-        '__FEDERAL_TAX__' => Strings::formatLocalizedNumber($monthFederalCents / 100, 2, 2),
-        '__PROVINCIAL_TAX__' => Strings::formatLocalizedNumber($monthProvincialCents / 100, 2, 2),
-        '__TOTAL_TAX__' => Strings::formatLocalizedNumber(($monthFederalCents + $monthProvincialCents) / 100, 2, 2),
-        '__EI__' => Strings::formatLocalizedNumber($monthEICents / 100, 2, 2),
-        '__CPP__' => Strings::formatLocalizedNumber($monthCPPCents / 100, 2, 2),
-        '__OAS__' => Strings::formatLocalizedNumber($monthOASCents / 100, 2, 2),
-        '__TOTAL_DEDUCTIONS__' => Strings::formatLocalizedNumber($monthTotalTaxCents / 100, 2, 2),
-        '__NET__' => Strings::formatLocalizedNumber($monthNetCents / 100, 2, 2),
+      $rows[] = [
+        'id' => sprintf('%04d-%02d', $year, $month),
+        'month' => Strings::formatLocalizedShortMonth($year, $month),
+        'regular_hours' => Strings::formatLocalizedNumber($monthRegularHours, 2, 2),
+        'overtime_hours' => Strings::formatLocalizedNumber($monthOvertimeHours, 2, 2),
+        'gross' => '$' . Strings::formatLocalizedNumber($monthGrossCents / 100, 2, 2),
+        'federal_tax' => '$' . Strings::formatLocalizedNumber($monthFederalCents / 100, 2, 2),
+        'provincial_tax' => '$' . Strings::formatLocalizedNumber($monthProvincialCents / 100, 2, 2),
+        'total_tax' => '$' . Strings::formatLocalizedNumber(($monthFederalCents + $monthProvincialCents) / 100, 2, 2),
+        'ei' => '$' . Strings::formatLocalizedNumber($monthEICents / 100, 2, 2),
+        'cpp' => '$' . Strings::formatLocalizedNumber($monthCPPCents / 100, 2, 2),
+        'oas' => '$' . Strings::formatLocalizedNumber($monthOASCents / 100, 2, 2),
+        'total_deductions' => '$' . Strings::formatLocalizedNumber($monthTotalTaxCents / 100, 2, 2),
+        'net' => '$' . Strings::formatLocalizedNumber($monthNetCents / 100, 2, 2),
       ];
-
-      $monthsHTML[] = Render::template('earnings-month', $renderMonth);
 
       $previousRegularHours = $ytdRegularHours;
       $previousOvertimeHours = $ytdOvertimeHours;
@@ -119,26 +117,36 @@ final class Hooks
       $previousOldAgeSecurity = $oldAgeSecurity;
     }
 
-    return Render::template('earnings-monthly-viewstrip', [
-      '__YEAR__' => (string) $year,
-      '__DATA_GRID__' => 'earnings-monthly-' . $year,
-      '__EARNINGS_MONTHLY_ARIA__' => htmlspecialchars(
-        self::formatI18n('EARNINGS_MONTHLY_GRID_ARIA_FOR', ['year' => (string) $year]),
-        ENT_QUOTES,
-        'UTF-8',
-      ),
-      '__EARNINGS_MONTH__' => Strings::i18n('EARNINGS_MONTH'),
-      '__REGULAR_LABEL__' => Strings::i18n('REGULAR'),
-      '__OT_LABEL__' => Strings::i18n('OVERTIME'),
-      '__GROSS_LABEL__' => Strings::i18n('GROSS'),
-      '__FEDERAL_TAX_LABEL__' => Strings::i18n('FEDERAL_TAX'),
-      '__PROVINCIAL_TAX_LABEL__' => Strings::i18n('PROVINCIAL_TAX'),
-      '__EARNINGS_EI__' => Strings::i18n('EARNINGS_EI'),
-      '__EARNINGS_CPP__' => Strings::i18n('EARNINGS_CPP'),
-      '__EARNINGS_OAS__' => Strings::i18n('EARNINGS_OAS'),
-      '__EARNINGS_TOTAL_DEDUCTIONS__' => Strings::i18n('EARNINGS_TOTAL_DEDUCTIONS'),
-      '__NET_LABEL__' => Strings::i18n('NET'),
-      '__MONTHS__' => implode('', $monthsHTML),
-    ]);
+    return (new DataGrid([
+      'id' => 'earnings-monthly-' . $year,
+      'columns' => self::columns(),
+      'rows' => $rows,
+      'meta' => [
+        'layout' => 'auto',
+        'page' => 1,
+        'totalPages' => 1,
+        'title' => self::formatI18n('EARNINGS_MONTHLY_GRID_ARIA_FOR', ['year' => (string) $year]),
+      ],
+    ]))->table();
+  }
+
+  /**
+   * @return list<array<string, scalar>>
+   */
+  private static function columns(): array
+  {
+    return [
+      ['key' => 'month', 'label' => Strings::i18n('EARNINGS_MONTH')],
+      ['key' => 'regular_hours', 'label' => Strings::i18n('REGULAR'), 'align' => 'right'],
+      ['key' => 'overtime_hours', 'label' => Strings::i18n('OVERTIME'), 'align' => 'right'],
+      ['key' => 'gross', 'label' => Strings::i18n('GROSS'), 'align' => 'right'],
+      ['key' => 'federal_tax', 'label' => Strings::i18n('FEDERAL_TAX'), 'align' => 'right'],
+      ['key' => 'provincial_tax', 'label' => Strings::i18n('PROVINCIAL_TAX'), 'align' => 'right'],
+      ['key' => 'ei', 'label' => Strings::i18n('EARNINGS_EI'), 'align' => 'right'],
+      ['key' => 'cpp', 'label' => Strings::i18n('EARNINGS_CPP'), 'align' => 'right'],
+      ['key' => 'oas', 'label' => Strings::i18n('EARNINGS_OAS'), 'align' => 'right'],
+      ['key' => 'total_deductions', 'label' => Strings::i18n('EARNINGS_TOTAL_DEDUCTIONS'), 'align' => 'right'],
+      ['key' => 'net', 'label' => Strings::i18n('NET'), 'align' => 'right'],
+    ];
   }
 }

@@ -2,7 +2,7 @@
 
 Version: 2026-04-10
 Owner: Security + Platform Engineering
-Applies to: user data at rest, organization-shared records, transport/session encryption boundaries, and all encryption/decryption service paths
+Applies to: user data at rest, business-shared records, transport/session encryption boundaries, and all encryption/decryption service paths
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Define explicit, auditable encryption requirements for PayCal data confidentiali
 ## Allowed Encryption Contexts (Allowlist)
 
 - `user-private-records`
-- `org-shared-records`
+- `business-shared-records`
 - `account-recovery-bootstrap`
 - `incident-forensics-readonly`
 
@@ -25,7 +25,7 @@ Define explicit, auditable encryption requirements for PayCal data confidentiali
 - plaintext persistence of sensitive fields in application storage
 - plaintext DEK storage in browser persistence or server-side profile fields
 - bypassing envelope/version checks for encrypted payloads
-- decrypting organization-shared payloads without valid relationship/consent gating
+- decrypting business-shared payloads without valid relationship/consent gating
 
 ## Required Controls for Encryption and Decryption
 
@@ -41,7 +41,7 @@ Primary runtime surfaces and enforcement points:
 
 - `PayCal\\Controllers\\DEKController`
 - `PayCal\\Controllers\\KekController`
-- `PayCal\\Domain\\OrganizationEncryptionService`
+- `PayCal\\Infrastructure\\Business\\BusinessEncryptionService`
 - `PayCal\\Domain\\WorkEntry` encryption/decryption paths
 
 Policy is declarative; enforcement remains at controller and domain service boundaries.

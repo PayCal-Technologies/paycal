@@ -136,7 +136,7 @@ Manual browser sweep snapshot (2026-03-22):
 - `/settings/`: All panels have scoped `role="status" aria-live="polite"` regions; zero assertive regions; passkey grid live-region contract verified.
 - `/help/`: skip-to-main link visible on focus; first heading after landmark is `h1`; no two-axis scrolling.
 - `/transparency/accessibility/`: focus indicators visible; no heading skips; table has visible caption.
-- Signed-in routes (`/`, `/sites/`, `/organizations/`): no document-level two-axis scrolling; first-focus visual indicators visible.
+- Signed-in routes (`/`, `/sites/`, `/business/`): no document-level two-axis scrolling; first-focus visual indicators visible.
 
 No P0 or P1 items are open.
 

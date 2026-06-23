@@ -19,7 +19,7 @@ This checklist covers the two remaining open tracks from the WCAG plan:
 ## Execution Checklist
 
 - [ ] Assign named owners to each role and publish in sprint board.
-- [ ] Run VoiceOver pass on macOS across `/`, `/auth/`, `/settings/`, `/sites/`, `/organizations/`, `/help/`, `/transparency/accessibility/`.
+- [ ] Run VoiceOver pass on macOS across `/`, `/auth/`, `/settings/`, `/sites/`, `/business/`, `/help/`, `/transparency/accessibility/`.
 - [ ] Record defects using `.github/ISSUE_TEMPLATE/accessibility-defect.yml` with WCAG criterion and route.
 - [ ] Fix P0/P1 assistive-tech defects and add regression coverage where feasible.
 - [ ] Re-run `npm run test:a11y:all` after fixes and attach output summary to release notes.
@@ -34,7 +34,7 @@ This checklist covers the two remaining open tracks from the WCAG plan:
 | `/auth/` | Frontend Lead | Accessibility Lead | Yes | Tablists, alert/status messaging, passkey async states |
 | `/settings/` | Frontend Lead | QA Lead | Yes | Multi-dialog focus management, status regions, destructive flows |
 | `/sites/` | QA Lead | Frontend Lead | Yes | Tablist + datagrid instructions and updates |
-| `/organizations/` | QA Lead | Frontend Lead | Yes | Datagrid semantics and live announcements |
+| `/business/` | QA Lead | Frontend Lead | Yes | Datagrid semantics and live announcements |
 | `/help/` | QA Lead | Accessibility Lead | Yes | Heading structure, breadcrumbs, media alternatives |
 | `/transparency/accessibility/` | Accessibility Lead | Release Manager | Yes | Policy clarity, feedback form path, shortcut exception docs |
 

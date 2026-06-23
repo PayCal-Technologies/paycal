@@ -146,8 +146,8 @@ final class TaxesTest extends TestCase
     return [
         'minimum wage' => [20000, 5600, 5900],
         'median income' => [50000, 14400, 14800],
-        'high income' => [100000, 32000, 32600],
-        'very high income' => [200000, 83500, 84500],
+        'high income' => [100000, 32000, 33300],
+        'very high income' => [200000, 83500, 85000],
     ];
   }
 
@@ -240,10 +240,10 @@ final class TaxesTest extends TestCase
         ['Nova Scotia', 5],
         ['Nunavut', 4],
       ['Ontario', 5],
-      ['Prince Edward Island', 5],
+      ['Prince Edward Island', 6],
       ['Quebec', 4],
       ['Saskatchewan', 3],
-      ['Yukon', 6],
+      ['Yukon', 5],
     ];
   }
 

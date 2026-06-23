@@ -42,7 +42,7 @@ final class BillingProvider
   public const STRIPE = 'stripe';
 
   /**
-   * TODO: Document current.
+   * Current.
    */
   #[ExtensionCapability('billing.provider')]
   public static function current(): string
@@ -54,7 +54,7 @@ final class BillingProvider
   }
 
   /**
-   * TODO: Document isStripe.
+   * Is stripe.
    */
   public static function isStripe(): bool
   {

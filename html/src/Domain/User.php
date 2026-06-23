@@ -8,8 +8,6 @@ use PayCal\Attributes\Required;
 use PayCal\Domain\Enums\AuthLevel;
 use PayCal\Domain\Enums\FormTTL;
 use PayCal\Domain\Enums\SessionTimeout;
-use PayCal\Domain\Enums\Subscription;
-use PayCal\Domain\Enums\SubscriptionStatus;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Config\SystemConfig;
 
@@ -72,6 +70,7 @@ final class User
   public ?string $account_recovery_salt    = null;  // Salt for recovery KEK derivation
   public ?string $wrapped_dek_recovery     = null;  // DEK wrapped with recovery-derived KEK
   public bool $recovery_key_generated      = false;
+  public ?string $recovery_key_updated_at  = null;
   public ?string $recovery_proof_key       = null;
   public int $recovery_proof_key_version   = 0;
 
@@ -95,16 +94,6 @@ final class User
   #[\PayCal\Domain\Attributes\Enum(AuthLevel::class)]
   public AuthLevel $auth_level                       = AuthLevel::USER;
 
-  // Subscription management
-  #[\PayCal\Domain\Attributes\Enum(Subscription::class)]
-  public Subscription $subscription_tier             = Subscription::FREE;
-  #[\PayCal\Domain\Attributes\Enum(SubscriptionStatus::class)]
-  public SubscriptionStatus $subscription_status     = SubscriptionStatus::ACTIVE;
-  public ?string $subscription_id                    = null;  // External payment provider ID
-  public ?string $subscription_start_date            = null;  // ISO 8601 date when subscription became active
-  public ?string $subscription_renewal_date          = null;  // ISO 8601 date for next renewal
-  public ?string $subscription_cancel_date           = null;  // ISO 8601 date when canceled (for analytics)
-
   public string $last_session_hash                   = '';
   public ?string $last_signin                        = null;
   public ?string $last_signin_ip                     = null;
@@ -115,6 +104,7 @@ final class User
   public string $locale                              = 'en-CA';
   public string $text                                = UserPreferenceDefaults::DEFAULT_TEXT;
   public string $spacing                             = UserPreferenceDefaults::DEFAULT_SPACING;
+  public string $depth                               = UserPreferenceDefaults::DEFAULT_DEPTH;
   public string $dyslexia_typography                 = UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY;
   public string $help_popup_timeout_seconds          = UserPreferenceDefaults::DEFAULT_HELP_POPUP_TIMEOUT_SECONDS;
   public string $toast_position                      = UserPreferenceDefaults::DEFAULT_TOAST_POSITION;
@@ -169,6 +159,9 @@ final class User
   public string $default_living_out_allowance        = '';
   public string $default_travel_hours                = '';
   public string $province                            = 'AB';
+  public bool $indigenous_tax_exemption_eligible     = false;
+  public bool $lives_on_reserve                      = false;
+  public string $reserve_name                        = '';
   public string $timezone                            = 'America/Edmonton';
   public string $currency                            = 'CAD';
   public string $session_timeout                     = UserPreferenceDefaults::DEFAULT_SESSION_TIMEOUT;
@@ -361,7 +354,7 @@ final class User
 
     $created = strval(time());
     $key     = Keys::VERIFICATION_CODES . ":" . InputSanitizer::sanitizeString($userUUID);
-    Database::hsetex($key, [InputSanitizer::sanitizeString($code) => $created], FormTTL::ONE_HOUR->value);
+    Database::hsetex($key, [PayCalCode::normalize(InputSanitizer::sanitizeString($code)) => $created], FormTTL::ONE_HOUR->value);
   }
 
 
@@ -770,4 +763,3 @@ final class User
     return 'U'.substr($hA256Hash, 0, 8);
   }
 }
-

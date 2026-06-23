@@ -103,7 +103,8 @@ $isAuthenticated = $hash !== null && Authentication::sessionExists($hash);
 if ($isAuthenticated) {
   echo Render::jsScript('-');
   echo Render::jsScript('encryption');
-  echo Render::jsScript('org-dek-auto-bootstrap');
+  echo Render::jsScript('plaintext-work-capture');
+  echo Render::jsScript('business-dek-auto-bootstrap');
 }
 
 

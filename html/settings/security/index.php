@@ -9,6 +9,7 @@ require_once dirname(__DIR__) . '/_layout.php';
 
 <?php
 require __DIR__ . '/../_partials/panel_security_passkeys.php';
+require __DIR__ . '/../_partials/panel_security_federated.php';
 require __DIR__ . '/../_partials/panel_security_sessions.php';
 require __DIR__ . '/../_partials/panel_security_sensitive.php';
 require __DIR__ . '/../_partials/panel_security_timeouts.php';

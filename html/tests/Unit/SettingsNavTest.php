@@ -14,33 +14,15 @@ final class SettingsNavTest extends TestCase
     $slugs = array_map(static fn (array $tab): string => $tab['slug'], SettingsNav::subNavTabs());
 
     $this->assertSame(
-      ['account', 'calendar', 'appearance', 'accessibility', 'security', 'data', 'diagnostics'],
+      ['accessibility', 'account', 'subscription', 'data', 'appearance', 'calendar', 'security', 'diagnostics'],
       $slugs
     );
   }
 
   #[Test]
-  public function legacyHashRedirectsMapOldPanelsToSubPages(): void
+  public function defaultSubPageIsAccessibility(): void
   {
-    $redirects = SettingsNav::legacyHashRedirects();
-
-    $this->assertSame('/settings/account/', $redirects['account']);
-    $this->assertSame('/settings/account/', $redirects['panel-billing']);
-    $this->assertSame('/settings/calendar/', $redirects['panel-pay-period']);
-    $this->assertSame('/settings/calendar/', $redirects['panel-account-work-defaults']);
-    $this->assertSame('/settings/calendar/', $redirects['panel-calendar-work-defaults']);
-    $this->assertSame('/settings/calendar/', $redirects['panel-calendar']);
-    $this->assertSame('/settings/appearance/', $redirects['panel-style']);
-    $this->assertSame('/settings/accessibility/', $redirects['panel-audio']);
-    $this->assertSame('/settings/security/', $redirects['panel-passkeys']);
-    $this->assertSame('/settings/data/', $redirects['panel-data-portability']);
-    $this->assertSame('/settings/diagnostics/', $redirects['panel-debugging']);
-  }
-
-  #[Test]
-  public function defaultSubPageIsAccount(): void
-  {
-    $this->assertSame('/settings/account/', SettingsNav::defaultSubPageHref());
+    $this->assertSame('/settings/accessibility/', SettingsNav::defaultSubPageHref());
   }
 
   #[Test]
@@ -69,6 +51,49 @@ final class SettingsNavTest extends TestCase
       $this->assertArrayHasKey($key, $enMap, $key . ' must exist in strings/en.txt');
       $this->assertNotSame($key, $enMap[$key], $key . ' must not fall back to the raw key name');
       $this->assertNotSame('', trim($enMap[$key]), $key . ' must have a non-empty value');
+    }
+  }
+
+  #[Test]
+  public function settingsShellUsesTabsAsSubpageSelectionAndLeavesHeadingsToPanels(): void
+  {
+    $projectRoot = dirname(__DIR__, 3);
+    $shell = (string) file_get_contents($projectRoot . '/html/settings/_shell.php');
+    $settingsCss = (string) file_get_contents($projectRoot . '/html/css/settings/index.php');
+
+    $this->assertStringContainsString('settings_subnav_tab--active', $shell);
+    $this->assertStringContainsString('aria-current="page"', $shell);
+    $this->assertStringNotContainsString('settings_page_header', $shell);
+    $this->assertStringNotContainsString('settings_page_title', $shell);
+    $this->assertStringNotContainsString('settings_page_desc', $shell);
+    $this->assertStringNotContainsString('settings-page-title', $shell);
+    $this->assertStringNotContainsString('settings-page-desc', $shell);
+    $this->assertStringNotContainsString('.settings_page_header', $settingsCss);
+    $this->assertStringNotContainsString('.settings_page_title', $settingsCss);
+    $this->assertStringNotContainsString('.settings_page_desc', $settingsCss);
+    $this->assertStringContainsString('.settings_page_content > section.panel > h2', $settingsCss);
+  }
+
+  #[Test]
+  public function settingsPanelHeadingsUseSharedCardTitleClass(): void
+  {
+    $projectRoot = dirname(__DIR__, 3);
+    $settingsCss = (string) file_get_contents($projectRoot . '/html/css/settings/index.php');
+
+    $this->assertStringContainsString('.settings_page_content h2.settings_card_title', $settingsCss);
+
+    foreach ([
+      'panel_calendar.php',
+      'panel_security_passkeys.php',
+      'panel_security_timeouts.php',
+      'panel_data.php',
+      'panel_diagnostics_advanced.php',
+      'panel_security_federated.php',
+      'panel_account_activity.php',
+      'panel_account_danger.php',
+    ] as $partial) {
+      $contents = (string) file_get_contents($projectRoot . '/html/settings/_partials/' . $partial);
+      $this->assertStringContainsString('settings_card_title', $contents, $partial . ' must use the shared settings panel heading style');
     }
   }
 

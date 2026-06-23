@@ -340,7 +340,7 @@ require_once Config\Environment::appHome() . 'html/header.php';
     <p>
       <strong><?php echo forecast_index_i18n('FORECAST_UPGRADE_TITLE'); ?></strong>
       <?php echo forecast_index_i18n('FORECAST_UPGRADE_LEDE_SUFFIX'); ?>
-      <a href="/premium/"><?php echo forecast_index_i18n('FORECAST_UPGRADE_LINK'); ?></a>
+      <a href="/pricing/"><?php echo forecast_index_i18n('FORECAST_UPGRADE_LINK'); ?></a>
       <?php echo forecast_index_i18n('FORECAST_UPGRADE_LINK_SUFFIX'); ?>
     </p>
   </section>

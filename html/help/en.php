@@ -48,66 +48,67 @@ require_once HTML.'/header.php';
         <p class="deck"><?php echo htmlspecialchars(help_index_i18n('HELP_CENTER_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
       </header>
       <div class="doc-article-body">
-        <section class="doc-section highlight">
+        <section class="doc-section highlight" aria-labelledby="help-overview-heading">
+          <h2 id="help-overview-heading" class="visually_hidden"><?php echo htmlspecialchars(help_index_i18n('HELP_CENTER_HEADING'), ENT_QUOTES, 'UTF-8'); ?></h2>
           <p><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_INTRO'), ENT_QUOTES, 'UTF-8'); ?></p>
           <p><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ACCESSIBILITY_PREFIX'), ENT_QUOTES, 'UTF-8'); ?> <a href="/transparency/accessibility/"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ACCESSIBILITY_LINK'), ENT_QUOTES, 'UTF-8'); ?></a>.</p>
           <p><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_TRANSPARENCY_HUB_PREFIX'), ENT_QUOTES, 'UTF-8'); ?> <a href="/transparency/"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_TRANSPARENCY_HUB'), ENT_QUOTES, 'UTF-8'); ?></a>.</p>
         </section>
 
-        <div class="doc-panel-grid doc-panel-grid--responsive-3" aria-label="<?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ARIA'), ENT_QUOTES, 'UTF-8'); ?>">
+        <div class="doc-panel-grid doc-panel-grid--responsive-3" role="list" aria-label="<?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ARIA'), ENT_QUOTES, 'UTF-8'); ?>">
 
-          <section class="doc-section">
-            <h2><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_GETTING_STARTED'), ENT_QUOTES, 'UTF-8'); ?></h2>
+          <section class="doc-section" role="listitem" aria-labelledby="help-card-getting-started">
+            <h2 id="help-card-getting-started"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_GETTING_STARTED'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <p><?php echo htmlspecialchars(help_index_i18n('HELP_GETTING_STARTED_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <p><a class="doc-read-more" href="/help/getting-started/"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></a></p>
+            <p><a class="doc-read-more" href="/help/getting-started/" aria-labelledby="help-card-getting-started help-read-more-getting-started"><span id="help-read-more-getting-started"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></span></a></p>
           </section>
 
-          <section class="doc-section">
-            <h2><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_SETUP_WORK_SITE'), ENT_QUOTES, 'UTF-8'); ?></h2>
+          <section class="doc-section" role="listitem" aria-labelledby="help-card-work-site">
+            <h2 id="help-card-work-site"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_SETUP_WORK_SITE'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <p><?php echo htmlspecialchars(help_index_i18n('HELP_WORK_SITE_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <p><a class="doc-read-more" href="/help/work-site/"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></a></p>
+            <p><a class="doc-read-more" href="/help/work-site/" aria-labelledby="help-card-work-site help-read-more-work-site"><span id="help-read-more-work-site"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></span></a></p>
           </section>
 
-          <section class="doc-section">
-            <h2><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_LOG_WORK_HOURS'), ENT_QUOTES, 'UTF-8'); ?></h2>
+          <section class="doc-section" role="listitem" aria-labelledby="help-card-work-hours">
+            <h2 id="help-card-work-hours"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_LOG_WORK_HOURS'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <p><?php echo htmlspecialchars(help_index_i18n('HELP_WORK_HOURS_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <p><a class="doc-read-more" href="/help/work-hours/"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></a></p>
+            <p><a class="doc-read-more" href="/help/work-hours/" aria-labelledby="help-card-work-hours help-read-more-work-hours"><span id="help-read-more-work-hours"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></span></a></p>
           </section>
 
-          <section class="doc-section">
-            <h2><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_TAX_BRACKETS'), ENT_QUOTES, 'UTF-8'); ?></h2>
+          <section class="doc-section" role="listitem" aria-labelledby="help-card-tax-brackets">
+            <h2 id="help-card-tax-brackets"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_TAX_BRACKETS'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <p><?php echo htmlspecialchars(help_index_i18n('HELP_TAX_BRACKETS_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <p><a class="doc-read-more" href="/help/tax-brackets/"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></a></p>
+            <p><a class="doc-read-more" href="/help/tax-brackets/" aria-labelledby="help-card-tax-brackets help-read-more-tax-brackets"><span id="help-read-more-tax-brackets"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></span></a></p>
           </section>
 
-          <section class="doc-section">
-            <h2><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ACCOUNT_SETTINGS'), ENT_QUOTES, 'UTF-8'); ?></h2>
+          <section class="doc-section" role="listitem" aria-labelledby="help-card-account-settings">
+            <h2 id="help-card-account-settings"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ACCOUNT_SETTINGS'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <p><?php echo htmlspecialchars(help_index_i18n('HELP_ACCOUNT_SETTINGS_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <p><a class="doc-read-more" href="/help/account-settings/"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></a></p>
+            <p><a class="doc-read-more" href="/help/account-settings/" aria-labelledby="help-card-account-settings help-read-more-account-settings"><span id="help-read-more-account-settings"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></span></a></p>
           </section>
 
-          <section class="doc-section">
-            <h2><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_TROUBLESHOOTING'), ENT_QUOTES, 'UTF-8'); ?></h2>
+          <section class="doc-section" role="listitem" aria-labelledby="help-card-troubleshooting">
+            <h2 id="help-card-troubleshooting"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_TROUBLESHOOTING'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <p><?php echo htmlspecialchars(help_index_i18n('HELP_TROUBLESHOOTING_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <p><a class="doc-read-more" href="/help/troubleshooting/"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></a></p>
+            <p><a class="doc-read-more" href="/help/troubleshooting/" aria-labelledby="help-card-troubleshooting help-read-more-troubleshooting"><span id="help-read-more-troubleshooting"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></span></a></p>
           </section>
 
-          <section class="doc-section">
-            <h2><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_POLICIES_LEGAL'), ENT_QUOTES, 'UTF-8'); ?></h2>
+          <section class="doc-section" role="listitem" aria-labelledby="help-card-policies-legal">
+            <h2 id="help-card-policies-legal"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_POLICIES_LEGAL'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <p><?php echo htmlspecialchars(help_index_i18n('HELP_POLICIES_LEGAL_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <p><a class="doc-read-more" href="/help/policies-legal/"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></a></p>
+            <p><a class="doc-read-more" href="/help/policies-legal/" aria-labelledby="help-card-policies-legal help-read-more-policies-legal"><span id="help-read-more-policies-legal"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></span></a></p>
           </section>
 
-          <section class="doc-section">
-            <h2><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_REQUIREMENTS'), ENT_QUOTES, 'UTF-8'); ?></h2>
+          <section class="doc-section" role="listitem" aria-labelledby="help-card-requirements">
+            <h2 id="help-card-requirements"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_REQUIREMENTS'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <p><?php echo htmlspecialchars(help_index_i18n('HELP_REQUIREMENTS_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <p><a class="doc-read-more" href="/help/requirements/"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></a></p>
+            <p><a class="doc-read-more" href="/help/requirements/" aria-labelledby="help-card-requirements help-read-more-requirements"><span id="help-read-more-requirements"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></span></a></p>
           </section>
 
-          <section class="doc-section">
-            <h2><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_WEBAUTHN_SECURITY'), ENT_QUOTES, 'UTF-8'); ?></h2>
+          <section class="doc-section" role="listitem" aria-labelledby="help-card-webauthn-security">
+            <h2 id="help-card-webauthn-security"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_WEBAUTHN_SECURITY'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <p><?php echo htmlspecialchars(help_index_i18n('HELP_WEBAUTHN_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <p><a class="doc-read-more" href="/help/webauthn-security/"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></a></p>
+            <p><a class="doc-read-more" href="/help/webauthn-security/" aria-labelledby="help-card-webauthn-security help-read-more-webauthn-security"><span id="help-read-more-webauthn-security"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></span></a></p>
           </section>
 
         </div><!-- .doc-panel-grid -->
@@ -122,4 +123,3 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . Render::cssURL('transparency') 
 echo PHP_EOL . '<link rel="stylesheet" href="' . Render::cssURL('help') . '">' . PHP_EOL;
 echo PHP_EOL . Render::jsScript('help');
 require_once HTML . '/footer.php';
-

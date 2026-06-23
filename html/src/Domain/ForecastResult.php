@@ -59,7 +59,7 @@ final class ForecastResult
   public readonly int $estimatedGrossCents;
 
   /**
-   * Estimated combined income tax in cents (federal + provincial marginal rate stub).
+   * Estimated combined income tax in cents (federal + provincial marginal-rate model).
    * Labelled ESTIMATE — not CRA-authoritative.
    */
   public readonly int $estimatedTaxCents;

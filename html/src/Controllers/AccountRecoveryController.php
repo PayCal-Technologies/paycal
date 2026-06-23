@@ -16,6 +16,7 @@ use PayCal\Domain\EmailGarum;
 use PayCal\Domain\Encryption\EnvelopeFormat;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
+use PayCal\Domain\PayCalCode;
 use PayCal\Domain\RecoveryKey;
 use PayCal\Infrastructure\RateControl\RateLimiter;
 use PayCal\Domain\Response;
@@ -115,7 +116,7 @@ final class AccountRecoveryController
     }
 
     if ($user !== null && $user->email_verified) {
-      $code = Security::generateVerificationCode(6);
+      $code = Security::generateVerificationCode(PayCalCode::EMAIL_TOTAL_LENGTH);
       $transaction->storeEmailCode($code);
       EmailGarum::sendAccountRecoveryCode($user->email, $user->full_name, $code);
     }
@@ -180,15 +181,30 @@ final class AccountRecoveryController
       $this->fail('Recovery link is invalid or expired.', HttpStatus::HTTP_BAD_REQUEST);
     }
 
-    if (!$transaction->elevateForMagicLinkPasskey($this->clientFingerprintHash(), $this->clientIpClass())) {
-      $this->fail('Recovery link is invalid or expired.', HttpStatus::HTTP_BAD_REQUEST);
+    $user = $transaction->userUuid() !== '' ? User::getByUUID($transaction->userUuid()) : null;
+    $recoveryKeyAvailable = $user !== null && $this->hasRecoveryKeyMaterial($user);
+    $firstPasskeyEligible = $user !== null && $this->canEmailOnlyBootstrap($user);
+    $passkeyReady = in_array($transaction->status(), [
+      AccountRecoveryTransaction::STATUS_PROOF_VERIFIED,
+      AccountRecoveryTransaction::STATUS_BOOTSTRAP_ISSUED,
+    ], true);
+
+    if (!$passkeyReady && $firstPasskeyEligible) {
+      $passkeyReady = $transaction->elevateForMagicLinkPasskey($this->clientFingerprintHash(), $this->clientIpClass());
+      if (!$passkeyReady) {
+        $this->fail('Recovery link is invalid or expired.', HttpStatus::HTTP_BAD_REQUEST);
+      }
     }
 
     Response::success('Recovery link confirmed.', [
       'txnId' => $transaction->id(),
       'txnSecret' => $txnSecret,
-      'status' => $transaction->status(),
-      'passkeyReady' => true,
+      'transactionStatus' => $transaction->status(),
+      'recoveryKeyRequired' => !$passkeyReady && $recoveryKeyAvailable,
+      'recoveryKeyAvailable' => $recoveryKeyAvailable,
+      'recoveryUnavailable' => !$passkeyReady && !$recoveryKeyAvailable,
+      'passkeyReady' => $passkeyReady,
+      'firstPasskeySetup' => $firstPasskeyEligible,
     ]);
   }
 
@@ -214,7 +230,7 @@ final class AccountRecoveryController
 
     $user = $transaction->userUuid() !== '' ? User::getByUUID($transaction->userUuid()) : null;
     if ($user !== null) {
-      $code = Security::generateVerificationCode(6);
+      $code = Security::generateVerificationCode(PayCalCode::EMAIL_TOTAL_LENGTH);
       $transaction->storeEmailCode($code);
       EmailGarum::sendAccountRecoveryCode($user->email, $user->full_name, $code);
     }
@@ -243,8 +259,13 @@ final class AccountRecoveryController
     $this->enforceRecoveryRateLimit('verify-email', $this->extractTxnId($body));
 
     $transaction = $this->loadAuthorizedTransaction($body);
-    $code = strtoupper(InputSanitizer::sanitizeString($this->scalarString($body['code'] ?? '')));
+    $code = PayCalCode::normalize(InputSanitizer::sanitizeString($this->scalarString($body['code'] ?? '')));
     if ($transaction === null || $code === '') {
+      $this->fail('Recovery verification failed.', HttpStatus::HTTP_UNAUTHORIZED);
+    }
+
+    if (!PayCalCode::validate($code, PayCalCode::EMAIL_SECRET_LENGTH)) {
+      $transaction->verifyEmailCode($code, $this->clientFingerprintHash(), $this->clientIpClass());
       $this->fail('Recovery verification failed.', HttpStatus::HTTP_UNAUTHORIZED);
     }
 
@@ -252,7 +273,25 @@ final class AccountRecoveryController
       $this->fail('Recovery verification failed.', HttpStatus::HTTP_UNAUTHORIZED);
     }
 
-    Response::success('Recovery email verified.', ['txnId' => $transaction->id()]);
+    $user = $transaction->userUuid() !== '' ? User::getByUUID($transaction->userUuid()) : null;
+    $firstPasskeyEligible = false;
+    $recoveryKeyAvailable = false;
+    if ($user !== null) {
+      $recoveryKeyAvailable = $this->hasRecoveryKeyMaterial($user);
+      $firstPasskeyEligible = $this->canEmailOnlyBootstrap($user);
+      if ($firstPasskeyEligible && !$transaction->elevateForEmailCodePasskeyBootstrap($this->clientFingerprintHash(), $this->clientIpClass())) {
+        $firstPasskeyEligible = false;
+      }
+    }
+
+    Response::success('Recovery email verified.', [
+      'txnId' => $transaction->id(),
+      'recoveryKeyRequired' => !$firstPasskeyEligible && $recoveryKeyAvailable,
+      'recoveryKeyAvailable' => $recoveryKeyAvailable,
+      'recoveryUnavailable' => !$firstPasskeyEligible && !$recoveryKeyAvailable,
+      'passkeyReady' => $firstPasskeyEligible,
+      'firstPasskeySetup' => $firstPasskeyEligible,
+    ]);
   }
 
   /**
@@ -276,7 +315,7 @@ final class AccountRecoveryController
     }
 
     $user = $transaction->userUuid() !== '' ? User::getByUUID($transaction->userUuid()) : null;
-    if ($user === null || $user->wrapped_dek_recovery === null || $user->account_recovery_salt === null || $user->recovery_proof_key === null) {
+    if ($user === null || !$this->hasRecoveryKeyMaterial($user)) {
       $this->fail('Recovery is not available for this account yet.', HttpStatus::HTTP_UNPROCESSABLE);
     }
 
@@ -316,8 +355,15 @@ final class AccountRecoveryController
     $transaction = $this->loadAuthorizedTransaction($body);
     $proof = $this->scalarString($body['proof'] ?? '');
     $proofNonce = $this->scalarString($body['proofNonce'] ?? '');
+    $recoveryCode = PayCalCode::normalize($this->scalarString($body['recoveryCode'] ?? ''));
     $guard = new AccountRecoveryAbuseGuard();
     if ($transaction === null || $proof === '' || $proofNonce === '') {
+      $guard->recordReplayEvent(Security::getClientIPAddress(), 'proof');
+      $this->fail('Recovery proof failed.', HttpStatus::HTTP_UNAUTHORIZED);
+    }
+
+    if (!PayCalCode::validate($recoveryCode, PayCalCode::RECOVERY_SECRET_LENGTH) && !RecoveryKey::validate($recoveryCode)) {
+      $transaction->recordFailedAttempt();
       $guard->recordReplayEvent(Security::getClientIPAddress(), 'proof');
       $this->fail('Recovery proof failed.', HttpStatus::HTTP_UNAUTHORIZED);
     }
@@ -363,13 +409,18 @@ final class AccountRecoveryController
       $this->fail('Recovery bootstrap unavailable.', HttpStatus::HTTP_BAD_REQUEST);
     }
 
+    $cryptoState = $this->prepareRecoveryBootstrapCrypto($user);
+
     Response::success('Recovery bootstrap ready.', [
       'userId' => $user->user_uuid,
       'email' => $user->email,
       'fullName' => $user->full_name,
-      'encryptionSalt' => $user->encryption_salt,
+      'encryptionSalt' => $cryptoState['encryptionSalt'],
       'dekVersion' => $user->dek_version,
       'cryptoVersion' => $user->crypto_version > 0 ? $user->crypto_version : 1,
+      'allowDekGeneration' => $cryptoState['allowDekGeneration'],
+      'hasExistingCryptoMaterial' => $cryptoState['hasExistingCryptoMaterial'],
+      'hasEncryptedEntries' => $cryptoState['hasEncryptedEntries'],
       'bootstrapTtlSeconds' => (int) SystemConfig::get('account_recovery_bootstrap_ttl_seconds'),
     ]);
   }
@@ -512,9 +563,20 @@ final class AccountRecoveryController
       $this->fail('Recovery completion failed.', HttpStatus::HTTP_BAD_REQUEST);
     }
 
-    $credentialId = $this->scalarString($body['credentialId'] ?? $transaction->replacementCredentialId());
+    $credentialId = $this->scalarString($body['credentialId'] ?? '');
+    $registeredCredentialId = $transaction->replacementCredentialId();
     $wrappedDekPasskey = $this->scalarString($body['wrappedDekPasskey'] ?? '');
-    if ($credentialId === '' || $wrappedDekPasskey === '') {
+    if ($credentialId === '' || $registeredCredentialId === '' || !hash_equals($registeredCredentialId, $credentialId) || $wrappedDekPasskey === '') {
+      $this->fail('Recovery completion failed.', HttpStatus::HTTP_BAD_REQUEST);
+    }
+
+    $credentialData = Database::hgetall(Keys::webauthnCredential($credentialId));
+    if (
+      $credentialData === []
+      || $this->scalarString($credentialData['user_uuid'] ?? '') !== $transaction->userUuid()
+      || $this->scalarString($credentialData['credential_id'] ?? '') !== $credentialId
+      || $this->scalarString($credentialData['revoked_at'] ?? '') !== ''
+    ) {
       $this->fail('Recovery completion failed.', HttpStatus::HTTP_BAD_REQUEST);
     }
 
@@ -540,6 +602,7 @@ final class AccountRecoveryController
 
     Authentication::clearUserRecoveryPending($transaction->userUuid(), $transaction->id());
     Authentication::destroyAllUserSessions($transaction->userUuid());
+    $this->revokePreviousPasskeysAfterRecovery($transaction->userUuid(), $credentialId);
 
     $sessionHash = bin2hex(random_bytes(self::SECRET_BYTES));
     Authentication::setSession($sessionHash, $transaction->userUuid());
@@ -621,6 +684,7 @@ final class AccountRecoveryController
       UserFields::ACCOUNT_RECOVERY_SALT->value => $accountRecoverySalt,
       UserFields::WRAPPED_DEK_RECOVERY->value => $wrappedDekRecovery,
       UserFields::RECOVERY_KEY_GENERATED->value => '1',
+      UserFields::RECOVERY_KEY_UPDATED_AT->value => date('c'),
       UserFields::RECOVERY_PROOF_KEY->value => $recoveryProofKey,
       UserFields::RECOVERY_PROOF_KEY_VERSION->value => '1',
     ]);
@@ -645,6 +709,150 @@ final class AccountRecoveryController
     if ($remainingDelay > 0) {
       usleep($remainingDelay * 1000);
     }
+  }
+
+  /**
+   * @return array{
+   *   encryptionSalt: string,
+   *   allowDekGeneration: bool,
+   *   hasExistingCryptoMaterial: bool,
+   *   hasEncryptedEntries: bool
+   * }
+   */
+  private function prepareRecoveryBootstrapCrypto(User $user, bool $persistGeneratedSalt = true): array
+  {
+    $userUUID = $user->user_uuid;
+    $userKey = Keys::USER . ':' . $userUUID;
+    $salt = $this->scalarString(Database::hget($userKey, UserFields::ENCRYPTION_SALT->value) ?: $user->encryption_salt);
+    $hasExistingCryptoMaterial = $this->hasExistingCryptoMaterial($user);
+    $hasEncryptedEntries = $this->hasEncryptedWorkEntries($userUUID);
+    $allowDekGeneration = !$hasExistingCryptoMaterial && !$hasEncryptedEntries;
+
+    if ($salt === '' && $allowDekGeneration && $persistGeneratedSalt) {
+      $salt = base64_encode(random_bytes(self::SECRET_BYTES));
+      Database::hset($userKey, [
+        UserFields::ENCRYPTION_SALT->value => $salt,
+        UserFields::DEK_VERSION->value => (string) max(1, $user->dek_version),
+        UserFields::CRYPTO_VERSION->value => (string) max(1, $user->crypto_version),
+      ]);
+    }
+
+    return [
+      'encryptionSalt' => $salt,
+      'allowDekGeneration' => $allowDekGeneration,
+      'hasExistingCryptoMaterial' => $hasExistingCryptoMaterial,
+      'hasEncryptedEntries' => $hasEncryptedEntries,
+    ];
+  }
+
+  /**
+   * Detect whether the user already has any wrapped DEK material.
+   */
+  private function hasExistingCryptoMaterial(User $user): bool
+  {
+    if (
+      $this->scalarString($user->wrapped_dek) !== ''
+      || $this->scalarString($user->wrapped_dek_passkey) !== ''
+      || $this->scalarString($user->wrapped_dek_recovery) !== ''
+    ) {
+      return true;
+    }
+
+    return Database::hgetall(Keys::USER . ':' . $user->user_uuid . ':passkey_wrapped_deks') !== [];
+  }
+
+  /**
+   * Determine whether email recovery may bootstrap fresh crypto material.
+   */
+  private function canEmailOnlyBootstrap(User $user): bool
+  {
+    $cryptoState = $this->prepareRecoveryBootstrapCrypto($user, false);
+
+    return $cryptoState['allowDekGeneration'] && !$this->hasExistingPasskeys($user);
+  }
+
+  /**
+   * Return true when the user has at least one non-revoked passkey credential.
+   */
+  private function hasExistingPasskeys(User $user): bool
+  {
+    foreach (Database::smembers(Keys::webauthnUserCredentials($user->user_uuid)) as $credentialIdRaw) {
+      $credentialId = $this->scalarString($credentialIdRaw);
+      if ($credentialId === '') {
+        continue;
+      }
+
+      $credentialData = Database::hgetall(Keys::webauthnCredential($credentialId));
+      if (
+        $credentialData !== []
+        && $this->scalarString($credentialData['user_uuid'] ?? '') === $user->user_uuid
+        && $this->scalarString($credentialData['revoked_at'] ?? '') === ''
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Revoke older passkeys after a successful recovery credential replacement.
+   */
+  private function revokePreviousPasskeysAfterRecovery(string $userUuid, string $replacementCredentialId): void
+  {
+    $now = (string) time();
+    foreach (Database::smembers(Keys::webauthnUserCredentials($userUuid)) as $credentialIdRaw) {
+      $credentialId = $this->scalarString($credentialIdRaw);
+      if ($credentialId === '' || hash_equals($replacementCredentialId, $credentialId)) {
+        continue;
+      }
+
+      $credentialData = Database::hgetall(Keys::webauthnCredential($credentialId));
+      if ($credentialData === [] || $this->scalarString($credentialData['user_uuid'] ?? '') !== $userUuid) {
+        continue;
+      }
+
+      Database::hset(Keys::webauthnCredential($credentialId), [
+        'revoked_at' => $now,
+        'revoked_reason' => 'account_recovery',
+        'pending_review' => '1',
+      ]);
+    }
+  }
+
+  /**
+   * Verify that all recovery-key fields required for key-based recovery exist.
+   */
+  private function hasRecoveryKeyMaterial(User $user): bool
+  {
+    return $this->scalarString($user->wrapped_dek_recovery) !== ''
+      && $this->scalarString($user->account_recovery_salt) !== ''
+      && $this->scalarString($user->recovery_proof_key) !== '';
+  }
+
+  /**
+   * Detect encrypted work entries that would block unsafe email-only bootstrap.
+   */
+  private function hasEncryptedWorkEntries(string $userUUID): bool
+  {
+    foreach ($this->workKeyPatternsForUser($userUUID) as $pattern) {
+      foreach (Database::scanKeys($pattern) as $workKey) {
+        if (Database::hget((string) $workKey, 'encrypted_blob') !== '') {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /** @return array<int, string> */
+  private function workKeyPatternsForUser(string $userUUID): array
+  {
+    return [
+      Keys::WORK . ':' . $userUUID . ':*',
+      Keys::WORK . ':' . Keys::ARCHIVED . ':' . $userUUID . ':*',
+    ];
   }
 
   /**
@@ -813,5 +1021,3 @@ final class AccountRecoveryController
   }
 
 }
-
-

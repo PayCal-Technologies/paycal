@@ -169,7 +169,7 @@ final class BusinessNameGuard
   }
 
   /**
-   * TODO: Document normalizeUnicode.
+   * Normalize unicode.
    */
   private static function normalizeUnicode(string $value): string
   {
@@ -183,7 +183,7 @@ final class BusinessNameGuard
   }
 
   /**
-   * TODO: Document stripInvisibleControls.
+   * Strip invisible controls.
    */
   private static function stripInvisibleControls(string $value): string
   {
@@ -191,7 +191,7 @@ final class BusinessNameGuard
   }
 
   /**
-   * TODO: Document skeleton.
+   * Skeleton.
    */
   private static function skeleton(string $searchName): string
   {
@@ -210,7 +210,7 @@ final class BusinessNameGuard
   }
 
   /**
-   * TODO: Document matchesReserved.
+   * Matches reserved.
    */
   private static function matchesReserved(string $searchName, string $skeleton): bool
   {
@@ -228,7 +228,7 @@ final class BusinessNameGuard
   }
 
   /**
-   * TODO: Document isExactReservedPaycal.
+   * Is exact reserved paycal.
    */
   private static function isExactReservedPaycal(string $searchName): bool
   {
@@ -236,7 +236,7 @@ final class BusinessNameGuard
   }
 
   /**
-   * TODO: Document hasMixedScript.
+   * Has mixed script.
    */
   private static function hasMixedScript(string $value): bool
   {
@@ -295,7 +295,7 @@ final class BusinessNameGuard
   }
 
   /**
-   * TODO: Document nameMinLength.
+   * Name min length.
    */
   private static function nameMinLength(): int
   {
@@ -306,7 +306,7 @@ final class BusinessNameGuard
   }
 
   /**
-   * TODO: Document nameMaxLength.
+   * Name max length.
    */
   private static function nameMaxLength(): int
   {
@@ -317,7 +317,7 @@ final class BusinessNameGuard
   }
 
   /**
-   * TODO: Document autoApproveMaxScore.
+   * Auto approve max score.
    */
   private static function autoApproveMaxScore(): int
   {
@@ -328,7 +328,7 @@ final class BusinessNameGuard
   }
 
   /**
-   * TODO: Document needsReviewMaxScore.
+   * Needs review max score.
    */
   private static function needsReviewMaxScore(): int
   {

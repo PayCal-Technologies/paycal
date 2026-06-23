@@ -17,6 +17,9 @@ final class BillingProviderModeContractTest extends TestCase
     $this->assertStringContainsString('public function handleCheckoutReturn(): void', $controller);
     $this->assertStringContainsString('public function createPortalSession(): void', $controller);
     $this->assertStringContainsString('public function confirmCheckoutSession(): void', $controller);
+    $this->assertStringContainsString('public function changeSubscriptionPlan(): void', $controller);
+    $this->assertStringContainsString('public function createPlanChangePortalSession(): void', $controller);
+    $this->assertStringContainsString('public function handlePlanChangeReturn(): void', $controller);
     $this->assertStringContainsString('public function webhook(): void', $controller);
   }
 
@@ -36,6 +39,11 @@ final class BillingProviderModeContractTest extends TestCase
     $this->assertStringContainsString('if (!BillingProvider::isStripe()) {', $controller);
     $this->assertStringContainsString('SubscriptionRepository::upgradeToPremium($userUUID);', $controller);
     $this->assertStringContainsString('SubscriptionRepository::downgradeToFree($userUUID);', $controller);
+    $this->assertStringContainsString("\$service->changeSubscriptionPlan(\$userUUID, \$plan, \$prorationBehavior);", $controller);
+    $this->assertStringContainsString("\$service->createPlanChangePortalSession(\$userUUID, \$plan, \$returnURL, User::current()->email);", $controller);
+    $this->assertStringContainsString('/api/v1/billing/plan-change-return?next=', $controller);
+    $this->assertStringContainsString('(new StripeBillingService())->reconcileSubscriptionState($userUUID);', $controller);
+    $this->assertStringContainsString("'business-upgrade'", $controller);
     $this->assertStringContainsString("'billing_provider' => BillingProvider::current()", $controller);
   }
 

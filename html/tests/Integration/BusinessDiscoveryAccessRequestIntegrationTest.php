@@ -29,10 +29,10 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
     parent::setUp();
 
     $this->service = new BusinessDiscoveryService();
-    $this->originalOrgSharedEncryptionEnabled = (bool) SystemConfig::get('org_shared_encryption_enabled');
-    $this->originalOrgSharedEncryptionWriteEnabled = (bool) SystemConfig::get('org_shared_encryption_enable_write');
-    SystemConfig::set('org_shared_encryption_enabled', false);
-    SystemConfig::set('org_shared_encryption_enable_write', false);
+    $this->originalOrgSharedEncryptionEnabled = (bool) SystemConfig::get('business_shared_encryption_enabled');
+    $this->originalOrgSharedEncryptionWriteEnabled = (bool) SystemConfig::get('business_shared_encryption_enable_write');
+    SystemConfig::set('business_shared_encryption_enabled', false);
+    SystemConfig::set('business_shared_encryption_enable_write', false);
 
     $suffix = bin2hex(random_bytes(6));
     $this->ownerUUID = 'org-owner-' . $suffix;
@@ -71,46 +71,53 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
       }
       Database::unlink($auditSetKey);
 
-      $requestSetKey = Keys::BUSINESS_ACCESS_REQUEST_ORG . ':' . $orgId;
+      $requestSetKey = Keys::BUSINESS_ACCESS_REQUEST_BUSINESS . ':' . $orgId;
       foreach (Database::smembers($requestSetKey) as $requestId) {
         Database::unlink(Keys::BUSINESS_ACCESS_REQUEST . ':' . $requestId);
       }
       Database::unlink($requestSetKey);
 
       Database::unlink(Keys::BUSINESS_SITE . ':' . $orgId);
-      Database::unlink(Keys::BUSINESS_INVITE_ORG . ':' . $orgId);
+      Database::unlink(Keys::BUSINESS_INVITE_BUSINESS . ':' . $orgId);
       Database::unlink(Keys::BUSINESS_MEMBERS . ':' . $orgId);
-      Database::unlink(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId);
+      Database::unlink(Keys::BUSINESS_CONNECTIONS . ':' . $orgId);
       Database::unlink(Keys::BUSINESS_PENDING . ':' . $orgId);
       Database::unlink(Keys::BUSINESS . ':' . $orgId);
       Database::unlink(Keys::BUSINESS_SETTINGS . ':' . $orgId);
-      Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->ownerUUID);
-      Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->requesterUUID);
-      Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->secondRequesterUUID);
+      Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $this->ownerUUID);
+      Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $this->requesterUUID);
+      Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $this->secondRequesterUUID);
       Database::unlink(Keys::BUSINESS_ACCESS_REQUEST_ACTIVE . ':' . $orgId . ':' . $this->requesterUUID);
       Database::unlink(Keys::BUSINESS_ACCESS_REQUEST_ACTIVE . ':' . $orgId . ':' . $this->secondRequesterUUID);
+      foreach (Database::smembers(Keys::businessConsentsByBusiness($orgId)) as $consentId) {
+        Database::unlink(Keys::businessConsent((string) $consentId));
+      }
+      Database::unlink(Keys::businessConsentsByBusiness($orgId));
+      foreach (Database::scanKeys(Keys::BUSINESS_DEK_WRAP . ':' . $orgId . ':*') as $wrapKey) {
+        Database::unlink((string) $wrapKey);
+      }
     }
 
     Database::unlink(Keys::BUSINESS_OWNER . ':' . $this->ownerUUID);
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->ownerUUID);
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->requesterUUID);
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->secondRequesterUUID);
-    Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->ownerUUID);
-    Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->requesterUUID);
-    Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->secondRequesterUUID);
+    Database::unlink(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->ownerUUID);
+    Database::unlink(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->requesterUUID);
+    Database::unlink(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->secondRequesterUUID);
     Database::unlink(Keys::BUSINESS_ACCESS_REQUEST_REQUESTER . ':' . $this->requesterUUID);
     Database::unlink(Keys::BUSINESS_ACCESS_REQUEST_REQUESTER . ':' . $this->secondRequesterUUID);
 
     $this->cleanupUser($this->ownerUUID, $this->ownerEmail);
     $this->cleanupUser($this->requesterUUID, $this->requesterEmail);
     $this->cleanupUser($this->secondRequesterUUID, $this->secondRequesterEmail);
-    SystemConfig::set('org_shared_encryption_enabled', $this->originalOrgSharedEncryptionEnabled);
-    SystemConfig::set('org_shared_encryption_enable_write', $this->originalOrgSharedEncryptionWriteEnabled);
+    SystemConfig::set('business_shared_encryption_enabled', $this->originalOrgSharedEncryptionEnabled);
+    SystemConfig::set('business_shared_encryption_enable_write', $this->originalOrgSharedEncryptionWriteEnabled);
 
     parent::tearDown();
   }
 
-  public function testApproveAccessRequestCreatesActiveRelationship(): void
+  public function testApproveAccessRequestCreatesActiveConnection(): void
   {
     $day = date('Y-m-d');
     $requested = $this->service->requestAccessByOwnerEmail($this->requesterUUID, $this->ownerEmail);
@@ -128,16 +135,16 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
     ]);
     $this->assertTrue($approved['success']);
 
-    $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->requesterUUID);
-    $this->assertSame('active', (string) ($relationship['status'] ?? ''));
-    $this->assertSame('member', (string) ($relationship['role'] ?? ''));
-    $this->assertSame('sites.read,work.read', (string) ($relationship['scopes'] ?? ''));
-    $this->assertSame('1', (string) ($relationship['scope_preset_version'] ?? ''));
-    $this->assertSame('2026-06-18', (string) ($relationship['scope_policy_version'] ?? ''));
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->requesterUUID);
+    $this->assertSame('active', (string) ($connection['status'] ?? ''));
+    $this->assertSame('member', (string) ($connection['role'] ?? ''));
+    $this->assertSame('sites.read,work.read,work.scope.self', (string) ($connection['scopes'] ?? ''));
+    $this->assertSame('1', (string) ($connection['scope_preset_version'] ?? ''));
+    $this->assertSame('2026-06-18', (string) ($connection['scope_policy_version'] ?? ''));
     $this->assertSame(1, Database::sismember(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->requesterUUID));
     $this->assertSame(1, Database::sismember(Keys::BUSINESS_USER . ':' . $this->requesterUUID, $this->businessId));
-    $this->assertSame(1, Database::sismember(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $this->requesterUUID));
-    $this->assertSame(1, Database::sismember(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->requesterUUID, $this->businessId));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_CONNECTIONS . ':' . $this->businessId, $this->requesterUUID));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->requesterUUID, $this->businessId));
     $this->assertSame(0, Database::sismember(Keys::BUSINESS_PENDING . ':' . $this->businessId, $this->requesterUUID));
 
     $history = $this->service->listAccessRequestHistory($this->ownerUUID, $this->businessId);
@@ -155,9 +162,73 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
     $this->assertGreaterThanOrEqual(1, $approvedMetric);
   }
 
-  public function testPendingRelationshipIsIndexedButNotCountedAsActiveMember(): void
+  public function testApproveAccessRequestPreservesConsentDataForEncryptedActivation(): void
   {
-    $method = new \ReflectionMethod(BusinessDiscoveryService::class, 'setRelationship');
+    SystemConfig::set('business_shared_encryption_enabled', true);
+    Database::hset(Keys::USER . ':' . $this->requesterUUID . ':passkey_wrapped_deks', [
+      'cred-' . $this->requesterUUID => base64_encode('test-wrapped-dek'),
+    ]);
+
+    $requested = $this->service->requestAccessByOwnerEmail($this->requesterUUID, $this->ownerEmail);
+    $this->assertTrue($requested['success']);
+
+    $requestId = (string) ($requested['data']['request_id'] ?? '');
+    $this->assertNotSame('', $requestId);
+
+    $approved = $this->service->approveAccessRequest($this->ownerUUID, $this->businessId, $requestId, [
+      'consent_acknowledged' => '1',
+      'consent_version' => 'v1',
+      'disclaimer_text' => 'Test consent acknowledged',
+      'ip' => '127.0.0.1',
+      'user_agent' => 'phpunit',
+    ]);
+
+    $this->assertTrue($approved['success'], (string) ($approved['message'] ?? ''));
+
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->requesterUUID);
+    $this->assertSame('active', (string) ($connection['status'] ?? ''));
+    $this->assertNotSame('', (string) ($connection['consent_id'] ?? ''));
+    $this->assertNotSame('', (string) ($connection['credential_id'] ?? ''));
+    $this->assertSame('sites.read,work.read,work.scope.self', (string) ($connection['scopes'] ?? ''));
+    $this->assertSame((string) ($approved['data']['consent_id'] ?? ''), (string) ($connection['consent_id'] ?? ''));
+  }
+
+  public function testApproveAccessRequestIsIdempotentWhenConnectionAlreadyActive(): void
+  {
+    $requested = $this->service->requestAccessByOwnerEmail($this->requesterUUID, $this->ownerEmail);
+    $this->assertTrue($requested['success']);
+
+    $requestId = (string) ($requested['data']['request_id'] ?? '');
+    $this->assertNotSame('', $requestId);
+
+    Database::hset(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->requesterUUID, [
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+      'role' => 'admin',
+      'scopes' => 'all',
+      'accepted_at' => date('c'),
+    ]);
+
+    $approved = $this->service->approveAccessRequest($this->ownerUUID, $this->businessId, $requestId, [
+      'consent_acknowledged' => '1',
+      'consent_version' => 'v1',
+      'disclaimer_text' => 'Test consent acknowledged',
+      'ip' => '127.0.0.1',
+      'user_agent' => 'phpunit',
+    ]);
+
+    $this->assertTrue($approved['success'], (string) ($approved['message'] ?? ''));
+    $request = Database::hgetall(Keys::BUSINESS_ACCESS_REQUEST . ':' . $requestId);
+    $this->assertSame('approved', (string) ($request['status'] ?? ''));
+
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->requesterUUID);
+    $this->assertSame('active', (string) ($connection['status'] ?? ''));
+    $this->assertSame('admin', (string) ($connection['role'] ?? ''));
+    $this->assertSame('all', (string) ($connection['scopes'] ?? ''));
+  }
+
+  public function testPendingConnectionIsIndexedButNotCountedAsActiveMember(): void
+  {
+    $method = new \ReflectionMethod(BusinessDiscoveryService::class, 'setConnection');
     $method->invoke($this->service, $this->businessId, $this->secondRequesterUUID, [
       'role' => 'member',
       'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_PENDING,
@@ -165,19 +236,48 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
       'created_at' => date('c'),
     ]);
 
-    $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->secondRequesterUUID);
-    $this->assertSame('pending', (string) ($relationship['status'] ?? ''));
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->secondRequesterUUID);
+    $this->assertSame('pending', (string) ($connection['status'] ?? ''));
     $this->assertSame(0, Database::sismember(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->secondRequesterUUID));
     $this->assertSame(0, Database::sismember(Keys::BUSINESS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
-    $this->assertSame(1, Database::sismember(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $this->secondRequesterUUID));
-    $this->assertSame(1, Database::sismember(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_CONNECTIONS . ':' . $this->businessId, $this->secondRequesterUUID));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
     $this->assertSame(1, Database::sismember(Keys::BUSINESS_PENDING . ':' . $this->businessId, $this->secondRequesterUUID));
 
     $metrics = BusinessDashboardMetrics::forBusiness($this->businessId, true);
     $this->assertSame(1, $metrics['members']);
   }
 
-  public function testRejectAccessRequestMarksPendingRelationshipRejected(): void
+  public function testListForUserFindsPendingConnectionWhenConnectionIndexIsMissing(): void
+  {
+    Database::hset(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->secondRequesterUUID, [
+      'business_id' => $this->businessId,
+      'user_uuid' => $this->secondRequesterUUID,
+      'role' => 'member',
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_PENDING,
+      'scopes' => 'sites.read,work.read',
+      'created_at' => date('c'),
+    ]);
+    Database::srem(Keys::BUSINESS_CONNECTIONS . ':' . $this->businessId, $this->secondRequesterUUID);
+    Database::srem(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->secondRequesterUUID, $this->businessId);
+    Database::srem(Keys::BUSINESS_USER . ':' . $this->secondRequesterUUID, $this->businessId);
+
+    $list = $this->service->listForUser($this->secondRequesterUUID);
+    $this->assertTrue($list['success']);
+
+    $businesses = is_array($list['data']['businesses'] ?? null)
+      ? $list['data']['businesses']
+      : [];
+
+    $matchingRows = array_values(array_filter($businesses, function (mixed $row): bool {
+      return is_array($row) && (string) ($row['business_id'] ?? '') === $this->businessId;
+    }));
+
+    $this->assertNotSame([], $matchingRows, 'Pending connections must render even when disposable indexes drift.');
+    $this->assertSame('pending', (string) ($matchingRows[0]['connection_status'] ?? ''));
+  }
+
+  public function testRejectAccessRequestMarksPendingConnectionRejected(): void
   {
     $day = date('Y-m-d');
     $requested = $this->service->requestAccessByOwnerEmail($this->secondRequesterUUID, $this->ownerEmail);
@@ -189,12 +289,12 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
     $rejected = $this->service->rejectAccessRequest($this->ownerUUID, $this->businessId, $requestId);
     $this->assertTrue($rejected['success']);
 
-    $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->secondRequesterUUID);
-    $this->assertSame('rejected', (string) ($relationship['status'] ?? ''));
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->secondRequesterUUID);
+    $this->assertSame('rejected', (string) ($connection['status'] ?? ''));
     $this->assertSame(0, Database::sismember(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->secondRequesterUUID));
     $this->assertSame(0, Database::sismember(Keys::BUSINESS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
-    $this->assertSame(0, Database::sismember(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $this->secondRequesterUUID));
-    $this->assertSame(0, Database::sismember(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_CONNECTIONS . ':' . $this->businessId, $this->secondRequesterUUID));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
     $this->assertSame(0, Database::sismember(Keys::BUSINESS_PENDING . ':' . $this->businessId, $this->secondRequesterUUID));
 
     $history = $this->service->listAccessRequestHistory($this->ownerUUID, $this->businessId);
@@ -209,6 +309,52 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
 
     $rejectedMetric = (int) Database::get(Keys::TELEMETRY . ':business:access_request:rejected:' . $day);
     $this->assertGreaterThanOrEqual(1, $rejectedMetric);
+  }
+
+  public function testLeavingPendingConnectionCancelsAccessRequest(): void
+  {
+    $day = date('Y-m-d');
+    $requested = $this->service->requestAccessByOwnerEmail($this->secondRequesterUUID, $this->ownerEmail);
+    $this->assertTrue($requested['success']);
+
+    $requestId = (string) ($requested['data']['request_id'] ?? '');
+    $this->assertNotSame('', $requestId);
+
+    $activeKey = Keys::BUSINESS_ACCESS_REQUEST_ACTIVE . ':' . $this->businessId . ':' . $this->secondRequesterUUID;
+    $this->assertSame($requestId, (string) Database::get($activeKey));
+
+    $left = $this->service->leaveBusiness($this->secondRequesterUUID, $this->businessId);
+    $this->assertTrue($left['success']);
+    $this->assertSame('Membership request canceled.', (string) ($left['message'] ?? ''));
+    $this->assertSame($requestId, (string) ($left['data']['request_id'] ?? ''));
+
+    $request = Database::hgetall(Keys::BUSINESS_ACCESS_REQUEST . ':' . $requestId);
+    $this->assertSame('withdrawn', (string) ($request['status'] ?? ''));
+    $this->assertSame($this->secondRequesterUUID, (string) ($request['withdrawn_by'] ?? ''));
+    $this->assertNotSame('', (string) ($request['withdrawn_at'] ?? ''));
+    $this->assertSame('', (string) Database::get($activeKey));
+
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->secondRequesterUUID);
+    $this->assertSame('withdrawn', (string) ($connection['status'] ?? ''));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->secondRequesterUUID));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_CONNECTIONS . ':' . $this->businessId, $this->secondRequesterUUID));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->secondRequesterUUID, $this->businessId));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_PENDING . ':' . $this->businessId, $this->secondRequesterUUID));
+
+    $history = $this->service->listAccessRequestHistory($this->ownerUUID, $this->businessId);
+    $this->assertTrue($history['success']);
+    $statuses = array_map(
+      static fn (array $row): string => (string) ($row['status'] ?? ''),
+      is_array($history['data']['requests'] ?? null) ? $history['data']['requests'] : []
+    );
+    $this->assertContains('withdrawn', $statuses);
+
+    $metrics = BusinessDashboardMetrics::forBusiness($this->businessId, true);
+    $this->assertSame(0, $metrics['pending_requests']);
+
+    $withdrawnMetric = (int) Database::get(Keys::TELEMETRY . ':business:access_request:withdrawn:' . $day);
+    $this->assertGreaterThanOrEqual(1, $withdrawnMetric);
   }
 
   public function testRemovingOwnedOrganizationClearsAccessRequestIndexes(): void
@@ -276,7 +422,9 @@ final class BusinessDiscoveryAccessRequestIntegrationTest extends TestCase
   private function cleanupUser(string $userUUID, string $email): void
   {
     Database::unlink(Keys::USER . ':' . $userUUID);
+    Database::unlink(Keys::USER . ':' . $userUUID . ':passkey_wrapped_deks');
     Database::unlink(Keys::USER_SUBSCRIPTION . ':' . $userUUID);
+    Database::unlink(Keys::businessConsentsByUser($userUUID));
     Database::unlink(Keys::EMAIL . ':' . $email);
     Database::unlink(Keys::EMAIL . $email);
   }

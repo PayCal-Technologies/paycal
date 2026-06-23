@@ -4,7 +4,7 @@
  */
 
 import { calculateTaxes } from '/js/earnings/taxes.js';
-import { resolveUserLocale } from '/js/earnings/locale.js';
+import { resolveUserLocale } from '/js/core/locale.js';
 
 const USER_LOCALE = resolveUserLocale();
 
@@ -1058,9 +1058,12 @@ export function downloadPdfFile(pdfData, filename = 'earnings-report.pdf') {
   window.URL.revokeObjectURL(url);
 }
 
-export async function downloadPdfServerSide(scope, rows, report, filename, startDate = '', endDate = '') {
+export async function downloadPdfServerSide(scope, rows, report, filename, startDate = '', endDate = '', printMode = 'color') {
   const year = Number(report?.meta?.year) || new Date().getFullYear();
-  const body = JSON.stringify({ scope, rows, report, year, start_date: startDate, end_date: endDate });
+  const normalizedPrintMode = ['bw', 'grayscale', 'color'].includes(String(printMode || '').toLowerCase())
+    ? String(printMode).toLowerCase()
+    : 'color';
+  const body = JSON.stringify({ scope, rows, report, year, start_date: startDate, end_date: endDate, print_mode: normalizedPrintMode });
 
   const resp = await fetch('/api/v1/export/pdf', {
     method: 'POST',

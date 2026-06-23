@@ -1,13 +1,12 @@
 <?php declare(strict_types=1);
 
 /**
- * Transparency Hub — permanent redirect to paycaltech.com/transparency/.
+ * Transparency Hub — permanent redirect to the corporate transparency hub.
  *
- * The PayCal transparency hub has moved to the corporate site at
- * paycaltech.com.  All requests are forwarded with 301 to preserve
- * existing bookmarks and search-engine indexing.  Sub-paths are passed
- * through after validation so individual transparency section URLs continue
- * to resolve correctly.
+ * The PayCal transparency hub has moved to the corporate site.  Production
+ * requests go to paycaltech.com.
+ * Sub-paths are passed through after validation so individual transparency
+ * section URLs continue to resolve correctly.
  *
  * PHP version 8.4.16
  */
@@ -26,5 +25,7 @@ if (is_string($rawUri)) {
     }
 }
 
-header('Location: https://paycaltech.com/transparency/' . $subPath, true, 301);
+$targetOrigin = 'https://paycaltech.com';
+
+header('Location: ' . $targetOrigin . '/transparency/' . $subPath, true, 301);
 exit;

@@ -62,6 +62,32 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   margin: 0 0 0.5rem;
 }
 
+.earnings-graph-container {
+  width: 100%;
+}
+
+.earnings-graph-container svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.earnings-chart-touch-hint {
+  display: none;
+  margin: 0.3rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.earnings-chart-touch-hint:not([hidden]) {
+  display: block;
+}
+
 .earnings_metrics_split {
   width: 100%;
   display: flex;
@@ -101,13 +127,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   line-height: 1.5;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(2px);
-  transition: opacity 0.12s ease, transform 0.12s ease;
+  transition: opacity 0.12s ease;
 }
 
 .hover_help_tooltip.is-visible {
   opacity: 1;
-  transform: translateY(0);
 }
 
 #daily_earnings,
@@ -212,13 +236,54 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .earnings_ytd_basic_list {
   margin: 0;
+  padding: 0;
 }
 
-.earnings_ytd_basic_row {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--gap-sm, 0.5rem);
-  padding: 0.2rem 0;
+.earnings_report_pairs {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.earnings_report_pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: baseline;
+  width: 100%;
+  margin: 0;
+  padding: 0.18rem 0;
+}
+
+.earnings_report_pair .item_label,
+.earnings_report_pair .item_value {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.earnings_report_pair .item_label {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.earnings_report_pair .item_value {
+  justify-self: end;
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.earnings_report_pair--strong .item_label,
+.earnings_report_pair--strong .item_value {
+  color: var(--color-text);
+  font-weight: 900;
 }
 
 .earnings_ext_compare_notice {
@@ -254,27 +319,43 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .earnings_hi_grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  gap: 0.28rem 1rem;
 }
 
 .earnings_hi_card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm, 6px);
-  padding: 0.55rem 0.7rem;
-  background: var(--surface);
-}
-
-.earnings_hi_card h3 {
-  margin: 0 0 0.3rem;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
-.earnings_hi_card p {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: baseline;
   margin: 0;
-  font-weight: 600;
+  padding: 0.18rem 0;
+}
+
+.earnings_hi_card .item_label,
+.earnings_hi_card .item_value {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.earnings_hi_card .item_label {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.earnings_hi_card .item_value {
+  justify-self: end;
   color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .earnings_hi_note {
@@ -401,27 +482,112 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   font-size: 0.85rem;
 }
 
-.earnings_monthly_datagrid {
+.earnings_monthly_datagrid,
+[data-grid^="earnings-monthly-"],
+[data-grid^="member-reports-monthly-"] {
   width: min(96rem, 100%);
 }
 
-.earnings_monthly_datagrid .datagrid_item:nth-child(2),
-.earnings_monthly_datagrid .datagrid_item:nth-child(3),
-.earnings_monthly_datagrid .datagrid_item:nth-child(4),
-.earnings_monthly_datagrid .datagrid_item:nth-child(5),
-.earnings_monthly_datagrid .datagrid_item:nth-child(6),
-.earnings_monthly_datagrid .datagrid_item:nth-child(7),
-.earnings_monthly_datagrid .datagrid_item:nth-child(8),
-.earnings_monthly_datagrid .datagrid_item:nth-child(9),
-.earnings_monthly_datagrid .datagrid_heading:nth-child(2),
-.earnings_monthly_datagrid .datagrid_heading:nth-child(3),
-.earnings_monthly_datagrid .datagrid_heading:nth-child(4),
-.earnings_monthly_datagrid .datagrid_heading:nth-child(5),
-.earnings_monthly_datagrid .datagrid_heading:nth-child(6),
-.earnings_monthly_datagrid .datagrid_heading:nth-child(7),
-.earnings_monthly_datagrid .datagrid_heading:nth-child(8),
-.earnings_monthly_datagrid .datagrid_heading:nth-child(9) {
-  text-align: right;
+@media (max-width: 719px) {
+  #daily_earnings,
+  [id^="daily_earnings_"] {
+    margin: var(--gap-sm, 0.5rem) 0;
+    white-space: normal;
+    overflow: visible;
+  }
+
+  #daily_earnings .earnings_daily_datagrid,
+  [id^="daily_earnings_"] .earnings_daily_datagrid,
+  [data-grid^="earnings-daily-"],
+  [data-grid^="member-reports-daily-"],
+  [data-grid^="earnings-monthly-"],
+  [data-grid^="member-reports-monthly-"] {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  [data-grid^="earnings-daily-"] .datagrid_table,
+  [data-grid^="member-reports-daily-"] .datagrid_table,
+  [data-grid^="earnings-monthly-"] .datagrid_table,
+  [data-grid^="member-reports-monthly-"] .datagrid_table,
+  [data-grid^="earnings-daily-"] .datagrid_body,
+  [data-grid^="member-reports-daily-"] .datagrid_body,
+  [data-grid^="earnings-monthly-"] .datagrid_body,
+  [data-grid^="member-reports-monthly-"] .datagrid_body {
+    width: 100%;
+  }
+
+  [data-grid^="earnings-daily-"] .datagrid_body,
+  [data-grid^="member-reports-daily-"] .datagrid_body,
+  [data-grid^="earnings-monthly-"] .datagrid_body,
+  [data-grid^="member-reports-monthly-"] .datagrid_body {
+    display: grid;
+    gap: 0.62rem;
+  }
+
+  [data-grid^="earnings-daily-"] .datagrid_row,
+  [data-grid^="member-reports-daily-"] .datagrid_row,
+  [data-grid^="earnings-monthly-"] .datagrid_row,
+  [data-grid^="member-reports-monthly-"] .datagrid_row {
+    width: 100%;
+  }
+
+  [data-grid^="earnings-daily-"] .datagrid_row_content,
+  [data-grid^="member-reports-daily-"] .datagrid_row_content,
+  [data-grid^="earnings-monthly-"] .datagrid_row_content,
+  [data-grid^="member-reports-monthly-"] .datagrid_row_content {
+    display: grid;
+    gap: 0.16rem;
+    width: 100%;
+    padding: 0.62rem 0.68rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 6px);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--panel-border) 12%, transparent);
+  }
+
+  [data-grid^="earnings-daily-"] .datagrid_item,
+  [data-grid^="member-reports-daily-"] .datagrid_item,
+  [data-grid^="earnings-monthly-"] .datagrid_item,
+  [data-grid^="member-reports-monthly-"] .datagrid_item {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: baseline;
+    justify-content: stretch;
+    gap: 0.7rem;
+    width: 100%;
+    padding: 0.13rem 0;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  [data-grid^="earnings-monthly-"] .datagrid_item::before,
+  [data-grid^="member-reports-monthly-"] .datagrid_item::before,
+  [data-grid^="earnings-daily-"] .datagrid_item::before,
+  [data-grid^="member-reports-daily-"] .datagrid_item::before {
+    content: attr(data-col-label);
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  [data-grid^="earnings-daily-"] .datagrid_col_date,
+  [data-grid^="member-reports-daily-"] .datagrid_col_date,
+  [data-grid^="earnings-monthly-"] .datagrid_col_month,
+  [data-grid^="member-reports-monthly-"] .datagrid_col_month {
+    margin-bottom: 0.14rem;
+    padding-bottom: 0.28rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 28%, transparent);
+    font-weight: 900;
+  }
 }
 
 .pay-period-cards {
@@ -620,6 +786,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   cursor: crosshair;
 }
 
+svg[data-compact-chart="true"] .earnings-crosshair {
+  cursor: pointer;
+  touch-action: none;
+}
+
 .svg-hidden {
   visibility: hidden;
 }
@@ -731,11 +902,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   border-radius: 0.65rem;
   padding: 0.85rem 1rem;
   background: var(--bg-elevated, rgba(255, 255, 255, 0.03));
-  transition: transform 180ms ease, box-shadow 180ms ease;
-}
-
-[data-forecast-status="updating"] .forecast-summary-card {
-  animation: forecastHorizonShift 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: box-shadow 180ms ease;
 }
 
 .forecast-summary-card__title {
@@ -1091,17 +1258,6 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   }
 }
 
-@keyframes forecastHorizonShift {
-  0% {
-    transform: translateX(-3px);
-  }
-  45% {
-    transform: translateX(3px);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
 .totals_summary {
   padding: var(--pad-md);
   border-radius: var(--border-radius);
@@ -1126,7 +1282,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 /* ============================================================================
-   EARNINGS VIEW TABS — My Earnings / Team Earnings toggle
+   EARNINGS VIEW TABS — My Earnings / Business Reports toggle
    ============================================================================ */
 
 .earnings_view_tabs {
@@ -1196,6 +1352,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .earnings_team_panel {
   width: 100%;
+}
+
+.earnings_team_panel [data-report-module][hidden] {
+  display: none !important;
 }
 
 .earnings_team_year_row {
@@ -1779,6 +1939,17 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   box-shadow: 0 2px 8px color-mix(in srgb, black 8%, transparent),
               0 1px 2px color-mix(in srgb, black 5%, transparent);
   overflow: hidden;
+}
+
+.earnings_ytd_figure.business_reports_module--insufficient-history .earnings_ytd_body {
+  display: none;
+}
+
+.business_reports_insufficient_history {
+  margin: 0;
+  padding: 1rem 1.5rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-sm, 0.86rem);
 }
 
 .earnings_ytd_header {
@@ -2629,6 +2800,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 .et_exec_snapshot_value--risk     { color: #ef4444; }
 .et_exec_snapshot_value--positive { color: #22c55e; }
+.et_exec_snapshot_value--ok       { color: #22c55e; }
 .et_exec_snapshot_value--normal   { color: #22c55e; }
 .et_exec_snapshot_value--watch    { color: #f59e0b; }
 .et_exec_snapshot_value--concern  { color: #f97316; }
@@ -2643,10 +2815,15 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--color-text-muted);
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: nowrap;
 }
 .et_exec_snapshot_sub {
   font-size: var(--font-sm, 0.8rem);
   color: var(--color-text-muted);
+  overflow-wrap: normal;
+  word-break: normal;
 }
 .et_exec_snapshot_sub--ok   { color: #22c55e; font-weight: 600; }
 .et_exec_snapshot_sub--over { color: #ef4444; font-weight: 600; }
@@ -2791,6 +2968,37 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   line-height: 1.35;
 }
 
+.et_risk_meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  margin: 0.45rem 0 0;
+}
+
+.et_risk_meta div {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.et_risk_meta dt,
+.et_risk_meta dd {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+
+.et_risk_meta dt {
+  color: var(--color-text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.et_risk_meta dd {
+  color: var(--color-text);
+}
+
 /* ═══ Recommendations ═══════════════════════════════════════════════════════ */
 .et_rec_figure {
   overflow: hidden;
@@ -2879,6 +3087,92 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   margin-left: auto;
 }
 
+/* ── Reports Print Dialog ── */
+.reports_print_toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0 0 0.75rem;
+}
+
+.reports_print_button {
+  min-height: 2.25rem;
+}
+
+.reports_print_dialog {
+  width: min(94vw, 34rem);
+  max-height: min(86vh, 42rem);
+  color: var(--color-text, #f5f7fb);
+}
+
+.reports_print_form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.reports_print_content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.reports_print_desc {
+  margin: 0;
+  color: var(--color-text-muted, #aab4c8);
+  line-height: 1.45;
+}
+
+.reports_print_modes {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.reports_print_mode {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr;
+  gap: 0.7rem;
+  align-items: start;
+  padding: 0.75rem;
+  border: 1px solid var(--border, #2a3446);
+  border-radius: var(--radius-sm, 5px);
+  background: var(--surface, rgba(255, 255, 255, 0.04));
+  cursor: pointer;
+}
+
+.reports_print_mode:has(input:checked) {
+  border-color: var(--color-primary, #4a9eff);
+  background: color-mix(in srgb, var(--color-primary, #4a9eff) 12%, transparent);
+}
+
+.reports_print_mode input {
+  margin-top: 0.15rem;
+  accent-color: var(--color-primary, #4a9eff);
+}
+
+.reports_print_mode_body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.reports_print_mode_title {
+  font-weight: 700;
+  color: var(--color-text, #f5f7fb);
+}
+
+.reports_print_mode_desc {
+  color: var(--color-text-muted, #aab4c8);
+  line-height: 1.35;
+  font-size: var(--font-sm, 0.87rem);
+}
+
 /* ── Print / PDF Export Layout ── */
 @media print {
   /* Hide all chrome */
@@ -2890,6 +3184,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   .earnings_team_year_row,
   .et_export_group,
   .et_export_btn,
+  .reports_print_toolbar,
+  .reports_print_dialog,
+  [data-group-export-format],
   [data-team-export-format] { display: none !important; }
 
   /* Show only the team panel */
@@ -2962,6 +3259,91 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   .et_exec_snapshot_value { color: #111 !important; }
   .et_exec_snapshot_value--risk { color: #c00 !important; }
   .et_exec_snapshot_value--positive { color: #060 !important; }
+
+  html:not([data-print-mode="color"]) .et_exec_snapshot_value--risk,
+  html:not([data-print-mode="color"]) .et_exec_snapshot_value--positive,
+  html:not([data-print-mode="color"]) .et_exec_snapshot_value--normal,
+  html:not([data-print-mode="color"]) .et_exec_snapshot_value--watch,
+  html:not([data-print-mode="color"]) .et_exec_snapshot_value--concern,
+  html:not([data-print-mode="color"]) .et_exec_snapshot_sub--ok,
+  html:not([data-print-mode="color"]) .et_exec_snapshot_sub--over,
+  html:not([data-print-mode="color"]) .et_health_score_num--normal,
+  html:not([data-print-mode="color"]) .et_health_score_num--healthy,
+  html:not([data-print-mode="color"]) .et_health_score_num--watch,
+  html:not([data-print-mode="color"]) .et_health_score_num--concern,
+  html:not([data-print-mode="color"]) .et_health_score_num--risk,
+  html:not([data-print-mode="color"]) .et_budget_stat_value--ok,
+  html:not([data-print-mode="color"]) .et_budget_stat_value--warning,
+  html:not([data-print-mode="color"]) .et_budget_stat_value--critical,
+  html:not([data-print-mode="color"]) .et_forecast_verdict--ok .et_forecast_verdict_label,
+  html:not([data-print-mode="color"]) .et_forecast_verdict--over .et_forecast_verdict_label {
+    color: #000000 !important;
+  }
+
+  html:not([data-print-mode="color"]) .et_health_badge,
+  html:not([data-print-mode="color"]) .et_alert_sev,
+  html:not([data-print-mode="color"]) .et_risk_sev,
+  html:not([data-print-mode="color"]) .et_budget_badge {
+    background: #ffffff !important;
+    border-color: #444444 !important;
+    color: #000000 !important;
+  }
+
+  html:not([data-print-mode="color"]) .et_alert_card--critical,
+  html:not([data-print-mode="color"]) .et_alert_card--warning,
+  html:not([data-print-mode="color"]) .et_alert_card--notice,
+  html:not([data-print-mode="color"]) .et_alert_card--normal,
+  html:not([data-print-mode="color"]) .et_alert_card--positive,
+  html:not([data-print-mode="color"]) .et_risk_item--critical,
+  html:not([data-print-mode="color"]) .et_risk_item--warning,
+  html:not([data-print-mode="color"]) .et_risk_item--notice,
+  html:not([data-print-mode="color"]) .et_rec_item--critical,
+  html:not([data-print-mode="color"]) .et_rec_item--warning,
+  html:not([data-print-mode="color"]) .et_rec_item--notice,
+  html:not([data-print-mode="color"]) .et_rec_item--positive {
+    background: #ffffff !important;
+    border-left-color: #000000 !important;
+  }
+
+  html:not([data-print-mode="color"]) .et_budget_bar_fill--ok,
+  html:not([data-print-mode="color"]) .et_budget_bar_fill--warning,
+  html:not([data-print-mode="color"]) .et_budget_bar_fill--critical,
+  html:not([data-print-mode="color"]) .et_comp_bar_rect--reg,
+  html:not([data-print-mode="color"]) .et_comp_bar_rect--ot,
+  html:not([data-print-mode="color"]) .et_comp_bar_rect--loa,
+  html:not([data-print-mode="color"]) .et_comp_bar_rect--other {
+    fill: #d9d9d9 !important;
+    stroke: #000000 !important;
+    stroke-width: 0.08 !important;
+    opacity: 1 !important;
+  }
+
+  html[data-print-mode="grayscale"] .et_budget_bar_fill--ok,
+  html[data-print-mode="grayscale"] .et_comp_bar_rect--reg {
+    fill: #b8b8b8 !important;
+  }
+
+  html[data-print-mode="grayscale"] .et_budget_bar_fill--warning,
+  html[data-print-mode="grayscale"] .et_comp_bar_rect--ot {
+    fill: #8f8f8f !important;
+  }
+
+  html[data-print-mode="grayscale"] .et_budget_bar_fill--critical,
+  html[data-print-mode="grayscale"] .et_comp_bar_rect--loa,
+  html[data-print-mode="grayscale"] .et_comp_bar_rect--other {
+    fill: #cfcfcf !important;
+  }
+
+  html[data-print-mode="bw"] .et_budget_bar_fill--ok,
+  html[data-print-mode="bw"] .et_budget_bar_fill--warning,
+  html[data-print-mode="bw"] .et_budget_bar_fill--critical,
+  html[data-print-mode="bw"] .et_comp_bar_rect--reg,
+  html[data-print-mode="bw"] .et_comp_bar_rect--ot,
+  html[data-print-mode="bw"] .et_comp_bar_rect--loa,
+  html[data-print-mode="bw"] .et_comp_bar_rect--other {
+    fill: #ffffff !important;
+    stroke: #000000 !important;
+  }
 
   /* Risk/rec items */
   .et_risk_item, .et_rec_item {

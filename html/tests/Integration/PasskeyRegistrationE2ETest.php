@@ -294,10 +294,7 @@ final class PasskeyRegistrationE2ETest extends TestCase
     Database::unlink(Keys::SESSION . ':' . $this->sessionHash);
     Database::unlink(Keys::USER . ':' . $this->userUUID);
     
-    $emailKey = Keys::EMAIL . ':' . $this->email;
-    $legacyEmailKey = Keys::EMAIL . $this->email;
-    Database::unlink($emailKey);
-    Database::unlink($legacyEmailKey);
+    Database::unlink(Keys::EMAIL . ':' . $this->email);
     
     unset($_COOKIE['PAYCAL_AUTH']);
   }

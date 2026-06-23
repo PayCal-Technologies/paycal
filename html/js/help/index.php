@@ -29,13 +29,42 @@ document.addEventListener('DOMContentLoaded', function() {
     return document.getElementById(id);
   }
 
+  function setPopoverExpanded(popover, expanded) {
+    if (!popover || !popover.id) {
+      return;
+    }
+
+    document
+      .querySelectorAll('[data-help-popover-open="' + popover.id + '"]')
+      .forEach((button) => {
+        button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      });
+  }
+
+  function syncPopoverState(popover) {
+    if (!popover) {
+      return;
+    }
+
+    const open = isPopoverOpen(popover);
+    setPopoverExpanded(popover, open);
+
+    if (open) {
+      popover.hidden = false;
+      return;
+    }
+
+    popover.hidden = true;
+    popover.classList.remove('is-open');
+  }
+
   function hidePopover(popover) {
     if (!popover) {
       return;
     }
 
+    setPopoverExpanded(popover, false);
     popover.hidden = true;
-    popover.style.display = 'none';
 
     if (supportsPopoverApi) {
       if (popover.matches(':popover-open')) {
@@ -54,16 +83,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     popover.hidden = false;
-    popover.style.display = 'grid';
 
     if (supportsPopoverApi) {
       if (!popover.matches(':popover-open')) {
         popover.showPopover();
       }
+      setPopoverExpanded(popover, true);
       return;
     }
 
     popover.classList.add('is-open');
+    setPopoverExpanded(popover, true);
   }
 
   function isPopoverOpen(popover) {
@@ -82,7 +112,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Ensure popovers never render expanded on first paint.
     popover.hidden = true;
     popover.classList.remove('is-open');
-    popover.style.display = 'none';
+    setPopoverExpanded(popover, false);
+    popover.addEventListener('toggle', () => {
+      syncPopoverState(popover);
+    });
   });
 
   openers.forEach((button) => {

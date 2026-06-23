@@ -61,7 +61,7 @@ final class LanguageAuditService
   private string $stringsDir;
 
   /**
-   * TODO: Document __construct.
+   * Construct.
    */
   public function __construct(string $stringsDir)
   {

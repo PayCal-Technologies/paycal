@@ -313,7 +313,7 @@ async function handleDownloadReport() {
         failures: lastRun.failures || 0,
       },
       timestamp: lastRun.timestamp || null,
-      output: lastRun.output || ''
+      rawOutputStored: false,
     };
     
     // Create blob from JSON

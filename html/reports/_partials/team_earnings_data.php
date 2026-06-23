@@ -5,9 +5,9 @@ namespace PayCal\Domain;
 use PayCal\Observability\Lens;
 
 /**
- * Build team earnings rollup data for $selectedOrgId and $teamEarningsYear.
+ * Build business reports rollup data for $selectedOrgId and $teamEarningsYear.
  *
- * Expects $selectedOrgId, $teamEarningsYear. Sets team rollup variables used by team_earnings_panel.php.
+ * Expects $selectedOrgId, $teamEarningsYear. Sets group rollup variables used by team_earnings_panel.php.
  */
 
 /** @var list<array{name: string, uuid: string, role: string, reg_hours: float, ot_hours: float, gross: float}> */
@@ -30,26 +30,28 @@ $teamUnlinkedOnlyWarn = false;
 $teamUnlinkedOnlyCount = 0;
 
 $orgSiteData_     = [];
+$orgSiteRefData_  = [];
+$businessGroupData_ = [];
 $memberLoaTotals_ = [];
 $memberWeeklyH_   = [];
 $memberDays_      = [];
 
 if (($selectedOrgId ?? '') !== '') {
-  Lens::timeStart('Team Earnings: resolve snapshot');
+  Lens::timeStart('Business Reports: resolve snapshot');
   $teamEarningsActorUUID = trim((string) ($userUUID ?? User::currentUUID()));
   $cachedSnapshot = $teamEarningsActorUUID === ''
     ? BusinessWorkspaceCache::getTeamEarnings($selectedOrgId, $teamEarningsYear)
     : null;
   if ($cachedSnapshot !== null) {
-    Lens::add('Team Earnings: snapshot source', ['source' => 'workspace_cache']);
+    Lens::add('Business Reports: snapshot source', ['source' => 'workspace_cache']);
     TeamEarningsSnapshotBuilder::applySnapshot($cachedSnapshot);
   } else {
-    Lens::add('Team Earnings: snapshot source', ['source' => 'live_build']);
+    Lens::add('Business Reports: snapshot source', ['source' => 'live_build']);
     $snapshot = TeamEarningsSnapshotBuilder::build($selectedOrgId, $teamEarningsYear, $teamEarningsActorUUID);
     if ($teamEarningsActorUUID === '') {
       BusinessWorkspaceCache::putTeamEarnings($selectedOrgId, $teamEarningsYear, $snapshot);
     }
     TeamEarningsSnapshotBuilder::applySnapshot($snapshot);
   }
-  Lens::timeEnd('Team Earnings: resolve snapshot');
+  Lens::timeEnd('Business Reports: resolve snapshot');
 }

@@ -215,12 +215,12 @@ final class BusinessMemberReportsTaxForensicTest extends TestCase
     );
     $this->assertGreaterThan(0, $expected['deductions']);
     $this->assertStringContainsString(
-      ForensicTaxSupport::formatTemplateCurrency($expected['deductions'] / 100),
+      ForensicTaxSupport::formatDataGridCurrency($expected['deductions'] / 100),
       $html,
     );
-    $this->assertStringContainsString(ForensicTaxSupport::formatTemplateCurrency(10000.0), $html);
+    $this->assertStringContainsString(ForensicTaxSupport::formatDataGridCurrency(10000.0), $html);
     $this->assertStringNotContainsString(
-      ForensicTaxSupport::formatTemplateCurrency(10000.0) . '</div><div class=\'datagrid_item\' role=\'gridcell\'>' . ForensicTaxSupport::formatTemplateCurrency(10000.0),
+      ForensicTaxSupport::formatDataGridCurrency(10000.0) . '</div><div class="datagrid_item" role="gridcell">' . ForensicTaxSupport::formatDataGridCurrency(10000.0),
       $html,
     );
   }

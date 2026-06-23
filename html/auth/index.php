@@ -103,6 +103,7 @@ $i18nKeys = [
   'AUTH_TABS_ARIA',
   'AUTH_TERMS_ACK_AND',
   'AUTH_TERMS_ACK_PREFIX',
+  'AUTH_TERMS_ACK_SUFFIX',
   'AUTH_TERMS_LINK',
   'AUTH_VERIFICATION_MESSAGE',
   'AUTH_VERIFICATION_STEP_1',
@@ -130,7 +131,10 @@ require_once __DIR__ . '/../header.php';
 
     <div class="auth-layout">
       <section class="auth-hero" role="img" aria-roledescription="hero image" aria-label="<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?> — <?php echo htmlspecialchars($i18n['AUTH_PAGE_HEADING'], ENT_QUOTES, 'UTF-8'); ?>">
-        <img class="auth-hero-image" src="/images/paycal-auth-hero-win10.png" alt="" loading="eager" decoding="async" aria-hidden="true">
+        <picture>
+          <source srcset="/images/paycal-auth-hero-win10.webp" type="image/webp">
+          <img class="auth-hero-image" src="/images/paycal-auth-hero-win10.jpg" alt="" loading="eager" decoding="async" aria-hidden="true">
+        </picture>
         <div class="auth-hero-overlay" aria-hidden="true"></div>
         <div class="auth-hero-content">
           <h1 class="visually_hidden"><?php echo htmlspecialchars($i18n['AUTH_PAGE_HEADING'], ENT_QUOTES, 'UTF-8'); ?></h1>
@@ -174,13 +178,17 @@ require_once __DIR__ . '/../header.php';
                   <button id="signin-passkey-phone" type="button" class="btn-link" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_DEVICE'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_DEVICE'], ENT_QUOTES, 'UTF-8'); ?></button>
                 </p>
                 <p class="status" id="signin-passkey-status" role="status" aria-live="polite" aria-atomic="true"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_STATUS'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <div id="federated-signin" class="federated-signin" hidden>
+                  <p class="divider-or" id="federated-signin-label"><?php echo htmlspecialchars($i18n['AUTH_DIVIDER_OR'], ENT_QUOTES, 'UTF-8'); ?></p>
+                  <div id="federated-signin-providers" class="federated-signin-providers" aria-labelledby="federated-signin-label"></div>
+                </div>
                 <?php if ($accountRecoveryEnabled) { ?>
                   <hr class="auth-recover-divider" aria-hidden="true">
                   <p class="auth-recover-link"><a href="/auth/recover/<?php echo $authLanguageQuery; ?>"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_ACCOUNT'], ENT_QUOTES, 'UTF-8'); ?></a></p>
                 <?php } ?>
               </section>
 
-              <p>By signing in you agree to our <a href="/policies/#terms"><?php echo htmlspecialchars($i18n['AUTH_TERMS_LINK'], ENT_QUOTES, 'UTF-8'); ?></a> <?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_AND'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#privacy"><?php echo htmlspecialchars($i18n['AUTH_PRIVACY_LINK'], ENT_QUOTES, 'UTF-8'); ?></a>.</p>
+              <p><?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_PREFIX'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#terms"><?php echo htmlspecialchars($i18n['AUTH_TERMS_LINK'], ENT_QUOTES, 'UTF-8'); ?></a> <?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_AND'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#privacy"><?php echo htmlspecialchars($i18n['AUTH_PRIVACY_LINK'], ENT_QUOTES, 'UTF-8'); ?></a><?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_SUFFIX'], ENT_QUOTES, 'UTF-8'); ?></p>
             </form>
           </section>
 

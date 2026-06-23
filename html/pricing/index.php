@@ -67,7 +67,7 @@ $features = [
   ['Financial reports', 'Deeper monthly, annual, tax, and earnings variance reports.', 'Basic reports', 'Advanced personal reports', 'Advanced business reports'],
   ['Business workspace', 'Create a shared workspace for payroll visibility and operations.', 'Not included', 'Not included', 'Included'],
   ['Member financial viewing', 'Review member work and finance records with role-based access.', 'Not included', 'Not included', 'Included'],
-  ['Aggregate analysis', 'Analyze team totals, labour cost drivers, overtime exposure, and site-level performance.', 'Not included', 'Not included', 'Included'],
+  ['Aggregate analysis', 'Analyze group totals, labour cost drivers, overtime exposure, and site-level performance.', 'Not included', 'Not included', 'Included'],
   ['Membership limit', 'Maximum active members in one business workspace, including the owner.', 'Not included', 'Not included', '100 active members total'],
   ['Role controls', 'Owner, manager, member, and viewer-style access controls for shared work.', 'Not included', 'Not included', 'Included'],
   ['Audit-ready records', 'Structured exports and histories built for payroll review.', 'Personal records', 'Personal records', 'Business records'],
@@ -177,7 +177,7 @@ $features = [
     <div class="pricing_note_grid">
       <p><strong>Free</strong> is for keeping personal work and pay records with PDF downloads.</p>
       <p><strong>Premium</strong> is for regular users who want forecasting, spreadsheet/text exports, stronger graphs, and deeper personal financial reports.</p>
-      <p><strong>Business</strong> is for owners and managers who need member visibility, aggregate payroll analysis, team reports, and up to 100 active members total for one flat price. The owner counts toward that limit, so a full workspace is one owner plus 99 additional members.</p>
+      <p><strong>Business</strong> is for owners and managers who need member visibility, aggregate payroll analysis, group reports, and up to 100 active members total for one flat price. The owner counts toward that limit, so a full workspace is one owner plus 99 additional members.</p>
     </div>
   </section>
 </div>

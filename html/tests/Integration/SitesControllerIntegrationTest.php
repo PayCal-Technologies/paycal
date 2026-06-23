@@ -25,17 +25,17 @@ final class SitesControllerIntegrationTest extends TestCase
     /** @var array<int, string> */
     private array $ephemeralKeys = [];
 
-    private function orgUnwrapDeniedCounterKey(string $reason): string
+    private function businessUnwrapDeniedCounterKey(string $reason): string
     {
         $schema = SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
 
-        return "telemetry:encryption:{$schema}:org:unwrap_denied_{$reason}";
+        return "telemetry:encryption:{$schema}:business:unwrap_denied_{$reason}";
     }
 
-    private function clearOrgUnwrapDeniedTelemetryCounters(): void
+    private function clearBusinessUnwrapDeniedTelemetryCounters(): void
     {
         $schema = SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
-        foreach (Database::scanKeys("telemetry:encryption:{$schema}:org:unwrap_denied_*") as $key) {
+        foreach (Database::scanKeys("telemetry:encryption:{$schema}:business:unwrap_denied_*") as $key) {
             Database::unlink((string) $key);
         }
     }
@@ -63,7 +63,7 @@ final class SitesControllerIntegrationTest extends TestCase
             'credential_id' => 'cred-' . bin2hex(random_bytes(4)),
         ]);
         Database::expire(Keys::SESSION . ':' . $this->testSessionHash, 3600);
-        $this->clearOrgUnwrapDeniedTelemetryCounters();
+        $this->clearBusinessUnwrapDeniedTelemetryCounters();
 
         // Create a test site record in the current canonical shape
         $this->testSiteId = bin2hex(random_bytes(16));
@@ -93,7 +93,7 @@ final class SitesControllerIntegrationTest extends TestCase
         foreach ($this->ephemeralKeys as $key) {
             Database::unlink($key);
         }
-        $this->clearOrgUnwrapDeniedTelemetryCounters();
+        $this->clearBusinessUnwrapDeniedTelemetryCounters();
 
         unset($_COOKIE['PAYCAL_AUTH']);
         unset($_SERVER['REQUEST_METHOD']);
@@ -279,8 +279,8 @@ final class SitesControllerIntegrationTest extends TestCase
             $orgId = (string) ($createOrg['data']['business_id'] ?? '');
             $this->assertNotSame('', $orgId);
 
-            Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
-                'organization_id' => $orgId,
+            Database::hset(Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $this->testUserUUID, [
+                'business_id' => $orgId,
                 'user_uuid' => $this->testUserUUID,
                 'role' => 'member',
                 'status' => 'active',
@@ -288,9 +288,9 @@ final class SitesControllerIntegrationTest extends TestCase
                 'updated_at' => date('c'),
             ]);
             Database::sadd(Keys::BUSINESS_MEMBERS . ':' . $orgId, $this->testUserUUID);
-            Database::sadd(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId, $this->testUserUUID);
+            Database::sadd(Keys::BUSINESS_CONNECTIONS . ':' . $orgId, $this->testUserUUID);
             Database::sadd(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
-            Database::sadd(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->testUserUUID, $orgId);
+            Database::sadd(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->testUserUUID, $orgId);
 
             $_POST = [
                 'owner_uuid' => $ownerUUID,
@@ -318,11 +318,11 @@ final class SitesControllerIntegrationTest extends TestCase
             $this->assertSame('Delegated Site Create', (string) ($site['site_name'] ?? ''));
 
             $service->leaveBusiness($ownerUUID, $orgId);
-            Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
+            Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $this->testUserUUID);
             Database::srem(Keys::BUSINESS_MEMBERS . ':' . $orgId, $this->testUserUUID);
-            Database::srem(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId, $this->testUserUUID);
+            Database::srem(Keys::BUSINESS_CONNECTIONS . ':' . $orgId, $this->testUserUUID);
             Database::srem(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
-            Database::srem(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->testUserUUID, $orgId);
+            Database::srem(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->testUserUUID, $orgId);
         } finally {
             if ($createdSiteId !== '') {
                 Database::unlink(Keys::SITE . ':' . $ownerUUID . ':' . $createdSiteId);
@@ -358,8 +358,8 @@ final class SitesControllerIntegrationTest extends TestCase
             $orgId = (string) ($createOrg['data']['business_id'] ?? '');
             $this->assertNotSame('', $orgId);
 
-            Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
-                'organization_id' => $orgId,
+            Database::hset(Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $this->testUserUUID, [
+                'business_id' => $orgId,
                 'user_uuid' => $this->testUserUUID,
                 'role' => 'viewer',
                 'status' => 'active',
@@ -367,9 +367,9 @@ final class SitesControllerIntegrationTest extends TestCase
                 'updated_at' => date('c'),
             ]);
             Database::sadd(Keys::BUSINESS_MEMBERS . ':' . $orgId, $this->testUserUUID);
-            Database::sadd(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId, $this->testUserUUID);
+            Database::sadd(Keys::BUSINESS_CONNECTIONS . ':' . $orgId, $this->testUserUUID);
             Database::sadd(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
-            Database::sadd(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->testUserUUID, $orgId);
+            Database::sadd(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->testUserUUID, $orgId);
 
             $_POST = [
                 'owner_uuid' => $ownerUUID,
@@ -389,14 +389,14 @@ final class SitesControllerIntegrationTest extends TestCase
             $response = json_decode((string) $output, true);
             $this->assertIsArray($response);
             $this->assertFalse($response['success'] ?? true, 'Delegated create should fail without sites.write scope.');
-            $this->assertStringContainsString('Insufficient organization scope', (string) ($response['message'] ?? ''));
+            $this->assertStringContainsString('Insufficient business scope', (string) ($response['message'] ?? ''));
 
             $service->leaveBusiness($ownerUUID, $orgId);
-            Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
+            Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $this->testUserUUID);
             Database::srem(Keys::BUSINESS_MEMBERS . ':' . $orgId, $this->testUserUUID);
-            Database::srem(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId, $this->testUserUUID);
+            Database::srem(Keys::BUSINESS_CONNECTIONS . ':' . $orgId, $this->testUserUUID);
             Database::srem(Keys::BUSINESS_USER . ':' . $this->testUserUUID, $orgId);
-            Database::srem(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->testUserUUID, $orgId);
+            Database::srem(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->testUserUUID, $orgId);
         } finally {
             Database::unlink(Keys::USER_SUBSCRIPTION . ':' . $ownerUUID);
             Database::unlink(Keys::USER . ':' . $ownerUUID);
@@ -441,15 +441,15 @@ final class SitesControllerIntegrationTest extends TestCase
             'nonce' => base64_encode(str_repeat('n', 12)),
             'aad' => 'site-aad',
             'meta' => [
-                'encryption_mode' => 'organization',
-                'org_id' => $orgId,
-                'segment' => BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+                'encryption_mode' => 'business',
+                'business_id' => $orgId,
+                'segment' => BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
                 'key_version' => 'v1',
             ],
         ];
 
-        Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
-            'organization_id' => $orgId,
+        Database::hset(Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $this->testUserUUID, [
+            'business_id' => $orgId,
             'user_uuid' => $this->testUserUUID,
             'role' => 'member',
             'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
@@ -459,7 +459,7 @@ final class SitesControllerIntegrationTest extends TestCase
             'encrypted_blob' => base64_encode((string) json_encode($envelope)),
         ]);
 
-        $this->ephemeralKeys[] = Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID;
+        $this->ephemeralKeys[] = Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $this->testUserUUID;
         $this->ephemeralKeys[] = $workKey;
 
         $controller = new SitesController();

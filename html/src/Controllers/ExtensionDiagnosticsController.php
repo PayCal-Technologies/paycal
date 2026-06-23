@@ -47,7 +47,7 @@ final class ExtensionDiagnosticsController
 {
   #[Route('extensions/runtime', ['GET'])]
   /**
-   * TODO: Document runtimeSnapshot.
+   * Runtime snapshot.
    */
   #[ExtensionDiagnostics('runtime-manifests')]
   public function runtimeSnapshot(): void

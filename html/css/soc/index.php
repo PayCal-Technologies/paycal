@@ -210,6 +210,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   border: 1px solid color-mix(in srgb, #1f7a38 40%, transparent);
 }
 
+.soc-portal .soc-artifacts-table .soc-badge--pass {
+  animation: socFinalityPulse 4s ease-in-out infinite;
+}
+
 .soc-badge--warn {
   background: color-mix(in srgb, #9a6b00 16%, transparent);
   color: #9a6b00;
@@ -250,6 +254,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .soc-ledger-block.is-verified {
   border-color: color-mix(in srgb, #1f7a38 50%, transparent);
   background: color-mix(in srgb, #1f7a38 6%, transparent);
+  animation: socLedgerIntegrityGlow 900ms ease-out both;
 }
 
 .soc-ledger-block.is-empty {
@@ -411,4 +416,22 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   border-top: 1px solid color-mix(in srgb, var(--panel-text, #444) 12%, transparent);
   padding-top: 0.5rem;
   margin-top: 0.25rem;
+}
+
+@keyframes socLedgerIntegrityGlow {
+  0%, 100% {
+    box-shadow: none;
+  }
+  45% {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, #1f7a38 65%, transparent), 0 0 18px color-mix(in srgb, #1f7a38 22%, transparent);
+  }
+}
+
+@keyframes socFinalityPulse {
+  0%, 100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
 }

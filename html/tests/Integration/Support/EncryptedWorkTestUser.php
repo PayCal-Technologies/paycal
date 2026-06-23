@@ -183,7 +183,7 @@ final class EncryptedWorkTestUser
    *   date (Y-m-d), site_id, site_name
    * Optional numeric keys:
    *   hours, regular_hours, overtime_hours, travel_hours, living_out_allowance, wage, gross,
-   *   tax, net, other
+   *   tax, net, other, omit_gross
    *
    * @param array<string, mixed> $row
    */
@@ -207,6 +207,7 @@ final class EncryptedWorkTestUser
     $gross    = array_key_exists('gross', $row)
       ? $this->numeric($row['gross'])
       : (($regular * $wage) + (($overtime * $wage) * 1.5) + ($travel * $wage) + $loa);
+    $omitGross = (bool) ($row['omit_gross'] ?? false);
 
     // Build plaintext payload (financial fields for decryptWorkRowIfNeeded to decode).
     $plaintextData = [
@@ -219,8 +220,10 @@ final class EncryptedWorkTestUser
       'travel_hours'       => number_format($travel, 2, '.', ''),
       'living_out_allowance' => number_format($loa, 2, '.', ''),
       'wage'               => number_format($wage, 2, '.', ''),
-      'gross'              => number_format($gross, 2, '.', ''),
     ];
+    if (!$omitGross) {
+      $plaintextData['gross'] = number_format($gross, 2, '.', '');
+    }
     foreach (['tax', 'net', 'other'] as $optKey) {
       if (array_key_exists($optKey, $row)) {
         $plaintextData[$optKey] = number_format($this->numeric($row[$optKey]), 2, '.', '');
@@ -260,9 +263,11 @@ final class EncryptedWorkTestUser
       'travel_hours'       => number_format($travel, 2, '.', ''),
       'living_out_allowance' => number_format($loa, 2, '.', ''),
       'wage'               => number_format($wage, 2, '.', ''),
-      'gross'              => number_format($gross, 2, '.', ''),
       'encrypted_blob'     => $encryptedBlob,
     ];
+    if (!$omitGross) {
+      $payload['gross'] = number_format($gross, 2, '.', '');
+    }
     foreach (['tax', 'net', 'other'] as $optKey) {
       if (array_key_exists($optKey, $row)) {
         $payload[$optKey] = number_format($this->numeric($row[$optKey]), 2, '.', '');

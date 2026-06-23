@@ -6,6 +6,8 @@ use PayCal\Observability\Lens;
 
 $teamReportsBaseUrl = $teamReportsBaseUrl ?? '/business/reports/';
 $isLensMode = (bool) ($isLensMode ?? false);
+$orgSiteRefData_ = is_array($orgSiteRefData_ ?? null) ? $orgSiteRefData_ : [];
+$businessGroupData_ = is_array($businessGroupData_ ?? null) ? $businessGroupData_ : [];
 
 $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n): string {
   if (isset($i18n) && is_array($i18n) && array_key_exists($key, $i18n)) {
@@ -38,11 +40,11 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
           <?php echo (int) $yr; ?>
         </a>
       <?php endforeach; ?>
-      <button type="button" class="et_export_btn et_export_btn--report" data-team-export-format="pdf">&#128438; <?php echo htmlspecialchars($teamPanelI18n('EARNINGS_PRINT_REPORT', 'Print report'), ENT_QUOTES, 'UTF-8'); ?></button>
+      <button type="button" class="et_export_btn et_export_btn--report" data-group-export-format="pdf">&#128438; <?php echo htmlspecialchars($teamPanelI18n('EARNINGS_PRINT_REPORT', 'Print report'), ENT_QUOTES, 'UTF-8'); ?></button>
     </div>
 
     <?php
-      $teamDroppedUnlinkedCount = (int) ($teamSiteMatchStats['dropped_unlinked'] ?? 0);
+      $teamDroppedUnlinkedCount = (int) ($teamSiteMatchStats['dropped_unlinked'] ?? ($teamSiteMatchStats['included_unlinked'] ?? 0));
       $teamDroppedWarn = $teamDroppedUnlinkedCount >= $teamSiteDropWarnThreshold;
       $teamMatchOwnerAndSite = (int) ($teamSiteMatchStats['match_owner_and_site'] ?? 0);
       $teamMatchUniqueSiteId = (int) ($teamSiteMatchStats['match_unique_site_id'] ?? 0);
@@ -56,9 +58,9 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
       $teamFallbackWarn = $teamFallbackRatio >= $teamSiteFallbackWarnThreshold;
     ?>
     <?php if ($isLensMode): ?>
-    <aside class="earnings_site_resolve_summary<?php echo $teamFallbackWarn ? ' earnings_site_resolve_summary--warning' : ''; ?>" role="status" aria-live="polite" aria-atomic="true" aria-label="<?php echo htmlspecialchars(earnings_i18n('EARNINGS_TEAM_SITE_RESOLVE_SUMMARY_ARIA', 'Team site resolution summary'), ENT_QUOTES, 'UTF-8'); ?>">
+    <aside class="earnings_site_resolve_summary<?php echo $teamFallbackWarn ? ' earnings_site_resolve_summary--warning' : ''; ?>" role="status" aria-live="polite" aria-atomic="true" aria-label="<?php echo htmlspecialchars(earnings_i18n('EARNINGS_TEAM_SITE_RESOLVE_SUMMARY_ARIA', 'Business site resolution summary'), ENT_QUOTES, 'UTF-8'); ?>">
       <div class="earnings_site_resolve_summary_header">
-        <h3 class="earnings_site_resolve_summary_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_TEAM_SITE_RESOLVE_TITLE', 'Team site resolution summary'), ENT_QUOTES, 'UTF-8'); ?></h3>
+        <h3 class="earnings_site_resolve_summary_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_TEAM_SITE_RESOLVE_TITLE', 'Business site resolution summary'), ENT_QUOTES, 'UTF-8'); ?></h3>
         <span class="earnings_site_resolve_summary_subtitle"><?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_TEAM_SITE_RESOLVE_ROWS_EVALUATED_FMT', '{count} rows evaluated', ['count' => (string) $teamEvaluatedTotal]), ENT_QUOTES, 'UTF-8'); ?></span>
       </div>
       <dl class="earnings_site_resolve_summary_grid">
@@ -88,14 +90,14 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
     </aside>
     <?php endif; ?>
     <?php if ($isLensMode && $teamDroppedUnlinkedCount > 0): ?>
-    <aside class="earnings_site_diag<?php echo $teamDroppedWarn ? ' earnings_site_diag--warning' : ''; ?>" role="status" aria-live="polite" aria-atomic="true" aria-label="<?php echo htmlspecialchars(earnings_i18n('EARNINGS_TEAM_SITE_LINK_DIAG_ARIA', 'Team site link diagnostics'), ENT_QUOTES, 'UTF-8'); ?>">
+    <aside class="earnings_site_diag<?php echo $teamDroppedWarn ? ' earnings_site_diag--warning' : ''; ?>" role="status" aria-live="polite" aria-atomic="true" aria-label="<?php echo htmlspecialchars(earnings_i18n('EARNINGS_TEAM_SITE_LINK_DIAG_ARIA', 'Business site link diagnostics'), ENT_QUOTES, 'UTF-8'); ?>">
       <div class="earnings_site_diag_header">
-        <h3 class="earnings_site_diag_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_TEAM_SITE_LINK_DIAG_TITLE', 'Team site-link diagnostics'), ENT_QUOTES, 'UTF-8'); ?></h3>
+        <h3 class="earnings_site_diag_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_TEAM_SITE_LINK_DIAG_TITLE', 'Business site-link diagnostics'), ENT_QUOTES, 'UTF-8'); ?></h3>
         <span class="earnings_site_diag_count"><?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_TEAM_SITE_LINK_DIAG_DROPPED_FMT', '{count} dropped', ['count' => (string) $teamDroppedUnlinkedCount]), ENT_QUOTES, 'UTF-8'); ?></span>
       </div>
       <p class="earnings_site_diag_summary">
         <?php if ($teamDroppedWarn): ?>
-          <?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_TEAM_SITE_LINK_DIAG_WARN_FMT', 'Warning: dropped rows exceeded threshold ({threshold}). Team totals may be under-counted.', ['threshold' => (string) $teamSiteDropWarnThreshold]), ENT_QUOTES, 'UTF-8'); ?>
+          <?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_TEAM_SITE_LINK_DIAG_WARN_FMT', 'Warning: dropped rows exceeded threshold ({threshold}). Business totals may be under-counted.', ['threshold' => (string) $teamSiteDropWarnThreshold]), ENT_QUOTES, 'UTF-8'); ?>
         <?php else: ?>
           <?php echo htmlspecialchars(earnings_i18n('EARNINGS_TEAM_SITE_LINK_DIAG_SUMMARY', 'Some rows were excluded because their site ownership reference did not match business-linked sites.'), ENT_QUOTES, 'UTF-8'); ?>
         <?php endif; ?>
@@ -138,7 +140,7 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
           <?php echo htmlspecialchars(
             earnings_i18n_fmt(
               'EARNINGS_TEAM_UNLINKED_ONLY_GUARD',
-              'Detected {count} work entries that were excluded because their sites are not linked to this business. Link the missing site(s) in Businesses to restore team totals.',
+              'Detected {count} work entries that were excluded because their sites are not linked to this business. Link the missing site(s) in Businesses to restore business totals.',
               ['count' => (string) $teamUnlinkedOnlyCount]
             ),
             ENT_QUOTES,
@@ -234,7 +236,7 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
     <?php else: ?>
 
     <?php
-      Lens::timeStart('Team Earnings: panel chart aggregates');
+      Lens::timeStart('Business Reports: panel chart aggregates');
       // ── Aggregate per-org monthly totals for YTD chart ───────────────────────
       /** @var array<string, array{label: string, reg: float, ot: float, gross: float, net: float, headcount: int, avg_gross: float, members: array<string, bool>}> $orgChartData */
       $orgChartData = [];
@@ -288,12 +290,12 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
         array_values($orgChartData)
       );
       $cN = count($cData);
-      Lens::timeEnd('Team Earnings: panel chart aggregates');
+      Lens::timeEnd('Business Reports: panel chart aggregates');
     ?>
 
     <?php if ($cN >= 1): ?>
     <?php
-      Lens::timeStart('Team Earnings: panel insights and rankings');
+      Lens::timeStart('Business Reports: panel insights and rankings');
       // ── Shared chart constants & helpers ────────────────────────────────────
       $svgW_ = 900; $padT_ = 20; $padB_ = 36; $ticks_ = 5;
 
@@ -363,10 +365,10 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
       $orgBudgetTotal_   = 0.0;
       $cachedSiteSettings = BusinessWorkspaceCache::getSiteSettings($selectedOrgId, $teamEarningsYear);
       if ($cachedSiteSettings !== null) {
-        Lens::add('Team Earnings: site settings source', ['source' => 'workspace_cache']);
+        Lens::add('Business Reports: site settings source', ['source' => 'workspace_cache']);
         $siteSettingsList_ = $cachedSiteSettings['site_settings_by_ref'];
       } else {
-        Lens::add('Team Earnings: site settings source', ['source' => 'live_fetch']);
+        Lens::add('Business Reports: site settings source', ['source' => 'live_fetch']);
         $siteRefs_       = Database::smembers(Keys::BUSINESS_SITE . ':' . $selectedOrgId);
         $siteSettingsKeys_ = [];
         foreach ($siteRefs_ as $sRef_) {
@@ -436,6 +438,57 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
       $forecastBasis_   = $completedCount_ > 0
         ? earnings_i18n_fmt('EARNINGS_FORECAST_BASIS_MONTH_AVG', '{months}-mo avg (${amount}/mo)', ['months' => (string) $completedCount_, 'amount' => number_format($avgMonthly_, 0)])
         : earnings_i18n('EARNINGS_FORECAST_BASIS_RUN_RATE', 'current-month run-rate');
+
+      $sitePlanningRows_ = [];
+      foreach ($orgSiteRefData_ as $siteRef_ => $siteRollup_) {
+        if (!is_array($siteRollup_)) {
+          continue;
+        }
+        $settings_ = is_array($siteSettingsList_[$siteRef_] ?? null) ? $siteSettingsList_[$siteRef_] : [];
+        $siteBudget_ = is_numeric($settings_['budget_amount'] ?? null) ? (float) $settings_['budget_amount'] : 0.0;
+        $siteGross_ = (float) ($siteRollup_['gross'] ?? 0.0);
+        $siteHours_ = (float) ($siteRollup_['hours'] ?? 0.0);
+        $siteUsedPct_ = $siteBudget_ > 0.0 ? round(($siteGross_ / $siteBudget_) * 100.0, 1) : null;
+        $siteWarn_ = is_numeric($settings_['warn_threshold'] ?? null) ? (float) $settings_['warn_threshold'] : 80.0;
+        $siteCrit_ = is_numeric($settings_['critical_threshold'] ?? null) ? (float) $settings_['critical_threshold'] : 95.0;
+        $siteStatus_ = $siteUsedPct_ === null
+          ? 'unbudgeted'
+          : ($siteUsedPct_ >= $siteCrit_ ? 'critical' : ($siteUsedPct_ >= $siteWarn_ ? 'warning' : 'ok'));
+        $sitePlanningRows_[] = [
+          'site_ref' => (string) ($siteRollup_['site_ref'] ?? $siteRef_),
+          'site_name' => (string) ($siteRollup_['site_name'] ?? $siteRef_),
+          'gross' => $siteGross_,
+          'hours' => $siteHours_,
+          'ot_ratio' => (float) ($siteRollup_['ot_ratio'] ?? 0.0),
+          'member_count' => (int) ($siteRollup_['member_count'] ?? 0),
+          'budget' => $siteBudget_,
+          'used_pct' => $siteUsedPct_,
+          'status' => $siteStatus_,
+          'cost_per_hour' => (float) ($siteRollup_['cost_per_hour'] ?? 0.0),
+          'match_strategies' => is_array($siteRollup_['match_strategies'] ?? null) ? implode(', ', $siteRollup_['match_strategies']) : '',
+        ];
+      }
+      usort($sitePlanningRows_, static fn(array $a, array $b): int => ((float) $b['gross']) <=> ((float) $a['gross']));
+
+      $groupPerformanceRows_ = [];
+      foreach ($businessGroupData_ as $groupRollup_) {
+        if (!is_array($groupRollup_)) {
+          continue;
+        }
+        $groupPerformanceRows_[] = [
+          'group_id' => (string) ($groupRollup_['group_id'] ?? ''),
+          'name' => (string) ($groupRollup_['name'] ?? ''),
+          'type' => (string) ($groupRollup_['type'] ?? 'manual'),
+          'member_count' => (int) ($groupRollup_['member_count'] ?? 0),
+          'active_member_count' => (int) ($groupRollup_['active_member_count'] ?? 0),
+          'site_count' => (int) ($groupRollup_['site_count'] ?? 0),
+          'hours' => (float) ($groupRollup_['hours'] ?? 0.0),
+          'gross' => (float) ($groupRollup_['gross'] ?? 0.0),
+          'ot_ratio' => (float) ($groupRollup_['ot_ratio'] ?? 0.0),
+          'cost_per_hour' => (float) ($groupRollup_['cost_per_hour'] ?? 0.0),
+        ];
+      }
+      usort($groupPerformanceRows_, static fn(array $a, array $b): int => ((float) $b['gross']) <=> ((float) $a['gross']));
 
       // ── ANALYTICS: Site ranking (used by alerts + cost drivers + site chart) ─
       uasort($orgSiteData_, fn($a, $b) => $b['gross'] <=> $a['gross']);
@@ -753,7 +806,10 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
       }
 
       // ── ANALYTICS: Cost Drivers ──────────────────────────────────────────
-      $topCostMembers_ = array_slice($memberRanked_, 0, 5);
+      $topCostMembers_ = array_slice(array_values(array_filter(
+        $memberRanked_,
+        static fn(array $member): bool => (float) ($member['gross'] ?? 0.0) > 0.0
+      )), 0, 5);
       $topDriverNames_ = array_slice(array_keys($topSites_), 0, 5);
       $topDriverSites_ = array_slice(array_values($topSites_), 0, 5);
       $totalOtH_       = $teamEarningsTotals['ot_hours'];
@@ -824,69 +880,46 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
       }
       usort($riskItems_, fn($a, $b) => ($sevOrder_[$a['severity']] ?? 9) <=> ($sevOrder_[$b['severity']] ?? 9));
 
-      // ── ANALYTICS: Positive insights for recommendations ─────────────────
-      $positiveItems_ = array_values(array_filter($insights_, fn($i) => $i['severity'] === 'positive'));
-
-      // ── ANALYTICS: Auto-generated recommendations ────────────────────────
-      $recommendations_ = [];
-      foreach ($riskItems_ as $ri_) {
-        if ($ri_['recommendation'] !== null) {
-          $recommendations_[] = ['priority' => $ri_['severity'], 'text' => $ri_['recommendation'], 'source' => $ri_['title']];
-        }
-      }
-      if (empty($recommendations_)) {
-        $recommendations_[] = [
-          'priority' => 'normal',
-          'text' => earnings_i18n('EARNINGS_NO_CRITICAL_ACTIONS', 'No critical actions required at this time. Continue monitoring trends.'),
-          'source' => earnings_i18n('SYSTEM', 'System'),
-        ];
-      }
-
       // ── ANALYTICS: Executive snapshot ────────────────────────────────────
-      $criticalCount_  = count(array_filter($riskItems_, fn($i) => $i['severity'] === 'critical'));
       $warningCount_   = count(array_filter($riskItems_, fn($i) => $i['severity'] === 'warning'));
-      $positiveCount_  = count($positiveItems_);
-      $topRisk_        = !empty($riskItems_) ? $riskItems_[0] : null;
-      Lens::timeEnd('Team Earnings: panel insights and rankings');
-      Lens::timeStart('Team Earnings: panel HTML render');
+      Lens::timeEnd('Business Reports: panel insights and rankings');
+      Lens::timeStart('Business Reports: panel HTML render');
     ?>
 
     <!-- ═══════════ EXECUTIVE SNAPSHOT ═══════════ -->
-    <div class="et_exec_snapshot" role="region" aria-label="<?php echo htmlspecialchars(earnings_i18n('EARNINGS_EXEC_SUMMARY_ARIA', 'Executive summary'), ENT_QUOTES, 'UTF-8'); ?>">
+    <div class="et_exec_snapshot" role="region" data-report-module="primary-kpis" data-report-tab="overview" data-report-title="Primary KPIs" aria-label="<?php echo htmlspecialchars(earnings_i18n('EARNINGS_EXEC_SUMMARY_ARIA', 'Executive summary'), ENT_QUOTES, 'UTF-8'); ?>">
       <div class="et_exec_snapshot_item et_exec_snapshot_item--primary">
+        <span class="et_exec_snapshot_value"><?php echo htmlspecialchars(earnings_fmt_money($ytdSpend_), ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="et_exec_snapshot_label"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_YTD_SPEND', 'YTD Pay'), ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="et_exec_snapshot_sub"><?php echo htmlspecialchars(earnings_fmt_money($avgMonthly_), ENT_QUOTES, 'UTF-8'); ?><?php echo htmlspecialchars(earnings_i18n('EARNINGS_PER_MONTH_AVG_SUFFIX', '/mo avg'), ENT_QUOTES, 'UTF-8'); ?></span>
+      </div>
+      <div class="et_exec_snapshot_item">
         <span class="et_exec_snapshot_value"><?php echo htmlspecialchars(earnings_fmt_money($eoyForecast_), ENT_QUOTES, 'UTF-8'); ?></span>
-        <span class="et_exec_snapshot_label"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_FORECAST_YEAR_END', 'Forecast Year End'), ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="et_exec_snapshot_label"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_FORECAST', 'Forecast'), ENT_QUOTES, 'UTF-8'); ?></span>
         <?php if ($budgetVerdict_ !== null): ?>
         <span class="et_exec_snapshot_sub et_exec_snapshot_sub--<?php echo $budgetVerdict_['status']; ?>"><?php echo htmlspecialchars($budgetVerdict_['label'], ENT_QUOTES, 'UTF-8'); ?></span>
         <?php endif; ?>
       </div>
       <div class="et_exec_snapshot_item">
-        <span class="et_exec_snapshot_value et_exec_snapshot_value--<?php echo $healthScoreStatus_; ?>"><?php echo $healthScore_; ?><span class="et_exec_snapshot_value_denom">/100</span></span>
-        <span class="et_exec_snapshot_label"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_WORKFORCE_HEALTH', 'Workforce Health'), ENT_QUOTES, 'UTF-8'); ?></span>
-        <span class="et_exec_snapshot_sub"><?php echo htmlspecialchars($healthScoreLabel_, ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="et_exec_snapshot_value et_exec_snapshot_value--<?php echo $budgetStatus_['cls'] ?? 'ok'; ?>"><?php echo $budgetPct_ !== null ? htmlspecialchars(number_format($budgetPct_, 1) . '%', ENT_QUOTES, 'UTF-8') : '&mdash;'; ?></span>
+        <span class="et_exec_snapshot_label"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_BUDGET', 'Budget %'), ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="et_exec_snapshot_sub"><?php echo htmlspecialchars($budgetStatus_['label'] ?? earnings_i18n('EARNINGS_BUDGET_NONE_CONFIGURED', 'No budget configured'), ENT_QUOTES, 'UTF-8'); ?></span>
       </div>
       <div class="et_exec_snapshot_item">
-        <span class="et_exec_snapshot_value et_exec_snapshot_value--risk"><?php echo $criticalCount_; ?></span>
-        <span class="et_exec_snapshot_label"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_CRITICAL_ISSUES', 'Critical Issues'), ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="et_exec_snapshot_value et_exec_snapshot_value--<?php echo $statusOtPct_; ?>"><?php echo htmlspecialchars(number_format($otPctAll_, 1) . '%', ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="et_exec_snapshot_label"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_OVERTIME_RATIO', 'OT Ratio'), ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="et_exec_snapshot_sub"><?php echo htmlspecialchars(earnings_fmt_hours((float) $teamEarningsTotals['ot_hours']), ENT_QUOTES, 'UTF-8'); ?> OT</span>
+      </div>
+      <div class="et_exec_snapshot_item">
+        <span class="et_exec_snapshot_value et_exec_snapshot_value--risk"><?php echo count($riskItems_); ?></span>
+        <span class="et_exec_snapshot_label"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_OPEN_RISK', 'Open Risk'), ENT_QUOTES, 'UTF-8'); ?></span>
         <span class="et_exec_snapshot_sub"><?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_WARNING_COUNT_FMT', '{count} warning(s)', ['count' => (string) $warningCount_]), ENT_QUOTES, 'UTF-8'); ?></span>
-      </div>
-      <div class="et_exec_snapshot_item">
-        <span class="et_exec_snapshot_value et_exec_snapshot_value--positive"><?php echo $positiveCount_; ?></span>
-        <span class="et_exec_snapshot_label"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_POSITIVE_TRENDS', 'Positive Trends'), ENT_QUOTES, 'UTF-8'); ?></span>
-        <?php if ($topRisk_ !== null): ?>
-        <span class="et_exec_snapshot_sub et_exec_snapshot_sub--muted"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_TOP_RISK_PREFIX', 'Top risk:'), ENT_QUOTES, 'UTF-8'); ?> <?php echo htmlspecialchars($topRisk_['title'], ENT_QUOTES, 'UTF-8'); ?></span>
-        <?php endif; ?>
-      </div>
-      <div class="et_exec_snapshot_item">
-        <span class="et_exec_snapshot_value"><?php echo htmlspecialchars(earnings_fmt_money($ytdSpend_), ENT_QUOTES, 'UTF-8'); ?></span>
-        <span class="et_exec_snapshot_label"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_YTD_SPEND', 'YTD Spend'), ENT_QUOTES, 'UTF-8'); ?></span>
-        <span class="et_exec_snapshot_sub"><?php echo htmlspecialchars(earnings_fmt_money($avgMonthly_), ENT_QUOTES, 'UTF-8'); ?><?php echo htmlspecialchars(earnings_i18n('EARNINGS_PER_MONTH_AVG_SUFFIX', '/mo avg'), ENT_QUOTES, 'UTF-8'); ?></span>
       </div>
     </div>
 
     <!-- ═══════════ BUDGET STATUS ═══════════ -->
     <?php if ($annualBudget_ > 0): ?>
-    <figure class="earnings_ytd_figure et_budget_figure" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_BUDGET_STATUS_FOR', 'Budget status for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
+    <figure class="earnings_ytd_figure et_budget_figure" data-report-module="budget-status" data-report-tab="payroll" data-report-title="Budget Status" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_BUDGET_STATUS_FOR', 'Budget status for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
       <header class="earnings_ytd_header">
         <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_BUDGET', 'Budget'), ENT_QUOTES, 'UTF-8'); ?></span>
         <?php if ($budgetStatus_ !== null): ?>
@@ -953,7 +986,7 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
     <div class="et_intel_row">
 
       <!-- Payroll Forecast -->
-      <figure class="et_intel_card et_intel_card--forecast" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_PAYROLL_FORECAST_FOR', 'Payroll forecast for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
+      <figure class="et_intel_card et_intel_card--forecast" data-report-module="forecast" data-report-tab="payroll" data-report-title="Payroll Forecast" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_PAYROLL_FORECAST_FOR', 'Payroll forecast for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
         <header class="et_intel_header">
           <span class="et_intel_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_PAYROLL_FORECAST', 'Payroll Forecast'), ENT_QUOTES, 'UTF-8'); ?></span>
           <span class="et_intel_subtitle"><?php echo htmlspecialchars($forecastConfDesc_, ENT_QUOTES, 'UTF-8'); ?></span>
@@ -998,7 +1031,7 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
       </figure>
 
       <!-- Workforce Health -->
-      <figure class="et_intel_card et_intel_card--health" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_WORKFORCE_HEALTH_FOR', 'Workforce health for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
+      <figure class="et_intel_card et_intel_card--health" data-report-module="workforce-health" data-report-tab="workforce" data-report-title="Workforce Health" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_WORKFORCE_HEALTH_FOR', 'Workforce health for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
         <header class="et_intel_header">
           <span class="et_intel_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_WORKFORCE_HEALTH', 'Workforce Health'), ENT_QUOTES, 'UTF-8'); ?></span>
         </header>
@@ -1104,7 +1137,7 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
             return;
           }
           ?>
-    <figure class="earnings_ytd_figure et_alerts_figure" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_INSIGHTS_FOR_CATEGORY', '{category} insights', ['category' => $catLabel_]), ENT_QUOTES, 'UTF-8'); ?>">
+    <figure class="earnings_ytd_figure et_alerts_figure" data-report-module="alerts-<?php echo htmlspecialchars($catKey_, ENT_QUOTES, 'UTF-8'); ?>" data-report-tab="<?php echo $catKey_ === 'operations' ? 'sites' : ($catKey_ === 'workforce' ? 'workforce' : 'overview'); ?>" data-report-title="<?php echo htmlspecialchars($catLabel_ . ' Alerts', ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_INSIGHTS_FOR_CATEGORY', '{category} insights', ['category' => $catLabel_]), ENT_QUOTES, 'UTF-8'); ?>">
       <header class="earnings_ytd_header">
         <span class="earnings_ytd_title"><?php echo htmlspecialchars($catLabel_, ENT_QUOTES, 'UTF-8'); ?></span>
         <span class="earnings_ytd_subtitle"><?php echo $catSub_; ?></span>
@@ -1166,7 +1199,7 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
     <?php else: ?>
     <!-- ═══════════ PANEL 1: PAYROLL (no insight rows) ═══════════ -->
     <?php endif; ?>
-    <figure class="earnings_ytd_figure et_reports_panel_payroll" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_PAYROLL_OVERVIEW_FOR', 'Payroll overview for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
+    <figure class="earnings_ytd_figure et_reports_panel_payroll" data-report-module="payroll-trend" data-report-tab="overview" data-report-title="Payroll Trend" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_PAYROLL_OVERVIEW_FOR', 'Payroll overview for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
       <header class="earnings_ytd_header">
         <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_PAYROLL', 'Payroll'), ENT_QUOTES, 'UTF-8'); ?></span>
         <span class="earnings_ytd_subtitle"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_PAYROLL_OVERVIEW_SUBTITLE', 'Monthly gross, net, avg per member & cumulative YTD spend'), ENT_QUOTES, 'UTF-8'); ?></span>
@@ -1253,7 +1286,7 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
       $p2yPct    = fn(float $v): float => (float) $padT_ + $p2PlotH - ($v / 100.0) * $p2PlotH;
       $p2ptRatio = $buildPts_($otRatioVals_, $p2xBarC, $p2yPct);
     ?>
-    <figure class="earnings_ytd_figure" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_HOURS_DISTRIBUTION_FOR', 'Hours distribution for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
+    <figure class="earnings_ytd_figure et_hours_figure" data-report-module="hours-overtime-trend" data-report-tab="overview" data-report-title="Hours / Overtime Trend" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_HOURS_DISTRIBUTION_FOR', 'Hours distribution for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
       <header class="earnings_ytd_header">
         <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_HOURS_DISTRIBUTION', 'Hours Distribution'), ENT_QUOTES, 'UTF-8'); ?></span>
         <span class="earnings_ytd_subtitle"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_HOURS_DISTRIBUTION_SUBTITLE', 'Regular vs. overtime by month - OT efficiency ratio (right axis)'), ENT_QUOTES, 'UTF-8'); ?></span>
@@ -1351,7 +1384,7 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
       $p3yPct  = fn(float $v): float => (float) $padT_ + $p3PlotH - ($v / 100.0) * $p3PlotH;
       $p3ptUtil = $buildPts_($utilVals_, $p3xBarC, $p3yPct);
     ?>
-    <figure class="earnings_ytd_figure" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_WORKFORCE_OVERVIEW_FOR', 'Workforce overview for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
+    <figure class="earnings_ytd_figure et_workforce_figure" data-report-module="workforce-overview" data-report-tab="workforce" data-report-title="Workforce Overview" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_WORKFORCE_OVERVIEW_FOR', 'Workforce overview for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
       <header class="earnings_ytd_header">
         <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_WORKFORCE', 'Workforce'), ENT_QUOTES, 'UTF-8'); ?></span>
         <span class="earnings_ytd_subtitle"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_WORKFORCE_OVERVIEW_SUBTITLE', 'Active headcount by month - workforce utilization rate (right axis)'), ENT_QUOTES, 'UTF-8'); ?></span>
@@ -1417,7 +1450,7 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
     </figure>
 
     <!-- ═══════════ COST DRIVERS ═══════════ -->
-    <figure class="earnings_ytd_figure et_cost_figure" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_COST_DRIVERS_FOR', 'Cost drivers for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
+    <figure class="earnings_ytd_figure et_cost_figure" data-report-module="cost-drivers" data-report-tab="overview" data-report-title="Top Cost Drivers" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_COST_DRIVERS_FOR', 'Cost drivers for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
       <header class="earnings_ytd_header">
         <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_COST_DRIVERS', 'Cost Drivers'), ENT_QUOTES, 'UTF-8'); ?></span>
         <span class="earnings_ytd_subtitle"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_COST_DRIVERS_SUBTITLE', 'Top contributors by member, site, OT premium & allowances'), ENT_QUOTES, 'UTF-8'); ?></span>
@@ -1468,6 +1501,113 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
       </div>
     </figure>
 
+    <!-- ═══════════ SITE PLANNING ROLLUP ═══════════ -->
+    <?php if (!empty($sitePlanningRows_)): ?>
+    <?php $_sitePlanningExportRows_ = array_map(static fn(array $row): array => [
+      'site' => $row['site_name'],
+      'site_ref' => $row['site_ref'],
+      'gross' => round((float) $row['gross'], 2),
+      'budget' => round((float) $row['budget'], 2),
+      'used_pct' => $row['used_pct'],
+      'hours' => round((float) $row['hours'], 2),
+      'ot_ratio' => round((float) $row['ot_ratio'], 1),
+      'members' => (int) $row['member_count'],
+      'status' => $row['status'],
+    ], $sitePlanningRows_); ?>
+    <figure class="earnings_ytd_figure et_cost_figure" data-report-module="site-planning" data-report-tab="sites" data-report-title="Site Planning" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_SITE_PLANNING_FOR', 'Site planning rollup for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>"
+      data-group-type="site-planning" data-group-year="<?php echo $teamEarningsYear; ?>" data-group-org="<?php echo htmlspecialchars($selectedOrgName, ENT_QUOTES, 'UTF-8'); ?>"
+      data-group-rows="<?php echo htmlspecialchars(json_encode($_sitePlanningExportRows_, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>">
+      <header class="earnings_ytd_header">
+        <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_SITE_PLANNING', 'Site Planning'), ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="earnings_ytd_subtitle"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_SITE_PLANNING_SUBTITLE', 'Canonical site rollups using linked site refs, budgets, hours, and OT exposure'), ENT_QUOTES, 'UTF-8'); ?></span>
+        <div class="et_export_group">
+          <button type="button" class="et_export_btn" data-group-export-format="csv"><?php echo htmlspecialchars(earnings_i18n('CSV', 'CSV'), ENT_QUOTES, 'UTF-8'); ?></button>
+          <button type="button" class="et_export_btn" data-group-export-format="txt"><?php echo htmlspecialchars(earnings_i18n('TXT', 'TXT'), ENT_QUOTES, 'UTF-8'); ?></button>
+        </div>
+      </header>
+      <div class="earnings_site_diag_table_wrap">
+        <table class="earnings_site_diag_table">
+          <thead>
+            <tr>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('SITE', 'Site'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('GROSS', 'Gross'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_BUDGET', 'Budget'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_USED', 'Used'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('HOURS', 'Hours'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_OVERTIME_RATIO', 'OT Ratio'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('MEMBERS', 'Members'), ENT_QUOTES, 'UTF-8'); ?></th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach (array_slice($sitePlanningRows_, 0, 10) as $sitePlanRow_): ?>
+            <tr>
+              <td><?php echo htmlspecialchars($sitePlanRow_['site_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+              <td><?php echo htmlspecialchars(earnings_fmt_money((float) $sitePlanRow_['gross']), ENT_QUOTES, 'UTF-8'); ?></td>
+              <td><?php echo (float) $sitePlanRow_['budget'] > 0.0 ? htmlspecialchars(earnings_fmt_money((float) $sitePlanRow_['budget']), ENT_QUOTES, 'UTF-8') : '&mdash;'; ?></td>
+              <td><?php echo $sitePlanRow_['used_pct'] !== null ? htmlspecialchars(number_format((float) $sitePlanRow_['used_pct'], 1) . '%', ENT_QUOTES, 'UTF-8') : '&mdash;'; ?></td>
+              <td><?php echo htmlspecialchars(earnings_fmt_hours((float) $sitePlanRow_['hours']), ENT_QUOTES, 'UTF-8'); ?></td>
+              <td><?php echo htmlspecialchars(number_format((float) $sitePlanRow_['ot_ratio'], 1) . '%', ENT_QUOTES, 'UTF-8'); ?></td>
+              <td><?php echo (int) $sitePlanRow_['member_count']; ?></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </figure>
+    <?php endif; ?>
+
+    <!-- ═══════════ GROUP PERFORMANCE ═══════════ -->
+    <?php if (!empty($groupPerformanceRows_)): ?>
+    <?php $_groupExportRows_ = array_map(static fn(array $row): array => [
+      'group' => $row['name'],
+      'type' => $row['type'],
+      'gross' => round((float) $row['gross'], 2),
+      'hours' => round((float) $row['hours'], 2),
+      'ot_ratio' => round((float) $row['ot_ratio'], 1),
+      'members' => (int) $row['active_member_count'],
+      'sites' => (int) $row['site_count'],
+      'cost_per_hour' => round((float) $row['cost_per_hour'], 2),
+    ], $groupPerformanceRows_); ?>
+    <figure class="earnings_ytd_figure et_cost_figure" data-report-module="group-performance" data-report-tab="groups" data-report-title="Group Performance" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_GROUP_PERFORMANCE_FOR', 'Group performance for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>"
+      data-group-type="groups" data-group-year="<?php echo $teamEarningsYear; ?>" data-group-org="<?php echo htmlspecialchars($selectedOrgName, ENT_QUOTES, 'UTF-8'); ?>"
+      data-group-rows="<?php echo htmlspecialchars(json_encode($_groupExportRows_, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>">
+      <header class="earnings_ytd_header">
+        <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_GROUP_PERFORMANCE', 'Group Performance'), ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="earnings_ytd_subtitle"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_GROUP_PERFORMANCE_SUBTITLE', 'Payroll, hours, sites, and OT ratio by member group'), ENT_QUOTES, 'UTF-8'); ?></span>
+        <div class="et_export_group">
+          <button type="button" class="et_export_btn" data-group-export-format="csv"><?php echo htmlspecialchars(earnings_i18n('CSV', 'CSV'), ENT_QUOTES, 'UTF-8'); ?></button>
+          <button type="button" class="et_export_btn" data-group-export-format="txt"><?php echo htmlspecialchars(earnings_i18n('TXT', 'TXT'), ENT_QUOTES, 'UTF-8'); ?></button>
+        </div>
+      </header>
+      <div class="earnings_site_diag_table_wrap">
+        <table class="earnings_site_diag_table">
+          <thead>
+            <tr>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('BUSINESS_GROUPS_COL_GROUP', 'Group'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('GROSS', 'Gross'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('HOURS', 'Hours'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_OVERTIME_RATIO', 'OT Ratio'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('MEMBERS', 'Members'), ENT_QUOTES, 'UTF-8'); ?></th>
+              <th scope="col"><?php echo htmlspecialchars(earnings_i18n('BUSINESS_GROUPS_COL_SITES', 'Sites'), ENT_QUOTES, 'UTF-8'); ?></th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach (array_slice($groupPerformanceRows_, 0, 10) as $groupRow_): ?>
+            <tr>
+              <td><?php echo htmlspecialchars($groupRow_['name'], ENT_QUOTES, 'UTF-8'); ?></td>
+              <td><?php echo htmlspecialchars(earnings_fmt_money((float) $groupRow_['gross']), ENT_QUOTES, 'UTF-8'); ?></td>
+              <td><?php echo htmlspecialchars(earnings_fmt_hours((float) $groupRow_['hours']), ENT_QUOTES, 'UTF-8'); ?></td>
+              <td><?php echo htmlspecialchars(number_format((float) $groupRow_['ot_ratio'], 1) . '%', ENT_QUOTES, 'UTF-8'); ?></td>
+              <td><?php echo (int) $groupRow_['active_member_count']; ?></td>
+              <td><?php echo (int) $groupRow_['site_count']; ?></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </figure>
+    <?php endif; ?>
+
     <!-- ═══════════ SITE PAYROLL COST ═══════════ -->
     <?php if (!empty($topSites_)):
       $siteN_     = min(count($topSites_), 8);
@@ -1479,15 +1619,15 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
       $siteSlice_ = array_slice(array_keys($topSites_), 0, 8);
     ?>
     <?php $_siteRows_ = array_map(fn($sn) => ['site' => $sn, 'gross' => round((float)$topSites_[$sn]['gross'], 2), 'members' => count($topSites_[$sn]['members']), 'reg_hrs' => round((float)$topSites_[$sn]['reg'], 2), 'ot_hrs' => round((float)$topSites_[$sn]['ot'], 2)], $siteSlice_); ?>
-    <figure class="earnings_ytd_figure" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_SITE_PAYROLL_COST_FOR', 'Site payroll cost for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>"
-      data-team-type="sites" data-team-year="<?php echo $teamEarningsYear; ?>" data-team-org="<?php echo htmlspecialchars($selectedOrgName, ENT_QUOTES, 'UTF-8'); ?>"
-      data-team-rows="<?php echo htmlspecialchars(json_encode($_siteRows_, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>">
+    <figure class="earnings_ytd_figure et_site_payroll_figure" data-report-module="site-payroll-cost" data-report-tab="sites" data-report-title="Site Payroll Cost" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_SITE_PAYROLL_COST_FOR', 'Site payroll cost for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>"
+      data-group-type="sites" data-group-year="<?php echo $teamEarningsYear; ?>" data-group-org="<?php echo htmlspecialchars($selectedOrgName, ENT_QUOTES, 'UTF-8'); ?>"
+      data-group-rows="<?php echo htmlspecialchars(json_encode($_siteRows_, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>">
       <header class="earnings_ytd_header">
         <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_SITE_PAYROLL_COST', 'Site Payroll Cost'), ENT_QUOTES, 'UTF-8'); ?></span>
         <span class="earnings_ytd_subtitle"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_SITE_PAYROLL_COST_SUBTITLE', 'YTD gross by worksite - hover for cost per hour & OT %'), ENT_QUOTES, 'UTF-8'); ?></span>
         <div class="et_export_group">
-          <button type="button" class="et_export_btn" data-team-export-format="csv"><?php echo htmlspecialchars(earnings_i18n('CSV', 'CSV'), ENT_QUOTES, 'UTF-8'); ?></button>
-          <button type="button" class="et_export_btn" data-team-export-format="txt"><?php echo htmlspecialchars(earnings_i18n('TXT', 'TXT'), ENT_QUOTES, 'UTF-8'); ?></button>
+          <button type="button" class="et_export_btn" data-group-export-format="csv"><?php echo htmlspecialchars(earnings_i18n('CSV', 'CSV'), ENT_QUOTES, 'UTF-8'); ?></button>
+          <button type="button" class="et_export_btn" data-group-export-format="txt"><?php echo htmlspecialchars(earnings_i18n('TXT', 'TXT'), ENT_QUOTES, 'UTF-8'); ?></button>
         </div>
       </header>
       <div class="earnings_ytd_body earnings_ytd_body--rank">
@@ -1537,7 +1677,7 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
 
     <!-- ═══════════ PAYROLL COMPOSITION ═══════════ -->
     <?php if ($totalGrossAll_ > 0 && $totalHrsAll2_ > 0): ?>
-    <figure class="earnings_ytd_figure et_composition_figure" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_PAYROLL_COMPOSITION_FOR', 'Payroll composition for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
+    <figure class="earnings_ytd_figure et_composition_figure" data-report-module="payroll-composition" data-report-tab="payroll" data-report-title="Payroll Composition" aria-label="<?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_PAYROLL_COMPOSITION_FOR', 'Payroll composition for {org}', ['org' => $selectedOrgName]), ENT_QUOTES, 'UTF-8'); ?>">
       <header class="earnings_ytd_header">
         <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_PAYROLL_COMPOSITION', 'Payroll Composition'), ENT_QUOTES, 'UTF-8'); ?></span>
         <span class="earnings_ytd_subtitle"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_PAYROLL_COMPOSITION_SUBTITLE', 'Where payroll dollars actually go'), ENT_QUOTES, 'UTF-8'); ?></span>
@@ -1584,16 +1724,16 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
         'notice' => earnings_i18n('EARNINGS_NOTICE', 'Notice'),
       ];
     ?>
-    <?php $_riskRows_ = array_map(fn($rk) => ['severity' => $rk['severity'], 'title' => $rk['title'], 'cause' => $rk['cause'], 'action' => $rk['recommendation'] ?? ''], $riskItems_); ?>
-    <figure class="earnings_ytd_figure et_risk_figure" aria-label="<?php echo htmlspecialchars(earnings_i18n('EARNINGS_RISK_REGISTER', 'Risk register'), ENT_QUOTES, 'UTF-8'); ?>"
-      data-team-type="risks" data-team-year="<?php echo $teamEarningsYear; ?>" data-team-org="<?php echo htmlspecialchars($selectedOrgName, ENT_QUOTES, 'UTF-8'); ?>"
-      data-team-rows="<?php echo htmlspecialchars(json_encode($_riskRows_, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>">
+    <?php $_riskRows_ = array_map(fn($rk) => ['severity' => $rk['severity'], 'title' => $rk['title'], 'cause' => $rk['cause'], 'action' => $rk['recommendation'] ?? '', 'owner' => $selectedOrgName, 'due' => 'Next pay period', 'status' => 'Open'], $riskItems_); ?>
+    <figure class="earnings_ytd_figure et_risk_figure" data-report-module="risk-register" data-report-tab="risks" data-report-title="Risk Register" aria-label="<?php echo htmlspecialchars(earnings_i18n('EARNINGS_RISK_REGISTER', 'Risk register'), ENT_QUOTES, 'UTF-8'); ?>"
+      data-group-type="risks" data-group-year="<?php echo $teamEarningsYear; ?>" data-group-org="<?php echo htmlspecialchars($selectedOrgName, ENT_QUOTES, 'UTF-8'); ?>"
+      data-group-rows="<?php echo htmlspecialchars(json_encode($_riskRows_, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>">
       <header class="earnings_ytd_header">
         <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_RISK_REGISTER', 'Risk register'), ENT_QUOTES, 'UTF-8'); ?></span>
         <span class="earnings_ytd_subtitle"><?php echo htmlspecialchars(earnings_i18n_fmt('EARNINGS_RISK_REGISTER_SUBTITLE_FMT', '{count} active risk(s) requiring attention', ['count' => (string) count($riskItems_)]), ENT_QUOTES, 'UTF-8'); ?></span>
         <div class="et_export_group">
-          <button type="button" class="et_export_btn" data-team-export-format="csv"><?php echo htmlspecialchars(earnings_i18n('CSV', 'CSV'), ENT_QUOTES, 'UTF-8'); ?></button>
-          <button type="button" class="et_export_btn" data-team-export-format="txt"><?php echo htmlspecialchars(earnings_i18n('TXT', 'TXT'), ENT_QUOTES, 'UTF-8'); ?></button>
+          <button type="button" class="et_export_btn" data-group-export-format="csv"><?php echo htmlspecialchars(earnings_i18n('CSV', 'CSV'), ENT_QUOTES, 'UTF-8'); ?></button>
+          <button type="button" class="et_export_btn" data-group-export-format="txt"><?php echo htmlspecialchars(earnings_i18n('TXT', 'TXT'), ENT_QUOTES, 'UTF-8'); ?></button>
         </div>
       </header>
       <div class="et_risk_body">
@@ -1609,6 +1749,11 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
             <?php if (!empty($rk_['recommendation'])): ?>
             <p class="et_risk_rec">→ <?php echo htmlspecialchars($rk_['recommendation'], ENT_QUOTES, 'UTF-8'); ?></p>
             <?php endif; ?>
+            <dl class="et_risk_meta">
+              <div><dt><?php echo htmlspecialchars(earnings_i18n('OWNER', 'Owner'), ENT_QUOTES, 'UTF-8'); ?></dt><dd><?php echo htmlspecialchars($selectedOrgName, ENT_QUOTES, 'UTF-8'); ?></dd></div>
+              <div><dt><?php echo htmlspecialchars(earnings_i18n('DUE_DATE', 'Due date'), ENT_QUOTES, 'UTF-8'); ?></dt><dd><?php echo htmlspecialchars(earnings_i18n('EARNINGS_NEXT_PAY_PERIOD', 'Next pay period'), ENT_QUOTES, 'UTF-8'); ?></dd></div>
+              <div><dt><?php echo htmlspecialchars(earnings_i18n('STATUS', 'Status'), ENT_QUOTES, 'UTF-8'); ?></dt><dd><?php echo htmlspecialchars(earnings_i18n('OPEN', 'Open'), ENT_QUOTES, 'UTF-8'); ?></dd></div>
+            </dl>
           </div>
         </div>
         <?php endforeach; ?>
@@ -1616,34 +1761,8 @@ $teamPanelI18n = static function (string $key, string $fallback = '') use ($i18n
     </figure>
     <?php endif; ?>
 
-    <!-- ═══════════ RECOMMENDATIONS ═══════════ -->
-    <?php $_recRows_ = array_map(fn($rec) => ['priority' => $rec['priority'], 'text' => $rec['text'], 'source' => $rec['source']], $recommendations_); ?>
-    <figure class="earnings_ytd_figure et_rec_figure" aria-label="<?php echo htmlspecialchars(earnings_i18n('EARNINGS_RECOMMENDED_ACTIONS', 'Recommended actions'), ENT_QUOTES, 'UTF-8'); ?>"
-      data-team-type="recommendations" data-team-year="<?php echo $teamEarningsYear; ?>" data-team-org="<?php echo htmlspecialchars($selectedOrgName, ENT_QUOTES, 'UTF-8'); ?>"
-      data-team-rows="<?php echo htmlspecialchars(json_encode($_recRows_, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>">
-      <header class="earnings_ytd_header">
-        <span class="earnings_ytd_title"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_RECOMMENDED_ACTIONS', 'Recommended actions'), ENT_QUOTES, 'UTF-8'); ?></span>
-        <span class="earnings_ytd_subtitle"><?php echo htmlspecialchars(earnings_i18n('EARNINGS_RECOMMENDED_ACTIONS_SUBTITLE', 'Auto-generated from this period\'s data'), ENT_QUOTES, 'UTF-8'); ?></span>
-        <div class="et_export_group">
-          <button type="button" class="et_export_btn" data-team-export-format="csv"><?php echo htmlspecialchars(earnings_i18n('CSV', 'CSV'), ENT_QUOTES, 'UTF-8'); ?></button>
-          <button type="button" class="et_export_btn" data-team-export-format="txt"><?php echo htmlspecialchars(earnings_i18n('TXT', 'TXT'), ENT_QUOTES, 'UTF-8'); ?></button>
-        </div>
-      </header>
-      <ol class="et_rec_list">
-        <?php foreach ($recommendations_ as $rci_ => $rec_): ?>
-        <li class="et_rec_item et_rec_item--<?php echo htmlspecialchars($rec_['priority'], ENT_QUOTES, 'UTF-8'); ?>">
-          <span class="et_rec_num"><?php echo $rci_ + 1; ?></span>
-          <div class="et_rec_content">
-            <span class="et_rec_text"><?php echo htmlspecialchars($rec_['text'], ENT_QUOTES, 'UTF-8'); ?></span>
-            <span class="et_rec_source"><?php echo htmlspecialchars($rec_['source'], ENT_QUOTES, 'UTF-8'); ?></span>
-          </div>
-        </li>
-        <?php endforeach; ?>
-      </ol>
-    </figure>
-
     <?php
-      Lens::timeEnd('Team Earnings: panel HTML render');
+      Lens::timeEnd('Business Reports: panel HTML render');
     endif; // $cN >= 1 ?>
 
     <?php endif; ?>

@@ -520,6 +520,12 @@ final class SitesService
       $endDate = '';
     }
 
+    $isOnReserve = $this->truthySiteValue($row['is_on_reserve'] ?? null) ? '1' : '0';
+
+    $reserveName = is_scalar($row['reserve_name'] ?? null)
+      ? mb_substr(trim((string) $row['reserve_name']), 0, 120)
+      : '';
+
     return [
         'site_name' => $siteName,
         'wage' => $wage,
@@ -533,7 +539,22 @@ final class SitesService
         'cost_code' => $costCode,
         'start_date' => $startDate,
         'end_date' => $endDate,
+        'is_on_reserve' => $isOnReserve,
+        'reserve_name' => $reserveName,
     ];
+  }
+
+  private function truthySiteValue(mixed $value): bool
+  {
+    if (is_bool($value)) {
+      return $value;
+    }
+
+    if (!is_scalar($value)) {
+      return false;
+    }
+
+    return in_array(strtolower(trim((string) $value)), ['1', 'true', 'yes', 'on'], true);
   }
 
   /**

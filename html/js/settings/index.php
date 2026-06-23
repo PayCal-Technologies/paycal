@@ -41,6 +41,7 @@ $i18nKeys = [
   'SETTINGS_JS_WORK_ENTRY_FIELDS_UPDATED',
   'SETTINGS_JS_CALENDAR_DISPLAY_UPDATED',
   'SETTINGS_JS_DENSITY_UPDATED_FMT',
+  'SETTINGS_JS_DEPTH_UPDATED_FMT',
   'SETTINGS_JS_ACCENT_UPDATED_FMT',
   'SETTINGS_JS_HIGH_CONTRAST_UPDATED_FMT',
   'SETTINGS_JS_REDUCED_MOTION_UPDATED_FMT',
@@ -62,6 +63,12 @@ $i18nKeys = [
   'SETTINGS_JS_EXPORT_ENCRYPT_FAILED',
   'SETTINGS_JS_EXPORT_ENCRYPTED_SUCCESS',
   'SETTINGS_JS_RECOVERY_KEY_ACTIVE',
+  'SETTINGS_RECOVERY_KEY_COPY_FAILED',
+  'SETTINGS_RECOVERY_KEY_COPIED',
+  'SETTINGS_RECOVERY_KEY_DISPLAY_INSTRUCTION',
+  'SETTINGS_RECOVERY_KEY_REGENERATE_CONFIRM',
+  'SETTINGS_RECOVERY_KEY_SUCCESS_CREATE',
+  'SETTINGS_RECOVERY_KEY_SUCCESS_REGENERATE',
   'KEYBOARD_SHORTCUTS',
   'SETTINGS_JS_AUDIO_MUTED',
   'SETTINGS_JS_AUDIO_ENABLED',
@@ -111,6 +118,23 @@ $i18nKeys = [
   'SETTINGS_JS_MODAL_CONFIRM_IMPORT',
   'SETTINGS_JS_SECURITY_REMAINING_FMT',
   'SETTINGS_JS_SECURITY_EXPIRED',
+  'SETTINGS_DATA_CONSENT_RULE',
+  'SETTINGS_DATA_CONSENT_ACTIVE',
+  'SETTINGS_DATA_CONSENT_REVOKED',
+  'SETTINGS_DATA_CONSENT_ACTIVE_DESC',
+  'SETTINGS_DATA_CONSENT_REVOKED_DESC',
+  'SETTINGS_DATA_CONSENT_SECURE_ACCESS_NOT_READY_DESC',
+  'SETTINGS_DATA_CONSENT_REVOKE',
+  'SETTINGS_DATA_CONSENT_REFRESH_ACCESS',
+  'SETTINGS_DATA_CONSENT_GRANT_CONFIRM',
+  'SETTINGS_DATA_CONSENT_REFRESH_CONFIRM',
+  'SETTINGS_DATA_CONSENT_REVOKE_CONFIRM',
+  'SETTINGS_DATA_CONSENT_GRANT_SUCCESS',
+  'SETTINGS_DATA_CONSENT_REFRESH_SUCCESS',
+  'SETTINGS_DATA_CONSENT_REVOKE_SUCCESS',
+  'SETTINGS_DATA_CONSENT_GRANT_SETUP_NEEDED',
+  'SETTINGS_DATA_CONSENT_ACTION_FAILED',
+  'SETTINGS_DATA_CONSENT_REVOKE_MODAL_TITLE',
   'SETTINGS_RECOVERY_SEND_BUTTON',
   'SETTINGS_SECURITY_BALANCED',
   'SETTINGS_SECURITY_LOW',
@@ -149,42 +173,23 @@ import PC from "<?php echo Environment::appURL('js/'); ?>";
 import PW from "<?php echo Environment::appURL('js/phantomwing/'); ?>";
 import { initializeBillingSection } from "../core/billing.js";
 import { fromBase64Url as b64urlToBuffer, toBase64, toBase64Url as bufferToB64url } from "../core/binary-codec.js";
+import { isWebAuthnCapableBrowser } from "../core/capabilities.js";
+import { setActionBusy } from "../core/actions.js";
+import {
+  clearFieldErrorStates,
+  clearFieldInvalidStates,
+  setFieldErrorState,
+} from "../core/forms.js";
+import { setPrefixedStatusText } from "../core/status-text.js";
+import {
+  buildPayPeriodCurrentRange,
+  buildPayPeriodDayNames,
+  buildPayPeriodPreviewState,
+  payPeriodFormatYmd,
+} from "../core/pay-period-preview.js";
+import { formatTemplate as formatSettingsMessage } from "../core/template.js";
 
 const SETTINGS_T = <?php echo json_encode($i18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
-
-(() => {
-  const node = document.getElementById('settings-legacy-hash-redirects');
-  if (!(node instanceof HTMLScriptElement)) {
-    return;
-  }
-
-  let redirects = null;
-  try {
-    redirects = JSON.parse(node.textContent || '');
-  } catch {
-    return;
-  }
-
-  if (!redirects || typeof redirects !== 'object') {
-    return;
-  }
-
-  const hashKey = (window.location.hash || '').replace(/^#/, '');
-  if (hashKey === '') {
-    return;
-  }
-
-  const target = redirects[hashKey];
-  if (typeof target !== 'string' || target === '') {
-    return;
-  }
-
-  const currentPath = window.location.pathname.replace(/\/$/, '');
-  const targetPath = target.replace(/\/$/, '');
-  if (currentPath !== targetPath) {
-    window.location.replace(target + (window.location.search || ''));
-  }
-})();
 
 const getSettingsCsrfToken = () => {
   const workspaceToken = document.querySelector('#settings_csrf_token');
@@ -198,14 +203,6 @@ const getSettingsCsrfToken = () => {
   }
 
   return '';
-};
-
-const formatSettingsMessage = (template, replacements = {}) => {
-  let message = String(template || '');
-  Object.entries(replacements).forEach(([key, value]) => {
-    message = message.split(`{${key}}`).join(String(value ?? ''));
-  });
-  return message;
 };
 
 const appendSettingsCsrfToken = (formData) => {
@@ -222,6 +219,42 @@ const debugLog = (...args) => {
   }
   PW.log('[Settings Debug]', ...args);
 };
+
+let lastSettingsAutosaveTarget = null;
+
+const rememberSettingsAutosaveTarget = (target) => {
+  if (!(target instanceof HTMLElement)) {
+    return;
+  }
+
+  const field = target.closest('input, select, textarea');
+  if (field instanceof HTMLElement) {
+    lastSettingsAutosaveTarget = field;
+  }
+};
+
+const markSettingsAutosaveTargetSaved = (fallbackTarget = null) => {
+  const field = fallbackTarget instanceof HTMLElement
+    ? fallbackTarget
+    : (lastSettingsAutosaveTarget instanceof HTMLElement && document.contains(lastSettingsAutosaveTarget) ? lastSettingsAutosaveTarget : null);
+  const target = field?.closest('.form-field, .item_pair, .settings_field, .details_inset_section') || field;
+  if (!(target instanceof HTMLElement)) {
+    return;
+  }
+
+  window.clearTimeout(Number(target.dataset.autosaveShimmerTimer || 0));
+  target.classList.remove('is-autosaved');
+  target.dataset.autosaveShimmer = 'saved';
+  target.classList.add('is-autosaved');
+  target.dataset.autosaveShimmerTimer = String(window.setTimeout(() => {
+    target.classList.remove('is-autosaved');
+    delete target.dataset.autosaveShimmer;
+    delete target.dataset.autosaveShimmerTimer;
+  }, 950));
+};
+
+document.addEventListener('input', (event) => rememberSettingsAutosaveTarget(event.target), true);
+document.addEventListener('change', (event) => rememberSettingsAutosaveTarget(event.target), true);
 
 
 /**
@@ -247,6 +280,7 @@ const handleRadioGroup = (name, endpoint, messageTemplate, options = {}) => {
       appendSettingsCsrfToken(formData);
 
       PC.updateResource(endpoint, formData).then(() => {
+        markSettingsAutosaveTargetSaved(checkedRadio);
         PC.showToast(
           messageTemplate
             .replace('{value}', value)
@@ -385,6 +419,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   })();
 
   const recoveryKeyBadgeEl = document.getElementById('settings_recovery_key_badge');
+  const recoveryKeyStatusValueEl = document.getElementById('settings_recovery_key_status_value');
+  const recoveryKeyUpdatedValueEl = document.getElementById('settings_recovery_key_updated_value');
+  const recoveryCodeOnceEl = document.getElementById('settings_recovery_code_once');
+  const recoveryCodeOnceValueEl = document.getElementById('settings_recovery_code_once_value');
+  const recoveryCodeCopyBtn = document.getElementById('settings_recovery_code_copy_btn');
+  const recoveryCodeDownloadBtn = document.getElementById('settings_recovery_code_download_btn');
+  const recoveryCodeOnceStatusEl = document.getElementById('settings_recovery_code_once_status');
   if (recoveryKeyBadgeEl instanceof HTMLElement) {
     const hasRecoveryKey = recoveryKeyBadgeEl.dataset.hasRecoveryKey === '1'
       || recoveryKeyBadgeEl.getAttribute('data-has-recovery-key') === '1';
@@ -404,20 +445,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const WEB_AUTHN_UNSUPPORTED_MESSAGE = SETTINGS_T.AUTH_JS_WEBAUTHN_UNSUPPORTED;
   let passkeyActionHardDisabled = false;
-  const isWebAuthnCapableBrowser = () => {
-    const hasPublicKeyCredential = typeof window.PublicKeyCredential !== 'undefined';
-    const hasCredentialsApi = typeof navigator.credentials !== 'undefined' && navigator.credentials !== null;
-    const hasGet = hasCredentialsApi && typeof navigator.credentials.get === 'function';
-    const hasCreate = hasCredentialsApi && typeof navigator.credentials.create === 'function';
-    return window.isSecureContext && hasPublicKeyCredential && hasCredentialsApi && hasGet && hasCreate;
-  };
 
   const normalizeBootstrapData = (payload) => {
     if (!payload || typeof payload !== 'object') {
       return {};
     }
 
+    if (payload.data && typeof payload.data === 'object') {
+      return payload.data;
+    }
+
     return payload;
+  };
+
+  const fetchAccountBootstrap = async () => {
+    const response = await fetch('/api/v1/user/account/bootstrap', {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: { 'Accept': 'application/json' },
+    });
+
+    const payload = await response.json();
+    if (!response.ok || payload.status !== 'success') {
+      throw new Error(payload.message || 'Unable to load account bootstrap data.');
+    }
+
+    return normalizeBootstrapData(payload);
   };
 
   const recoveryCryptoBridge = (() => {
@@ -426,6 +479,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     let hasDek = false;
     let dekVersion = 1;
     let cryptoVersion = 1;
+    let userId = '';
+    let encryptionSalt = '';
 
     const getWorker = () => {
       if (worker) {
@@ -469,39 +524,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     };
 
-    const fetchBootstrap = async () => {
-      const response = await fetch('/api/v1/user/account/bootstrap', {
-        method: 'GET',
-        credentials: 'same-origin',
-        headers: { 'Accept': 'application/json' },
-      });
-
-      const payload = await response.json();
-      if (!response.ok || payload.status !== 'success') {
-        throw new Error(payload.message || 'Unable to load account bootstrap data.');
-      }
-
-      return normalizeBootstrapData(payload);
-    };
-
     const ensureDEK = async () => {
       if (hasDek) {
         return true;
       }
 
-      const bootstrap = await fetchBootstrap();
+      const bootstrap = await fetchAccountBootstrap();
       const wrappedDekPasskey = bootstrap.wrappedDekPasskeyForCredential || '';
       const credentialId = bootstrap.credentialId || '';
-      const encryptionSalt = bootstrap.encryptionSalt || '';
+      encryptionSalt = bootstrap.encryptionSalt || '';
+      userId = bootstrap.userId || '';
+      const wrappedCredentialCount = Number(bootstrap.wrappedCredentialCount || 0);
 
       if (!wrappedDekPasskey || !credentialId || !encryptionSalt) {
+        if (wrappedCredentialCount > 0) {
+          throw new Error('Sign in with a passkey that can unlock your existing entries before adding another passkey.');
+        }
+
         throw new Error('Encrypted entries are not available yet. Open your calendar once and try again.');
       }
 
       await callWorker('unwrapWithPasskeyCredential', {
         wrappedDekPasskey,
         credentialId,
-        userId: bootstrap.userId || '',
+        userId,
         saltBase64: encryptionSalt,
         dekVersion: Number(bootstrap.dekVersion || 1),
         cryptoVersion: Number(bootstrap.cryptoVersion || 1),
@@ -523,9 +569,51 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     };
 
+    const wrapDEKWithPasskeyCredential = async (credentialId, saltBase64 = '') => {
+      await ensureDEK();
+
+      const saltForWrap = saltBase64 || encryptionSalt;
+      if (!credentialId || !saltForWrap || !userId) {
+        throw new Error('Missing passkey wrap inputs.');
+      }
+
+      const wrapped = await callWorker('wrapCurrentDekWithPasskeyCredential', {
+        credentialId,
+        userId,
+        saltBase64: saltForWrap,
+        derivationMode: 'credential-only',
+      });
+
+      const uploadResponse = await fetch('/api/v1/user/crypto/passkey-wrap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          credentialId,
+          wrappedDekPasskey: wrapped.wrappedDekPasskey,
+          dekVersion: wrapped.dekVersion,
+          cryptoVersion: wrapped.cryptoVersion,
+        }),
+      });
+
+      if (!uploadResponse.ok) {
+        let responseBody = '';
+        try {
+          responseBody = await uploadResponse.text();
+        } catch {
+          responseBody = '';
+        }
+
+        throw new Error(`Failed to persist wrapped DEK passkey (${uploadResponse.status}): ${responseBody || 'no response body'}`);
+      }
+
+      return true;
+    };
+
     return {
       ensureDEK,
       createRecoveryMaterial,
+      wrapDEKWithPasskeyCredential,
       get hasDek() {
         return hasDek;
       },
@@ -534,6 +622,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const getRecoveryCryptoApi = () => {
     if (window.PayCalCrypto?.ensureDEK && window.PayCalCrypto?.createRecoveryMaterial) {
+      return window.PayCalCrypto;
+    }
+
+    return recoveryCryptoBridge;
+  };
+
+  const getPasskeyWrapCryptoApi = () => {
+    if (window.PayCalCrypto?.ensureDEK && window.PayCalCrypto?.wrapDEKWithPasskeyCredential) {
       return window.PayCalCrypto;
     }
 
@@ -659,11 +755,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    addPasskeyButtonEl.disabled = busy;
-    addPasskeyButtonEl.setAttribute('aria-disabled', busy ? 'true' : 'false');
-    addPasskeyButtonEl.setAttribute('aria-busy', busy ? 'true' : 'false');
-    addPasskeyButtonEl.classList.toggle('is-working', busy);
+    setActionBusy(addPasskeyButtonEl, busy, {
+      ariaDisabled: true,
+      busyClass: 'is-working',
+    });
+    if (busy) {
+      addPasskeyButtonEl.classList.remove('is-success');
+    }
     addPasskeyButtonEl.textContent = busy ? 'Setting up passkey...' : 'Add Device';
+  };
+
+  const markAddPasskeySuccess = () => {
+    if (!(addPasskeyButtonEl instanceof HTMLElement)) {
+      return;
+    }
+    addPasskeyButtonEl.classList.add('is-success');
+    window.setTimeout(() => {
+      addPasskeyButtonEl.classList.remove('is-success');
+    }, 1300);
   };
 
   const setPasskeyGridStatus = (message) => {
@@ -690,6 +799,71 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   };
+
+  const setRecoveryCodeOnceStatus = (message) => {
+    if (recoveryCodeOnceStatusEl instanceof HTMLElement) {
+      recoveryCodeOnceStatusEl.textContent = String(message || '');
+    }
+  };
+
+  const currentDisplayedRecoveryCode = () => {
+    if (!(recoveryCodeOnceValueEl instanceof HTMLElement)) {
+      return '';
+    }
+    return String(recoveryCodeOnceValueEl.textContent || '').trim();
+  };
+
+  const showRecoveryCodeOnce = (recoveryCode) => {
+    if (!(recoveryCodeOnceEl instanceof HTMLElement) || !(recoveryCodeOnceValueEl instanceof HTMLElement)) {
+      return;
+    }
+    recoveryCodeOnceValueEl.textContent = String(recoveryCode || '').trim();
+    recoveryCodeOnceEl.hidden = false;
+    setRecoveryCodeOnceStatus('');
+  };
+
+  const copyDisplayedRecoveryCode = async () => {
+    const recoveryCode = currentDisplayedRecoveryCode();
+    if (recoveryCode === '') {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(recoveryCode);
+      setRecoveryCodeOnceStatus(SETTINGS_T.SETTINGS_RECOVERY_KEY_COPIED);
+    } catch (_error) {
+      setRecoveryCodeOnceStatus(SETTINGS_T.SETTINGS_RECOVERY_KEY_COPY_FAILED);
+    }
+  };
+
+  const downloadDisplayedRecoveryCode = () => {
+    const recoveryCode = currentDisplayedRecoveryCode();
+    if (recoveryCode === '') {
+      return;
+    }
+    const body = [
+      'PayCal Recovery Code',
+      '',
+      recoveryCode,
+      '',
+      SETTINGS_T.SETTINGS_RECOVERY_KEY_DISPLAY_INSTRUCTION,
+      '',
+    ].join('\n');
+    const url = URL.createObjectURL(new Blob([body], { type: 'text/plain' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `paycal-recovery-code-${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
+
+  recoveryCodeCopyBtn?.addEventListener('click', () => {
+    copyDisplayedRecoveryCode();
+  });
+  recoveryCodeDownloadBtn?.addEventListener('click', () => {
+    downloadDisplayedRecoveryCode();
+  });
 
   const formatPasskeyTimestamp = (ts) => {
     const value = Number(ts || 0);
@@ -904,6 +1078,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Avoid blocking click handler timing with a synchronous prompt.
     const deviceName = 'Passkey';
 
+    const passkeyWrapCrypto = getPasskeyWrapCryptoApi();
+    let bootstrapBeforeRegistration = {};
+    try {
+      bootstrapBeforeRegistration = await fetchAccountBootstrap();
+    } catch (bootstrapError) {
+      debugLog('[PASSKEY] Unable to inspect bootstrap before passkey registration:', bootstrapError);
+    }
+
+    const accountHasExistingDek = Number(bootstrapBeforeRegistration.wrappedCredentialCount || 0) > 0
+      || !!bootstrapBeforeRegistration.wrappedDek
+      || !!bootstrapBeforeRegistration.wrappedDekPasskey;
+
+    if (!passkeyWrapCrypto.hasDek) {
+      setPasskeyStatus('Preparing encrypted entries...', 'info');
+      setPasskeyGridStatus('Preparing encrypted entries for the new passkey...');
+      try {
+        await passkeyWrapCrypto.ensureDEK();
+      } catch (unlockError) {
+        if (accountHasExistingDek) {
+          const message = unlockError?.message || 'Sign in with a passkey that can unlock your existing entries before adding another passkey.';
+          setPasskeyStatus(message, 'error');
+          setPasskeyGridStatus(message);
+          throw unlockError;
+        }
+
+        debugLog('[PASSKEY] Existing DEK was not available before passkey registration:', unlockError);
+      }
+    }
+
     setPasskeyStatus('Starting passkey setup...', 'info');
     setPasskeyGridStatus('Starting passkey registration...');
 
@@ -1000,12 +1203,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       throw buildPasskeyApiError('register/finish', finishResponse, finishPayload, 'Unable to finish passkey registration.');
     }
 
-    // [CRYPTO] After successful registration, wrap DEK with passkey KEK
-    // This requires an immediate authentication to get the assertion signature
+    // [CRYPTO] After successful registration, wrap the existing DEK for this credential.
     setPasskeyStatus('Securing your data with this passkey...', 'info');
     setPasskeyGridStatus('Securing your data with the new passkey...');
     try {
-      await wrapDEKWithNewPasskey();
+      await wrapDEKWithNewPasskey(finishPayload.credentialId || finishPayload.data?.credentialId || '');
       setPasskeyStatus('Passkey added successfully.', 'success');
       setPasskeyGridStatus('Passkey added successfully. Refreshing passkeys list...');
     } catch (dekWrapError) {
@@ -1021,98 +1223,108 @@ document.addEventListener("DOMContentLoaded", async () => {
    * After passkey registration, securely attach the existing data key (DEK) to that passkey.
    *
    * Plain-language behavior:
-   * 1) Ask server for a passkey challenge.
-   * 2) User confirms with passkey.
-   * 3) Server returns stable credential ID.
-   * 4) Fetch encryption salt.
-   * 5) Wrap DEK using credential ID + salt so future unlock is deterministic.
+   * 1) Use the credential ID returned by verified passkey registration.
+   * 2) Fetch encryption salt.
+   * 3) Wrap DEK using credential ID + salt so future unlock is deterministic.
    */
-  async function wrapDEKWithNewPasskey() {
+  async function wrapDEKWithNewPasskey(registeredCredentialId = '') {
     debugLog('[PASSKEY] wrapDEKWithNewPasskey: starting DEK wrapping process (stable credential_id)...');
 
     if (!isWebAuthnCapableBrowser()) {
       throw new Error(WEB_AUTHN_UNSUPPORTED_MESSAGE);
     }
-    
-    // Check if DEK is available (calendar must have initialized encryption first)
-    if (!window.PayCalCrypto?.hasDek) {
+
+    const cryptoApi = getPasskeyWrapCryptoApi();
+    if (!cryptoApi.hasDek) {
+      await cryptoApi.ensureDEK();
+    }
+
+    if (!cryptoApi.hasDek) {
       throw new Error('[PASSKEY] DEK not available. Please unlock encrypted entries first.');
     }
 
-    // Step 1: Get challenge for authenticating with newly registered passkey
-    debugLog('[PASSKEY] Step 1: Requesting passkey challenge for DEK wrapping...');
-    const loginStartResponse = await fetch('/api/v1/auth/passkey/login/start', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({}),  // Server will detect current user
-    });
-
-    if (!loginStartResponse.ok) {
-      throw new Error('[PASSKEY] Unable to get challenge for passkey wrapping.');
+    let credentialId = String(registeredCredentialId || '').trim();
+    if (credentialId) {
+      debugLog('[PASSKEY] Step 1 complete: using credential_id returned by registration');
     }
 
-    const loginStartPayload = await loginStartResponse.json();
-    if (loginStartPayload.status !== 'success') {
-      throw new Error(loginStartPayload.message || '[PASSKEY] Challenge request failed.');
-    }
+    if (!credentialId) {
+      // Step 1: Get challenge for authenticating with newly registered passkey
+      debugLog('[PASSKEY] Step 1: Requesting passkey challenge for DEK wrapping...');
+      const loginStartResponse = await fetch('/api/v1/auth/passkey/login/start', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({}),  // Server will detect current user
+      });
 
-    // Step 2: User authenticates with newly registered passkey
-    debugLog('[PASSKEY] Step 2: Requesting passkey authentication...');
-    const challengeId = loginStartPayload.challengeId;
-    const options = loginStartPayload.publicKey || {};
-    options.challenge = b64urlToBuffer(options.challenge || '');
-    options.allowCredentials = Array.isArray(options.allowCredentials)
-      ? options.allowCredentials.map((c) => ({
-        ...c,
-        id: b64urlToBuffer(c.id),
-      }))
-      : [];
+      if (!loginStartResponse.ok) {
+        throw new Error('[PASSKEY] Unable to get challenge for passkey wrapping.');
+      }
 
-    const assertion = await navigator.credentials.get({ publicKey: options });
-    if (!assertion) {
-      throw new Error('[PASSKEY] Passkey authentication was cancelled.');
-    }
-    debugLog('[PASSKEY] Step 2 complete: assertion obtained');
+      const loginStartPayload = await loginStartResponse.json();
+      if (loginStartPayload.status !== 'success') {
+        throw new Error(loginStartPayload.message || '[PASSKEY] Challenge request failed.');
+      }
 
-    // Step 3: Complete passkey login to get stable credential_id
-    debugLog('[PASSKEY] Step 3: Completing passkey login to get credential_id...');
-    
-    const loginFinishResponse = await fetch('/api/v1/auth/passkey/login/finish', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        challengeId,
-        assertion: {
-          id: assertion.id,
-          type: assertion.type,
-          rawId: bufferToB64url(assertion.rawId),
-          response: {
-            clientDataJSON: bufferToB64url(assertion.response.clientDataJSON),
-            authenticatorData: bufferToB64url(assertion.response.authenticatorData),
-            signature: bufferToB64url(assertion.response.signature),
-            userHandle: assertion.response.userHandle ? bufferToB64url(assertion.response.userHandle) : null,
+      // Step 2: User authenticates with newly registered passkey
+      debugLog('[PASSKEY] Step 2: Requesting passkey authentication...');
+      const challengeId = loginStartPayload.challengeId;
+      const options = loginStartPayload.publicKey || {};
+      options.challenge = b64urlToBuffer(options.challenge || '');
+      options.allowCredentials = Array.isArray(options.allowCredentials)
+        ? options.allowCredentials.map((c) => ({
+          ...c,
+          id: b64urlToBuffer(c.id),
+        }))
+        : [];
+
+      const assertion = await navigator.credentials.get({ publicKey: options });
+      if (!assertion) {
+        throw new Error('[PASSKEY] Passkey authentication was cancelled.');
+      }
+      debugLog('[PASSKEY] Step 2 complete: assertion obtained');
+
+      // Step 3: Complete passkey login to get stable credential_id
+      debugLog('[PASSKEY] Step 3: Completing passkey login to get credential_id...');
+
+      const loginFinishResponse = await fetch('/api/v1/auth/passkey/login/finish', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          challengeId,
+          assertion: {
+            id: assertion.id,
+            type: assertion.type,
+            rawId: bufferToB64url(assertion.rawId),
+            response: {
+              clientDataJSON: bufferToB64url(assertion.response.clientDataJSON),
+              authenticatorData: bufferToB64url(assertion.response.authenticatorData),
+              signature: bufferToB64url(assertion.response.signature),
+              userHandle: assertion.response.userHandle ? bufferToB64url(assertion.response.userHandle) : null,
+            },
           },
-        },
-      }),
-    });
+        }),
+      });
 
-    if (!loginFinishResponse.ok) {
-      throw new Error('[PASSKEY] DEK wrapping authentication failed.');
+      if (!loginFinishResponse.ok) {
+        throw new Error('[PASSKEY] DEK wrapping authentication failed.');
+      }
+
+      const loginFinishPayload = await loginFinishResponse.json();
+      if (loginFinishPayload.status !== 'success') {
+        throw new Error('[PASSKEY] DEK wrapping failed at server.');
+      }
+
+      // Get credential_id from response (stable, deterministic)
+      if (!loginFinishPayload.data?.credential_id) {
+        throw new Error('[PASSKEY] credential_id not returned from server.');
+      }
+
+      credentialId = loginFinishPayload.data.credential_id;
+      debugLog('[PASSKEY] Step 3 complete: credential_id received (stable)');
     }
-
-    const loginFinishPayload = await loginFinishResponse.json();
-    if (loginFinishPayload.status !== 'success') {
-      throw new Error('[PASSKEY] DEK wrapping failed at server.');
-    }
-
-    // Get credential_id from response (stable, deterministic)
-    if (!loginFinishPayload.data?.credential_id) {
-      throw new Error('[PASSKEY] credential_id not returned from server.');
-    }
-
-    debugLog('[PASSKEY] Step 3 complete: credential_id received (stable)');
 
     // Step 4: Fetch encryption salt from bootstrap
     debugLog('[PASSKEY] Step 4: Fetching encryption salt...');
@@ -1138,19 +1350,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     debugLog('[PASSKEY] Step 5: Wrapping DEK with passkey KEK (stable credential_id + salt)...');
 
     // Step 5: Call the global function to wrap DEK with stable credential_id
-    if (window.PayCalCrypto?.wrapDEKWithPasskeyCredential) {
-      await window.PayCalCrypto.wrapDEKWithPasskeyCredential(
-        loginFinishPayload.data.credential_id,
-        bootstrapData.encryptionSalt
-      );
-      debugLog('[PASSKEY] Step 5 complete: DEK wrapped and uploaded (deterministic unwrap enabled)');
-    } else {
-      throw new Error('[PASSKEY] DEK wrapping API not available.');
-    }
+    await cryptoApi.wrapDEKWithPasskeyCredential(
+      credentialId,
+      bootstrapData.encryptionSalt
+    );
+    debugLog('[PASSKEY] Step 5 complete: DEK wrapped and uploaded (deterministic unwrap enabled)');
   };
 
   const createRecoveryKeyAction = async () => {
     const recoveryCrypto = getRecoveryCryptoApi();
+    const isRegenerating = createRecoveryKeyButtonEl instanceof HTMLButtonElement
+      && createRecoveryKeyButtonEl.dataset.hasRecoveryKey === '1';
+    if (isRegenerating && !window.confirm(createRecoveryKeyButtonEl.dataset.replaceConfirm || SETTINGS_T.SETTINGS_RECOVERY_KEY_REGENERATE_CONFIRM)) {
+      return;
+    }
 
     createRecoveryKeyButtonEl?.setAttribute('disabled', 'disabled');
     setRecoveryKeyStatus('Unlocking encrypted entries...', 'info');
@@ -1163,6 +1376,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       setRecoveryKeyStatus('Working…', 'info');
       let material = await recoveryCrypto.createRecoveryMaterial();
+      let recoveryCodeForDisplay = String(material.recoveryKey || '').trim();
       const requestPayload = {
         wrappedDekRecovery: material.wrappedDekRecovery,
         accountRecoverySalt: material.accountRecoverySalt,
@@ -1187,10 +1401,40 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const payload = await response.json();
       if (!response.ok || payload.status !== 'success') {
-        throw new Error(payload.message || 'Unable to create Recovery Key.');
+        throw new Error(payload.message || 'Unable to create Recovery Code.');
       }
 
-      setRecoveryKeyStatus('Recovery Key created. Check your email.', 'success');
+      if (recoveryKeyBadgeEl instanceof HTMLElement) {
+        recoveryKeyBadgeEl.dataset.hasRecoveryKey = '1';
+        recoveryKeyBadgeEl.hidden = false;
+        recoveryKeyBadgeEl.classList.add('is-visible');
+        recoveryKeyBadgeEl.setAttribute('aria-label', SETTINGS_T.SETTINGS_JS_RECOVERY_KEY_ACTIVE);
+      }
+      if (recoveryKeyStatusValueEl instanceof HTMLElement) {
+        recoveryKeyStatusValueEl.textContent = createRecoveryKeyButtonEl?.dataset.activeStatus || 'Active';
+        recoveryKeyStatusValueEl.classList.remove('is-missing');
+        recoveryKeyStatusValueEl.classList.add('is-active');
+      }
+      if (recoveryKeyUpdatedValueEl instanceof HTMLElement) {
+        recoveryKeyUpdatedValueEl.textContent = new Date().toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      }
+      if (createRecoveryKeyButtonEl instanceof HTMLButtonElement) {
+        createRecoveryKeyButtonEl.dataset.hasRecoveryKey = '1';
+        createRecoveryKeyButtonEl.textContent = createRecoveryKeyButtonEl.dataset.regenerateLabel || createRecoveryKeyButtonEl.textContent;
+      }
+      showRecoveryCodeOnce(recoveryCodeForDisplay);
+      recoveryCodeForDisplay = '';
+
+      setRecoveryKeyStatus(
+        isRegenerating
+          ? SETTINGS_T.SETTINGS_RECOVERY_KEY_SUCCESS_REGENERATE
+          : SETTINGS_T.SETTINGS_RECOVERY_KEY_SUCCESS_CREATE,
+        'success'
+      );
     } finally {
       createRecoveryKeyButtonEl?.removeAttribute('disabled');
     }
@@ -1209,6 +1453,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       setAddPasskeyBusyState(true);
       try {
         await addPasskeyAction();
+        markAddPasskeySuccess();
       } catch (error) {
         const errorMessage = simplifyPasskeyStatusMessage(error);
         setPasskeyStatus(errorMessage, 'error');
@@ -1223,13 +1468,133 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (createRecoveryKeyButtonEl) {
     createRecoveryKeyButtonEl.addEventListener('click', () => {
       createRecoveryKeyAction().catch((error) => {
-        setRecoveryKeyStatus(error?.message || 'Unable to create Recovery Key. Try again.', 'error');
+        setRecoveryKeyStatus(error?.message || 'Unable to create Recovery Code. Try again.', 'error');
         PW.error(error);
       });
     });
   }
 
+  const federatedProviderListEl = document.getElementById('federated_provider_list');
+  const federatedProviderStatusEl = document.getElementById('federated_provider_status');
+  const federatedResultStatus = (() => {
+    const params = new URLSearchParams(window.location.search || '');
+    return String(params.get('federated') || '').trim();
+  })();
+  const federatedResultMessage = (() => {
+    switch (federatedResultStatus) {
+      case 'linked':
+        return 'Google connected.';
+      case 'already_linked':
+        return 'This Google account is already connected.';
+      case 'provider_not_linked':
+        return 'Google is not connected to this PayCal account yet. Try Connect Google from this Security page.';
+      case 'invalid_provider_token':
+        return 'Google returned a token PayCal could not verify. Try connecting again.';
+      case 'invalid_state':
+      case 'missing_callback_params':
+        return 'The Google connection expired or was incomplete. Start again from Connect Google.';
+      case 'link_failed':
+        return 'PayCal could not find the account that started this Google connection. Sign in with your passkey and try again.';
+      case 'provider_unavailable':
+        return 'Google sign-in is not available right now.';
+      default:
+        return '';
+    }
+  })();
+
+  const setFederatedProviderStatus = (message) => {
+    if (federatedProviderStatusEl instanceof HTMLElement) {
+      federatedProviderStatusEl.textContent = message;
+    }
+  };
+
+  const renderFederatedProviders = (providers) => {
+    if (!(federatedProviderListEl instanceof HTMLElement)) {
+      return;
+    }
+
+    federatedProviderListEl.textContent = '';
+    const visibleProviders = Array.isArray(providers)
+      ? providers.filter((provider) => provider && provider.id === 'google' && provider.enabled === true)
+      : [];
+
+    if (visibleProviders.length === 0) {
+      setFederatedProviderStatus('Google sign-in is not configured for this local host.');
+      return;
+    }
+
+    visibleProviders.forEach((provider) => {
+      const row = document.createElement('div');
+      row.className = 'federated_provider_row';
+
+      const label = document.createElement('div');
+      label.className = 'federated_provider_label';
+      label.textContent = provider.linked
+        ? `Google connected${provider.email ? `: ${provider.email}` : ''}`
+        : 'Google is not connected';
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = provider.linked ? 'btn btn_delete' : 'btn btn_primary';
+      button.textContent = provider.linked ? 'Disconnect Google' : 'Connect Google';
+      button.addEventListener('click', async () => {
+        if (provider.linked) {
+          try {
+            setFederatedProviderStatus('Disconnecting Google...');
+            const response = await fetch('/api/v1/auth/federated/unlink', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({ provider: 'google' }),
+            });
+            const payload = await response.json();
+            if (!response.ok || payload.status !== 'success') {
+              throw new Error(payload.message || 'Unable to disconnect Google.');
+            }
+            renderFederatedProviders(payload.providers || []);
+            setFederatedProviderStatus('Google disconnected.');
+          } catch (error) {
+            setFederatedProviderStatus(error?.message || 'Unable to disconnect Google.');
+            PW.error(error);
+          }
+          return;
+        }
+
+        window.location.href = '/api/v1/auth/federated/start/google?mode=link';
+      });
+
+      row.appendChild(label);
+      row.appendChild(button);
+      federatedProviderListEl.appendChild(row);
+    });
+  };
+
+  const refreshFederatedProviders = async () => {
+    if (!(federatedProviderListEl instanceof HTMLElement)) {
+      return;
+    }
+
+    try {
+      setFederatedProviderStatus('Checking connected sign-in providers...');
+      const response = await fetch('/api/v1/auth/federated/linked', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' },
+      });
+      const payload = await response.json();
+      if (!response.ok || payload.status !== 'success') {
+        throw new Error(payload.message || 'Unable to load connected sign-in providers.');
+      }
+      renderFederatedProviders(payload.providers || []);
+      setFederatedProviderStatus(federatedResultMessage);
+    } catch (error) {
+      setFederatedProviderStatus(error?.message || 'Unable to load connected sign-in providers.');
+      PW.error(error);
+    }
+  };
+
   refreshPasskeyCredentials();
+  refreshFederatedProviders();
 
   const toggleChangeEmailStep = (showStep2) => {
     const step1 = PC.getElement('change_email_step1_section');
@@ -1261,44 +1626,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateChangeEmailVerifyState();
   };
 
-  const normalizeVerificationCode = (value) => String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
-
-  const setFieldInvalidState = (input, isInvalid) => {
-    if (!input) {
-      return;
-    }
-
-    if (isInvalid) {
-      input.setAttribute('aria-invalid', 'true');
-    } else {
-      input.removeAttribute('aria-invalid');
-    }
-  };
-
-  const setFieldErrorMessage = (errorId, message) => {
-    const errorEl = PC.getElement(errorId);
-    if (!errorEl) {
-      return;
-    }
-
-    errorEl.textContent = String(message || '').trim();
-  };
-
-  const setFieldErrorState = (input, errorId, message) => {
-    const text = String(message || '').trim();
-    setFieldInvalidState(input, text.length > 0);
-    setFieldErrorMessage(errorId, text);
-  };
-
-  const clearFieldErrorStates = (pairs) => {
-    pairs.forEach(([inputId, errorId]) => {
-      setFieldErrorState(PC.getElement(inputId), errorId, '');
-    });
-  };
-
-  const clearFieldInvalidStates = (ids) => {
-    ids.forEach((id) => setFieldInvalidState(PC.getElement(id), false));
-  };
+  const normalizeVerificationCode = (value) => String(value || '').toUpperCase().replace(/[-\s]/g, '').slice(0, 6);
 
   const updateChangeEmailVerifyState = () => {
     const verifyBtn = PC.getElement('change_email_verify_btn');
@@ -1378,6 +1706,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     return { data, raw };
   };
 
+  const cleanSettingsApiMessage = (message, fallback = SETTINGS_T.SETTINGS_DATA_CONSENT_ACTION_FAILED || 'Request failed.') => {
+    const text = String(message || fallback).trim().replace(/^\[[^\]]+\]\s*/, '');
+    return text === '' ? fallback : text;
+  };
+
+  const isSettingsApiStatusSuccess = (data) => {
+    if (!data || typeof data !== 'object' || !('status' in data)) {
+      return true;
+    }
+    const status = data.status;
+    if (status === true || status === 'success' || status === 'ok') {
+      return true;
+    }
+    if (typeof status === 'number') {
+      return status >= 200 && status < 300;
+    }
+    const normalized = String(status || '').trim().toLowerCase();
+    if (normalized === 'success' || normalized === 'ok') {
+      return true;
+    }
+    const numericStatus = Number(normalized);
+    return Number.isFinite(numericStatus) && numericStatus >= 200 && numericStatus < 300;
+  };
+
   attachChangeEmailCodeInputHandlers();
 
   PC.addClickAndEnterListener('change_email_prev_btn', (e) => {
@@ -1392,10 +1744,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     PC.closeModal('modal_change_email', SETTINGS_T.CHANGE_EMAIL);
   });
 
-  if (document.getElementById('call_edit_details_modal')) {
-    PC.addClickAndEnterListener('call_edit_details_modal', (e) => { e.preventDefault(); PC.openModal('modal_edit_details', SETTINGS_T.SETTINGS_ACCOUNT_DETAILS_TITLE); });
-  }
-  PC.addClickAndEnterListener('edit_details_cancel_btn', (e) => { e.preventDefault(); PC.closeModal('modal_edit_details', SETTINGS_T.SETTINGS_ACCOUNT_DETAILS_TITLE); });
   const CHANGE_EMAIL_I18N = {
     enterBothEmails: <?php echo json_encode(Strings::i18n('CHANGE_EMAIL_STATUS_ENTER_BOTH_EMAILS'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>,
     enterNewEmail: <?php echo json_encode(Strings::i18n('CHANGE_EMAIL_ERROR_ENTER_NEW_EMAIL'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>,
@@ -1427,7 +1775,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     PC.addClickAndEnterListener('edit_details_change_email_link', (e) => {
       e.preventDefault();
       resetChangeEmailModal();
-      PC.closeModal('modal_edit_details', SETTINGS_T.SETTINGS_ACCOUNT_DETAILS_TITLE);
       PC.openModal('modal_change_email', SETTINGS_T.CHANGE_EMAIL);
     });
   }
@@ -1588,15 +1935,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   PC.addClickAndEnterListener('call_delete_account_modal', (e) => {
     e.preventDefault();
-    const editDetailsModal = PC.getElement('modal_edit_details');
-    if (editDetailsModal?.open) {
-      PC.closeModal('modal_edit_details', 'Account Details');
-    }
-    PC.openModal('modal_delete_account', SETTINGS_T.DELETE_ACCOUNT);
-    PC.getElement('delete_account_confirm_phrase').focus();
-  });
-  PC.addClickAndEnterListener('settings_data_delete_account_btn', (e) => {
-    e.preventDefault();
     PC.openModal('modal_delete_account', SETTINGS_T.DELETE_ACCOUNT);
     PC.getElement('delete_account_confirm_phrase').focus();
   });
@@ -1630,7 +1968,63 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const editDetailsPhone = PC.getElement('edit_details_phone');
+  const resolveSettingsDialCodeFromLocale = (localeValue) => {
+    const locale = String(localeValue || '').trim();
+    const dialCodesByLocale = {
+      'en-CA': '+1',
+      'fr-CA': '+1',
+      'en-US': '+1',
+      'en-GB': '+44',
+      'fr-FR': '+33',
+      'de-DE': '+49',
+      'es-ES': '+34',
+      'pt-BR': '+55',
+    };
+
+    return dialCodesByLocale[locale] || '+1';
+  };
+
+  const syncSettingsPhoneCountryAdornment = () => {
+    const phoneInput = PC.getElement('edit_details_phone');
+    if (!(phoneInput instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const parent = phoneInput.parentElement;
+    if (!(parent instanceof HTMLElement)) {
+      return;
+    }
+
+    let shell = phoneInput.closest('.personal_phone_input_shell');
+    if (!(shell instanceof HTMLElement)) {
+      shell = document.createElement('div');
+      shell.className = 'personal_phone_input_shell';
+      parent.insertBefore(shell, phoneInput);
+      shell.appendChild(phoneInput);
+    }
+
+    let dialCodeEl = shell.querySelector('.personal_phone_country_code');
+    if (!(dialCodeEl instanceof HTMLElement)) {
+      dialCodeEl = document.createElement('span');
+      dialCodeEl.className = 'personal_phone_country_code';
+      dialCodeEl.setAttribute('aria-hidden', 'true');
+      shell.insertBefore(dialCodeEl, phoneInput);
+    }
+    shell.querySelectorAll('.personal_phone_country_code').forEach((candidate) => {
+      if (candidate !== dialCodeEl) {
+        candidate.remove();
+      }
+    });
+
+    const localeInput = PC.getElement('businesses_personal_locale');
+    const locale = localeInput instanceof HTMLSelectElement
+      ? String(localeInput.value || 'en-CA')
+      : 'en-CA';
+    dialCodeEl.textContent = resolveSettingsDialCodeFromLocale(locale);
+  };
+
   if (editDetailsPhone) {
+    syncSettingsPhoneCountryAdornment();
     PC.formatPhoneNumber(editDetailsPhone);
     editDetailsPhone.addEventListener('input', (e) => {
       PC.formatPhoneNumber(e.target);
@@ -1638,6 +2032,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     editDetailsPhone.addEventListener('change', (e) => {
       PC.formatPhoneNumber(e.target);
     });
+  }
+  const settingsPersonalLocale = PC.getElement('businesses_personal_locale');
+  if (settingsPersonalLocale) {
+    settingsPersonalLocale.addEventListener('change', syncSettingsPhoneCountryAdornment);
   }
 
   const editDetailsForm = PC.getElement('edit_details_form');
@@ -1657,6 +2055,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ['edit_details_address_line1', 'edit_details_address_line1_error'],
       ['edit_details_address_city', 'edit_details_address_city_error'],
       ['edit_details_address_postal', 'edit_details_address_postal_error'],
+      ['edit_details_reserve_name', 'edit_details_reserve_name_error'],
     ];
 
     const clearEditDetailsValidationState = () => {
@@ -1743,21 +2142,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       return true;
     };
 
-    const updatePanelField = (panelEl, value) => {
-      if (!panelEl) {
-        return;
-      }
-      if ('value' in panelEl) {
-        panelEl.value = value;
-        return;
-      }
-      panelEl.textContent = value;
+    const buildEditDetailsSignature = () => {
+      const formData = new FormData(editDetailsForm);
+      return Array.from(formData.entries())
+        .map(([key, value]) => `${key}:${String(value)}`)
+        .sort()
+        .join('|');
     };
 
-    editDetailsForm.addEventListener('submit', (e) => {
-      e.preventDefault();
+    let editDetailsSaveTimer = null;
+    let editDetailsLastSavedSignature = buildEditDetailsSignature();
+
+    const saveEditDetailsForm = () => {
+      if (editDetailsSaveTimer !== null) {
+        window.clearTimeout(editDetailsSaveTimer);
+        editDetailsSaveTimer = null;
+      }
 
       if (!validateEditDetailsForm()) {
+        return;
+      }
+
+      const nextSignature = buildEditDetailsSignature();
+      if (nextSignature === editDetailsLastSavedSignature) {
         return;
       }
 
@@ -1767,36 +2174,51 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const formData = new FormData(editDetailsForm);
       PC.updateResource('account/info', formData).then(() => {
+        editDetailsLastSavedSignature = nextSignature;
         clearEditDetailsValidationState();
-        const panelName = PC.getElement('label_full_name');
-        const panelPhone = PC.getElement('label_phone');
-        const panelProvince = PC.getElement('label_province');
-        const panelTimezone = PC.getElement('timezone_picker');
-
-        const modalName = PC.getElement('edit_details_full_name');
-        const modalPhone = PC.getElement('edit_details_phone');
-        const modalProvince = PC.getElement('edit_details_province');
-        const modalTimezone = PC.getElement('edit_details_timezone_picker');
-
-        if (panelName && modalName) updatePanelField(panelName, modalName.value);
-        if (panelPhone && modalPhone) updatePanelField(panelPhone, modalPhone.value);
-        if (panelProvince instanceof HTMLSelectElement && modalProvince instanceof HTMLSelectElement) {
-          panelProvince.value = modalProvince.value;
-        }
-        if (panelTimezone && modalTimezone) {
-          panelTimezone.value = modalTimezone.value;
-        }
-
         if (editDetailsStatus) {
           editDetailsStatus.textContent = <?php echo json_encode($i18n['INFO_UPDATED'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>;
         }
-        PC.closeModal('modal_edit_details', 'Account Details');
       }).catch(error => {
         if (editDetailsStatus) {
           editDetailsStatus.textContent = SETTINGS_T.BUSINESSES_SAVE_ACCOUNT_DETAILS_FAILED;
         }
         PW.error(error);
       });
+    };
+
+    const scheduleEditDetailsAutosave = (delayMs = 600) => {
+      if (editDetailsSaveTimer !== null) {
+        window.clearTimeout(editDetailsSaveTimer);
+      }
+      editDetailsSaveTimer = window.setTimeout(saveEditDetailsForm, delayMs);
+    };
+
+    editDetailsForm.querySelectorAll('input[name], select[name], textarea[name]').forEach((field) => {
+      if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement)) {
+        return;
+      }
+      if (field.disabled || field.type === 'hidden' || field.name === 'csrf_token' || field.name === 'username') {
+        return;
+      }
+
+      if (field instanceof HTMLInputElement && (field.type === 'checkbox' || field.type === 'radio')) {
+        field.addEventListener('change', () => saveEditDetailsForm());
+        return;
+      }
+
+      if (field instanceof HTMLSelectElement || (field instanceof HTMLInputElement && field.type === 'date')) {
+        field.addEventListener('change', () => saveEditDetailsForm());
+        return;
+      }
+
+      field.addEventListener('input', () => scheduleEditDetailsAutosave());
+      field.addEventListener('change', () => saveEditDetailsForm());
+    });
+
+    editDetailsForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveEditDetailsForm();
     });
   }
 
@@ -1958,18 +2380,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const setRecoveryStatus = (statusEl, state) => {
-    if (!statusEl) return;
-
-    statusEl.classList.remove(
-      'status_message_error',
-      'status_message_muted',
-      'status_message_info',
-      'status_message_success'
-    );
-
-    if (state) {
-      statusEl.classList.add(`status_message_${state}`);
-    }
+    setPrefixedStatusText(statusEl, '', state, { updateText: false });
   };
 
   const sendRecoveryEmailCode = async () => {
@@ -2068,7 +2479,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     if (!codeInput || !statusEl || !verifyBtn) return;
 
-    const code = codeInput.value.trim();
+    const code = normalizeVerificationCode(codeInput.value);
+    codeInput.value = code;
     const csrfToken = getRecoveryEmailCsrfToken();
     setFieldErrorState(codeInput, 'recovery_email_code_error', '');
     
@@ -2251,6 +2663,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const recoveryEmailCodeInputEl = PC.getElement('recovery_email_code_input');
   if (recoveryEmailCodeInputEl) {
     recoveryEmailCodeInputEl.addEventListener('input', () => {
+      const normalized = normalizeVerificationCode(recoveryEmailCodeInputEl.value);
+      if (recoveryEmailCodeInputEl.value !== normalized) {
+        recoveryEmailCodeInputEl.value = normalized;
+      }
       setFieldErrorState(recoveryEmailCodeInputEl, 'recovery_email_code_error', '');
     });
   }
@@ -2290,6 +2706,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       formData.append('debug_ttl_minutes', debugTtlMinutesSelect.value);
       appendSettingsCsrfToken(formData);
       PC.updateResource('settings/debug', formData).then(() => {
+        markSettingsAutosaveTargetSaved(debugTtlMinutesSelect);
         PC.showToast(SETTINGS_T.SETTINGS_JS_DEBUG_TTL_UPDATED, 'save', 3000, true);
       }).catch(error => PW.error(error));
     });
@@ -2321,6 +2738,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       appendSettingsCsrfToken(formData);
 
       PC.updateResource('settings/calendar', formData).then(() => {
+        markSettingsAutosaveTargetSaved(checkbox);
         PC.showToast(SETTINGS_T.SETTINGS_JS_WORK_ENTRY_FIELDS_UPDATED, 'save');
       }).catch(error => PW.error(error));
     });
@@ -2337,6 +2755,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       appendSettingsCsrfToken(formData);
 
       PC.updateResource('settings/calendar', formData).then(() => {
+        markSettingsAutosaveTargetSaved(checkbox);
         PC.showToast(SETTINGS_T.SETTINGS_JS_CALENDAR_DISPLAY_UPDATED, 'save');
       }).catch(error => PW.error(error));
     });
@@ -2405,6 +2824,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       formData.append('audio_feedback', PC.state.audio_feedback);
       appendSettingsCsrfToken(formData);
       PC.updateResource('settings/audio', formData).then(() => {
+        markSettingsAutosaveTargetSaved(checkedAudio);
         const modeLabel = PC.state.audio_feedback === 'none'
           ? SETTINGS_T.SETTINGS_JS_AUDIO_MUTED
           : SETTINGS_T.SETTINGS_JS_AUDIO_ENABLED;
@@ -2444,6 +2864,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     appendSettingsCsrfToken(formData);
 
     PC.updateResource('settings/audio', formData).then(() => {
+      markSettingsAutosaveTargetSaved(radioInput);
       PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_VOICE_UPDATED_FMT, { voice: voiceLabel }), 'save', 3000, true);
       if (PC.state.audio_feedback === 'all') {
         PC.textToSpeech(voiceLabel);
@@ -2478,6 +2899,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     formData.append('voice_volume', voiceVolumeSlider.value);
     appendSettingsCsrfToken(formData);
     PC.updateResource('settings/audio', formData).then(() => {
+      markSettingsAutosaveTargetSaved(voiceVolumeSlider);
       PC.showToast(SETTINGS_T.SETTINGS_JS_VOICE_VOLUME_UPDATED, 'save', 3000, true);
     }).catch(error => PW.error(error));
   };
@@ -2500,6 +2922,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* STYLE */
   const themePicker = PC.getElement('theme_picker');
   const variantPicker = PC.getElement('variant_picker');
+  const themeCards = Array.from(document.querySelectorAll('.settings_theme_card'));
+  const modeOptions = Array.from(document.querySelectorAll('.settings_mode_option'));
+  const selectedThemeLabel = document.getElementById('selected_theme_label');
   const languagePicker = PC.getElement('language_picker');
   const styleForm = PC.getElement('account_style_form');
   const textSlider = PC.getElement('text_slider');
@@ -2594,7 +3019,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   function submitStyleChange() {
-    if (!(themePicker instanceof HTMLSelectElement) || !(variantPicker instanceof HTMLSelectElement) || !(styleForm instanceof HTMLFormElement)) {
+    if (!(themePicker instanceof HTMLInputElement) || !(variantPicker instanceof HTMLInputElement) || !(styleForm instanceof HTMLFormElement)) {
       return;
     }
 
@@ -2609,6 +3034,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const csrfValue = getSettingsCsrfToken();
       if (csrfValue !== '') formData.append('csrf_token', csrfValue);
       PC.updateResource('settings/style', formData).then(() => {
+        markSettingsAutosaveTargetSaved(themePicker);
         PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_THEME_UPDATED_FMT, { theme, variant }), 'save', 3000, true);
         if (PC.state.audio_feedback === 'all') {
           PC.textToSpeech(`${theme} ${variant}`);
@@ -2618,8 +3044,77 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  const syncThemeCards = () => {
+    if (!(themePicker instanceof HTMLInputElement)) {
+      return;
+    }
+
+    themeCards.forEach(card => {
+      if (!(card instanceof HTMLButtonElement)) {
+        return;
+      }
+      const selected = card.dataset.themeValue === themePicker.value;
+      card.classList.toggle('is-selected', selected);
+      card.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      if (selected && selectedThemeLabel instanceof HTMLElement) {
+        const label = card.dataset.label || card.textContent?.trim() || themePicker.value;
+        const labelValue = selectedThemeLabel.querySelector('span');
+        if (labelValue instanceof HTMLElement) {
+          labelValue.textContent = label;
+        }
+      }
+    });
+  };
+
+  const syncModeOptions = () => {
+    if (!(variantPicker instanceof HTMLInputElement)) {
+      return;
+    }
+
+    modeOptions.forEach(option => {
+      if (!(option instanceof HTMLButtonElement)) {
+        return;
+      }
+      const selected = option.dataset.variantValue === variantPicker.value;
+      option.classList.toggle('is-selected', selected);
+      option.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+  };
+
+  themeCards.forEach(card => {
+    if (!(card instanceof HTMLButtonElement)) {
+      return;
+    }
+    card.addEventListener('click', () => {
+      if (!(themePicker instanceof HTMLInputElement) || !card.dataset.themeValue) {
+        return;
+      }
+      themePicker.value = card.dataset.themeValue;
+      syncThemeCards();
+      themePicker.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+
+  modeOptions.forEach(option => {
+    if (!(option instanceof HTMLButtonElement)) {
+      return;
+    }
+    option.addEventListener('click', () => {
+      if (!(variantPicker instanceof HTMLInputElement) || !option.dataset.variantValue) {
+        return;
+      }
+      variantPicker.value = option.dataset.variantValue;
+      syncModeOptions();
+      variantPicker.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+
   themePicker?.addEventListener('change', submitStyleChange);
+  themePicker?.addEventListener('change', syncThemeCards);
   variantPicker?.addEventListener('change', submitStyleChange);
+  variantPicker?.addEventListener('change', syncModeOptions);
+  syncThemeCards();
+  syncModeOptions();
   if (languagePicker instanceof HTMLSelectElement) {
     languagePicker.addEventListener('change', () => {
       const language = languagePicker.value;
@@ -2631,6 +3126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const csrfValue = getSettingsCsrfToken();
         if (csrfValue !== '') formData.append('csrf_token', csrfValue);
         PC.updateResource('settings/style', formData).then(() => {
+          markSettingsAutosaveTargetSaved(languagePicker);
           const langName = PC.getLanguageName(language);
           PC.showToast(SETTINGS_T.SETTINGS_JS_LANGUAGE_UPDATED, 'save', 3000, true);
           if (PC.state.audio_feedback === 'all') {
@@ -2655,6 +3151,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     PC.updateResource('account/info', formData).then(() => {
+      markSettingsAutosaveTargetSaved(fieldEl);
       PC.showToast(toastMessage, 'save', 3000, true);
     }).catch(error => PW.error(error));
   };
@@ -2686,6 +3183,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     PC.updateResource('account/info', formData).then(() => {
+      markSettingsAutosaveTargetSaved(controlEl);
       PC.showToast(toastMessage, 'save', 3000, true);
     }).catch(error => PW.error(error));
   };
@@ -2724,6 +3222,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const csrfValue = getSettingsCsrfToken();
     if (csrfValue !== '') formData.append('csrf_token', csrfValue);
     PC.updateResource('settings/style', formData).then(() => {
+      markSettingsAutosaveTargetSaved(sliderEl);
       PC.showToast(`${toastLabel} updated`, 'save', 3000, true);
       if (PC.state.audio_feedback === 'all') {
         PC.textToSpeech(sizeLabel);
@@ -2807,11 +3306,44 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const spokenLabel = document.querySelector(`label[for="${elementId}"]`)?.textContent?.trim() || preset.labelKey;
       PC.updateResource('settings/style', formData).then(() => {
+        markSettingsAutosaveTargetSaved(presetInput);
         PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_DENSITY_UPDATED_FMT, { label: spokenLabel }), 'save', 3000, true);
         if (PC.state.audio_feedback === 'all') {
           PC.textToSpeech(spokenLabel);
         }
       }).catch(error => PW.error(error));
+    });
+  });
+
+  Array.from(document.querySelectorAll('input[name="depth"]')).forEach(depthInput => {
+    if (!(depthInput instanceof HTMLInputElement)) {
+      return;
+    }
+
+    depthInput.addEventListener('change', () => {
+      if (!depthInput.checked) {
+        return;
+      }
+
+      const depth = depthInput.value;
+      const previousDepth = document.documentElement.getAttribute('data-depth') || 'standard';
+      const label = document.querySelector(`label[for="${depthInput.id}"]`)?.textContent?.trim() || depth;
+      document.documentElement.setAttribute('data-depth', depth);
+
+      const formData = new FormData();
+      formData.append('depth', depth);
+      appendSettingsCsrfToken(formData);
+
+      PC.updateResource('settings/style', formData).then(() => {
+        markSettingsAutosaveTargetSaved(depthInput);
+        PC.showToast(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_DEPTH_UPDATED_FMT, { label }), 'save', 3000, true);
+        if (PC.state.audio_feedback === 'all') {
+          PC.textToSpeech(label);
+        }
+      }).catch(error => {
+        document.documentElement.setAttribute('data-depth', previousDepth);
+        PW.error(error);
+      });
     });
   });
 
@@ -2882,6 +3414,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const csrfValue = getSettingsCsrfToken();
       if (csrfValue !== '') formData.append('csrf_token', csrfValue);
       PC.updateResource('settings/style', formData).then(() => {
+        markSettingsAutosaveTargetSaved(checkedRadio);
         PC.showToast(SETTINGS_T.SETTINGS_JS_TYPOGRAPHY_UPDATED, 'save', 3000, true);
         if (PC.state.audio_feedback === 'all') {
           PC.textToSpeech(spokenLabel);
@@ -2915,6 +3448,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const csrfValue = getSettingsCsrfToken();
       if (csrfValue !== '') formData.append('csrf_token', csrfValue);
       PC.updateResource('settings/style', formData).then(() => {
+        markSettingsAutosaveTargetSaved(helpPopupTimeoutSlider);
         PC.config.help_popup_timeout_seconds = Number(timeoutSeconds) || 0;
         PC.showToast(SETTINGS_T.SETTINGS_JS_HELP_POPUP_TIMEOUT_UPDATED, 'save', 3000, true);
         if (PC.state.audio_feedback === 'all') {
@@ -2935,6 +3469,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     return PC.updateResource('settings/style', formData).then(() => {
+      markSettingsAutosaveTargetSaved();
       if (typeof onSuccess === 'function') {
         onSuccess();
       }
@@ -3240,7 +3775,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const payPeriodPreviewSummary = document.getElementById('pay_period_preview_summary');
   const payPeriodPreviewCalendar = document.getElementById('pay_period_preview_calendar');
   const payPeriodLocale = PC?.config?.USER_LOCALE || document.documentElement.lang || undefined;
-  const canonicalWeekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const weekdayFullNames = <?php echo json_encode([
     Strings::i18n('WEEKDAY_SUNDAY'),
     Strings::i18n('WEEKDAY_MONDAY'),
@@ -3250,70 +3784,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     Strings::i18n('WEEKDAY_FRIDAY'),
     Strings::i18n('WEEKDAY_SATURDAY'),
   ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>;
-  const dayNames = (() => {
-    try {
-      const formatter = new Intl.DateTimeFormat(payPeriodLocale, { weekday: 'short' });
-      const sunday = new Date(Date.UTC(2026, 0, 4));
-
-      return canonicalWeekdayNames.map((_, index) => formatter.format(new Date(sunday.getTime() + (index * 86400000))));
-    } catch {
-      return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    }
-  })();
-  const weekdayMap = canonicalWeekdayNames.reduce((map, dayName, index) => {
-    map[dayName] = index;
-    return map;
-  }, {});
-  const parseYmd = (ymd) => new Date(`${ymd}T00:00:00`);
-  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-  const formatYmd = (d) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  };
-  const alignToAnchor = (start, anchor) => {
-    const target = weekdayMap[anchor] ?? 1;
-    let cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-    while (cursor.getDay() !== target) {
-      cursor = addDays(cursor, -1);
-    }
-    return cursor;
-  };
-  const nextPeriod = (start, frequency) => {
-    if (frequency === 'weekly') return addDays(start, 7);
-    if (frequency === 'biweekly') return addDays(start, 14);
-    if (frequency === 'semimonthly') {
-      if (start.getDate() <= 15) return new Date(start.getFullYear(), start.getMonth(), 16);
-      return new Date(start.getFullYear(), start.getMonth() + 1, 1);
-    }
-    return new Date(start.getFullYear(), start.getMonth() + 1, 1);
-  };
-  const periodEndExclusive = (start, frequency) => nextPeriod(start, frequency);
-  const currentPeriod = (startRaw, frequency, anchor) => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    if (frequency === 'weekly') {
-      const start = alignToAnchor(today, anchor);
-      return { start, endExclusive: addDays(start, 7) };
-    }
-    if (frequency === 'biweekly') {
-      let start = alignToAnchor(parseYmd(startRaw), anchor);
-      while (today < start) start = addDays(start, -14);
-      while (today >= addDays(start, 14)) start = addDays(start, 14);
-      return { start, endExclusive: addDays(start, 14) };
-    }
-    if (frequency === 'semimonthly') {
-      if (today.getDate() <= 15) {
-        const start = new Date(today.getFullYear(), today.getMonth(), 1);
-        return { start, endExclusive: new Date(today.getFullYear(), today.getMonth(), 16) };
-      }
-      const start = new Date(today.getFullYear(), today.getMonth(), 16);
-      return { start, endExclusive: new Date(today.getFullYear(), today.getMonth() + 1, 1) };
-    }
-    const start = new Date(today.getFullYear(), today.getMonth(), 1);
-    return { start, endExclusive: new Date(today.getFullYear(), today.getMonth() + 1, 1) };
-  };
+  const payPeriodDayNames = buildPayPeriodDayNames(payPeriodLocale, weekdayFullNames);
   const syncPayPeriodEditorStart = () => {
     const startControl = getPayControl('pay_period_start');
     if (!startControl) {
@@ -3328,62 +3799,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const resolved = currentPeriod(startRaw, frequency, anchor);
-    startControl.value = formatYmd(resolved.start);
-  };
-  const startOfWeek = (d) => addDays(d, -d.getDay());
-  const inRange = (d, start, endExclusive) => d >= start && d < endExclusive;
-  const monthLabel = (d) => d.toLocaleDateString(payPeriodLocale, { month: 'long', year: 'numeric' });
-  const buildRibbonCalendar = (periods, graceDays, today) => {
-    const header = dayNames.map((d) => `<th class="pp_day_head">${d}</th>`).join('');
-    const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const gridStart = startOfWeek(firstOfMonth);
-    const badgesPlaced = { p1: false, p2: false };
-    let bodyRows = '';
-    for (let week = 0; week < 6; week += 1) {
-      bodyRows += '<tr>';
-      for (let day = 0; day < 7; day += 1) {
-        const offset = (week * 7) + day;
-        const cellDate = addDays(gridStart, offset);
-        const isToday = formatYmd(cellDate) === formatYmd(today);
-        const classes = ['pp_day_cell'];
-        let badge = '';
-        periods.forEach((period, idx) => {
-          const periodKey = idx === 0 ? 'p1' : 'p2';
-          const prevDate = addDays(cellDate, -1);
-          const nextDate = addDays(cellDate, 1);
-          const active = inRange(cellDate, period.start, period.endExclusive);
-          const prevActive = inRange(prevDate, period.start, period.endExclusive);
-          const nextActive = inRange(nextDate, period.start, period.endExclusive);
-          const graceStart = period.endExclusive;
-          const graceEndExclusive = addDays(graceStart, graceDays);
-          const graceActive = inRange(cellDate, graceStart, graceEndExclusive);
-          if (active) {
-            classes.push('pp_in_period', `pp_in_${periodKey}`);
-            if (!prevActive || day === 0) classes.push(`pp_ribbon_start_${periodKey}`);
-            if (!nextActive || day === 6) classes.push(`pp_ribbon_end_${periodKey}`);
-            if (!badgesPlaced[periodKey]) {
-              badge = `<span class="pp_badge ${periodKey === 'p2' ? 'pp_badge_p2' : ''}">${period.label}</span>`;
-              badgesPlaced[periodKey] = true;
-            }
-          }
-          if (graceActive && graceDays > 0) {
-            const graceIndex = Math.min(graceDays, Math.max(1, Math.floor((cellDate - graceStart) / 86400000) + 1));
-            classes.push('pp_grace_day', `pp_grace_${graceIndex}`, `pp_grace_${periodKey}`);
-          }
-        });
-        if (isToday) classes.push('pp_today');
-        bodyRows += `<td class="${classes.join(' ')}"><span>${String(cellDate.getDate()).padStart(2, '0')}</span>${badge}</td>`;
-      }
-      bodyRows += '</tr>';
-    }
-    return `
-      <div class="pp_month_label">${monthLabel(today)}</div>
-      <table class="pp_three_week">
-        <thead><tr>${header}</tr></thead>
-        <tbody>${bodyRows}</tbody>
-      </table>
-    `;
+    const resolved = buildPayPeriodCurrentRange({
+      startYmd: startRaw,
+      frequency,
+      anchor,
+      alignBiweeklyToAnchor: true,
+      rollBiweeklyToToday: true,
+    });
+    startControl.value = payPeriodFormatYmd(resolved.start);
   };
   const renderPreview = () => {
     const startRaw = getPayControl('pay_period_start')?.value;
@@ -3397,29 +3820,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (payPeriodCurrentPreview) payPeriodCurrentPreview.textContent = '';
       return;
     }
-    const today = new Date();
-    const period1 = currentPeriod(startRaw, frequency, anchor);
-    const period2 = {
-      start: period1.endExclusive,
-      endExclusive: periodEndExclusive(period1.endExclusive, frequency),
-    };
-    const endInclusive1 = addDays(period1.endExclusive, -1);
-    const endInclusive2 = addDays(period2.endExclusive, -1);
-    const periods = [
-      { label: 'P1', start: period1.start, endExclusive: period1.endExclusive },
-      { label: 'P2', start: period2.start, endExclusive: period2.endExclusive },
-    ];
+    const preview = buildPayPeriodPreviewState({
+      startYmd: startRaw,
+      frequency,
+      anchor,
+      graceDays,
+      dayNames: payPeriodDayNames,
+      locale: payPeriodLocale,
+      alignBiweeklyToAnchor: true,
+      rollBiweeklyToToday: true,
+      calendarOptions: {
+        clampRibbonToWeek: true,
+      },
+    });
     if (payPeriodPreviewSummary) {
-      payPeriodPreviewSummary.textContent = `P1 ${formatYmd(period1.start)} → ${formatYmd(endInclusive1)}   P2 ${formatYmd(period2.start)} → ${formatYmd(endInclusive2)}`;
+      payPeriodPreviewSummary.textContent = preview.summary;
     }
     if (payPeriodPreviewCalendar) {
-      PC.setHTML(payPeriodPreviewCalendar, buildRibbonCalendar(periods, graceDays, today));
+      PC.setHTML(payPeriodPreviewCalendar, preview.html);
     }
     if (payPeriodCurrentPreview) {
-      payPeriodCurrentPreview.textContent = `P1 ${formatYmd(period1.start)} → ${formatYmd(endInclusive1)}   P2 ${formatYmd(period2.start)} → ${formatYmd(endInclusive2)}`;
+      payPeriodCurrentPreview.textContent = preview.summary;
     }
     if (payPeriodCurrentCalendar) {
-      PC.setHTML(payPeriodCurrentCalendar, buildRibbonCalendar(periods, graceDays, today));
+      PC.setHTML(payPeriodCurrentCalendar, preview.html);
     }
   };
   const getPayPeriodSnapshot = () => {
@@ -3772,18 +4196,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const setDataPortabilityStatus = (message, tone = 'muted') => {
-    if (!dataPortabilityEls.status) {
-      return;
-    }
-
-    dataPortabilityEls.status.classList.remove(
-      'status_message_error',
-      'status_message_muted',
-      'status_message_info',
-      'status_message_success'
-    );
-    dataPortabilityEls.status.classList.add(`status_message_${tone}`);
-    dataPortabilityEls.status.textContent = message;
+    setPrefixedStatusText(dataPortabilityEls.status, message, tone);
   };
 
   const appendDataPortabilityLog = (title, detail = '') => {
@@ -3867,6 +4280,254 @@ document.addEventListener("DOMContentLoaded", async () => {
     const { data, raw } = await parseApiResponse(response);
     return { response, data, raw };
   };
+
+  const dataConsentStatusEl = PC.getElement('settings_data_consent_status');
+  const setDataConsentStatus = (message, mode = 'muted') => {
+    if (dataConsentStatusEl) {
+      dataConsentStatusEl.textContent = message;
+      dataConsentStatusEl.dataset.status = mode;
+    }
+  };
+
+  const confirmBusinessConsentRevoke = async () => new Promise((resolve) => {
+    const modal = PC.getElement('modal_business_consent_revoke');
+    const confirmBtn = PC.getElement('business_consent_revoke_confirm_btn');
+    const cancelBtn = PC.getElement('business_consent_revoke_cancel_btn');
+    if (!(modal instanceof HTMLDialogElement) || !(confirmBtn instanceof HTMLButtonElement) || !(cancelBtn instanceof HTMLButtonElement)) {
+      resolve(window.confirm(SETTINGS_T.SETTINGS_DATA_CONSENT_REVOKE_CONFIRM));
+      return;
+    }
+
+    let settled = false;
+    const cleanup = () => {
+      confirmBtn.removeEventListener('click', onConfirm);
+      cancelBtn.removeEventListener('click', onCancel);
+      modal.removeEventListener('cancel', onCancel);
+      modal.removeEventListener('close', onCancel);
+    };
+    const finish = (confirmed) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      cleanup();
+      if (modal.open) {
+        PC.closeModal('modal_business_consent_revoke', SETTINGS_T.SETTINGS_DATA_CONSENT_REVOKE_MODAL_TITLE);
+      }
+      resolve(confirmed);
+    };
+    function onConfirm(event) {
+      event.preventDefault();
+      finish(true);
+    }
+    function onCancel(event) {
+      event.preventDefault();
+      finish(false);
+    }
+
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    modal.addEventListener('cancel', onCancel);
+    modal.addEventListener('close', onCancel);
+    PC.openModal('modal_business_consent_revoke', SETTINGS_T.SETTINGS_DATA_CONSENT_REVOKE_MODAL_TITLE);
+    confirmBtn.focus();
+  });
+
+  const postBusinessConsentAction = async (businessId, action) => {
+    const csrfToken = getSettingsCsrfToken();
+    const body = new URLSearchParams();
+    if (csrfToken) {
+      body.set('csrf_token', csrfToken);
+    }
+    body.set('consent_action', action);
+    if (action === 'grant') {
+      body.set('consent_acknowledged', '1');
+      body.set('consent_version', 'v1');
+      body.set('disclaimer_text', SETTINGS_T.SETTINGS_DATA_CONSENT_RULE || 'Only businesses you approve can use your work entries for protected reports.');
+    }
+
+    const response = await fetch(`/api/v1/businesses/${encodeURIComponent(businessId)}/consent/${action}`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      body: body.toString(),
+    });
+
+    const { data, raw } = await parseApiResponse(response);
+    return { response, data, raw };
+  };
+
+  const getBusinessConsentCount = (state) => {
+    const countEl = document.querySelector(`[data-business-consent-count="${state}"] strong`);
+    if (!(countEl instanceof HTMLElement)) {
+      return 0;
+    }
+    const value = Number.parseInt(String(countEl.textContent || '0'), 10);
+    return Number.isFinite(value) ? value : 0;
+  };
+
+  const setBusinessConsentCount = (state, value) => {
+    const countWrap = document.querySelector(`[data-business-consent-count="${state}"]`);
+    if (!(countWrap instanceof HTMLElement)) {
+      return;
+    }
+
+    const normalizedValue = Math.max(0, value);
+    const countEl = countWrap.querySelector('strong');
+    if (countEl instanceof HTMLElement) {
+      countEl.textContent = String(normalizedValue);
+    }
+
+    if (state !== 'active') {
+      countWrap.hidden = normalizedValue === 0;
+    }
+  };
+
+  const adjustBusinessConsentCounts = (fromState, toState) => {
+    if (fromState === toState) {
+      return;
+    }
+    if (fromState) {
+      setBusinessConsentCount(fromState, getBusinessConsentCount(fromState) - 1);
+    }
+    if (toState) {
+      setBusinessConsentCount(toState, getBusinessConsentCount(toState) + 1);
+    }
+  };
+
+  const setBusinessConsentCardState = (button, nextState, copy) => {
+    const card = button.closest('[data-business-consent-card]');
+    if (!(card instanceof HTMLElement)) {
+      return;
+    }
+
+    const previousState = String(card.dataset.businessConsentState || '');
+    const stateClasses = ['is-active', 'is-waiting', 'is-setup', 'is-revoked'];
+    card.classList.remove(...stateClasses);
+    card.classList.add(`is-${nextState}`);
+    card.dataset.businessConsentState = nextState;
+
+    const pill = card.querySelector('[data-business-consent-pill]');
+    if (pill instanceof HTMLElement) {
+      pill.classList.remove(...stateClasses);
+      pill.classList.add(`is-${nextState}`);
+      const statusText = pill.querySelector('.settings_data_consent_status_text');
+      if (statusText instanceof HTMLElement) {
+        statusText.textContent = copy.status;
+      } else {
+        pill.textContent = copy.status;
+      }
+    }
+
+    const desc = card.querySelector('[data-business-consent-desc]');
+    if (desc instanceof HTMLElement) {
+      desc.textContent = copy.description;
+    }
+
+    const controls = card.querySelector('.settings_data_consent_controls');
+    if (controls instanceof HTMLElement) {
+      controls.querySelectorAll('[data-business-consent-action]').forEach((actionEl) => actionEl.remove());
+      if (nextState === 'active') {
+        const revokeButton = document.createElement('button');
+        revokeButton.type = 'button';
+        revokeButton.className = 'btn btn_secondary settings_data_consent_action is-revoke';
+        revokeButton.dataset.businessConsentAction = 'revoke';
+        revokeButton.dataset.businessConsentMode = 'revoke';
+        revokeButton.dataset.businessId = String(button.dataset.businessId || '');
+        revokeButton.dataset.businessName = String(button.dataset.businessName || '');
+        revokeButton.textContent = SETTINGS_T.SETTINGS_DATA_CONSENT_REVOKE || 'Revoke';
+        revokeButton.addEventListener('click', handleBusinessConsentClick);
+        controls.appendChild(revokeButton);
+      }
+    }
+
+    adjustBusinessConsentCounts(previousState, nextState);
+  };
+
+  async function handleBusinessConsentClick(event) {
+    const button = event?.currentTarget;
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    const businessId = String(button.dataset.businessId || '');
+    const action = String(button.dataset.businessConsentAction || '');
+    const mode = String(button.dataset.businessConsentMode || action);
+    if (businessId === '' || !['grant', 'revoke'].includes(action)) {
+      return;
+    }
+
+    const confirmMessage = action === 'revoke'
+      ? SETTINGS_T.SETTINGS_DATA_CONSENT_REVOKE_CONFIRM
+      : (mode === 'refresh' ? SETTINGS_T.SETTINGS_DATA_CONSENT_REFRESH_CONFIRM : SETTINGS_T.SETTINGS_DATA_CONSENT_GRANT_CONFIRM);
+    if (action === 'revoke') {
+      const confirmed = await confirmBusinessConsentRevoke();
+      if (!confirmed) {
+        return;
+      }
+    } else if (confirmMessage && !window.confirm(confirmMessage)) {
+      return;
+    }
+
+    button.disabled = true;
+    button.setAttribute('aria-disabled', 'true');
+    setDataConsentStatus(confirmMessage, 'muted');
+
+    try {
+      const { response, data, raw } = await postBusinessConsentAction(businessId, action);
+      if (!response.ok || !isSettingsApiStatusSuccess(data)) {
+        const message = cleanSettingsApiMessage(data?.message || raw, SETTINGS_T.SETTINGS_DATA_CONSENT_ACTION_FAILED);
+        throw new Error(message);
+      }
+
+      const payload = data?.data && typeof data.data === 'object' ? data.data : {};
+      const protectedAccessReady = payload.protected_access_ready !== false;
+      const successMessage = action === 'revoke'
+        ? SETTINGS_T.SETTINGS_DATA_CONSENT_REVOKE_SUCCESS
+        : (protectedAccessReady
+          ? (mode === 'refresh' ? SETTINGS_T.SETTINGS_DATA_CONSENT_REFRESH_SUCCESS : SETTINGS_T.SETTINGS_DATA_CONSENT_GRANT_SUCCESS)
+          : SETTINGS_T.SETTINGS_DATA_CONSENT_GRANT_SETUP_NEEDED);
+      setDataConsentStatus(successMessage, 'success');
+      PC.showToast(successMessage, 'save', 3000, true);
+
+      if (action === 'revoke') {
+        setBusinessConsentCardState(button, 'revoked', {
+          status: SETTINGS_T.SETTINGS_DATA_CONSENT_REVOKED || 'Archived',
+          description: SETTINGS_T.SETTINGS_DATA_CONSENT_REVOKED_DESC || 'This business can no longer access protected work data.',
+        });
+      } else if (protectedAccessReady) {
+        setBusinessConsentCardState(button, 'active', {
+          status: SETTINGS_T.SETTINGS_DATA_CONSENT_ACTIVE || 'Active',
+          description: SETTINGS_T.SETTINGS_DATA_CONSENT_ACTIVE_DESC || 'Can use approved work entries for reports.',
+        });
+      } else {
+        const desc = button.closest('[data-business-consent-card]')?.querySelector('[data-business-consent-desc]');
+        if (desc instanceof HTMLElement) {
+          desc.textContent = SETTINGS_T.SETTINGS_DATA_CONSENT_SECURE_ACCESS_NOT_READY_DESC || SETTINGS_T.SETTINGS_DATA_CONSENT_GRANT_SETUP_NEEDED;
+        }
+        button.dataset.businessConsentMode = 'refresh';
+        button.textContent = SETTINGS_T.SETTINGS_DATA_CONSENT_REFRESH_ACCESS || button.textContent;
+        button.disabled = false;
+        button.setAttribute('aria-disabled', 'false');
+      }
+    } catch (error) {
+      const message = cleanSettingsApiMessage(error?.message, SETTINGS_T.SETTINGS_DATA_CONSENT_ACTION_FAILED);
+      setDataConsentStatus(message, 'error');
+      PC.showToast(message, 'error', 4000, true);
+      button.disabled = false;
+      button.setAttribute('aria-disabled', 'false');
+    }
+  }
+
+  document.querySelectorAll('[data-business-consent-action][data-business-id]').forEach((button) => {
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    button.addEventListener('click', handleBusinessConsentClick);
+  });
 
   const runAccountDataExport = async () => {
     dataPortabilityState.exporting = true;
@@ -4437,13 +5098,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const settingsWorkspace = document.getElementById('settings-workspace');
-  const isAccountSubpage = settingsWorkspace instanceof HTMLElement && settingsWorkspace.dataset.settingsSubpage === 'account';
+  const isSubscriptionSubpage = settingsWorkspace instanceof HTMLElement && settingsWorkspace.dataset.settingsSubpage === 'subscription';
   const hasBillingPanel = document.getElementById('panel-billing') instanceof HTMLElement;
-  if (!(isAccountSubpage && hasBillingPanel)) {
+  if (isSubscriptionSubpage && hasBillingPanel) {
     await initializeBillingSection({
-      successUrl: '/api/v1/billing/checkout-return',
-      cancelUrl: '/settings/account/?billing=cancel',
-      returnUrl: '/settings/account/#panel-billing',
+      successUrl: '/settings/subscription/?billing=success',
+      cancelUrl: '/settings/subscription/?billing=cancel',
+      returnUrl: '/settings/subscription/',
     messages: {
       success: SETTINGS_T.BILLING_JS_PREMIUM_ACTIVE,
       cancel: SETTINGS_T.BILLING_JS_PREMIUM_DISABLED,

@@ -3,11 +3,12 @@
 namespace PayCal\Domain;
 
 /**
- * Settings navigation: sub-page tabs, titles, and legacy hash redirects.
+ * Settings navigation: sub-page tabs and titles.
  */
 final class SettingsNav
 {
   public const PAGE_ACCOUNT = 'PAGE_SETTINGS_ACCOUNT';
+  public const PAGE_SUBSCRIPTION = 'PAGE_SETTINGS_SUBSCRIPTION';
   public const PAGE_CALENDAR = 'PAGE_SETTINGS_CALENDAR';
   public const PAGE_APPEARANCE = 'PAGE_SETTINGS_APPEARANCE';
   public const PAGE_ACCESSIBILITY = 'PAGE_SETTINGS_ACCESSIBILITY';
@@ -22,6 +23,14 @@ final class SettingsNav
   {
     return [
       [
+        'page' => self::PAGE_ACCESSIBILITY,
+        'slug' => 'accessibility',
+        'href' => '/settings/accessibility/',
+        'label_key' => 'SETTINGS_NAV_ACCESSIBILITY',
+        'title_key' => 'SETTINGS_PAGE_ACCESSIBILITY_TITLE',
+        'desc_key' => 'SETTINGS_PAGE_ACCESSIBILITY_DESC',
+      ],
+      [
         'page' => self::PAGE_ACCOUNT,
         'slug' => 'account',
         'href' => '/settings/account/',
@@ -30,12 +39,20 @@ final class SettingsNav
         'desc_key' => 'SETTINGS_PAGE_ACCOUNT_DESC',
       ],
       [
-        'page' => self::PAGE_CALENDAR,
-        'slug' => 'calendar',
-        'href' => '/settings/calendar/',
-        'label_key' => 'SETTINGS_NAV_CALENDAR',
-        'title_key' => 'SETTINGS_PAGE_CALENDAR_TITLE',
-        'desc_key' => 'SETTINGS_PAGE_CALENDAR_DESC',
+        'page' => self::PAGE_SUBSCRIPTION,
+        'slug' => 'subscription',
+        'href' => '/settings/subscription/',
+        'label_key' => 'SETTINGS_NAV_SUBSCRIPTION',
+        'title_key' => 'SETTINGS_PAGE_SUBSCRIPTION_TITLE',
+        'desc_key' => 'SETTINGS_PAGE_SUBSCRIPTION_DESC',
+      ],
+      [
+        'page' => self::PAGE_DATA,
+        'slug' => 'data',
+        'href' => '/settings/data/',
+        'label_key' => 'SETTINGS_NAV_DATA',
+        'title_key' => 'SETTINGS_PAGE_DATA_TITLE',
+        'desc_key' => 'SETTINGS_PAGE_DATA_DESC',
       ],
       [
         'page' => self::PAGE_APPEARANCE,
@@ -46,12 +63,12 @@ final class SettingsNav
         'desc_key' => 'SETTINGS_PAGE_APPEARANCE_DESC',
       ],
       [
-        'page' => self::PAGE_ACCESSIBILITY,
-        'slug' => 'accessibility',
-        'href' => '/settings/accessibility/',
-        'label_key' => 'SETTINGS_NAV_ACCESSIBILITY',
-        'title_key' => 'SETTINGS_PAGE_ACCESSIBILITY_TITLE',
-        'desc_key' => 'SETTINGS_PAGE_ACCESSIBILITY_DESC',
+        'page' => self::PAGE_CALENDAR,
+        'slug' => 'calendar',
+        'href' => '/settings/calendar/',
+        'label_key' => 'SETTINGS_NAV_CALENDAR',
+        'title_key' => 'SETTINGS_PAGE_CALENDAR_TITLE',
+        'desc_key' => 'SETTINGS_PAGE_CALENDAR_DESC',
       ],
       [
         'page' => self::PAGE_SECURITY,
@@ -60,14 +77,6 @@ final class SettingsNav
         'label_key' => 'SETTINGS_NAV_SECURITY',
         'title_key' => 'SETTINGS_PAGE_SECURITY_TITLE',
         'desc_key' => 'SETTINGS_PAGE_SECURITY_DESC',
-      ],
-      [
-        'page' => self::PAGE_DATA,
-        'slug' => 'data',
-        'href' => '/settings/data/',
-        'label_key' => 'SETTINGS_NAV_DATA',
-        'title_key' => 'SETTINGS_PAGE_DATA_TITLE',
-        'desc_key' => 'SETTINGS_PAGE_DATA_DESC',
       ],
       [
         'page' => self::PAGE_DIAGNOSTICS,
@@ -106,51 +115,16 @@ final class SettingsNav
   }
 
   /**
-   * Legacy single-page hash anchors → sub-page routes.
-   *
-   * @return array<string, string>
+   * Default sub page href.
    */
-  public static function legacyHashRedirects(): array
-  {
-    return [
-      'panel-calendar' => '/settings/calendar/',
-      'calendar' => '/settings/calendar/',
-      'panel-style' => '/settings/appearance/',
-      'style' => '/settings/appearance/',
-      'panel-audio' => '/settings/accessibility/',
-      'audio' => '/settings/accessibility/',
-      'panel-passkeys' => '/settings/security/',
-      'passkeys' => '/settings/security/',
-      'panel-security' => '/settings/security/',
-      'security' => '/settings/security/',
-      'panel-data-portability' => '/settings/data/',
-      'data-portability' => '/settings/data/',
-      'data' => '/settings/data/',
-      'panel-debugging' => '/settings/diagnostics/',
-      'debugging' => '/settings/diagnostics/',
-      'sites' => '/settings/calendar/',
-      'pay_period' => '/settings/calendar/',
-      'account' => '/settings/account/',
-      'panel-info' => '/settings/account/',
-      'info' => '/settings/account/',
-      'panel-billing' => '/settings/account/',
-      'billing' => '/settings/account/',
-      'panel-pay-period' => '/settings/calendar/',
-      'panel-account-work-defaults' => '/settings/calendar/',
-      'panel-calendar-work-defaults' => '/settings/calendar/',
-      'panel-internationalization' => '/settings/account/',
-      'panel-business-connect' => '/settings/account/',
-      'panel-account-activity' => '/settings/account/',
-      'panel-danger-zone' => '/settings/account/',
-      'preferences' => '/settings/appearance/',
-    ];
-  }
-
   public static function defaultSubPageHref(): string
   {
-    return '/settings/account/';
+    return '/settings/accessibility/';
   }
 
+  /**
+   * Can view advanced diagnostics.
+   */
   public static function canViewAdvancedDiagnostics(): bool
   {
     return User::isAdmin() || User::isManager();

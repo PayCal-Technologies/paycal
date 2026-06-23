@@ -37,12 +37,12 @@ final class Hooks
 
     return '<section id="' . self::escape($id) . '" class="earnings_ytd_basic" role="region" aria-label="' . $label . '">'
       . '<h3 class="earnings_panel_subtitle">Year to Date Snapshot (Basic)</h3>'
-      . '<dl class="earnings_ytd_basic_list">'
-      . '<div class="earnings_ytd_basic_row"><dt>' . $regularLabel . '</dt><dd>' . $regular . ' ' . $hoursLabel . '</dd></div>'
-      . '<div class="earnings_ytd_basic_row"><dt>' . $overtimeLabel . '</dt><dd>' . $overtime . ' ' . $hoursLabel . '</dd></div>'
-      . '<div class="earnings_ytd_basic_row"><dt>' . $grossLabel . '</dt><dd>' . $gross . '</dd></div>'
-      . '<div class="earnings_ytd_basic_row"><dt>' . $deductionsLabel . '</dt><dd>' . $deductions . '</dd></div>'
-      . '<div class="earnings_ytd_basic_row"><dt><strong>' . $netLabel . '</strong></dt><dd><strong>' . $net . '</strong></dd></div>'
+      . '<dl class="earnings_ytd_basic_list earnings_report_pairs">'
+      . '<div class="earnings_ytd_basic_row earnings_report_pair item_pair"><dt class="item_label">' . $regularLabel . '</dt><dd class="item_value">' . $regular . ' ' . $hoursLabel . '</dd></div>'
+      . '<div class="earnings_ytd_basic_row earnings_report_pair item_pair"><dt class="item_label">' . $overtimeLabel . '</dt><dd class="item_value">' . $overtime . ' ' . $hoursLabel . '</dd></div>'
+      . '<div class="earnings_ytd_basic_row earnings_report_pair item_pair"><dt class="item_label">' . $grossLabel . '</dt><dd class="item_value">' . $gross . '</dd></div>'
+      . '<div class="earnings_ytd_basic_row earnings_report_pair item_pair"><dt class="item_label">' . $deductionsLabel . '</dt><dd class="item_value">' . $deductions . '</dd></div>'
+      . '<div class="earnings_ytd_basic_row earnings_report_pair item_pair earnings_report_pair--strong"><dt class="item_label">' . $netLabel . '</dt><dd class="item_value">' . $net . '</dd></div>'
       . '</dl>'
       . '</section>';
   }

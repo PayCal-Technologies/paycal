@@ -41,7 +41,7 @@ require_once HTML.'/header.php';
       from cache in single-digit milliseconds. This article explains what was slow, why,
       and exactly what we changed.
     </p>
-    <p class="doc-article-meta">Published: <time datetime="2026-06-09">2026-06-09</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-06-09">2026-06-09</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time> &middot; <a href="<?php echo transparency_href('/transparency/members-performance-2026-06-19-pre-connections/'); ?>">Previous version</a></p>
   </header>
 
   <div class="doc-article-body">
@@ -58,7 +58,7 @@ require_once HTML.'/header.php';
       </div>
       <p>
         For business administrators, the Members page now appears effectively instant, even for
-        larger organizations.
+        larger businesses.
       </p>
     </section>
 
@@ -142,7 +142,7 @@ require_once HTML.'/header.php';
       </p>
       <p>
         Small businesses with a handful of members were largely unaffected; the stacked latency
-        only becomes noticeable as organizations grow to dozens or hundreds of members, where
+        only becomes noticeable as businesses grow to dozens or hundreds of members, where
         the per-member round trips accumulate into seconds of server time.
       </p>
       <p>
@@ -247,7 +247,7 @@ $profiles = Database::pipelineHgetall(array_map($profileKey, $memberIds));</code
         </li>
         <li>
           <strong>Correctness is tested.</strong> Contract and unit tests cover the cache
-          invalidation behavior — verifying that role updates and membership changes evict
+          invalidation behavior — verifying that role updates and connection changes evict
           the cached grid, and that expired or mismatched cache entries are never served.
         </li>
       </ul>

@@ -15,6 +15,7 @@ use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Log;
 use PayCal\Domain\BusinessDiscoveryService;
 use PayCal\Domain\PayPeriodGenerator;
+use PayCal\Domain\PlaintextWorkEntryCaptureService;
 use PayCal\Domain\Render;
 use PayCal\Domain\RequestGuard;
 use PayCal\Domain\Response;
@@ -25,6 +26,7 @@ use PayCal\Domain\Strings;
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\SystemLimits;
 use PayCal\Domain\User;
+use PayCal\Domain\UserConnectionService;
 use PayCal\Domain\UserPreferenceDefaults;
 use PayCal\Domain\UserRepository;
 use PayCal\Domain\Work;
@@ -42,7 +44,7 @@ use PayCal\Observability\Lens;
  * Developer notes:
  * - This controller is request glue, not the authority for work-entry schema.
  * - Historical locking must be enforced before any mutation path persists data.
- * - Delegated organization writes must emit audit and denial telemetry.
+ * - Delegated business writes must emit audit and denial telemetry.
  * - Correlation of financial/site metadata must remain behind broker checks.
  *
  * Architectural role:
@@ -87,6 +89,9 @@ class CalendarController
     return is_scalar($value) ? (string) $value : $default;
   }
 
+  /**
+   * Week start for user.
+   */
   private static function weekStartForUser(?User $user): int
   {
     return UserPreferenceDefaults::calendarWeekStartDay($user);
@@ -126,19 +131,23 @@ class CalendarController
       return $target;
     }
 
-    foreach (Database::smembers(Keys::BUSINESS_USER . ':' . $actorUUID) as $orgIdRaw) {
-      $orgId = self::scalarString($orgIdRaw);
-      if ($orgId === '') {
+    if ((new UserConnectionService())->canUserViewSharedWorkData($requestedUUID, $actorUUID)) {
+      return $target;
+    }
+
+    foreach (Database::smembers(Keys::BUSINESS_USER . ':' . $actorUUID) as $businessIdRaw) {
+      $businessId = self::scalarString($businessIdRaw);
+      if ($businessId === '') {
         continue;
       }
 
-      $org = Database::hgetall(Keys::BUSINESS . ':' . $orgId);
-      if (empty($org)) {
+      $business = Database::hgetall(Keys::BUSINESS . ':' . $businessId);
+      if (empty($business)) {
         continue;
       }
 
-      $ownerUUID = self::scalarString($org['owner_uuid'] ?? '');
-      $actorRel = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $actorUUID);
+      $ownerUUID = self::scalarString($business['owner_uuid'] ?? '');
+      $actorRel = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $actorUUID);
       $actorRole = strtolower(self::scalarString($actorRel['role'] ?? ''));
       $actorStatus = self::scalarString($actorRel['status'] ?? '');
       $isOwner = $ownerUUID !== '' && $ownerUUID === $actorUUID;
@@ -151,7 +160,7 @@ class CalendarController
         return $target;
       }
 
-      $targetRel = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $requestedUUID);
+      $targetRel = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $requestedUUID);
       $targetStatus = self::scalarString($targetRel['status'] ?? '');
       if ($targetStatus === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
         return $target;
@@ -243,6 +252,103 @@ class CalendarController
   }
 
   /**
+   * GET calendar/plaintext-capture
+   *
+   * Returns a small current-user-only queue of legacy work rows that still need
+   * client-side encryption with the unlocked DEK.
+   */
+  #[Route('calendar/plaintext-capture', ['GET'])]
+  public function listPlaintextCaptureEntries(): void
+  {
+    $user = User::current();
+    $limit = (int) (InputSanitizer::getString('limit') ?? '25');
+    $includeArchived = InputSanitizer::getString('include_archived') === '1';
+    $result = (new PlaintextWorkEntryCaptureService())->listPending(
+      $user->user_uuid,
+      $limit,
+      $includeArchived,
+    );
+
+    if (!$result['success']) {
+      Response::error('[CC] Unable to prepare encrypted capture.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    Response::success('[CC] Plaintext capture queue loaded.', $result['data'], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST calendar/plaintext-capture
+   *
+   * Finalizes client-encrypted rewrites for current-user legacy plaintext rows.
+   */
+  #[Route('calendar/plaintext-capture', ['POST'])]
+  public function finalizePlaintextCaptureEntries(): void
+  {
+    $user = User::current();
+    $raw = InputSanitizer::postRaw('entries');
+    if ($raw === '') {
+      $raw = (string) file_get_contents('php://input');
+    }
+
+    $decoded = json_decode($raw, true);
+    $csrfToken = '';
+    if (is_array($decoded)) {
+      $csrfToken = self::scalarString($decoded['csrf_token'] ?? '');
+    }
+
+    if (!$user->verifyFormNonce('calendar', $csrfToken)) {
+      Response::error('[CC] Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+
+      return;
+    }
+
+    if (is_array($decoded) && isset($decoded['entries']) && is_array($decoded['entries'])) {
+      $decoded = $decoded['entries'];
+    }
+
+    if (!is_array($decoded)) {
+      Response::error('[CC] Invalid encrypted capture payload.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $entries = [];
+    foreach ($decoded as $item) {
+      if (!is_array($item)) {
+        continue;
+      }
+
+      $entry = [];
+      foreach ($item as $key => $value) {
+        if (is_string($key)) {
+          $entry[$key] = $value;
+        }
+      }
+      $entries[] = $entry;
+    }
+    if (count($entries) > 100) {
+      Response::error('[CC] Too many encrypted capture entries.', [], HttpStatus::HTTP_UNPROCESSABLE);
+
+      return;
+    }
+
+    $result = (new PlaintextWorkEntryCaptureService())->finalize($user->user_uuid, $entries);
+    $status = $result['data']['failed'] > 0
+      ? HttpStatus::HTTP_UNPROCESSABLE
+      : HttpStatus::HTTP_OK;
+
+    if (!$result['success']) {
+      Response::error('[CC] Some work entries could not be encrypted.', $result['data'], $status);
+
+      return;
+    }
+
+    Response::success('[CC] Work entries encrypted.', $result['data'], $status);
+  }
+
+  /**
    * Handles calendar work-entry updates.
    *
    * Accepts single or batched work entries from the calendar UI, validates request context (session, user, CSRF),
@@ -308,8 +414,6 @@ class CalendarController
         CalendarFields::W->value,
         'mode',
         'business_id',
-        'organization_id',
-        'org_id',
         'target_user_uuid',
         'owner_uuid',
     ];
@@ -347,49 +451,45 @@ class CalendarController
     }
     $targetUserUUID = InputSanitizer::sanitizeString($targetUserRaw === '' ? $actorUUID : $targetUserRaw);
 
-    $orgId = BusinessDiscoveryService::resolvePostedBusinessId(
-      InputSanitizer::postString('business_id'),
-      InputSanitizer::postString('organization_id'),
-      InputSanitizer::postString('org_id'),
-    );
+    $businessId = BusinessDiscoveryService::resolvePostedBusinessId(InputSanitizer::postString('business_id'));
 
     if (BusinessDiscoveryService::isDelegatedWorkMode($mode)) {
-      if (!(bool) SystemConfig::get('org_shared_encryption_enabled')
-        || !(bool) SystemConfig::get('org_shared_encryption_enable_write')) {
-        self::incrementOrgWriteDeniedCounter('writes_disabled');
-        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'writes_disabled', $dayId, 0);
+      if (!(bool) SystemConfig::get('business_shared_encryption_enabled')
+        || !(bool) SystemConfig::get('business_shared_encryption_enable_write')) {
+        self::incrementBusinessWriteDeniedCounter('writes_disabled');
+        self::appendBusinessWorkWriteAudit($businessId, $actorUUID, $targetUserUUID, 'denied', 'writes_disabled', $dayId, 0);
         Response::error('[CC] Business mode writes are disabled.', [], HttpStatus::HTTP_FORBIDDEN);
 
         return;
       }
 
-      if ($orgId === '') {
-        self::incrementOrgWriteDeniedCounter('missing_org_id');
+      if ($businessId === '') {
+        self::incrementBusinessWriteDeniedCounter('missing_business_id');
         Response::error('[CC] business_id is required for business mode writes.', [], HttpStatus::HTTP_BAD_REQUEST);
 
         return;
       }
 
       if ($targetUserUUID === '') {
-        self::incrementOrgWriteDeniedCounter('missing_target_user');
-        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'missing_target_user', $dayId, 0);
+        self::incrementBusinessWriteDeniedCounter('missing_target_user');
+        self::appendBusinessWorkWriteAudit($businessId, $actorUUID, $targetUserUUID, 'denied', 'missing_target_user', $dayId, 0);
         Response::error('[CC] target_user_uuid is required for business mode writes.', [], HttpStatus::HTTP_BAD_REQUEST);
 
         return;
       }
 
-      $orgDiscovery = new BusinessDiscoveryService();
-      if (!$orgDiscovery->canMutateWorkForOwner($actorUUID, $targetUserUUID, $orgId)) {
-        self::incrementOrgWriteDeniedCounter('insufficient_scope');
-        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'insufficient_scope', $dayId, 0);
+      $businessDiscovery = new BusinessDiscoveryService();
+      if (!$businessDiscovery->canMutateWorkForOwner($actorUUID, $targetUserUUID, $businessId)) {
+        self::incrementBusinessWriteDeniedCounter('insufficient_scope');
+        self::appendBusinessWorkWriteAudit($businessId, $actorUUID, $targetUserUUID, 'denied', 'insufficient_scope', $dayId, 0);
         Response::error('[CC] Insufficient business scope for delegated work mutation.', [], HttpStatus::HTTP_FORBIDDEN);
 
         return;
       }
 
       if (!self::isDateInCurrentPayPeriodForUser($dayId, $targetUserUUID)) {
-        self::incrementOrgWriteDeniedCounter('outside_current_period');
-        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'outside_current_period', $dayId, 0);
+        self::incrementBusinessWriteDeniedCounter('outside_current_period');
+        self::appendBusinessWorkWriteAudit($businessId, $actorUUID, $targetUserUUID, 'denied', 'outside_current_period', $dayId, 0);
         Response::error('[CC] Business mode writes are limited to the target user current pay period.', [], HttpStatus::HTTP_UNPROCESSABLE);
 
         return;
@@ -399,8 +499,8 @@ class CalendarController
     // Check if date is locked for editing (historical record locking)
     if (WorkEntryLockService::isLocked($dayId, $targetUserUUID)) {
       if (BusinessDiscoveryService::isDelegatedWorkMode($mode)) {
-        self::incrementOrgWriteDeniedCounter('historical_lock');
-        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'historical_lock', $dayId, 0);
+        self::incrementBusinessWriteDeniedCounter('historical_lock');
+        self::appendBusinessWorkWriteAudit($businessId, $actorUUID, $targetUserUUID, 'denied', 'historical_lock', $dayId, 0);
       }
       \PayCal\Domain\Response::error(
         self::entryLockedMessage(),
@@ -472,14 +572,14 @@ class CalendarController
         }
 
         if (BusinessDiscoveryService::isDelegatedWorkMode($mode)) {
-          $contextValidation = WorkEntry::validateOrganizationEnvelopeContext(
+          $contextValidation = WorkEntry::validateBusinessEnvelopeContext(
             $blob,
-            $orgId,
-            BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD
+            $businessId,
+            BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD
           );
           if (!$contextValidation['valid']) {
-            self::incrementOrgWriteDeniedCounter('envelope_context_mismatch');
-            self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'denied', 'envelope_context_mismatch', $dayId, 0);
+            self::incrementBusinessWriteDeniedCounter('envelope_context_mismatch');
+            self::appendBusinessWorkWriteAudit($businessId, $actorUUID, $targetUserUUID, 'denied', 'envelope_context_mismatch', $dayId, 0);
             Response::error('[CC] Business envelope context mismatch.', ['error' => $contextValidation['error']], HttpStatus::HTTP_UNPROCESSABLE);
 
             return;
@@ -581,7 +681,7 @@ class CalendarController
       \PayCal\Observability\Lens::add('Calendar Batch Success', $diagnostic, 'success');
 
       if (BusinessDiscoveryService::isDelegatedWorkMode($mode)) {
-        self::appendBusinessWorkWriteAudit($orgId, $actorUUID, $targetUserUUID, 'success', 'saved', $dayId, $updated);
+        self::appendBusinessWorkWriteAudit($businessId, $actorUUID, $targetUserUUID, 'success', 'saved', $dayId, $updated);
       }
       
       Response::success('[CC] Batch update success.', ['week' => $week, 'diagnostic' => $diagnostic], HttpStatus::HTTP_OK);
@@ -623,9 +723,9 @@ class CalendarController
   }
 
   /**
-   * Increments denied-write telemetry for organization-bound work updates.
+   * Increments denied-write telemetry for business-bound work updates.
    */
-  private static function incrementOrgWriteDeniedCounter(string $reason): void
+  private static function incrementBusinessWriteDeniedCounter(string $reason): void
   {
     $reason = trim(InputSanitizer::sanitizeString($reason));
     if ($reason === '') {
@@ -634,9 +734,9 @@ class CalendarController
 
     try {
       $v = SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
-      Database::incr("telemetry:encryption:{$v}:org:work_write_denied:{$reason}");
+      Database::incr("telemetry:encryption:{$v}:business:work_write_denied:{$reason}");
     } catch (Throwable $e) {
-      Log::debug('Org write denied telemetry increment failed: ' . $e->getMessage());
+      Log::debug('Business write denied telemetry increment failed: ' . $e->getMessage());
     }
   }
 
@@ -644,7 +744,7 @@ class CalendarController
    * Appends a business audit event for work-write operations.
    */
   private static function appendBusinessWorkWriteAudit(
-    string $orgId,
+    string $businessId,
     string $actorUUID,
     string $targetUserUUID,
     string $outcome,
@@ -652,27 +752,27 @@ class CalendarController
     string $dayId,
     int $entryCount
   ): void {
-    $orgId = trim(InputSanitizer::sanitizeString($orgId));
-    if ($orgId === '') {
+    $businessId = trim(InputSanitizer::sanitizeString($businessId));
+    if ($businessId === '') {
       return;
     }
 
     try {
       (new BusinessDiscoveryService())->appendBusinessAuditEvent(
-        $orgId,
-        'org.work.write',
+        $businessId,
+        'business.work.write',
         $actorUUID,
         [
           'target_user_uuid' => $targetUserUUID,
           'date' => $dayId,
-          'segment' => BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+          'segment' => BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
           'outcome' => $outcome,
           'reason' => $reason,
           'entry_count' => (string) $entryCount,
         ]
       );
     } catch (\Throwable $e) {
-      Log::debug('[CalendarController] org.work.write audit emit failed: ' . $e->getMessage());
+      Log::debug('[CalendarController] business.work.write audit emit failed: ' . $e->getMessage());
     }
   }
 
@@ -860,6 +960,11 @@ class CalendarController
           'living_out_allowance' => self::numericFloat($entry['living_out_allowance'] ?? $entry['l'] ?? 0),
           'travel_hours' => self::numericFloat($entry['travel_hours'] ?? $entry['t'] ?? 0),
           'wage' => self::numericFloat($entry['wage'] ?? $entry['w'] ?? 0),
+          'regular_amount' => self::numericFloat($entry['regular_amount'] ?? 0),
+          'overtime_amount' => self::numericFloat($entry['overtime_amount'] ?? 0),
+          'travel_amount' => self::numericFloat($entry['travel_amount'] ?? 0),
+          'living_out_amount' => self::numericFloat($entry['living_out_amount'] ?? 0),
+          'gross' => self::numericFloat($entry['gross'] ?? $entry['g'] ?? 0),
         ];
         // Phase 2: Include encrypted_blob if present
         if (isset($entry['encrypted_blob']) && is_string($entry['encrypted_blob'])) {
@@ -1145,6 +1250,11 @@ class CalendarController
         $travel = self::numericFloat($entry['travel_hours'] ?? $entry['travel'] ?? $entry['t'] ?? 0);
         $hours = self::numericFloat($entry['hours'] ?? $entry['h'] ?? ($regular + $overtime));
         $wage = self::numericFloat($entry['wage'] ?? $entry['w'] ?? 0);
+        $regularAmount = self::numericFloat($entry['regular_amount'] ?? 0);
+        $overtimeAmount = self::numericFloat($entry['overtime_amount'] ?? 0);
+        $travelAmount = self::numericFloat($entry['travel_amount'] ?? 0);
+        $livingOutAmount = self::numericFloat($entry['living_out_amount'] ?? 0);
+        $gross = self::numericFloat($entry['gross'] ?? $entry['g'] ?? 0);
         
         // Store normalized work data (include site_name for frontend display)
         $workDict[$workId] = [
@@ -1168,6 +1278,12 @@ class CalendarController
           'h' => $hours,
           'wage' => $wage,
           'w' => $wage,
+          'regular_amount' => $regularAmount,
+          'overtime_amount' => $overtimeAmount,
+          'travel_amount' => $travelAmount,
+          'living_out_amount' => $livingOutAmount,
+          'gross' => $gross,
+          'g' => $gross,
         ];
         
         $dateToWorkIds[$ymd][] = $workId;
@@ -1336,4 +1452,3 @@ class CalendarController
     ]);
   }
 }
-

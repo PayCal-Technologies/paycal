@@ -43,7 +43,7 @@ Primary runtime surfaces and policy-relevant implementations:
 - `PayCal\\Controllers\\DEKController`
 - `PayCal\\Controllers\\PasskeyController`
 - `PayCal\\Controllers\\AccountRecoveryController`
-- `PayCal\\Domain\\OrganizationDiscoveryService` org DEK wrap bootstrap flows
+- `PayCal\\Domain\\BusinessDiscoveryService` business DEK wrap bootstrap flows
 
 Policy is lifecycle-governance; enforcement remains in controller and domain services.
 

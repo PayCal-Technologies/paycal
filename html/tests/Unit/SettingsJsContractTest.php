@@ -13,7 +13,7 @@ final class SettingsJsContractTest extends TestCase
     $projectRoot = dirname(__DIR__, 3);
     $js = (string) file_get_contents($projectRoot . '/html/js/settings/index.php');
 
-    $this->assertStringContainsString('const formatSettingsMessage =', $js);
+    $this->assertStringContainsString('formatTemplate as formatSettingsMessage', $js);
     $this->assertStringContainsString('settings_copy_support_info_btn', $js);
     $this->assertStringContainsString('settings_export_debug_bundle_btn', $js);
     $this->assertStringContainsString('SETTINGS_T.SETTINGS_JS_SUPPORT_INFO_LABEL', $js);

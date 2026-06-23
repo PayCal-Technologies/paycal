@@ -63,45 +63,49 @@ foreach ($i18nKeys as $i18nKey) {
 <body data-worker-version="<?php echo htmlspecialchars($assetVersion, ENT_QUOTES, 'UTF-8'); ?>">
   <main class="recovery-shell">
     <header class="recovery-header">
-      <a class="recovery-back" href="/auth/<?php echo $authLanguageQuery; ?>"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_BACK_TO_SIGNIN'], ENT_QUOTES, 'UTF-8'); ?></a>
-      <h1><?php echo htmlspecialchars($i18n['AUTH_RECOVER_HEADING'], ENT_QUOTES, 'UTF-8'); ?></h1>
-      <p><?php echo htmlspecialchars($i18n['AUTH_RECOVER_INTRO_LINE_1'], ENT_QUOTES, 'UTF-8'); ?><br><?php echo htmlspecialchars($i18n['AUTH_RECOVER_INTRO_LINE_2'], ENT_QUOTES, 'UTF-8'); ?></p>
+      <a class="recovery-back" href="/auth/<?php echo $authLanguageQuery; ?>">&lt; Back to sign in</a>
+      <h1>Recover your account</h1>
+      <p>Use your codes to create a passkey.</p>
     </header>
     <section class="recovery-card">
-      <ol class="recovery-steps" aria-label="<?php echo htmlspecialchars($i18n['AUTH_RECOVER_STEPS_ARIA_LABEL'], ENT_QUOTES, 'UTF-8'); ?>">
-        <li<?php echo $hasMagicLinkToken ? '' : ' class="is-active"'; ?> data-step-indicator="1"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_STEP_VERIFY'], ENT_QUOTES, 'UTF-8'); ?></li>
-        <li<?php echo $hasMagicLinkToken ? ' class="is-active"' : ''; ?> data-step-indicator="2"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_STEP_PASSKEY'], ENT_QUOTES, 'UTF-8'); ?></li>
-        <li data-step-indicator="3"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_STEP_SUCCESS'], ENT_QUOTES, 'UTF-8'); ?></li>
-      </ol>
-      <p class="recovery-status" id="recovery-status" aria-live="assertive"><?php echo htmlspecialchars($hasMagicLinkToken ? $i18n['AUTH_RECOVER_STATUS_MAGIC_LINK'] : $i18n['AUTH_RECOVER_STATUS_START'], ENT_QUOTES, 'UTF-8'); ?></p>
-      <section class="recovery-panel<?php echo $hasMagicLinkToken ? ' is-hidden' : ''; ?>" data-step="1">
-        <form id="recovery-start-form">
-          <label for="recovery-email"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_ACCOUNT_EMAIL'], ENT_QUOTES, 'UTF-8'); ?></label>
-          <input id="recovery-email" name="email" type="email" autocomplete="email" required>
-          <button id="recovery-send-code" type="submit" class="btn btn_primary"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_SEND_CODE'], ENT_QUOTES, 'UTF-8'); ?></button>
-        </form>
-        <form id="recovery-verify-form" class="is-hidden">
-          <div id="recovery-code-block">
-            <label for="recovery-code"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_CODE_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-            <input id="recovery-code" name="code" type="text" autocomplete="one-time-code" maxlength="6" required>
+      <section class="recovery-panel" data-step="1">
+        <form id="recovery-start-form" class="recovery-email-form">
+          <div class="recovery-field recovery-email-field">
+            <label for="recovery-email">Email address</label>
+            <div class="recovery-email-row">
+              <input id="recovery-email" name="email" type="email" autocomplete="email" required>
+              <button id="recovery-send-code" type="submit" class="btn btn_secondary">Send code</button>
+            </div>
           </div>
-          <label for="recovery-key"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_KEY_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-          <input id="recovery-key" name="recoveryKey" type="text" autocomplete="off" spellcheck="false" required>
+          <p class="recovery-status" id="recovery-status" aria-live="assertive"><?php echo htmlspecialchars($hasMagicLinkToken ? $i18n['AUTH_RECOVER_STATUS_MAGIC_LINK'] : '', ENT_QUOTES, 'UTF-8'); ?></p>
+        </form>
+        <form id="recovery-verify-form" class="recovery-code-form">
+          <div id="recovery-code-block" class="recovery-field">
+            <label for="recovery-code">Verification code</label>
+            <input id="recovery-code" name="code" type="text" autocomplete="one-time-code" maxlength="6" required aria-describedby="recovery-code-error">
+            <p class="recovery-hint">Sent to your email.</p>
+            <p class="recovery-field-error" id="recovery-code-error" aria-live="polite"></p>
+          </div>
+          <div id="recovery-key-block" class="recovery-field">
+            <label for="recovery-key">Recovery code</label>
+            <input id="recovery-key" name="recoveryKey" type="text" autocomplete="off" spellcheck="false" maxlength="16" required aria-describedby="recovery-key-error">
+            <p class="recovery-hint">Saved when you secured your account.</p>
+            <p class="recovery-field-error" id="recovery-key-error" aria-live="polite"></p>
+          </div>
           <div class="recovery-actions">
-            <button type="button" id="recovery-back-signin" class="btn btn_secondary"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_BACK_TO_SIGNIN_BUTTON'], ENT_QUOTES, 'UTF-8'); ?></button>
-            <button type="submit" class="btn btn_primary"><?php echo htmlspecialchars($i18n['CONTINUE'], ENT_QUOTES, 'UTF-8'); ?></button>
+            <button type="submit" class="btn btn_primary" disabled aria-disabled="true">Verify and continue</button>
           </div>
         </form>
       </section>
-      <section class="recovery-panel<?php echo $hasMagicLinkToken ? '' : ' is-hidden'; ?>" data-step="2">
+      <section class="recovery-panel is-hidden" data-step="2">
         <p><?php echo htmlspecialchars($i18n['AUTH_RECOVER_VERIFIED_REGISTER_PASSKEY'], ENT_QUOTES, 'UTF-8'); ?></p>
         <label for="recovery-device-name"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_NEW_PASSKEY_NAME'], ENT_QUOTES, 'UTF-8'); ?></label>
         <input id="recovery-device-name" name="deviceName" type="text" autocomplete="off" value="<?php echo htmlspecialchars($i18n['AUTH_RECOVER_DEFAULT_DEVICE_NAME'], ENT_QUOTES, 'UTF-8'); ?>">
         <div class="recovery-actions">
-          <button type="button" id="recovery-register-passkey" class="btn btn_primary"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_REGISTER_NEW_PASSKEY'], ENT_QUOTES, 'UTF-8'); ?></button>
+          <button type="button" id="recovery-register-passkey" class="btn btn_primary" disabled aria-disabled="true"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_REGISTER_NEW_PASSKEY'], ENT_QUOTES, 'UTF-8'); ?></button>
           <button type="button" id="recovery-cancel" class="btn btn_secondary"><?php echo htmlspecialchars($i18n['CANCEL'], ENT_QUOTES, 'UTF-8'); ?></button>
         </div>
-        <p class="recovery-hint" id="recovery-existing-passkey-hint" aria-live="polite">
+        <p class="recovery-hint is-prominent" id="recovery-existing-passkey-hint" aria-live="polite">
           <?php echo htmlspecialchars($i18n['AUTH_RECOVER_ALREADY_HAVE_PASSKEY'], ENT_QUOTES, 'UTF-8'); ?> <a href="/auth/" id="recovery-signin-instead"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_SIGN_IN_INSTEAD'], ENT_QUOTES, 'UTF-8'); ?></a>
         </p>
       </section>

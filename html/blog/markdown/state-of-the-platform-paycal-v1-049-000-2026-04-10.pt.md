@@ -67,9 +67,9 @@ Orphaned Work Recovery detecta registros desvinculados após exclusão de sites 
 
 ## Premium: colaboração sem compromisso
 
-Os recursos premium para organizações oferecem maior controle operacional sem sacrificar privacidade individual.
+Os recursos premium para empresas oferecem maior controle operacional sem sacrificar privacidade individual.
 
-◆ Organization Hub para fluxos de empregadores e equipes
+◆ Business Hub para fluxos de empregadores e equipes
 ◆ Modelo refinado de escopo de papéis com permissões granulares
 ◆ Visualizações de calendário delegadas para supervisão gerencial
 ◆ DEK Auto-Bootstrap para prontidão imediata de criptografia ao visitar a página

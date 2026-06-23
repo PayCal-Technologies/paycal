@@ -29,34 +29,19 @@ foreach ($teamEarningsI18nKeys as $teamEarningsI18nKey) {
 
 ?>
 import PC from '/js/';
+import { escapeHtml } from '/js/core/escape.js';
+import {
+  formatI18n as formatConfigI18n,
+  getI18nLabel as getConfigI18nLabel,
+} from '/js/core/template.js';
 
 Object.assign(PC.config, <?php echo json_encode($teamEarningsI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 document.addEventListener('DOMContentLoaded', () => {
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
+  const getI18nLabel = (key, fallback = '') => getConfigI18nLabel(PC?.config, key, fallback);
+  const formatI18n = (key, fallback, params = {}) => formatConfigI18n(PC?.config, key, fallback, params);
 
-  function getI18nLabel(key, fallback = '') {
-    const value = String(PC?.config?.[key] ?? '').trim();
-    return value !== '' ? value : fallback;
-  }
-
-  function formatI18n(key, fallback, params = {}) {
-    let label = getI18nLabel(key, fallback);
-    Object.entries(params).forEach(([paramKey, paramValue]) => {
-      const token = new RegExp(`\\{${paramKey}\\}`, 'g');
-      label = label.replace(token, String(paramValue));
-    });
-    return label;
-  }
-
-  function buildTeamCsv(type, org, year, rows) {
+  function buildGroupCsv(type, org, year, rows) {
     const hdr = `"${org}","${type}","${year}"\n`;
     if (type === 'members') {
       const head = [
@@ -107,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return '';
   }
 
-  function buildTeamTxt(type, org, year, rows) {
+  function buildGroupTxt(type, org, year, rows) {
     const sep = '\u2500'.repeat(60);
     const reportLabel = getI18nLabel('EARNINGS_REPORT', 'REPORT').toUpperCase();
     const typeLabelByKey = {
@@ -148,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return '';
   }
 
-  function downloadTeamText(content, filename, mime) {
+  function downloadGroupText(content, filename, mime) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([content], { type: mime }));
     a.download = filename;
@@ -158,22 +143,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('click', (event) => {
-    const btn = event.target.closest('[data-team-export-format]');
+    const btn = event.target.closest('[data-group-export-format], [data-team-export-format]');
     if (!btn) { return; }
     event.preventDefault();
 
-    const format = btn.dataset.teamExportFormat;
+    const format = btn.dataset.groupExportFormat || btn.dataset.teamExportFormat;
     if (format === 'pdf') {
       window.print();
       return;
     }
 
-    const figure = btn.closest('[data-team-type]');
+    const figure = btn.closest('[data-group-type], [data-team-type]');
     if (!figure) { return; }
-    const type = figure.dataset.teamType || 'data';
-    const year = figure.dataset.teamYear || String(new Date().getFullYear());
-    const org  = figure.dataset.teamOrg || getI18nLabel('EARNINGS_TEAM_EARNINGS', 'Team Earnings');
-    const raw  = figure.dataset.teamRows;
+    const type = figure.dataset.groupType || figure.dataset.teamType || 'data';
+    const year = figure.dataset.groupYear || figure.dataset.teamYear || String(new Date().getFullYear());
+    const org  = figure.dataset.groupOrg || figure.dataset.teamOrg || getI18nLabel('EARNINGS_TEAM_EARNINGS', 'Business Reports');
+    const raw  = figure.dataset.groupRows || figure.dataset.teamRows;
     if (!raw) { return; }
 
     let rows;
@@ -183,11 +168,11 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = true;
     btn.textContent = '\u2026';
     try {
-      const fname = `paycal-team-${type}-${year}`;
+      const fname = `paycal-group-${type}-${year}`;
       if (format === 'csv') {
-        downloadTeamText(buildTeamCsv(type, org, year, rows), `${fname}.csv`, 'text/csv;charset=utf-8');
+        downloadGroupText(buildGroupCsv(type, org, year, rows), `${fname}.csv`, 'text/csv;charset=utf-8');
       } else if (format === 'txt') {
-        downloadTeamText(buildTeamTxt(type, org, year, rows), `${fname}.txt`, 'text/plain;charset=utf-8');
+        downloadGroupText(buildGroupTxt(type, org, year, rows), `${fname}.txt`, 'text/plain;charset=utf-8');
       }
     } finally {
       btn.disabled = false;

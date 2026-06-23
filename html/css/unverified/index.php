@@ -234,10 +234,6 @@ main {
   text-align: center;
 }
 
-.verification-form .status.status-drop-in {
-  animation: statusDropIn 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-
 .verification-form .status-error {
   color: var(--uv-danger);
 }
@@ -252,17 +248,6 @@ main {
 
 .verification-form .status.is-hidden {
   display: none;
-}
-
-@keyframes statusDropIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .verification-form .resend-link {

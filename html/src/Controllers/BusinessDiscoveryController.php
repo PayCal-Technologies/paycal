@@ -5,6 +5,7 @@ namespace PayCal\Controllers;
 use PayCal\Domain\ArrayPager;
 use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\Authentication;
+use PayCal\Domain\Business\BusinessPermissionPresenter;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\DataGrid;
 use PayCal\Domain\Database;
@@ -12,9 +13,11 @@ use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Infrastructure\Audit\BusinessAuditControlTestService;
 use PayCal\Domain\BusinessDiscoveryService;
+use PayCal\Domain\BusinessGroupService;
 use PayCal\Domain\BusinessMemberReportExportService;
 use PayCal\Domain\BusinessMemberReportsService;
 use PayCal\Domain\BusinessMembersGridRenderer;
+use PayCal\Domain\BusinessGroupsGridRenderer;
 use PayCal\Domain\BusinessSitesGridRenderer;
 use PayCal\Domain\BusinessWorkspaceWarmer;
 use PayCal\Domain\ForecastProjectionService;
@@ -22,9 +25,11 @@ use PayCal\Domain\ForecastScenario;
 use PayCal\Domain\Enums\SiteStatus;
 use PayCal\Domain\RequestGuard;
 use PayCal\Domain\Response;
+use PayCal\Domain\Strings;
 use PayCal\Domain\SubscriptionGate;
 use PayCal\Domain\TimestampFormatter;
 use PayCal\Domain\User;
+use PayCal\Domain\UserConnectionService;
 use PayCal\Domain\UserRepository;
 
 /**
@@ -109,6 +114,9 @@ final class BusinessDiscoveryController
     Authentication::abortIfUnauthenticated();
   }
 
+  /**
+   * Return whether the current user can use the business workspace.
+   */
   private static function canUseBusinessWorkspace(): bool
   {
     if (User::isAdmin()) {
@@ -120,13 +128,16 @@ final class BusinessDiscoveryController
     return $userUUID !== '' && SubscriptionGate::hasActiveBusiness($userUUID);
   }
 
+  /**
+   * Require business workspace access for an operation.
+   */
   private static function requireBusinessWorkspace(string $operation): bool
   {
     if (self::canUseBusinessWorkspace()) {
       return true;
     }
 
-    Response::error('[OrgC] Business workspace access requires PayCal Business.', [
+    Response::error('[Business] Business workspace access requires PayCal Business.', [
       'operation' => $operation,
     ], HttpStatus::HTTP_FORBIDDEN);
 
@@ -148,7 +159,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -164,9 +175,9 @@ final class BusinessDiscoveryController
     ]);
 
     if ($result['success']) {
-      Response::success('[OrgC] Business created.', $result['data'], HttpStatus::HTTP_CREATED);
+      Response::success('[Business] Business created.', $result['data'], HttpStatus::HTTP_CREATED);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -181,14 +192,136 @@ final class BusinessDiscoveryController
    */
   public function listForCurrentUser(): void
   {
-    if (!self::requireBusinessWorkspace('businesses.list')) {
-      return;
-    }
-
     $service = new BusinessDiscoveryService();
     $result = $service->listForUser(User::currentUUID());
 
-    Response::success('[OrgC] Businesses retrieved.', $result['data'], HttpStatus::HTTP_OK);
+    Response::success('[Business] Businesses retrieved.', $result['data'], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * GET connections/people
+   *
+   * Lists person-to-person connections and explicit grants for the current user.
+   */
+  #[Route('connections/people', ['GET'])]
+  public function listPersonConnections(): void
+  {
+    $service = new UserConnectionService();
+    $result = $service->listForUser(User::currentUUID());
+
+    if ($result['success']) {
+      Response::success('Person connections retrieved.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
+  }
+
+  /**
+   * POST connections/people/request
+   *
+   * Sends a person connection request. No data access is granted by this action.
+   */
+  #[Route('connections/people/request', ['POST'])]
+  public function requestPersonConnection(): void
+  {
+    $filtered = RequestGuard::filterPost(['target_email'], []);
+    if (false === $filtered) {
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $emailRaw = $filtered['target_email'] ?? '';
+    $targetEmail = is_scalar($emailRaw) ? (string) $emailRaw : '';
+    $service = new UserConnectionService();
+    $result = $service->requestPersonConnection(User::currentUUID(), $targetEmail);
+
+    if ($result['success']) {
+      Response::success($result['message'], $result['data'], HttpStatus::HTTP_CREATED);
+    } else {
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
+  }
+
+  /**
+   * POST connections/people/{connectionId}/approve
+   *
+   * Approves an incoming person connection request without granting data access.
+   */
+  #[Route('connections/people/{connectionId}/approve', ['POST'])]
+  public function approvePersonConnection(string $connectionId): void
+  {
+    $service = new UserConnectionService();
+    $result = $service->approvePersonConnection(User::currentUUID(), InputSanitizer::sanitizeString($connectionId));
+
+    if ($result['success']) {
+      Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
+  }
+
+  /**
+   * POST connections/people/{connectionId}/revoke
+   *
+   * Revokes, cancels, or declines a person connection.
+   */
+  #[Route('connections/people/{connectionId}/revoke', ['POST'])]
+  public function revokePersonConnection(string $connectionId): void
+  {
+    $filtered = RequestGuard::filterPost(['status'], []);
+    if (false === $filtered) {
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $statusRaw = $filtered['status'] ?? UserConnectionService::STATUS_REVOKED;
+    $status = is_scalar($statusRaw) ? (string) $statusRaw : UserConnectionService::STATUS_REVOKED;
+    $service = new UserConnectionService();
+    $result = $service->revokePersonConnection(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($connectionId),
+      $status
+    );
+
+    if ($result['success']) {
+      Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
+  }
+
+  /**
+   * POST connections/people/{connectionId}/grants
+   *
+   * Enables or disables one explicit permission for a person connection.
+   */
+  #[Route('connections/people/{connectionId}/grants', ['POST'])]
+  public function updatePersonConnectionGrant(string $connectionId): void
+  {
+    $filtered = RequestGuard::filterPost(['capability', 'enabled'], []);
+    if (false === $filtered) {
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $capabilityRaw = $filtered['capability'] ?? '';
+    $enabledRaw = $filtered['enabled'] ?? '0';
+    $capability = is_scalar($capabilityRaw) ? (string) $capabilityRaw : '';
+    $enabled = in_array(strtolower(trim(is_scalar($enabledRaw) ? (string) $enabledRaw : '0')), ['1', 'true', 'yes', 'on'], true);
+
+    $service = new UserConnectionService();
+    $result = $enabled
+      ? $service->grantCapability(User::currentUUID(), InputSanitizer::sanitizeString($connectionId), $capability)
+      : $service->revokeCapability(User::currentUUID(), InputSanitizer::sanitizeString($connectionId), $capability);
+
+    if ($result['success']) {
+      Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
   }
 
   /**
@@ -207,9 +340,9 @@ final class BusinessDiscoveryController
     $result = $service->markBusinessNotificationsRead(User::currentUUID(), $businessId);
 
     if ($result['success']) {
-      Response::success('[OrgC] Business notifications marked read.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Business notifications marked read.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -232,7 +365,7 @@ final class BusinessDiscoveryController
     $result = $service->listForUser(User::currentUUID());
 
     if (!$result['success']) {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
 
       return;
     }
@@ -354,7 +487,7 @@ final class BusinessDiscoveryController
       $html
     );
 
-    Response::success('[OrgC] Businesses grid rendered.', [
+    Response::success('[Business] Businesses grid rendered.', [
       'html' => $html,
     ], HttpStatus::HTTP_OK);
   }
@@ -392,7 +525,7 @@ final class BusinessDiscoveryController
         'data' => [],
       ];
       Response::error(
-        '[OrgC] ' . $result['message'],
+        '[Business] ' . $result['message'],
         $serviceResult['data'],
         self::serviceFailureHttpStatus($serviceResult),
       );
@@ -426,7 +559,7 @@ final class BusinessDiscoveryController
 
     if (!$result['success']) {
       Response::error(
-        '[OrgC] ' . $result['message'],
+        '[Business] ' . $result['message'],
         $result['data'],
         HttpStatus::HTTP_FORBIDDEN,
       );
@@ -450,7 +583,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, $allowedArrays);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -467,10 +600,10 @@ final class BusinessDiscoveryController
 
     $memberUUIDs = [];
     if ($selectAll) {
-      $relationshipPattern = Keys::BUSINESS_RELATIONSHIP . ':' . InputSanitizer::sanitizeString($businessId) . ':*';
-      foreach (Database::scanKeys($relationshipPattern) as $relationshipKey) {
-        $parts = explode(':', (string) $relationshipKey);
-        // business:relationship:{businessId}:{memberUUID}
+      $connectionPattern = Keys::BUSINESS_CONNECTION . ':' . InputSanitizer::sanitizeString($businessId) . ':*';
+      foreach (Database::scanKeys($connectionPattern) as $connectionKey) {
+        $parts = explode(':', (string) $connectionKey);
+        // business:connection:{businessId}:{memberUUID}
         $memberUUID = (string) ($parts[3] ?? '');
         if ($memberUUID !== '') {
           $memberUUIDs[] = $memberUUID;
@@ -503,10 +636,183 @@ final class BusinessDiscoveryController
     );
 
     if ($result['success']) {
-      Response::success('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
+  }
+
+  /**
+   * GET businesses/{businessId}/groups
+   */
+  #[Route('businesses/{businessId}/groups', ['GET'])]
+  public function listBusinessGroups(string $businessId): void
+  {
+    $businessId = InputSanitizer::sanitizeString($businessId);
+    $activeOnly = trim((string) (InputSanitizer::getString('active') ?? '')) === '1';
+    $result = (new BusinessGroupService())->listGroups(User::currentUUID(), $businessId, $activeOnly);
+
+    if (!$result['success']) {
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * GET businesses/{businessId}/groups/grid
+   */
+  #[Route('businesses/{businessId}/groups/grid', ['GET'])]
+  public function listBusinessGroupsGrid(string $businessId): void
+  {
+    $businessId = InputSanitizer::sanitizeString($businessId);
+    $status = strtolower(trim((string) (InputSanitizer::getString('status') ?? 'active')));
+    if (!in_array($status, ['active', 'archived'], true)) {
+      $status = 'active';
+    }
+
+    $result = (new BusinessGroupsGridRenderer())->renderForBusiness(
+      User::currentUUID(),
+      $businessId,
+      [
+        'search' => trim((string) (InputSanitizer::getString('search') ?? '')),
+        'sort' => (string) (InputSanitizer::getString('sort') ?? 'name'),
+        'direction' => (string) (InputSanitizer::getString('direction') ?? 'asc'),
+        'page' => max(1, (int) (InputSanitizer::getString('page') ?? '1')),
+        'status' => $status,
+      ],
+    );
+
+    if (!$result['success']) {
+      $serviceResult = $result['service_result'] ?? [
+        'message' => $result['message'],
+        'data' => [],
+      ];
+      Response::error('[Business] ' . $result['message'], $serviceResult['data'], self::serviceFailureHttpStatus($serviceResult));
+      return;
+    }
+
+    Response::success($result['message'], [
+      'html' => $result['html'],
+    ], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST businesses/{businessId}/groups
+   */
+  #[Route('businesses/{businessId}/groups', ['POST'])]
+  public function saveBusinessGroup(string $businessId): void
+  {
+    $filtered = RequestGuard::filterPost(['group_id', 'name', 'description'], []);
+    if (false === $filtered) {
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $result = (new BusinessGroupService())->saveGroup(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $filtered);
+    if (!$result['success']) {
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST businesses/{businessId}/groups/{groupId}/members
+   */
+  #[Route('businesses/{businessId}/groups/{groupId}/members', ['POST'])]
+  public function addBusinessGroupMembers(string $businessId, string $groupId): void
+  {
+    $filtered = RequestGuard::filterPost([], ['member_uuids']);
+    if (false === $filtered) {
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $memberUUIDs = [];
+    $raw = $filtered['member_uuids'] ?? [];
+    if (is_array($raw)) {
+      foreach ($raw as $memberUUIDRaw) {
+        if (is_scalar($memberUUIDRaw)) {
+          $memberUUID = InputSanitizer::sanitizeString((string) $memberUUIDRaw);
+          if ($memberUUID !== '') {
+            $memberUUIDs[] = $memberUUID;
+          }
+        }
+      }
+    }
+
+    $result = (new BusinessGroupService())->addMembers(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($businessId),
+      InputSanitizer::sanitizeString($groupId),
+      $memberUUIDs,
+    );
+    if (!$result['success']) {
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST businesses/{businessId}/groups/{groupId}/archive
+   */
+  #[Route('businesses/{businessId}/groups/{groupId}/archive', ['POST'])]
+  public function archiveBusinessGroup(string $businessId, string $groupId): void
+  {
+    $result = (new BusinessGroupService())->archiveGroup(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($businessId),
+      InputSanitizer::sanitizeString($groupId),
+    );
+    if (!$result['success']) {
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST businesses/{businessId}/groups/{groupId}/restore
+   */
+  #[Route('businesses/{businessId}/groups/{groupId}/restore', ['POST'])]
+  public function restoreBusinessGroup(string $businessId, string $groupId): void
+  {
+    $result = (new BusinessGroupService())->restoreGroup(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($businessId),
+      InputSanitizer::sanitizeString($groupId),
+    );
+    if (!$result['success']) {
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * POST businesses/{businessId}/groups/{groupId}/delete
+   */
+  #[Route('businesses/{businessId}/groups/{groupId}/delete', ['POST'])]
+  public function deleteBusinessGroup(string $businessId, string $groupId): void
+  {
+    $result = (new BusinessGroupService())->deleteGroup(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($businessId),
+      InputSanitizer::sanitizeString($groupId),
+    );
+    if (!$result['success']) {
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      return;
+    }
+
+    Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
   }
 
   /**
@@ -534,7 +840,7 @@ final class BusinessDiscoveryController
 
     if (!$result['success']) {
       Response::error(
-        '[OrgC] ' . $result['message'],
+        '[Business] ' . $result['message'],
         $result['data'],
         HttpStatus::HTTP_FORBIDDEN,
       );
@@ -591,7 +897,7 @@ final class BusinessDiscoveryController
 
     if (!$result['success']) {
       Response::error(
-        '[OrgC] ' . $result['message'],
+        '[Business] ' . $result['message'],
         $result['data'],
         HttpStatus::HTTP_FORBIDDEN,
       );
@@ -621,7 +927,7 @@ final class BusinessDiscoveryController
 
     if (!$result['success']) {
       Response::error(
-        '[OrgC] ' . $result['message'],
+        '[Business] ' . $result['message'],
         $result['data'],
         HttpStatus::HTTP_FORBIDDEN,
       );
@@ -664,13 +970,13 @@ final class BusinessDiscoveryController
     ];
     $filtered = RequestGuard::filterPost($allowedStrings, ['member_uuids']);
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
 
-    $access = (new BusinessDiscoveryService())->listRelationships(User::currentUUID(), $businessId);
+    $access = (new BusinessDiscoveryService())->listConnections(User::currentUUID(), $businessId);
     if (!$access['success']) {
-      Response::error('[OrgC] Business access denied.', $access['data'], self::serviceFailureHttpStatus($access));
+      Response::error('[Business] Business access denied.', $access['data'], self::serviceFailureHttpStatus($access));
       return;
     }
 
@@ -722,7 +1028,7 @@ final class BusinessDiscoveryController
       ],
     );
 
-    Response::success('[OrgC] Report batch audit recorded.', [], HttpStatus::HTTP_OK);
+    Response::success('[Business] Report batch audit recorded.', [], HttpStatus::HTTP_OK);
   }
 
   /**
@@ -745,12 +1051,12 @@ final class BusinessDiscoveryController
       try {
         $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
       } catch (\JsonException) {
-        Response::error('[OrgC] Invalid JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
+        Response::error('[Business] Invalid JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
         return;
       }
 
       if (!is_array($decoded)) {
-        Response::error('[OrgC] JSON payload must be an object.', [], HttpStatus::HTTP_BAD_REQUEST);
+        Response::error('[Business] JSON payload must be an object.', [], HttpStatus::HTTP_BAD_REQUEST);
         return;
       }
       $postData = $decoded;
@@ -780,7 +1086,7 @@ final class BusinessDiscoveryController
         default => HttpStatus::HTTP_FORBIDDEN,
       };
 
-      Response::error('[OrgC] ' . $result['message'], $result['data'], $status);
+      Response::error('[Business] ' . $result['message'], $result['data'], $status);
       return;
     }
 
@@ -818,7 +1124,7 @@ final class BusinessDiscoveryController
 
     if (!$result['success']) {
       Response::error(
-        '[OrgC] ' . $result['message'],
+        '[Business] ' . $result['message'],
         $result['data'],
         HttpStatus::HTTP_FORBIDDEN,
       );
@@ -846,7 +1152,7 @@ final class BusinessDiscoveryController
 
     if (!$context['success']) {
       Response::error(
-        '[OrgC] ' . $context['message'],
+        '[Business] ' . $context['message'],
         $context['data'],
         HttpStatus::HTTP_FORBIDDEN,
       );
@@ -863,7 +1169,7 @@ final class BusinessDiscoveryController
           $postData = $decoded;
         }
       } catch (\JsonException) {
-        Response::error('[OrgC] Invalid JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
+        Response::error('[Business] Invalid JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
 
         return;
       }
@@ -879,7 +1185,7 @@ final class BusinessDiscoveryController
     /** @var User $memberUser */
     $memberUser = $context['data']['member_user'];
     $state = (new ForecastProjectionService())->preview($memberUser, $overrides, $scenario);
-    Response::success('[OrgC] Member forecast preview calculated.', $state, HttpStatus::HTTP_OK);
+    Response::success('[Business] Member forecast preview calculated.', $state, HttpStatus::HTTP_OK);
   }
 
   /**
@@ -901,7 +1207,7 @@ final class BusinessDiscoveryController
 
     if (!$result['success']) {
       Response::error(
-        '[OrgC] ' . $result['message'],
+        '[Business] ' . $result['message'],
         $result['data'],
         HttpStatus::HTTP_FORBIDDEN,
       );
@@ -929,7 +1235,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, $allowedArrays);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -953,9 +1259,9 @@ final class BusinessDiscoveryController
     $result = $service->sendInvite(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $email, $scopes);
 
     if ($result['success']) {
-      Response::success('[OrgC] Invite created.', $result['data'], HttpStatus::HTTP_CREATED);
+      Response::success('[Business] Invite created.', $result['data'], HttpStatus::HTTP_CREATED);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -976,14 +1282,14 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, $allowedArrays);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
 
     $payloadValidation = $this->validateInviteImportPayload($filtered);
     if (!$payloadValidation['valid']) {
-      Response::error('[OrgC] Malformed import payload.', [
+      Response::error('[Business] Malformed import payload.', [
         'malformed_fields' => $payloadValidation['malformed_fields'],
         'details' => $payloadValidation['details'],
       ], HttpStatus::HTTP_BAD_REQUEST);
@@ -1011,9 +1317,9 @@ final class BusinessDiscoveryController
     $result = $service->prepareBulkInviteImport(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $emails, $scopes);
 
     if ($result['success']) {
-      Response::success('[OrgC] Invite import prepared.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Invite import prepared.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1078,7 +1384,7 @@ final class BusinessDiscoveryController
     $scopesRaw = $filtered['scopes'] ?? [];
     if (!is_array($scopesRaw)) {
       $malformedFields[] = 'scopes';
-      $details['scopes'] = 'Expected an array of invite scopes.';
+      $details['scopes'] = 'Expected a list of access options.';
     }
 
     if ($emailsSource === '' && $emailsChunks === []) {
@@ -1148,7 +1454,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1160,9 +1466,9 @@ final class BusinessDiscoveryController
     $result = $service->startBulkInviteImportChallenge(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $importId);
 
     if ($result['success']) {
-      Response::success('[OrgC] Invite import challenge started.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Invite import challenge started.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1182,7 +1488,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1199,9 +1505,9 @@ final class BusinessDiscoveryController
     $result = $service->verifyBulkInviteImportChallenge(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $importId, $challengeId, $code);
 
     if ($result['success']) {
-      Response::success('[OrgC] Invite import challenge verified.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Invite import challenge verified.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1221,7 +1527,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1235,9 +1541,9 @@ final class BusinessDiscoveryController
     $result = $service->commitBulkInviteImport(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $importId, $challengeId);
 
     if ($result['success']) {
-      Response::success('[OrgC] Invite import committed.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Invite import committed.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1256,9 +1562,9 @@ final class BusinessDiscoveryController
     $result = $service->listInvites(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
 
     if ($result['success']) {
-      Response::success('[OrgC] Invites retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Invites retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1278,9 +1584,9 @@ final class BusinessDiscoveryController
     $result = $service->listInviteHistory(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
 
     if ($result['success']) {
-      Response::success('[OrgC] Invite history retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Invite history retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1300,9 +1606,9 @@ final class BusinessDiscoveryController
     $result = $service->listAccessRequests(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
 
     if ($result['success']) {
-      Response::success('[OrgC] Access requests retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('Access requests loaded.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1321,7 +1627,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1342,9 +1648,9 @@ final class BusinessDiscoveryController
     $result = $service->approveAccessRequest(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $requestId, $consentContext);
 
     if ($result['success']) {
-      Response::success('[OrgC] Access request approved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('Request approved. The member can now access the business workspace.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1363,7 +1669,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1375,9 +1681,9 @@ final class BusinessDiscoveryController
     $result = $service->rejectAccessRequest(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $requestId);
 
     if ($result['success']) {
-      Response::success('[OrgC] Access request rejected.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('Request declined.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1396,7 +1702,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1408,9 +1714,9 @@ final class BusinessDiscoveryController
     $result = $service->revokeInvite(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $inviteID);
 
     if ($result['success']) {
-      Response::success('[OrgC] Invite revoked.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('Invite cancelled.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1418,7 +1724,7 @@ final class BusinessDiscoveryController
    * POST businesses/invites/accept
    *
    * Accepts a pending invitation (identified by token) and creates a membership
-   * relationship between the current user and the inviting business.
+   * connection between the current user and the inviting business.
    */
   #[Route('businesses/invites/accept', ['POST'])]
   /**
@@ -1430,7 +1736,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1451,9 +1757,9 @@ final class BusinessDiscoveryController
     $result = $service->acceptInvite($token, User::currentUUID(), $consentContext);
 
     if ($result['success']) {
-      Response::success('[OrgC] Invite accepted.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('Invite accepted. Your business membership is active.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error($result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -1480,7 +1786,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1500,28 +1806,98 @@ final class BusinessDiscoveryController
     $result = $service->acceptMembershipWithConsent(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $payload);
 
     if ($result['success']) {
-      Response::success('[OrgC] Membership consent flow completed.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('Membership accepted. Your data access choices are saved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error($result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
   /**
-   * POST businesses/{businessId}/relationships/revoke
+   * POST businesses/{businessId}/consent/grant
+   *
+   * Lets the current member grant protected business data sharing consent
+   * without changing their membership.
+   */
+  #[Route('businesses/{businessId}/consent/grant', ['POST'])]
+  public function grantBusinessDataConsent(string $businessId): void
+  {
+    $allowedStrings = [
+      'consent_action',
+      'consent_id',
+      'consent_version',
+      'consent_acknowledged',
+      'disclaimer_text',
+    ];
+    $filtered = RequestGuard::filterPost($allowedStrings, []);
+
+    if (false === $filtered) {
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $payload = [
+      'consent_id' => is_scalar($filtered['consent_id'] ?? null) ? InputSanitizer::sanitizeString((string) $filtered['consent_id']) : '',
+      'consent_version' => is_scalar($filtered['consent_version'] ?? null) ? InputSanitizer::sanitizeString((string) $filtered['consent_version']) : 'v1',
+      'consent_acknowledged' => is_scalar($filtered['consent_acknowledged'] ?? null) ? (string) $filtered['consent_acknowledged'] : '1',
+      'disclaimer_text' => is_scalar($filtered['disclaimer_text'] ?? null) ? (string) $filtered['disclaimer_text'] : '',
+      'ip' => isset($_SERVER['REMOTE_ADDR']) && is_scalar($_SERVER['REMOTE_ADDR']) ? (string) $_SERVER['REMOTE_ADDR'] : '',
+      'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) && is_scalar($_SERVER['HTTP_USER_AGENT']) ? (string) $_SERVER['HTTP_USER_AGENT'] : '',
+    ];
+
+    $service = new BusinessDiscoveryService();
+    $result = $service->grantBusinessDataConsent(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $payload);
+
+    if ($result['success']) {
+      Response::success('Data access allowed.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
+  }
+
+  /**
+   * POST businesses/{businessId}/consent/revoke
+   *
+   * Lets the current member revoke protected business data sharing consent
+   * without leaving the business.
+   */
+  #[Route('businesses/{businessId}/consent/revoke', ['POST'])]
+  public function revokeBusinessDataConsent(string $businessId): void
+  {
+    $filtered = RequestGuard::filterPost(['consent_action'], []);
+
+    if (false === $filtered) {
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $service = new BusinessDiscoveryService();
+    $result = $service->revokeBusinessDataConsent(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
+
+    if ($result['success']) {
+      Response::success('Data access revoked.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
+  }
+
+  /**
+   * POST businesses/{businessId}/connections/revoke
    *
    * Permanently removes a member from the business (owner/manager only).
    */
-  #[Route('businesses/{businessId}/relationships/revoke', ['POST'])]
+  #[Route('businesses/{businessId}/connections/revoke', ['POST'])]
   /**
-   * Handles revokeRelationship operation.
+   * Handles revokeConnection operation.
    */
-  public function revokeRelationship(string $businessId): void
+  public function revokeConnection(string $businessId): void
   {
     $allowedStrings = ['target_user_uuid'];
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1530,32 +1906,32 @@ final class BusinessDiscoveryController
     $targetUUID = is_scalar($targetRaw) ? InputSanitizer::sanitizeString((string) $targetRaw) : '';
 
     $service = new BusinessDiscoveryService();
-    $result = $service->revokeRelationship(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $targetUUID);
+    $result = $service->revokeConnection(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $targetUUID);
 
     if ($result['success']) {
-      Response::success('[OrgC] Relationship revoked.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('Member access removed.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
   /**
-   * POST businesses/{businessId}/relationships/update-role
+   * POST businesses/{businessId}/connections/update-role
    *
    * Updates the role of an existing member (e.g. member → manager).
    * Owner cannot change their own role.
    */
-  #[Route('businesses/{businessId}/relationships/update-role', ['POST'])]
+  #[Route('businesses/{businessId}/connections/update-role', ['POST'])]
   /**
-   * Handles updateRelationshipRole operation.
+   * Handles updateConnectionRole operation.
    */
-  public function updateRelationshipRole(string $businessId): void
+  public function updateConnectionRole(string $businessId): void
   {
     $allowedStrings = ['target_user_uuid', 'role'];
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1566,12 +1942,12 @@ final class BusinessDiscoveryController
     $role = is_scalar($roleRaw) ? InputSanitizer::sanitizeString((string) $roleRaw) : '';
 
     $service = new BusinessDiscoveryService();
-    $result = $service->updateRelationshipRole(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $targetUUID, $role);
+    $result = $service->updateConnectionRole(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $targetUUID, $role);
 
     if ($result['success']) {
-      Response::success('[OrgC] Relationship role updated.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Connection role updated.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -1583,7 +1959,7 @@ final class BusinessDiscoveryController
    */
   #[Route('businesses/{businessId}/leave', ['POST'])]
   /**
-   * Handles leaveBusinessLegacyAlias operation.
+   * Handle the current user's request to leave a business.
    */
   public function leaveBusiness(string $businessId): void
   {
@@ -1591,24 +1967,16 @@ final class BusinessDiscoveryController
     $result = $service->leaveBusiness(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
 
     if ($result['success']) {
-      Response::success('[OrgC] Business relationship withdrawn.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success($result['message'], $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error($result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
-  }
-
-  /**
-   * Backward-compatibility alias for callers still invoking the legacy method.
-   */
-  public function leaveBusinessLegacyAlias(string $businessId): void
-  {
-    $this->leaveBusiness($businessId);
   }
 
   /**
    * GET businesses/{businessId}/cache/warm
    *
-   * Pre-populates the business workspace cache (roster, sites, team earnings,
+   * Pre-populates the business workspace cache (roster, sites, business reports,
    * member summaries). Intended to be called non-blocking from the dashboard.
    */
   #[Route('businesses/{businessId}/cache/warm', ['GET', 'POST'])]
@@ -1625,20 +1993,20 @@ final class BusinessDiscoveryController
     $warmStatus = $result['warm_status'];
 
     if ($warmStatus === 'denied') {
-      Response::error('[OrgC] Business workspace cache warm denied.', $result, HttpStatus::HTTP_FORBIDDEN);
+      Response::error('[Business] Business workspace cache warm denied.', $result, HttpStatus::HTTP_FORBIDDEN);
       return;
     }
 
     if (in_array($warmStatus, ['accepted', 'in_progress'], true)) {
       Response::success(
-        '[OrgC] Business workspace cache warm accepted.',
+        '[Business] Business workspace cache warm accepted.',
         $result,
         HttpStatus::HTTP_ACCEPTED,
       );
       return;
     }
 
-    Response::success('[OrgC] Business workspace cache warm complete.', $result, HttpStatus::HTTP_OK);
+    Response::success('[Business] Business workspace cache warm complete.', $result, HttpStatus::HTTP_OK);
   }
 
   /**
@@ -1649,7 +2017,7 @@ final class BusinessDiscoveryController
    */
   #[Route('businesses/{businessId}/sites', ['GET'])]
   /**
-   * Handles listOrgSites operation.
+   * List sites linked to a business.
    */
   public function listBusinessSites(string $businessId): void
   {
@@ -1657,9 +2025,9 @@ final class BusinessDiscoveryController
     $result  = $service->listBusinessSites(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
 
     if ($result['success']) {
-      Response::success('[OrgC] Org sites retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Business sites retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -1698,7 +2066,7 @@ final class BusinessDiscoveryController
         'data' => [],
       ];
       Response::error(
-        '[OrgC] ' . $result['message'],
+        '[Business] ' . $result['message'],
         $serviceResult['data'],
         self::serviceFailureHttpStatus($serviceResult),
       );
@@ -1726,7 +2094,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1745,18 +2113,10 @@ final class BusinessDiscoveryController
     );
 
     if ($result['success']) {
-      Response::success('[OrgC] Site unlinked.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Site unlinked.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
-  }
-
-  /**
-   * Backward-compatibility alias for callers still invoking the legacy method.
-   */
-  public function listOrgSites(string $businessId): void
-  {
-    $this->listBusinessSites($businessId);
   }
 
   /**
@@ -1775,7 +2135,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1789,9 +2149,9 @@ final class BusinessDiscoveryController
     $result = $service->linkSite(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $siteOwner, $siteId);
 
     if ($result['success']) {
-      Response::success('[OrgC] Site linked.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Site linked.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -1807,7 +2167,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1820,9 +2180,9 @@ final class BusinessDiscoveryController
     );
 
     if ($result['success']) {
-      Response::success('[OrgC] Business site created.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Business site created.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -1843,9 +2203,9 @@ final class BusinessDiscoveryController
     );
 
     if ($result['success']) {
-      Response::success('[OrgC] Site unlinked.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Site unlinked.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -1864,9 +2224,9 @@ final class BusinessDiscoveryController
     $result = $service->getBusinessSettings(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
 
     if ($result['success']) {
-      Response::success('[OrgC] Business settings retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Business settings retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -1904,6 +2264,9 @@ final class BusinessDiscoveryController
       'contact_email',
       'contact_phone',
       'website',
+      'indigenous_owned',
+      'resident_on_reserve',
+      'reserve_name',
       'address_line1',
       'address_line2',
       'address_city',
@@ -1974,7 +2337,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, [], $droppedKeys, $base64ImageFields, $rawStringFields);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -1983,9 +2346,9 @@ final class BusinessDiscoveryController
     $result = $service->updateBusinessSettings(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $filtered);
 
     if ($result['success']) {
-      Response::success('[OrgC] Business settings updated.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Business settings updated.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -2006,9 +2369,9 @@ final class BusinessDiscoveryController
     );
 
     if ($result['success']) {
-      Response::success('[OrgC] Business site editor data retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Business site editor data retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -2030,18 +2393,79 @@ final class BusinessDiscoveryController
     );
 
     if ($result['success']) {
-      Response::success('[OrgC] Org site settings retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Business site settings retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
   /**
-   * Backward-compatibility alias for callers still invoking the legacy method.
+   * POST businesses/{businessId}/sites/{siteOwnerUUID}/{siteID}/restore
+   *
+   * Restores an archived linked site and its archived work entries.
    */
-  public function getOrgSiteSettings(string $businessId, string $siteOwnerUUID, string $siteID): void
+  #[Route('businesses/{businessId}/sites/{siteOwnerUUID}/{siteID}/restore', ['POST'])]
+  public function restoreBusinessSite(string $businessId, string $siteOwnerUUID, string $siteID): void
   {
-    $this->getBusinessSiteSettings($businessId, $siteOwnerUUID, $siteID);
+    $service = new BusinessDiscoveryService();
+    $result  = $service->restoreBusinessSite(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($businessId),
+      InputSanitizer::sanitizeString($siteOwnerUUID),
+      InputSanitizer::sanitizeString($siteID),
+    );
+
+    if ($result['success']) {
+      Response::success('[Business] Site restored.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
+  }
+
+  /**
+   * POST businesses/{businessId}/sites/{siteOwnerUUID}/{siteID}/archive
+   *
+   * Archives a business-linked site while keeping it available in the Archived list.
+   */
+  #[Route('businesses/{businessId}/sites/{siteOwnerUUID}/{siteID}/archive', ['POST'])]
+  public function archiveBusinessSite(string $businessId, string $siteOwnerUUID, string $siteID): void
+  {
+    $service = new BusinessDiscoveryService();
+    $result  = $service->archiveBusinessSite(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($businessId),
+      InputSanitizer::sanitizeString($siteOwnerUUID),
+      InputSanitizer::sanitizeString($siteID),
+    );
+
+    if ($result['success']) {
+      Response::success('[Business] Site archived.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
+  }
+
+  /**
+   * POST businesses/{businessId}/sites/{siteOwnerUUID}/{siteID}/permanent-delete
+   *
+   * Permanently deletes an archived business-linked site.
+   */
+  #[Route('businesses/{businessId}/sites/{siteOwnerUUID}/{siteID}/permanent-delete', ['POST'])]
+  public function permanentDeleteBusinessSite(string $businessId, string $siteOwnerUUID, string $siteID): void
+  {
+    $service = new BusinessDiscoveryService();
+    $result  = $service->permanentDeleteBusinessSite(
+      User::currentUUID(),
+      InputSanitizer::sanitizeString($businessId),
+      InputSanitizer::sanitizeString($siteOwnerUUID),
+      InputSanitizer::sanitizeString($siteID),
+    );
+
+    if ($result['success']) {
+      Response::success('[Business] Site permanently deleted.', $result['data'], HttpStatus::HTTP_OK);
+    } else {
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+    }
   }
 
   /**
@@ -2064,7 +2488,7 @@ final class BusinessDiscoveryController
     $filtered    = RequestGuard::filterPost($allowedStrings, [], $droppedKeys);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -2079,18 +2503,10 @@ final class BusinessDiscoveryController
     );
 
     if ($result['success']) {
-      Response::success('[OrgC] Site settings updated.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Site settings updated.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
-  }
-
-  /**
-   * Backward-compatibility alias for callers still invoking the legacy method.
-   */
-  public function updateOrgSiteSettings(string $businessId, string $siteOwnerUUID, string $siteID): void
-  {
-    $this->updateBusinessSiteSettings($businessId, $siteOwnerUUID, $siteID);
   }
 
   /**
@@ -2109,7 +2525,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -2121,9 +2537,9 @@ final class BusinessDiscoveryController
     $result = $service->requestAccessByOwnerEmail(User::currentUUID(), $ownerEmail);
 
     if ($result['success']) {
-      Response::success('[OrgC] Access request submitted.', $result['data'], HttpStatus::HTTP_CREATED);
+      Response::success('Request sent. No protected work data is shared by this request.', $result['data'], HttpStatus::HTTP_CREATED);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error($result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -2150,7 +2566,7 @@ final class BusinessDiscoveryController
 
     $query = trim((string) (InputSanitizer::getString('q') ?? ''));
     if ($mode === 'latest') {
-      Response::success('[OrgC] Access lookup latest results generated.', [
+      Response::success('[Business] Access lookup latest results generated.', [
         'suggestions' => [],
       ], HttpStatus::HTTP_OK);
 
@@ -2158,7 +2574,7 @@ final class BusinessDiscoveryController
     }
 
     if (mb_strlen($query) < 2) {
-      Response::success('[OrgC] Access lookup query too short.', [
+      Response::success('[Business] Access lookup query too short.', [
         'suggestions' => [],
       ], HttpStatus::HTTP_OK);
 
@@ -2184,7 +2600,7 @@ final class BusinessDiscoveryController
       ];
     }
 
-    Response::success('[OrgC] Access lookup results generated.', [
+    Response::success('[Business] Access lookup results generated.', [
       'suggestions' => $suggestions,
     ], HttpStatus::HTTP_OK);
   }
@@ -2205,7 +2621,7 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -2217,16 +2633,16 @@ final class BusinessDiscoveryController
     $result = $service->transferOwnership(User::currentUUID(), InputSanitizer::sanitizeString($businessId), $targetUUID);
 
     if ($result['success']) {
-      Response::success('[OrgC] Ownership transferred.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Ownership transferred.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
   /**
    * POST businesses/{businessId}/encryption/bootstrap
    *
-   * Bootstraps org DEK wraps for all active business members.
+   * Bootstraps business DEK wraps for all active business members.
    */
   #[Route('businesses/{businessId}/encryption/bootstrap', ['POST'])]
   /**
@@ -2238,30 +2654,30 @@ final class BusinessDiscoveryController
     $filtered = RequestGuard::filterPost($allowedStrings, []);
 
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
 
-    $segmentRaw = $filtered['segment'] ?? BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD;
+    $segmentRaw = $filtered['segment'] ?? BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD;
     $versionRaw = $filtered['version'] ?? '1';
 
     $segment = is_scalar($segmentRaw)
       ? InputSanitizer::sanitizeString((string) $segmentRaw)
-      : BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD;
+      : BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD;
     $version = is_scalar($versionRaw)
       ? InputSanitizer::sanitizeString((string) $versionRaw)
       : '1';
 
     if ($segment === '') {
-      $segment = BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD;
+      $segment = BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD;
     }
     if ($version === '') {
       $version = '1';
     }
 
     $service = new BusinessDiscoveryService();
-    $result = $service->bootstrapOrgDekForAllMembers(
+    $result = $service->bootstrapBusinessDekForAllMembers(
       User::currentUUID(),
       InputSanitizer::sanitizeString($businessId),
       $segment,
@@ -2269,24 +2685,16 @@ final class BusinessDiscoveryController
     );
 
     if ($result['success']) {
-      Response::success('[OrgC] Business DEK bootstrap completed.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Business DEK bootstrap completed.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
-  }
-
-  /**
-   * Backward-compatibility alias for callers still invoking the legacy method.
-   */
-  public function bootstrapBusinessEncryptionLegacyAlias(string $businessId): void
-  {
-    $this->bootstrapBusinessEncryption($businessId);
   }
 
   /**
    * POST businesses/encryption/auto-bootstrap
    *
-   * Lightweight page-visit runner that opportunistically bootstraps org DEKs.
+   * Lightweight page-visit runner that opportunistically bootstraps business DEKs.
    */
   #[Route('businesses/encryption/auto-bootstrap', ['POST'])]
   /**
@@ -2295,11 +2703,11 @@ final class BusinessDiscoveryController
   public function autoBootstrapBusinessEncryption(): void
   {
     $actorUUID = User::currentUUID();
-    $actorThrottleKey = Keys::TELEMETRY . ':org:dek:auto_bootstrap:user:' . $actorUUID;
+    $actorThrottleKey = Keys::TELEMETRY . ':business:dek:auto_bootstrap:user:' . $actorUUID;
     // setnx is atomic (SET NX EX); eliminates the exists()→set() TOCTOU race
     // where two concurrent requests both observe the key absent and both proceed.
     if (!Database::setnx($actorThrottleKey, '1', 120)) {
-      Response::success('[OrgC] Auto bootstrap skipped (throttled).', [
+      Response::success('[Business] Auto bootstrap skipped (throttled).', [
         'throttled' => true,
       ], HttpStatus::HTTP_OK);
 
@@ -2307,41 +2715,33 @@ final class BusinessDiscoveryController
     }
 
     $service = new BusinessDiscoveryService();
-    $result = $service->autoBootstrapOrgDekOnPageVisit($actorUUID);
+    $result = $service->autoBootstrapBusinessDekOnPageVisit($actorUUID);
 
     if ($result['success']) {
-      Response::success('[OrgC] Auto bootstrap evaluated.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Auto bootstrap evaluated.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
   /**
-   * Backward-compatibility alias for callers still invoking the legacy method.
-   */
-  public function autoBootstrapBusinessEncryptionLegacyAlias(): void
-  {
-    $this->autoBootstrapBusinessEncryption();
-  }
-
-  /**
-   * GET businesses/{businessId}/relationships
+   * GET businesses/{businessId}/connections
    *
-   * Returns all active membership relationships for the specified business.
+   * Returns all active connections for the specified business.
    */
-  #[Route('businesses/{businessId}/relationships', ['GET'])]
+  #[Route('businesses/{businessId}/connections', ['GET'])]
   /**
-   * Handles listRelationships operation.
+   * Handles listConnections operation.
    */
-  public function listRelationships(string $businessId): void
+  public function listConnections(string $businessId): void
   {
     $service = new BusinessDiscoveryService();
-    $result = $service->listRelationships(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
+    $result = $service->listConnections(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
 
     if ($result['success']) {
-      Response::success('[OrgC] Relationships retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Connections retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -2360,21 +2760,21 @@ final class BusinessDiscoveryController
     $result = $service->listAuditTimeline(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
 
     if ($result['success']) {
-      Response::success('[OrgC] Audit timeline retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Audit timeline retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
   /**
-   * TODO: Document generateAuditControlTest.
+   * Generate audit control test.
    */
   #[Route('businesses/{businessId}/audit/control-test', ['POST'])]
   public function generateAuditControlTest(string $businessId): void
   {
     $filtered = RequestGuard::filterPost(['summary'], []);
     if (false === $filtered) {
-      Response::error('[OrgC] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -2393,7 +2793,7 @@ final class BusinessDiscoveryController
     );
 
     if ($result['success']) {
-      Response::success('[OrgC] Audit control test generated.', $result['data'], HttpStatus::HTTP_CREATED);
+      Response::success('[Business] Audit control test generated.', $result['data'], HttpStatus::HTTP_CREATED);
 
       return;
     }
@@ -2403,7 +2803,7 @@ final class BusinessDiscoveryController
       ? HttpStatus::HTTP_FORBIDDEN
       : (str_contains($message, 'gcs') ? HttpStatus::HTTP_INTERNAL_SERVER_ERROR : HttpStatus::HTTP_BAD_REQUEST);
 
-    Response::error('[OrgC] ' . $result['message'], $result['data'], $httpCode);
+    Response::error('[Business] ' . $result['message'], $result['data'], $httpCode);
   }
 
   /**
@@ -2423,7 +2823,7 @@ final class BusinessDiscoveryController
     $result = $service->listAuditTimeline(User::currentUUID(), $businessId);
 
     if (!$result['success']) {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -2450,9 +2850,9 @@ final class BusinessDiscoveryController
     $result = $service->listAuditTimelineForMember(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
 
     if ($result['success']) {
-      Response::success('[OrgC] Member audit timeline retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Member audit timeline retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
@@ -2473,7 +2873,7 @@ final class BusinessDiscoveryController
     $result = $service->listAuditTimelineForMember(User::currentUUID(), $businessId);
 
     if (!$result['success']) {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -2482,7 +2882,7 @@ final class BusinessDiscoveryController
       ? $result['data']['events']
       : [];
 
-    $this->renderAuditGridResponse($events, 'businesses-free-audit-grid', 'My Business Audit Timeline', $businessId);
+    $this->renderAuditGridResponse($events, 'businesses-free-audit-grid', 'Connections Audit Timeline', $businessId);
   }
 
   /** @param array<int, mixed> $events */
@@ -2548,7 +2948,8 @@ final class BusinessDiscoveryController
       }
 
       $detailsMap = self::decodeAuditDetails(isset($event['details']) && is_scalar($event['details']) ? (string) $event['details'] : '');
-      $detailsJson = json_encode($detailsMap, JSON_UNESCAPED_SLASHES) ?: '{}';
+      $displayDetailsMap = self::presentAuditDetails($detailsMap);
+      $detailsJson = json_encode($displayDetailsMap, JSON_UNESCAPED_SLASHES) ?: '{}';
 
       $enrichedDetails = $detailsMap;
       if (($enrichedDetails['business_name'] ?? '') === '' && $orgName !== '') {
@@ -2564,12 +2965,14 @@ final class BusinessDiscoveryController
         'id' => isset($event['event_id']) && is_scalar($event['event_id']) ? (string) $event['event_id'] : '',
         'created_at' => TimestampFormatter::formatAuditTimestamp($createdAtRaw),
         'created_at_raw' => $createdAtRaw,
-        'event_type' => isset($event['event_type']) && is_scalar($event['event_type']) ? (string) $event['event_type'] : '',
+        'event_type' => self::presentAuditEventType(
+          isset($event['event_type']) && is_scalar($event['event_type']) ? (string) $event['event_type'] : '',
+        ),
         'actor' => isset($event['actor_uuid']) && is_scalar($event['actor_uuid'])
           ? (string) ($actorLabels[(string) $event['actor_uuid']] ?? (string) $event['actor_uuid'])
           : '',
         'target' => self::deriveAuditTarget($enrichedDetails),
-        'details' => self::summarizeAuditDetails($detailsMap),
+        'details' => self::summarizeAuditDetails($displayDetailsMap),
         'event_details_json' => $detailsJson,
       ];
     }, $events);
@@ -2654,7 +3057,7 @@ final class BusinessDiscoveryController
 
     $html = $html . $eventDetailsStore;
 
-    Response::success('[OrgC] Audit grid rendered.', [
+    Response::success('[Business] Audit grid rendered.', [
       'html' => $html,
     ], HttpStatus::HTTP_OK);
   }
@@ -2676,14 +3079,14 @@ final class BusinessDiscoveryController
     $result = $service->listInviteHistory(User::currentUUID(), $businessId);
 
     if (!$result['success']) {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
 
     $accessHistoryResult = $service->listAccessRequestHistory(User::currentUUID(), $businessId);
     if (!$accessHistoryResult['success']) {
-      Response::error('[OrgC] ' . $accessHistoryResult['message'], $accessHistoryResult['data'], HttpStatus::HTTP_BAD_REQUEST);
+      Response::error('[Business] ' . $accessHistoryResult['message'], $accessHistoryResult['data'], HttpStatus::HTTP_BAD_REQUEST);
 
       return;
     }
@@ -2797,7 +3200,7 @@ final class BusinessDiscoveryController
     $replacement = '$1 data-search="' . $searchAttr . '" data-sort="' . $sortAttr . '" data-direction="' . $directionAttr . '" data-pagination-start="' . $start . '" data-pagination-end="' . $end . '" data-pagination-total="' . $total . '">';
     $html = (string) preg_replace($pattern, $replacement, $html, 1);
 
-    Response::success('[OrgC] Invite history grid rendered.', [
+    Response::success('[Business] Invite history grid rendered.', [
       'html' => $html,
     ], HttpStatus::HTTP_OK);
   }
@@ -2816,7 +3219,7 @@ final class BusinessDiscoveryController
     $service = new BusinessDiscoveryService();
     $result = $service->discoveryForUser(User::currentUUID());
 
-    Response::success('[OrgC] Discovery generated.', $result['data'], HttpStatus::HTTP_OK);
+    Response::success('[Business] Discovery generated.', $result['data'], HttpStatus::HTTP_OK);
   }
 
   /** @return array<string, string> */
@@ -2886,10 +3289,208 @@ final class BusinessDiscoveryController
 
     $parts = [];
     foreach ($details as $key => $value) {
-      $parts[] = $key . '=' . $value;
+      $parts[] = $key . ': ' . $value;
     }
 
     return implode(', ', $parts);
+  }
+
+  /**
+   * Convert an audit event type into readable UI copy.
+   */
+  private static function presentAuditEventType(string $eventType): string
+  {
+    $normalized = strtolower(trim($eventType));
+    $labels = [
+      'access.request.approved' => 'Access request approved',
+      'access.request.consented' => 'Consent captured',
+      'access.request.notification' => 'Access request notification sent',
+      'access.request.rejected' => 'Access request rejected',
+      'access.requested' => 'Access requested',
+      'audit.control_test.error_generated' => 'Audit control test generated',
+      'business.created' => 'Business created',
+      'invite.accepted' => 'Invitation accepted',
+      'invite.bulk_challenge_started' => 'Bulk invite verification started',
+      'invite.bulk_import_committed' => 'Bulk invite import completed',
+      'invite.bulk_prepare' => 'Bulk invite import prepared',
+      'invite.revoked' => 'Invitation revoked',
+      'invite.sent' => 'Invitation sent',
+      'business.consent.accepted' => 'Business consent recorded',
+      'business.consent.granted_from_settings' => 'Data sharing approved',
+      'business.consent.revoked_from_settings' => 'Data sharing revoked',
+      'business.dek.wrap.bootstrap' => 'Secure access prepared',
+      'business.dek.wrap.bootstrap.bulk' => 'Secure access prepared for members',
+      'ownership.transferred' => 'Ownership transferred',
+      'connection.revoked' => 'Business access revoked',
+      'connection.role_updated' => 'Business role updated',
+      'connection.withdrawn' => 'Member left business',
+      'settings.updated' => 'Business settings updated',
+      'site.linked' => 'Site connected',
+      'site.unlinked' => 'Site removed',
+      'site_settings.updated' => 'Site settings updated',
+    ];
+
+    return $labels[$normalized] ?? self::humanizeAuditToken($eventType);
+  }
+
+  /** @param array<string, string> $details
+   *  @return array<string, string>
+   */
+  private static function presentAuditDetails(array $details): array
+  {
+    $display = [];
+    foreach ($details as $key => $value) {
+      $label = self::presentAuditDetailLabel($key);
+      if (isset($display[$label])) {
+        $label .= ' ' . (string) (count($display) + 1);
+      }
+
+      $display[$label] = self::presentAuditDetailValue($key, $value);
+    }
+
+    return $display;
+  }
+
+  /**
+   * Convert an audit detail key into a readable label.
+   */
+  private static function presentAuditDetailLabel(string $key): string
+  {
+    $normalized = strtolower(trim($key));
+    $labels = [
+      'accepted_by' => 'Accepted by',
+      'accepted_count' => 'Accepted invites',
+      'already_invited_count' => 'Already invited',
+      'already_member_count' => 'Already members',
+      'authority_domain' => 'Allowed email domain',
+      'authority_email' => 'Authority email',
+      'batch_code' => 'Batch code',
+      'bootstrapped_count' => 'Members prepared',
+      'business_name' => 'Business',
+      'business_type' => 'Business type',
+      'challenge_id' => 'Verification challenge',
+      'consent_id' => 'Consent record',
+      'consent_version' => 'Consent version',
+      'credential_id' => 'Passkey credential',
+      'dek_id' => 'Secure access key',
+      'duplicate_count' => 'Duplicate emails',
+      'email_dispatch' => 'Email delivery',
+      'failed_count' => 'Members skipped',
+      'failure_count' => 'Failed invites',
+      'fields' => 'Updated fields',
+      'fields_updated' => 'Updated fields',
+      'from_user_uuid' => 'Previous owner',
+      'import_id' => 'Import session',
+      'input_count' => 'Submitted emails',
+      'invalid_count' => 'Invalid emails',
+      'invitee_email' => 'Invitee email',
+      'invitee_uuid' => 'Invitee',
+      'invite_id' => 'Invitation',
+      'key_version' => 'Secure access version',
+      'name' => 'Business name',
+      'owner_email' => 'Owner email',
+      'requester_contact_email' => 'Requester email',
+      'requester_uuid' => 'Requester',
+      'request_id' => 'Access request',
+      'revoked_consent_count' => 'Consent records revoked',
+      'revoked_wrap_count' => 'Secure access records revoked',
+      'role' => 'Role',
+      'scopes' => Strings::i18n('BUSINESSES_ACCESS_SCOPES_LABEL'),
+      'secure_bootstrap_skipped' => 'Secure setup',
+      'segment' => 'Protected data area',
+      'site_id' => 'Site',
+      'site_owner_uuid' => 'Site owner',
+      'status' => 'Status',
+      'success_count' => 'Invites sent',
+      'target_user_uuid' => 'Member',
+      'to_user_uuid' => 'New owner',
+      'truncated_count' => 'Skipped because of limit',
+      'user_agent_hash' => 'Device check',
+      'user_uuid' => 'Member',
+      'wrong_domain_count' => 'Wrong email domain',
+    ];
+
+    return $labels[$normalized] ?? self::humanizeAuditToken($key);
+  }
+
+  /**
+   * Convert an audit detail value into readable UI copy.
+   */
+  private static function presentAuditDetailValue(string $key, string $value): string
+  {
+    $normalizedKey = strtolower(trim($key));
+    $trimmedValue = trim($value);
+
+    if ($trimmedValue === '[REDACTED]') {
+      return 'Protected';
+    }
+
+    if ($normalizedKey === 'scopes' || str_ends_with($normalizedKey, '_scopes')) {
+      return BusinessPermissionPresenter::scopeListLabel($trimmedValue);
+    }
+
+    if (in_array($normalizedKey, ['fields', 'fields_updated'], true)) {
+      return self::humanizeAuditTokenList($trimmedValue);
+    }
+
+    if ($normalizedKey === 'email_dispatch') {
+      return match (strtolower($trimmedValue)) {
+        'sent' => 'Sent',
+        'failed' => 'Not sent',
+        default => self::humanizeAuditToken($trimmedValue),
+      };
+    }
+
+    if ($normalizedKey === 'secure_bootstrap_skipped' && $trimmedValue === 'business_shared_encryption_disabled') {
+      return 'Secure setup was not required for this workspace.';
+    }
+
+    if ($normalizedKey === 'segment') {
+      return match (strtolower($trimmedValue)) {
+        'current_period' => 'Current pay period',
+        'archive' => 'Archive',
+        default => self::humanizeAuditToken($trimmedValue),
+      };
+    }
+
+    if (in_array($normalizedKey, ['business_type', 'role', 'status'], true)) {
+      return self::humanizeAuditToken($trimmedValue);
+    }
+
+    return $trimmedValue;
+  }
+
+  /**
+   * Convert a comma-separated audit token list into readable text.
+   */
+  private static function humanizeAuditTokenList(string $value): string
+  {
+    $tokens = preg_split('/\s*,\s*/', trim($value), -1, PREG_SPLIT_NO_EMPTY);
+    if (!is_array($tokens) || $tokens === []) {
+      return '';
+    }
+
+    return implode(', ', array_map(static fn (string $token): string => self::humanizeAuditToken($token), $tokens));
+  }
+
+  /**
+   * Convert an audit token into readable text.
+   */
+  private static function humanizeAuditToken(string $value): string
+  {
+    $trimmed = trim($value);
+    if ($trimmed === '') {
+      return '';
+    }
+
+    $normalized = preg_replace('/[\._-]+/', ' ', $trimmed);
+    $normalized = is_string($normalized) ? preg_replace('/\s+/', ' ', $normalized) : $trimmed;
+    $normalized = is_string($normalized) ? trim($normalized) : $trimmed;
+    if ($normalized === '') {
+      return '';
+    }
+
+    return ucwords(strtolower($normalized));
   }
 
   /** @param array<int, mixed> $scopes */
@@ -2907,11 +3508,11 @@ final class BusinessDiscoveryController
       }
     }
 
-    if (in_array('access.manage', $values, true) || in_array('org.settings.write', $values, true)) {
+    if (in_array('access.manage', $values, true) || in_array('business.settings.write', $values, true)) {
       return 'manager';
     }
     if (in_array('sites.write', $values, true)
-      || (in_array('work.write', $values, true) && in_array('work.scope.org', $values, true))) {
+      || (in_array('work.write', $values, true) && in_array('work.scope.business', $values, true))) {
       return 'contributor';
     }
     if (in_array('work.self.write', $values, true)
@@ -2965,6 +3566,9 @@ final class BusinessDiscoveryController
       'contact_email',
       'contact_phone',
       'website',
+      'indigenous_owned',
+      'resident_on_reserve',
+      'reserve_name',
       'address_line1',
       'address_line2',
       'address_city',
@@ -3013,9 +3617,9 @@ final class BusinessDiscoveryController
     );
 
     if ($result['success']) {
-      Response::success('[OrgC] Business audit timeline retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Business audit timeline retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 
@@ -3036,9 +3640,9 @@ final class BusinessDiscoveryController
     $result  = $service->listAuditTimelineForMember(User::currentUUID(), $businessId);
 
     if ($result['success']) {
-      Response::success('[OrgC] Member audit timeline retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[Business] Member audit timeline retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
-      Response::error('[OrgC] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
+      Response::error('[Business] ' . $result['message'], $result['data'], self::serviceFailureHttpStatus($result));
     }
   }
 }

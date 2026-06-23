@@ -7,13 +7,13 @@ use PayCal\Domain\Constants\Keys;
 /**
  * Central pre-warmable cache for business workspace read paths.
  *
- * Stores materialized roster, sites, site settings, team earnings, and member
+ * Stores materialized roster, sites, site settings, business reports, and member
  * work-entry batches under business:cache:workspace:* keys. Member financial
  * summaries remain in BusinessMembersCache.
  *
  * Invalidation tiers:
  * - invalidate(): membership/site-link mutations (full purge)
- * - invalidateFinancialData(): work-entry edits (member work + summaries + team earnings)
+ * - invalidateFinancialData(): work-entry edits (member work + summaries + business reports)
  * - invalidateSiteSettings(): site planning/budget field updates only
  */
 final class BusinessWorkspaceCache
@@ -379,6 +379,7 @@ final class BusinessWorkspaceCache
 
     BusinessMembersCache::invalidate($businessId);
     BusinessSnapshotCache::invalidate($businessId);
+    self::dropGroupMetricsCache($businessId);
 
     foreach (Database::scanKeys(Keys::businessWorkspaceCachePattern($businessId)) as $key) {
       Database::unlink($key);
@@ -386,7 +387,7 @@ final class BusinessWorkspaceCache
   }
 
   /**
-   * Drop financial segments only (member work, team earnings, members summaries).
+   * Drop financial segments only (member work, business reports, members summaries).
    * Preserves roster, sites, and site settings.
    */
   public static function invalidateFinancialData(string $businessId, ?int $year = null): void
@@ -397,6 +398,7 @@ final class BusinessWorkspaceCache
     }
 
     BusinessMembersCache::invalidate($businessId);
+    self::dropGroupMetricsCache($businessId);
     self::dropSegment(self::SEGMENT_MEMBER_WORK, $businessId);
 
     if ($year !== null) {
@@ -406,6 +408,16 @@ final class BusinessWorkspaceCache
     }
 
     self::dropSegmentKeys(self::SEGMENT_TEAM_EARNINGS, $businessId);
+  }
+
+  /**
+   * Remove cached group metric snapshots for the given business.
+   */
+  private static function dropGroupMetricsCache(string $businessId): void
+  {
+    foreach (Database::scanKeys(Keys::businessGroupMetricsCachePattern($businessId)) as $key) {
+      Database::unlink($key);
+    }
   }
 
   /**
@@ -440,7 +452,7 @@ final class BusinessWorkspaceCache
   }
 
   /**
-   * TODO: Document dropSegment.
+   * Drop segment.
    */
   private static function dropSegment(string $segment, string $businessId, ?int $year = null): void
   {
@@ -448,7 +460,7 @@ final class BusinessWorkspaceCache
   }
 
   /**
-   * TODO: Document dropSegmentKeys.
+   * Drop segment keys.
    */
   private static function dropSegmentKeys(string $segment, string $businessId): void
   {
@@ -515,7 +527,7 @@ final class BusinessWorkspaceCache
     Database::set(Keys::businessWorkspaceCache($segment, $businessId, $year), $encoded, self::TTL_SECONDS);
   }
   /**
-   * TODO: Document scalarString.
+   * Scalar string.
    */
   private static function scalarString(mixed $value): string
   {

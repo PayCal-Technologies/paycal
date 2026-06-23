@@ -111,6 +111,21 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
           </div>
         </div>
 
+        <div class='item_pair'>
+          <label class='item_label' for='site_is_on_reserve_input'>On reserve</label>
+          <div class='item_value'>
+            <input type='hidden' name='is_on_reserve' value='0'>
+            <input id='site_is_on_reserve_input' type='checkbox' name='is_on_reserve' value='1' aria-describedby='create_site_form_status'>
+          </div>
+        </div>
+
+        <div class='item_pair'>
+          <label class='item_label' for='site_reserve_name_input'>Reserve name</label>
+          <div class='item_value'>
+            <input id='site_reserve_name_input' type='text' name='reserve_name' value='' maxlength='120' aria-describedby='create_site_form_status'>
+          </div>
+        </div>
+
         <!-- Province -->
         <div class='item_pair'>
           <label class='item_label' for='site_province_select'><?php echo site_editor_i18n('PROVINCE'); ?></label>
@@ -303,6 +318,21 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
             </div>
           </div>
 
+          <div class='item_pair'>
+            <label class='item_label' for='edit_site_is_on_reserve_input'>On reserve</label>
+            <div class='item_value'>
+              <input type='hidden' name='is_on_reserve' value='0'>
+              <input id='edit_site_is_on_reserve_input' type='checkbox' name='is_on_reserve' value='1' aria-describedby='edit_site_form_status'>
+            </div>
+          </div>
+
+          <div class='item_pair'>
+            <label class='item_label' for='edit_site_reserve_name_input'>Reserve name</label>
+            <div class='item_value'>
+              <input id='edit_site_reserve_name_input' type='text' name='reserve_name' value='' maxlength='120' aria-describedby='edit_site_form_status'>
+            </div>
+          </div>
+
           <!-- Site Color -->
           <div class='item_pair item_pair_color'>
             <div class='item_label item_label_color'>
@@ -312,14 +342,19 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
             <div class='item_value'>
               <?php
               $swatchHtml = '';
+              $defaultSiteColor = SiteColorPalette::default();
               foreach (SiteColorPalette::pickerPalette() as $idx => $sc) {
-                $hex   = htmlspecialchars($sc['hex'],   ENT_QUOTES, 'UTF-8');
-                $label = htmlspecialchars($sc['label'], ENT_QUOTES, 'UTF-8');
-                $swatchHtml .= "<button type='button' class='site_color_swatch' data-hex='{$hex}' data-idx='{$idx}' aria-label='{$label}'></button>";
+                $hex       = htmlspecialchars($sc['hex'], ENT_QUOTES, 'UTF-8');
+                $label     = htmlspecialchars($sc['label'], ENT_QUOTES, 'UTF-8');
+                $ariaLabel = htmlspecialchars(site_editor_i18n('SITES_SITE_COLOR_LABEL') . ': ' . $sc['label'] . ' (' . $sc['hex'] . ')', ENT_QUOTES, 'UTF-8');
+                $selected  = strtoupper((string) $sc['hex']) === strtoupper($defaultSiteColor);
+                $className = $selected ? 'site_color_swatch is-selected' : 'site_color_swatch';
+                $pressed   = $selected ? 'true' : 'false';
+                $swatchHtml .= "<button type='button' class='{$className}' data-hex='{$hex}' data-label='{$label}' data-idx='{$idx}' aria-label='{$ariaLabel}' aria-pressed='{$pressed}'></button>";
               }
               echo "<div class='site_color_picker' id='edit_site_color_picker'>"
                 . "<div class='site_color_swatches' id='edit_site_color_swatches'>{$swatchHtml}</div>"
-                . "<input type='hidden' id='edit_site_color_input' name='site_color' value='" . SiteColorPalette::default() . "'>"
+                . "<input type='hidden' id='edit_site_color_input' name='site_color' value='" . $defaultSiteColor . "'>"
                 . "</div>";
               ?>
             </div>
@@ -442,6 +477,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
           <?php if ($siteEditorContext === 'business'): ?>
           <button type='button' id='edit_site_unlink_business' class='btn btn_secondary'><?php echo site_editor_i18n('BUSINESS_SITES_UNLINK'); ?></button>
           <?php endif; ?>
+          <button type='button' id='edit_site_delete' class='btn btn_danger' hidden><?php echo site_editor_i18n('SITES_DELETE_ACTION'); ?></button>
           <button type='submit' id='edit_site_submit' class='btn btn_primary'><?php echo site_editor_i18n('SITES_SAVE_SITE'); ?></button>
           <button type='button' id='edit_site_cancel' class='btn btn_secondary' data-dialog-close='modal_edit_site'>
             <?php echo site_editor_i18n('CLOSE'); ?>
@@ -455,8 +491,8 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
   <dialog id='modal_confirm_delete_site' class='dialog' aria-modal='true' aria-labelledby='modal_confirm_delete_site_title' aria-describedby='confirm_delete_site_aria confirm_delete_site_message'>
     <p id='confirm_delete_site_aria' class='visually_hidden'><?php echo site_editor_i18n('SITES_CONFIRM_ARCHIVE_ARIA'); ?></p>
     <section class='modal_header'>
-      <button type='button' class='btn_close' data-dialog-close='modal_confirm_delete_site' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
       <h2 id='modal_confirm_delete_site_title' class='modal_title'><?php echo site_editor_i18n('SITES_CONFIRM_ARCHIVE_TITLE'); ?></h2>
+      <button type='button' class='btn_close' data-dialog-close='modal_confirm_delete_site' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
     </section>
     <section class='modal_content'>
       <p id='confirm_delete_site_message'></p>
@@ -477,8 +513,8 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
   <dialog id='modal_archived_work' class='dialog modal_archived_work' aria-modal='true' aria-labelledby='archived_work_title' aria-describedby='archived_work_aria archived_work_content'>
     <p id='archived_work_aria' class='visually_hidden'><?php echo site_editor_i18n('SITES_ARCHIVED_WORK_ARIA'); ?></p>
     <section class='modal_header'>
-      <button type='button' class='btn_close' data-dialog-close='modal_archived_work' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
       <h2 class='modal_title' id='archived_work_title'><?php echo site_editor_i18n('SITES_ARCHIVED_WORK_TITLE'); ?></h2>
+      <button type='button' class='btn_close' data-dialog-close='modal_archived_work' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
     </section>
     <section class='modal_content' id='archived_work_content'>
       <p class='archived_work_loading'><?php echo site_editor_i18n('LOADING'); ?></p>
@@ -499,8 +535,8 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
   <dialog id='modal_finality_delete' class='dialog' aria-modal='true' aria-labelledby='modal_finality_delete_title' aria-describedby='finality_delete_aria finality_delete_message'>
     <p id='finality_delete_aria' class='visually_hidden'><?php echo site_editor_i18n('SITES_FINALITY_DELETE_ARIA'); ?></p>
     <section class='modal_header'>
-      <button type='button' class='btn_close' data-dialog-close='modal_finality_delete' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
       <h2 id='modal_finality_delete_title' class='modal_title modal_title_danger'>⚠️ <?php echo site_editor_i18n('SITES_FINALITY_DELETE_TITLE'); ?></h2>
+      <button type='button' class='btn_close' data-dialog-close='modal_finality_delete' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
     </section>
     <section class='modal_content'>
       <p id='finality_delete_message'></p>

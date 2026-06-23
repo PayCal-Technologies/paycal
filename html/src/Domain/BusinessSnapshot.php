@@ -7,10 +7,10 @@ namespace PayCal\Domain;
  */
 final class BusinessSnapshot
 {
-  public const SCHEMA_VERSION = 1;
+  public const SCHEMA_VERSION = 2;
 
   /**
-   * @param list<array<string, mixed>> $relationships
+   * @param list<array<string, mixed>> $connections
    * @param list<array<string, mixed>> $members
    */
   public function __construct(
@@ -18,7 +18,7 @@ final class BusinessSnapshot
     public readonly string $business_id,
     public readonly int $member_count,
     public readonly int $site_count,
-    public readonly array $relationships,
+    public readonly array $connections,
     public readonly array $members,
     public readonly ?int $pending_invites = null,
     public readonly ?int $pending_requests = null,
@@ -37,7 +37,7 @@ final class BusinessSnapshot
       'business_id' => $this->business_id,
       'member_count' => $this->member_count,
       'site_count' => $this->site_count,
-      'relationships' => $this->relationships,
+      'connections' => $this->connections,
       'members' => $this->members,
       'pending_invites' => $this->pending_invites,
       'pending_requests' => $this->pending_requests,
@@ -64,14 +64,14 @@ final class BusinessSnapshot
       return null;
     }
 
-    $relationshipsRaw = $data['relationships'] ?? [];
+    $connectionsRaw = $data['connections'] ?? [];
     $membersRaw = $data['members'] ?? [];
-    if (!is_array($relationshipsRaw) || !is_array($membersRaw)) {
+    if (!is_array($connectionsRaw) || !is_array($membersRaw)) {
       return null;
     }
 
-    /** @var list<array<string, mixed>> $relationships */
-    $relationships = array_values(array_filter($relationshipsRaw, 'is_array'));
+    /** @var list<array<string, mixed>> $connections */
+    $connections = array_values(array_filter($connectionsRaw, 'is_array'));
     /** @var list<array<string, mixed>> $members */
     $members = array_values(array_filter($membersRaw, 'is_array'));
 
@@ -83,7 +83,7 @@ final class BusinessSnapshot
       business_id: $businessId,
       member_count: max(0, self::intField($data, 'member_count', count($members))),
       site_count: max(0, self::intField($data, 'site_count', 0)),
-      relationships: $relationships,
+      connections: $connections,
       members: $members,
       pending_invites: is_scalar($pendingInvites) ? max(0, (int) $pendingInvites) : null,
       pending_requests: is_scalar($pendingRequests) ? max(0, (int) $pendingRequests) : null,

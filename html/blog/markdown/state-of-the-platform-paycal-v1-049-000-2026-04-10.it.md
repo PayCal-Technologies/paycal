@@ -67,9 +67,9 @@ Orphaned Work Recovery rileva record scollegati dopo cancellazioni di siti e sup
 
 ## Premium: collaborazione senza compromessi
 
-Le funzionalità premium per organizzazioni offrono maggiore controllo operativo senza sacrificare la privacy individuale.
+Le funzionalità premium business offrono maggiore controllo operativo senza sacrificare la privacy individuale.
 
-◆ Organization Hub per flussi di lavoro di datori di lavoro e team
+◆ Business Hub per flussi di lavoro di datori di lavoro e team
 ◆ Modello di ruolo raffinato con permessi granulari
 ◆ Viste calendario delegate per supervisione manageriale
 ◆ DEK Auto-Bootstrap per prontezza di cifratura immediata alla visita pagina

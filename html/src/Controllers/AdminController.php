@@ -24,6 +24,7 @@ use PayCal\Domain\User;
 use PayCal\Domain\WorkEntryRepository;
 use PayCal\Domain\UserRepository;
 use PayCal\Domain\UserSettings;
+use PayCal\Observability\ArgusConsole;
 
 /**
  * AdminController.php
@@ -86,6 +87,10 @@ class AdminController
     'admin.limits.update',
     'admin.limits.reset',
     'admin.limits.reset-all',
+    'admin.argus.master',
+    'admin.argus.package',
+    'admin.argus.scope',
+    'admin.argus.preset',
   ];
 
   /**
@@ -948,6 +953,219 @@ class AdminController
   }
 
   /**
+   * Argus trace control panel snapshot.
+   */
+  #[Route('admin/argus/status', ['GET'])]
+  public function getArgusStatus(): void
+  {
+    if (!$this->authorized) {
+      Response::error('Unauthorized.', [], HttpStatus::HTTP_UNAUTHORIZED);
+
+      return;
+    }
+
+    try {
+      Response::success(
+        '[Admin] Argus trace control snapshot.',
+        ['snapshot' => ArgusConsole::snapshot()],
+        HttpStatus::HTTP_OK
+      );
+    } catch (\Throwable $e) {
+      Log::error('[Admin] getArgusStatus exception: ' . $e->getMessage());
+      Response::error('[Admin] Failed to load Argus snapshot.', [], HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Toggle global Argus master switch.
+   */
+  #[Route('admin/argus/master', ['POST'])]
+  public function updateArgusMaster(): void
+  {
+    if (!$this->requireCapability('admin.argus.master')) {
+      return;
+    }
+
+    $enabled = InputSanitizer::postString('enabled');
+    if ($enabled !== '0' && $enabled !== '1') {
+      Response::error('[Admin] Invalid master value. Use 0 or 1.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $durationMinutes = (int) InputSanitizer::postString('duration_minutes');
+    $adminOverride = InputSanitizer::postString('admin_override') === '1';
+
+    $snapshot = ArgusConsole::setMasterEnabled($enabled === '1', User::currentUUID(), $durationMinutes, $adminOverride);
+
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.argus.master.updated', User::currentUUID(), [
+      'enabled' => $enabled,
+      'duration_minutes' => $durationMinutes,
+      'admin_override' => $adminOverride ? '1' : '0',
+    ]);
+
+    Response::success(
+      '[Admin] Argus master switch updated.',
+      [
+        'master_enabled' => $enabled === '1',
+        'snapshot' => $snapshot,
+      ],
+      HttpStatus::HTTP_OK
+    );
+  }
+
+  /**
+   * Toggle an Argus trace package (module).
+   */
+  #[Route('admin/argus/package', ['POST'])]
+  public function updateArgusPackage(): void
+  {
+    if (!$this->requireCapability('admin.argus.package')) {
+      return;
+    }
+
+    $moduleId = InputSanitizer::postString('module');
+    $enabled = InputSanitizer::postString('enabled');
+    if ($moduleId === '') {
+      Response::error('[Admin] Missing module id.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+    if ($enabled !== '0' && $enabled !== '1') {
+      Response::error('[Admin] Invalid package value. Use 0 or 1.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $durationMinutes = (int) InputSanitizer::postString('duration_minutes');
+    $adminOverride = InputSanitizer::postString('admin_override') === '1';
+
+    $snapshot = ArgusConsole::setPackageEnabled(
+      $moduleId,
+      $enabled === '1',
+      User::currentUUID(),
+      $durationMinutes,
+      $adminOverride,
+    );
+    if ($snapshot === null) {
+      Response::error('[Admin] Unknown trace package.', ['module' => $moduleId], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.argus.package.updated', User::currentUUID(), [
+      'module' => $moduleId,
+      'enabled' => $enabled,
+      'duration_minutes' => $durationMinutes,
+      'admin_override' => $adminOverride ? '1' : '0',
+    ]);
+
+    Response::success(
+      '[Admin] Argus trace package updated.',
+      [
+        'module' => $moduleId,
+        'enabled' => $enabled === '1',
+        'snapshot' => $snapshot,
+      ],
+      HttpStatus::HTTP_OK
+    );
+  }
+
+  /**
+   * Set global Argus capture scope filters.
+   */
+  #[Route('admin/argus/scope', ['POST'])]
+  public function updateArgusScope(): void
+  {
+    if (!$this->requireCapability('admin.argus.scope')) {
+      return;
+    }
+
+    $snapshot = ArgusConsole::setCaptureScope([
+      'user_uuid' => InputSanitizer::postString('user_uuid'),
+      'business_id' => InputSanitizer::postString('business_id'),
+      'session_hash' => InputSanitizer::postString('session_hash'),
+      'request_id' => InputSanitizer::postString('request_id'),
+      'route' => InputSanitizer::postString('route'),
+    ], User::currentUUID());
+
+    $runtime = $snapshot['runtime'] ?? null;
+    $scopeRaw = is_array($runtime) ? ($runtime['capture_scope'] ?? null) : null;
+    $scopeDetails = [];
+    if (is_array($scopeRaw)) {
+      foreach ($scopeRaw as $scopeKey => $scopeValue) {
+        if (!is_string($scopeKey) || !is_scalar($scopeValue)) {
+          continue;
+        }
+        $scopeDetails[$scopeKey] = (string) $scopeValue;
+      }
+    }
+
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.argus.scope.updated', User::currentUUID(), [
+      'scope' => json_encode($scopeDetails, JSON_UNESCAPED_SLASHES) ?: '{}',
+    ]);
+
+    Response::success('[Admin] Argus capture scope updated.', ['snapshot' => $snapshot], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * Apply a named Argus capture preset bundle.
+   */
+  #[Route('admin/argus/preset', ['POST'])]
+  public function applyArgusPreset(): void
+  {
+    if (!$this->requireCapability('admin.argus.preset')) {
+      return;
+    }
+
+    $presetId = InputSanitizer::postString('preset_id');
+    if ($presetId === '') {
+      Response::error('[Admin] Missing preset id.', [], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    $durationMinutes = (int) InputSanitizer::postString('duration_minutes');
+    $adminOverride = InputSanitizer::postString('admin_override') === '1';
+
+    $snapshot = ArgusConsole::applyPreset($presetId, User::currentUUID(), $durationMinutes, $adminOverride);
+    if ($snapshot === null) {
+      Response::error('[Admin] Unknown Argus preset.', ['preset_id' => $presetId], HttpStatus::HTTP_BAD_REQUEST);
+
+      return;
+    }
+
+    \PayCal\Infrastructure\Audit\SystemAuditRepository::append('admin.argus.preset.applied', User::currentUUID(), [
+      'preset_id' => $presetId,
+      'duration_minutes' => $durationMinutes,
+    ]);
+
+    Response::success('[Admin] Argus preset applied.', ['snapshot' => $snapshot], HttpStatus::HTTP_OK);
+  }
+
+  /**
+   * Read recent diagnostic events for a trace id.
+   */
+  #[Route('admin/argus/timeline/{traceId}', ['GET'])]
+  public function getArgusTimeline(string $traceId): void
+  {
+    if (!$this->authorized) {
+      Response::error('Unauthorized.', [], HttpStatus::HTTP_UNAUTHORIZED);
+
+      return;
+    }
+
+    Response::success(
+      '[Admin] Argus trace timeline.',
+      [
+        'trace_id' => $traceId,
+        'events' => ArgusConsole::timelineForTrace($traceId),
+      ],
+      HttpStatus::HTTP_OK
+    );
+  }
+
+  /**
    * Handles requireCapability operation.
    */
   private function requireCapability(string $action): bool
@@ -1009,17 +1227,14 @@ class AdminController
     foreach (Database::scanKeys(Keys::LOCK_BOUNDARY . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
-    Database::unlink(Keys::LOCK_BOUNDARY . ':' . $userUUID);
     Database::unlink(Keys::VERIFICATION_CODES . ':' . $userUUID);
 
-    // Email index records (current + pending; legacy and current styles)
+    // Email index records (current + pending)
     if ($email !== '') {
       Database::unlink(Keys::EMAIL . ':' . $email);
-      Database::unlink(Keys::EMAIL . $email);
     }
     if ($newEmail !== '') {
       Database::unlink(Keys::EMAIL . ':' . $newEmail);
-      Database::unlink(Keys::EMAIL . $newEmail);
     }
 
     // Passkey and wrapped DEK records
@@ -1219,5 +1434,3 @@ class AdminController
     ], HttpStatus::HTTP_OK);
   }
 }
-
-

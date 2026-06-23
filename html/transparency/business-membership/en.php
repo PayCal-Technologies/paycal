@@ -1,11 +1,10 @@
 <?php
 /**
- * Public Transparency: Business Membership and Role Philosophy
+ * Public Transparency: Business Connections and Role Philosophy
  *
  * PURPOSE:
- * Explain why PayCal uses a Business <-> Member relationship model,
- * how role changes are governed, and what architectural philosophy guides
- * capability, scope, and security decisions.
+ * Explain how PayCal separates business connections, active membership,
+ * role changes, consent, and explicit access grants.
  */
 
 declare(strict_types=1);
@@ -31,17 +30,17 @@ require_once HTML.'/header.php';
   <nav class="doc-breadcrumb" aria-label="<?php echo $i18n['BREADCRUMB']; ?>">
     <a href="<?php echo transparency_href('/transparency/'); ?>"><?php echo $i18n['HELP_TOC_TRANSPARENCY_HUB']; ?></a>
     <span class="separator">/</span>
-    <span class="current">Business Membership and Role Philosophy</span>
+    <span class="current">Business Connections and Role Philosophy</span>
   </nav>
 
   <header class="doc-article-header">
     <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_BUSINESS_MEMBERSHIP_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
-      This page explains the shift from loosely-coupled team semantics to an explicit
-      Business <strong>&lt;-&gt;</strong> Member relationship model, the current role policy,
-      and the principles we use to keep permissions auditable and secure.
+      This page explains the shift from loosely-coupled group semantics to explicit
+      Connections. A connection says who is linked to whom. Membership, role,
+      consent, and protected-data access are separate policy decisions.
     </p>
-    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time> &middot; <a href="<?php echo transparency_href('/transparency/business-membership-2026-06-19-pre-connections/'); ?>">Previous version</a></p>
   </header>
 
   <div class="doc-article-body">
@@ -52,19 +51,37 @@ require_once HTML.'/header.php';
         test, and audit is safer than a model built from scattered one-off checks.
       </p>
       <p>
-        The Organization <strong>&lt;-&gt;</strong> Member structure gives every actor an explicit
-        relationship to an organization with policy-aware status, role, and scope behavior.
+        The Business <strong>&lt;-&gt;</strong> Member connection gives every actor an explicit
+        identity link to a business. Active membership, role authority, protected-data
+        consent, and any future person-to-person grants remain separate from that link.
       </p>
     </section>
 
     <section class="doc-section">
-      <h2>Organization <strong>&lt;-&gt;</strong> Member Relationship Changes</h2>
+      <h2>Business <strong>&lt;-&gt;</strong> Member Connection Changes</h2>
       <ul class="doc-list">
-        <li>Membership is represented as an explicit relationship rather than an implicit UI state.</li>
+        <li>Connections are represented explicitly rather than implied by UI state.</li>
         <li>Access-request, invite, approval, activation, and revocation lifecycle states are enforced by backend policy.</li>
-        <li>Organization panels and notifications now reflect relationship transitions and role outcomes more consistently.</li>
-        <li>Shared organization behavior is governed by membership state before privileged actions are processed.</li>
+        <li>Business panels and notifications now reflect connection transitions and role outcomes more consistently.</li>
+        <li>Shared business behavior is governed by active membership and role policy before privileged actions are processed.</li>
       </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2>Connection, Membership, Consent, and Grants</h2>
+      <p>
+        PayCal now treats these as separate concepts:
+      </p>
+      <ul class="doc-list">
+        <li><strong>Connection:</strong> an identity link between a person and a business, or between two people.</li>
+        <li><strong>Membership:</strong> the active business participation state used for workspace collaboration.</li>
+        <li><strong>Consent:</strong> the member's approval for protected work data sharing.</li>
+        <li><strong>Grant:</strong> an explicit permission, such as delegated calendar viewing or a future trusted recovery capability.</li>
+      </ul>
+      <p>
+        A connection alone does not grant protected reports, exports, payroll visibility,
+        recovery authority, or the ability to act for another person.
+      </p>
     </section>
 
     <section class="doc-section">
@@ -87,11 +104,12 @@ require_once HTML.'/header.php';
     <section class="doc-section">
       <h2>Security and Encryption Philosophy</h2>
       <p>
-        Organization collaboration intersects with encryption and consent controls. Membership and role checks
-        gate shared organization envelope behavior so sensitive operations remain policy-bound.
+        Business collaboration intersects with encryption and consent controls. Active membership,
+        role checks, and consent state gate shared business envelope behavior so sensitive
+        operations remain policy-bound.
       </p>
       <ul class="doc-list">
-        <li>Membership and consent state are validated before organization-shared secure operations proceed.</li>
+        <li>Membership and consent state are validated before business-shared secure operations proceed.</li>
         <li>Role changes and membership transitions are treated as security-relevant events, not only UX events.</li>
         <li>Access denial paths are expected behavior under policy mismatch and are surfaced for auditability.</li>
       </ul>

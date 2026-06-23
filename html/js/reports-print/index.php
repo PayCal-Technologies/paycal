@@ -1,0 +1,273 @@
+<?php declare(strict_types=1);
+
+namespace PayCal\Domain;
+
+require_once '../../config.php';
+
+Authentication::abortIfUnauthenticated();
+
+CORS::handleORIGIN();
+CORS::renderContentType('application/javascript');
+
+Javascript::renderDocBlock();
+?>
+const REPORTS_PRINT_STORAGE_KEY = 'paycal.reports.printMode';
+const REPORTS_PRINT_DEFAULT_MODE = 'bw';
+const REPORTS_PRINT_MODES = new Set(['bw', 'grayscale', 'color']);
+const REPORTS_PRINT_BYPASS_ATTR = 'data-reports-print-bypass';
+const BUSINESS_REPORT_PDF_SELECTOR = '[data-group-export-format="pdf"], [data-team-export-format="pdf"]';
+let reportsPrintPendingAction = null;
+
+const isReportsPrintPage = () => {
+  const path = window.location.pathname.replace(/\/+$/, '/') || '/';
+  return path === '/reports/' || path === '/business/reports/';
+};
+
+const normalizePrintMode = (mode) => {
+  const normalized = String(mode || '').trim().toLowerCase();
+  return REPORTS_PRINT_MODES.has(normalized) ? normalized : REPORTS_PRINT_DEFAULT_MODE;
+};
+
+const readPrintMode = () => {
+  try {
+    return normalizePrintMode(window.localStorage.getItem(REPORTS_PRINT_STORAGE_KEY));
+  } catch {
+    return REPORTS_PRINT_DEFAULT_MODE;
+  }
+};
+
+const writePrintMode = (mode) => {
+  const normalized = normalizePrintMode(mode);
+  document.documentElement.dataset.printMode = normalized;
+  try {
+    window.localStorage.setItem(REPORTS_PRINT_STORAGE_KEY, normalized);
+  } catch {
+    // Storage can be unavailable in private contexts; the data attribute is enough for this print.
+  }
+  return normalized;
+};
+
+const modeLabels = {
+  bw: 'Black & white',
+  grayscale: 'Grayscale',
+  color: 'Full color',
+};
+
+const modeDescriptions = {
+  bw: 'Highest contrast and lowest ink use. Charts print as black lines on white paper.',
+  grayscale: 'Printer-friendly gray tones with more separation between report series.',
+  color: 'Preserves report chart colors while keeping page backgrounds white.',
+};
+
+const setReportsPrintMarkup = (target, markup) => {
+  const guardian = window.Guardian;
+  if (!guardian || typeof guardian.setHTML !== 'function') {
+    throw new Error('Guardian module is required before reports print controls.');
+  }
+  guardian.setHTML(target, markup);
+};
+
+const findPanelPdfButton = (target) => {
+  if (!(target instanceof Element)) {
+    return null;
+  }
+  return target.closest(
+    `[data-export-scope][data-export-format="pdf"], ${BUSINESS_REPORT_PDF_SELECTOR}`,
+  );
+};
+
+const printAfterStyleFlush = (mode) => {
+  document.documentElement.dataset.printMode = mode;
+  document.documentElement.classList.add('reports_print_mode_ready');
+  window.dispatchEvent(new CustomEvent('paycal:reports-print-mode-applied', { detail: { mode } }));
+  // Force a layout read so Chrome's print preview sees the selected mode.
+  void document.documentElement.offsetHeight;
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      window.print();
+    });
+  });
+};
+
+const runPrintAction = (mode) => {
+  const action = reportsPrintPendingAction;
+  reportsPrintPendingAction = null;
+  document.documentElement.dataset.printMode = mode;
+
+  if (action && action.type === 'button' && action.button instanceof HTMLElement && action.button.isConnected) {
+    if (action.button.matches(BUSINESS_REPORT_PDF_SELECTOR)) {
+      printAfterStyleFlush(mode);
+      return;
+    }
+
+    action.button.setAttribute(REPORTS_PRINT_BYPASS_ATTR, '1');
+    action.button.click();
+    return;
+  }
+
+  printAfterStyleFlush(mode);
+};
+
+const ensurePrintDialog = () => {
+  let dialog = document.getElementById('reports_print_dialog');
+  if (dialog instanceof HTMLDialogElement) {
+    return dialog;
+  }
+
+  dialog = document.createElement('dialog');
+  dialog.id = 'reports_print_dialog';
+  dialog.className = 'dialog reports_print_dialog';
+  dialog.setAttribute('aria-labelledby', 'reports_print_dialog_title');
+  dialog.setAttribute('aria-describedby', 'reports_print_dialog_desc');
+  setReportsPrintMarkup(dialog, `
+    <form method="dialog" class="reports_print_form">
+      <section class="modal_header reports_print_header">
+        <h2 id="reports_print_dialog_title" class="modal_title">Print report</h2>
+        <button type="button" class="btn_close" data-reports-print-close aria-label="Close">&times;</button>
+      </section>
+      <section class="modal_content reports_print_content">
+        <p id="reports_print_dialog_desc" class="reports_print_desc">Choose how this reports page should be prepared for Chrome print or Save as PDF.</p>
+        <fieldset class="reports_print_modes">
+          <legend class="visually_hidden">Print color mode</legend>
+          ${Array.from(REPORTS_PRINT_MODES).map((mode) => `
+            <label class="reports_print_mode" data-print-mode-option="${mode}">
+              <input type="radio" name="reports_print_mode" value="${mode}">
+              <span class="reports_print_mode_body">
+                <span class="reports_print_mode_title">${modeLabels[mode]}</span>
+                <span class="reports_print_mode_desc">${modeDescriptions[mode]}</span>
+              </span>
+            </label>
+          `).join('')}
+        </fieldset>
+      </section>
+      <section class="modal_footer reports_print_footer">
+        <button type="button" class="btn btn_secondary" data-reports-print-close>Cancel</button>
+        <button type="submit" class="btn btn_primary" value="print">Print</button>
+      </section>
+    </form>
+  `);
+
+  document.body.appendChild(dialog);
+
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) {
+      dialog.close('cancel');
+    }
+  });
+
+  dialog.querySelectorAll('[data-reports-print-close]').forEach((button) => {
+    button.addEventListener('click', () => {
+      dialog.close('cancel');
+    });
+  });
+
+  dialog.addEventListener('close', () => {
+    document.documentElement.classList.remove('reports_print_dialog_open');
+  });
+
+  dialog.querySelector('form')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const mode = writePrintMode(data.get('reports_print_mode'));
+    dialog.close('print');
+    window.setTimeout(() => {
+      runPrintAction(mode);
+    }, 50);
+  });
+
+  return dialog;
+};
+
+const syncDialogMode = (dialog) => {
+  const selected = readPrintMode();
+  const input = dialog.querySelector(`input[name="reports_print_mode"][value="${selected}"]`);
+  if (input instanceof HTMLInputElement) {
+    input.checked = true;
+  }
+};
+
+const openReportsPrintDialog = (action = null) => {
+  const dialog = ensurePrintDialog();
+  reportsPrintPendingAction = action;
+  syncDialogMode(dialog);
+  writePrintMode(readPrintMode());
+  document.documentElement.classList.add('reports_print_dialog_open');
+  if (typeof dialog.showModal === 'function') {
+    dialog.showModal();
+  } else {
+    dialog.setAttribute('open', 'open');
+  }
+  const checked = dialog.querySelector('input[name="reports_print_mode"]:checked');
+  if (checked instanceof HTMLElement) {
+    checked.focus();
+  }
+};
+
+const ensurePrintButton = () => {
+  if (document.getElementById('reports_print_options_button')) {
+    return;
+  }
+
+  const mount = document.querySelector('[data-earnings-mode]')
+    || document.querySelector('.business_reports_panel_shell')
+    || document.getElementById('business-workspace')
+    || document.getElementById('main');
+  if (!(mount instanceof HTMLElement)) {
+    return;
+  }
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'reports_print_toolbar';
+  setReportsPrintMarkup(toolbar, `
+    <button type="button" class="btn btn_secondary reports_print_button" id="reports_print_options_button" aria-haspopup="dialog" aria-controls="reports_print_dialog">
+      Print report
+    </button>
+  `);
+  mount.insertAdjacentElement('beforebegin', toolbar);
+  toolbar.querySelector('button')?.addEventListener('click', () => openReportsPrintDialog());
+};
+
+const shouldIgnorePrintShortcut = (event) => {
+  if (event.defaultPrevented) {
+    return true;
+  }
+  if (!(event.metaKey || event.ctrlKey) || event.shiftKey || event.altKey) {
+    return true;
+  }
+  return String(event.key || '').toLowerCase() !== 'p';
+};
+
+if (isReportsPrintPage()) {
+  writePrintMode(readPrintMode());
+
+  document.addEventListener('DOMContentLoaded', ensurePrintButton);
+
+  document.addEventListener('click', (event) => {
+    const button = findPanelPdfButton(event.target);
+    if (!(button instanceof HTMLElement)) {
+      return;
+    }
+
+    if (button.hasAttribute(REPORTS_PRINT_BYPASS_ATTR)) {
+      button.removeAttribute(REPORTS_PRINT_BYPASS_ATTR);
+      return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openReportsPrintDialog({ type: 'button', button });
+  }, true);
+
+  document.addEventListener('keydown', (event) => {
+    if (shouldIgnorePrintShortcut(event)) {
+      return;
+    }
+    event.preventDefault();
+    openReportsPrintDialog();
+  }, true);
+
+  window.addEventListener('beforeprint', () => {
+    writePrintMode(readPrintMode());
+  });
+}

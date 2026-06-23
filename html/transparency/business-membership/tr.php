@@ -1,11 +1,10 @@
 <?php
 /**
- * Public Transparency: Organization Membership and Role Philosophy
+ * Public Transparency: Business Connections and Role Philosophy
  *
  * PURPOSE:
- * Explain why PayCal uses an Organization <-> Member relationship model,
- * how role changes are governed, and what architectural philosophy guides
- * capability, scope, and security decisions.
+ * Explain how PayCal separates business connections, active membership,
+ * role changes, consent, and explicit access grants.
  */
 
 declare(strict_types=1);
@@ -31,17 +30,17 @@ require_once HTML.'/header.php';
   <nav class="doc-breadcrumb" aria-label="<?php echo $i18n['BREADCRUMB']; ?>">
     <a href="<?php echo transparency_href('/transparency/'); ?>"><?php echo $i18n['HELP_TOC_TRANSPARENCY_HUB']; ?></a>
     <span class="separator">/</span>
-    <span class="current">Organizasyon Üyeliği ve Rol Felsefesi</span>
+    <span class="current">İş Bağlantıları ve Rol Felsefesi</span>
   </nav>
 
   <header class="doc-article-header">
     <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_BUSINESS_MEMBERSHIP_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
-      Bu sayfa, gevşek bağlı ekip semantiğinden açık bir Organizasyon <strong>&lt;-&gt;</strong> Üye
-      ilişki modeline geçişi, mevcut rol politikasını ve izinleri denetlenebilir ve güvenli tutmak
-      için kullandığımız ilkeleri açıklamaktadır.
+      Bu sayfa, gevşek bağlı ekip semantiğinden açık Connections modeline geçişi açıklar.
+      Bir connection kimin kime bağlı olduğunu söyler. Üyelik, rol, onay ve korumalı veri
+      erişimi ayrı politika kararları olarak kalır.
     </p>
-    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time> &middot; <a href="<?php echo transparency_href('/transparency/business-membership-2026-06-19-pre-connections/'); ?>">Previous version</a></p>
   </header>
 
   <div class="doc-article-body">
@@ -52,19 +51,37 @@ require_once HTML.'/header.php';
         kolay bir rol modeli, dağınık tek seferlik kontrollerden oluşturulmuş bir modelden daha güvenlidir.
       </p>
       <p>
-        Organizasyon <strong>&lt;-&gt;</strong> Üye yapısı, her aktöre politika destekli durum, rol ve
-        kapsam davranışıyla bir organizasyonla açık bir ilişki verir.
+        Business <strong>&lt;-&gt;</strong> Üye connection'ı her aktöre bir işletmeyle açık identity link
+        verir. Aktif üyelik, rol yetkisi, korumalı veri onayı ve gelecekteki kişi-kişi grants
+        bu linkten ayrı kalır.
       </p>
     </section>
 
     <section class="doc-section">
-      <h2>Organizasyon <strong>&lt;-&gt;</strong> Üye İlişkisindeki Değişiklikler</h2>
+      <h2>Business <strong>&lt;-&gt;</strong> Üye Connection Değişiklikleri</h2>
       <ul class="doc-list">
-        <li>Üyelik, örtük bir UI durumu yerine açık bir ilişki olarak temsil edilir.</li>
+        <li>Connections, UI durumundan çıkarılmak yerine açıkça temsil edilir.</li>
         <li>Erişim isteği, davet, onay, etkinleştirme ve iptal yaşam döngüsü durumları backend politikası tarafından uygulanır.</li>
-        <li>Organizasyon panelleri ve bildirimler artık ilişki geçişlerini ve rol sonuçlarını daha tutarlı biçimde yansıtmaktadır.</li>
-        <li>Paylaşılan organizasyon davranışı, ayrıcalıklı işlemler işlenmeden önce üyelik durumu tarafından yönetilir.</li>
+        <li>Business panelleri ve bildirimler artık connection geçişlerini ve rol sonuçlarını daha tutarlı biçimde yansıtır.</li>
+        <li>Paylaşılan Business davranışı, ayrıcalıklı işlemler işlenmeden önce aktif üyelik ve rol politikası tarafından yönetilir.</li>
       </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2>Connection, üyelik, onay ve grants</h2>
+      <p>
+        PayCal artık bu kavramları ayrı ele alır:
+      </p>
+      <ul class="doc-list">
+        <li><strong>Connection:</strong> bir kişi ile işletme arasında veya iki kişi arasında identity link.</li>
+        <li><strong>Üyelik:</strong> workspace işbirliği için kullanılan aktif Business katılım durumu.</li>
+        <li><strong>Onay:</strong> üyenin korumalı iş verilerini paylaşma izni.</li>
+        <li><strong>Grant:</strong> delege takvim görünümü veya gelecekteki trusted recovery gibi açık izin.</li>
+      </ul>
+      <p>
+        Connection tek başına korumalı raporlar, exportlar, payroll görünürlüğü,
+        recovery yetkisi veya başka biri adına hareket etme yeteneği vermez.
+      </p>
     </section>
 
     <section class="doc-section">
@@ -87,8 +104,8 @@ require_once HTML.'/header.php';
     <section class="doc-section">
       <h2>Güvenlik ve Şifreleme Felsefesi</h2>
       <p>
-        Organizasyon işbirliği, şifreleme ve onay kontrolleriyle kesişir. Üyelik ve rol kontrolleri,
-        hassas işlemlerin politikaya bağlı kalması için paylaşılan organizasyon zarfı davranışını yönetir.
+        Business işbirliği, şifreleme ve onay kontrolleriyle kesişir. Aktif üyelik, rol kontrolleri
+        ve onay durumu, hassas işlemlerin politikaya bağlı kalması için paylaşılan Business envelope davranışını yönetir.
       </p>
       <ul class="doc-list">
         <li>Üyelik ve onay durumu, paylaşılan güvenli işlemler devam etmeden önce doğrulanır.</li>

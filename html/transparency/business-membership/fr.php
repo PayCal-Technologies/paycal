@@ -1,11 +1,10 @@
 <?php
 /**
- * Public Transparency: Organization Membership and Role Philosophy
+ * Public Transparency: Business Connections and Role Philosophy
  *
  * PURPOSE:
- * Explain why PayCal uses an Organization <-> Member relationship model,
- * how role changes are governed, and what architectural philosophy guides
- * capability, scope, and security decisions.
+ * Explain how PayCal separates business connections, active membership,
+ * role changes, consent, and explicit access grants.
  */
 
 declare(strict_types=1);
@@ -31,17 +30,17 @@ require_once HTML.'/header.php';
   <nav class="doc-breadcrumb" aria-label="<?php echo $i18n['BREADCRUMB']; ?>">
     <a href="<?php echo transparency_href('/transparency/'); ?>"><?php echo $i18n['HELP_TOC_TRANSPARENCY_HUB']; ?></a>
     <span class="separator">/</span>
-    <span class="current">Adhésion organisationnelle et philosophie des rôles</span>
+    <span class="current">Connexions professionnelles et philosophie des rôles</span>
   </nav>
 
   <header class="doc-article-header">
     <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_BUSINESS_MEMBERSHIP_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
-      Cette page explique le passage d'une sémantique d'équipe faiblement couplée à un modèle
-      explicite de relation Organisation <strong>&lt;-&gt;</strong> Membre, la politique de rôle
-      actuelle, et les principes que nous appliquons pour maintenir les permissions auditables et sécurisées.
+      Cette page explique le passage d'une sémantique d'équipe faiblement couplée à des
+      Connexions explicites. Une connexion indique qui est lié à qui. Adhésion, rôle,
+      consentement et accès aux données protégées restent des décisions de politique séparées.
     </p>
-    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time> &middot; <a href="<?php echo transparency_href('/transparency/business-membership-2026-06-19-pre-connections/'); ?>">Previous version</a></p>
   </header>
 
   <div class="doc-article-body">
@@ -53,20 +52,37 @@ require_once HTML.'/header.php';
         vérifications ponctuelles dispersées.
       </p>
       <p>
-        La structure Organisation <strong>&lt;-&gt;</strong> Membre donne à chaque acteur une relation
-        explicite avec une organisation, avec un comportement d'état, de rôle et de portée
-        pris en charge par la politique.
+        La connexion Business <strong>&lt;-&gt;</strong> Membre donne à chaque acteur un lien d'identité
+        explicite avec une entreprise. L'adhésion active, l'autorité de rôle, le consentement
+        aux données protégées et les futurs partages personne-à-personne restent séparés de ce lien.
       </p>
     </section>
 
     <section class="doc-section">
-      <h2>Changements dans la relation Organisation <strong>&lt;-&gt;</strong> Membre</h2>
+      <h2>Changements dans la connexion Business <strong>&lt;-&gt;</strong> Membre</h2>
       <ul class="doc-list">
-        <li>L'adhésion est représentée comme une relation explicite plutôt qu'un état d'interface implicite.</li>
+        <li>Les connexions sont représentées explicitement plutôt que déduites de l'état de l'interface.</li>
         <li>Les états du cycle de vie — demande d'accès, invitation, approbation, activation et révocation — sont appliqués par la politique backend.</li>
-        <li>Les panneaux d'organisation et les notifications reflètent désormais les transitions de relation et les résultats de rôle de manière plus cohérente.</li>
-        <li>Le comportement d'organisation partagé est régi par l'état de l'adhésion avant le traitement des actions privilégiées.</li>
+        <li>Les panneaux Business et les notifications reflètent désormais les transitions de connexion et les résultats de rôle de manière plus cohérente.</li>
+        <li>Le comportement Business partagé est régi par l'adhésion active et la politique de rôle avant le traitement des actions privilégiées.</li>
       </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2>Connexion, adhésion, consentement et grants</h2>
+      <p>
+        PayCal traite maintenant ces concepts séparément :
+      </p>
+      <ul class="doc-list">
+        <li><strong>Connexion :</strong> un lien d'identité entre une personne et une entreprise, ou entre deux personnes.</li>
+        <li><strong>Adhésion :</strong> l'état de participation Business active utilisé pour la collaboration dans le workspace.</li>
+        <li><strong>Consentement :</strong> l'approbation du membre pour partager des données de travail protégées.</li>
+        <li><strong>Grant :</strong> une permission explicite, comme une vue de calendrier déléguée ou une future capacité de récupération de confiance.</li>
+      </ul>
+      <p>
+        Une connexion seule ne donne pas accès aux rapports protégés, aux exports, à la paie,
+        à l'autorité de récupération ni à la capacité d'agir pour une autre personne.
+      </p>
     </section>
 
     <section class="doc-section">
@@ -89,9 +105,9 @@ require_once HTML.'/header.php';
     <section class="doc-section">
       <h2>Philosophie de la sécurité et du chiffrement</h2>
       <p>
-        La collaboration organisationnelle recoupule avec les contrôles de chiffrement et de consentement. Les vérifications
-        d'adhésion et de rôle conditionnent le comportement de l'enveloppe organisationnelle partagée afin que les
-        opérations sensibles restent liées à la politique.
+        La collaboration Business recoupe les contrôles de chiffrement et de consentement.
+        L'adhésion active, les vérifications de rôle et l'état du consentement conditionnent le
+        comportement de l'enveloppe Business partagée afin que les opérations sensibles restent liées à la politique.
       </p>
       <ul class="doc-list">
         <li>L'état de l'adhésion et du consentement est validé avant le traitement des opérations sécurisées partagées.</li>

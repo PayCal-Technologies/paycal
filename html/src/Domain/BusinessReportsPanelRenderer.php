@@ -8,7 +8,7 @@ namespace PayCal\Domain;
 final class BusinessReportsPanelRenderer
 {
   /**
-   * TODO: Document loadingSkeleton.
+   * Loading skeleton.
    */
   public function loadingSkeleton(int $year = 0): string
   {
@@ -28,7 +28,7 @@ final class BusinessReportsPanelRenderer
   }
 
   /**
-   * TODO: Document buildYearRowSkeleton.
+   * Build year row skeleton.
    */
   private function buildYearRowSkeleton(): string
   {
@@ -40,7 +40,7 @@ final class BusinessReportsPanelRenderer
   }
 
   /**
-   * TODO: Document buildExecSnapshotSkeleton.
+   * Build exec snapshot skeleton.
    */
   private function buildExecSnapshotSkeleton(): string
   {
@@ -79,7 +79,7 @@ final class BusinessReportsPanelRenderer
   }
 
   /**
-   * TODO: Document buildMemberGridSkeleton.
+   * Build member grid skeleton.
    */
   private function buildMemberGridSkeleton(): string
   {

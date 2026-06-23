@@ -69,15 +69,15 @@ final class BusinessAuditControlTestServiceIntegrationTest extends TestCase
       Database::unlink(Keys::BUSINESS . ':' . $this->businessId);
       Database::unlink(Keys::BUSINESS_SETTINGS . ':' . $this->businessId);
       Database::unlink(Keys::BUSINESS_MEMBERS . ':' . $this->businessId);
-      Database::unlink(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId);
+      Database::unlink(Keys::BUSINESS_CONNECTIONS . ':' . $this->businessId);
       Database::unlink(Keys::BUSINESS_PENDING . ':' . $this->businessId);
       Database::unlink(Keys::BUSINESS_USER . ':' . $this->ownerUUID);
       Database::unlink(Keys::BUSINESS_USER . ':' . $this->viewerUUID);
-      Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->ownerUUID);
-      Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->viewerUUID);
+      Database::unlink(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->ownerUUID);
+      Database::unlink(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->viewerUUID);
       Database::unlink(Keys::BUSINESS_OWNER . ':' . $this->ownerUUID);
-      Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->ownerUUID);
-      Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->viewerUUID);
+      Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->ownerUUID);
+      Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->viewerUUID);
     }
 
     Database::unlink(Keys::SYSTEM_AUDIT_GCS_CHAIN_TIP);
@@ -161,10 +161,10 @@ final class BusinessAuditControlTestServiceIntegrationTest extends TestCase
   public function testViewerCannotGenerateAuditControlTest(): void
   {
     Database::sadd(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->viewerUUID);
-    Database::sadd(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $this->viewerUUID);
+    Database::sadd(Keys::BUSINESS_CONNECTIONS . ':' . $this->businessId, $this->viewerUUID);
     Database::sadd(Keys::BUSINESS_USER . ':' . $this->viewerUUID, $this->businessId);
-    Database::sadd(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->viewerUUID, $this->businessId);
-    Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->viewerUUID, [
+    Database::sadd(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->viewerUUID, $this->businessId);
+    Database::hset(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->viewerUUID, [
       'business_id' => $this->businessId,
       'user_uuid' => $this->viewerUUID,
       'role' => 'viewer',

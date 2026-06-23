@@ -81,13 +81,13 @@ namespace PayCal\Domain;
           <h3 id="businesses_membership_consent_matrix_title" class="section_title_sm"><?php echo businesses_index_i18n('BUSINESSES_HIERARCHY_PERMISSIONS_TITLE'); ?></h3>
           <dl class="businesses_current_details_list">
             <dt>Protected work data</dt>
-            <dd>Business-scoped hours, earnings, reports, and exports for org-managed sites only.</dd>
+            <dd>Business-scoped hours, earnings, reports, and exports for business-managed sites only.</dd>
             <dt>Actor</dt>
             <dd>You, after signing in and accepting this membership action.</dd>
             <dt>Membership</dt>
             <dd>Must remain active before the business can read protected work data.</dd>
             <dt>Credential and envelope</dt>
-            <dd>Each read must match your consent, active key wrap, and organization encryption envelope.</dd>
+            <dd>Each read must match your consent, active key wrap, and business encryption envelope.</dd>
             <dt>Current consent</dt>
             <dd id="businesses_membership_consent_current_ack">Not granted.</dd>
             <dt>Consent version</dt>

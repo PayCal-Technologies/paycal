@@ -1,11 +1,10 @@
 <?php
 /**
- * Public Transparency: Organization Membership and Role Philosophy
+ * Public Transparency: Business Connections and Role Philosophy
  *
  * PURPOSE:
- * Explain why PayCal uses an Organization <-> Member relationship model,
- * how role changes are governed, and what architectural philosophy guides
- * capability, scope, and security decisions.
+ * Explain how PayCal separates business connections, active membership,
+ * role changes, consent, and explicit access grants.
  */
 
 declare(strict_types=1);
@@ -31,18 +30,17 @@ require_once HTML.'/header.php';
   <nav class="doc-breadcrumb" aria-label="<?php echo $i18n['BREADCRUMB']; ?>">
     <a href="<?php echo transparency_href('/transparency/'); ?>"><?php echo $i18n['HELP_TOC_TRANSPARENCY_HUB']; ?></a>
     <span class="separator">/</span>
-    <span class="current">Miyembro ng Organisasyon at Pilosopiya ng Papel</span>
+    <span class="current">Mga Koneksyon ng Negosyo at Pilosopiya ng Papel</span>
   </nav>
 
   <header class="doc-article-header">
     <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_BUSINESS_MEMBERSHIP_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
-      Ipinaliwanag ng pahinang ito ang paglipat mula sa maluwag na nakakonektang semantika ng koponan
-      patungo sa isang malinaw na modelo ng relasyon ng Organisasyon <strong>&lt;-&gt;</strong> Miyembro,
-      ang kasalukuyang patakaran sa papel, at ang mga prinsipyong ginagamit namin upang mapanatiling
-      naaakit at ligtas ang mga pahintulot.
+      Ipinaliwanag ng pahinang ito ang paglipat mula sa maluwag na semantika ng koponan patungo
+      sa malinaw na Connections. Sinasabi ng connection kung sino ang naka-link kanino. Ang membership,
+      papel, consent, at access sa protected data ay magkakahiwalay na desisyon ng patakaran.
     </p>
-    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time> &middot; <a href="<?php echo transparency_href('/transparency/business-membership-2026-06-19-pre-connections/'); ?>">Previous version</a></p>
   </header>
 
   <div class="doc-article-body">
@@ -54,20 +52,37 @@ require_once HTML.'/header.php';
         mga nakakalat na minsan-lang na pagsusuri.
       </p>
       <p>
-        Ang istruktura ng Organisasyon <strong>&lt;-&gt;</strong> Miyembro ay nagbibigay sa bawat aktor
-        ng malinaw na relasyon sa isang organisasyon na may patakaran-aware na status, papel, at
-        gawi ng saklaw.
+        Ang Business <strong>&lt;-&gt;</strong> Member connection ay nagbibigay sa bawat aktor ng malinaw
+        na identity link sa isang business. Ang active membership, role authority, consent sa protected
+        data, at future person-to-person grants ay nananatiling hiwalay sa link na iyon.
       </p>
     </section>
 
     <section class="doc-section">
-      <h2>Mga Pagbabago sa Relasyon ng Organisasyon <strong>&lt;-&gt;</strong> Miyembro</h2>
+      <h2>Mga Pagbabago sa Business <strong>&lt;-&gt;</strong> Member Connection</h2>
       <ul class="doc-list">
-        <li>Ang miyembro ay kinakatawan bilang isang malinaw na relasyon kaysa sa isang implicit na estado ng UI.</li>
+        <li>Ang connections ay malinaw na kinakatawan sa halip na hulaan mula sa estado ng UI.</li>
         <li>Ang mga estado ng lifecycle — kahilingan ng access, imbitasyon, pag-apruba, pag-activate, at pagbabawi — ay isinasagawa ng patakaran ng backend.</li>
-        <li>Ang mga panel ng organisasyon at mga abiso ay mas patuloy na sumasalamin sa mga paglipat ng relasyon at mga resulta ng papel.</li>
-        <li>Ang nakabahaging gawi ng organisasyon ay pinamamahalaan ng estado ng miyembro bago maproseso ang mga may pribilehiyong aksyon.</li>
+        <li>Ang Business panels at notifications ay mas consistent na nagpapakita ng connection transitions at role outcomes.</li>
+        <li>Ang nakabahaging gawi ng Business ay pinamamahalaan ng active membership at role policy bago maproseso ang mga may pribilehiyong aksyon.</li>
       </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2>Connection, membership, consent, at grants</h2>
+      <p>
+        Hinihiwalay na ngayon ng PayCal ang mga konseptong ito:
+      </p>
+      <ul class="doc-list">
+        <li><strong>Connection:</strong> identity link sa pagitan ng tao at business, o sa pagitan ng dalawang tao.</li>
+        <li><strong>Membership:</strong> active Business participation state para sa workspace collaboration.</li>
+        <li><strong>Consent:</strong> pag-apruba ng member na ibahagi ang protected work data.</li>
+        <li><strong>Grant:</strong> malinaw na permission, gaya ng delegated calendar viewing o future trusted recovery capability.</li>
+      </ul>
+      <p>
+        Ang connection lang ay hindi nagbibigay ng protected reports, exports, payroll visibility,
+        recovery authority, o kakayahang kumilos para sa ibang tao.
+      </p>
     </section>
 
     <section class="doc-section">
@@ -90,9 +105,9 @@ require_once HTML.'/header.php';
     <section class="doc-section">
       <h2>Pilosopiya ng Seguridad at Encryption</h2>
       <p>
-        Ang pakikipagtulungan ng organisasyon ay nakikipag-ugnayan sa mga kontrol sa encryption at pahintulot.
-        Ang mga pagsusuri ng miyembro at papel ay nagtatakda ng nakabahaging gawi ng envelope ng organisasyon
-        upang ang mga sensitibong operasyon ay manatiling nakatali sa patakaran.
+        Ang Business collaboration ay konektado sa encryption at consent controls. Active membership,
+        role checks, at consent state ang nagtatakda ng shared Business envelope behavior upang ang
+        sensitibong operations ay manatiling nakatali sa patakaran.
       </p>
       <ul class="doc-list">
         <li>Ang estado ng miyembro at pahintulot ay napatunayan bago magpatuloy ang mga nakabahaging ligtas na operasyon.</li>

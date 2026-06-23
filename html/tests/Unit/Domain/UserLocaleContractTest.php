@@ -41,11 +41,11 @@ final class UserLocaleContractTest extends TestCase
   public function workspaceTimestampFormatterUsesViewerLocale(): void
   {
     $projectRoot = dirname(__DIR__, 4);
-    $workspaceJs = (string) file_get_contents($projectRoot . '/html/js/business/workspace.js.php');
+    $timestampPopoversJs = (string) file_get_contents($projectRoot . '/html/js/business/core/timestamp-popovers.js.php');
 
-    $this->assertStringContainsString('const resolveViewerLocale = () => {', $workspaceJs);
-    $this->assertStringContainsString('new Intl.DateTimeFormat(viewerLocale, { ...options, timeZone: normalizedZone })', $workspaceJs);
-    $this->assertStringNotContainsString("new Intl.DateTimeFormat('en-US', { ...options, timeZone: normalizedZone })", $workspaceJs);
+    $this->assertStringContainsString('const resolveViewerLocale = () => {', $timestampPopoversJs);
+    $this->assertStringContainsString('new Intl.DateTimeFormat(viewerLocale, { ...options, timeZone: normalizedZone })', $timestampPopoversJs);
+    $this->assertStringNotContainsString("new Intl.DateTimeFormat('en-US', { ...options, timeZone: normalizedZone })", $timestampPopoversJs);
   }
 
   #[Group('private-moat')]
@@ -53,11 +53,11 @@ final class UserLocaleContractTest extends TestCase
   public function profileLanguageSaveDoesNotRequirePayPeriodValidationForDetailsSource(): void
   {
     $projectRoot = dirname(__DIR__, 4);
-    $workspaceJs = (string) file_get_contents($projectRoot . '/html/js/business/workspace.js.php');
+    $personalSettingsJs = (string) file_get_contents($projectRoot . '/html/js/business/core/personal-settings.js.php');
 
-    $this->assertStringContainsString("const PAY_PERIOD_SAVE_SOURCES = new Set(['frequency', 'anchor', 'grace', 'calendar-day']);", $workspaceJs);
-    $this->assertStringContainsString('if (PAY_PERIOD_SAVE_SOURCES.has(source) && !payPeriodValid)', $workspaceJs);
-    $this->assertStringContainsString('window.location.reload();', $workspaceJs);
+    $this->assertStringContainsString("const PAY_PERIOD_SAVE_SOURCES = new Set(['frequency', 'anchor', 'grace', 'calendar-day']);", $personalSettingsJs);
+    $this->assertStringContainsString('if (PAY_PERIOD_SAVE_SOURCES.has(source) && !payPeriodValid)', $personalSettingsJs);
+    $this->assertStringContainsString('window.location.reload();', $personalSettingsJs);
   }
 
   #[Group('private-moat')]
@@ -65,16 +65,16 @@ final class UserLocaleContractTest extends TestCase
   public function profileLanguageSaveStillWorksWhenPayPeriodManagedByBusiness(): void
   {
     $projectRoot = dirname(__DIR__, 4);
-    $workspaceJs = (string) file_get_contents($projectRoot . '/html/js/business/workspace.js.php');
+    $personalSettingsJs = (string) file_get_contents($projectRoot . '/html/js/business/core/personal-settings.js.php');
 
-    $this->assertStringContainsString('const payPeriodManaged = state.profilePayPeriodManagedByBusiness;', $workspaceJs);
-    $this->assertStringContainsString('if (payPeriodManaged && PAY_PERIOD_SAVE_SOURCES.has(source))', $workspaceJs);
-    $this->assertStringContainsString('if (!payPeriodValid || payPeriodManaged)', $workspaceJs);
+    $this->assertStringContainsString('const payPeriodManaged = state.profilePayPeriodManagedByBusiness;', $personalSettingsJs);
+    $this->assertStringContainsString('if (payPeriodManaged && PAY_PERIOD_SAVE_SOURCES.has(source))', $personalSettingsJs);
+    $this->assertStringContainsString('if (!payPeriodValid || payPeriodManaged)', $personalSettingsJs);
 
     $saveFn = 'const savePersonalBusinessSettings = async (source = \'auto\') => {';
-    $saveStart = strpos($workspaceJs, $saveFn);
+    $saveStart = strpos($personalSettingsJs, $saveFn);
     $this->assertNotFalse($saveStart);
-    $saveBody = substr($workspaceJs, (int) $saveStart, 1200);
+    $saveBody = substr($personalSettingsJs, (int) $saveStart, 1200);
     $this->assertStringNotContainsString(
       'if (state.profilePayPeriodManagedByBusiness) {',
       $saveBody,
@@ -111,14 +111,15 @@ final class UserLocaleContractTest extends TestCase
     $projectRoot = dirname(__DIR__, 4);
     $dataGrid = (string) file_get_contents($projectRoot . '/html/src/Domain/DataGrid.php');
     $calendarJs = (string) file_get_contents($projectRoot . '/html/js/calendar/calendar.js');
+    $calendarI18nJs = (string) file_get_contents($projectRoot . '/html/js/calendar/i18n.js');
     $settingsJs = (string) file_get_contents($projectRoot . '/html/js/settings/index.php');
 
     $this->assertStringContainsString('Strings::formatLocalizedMonthYear', $dataGrid);
     $this->assertStringContainsString('Strings::generateWeekDayLabels', $dataGrid);
     $this->assertStringNotContainsString("['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']", $dataGrid);
     $this->assertStringContainsString('function calendarUserLocale()', $calendarJs);
-    $this->assertStringContainsString('function calendarConfig()', $calendarJs);
-    $this->assertStringContainsString('calendar-page-i18n', $calendarJs);
+    $this->assertStringContainsString('function calendarConfig()', $calendarI18nJs);
+    $this->assertStringContainsString('calendar-page-i18n', $calendarI18nJs);
     $this->assertStringNotContainsString("toLocaleDateString('en-US'", $calendarJs);
     $this->assertStringContainsString('payPeriodLocale', $settingsJs);
     $this->assertStringContainsString('PC?.config?.USER_LOCALE', $settingsJs);

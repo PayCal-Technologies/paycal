@@ -5,6 +5,7 @@ namespace PayCal\Controllers;
 use PayCal\Domain\ArrayPager;
 use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\Authentication;
+use PayCal\Domain\CryptoCompatibilityTelemetry;
 use PayCal\Domain\DataGrid;
 use PayCal\Domain\Database;
 use PayCal\Domain\Enums\HttpStatus;
@@ -32,7 +33,7 @@ use PayCal\Observability\Lens;
  * SitesController.php
  *
  * Purpose: Route layer for site CRUD, datagrid responses, and delegated
- * organization-aware site operations.
+ * business-aware site operations.
  *
  * Developer notes:
  * - This controller owns HTTP concerns, response shaping, and permission
@@ -98,7 +99,7 @@ final class SitesController
 
     $orgDiscovery = new BusinessDiscoveryService();
     if (!$orgDiscovery->canMutateSitesForOwner($actorUUID, $ownerUUID)) {
-      Response::error('[Sites] Insufficient organization scope for delegated site mutation.', [], HttpStatus::HTTP_FORBIDDEN);
+      Response::error('[Sites] Insufficient business scope for delegated site mutation.', [], HttpStatus::HTTP_FORBIDDEN);
       return null;
     }
 
@@ -122,18 +123,66 @@ final class SitesController
   }
 
   /**
+   * Extract the ISO date segment from active or archived work entry keys.
+   */
+  private static function workDateFromKey(string $workKey): string
+  {
+    $parts = explode(':', $workKey);
+    $date = ($parts[1] ?? '') === 'archived'
+      ? self::scalarString($parts[3] ?? '')
+      : self::scalarString($parts[2] ?? '');
+
+    return preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : '';
+  }
+
+  /**
+   * Format compact date labels for grid cells.
+   */
+  private static function formatGridDate(string $date): string
+  {
+    if ($date === '') {
+      return '—';
+    }
+
+    $timestamp = strtotime($date);
+
+    return $timestamp === false ? '—' : date('M j, Y', $timestamp);
+  }
+
+  /**
    * Render the budget used cell with a native progress value and no inline CSS.
    */
   private static function renderBudgetUsedCell(float $percent): string
   {
     $bounded = max(0.0, min(100.0, $percent));
-    $value = number_format($bounded, 1);
-    $progressValue = (string) round($bounded, 1);
+    $value = $bounded > 0.0 && $bounded < 0.1
+      ? '<0.1%'
+      : number_format($bounded, 1) . '%';
+    $progressValue = $bounded > 0.0 && $bounded < 0.1
+      ? '0.1'
+      : (string) round($bounded, 1);
 
     return '<div class="site_budget_used_cell">'
       . '<progress class="site_budget_progress" max="100" value="' . htmlspecialchars($progressValue, ENT_QUOTES, 'UTF-8') . '"></progress>'
-      . '<span class="site_budget_used_value">' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '%</span>'
+      . '<span class="site_budget_used_value">' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '</span>'
       . '</div>';
+  }
+
+  /**
+   * Render personal site name using the same compact ownership pattern as Business Sites.
+   */
+  private static function renderPersonalSiteNameCell(string $siteName): string
+  {
+    $displayName = htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8');
+    $personalLabel = htmlspecialchars(Strings::i18n('BUSINESS_SITES_STATUS_TAG_PERSONAL'), ENT_QUOTES, 'UTF-8');
+
+    return '<span class="business_sites_site_name_cell">'
+      . '<span class="business_sites_site_name_primary">'
+      . '<span class="business_sites_ownership_symbol business_sites_ownership_symbol--personal" aria-hidden="true"></span>'
+      . '<span class="business_sites_site_name_text">' . $displayName . '</span>'
+      . '</span>'
+      . '<span class="business_sites_ownership_status business_sites_ownership_status--personal">' . $personalLabel . '</span>'
+      . '</span>';
   }
 
   /**
@@ -142,6 +191,23 @@ final class SitesController
   private static function scalarString(mixed $value, string $default = ''): string
   {
     return is_scalar($value) ? (string) $value : $default;
+  }
+
+  /**
+   * @param array<string, float|int|string> $site
+   */
+  private static function siteGridSortValue(array $site, string $sort): string|float|int
+  {
+    return match ($sort) {
+      'site_name' => self::scalarString($site['_site_name_plain'] ?? $site['site_name'] ?? ''),
+      'last_worked' => self::scalarString($site['_last_worked'] ?? ''),
+      'wage' => self::numericFloat($site['_wage'] ?? $site['wage'] ?? 0),
+      'work_gross' => self::numericFloat($site['work_gross_raw'] ?? 0),
+      'budget_used' => self::numericFloat($site['budget_used_raw'] ?? 0),
+      'entries' => (int) self::numericFloat($site['entries'] ?? 0),
+      'living_out_allowance', 'travel_hours' => self::numericFloat($site[$sort] ?? 0),
+      default => self::scalarString($site[$sort] ?? ''),
+    };
   }
 
   /**
@@ -235,41 +301,49 @@ final class SitesController
   }
 
   /**
-   * Resolve the correct DEK wrapper for either personal or organization envelopes.
+   * Resolve the correct DEK wrapper for either personal or business envelopes.
    */
   private static function resolveDekForEnvelope(string $blob, string $ownerUUID, string $credentialId, string $saltB64): ?string
   {
-    $orgMeta = self::parseOrganizationEnvelopeMetadata($blob);
-    if (is_array($orgMeta)) {
+    $businessMeta = self::parseBusinessEnvelopeMetadata($blob);
+    if (is_array($businessMeta)) {
       $actorUUID = User::currentUUID();
       if ($actorUUID === '' || $credentialId === '') {
-        self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'missing_actor_or_credential');
+        self::appendBusinessWorkReadAudit($businessMeta, $actorUUID, $ownerUUID, 'denied', 'missing_actor_or_credential');
         return null;
       }
 
       $wrap = (new BusinessEncryptionService())->resolveActiveWrapForUnwrap(
-        $orgMeta['org_id'],
-        $orgMeta['segment'],
-        $orgMeta['key_version'],
+        $businessMeta['business_id'],
+        $businessMeta['segment'],
+        $businessMeta['key_version'],
         $actorUUID,
         $credentialId,
         '',
-        $orgMeta['dek_id']
+        $businessMeta['dek_id']
       );
       if (!$wrap['success']) {
-        self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'wrap_resolution_failed');
+        self::appendBusinessWorkReadAudit($businessMeta, $actorUUID, $ownerUUID, 'denied', 'wrap_resolution_failed');
         return null;
       }
 
       $wrappedDek = self::scalarString($wrap['data']['wrapped_dek'] ?? '');
       if ($wrappedDek === '') {
-        self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'missing_wrapped_dek');
+        CryptoCompatibilityTelemetry::wrapperMissing(CryptoCompatibilityTelemetry::SOURCE_BUSINESS_CURRENT);
+        self::appendBusinessWorkReadAudit($businessMeta, $actorUUID, $ownerUUID, 'denied', 'missing_wrapped_dek');
         return null;
       }
 
-      self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'success', 'wrap_resolved');
+      CryptoCompatibilityTelemetry::wrapperPresent(CryptoCompatibilityTelemetry::SOURCE_BUSINESS_CURRENT);
+      self::appendBusinessWorkReadAudit($businessMeta, $actorUUID, $ownerUUID, 'success', 'wrap_resolved');
 
-      return self::unwrapDekFromPasskeyWrapper($wrappedDek, $credentialId, $actorUUID, $saltB64);
+      return self::unwrapDekFromPasskeyWrapper(
+        $wrappedDek,
+        $credentialId,
+        $actorUUID,
+        $saltB64,
+        CryptoCompatibilityTelemetry::SOURCE_BUSINESS_CURRENT
+      );
     }
 
     $wrappedPasskeyMapKey = Keys::USER . ':' . $ownerUUID . ':passkey_wrapped_deks';
@@ -279,43 +353,58 @@ final class SitesController
     }
 
     if ($credentialId === '') {
+      CryptoCompatibilityTelemetry::wrapperMissing(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT);
       return null;
     }
     if ($wrappedDekPasskey === '') {
+      CryptoCompatibilityTelemetry::wrapperMissing(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT);
+      $legacyWrappedDek = self::scalarString(Database::hget(Keys::USER . ':' . $ownerUUID, 'wrapped_dek_passkey'));
+      if ($legacyWrappedDek !== '') {
+        CryptoCompatibilityTelemetry::wrapperPresent(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_LEGACY);
+        CryptoCompatibilityTelemetry::legacyWrapperBlocked();
+      }
       return null;
     }
 
-    return self::unwrapDekFromPasskeyWrapper($wrappedDekPasskey, $credentialId, $ownerUUID, $saltB64);
+    CryptoCompatibilityTelemetry::wrapperPresent(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT);
+
+    return self::unwrapDekFromPasskeyWrapper(
+      $wrappedDekPasskey,
+      $credentialId,
+      $ownerUUID,
+      $saltB64,
+      CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT
+    );
   }
 
-  /** @param array{org_id: string, segment: string, key_version: string, dek_id: string} $orgMeta */
-  private static function appendBusinessWorkReadAudit(array $orgMeta, string $actorUUID, string $targetUUID, string $outcome, string $reason): void
+  /** @param array{business_id: string, segment: string, key_version: string, dek_id: string} $businessMeta */
+  private static function appendBusinessWorkReadAudit(array $businessMeta, string $actorUUID, string $targetUUID, string $outcome, string $reason): void
   {
-    if ($orgMeta['org_id'] === '') {
+    if ($businessMeta['business_id'] === '') {
       return;
     }
 
     try {
       (new BusinessDiscoveryService())->appendBusinessAuditEvent(
-        (string) $orgMeta['org_id'],
-        'org.work.read',
+        (string) $businessMeta['business_id'],
+        'business.work.read',
         $actorUUID !== '' ? $actorUUID : User::currentUUID(),
         [
           'target_user_uuid' => $targetUUID,
-          'segment' => $orgMeta['segment'],
-          'key_version' => $orgMeta['key_version'],
-          'dek_id' => $orgMeta['dek_id'],
+          'segment' => $businessMeta['segment'],
+          'key_version' => $businessMeta['key_version'],
+          'dek_id' => $businessMeta['dek_id'],
           'outcome' => $outcome,
           'reason' => $reason,
         ]
       );
     } catch (\Throwable $e) {
-      \PayCal\Domain\Log::debug('[SitesController] org.work.read audit emit failed: ' . $e->getMessage());
+      \PayCal\Domain\Log::debug('[SitesController] business.work.read audit emit failed: ' . $e->getMessage());
     }
   }
 
-  /** @return array{org_id: string, segment: string, key_version: string, dek_id: string}|null */
-  private static function parseOrganizationEnvelopeMetadata(string $blob): ?array
+  /** @return array{business_id: string, segment: string, key_version: string, dek_id: string}|null */
+  private static function parseBusinessEnvelopeMetadata(string $blob): ?array
   {
     $decodedEnvelope = base64_decode($blob, true);
     if ($decodedEnvelope === false) {
@@ -335,22 +424,22 @@ final class SitesController
       return null;
     }
 
-    $orgIdRaw = $meta['org_id'] ?? ($envelope['org_id'] ?? '');
+    $businessIdRaw = $meta['business_id'] ?? ($envelope['business_id'] ?? '');
     $segmentRaw = $meta['segment'] ?? ($envelope['segment'] ?? '');
     $keyVersionRaw = $meta['key_version'] ?? ($envelope['key_version'] ?? '');
     $dekIdRaw = $meta['dek_id'] ?? ($envelope['dek_id'] ?? '');
 
-    $orgId = is_scalar($orgIdRaw) ? trim((string) $orgIdRaw) : '';
+    $businessId = is_scalar($businessIdRaw) ? trim((string) $businessIdRaw) : '';
     $segment = is_scalar($segmentRaw) ? trim((string) $segmentRaw) : '';
     $keyVersion = is_scalar($keyVersionRaw) ? trim((string) $keyVersionRaw) : '';
     $dekId = is_scalar($dekIdRaw) ? trim((string) $dekIdRaw) : '';
 
-    if ($orgId === '' || $segment === '' || $keyVersion === '' || $dekId === '') {
+    if ($businessId === '' || $segment === '' || $keyVersion === '' || $dekId === '') {
       return null;
     }
 
     return [
-      'org_id' => $orgId,
+      'business_id' => $businessId,
       'segment' => $segment,
       'key_version' => $keyVersion,
       'dek_id' => $dekId,
@@ -373,27 +462,39 @@ final class SitesController
   /**
    * Handles unwrapDekFromPasskeyWrapper operation.
    */
-  private static function unwrapDekFromPasskeyWrapper(string $wrappedDekPasskey, string $credentialId, string $userUUID, string $saltB64): ?string
+  private static function unwrapDekFromPasskeyWrapper(
+    string $wrappedDekPasskey,
+    string $credentialId,
+    string $userUUID,
+    string $saltB64,
+    string $telemetrySource
+  ): ?string
   {
+    CryptoCompatibilityTelemetry::unwrapAttempt($telemetrySource);
+
     $decodedEnvelope = base64_decode($wrappedDekPasskey, true);
     if ($decodedEnvelope === false) {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
     $envelope = json_decode($decodedEnvelope, true);
     if (!is_array($envelope)) {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
     $nonceB64 = self::scalarString($envelope['nonce'] ?? $envelope['iv'] ?? '');
     $ctB64 = self::scalarString($envelope['ciphertext'] ?? $envelope['ct'] ?? '');
     if ($nonceB64 === '' || $ctB64 === '') {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
     $nonce = base64_decode($nonceB64, true);
     $ciphertextWithTag = base64_decode($ctB64, true);
     if ($nonce === false || $ciphertextWithTag === false || strlen($ciphertextWithTag) < 17) {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
@@ -404,9 +505,12 @@ final class SitesController
     if (is_string($kekCanonical) && $kekCanonical !== '') {
       $dek = openssl_decrypt($ciphertext, 'aes-256-gcm', $kekCanonical, OPENSSL_RAW_DATA, $nonce, $tag);
       if (is_string($dek) && $dek !== '') {
+        CryptoCompatibilityTelemetry::unwrapSuccess($telemetrySource);
         return $dek;
       }
     }
+
+    CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
 
     return null;
   }
@@ -749,28 +853,16 @@ final class SitesController
     ]);
 
     $grid = DataGrid::create("sites-{$status}", Strings::i18n('SITES'));
-    // Only show Create Site button on Active tab
-    if (SiteStatus::ACTIVE->value === $status) {
-      $grid->addControl([
-          'type' => 'primary',
-          'label' => Strings::i18n('SITES_CREATE'),
-          'action' => 'create-site',
-      ]);
-    }
     $grid->enableSearch(Strings::i18n('BUSINESS_SITES_FILTER_PLACEHOLDER'));
     $grid->enableSorting();
     $grid->enableColumnVisibility();
-    $grid->setColumnVisibilityMode('menu');
-    $grid->addColumn('site_name', Strings::i18n('NAME'), true, 'minmax(14rem, 3fr)');
-    $grid->addColumn('ownership', Strings::i18n('BUSINESS_SITES_GRID_OWNERSHIP'), false, 'minmax(7rem, 1fr)', null, true, false);
-    $grid->addColumn('wage', Strings::i18n('WAGE'), true, 'minmax(5rem, 1fr)', 'right', true, false);
-    $grid->addColumn('living_out_allowance', Strings::i18n('LOA'), true, 'minmax(5rem, 1fr)', 'right', true, false);
-    $grid->addColumn('travel_hours', Strings::i18n('TRAVEL'), true, 'minmax(5rem, 1fr)', 'right', true, false);
-    $grid->addColumn('province', Strings::i18n('PROVINCE'), true, 'minmax(8rem, 1.5fr)', 'right', true, false);
+    $grid->addColumn('site_name', Strings::i18n('SITE'), true, 'minmax(14rem, 3fr)', null, true, false, true);
     $grid->addColumn('entries', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_ENTRIES'), true, 'minmax(4rem, 0.75fr)', 'right');
     $grid->addColumn('work_gross', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_WORK_GROSS'), true, 'minmax(6rem, 1fr)', 'right');
-    $grid->addColumn('budget_amount', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_BUDGET'), false, 'minmax(6rem, 1fr)', 'right');
-    $grid->addColumn('budget_used', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_USED'), false, 'minmax(6rem, 1fr)', 'right', true, true, true);
+    $grid->addColumn('wage', Strings::i18n('WAGE'), true, 'minmax(5rem, 0.85fr)', 'right');
+    $grid->addColumn('last_worked', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_LAST_WORKED'), true, 'minmax(7rem, 1fr)', 'right');
+    $grid->addColumn('budget_amount', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_BUDGET'), true, 'minmax(6rem, 1fr)', 'right', false, true);
+    $grid->addColumn('budget_used', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_USED'), true, 'minmax(7rem, 1.1fr)', 'right', false, true, true);
     // Use 3D box icon for active sites (archive), trash for archived (permanent delete)
     $actionIcon = SiteStatus::ACTIVE->value === $status ? '📦' : '🗑';
     $grid->addRowAction('delete', $actionIcon);
@@ -1279,10 +1371,12 @@ final class SitesController
       if (empty($siteArray['site_name'])) {
         $siteArray['site_name'] = "Unknown Site ({$siteId})";
       }
+      $siteArray['_site_name_plain'] = self::scalarString($siteArray['site_name']);
+      $siteArray['_wage'] = self::numericFloat($siteArray['wage'] ?? 0);
 
       // Convert province code to full name for display
-      $provinceCode = $siteArray['province'] ?? '';
-      $siteArray['province'] = $provinces[$provinceCode] ?? $provinceCode;
+      $provinceCode = self::scalarString($siteArray['province'] ?? '');
+      $siteArray['province'] = isset($provinces[$provinceCode]) ? $provinces[$provinceCode] : $provinceCode;
 
       // Count work entries (both active and archived)
       $activePattern = Keys::WORK . ':' . User::currentUUID() . ':*:' . $siteId;
@@ -1294,7 +1388,13 @@ final class SitesController
       $siteArray['entries'] = count($activeKeys) + count($archivedKeys);
 
       $workGross = 0.0;
+      $lastWorkedDate = '';
       foreach (array_merge($activeKeys, $archivedKeys) as $workKey) {
+        $workDate = self::workDateFromKey((string) $workKey);
+        if ($workDate !== '' && strcmp($workDate, $lastWorkedDate) > 0) {
+          $lastWorkedDate = $workDate;
+        }
+
         $workRow = Database::hgetall($workKey);
 
         $resolved = self::decryptWorkRowIfNeeded($workRow, $currentUUID);
@@ -1309,12 +1409,13 @@ final class SitesController
       $budgetAmount = $budget !== null ? self::numericFloat($budget['amount']) : 0.0;
       $budgetPercent = $budgetAmount > 0 ? ($workGross / $budgetAmount) * 100 : 0.0;
 
-      $siteArray['ownership'] = Strings::i18n('BUSINESS_SITES_STATUS_TAG_PERSONAL');
       $siteArray['work_gross_raw'] = $workGross;
       $siteArray['work_gross'] = self::formatGridCurrency($workGross, 0);
       $siteArray['budget_amount'] = $budget !== null ? self::scalarString($budget['formatted']) : '';
       $siteArray['budget_used_raw'] = $budgetPercent;
       $siteArray['budget_used'] = $budgetAmount > 0 ? self::renderBudgetUsedCell($budgetPercent) : '';
+      $siteArray['_last_worked'] = $lastWorkedDate;
+      $siteArray['last_worked'] = self::formatGridDate($lastWorkedDate);
       Lens::increment('sites_processed');
 
       $result[] = $siteArray;
@@ -1324,12 +1425,15 @@ final class SitesController
     if ('' !== $search) {
       Lens::timeStart('Search Filter');
       $searchLower = mb_strtolower($search);
-      $result = array_filter($result, function ($site) use ($searchLower) {
-        $nameLower = mb_strtolower($site['site_name']);
-        $provinceLower = mb_strtolower($site['province']);
+      $result = array_values(array_filter($result, static function (array $site) use ($searchLower): bool {
+        $nameLower = mb_strtolower(self::scalarString($site['_site_name_plain']));
+        $provinceLower = mb_strtolower(self::scalarString($site['province']));
+        $lastWorkedLower = mb_strtolower(self::scalarString($site['last_worked']));
 
-        return str_contains($nameLower, $searchLower) || str_contains($provinceLower, $searchLower);
-      });
+        return str_contains($nameLower, $searchLower)
+          || str_contains($provinceLower, $searchLower)
+          || str_contains($lastWorkedLower, $searchLower);
+      }));
       Lens::timeEnd('Search Filter');
       Lens::add('Search Filtered', ['query' => $search, 'results' => count($result)]);
     }
@@ -1337,20 +1441,17 @@ final class SitesController
     // Apply sorting
     if ('' !== $sort && count($result) > 0) {
       Lens::timeStart('Sort Results');
-      usort($result, function ($a, $b) use ($sort, $direction) {
-        $aVal = $a[$sort] ?? '';
-        $bVal = $b[$sort] ?? '';
+      usort($result, static function (array $a, array $b) use ($sort, $direction): int {
+        $aVal = self::siteGridSortValue($a, $sort);
+        $bVal = self::siteGridSortValue($b, $sort);
+
+        if ('last_worked' === $sort) {
+          $cmp = strcmp((string) $aVal, (string) $bVal);
+          return 'desc' === $direction ? -$cmp : $cmp;
+        }
 
         // Numeric comparison for wage, loa, travel_hours, entries, gross, and budget used.
         if (in_array($sort, ['wage', 'living_out_allowance', 'travel_hours', 'entries', 'work_gross', 'budget_used'], true)) {
-          if ('work_gross' === $sort) {
-            $aVal = $a['work_gross_raw'];
-            $bVal = $b['work_gross_raw'];
-          }
-          if ('budget_used' === $sort) {
-            $aVal = $a['budget_used_raw'];
-            $bVal = $b['budget_used_raw'];
-          }
           $aVal = (float) $aVal;
           $bVal = (float) $bVal;
           $cmp = $aVal <=> $bVal;
@@ -1363,6 +1464,13 @@ final class SitesController
       Lens::timeEnd('Sort Results');
       Lens::add('Sort Applied', ['column' => $sort, 'direction' => $direction]);
     }
+
+    foreach ($result as &$siteRow) {
+      $siteRow['site_name'] = self::renderPersonalSiteNameCell(
+        self::scalarString($siteRow['_site_name_plain'])
+      );
+    }
+    unset($siteRow);
 
     Lens::add('getSitesForGrid Final', [
       'total_returned' => count($result),
@@ -1380,6 +1488,6 @@ final class SitesController
     }
     unset($row);
 
-    return array_values($result);
+    return $result;
   }
 }

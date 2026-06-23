@@ -48,6 +48,14 @@ final class RecoveryKey
   }
 
   /**
+   * Generate a formatted recovery code with checksum protection.
+   */
+  public static function generateCode(): string
+  {
+    return PayCalCode::generateRecoveryCode();
+  }
+
+  /**
    * Generate account recovery salt (32 bytes)
    *
    * @return string 32 random bytes
@@ -135,6 +143,10 @@ final class RecoveryKey
    */
   public static function format(string $encoded): string
   {
+    if (strlen(self::normalize($encoded)) === PayCalCode::RECOVERY_TOTAL_LENGTH) {
+      return PayCalCode::formatRecoveryCode($encoded);
+    }
+
     return implode('-', str_split($encoded, 4));
   }
 
@@ -147,7 +159,16 @@ final class RecoveryKey
    */
   public static function normalize(string $input): string
   {
-    return strtoupper(str_replace(['-', ' '], '', trim($input)));
+    return PayCalCode::normalize($input);
+  }
+
+  public static function secretMaterial(string $input): string
+  {
+    if (PayCalCode::validate($input, PayCalCode::RECOVERY_SECRET_LENGTH)) {
+      return PayCalCode::recoverySecretMaterial($input);
+    }
+
+    return self::decodeCrockford($input);
   }
 
   /**
@@ -298,6 +319,10 @@ final class RecoveryKey
   {
     try {
       $normalized = self::normalize($input);
+
+      if (PayCalCode::validate($normalized, PayCalCode::RECOVERY_SECRET_LENGTH)) {
+        return true;
+      }
       
       // Crockford Base32 encoding of 32 bytes produces 52 characters
       // (32 bytes * 8 bits/byte = 256 bits ÷ 5 bits/char = 51.2 → 52 chars)
@@ -315,4 +340,3 @@ final class RecoveryKey
     }
   }
 }
-

@@ -432,6 +432,19 @@ class AdminPageController
       . "</div>"
       . "</div>";
 
+    $goldMasterCardHtml = ""
+      . "<div class='admin-card panel'>"
+      . "<div class='admin-card-header'><h3>GoldMaster</h3></div>"
+      . "<div class='admin-card-body'>"
+      . "<p>Canonical examples for humans and AI agents.</p>"
+      . "<p class='text-muted'>Static metadata, read-only previews, no code execution.</p>"
+      . "</div>"
+      . "<div class='admin-card-footer'>"
+      . "<a href='/admin/goldmaster/' class='btn btn_primary'>Open GoldMaster</a>"
+      . "<a href='/transparency/goldmaster/' target='_blank' rel='noopener noreferrer' class='btn btn_secondary'>Transparency article</a>"
+      . "</div>"
+      . "</div>";
+
     // Build site color palette panel
     $paletteSwatchesHtml = '';
     foreach (SiteColorPalette::palette() as $idx => $sc) {
@@ -515,6 +528,7 @@ class AdminPageController
       '__SYSTEM_LIMITS_HTML__' => $systemLimitsHtml,
       '__CONTACT_HEALTH_HTML__' => $contactHealthHtml,
       '__STRIPE_HEALTH_HTML__' => $stripeHealthHtml,
+      '__GOLDMASTER_CARD_HTML__' => $goldMasterCardHtml,
       '__SITE_COLOR_PALETTE_HTML__' => $siteColorPaletteHtml,
       '__SITE__' => '/',
       '__CSP_NONCE__' => $cspNonce,
@@ -732,4 +746,3 @@ class AdminPageController
     }
   }
 }
-

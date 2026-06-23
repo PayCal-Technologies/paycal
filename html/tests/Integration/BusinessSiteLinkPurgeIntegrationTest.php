@@ -34,7 +34,7 @@ final class BusinessSiteLinkPurgeIntegrationTest extends TestCase
     $this->seedUser($this->ownerUUID, $this->ownerEmail);
 
     Database::hset(Keys::USER_SUBSCRIPTION . ':' . $this->ownerUUID, [
-      'tier' => 'premium',
+      'tier' => 'business',
       'status' => 'active',
     ]);
 
@@ -50,6 +50,7 @@ final class BusinessSiteLinkPurgeIntegrationTest extends TestCase
   {
     if ($this->businessId !== '') {
       Database::unlink(Keys::BUSINESS_SITE . ':' . $this->businessId);
+      Database::unlink(Keys::BUSINESS_SITE_SETTINGS . ':' . $this->businessId . ':' . $this->ownerUUID . ':' . $this->siteId);
     }
 
     if ($this->ownerUUID !== '' && $this->siteId !== '') {
@@ -136,6 +137,48 @@ final class BusinessSiteLinkPurgeIntegrationTest extends TestCase
     $this->assertStringContainsString('Edmonton Oil', $archivedGrid['html']);
   }
 
+  public function testArchiveBusinessSiteKeepsLinkAndMovesToArchivedGrid(): void
+  {
+    $siteRef = $this->ownerUUID . ':' . $this->siteId;
+    Database::hset(Keys::SITE . ':' . $this->ownerUUID . ':' . $this->siteId, [
+      'site_name' => 'Archive From Business Editor',
+      'wage' => '45',
+      'living_out_allowance' => '0',
+      'travel_hours' => '0',
+      'province' => 'AB',
+      'status' => SiteStatus::ACTIVE->value,
+      'ownership_scope' => BusinessDiscoveryService::BUSINESS_SITE_OWNERSHIP_BUSINESS,
+      'business_managed' => '1',
+      'id' => $this->siteId,
+    ]);
+    Database::sadd(Keys::BUSINESS_SITE . ':' . $this->businessId, $siteRef);
+
+    $archiveResult = $this->service->archiveBusinessSite(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->ownerUUID,
+      $this->siteId,
+    );
+
+    $this->assertTrue($archiveResult['success'], (string) ($archiveResult['message'] ?? 'Archive failed.'));
+    $this->assertSame(SiteStatus::ARCHIVED->value, Database::hget(Keys::SITE . ':' . $this->ownerUUID . ':' . $this->siteId, 'status'));
+    $this->assertSame(SiteStatus::ARCHIVED->value, Database::hget(Keys::BUSINESS_SITE_SETTINGS . ':' . $this->businessId . ':' . $siteRef, 'site_status'));
+    $this->assertSame(1, Database::sismember(Keys::BUSINESS_SITE . ':' . $this->businessId, $siteRef));
+
+    $renderer = new BusinessSitesGridRenderer();
+    $activeGrid = $renderer->renderForBusiness($this->ownerUUID, $this->businessId, [
+      'status' => SiteStatus::ACTIVE->value,
+    ]);
+    $archivedGrid = $renderer->renderForBusiness($this->ownerUUID, $this->businessId, [
+      'status' => SiteStatus::ARCHIVED->value,
+    ]);
+
+    $this->assertTrue($activeGrid['success']);
+    $this->assertStringNotContainsString('Archive From Business Editor', $activeGrid['html']);
+    $this->assertTrue($archivedGrid['success']);
+    $this->assertStringContainsString('Archive From Business Editor', $archivedGrid['html']);
+  }
+
   public function testPermanentDeleteRemovesBusinessSiteLinks(): void
   {
     $siteRef = $this->ownerUUID . ':' . $this->siteId;
@@ -155,5 +198,37 @@ final class BusinessSiteLinkPurgeIntegrationTest extends TestCase
     $this->assertTrue($deleteResult['success']);
     $this->assertFalse(Database::exists(Keys::SITE . ':' . $this->ownerUUID . ':' . $this->siteId));
     $this->assertSame(0, Database::sismember(Keys::BUSINESS_SITE . ':' . $this->businessId, $siteRef));
+  }
+
+  public function testPermanentDeleteBusinessSiteRemovesBusinessSiteLinks(): void
+  {
+    $siteRef = $this->ownerUUID . ':' . $this->siteId;
+    $settingsKey = Keys::BUSINESS_SITE_SETTINGS . ':' . $this->businessId . ':' . $siteRef;
+    Database::hset(Keys::SITE . ':' . $this->ownerUUID . ':' . $this->siteId, [
+      'site_name' => 'Business Editor Purge Site',
+      'wage' => '45',
+      'living_out_allowance' => '0',
+      'travel_hours' => '0',
+      'province' => 'AB',
+      'status' => SiteStatus::ARCHIVED->value,
+      'id' => $this->siteId,
+    ]);
+    Database::sadd(Keys::BUSINESS_SITE . ':' . $this->businessId, $siteRef);
+    Database::hset($settingsKey, [
+      'site_status' => SiteStatus::ARCHIVED->value,
+      'budget_amount' => '5000',
+    ]);
+
+    $deleteResult = $this->service->permanentDeleteBusinessSite(
+      $this->ownerUUID,
+      $this->businessId,
+      $this->ownerUUID,
+      $this->siteId,
+    );
+
+    $this->assertTrue($deleteResult['success'], (string) ($deleteResult['message'] ?? 'Permanent delete failed.'));
+    $this->assertFalse(Database::exists(Keys::SITE . ':' . $this->ownerUUID . ':' . $this->siteId));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_SITE . ':' . $this->businessId, $siteRef));
+    $this->assertFalse(Database::exists($settingsKey));
   }
 }

@@ -10,6 +10,7 @@ use PayCal\Domain\EmailGarum;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
+use PayCal\Domain\PayCalCode;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
 use PayCal\Infrastructure\Telemetry\SecurityLog;
@@ -141,8 +142,8 @@ final class RecoveryEmailController
       }
 
       // Generate verification code (6 characters)
-      $code = Security::generateVerificationCode(6);
-      $codeHash = hash('sha256', $code);
+      $code = Security::generateVerificationCode(PayCalCode::EMAIL_TOTAL_LENGTH);
+      $codeHash = hash('sha256', PayCalCode::normalize($code));
       $ttlMinutes = (int) SystemConfig::get('recovery_email_code_ttl_minutes');
       $expiresAt = $now + ($ttlMinutes * 60);
 
@@ -232,16 +233,16 @@ final class RecoveryEmailController
         return;
       }
 
-      $code = strtoupper(InputSanitizer::sanitizeString($input['code']));
-      if (strlen($code) !== 6) {
-        Response::error('Verification code must be exactly 6 characters.', [], HttpStatus::HTTP_BAD_REQUEST);
-        return;
-      }
+      $code = PayCalCode::normalize(InputSanitizer::sanitizeString($input['code']));
 
       // Check attempt limit
       $codeKey = Keys::recoveryEmailCode($user->user_uuid);
       $attemptData = Database::hgetall($codeKey);
       if (empty($attemptData)) {
+        if (!PayCalCode::validate($code, PayCalCode::EMAIL_SECRET_LENGTH)) {
+          Response::error('Verification code must be exactly 6 characters.', [], HttpStatus::HTTP_BAD_REQUEST);
+          return;
+        }
         Response::error('No verification code found. Start verification again.', [], HttpStatus::HTTP_BAD_REQUEST);
         return;
       }
@@ -267,9 +268,15 @@ final class RecoveryEmailController
         return;
       }
 
+      if (!PayCalCode::validate($code, PayCalCode::EMAIL_SECRET_LENGTH)) {
+        Database::hset($codeKey, ['verify_attempts' => (string) ($attempts + 1)]);
+        Response::error('Verification code must be exactly 6 characters.', [], HttpStatus::HTTP_BAD_REQUEST);
+        return;
+      }
+
       // Verify code
       $storedHash = (string) ($attemptData['code_hash'] ?? '');
-      $providedHash = hash('sha256', $code);
+      $providedHash = hash('sha256', PayCalCode::normalize($code));
 
       if (!hash_equals($storedHash, $providedHash)) {
         Database::hset($codeKey, ['verify_attempts' => (string) ($attempts + 1)]);
@@ -393,8 +400,8 @@ final class RecoveryEmailController
       }
 
       // Generate new code (6 characters)
-      $code = Security::generateVerificationCode(6);
-      $codeHash = hash('sha256', $code);
+      $code = Security::generateVerificationCode(PayCalCode::EMAIL_TOTAL_LENGTH);
+      $codeHash = hash('sha256', PayCalCode::normalize($code));
       $ttlMinutes = (int) SystemConfig::get('recovery_email_code_ttl_minutes');
       $expiresAt = $now + ($ttlMinutes * 60);
 
@@ -445,4 +452,3 @@ final class RecoveryEmailController
     return substr($email, 0, 2) . '***' . substr($email, $atPos);
   }
 }
-

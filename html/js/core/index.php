@@ -165,6 +165,7 @@ foreach ($i18nKeys as $i18nKey) {
 import PW from '/js/phantomwing/';
 import NavigationToggle from '/js/navigation-toggle.js';
 import RuntimeIntegrity from '/js/runtime-integrity.js';
+import SignalPanel from '/js/signal-panel.js';
 import A11yModule from '/js/core/a11y.js';
 import BinaryCodec from '/js/core/binary-codec.js';
 import { escapePattern } from '/js/core/regex.js';
@@ -1739,8 +1740,8 @@ const PayCalCore = (() => {
       left = Math.max(edgePad, Math.min(left, window.innerWidth - popoverWidth - edgePad));
       top = Math.max(edgePad, Math.min(top, window.innerHeight - popoverHeight - edgePad));
 
-      adminPopover.style.left = `${Math.round(left)}px`;
-      adminPopover.style.top = `${Math.round(top)}px`;
+      adminPopover.style.setProperty('--nav-admin-popover-left', `${Math.round(left)}px`);
+      adminPopover.style.setProperty('--nav-admin-popover-top', `${Math.round(top)}px`);
     };
 
     const isAdminPopoverOpen = () => {
@@ -1968,7 +1969,7 @@ const PayCalCore = (() => {
     });
 
     // Dashboard
-    const dashboardEl = getElement("dashboard");
+    const dashboardEl = document.getElementById("dashboard");
     if (dashboardEl) {
       const heartbeatContentEl = getElement("ws_heartbeat_content");
       let heartbeatIntervalId = null;
@@ -2105,7 +2106,8 @@ const PayCalCore = (() => {
       currentX = (window.innerWidth - rect.width) / 2;
       currentY = (window.innerHeight - rect.height) / 4;
 
-      dashboardEl.style.transform = `translate(${currentX}px, ${currentY}px)`;
+      dashboardEl.style.setProperty('--dashboard-panel-left', `${currentX}px`);
+      dashboardEl.style.setProperty('--dashboard-panel-top', `${currentY}px`);
       dashboardEl.classList.remove("dashboard-prep");
 
       /* -------------------------
@@ -2184,7 +2186,8 @@ const PayCalCore = (() => {
           currentX = newX;
           currentY = newY;
 
-          dashboardEl.style.transform = `translate(${newX}px, ${newY}px)`;
+          dashboardEl.style.setProperty('--dashboard-panel-left', `${newX}px`);
+          dashboardEl.style.setProperty('--dashboard-panel-top', `${newY}px`);
         }
 
         if (isResizing) {
@@ -2198,8 +2201,8 @@ const PayCalCore = (() => {
           const newWidth = Math.max(minWidth, startWidth + dx);
           const newHeight = Math.max(minHeight, startHeight + dy);
 
-          dashboardEl.style.width = `${newWidth}px`;
-          dashboardEl.style.height = `${newHeight}px`;
+          dashboardEl.style.setProperty('--dashboard-panel-width', `${newWidth}px`);
+          dashboardEl.style.setProperty('--dashboard-panel-height', `${newHeight}px`);
         }
 
         rafId = null;
@@ -2262,6 +2265,14 @@ const PayCalCore = (() => {
         NavigationToggle.init();
       } catch (err) {
         PW.warn('Navigation toggle initialization failed:', err);
+      }
+    }
+
+    if (SignalPanel && typeof SignalPanel.init === 'function') {
+      try {
+        SignalPanel.init({ core: PayCalCore, PW });
+      } catch (err) {
+        PW.warn('Signal Panel initialization failed:', err);
       }
     }
 

@@ -24,8 +24,9 @@ if (!headers_sent()) {
 
 require __DIR__ . '/_partials/vars.php';
 
+$isSettingsDashboard = $currentPage === 'PAGE_SETTINGS';
 $tabMeta = SettingsNav::tabForPage($currentPage);
-if ($tabMeta === null) {
+if ($tabMeta === null && !$isSettingsDashboard) {
   throw new \RuntimeException('Unknown settings sub-page: ' . $currentPage);
 }
 
@@ -33,10 +34,10 @@ $pageLanguage = (string) $user->language;
 $pageLabel = settings_index_i18n('SETTINGS');
 
 if (!isset($pageTitle) || $pageTitle === '') {
-  $pageTitle = settings_index_i18n($tabMeta['title_key']) . ' - [' . settings_index_i18n('SITE_NAME') . ']';
+  $pageTitle = ($isSettingsDashboard ? settings_index_i18n('SETTINGS_DASHBOARD_TITLE') : settings_index_i18n((string) $tabMeta['title_key'])) . ' - [' . settings_index_i18n('SITE_NAME') . ']';
 }
 
-$settingsSubpageSlug = $tabMeta['slug'];
+$settingsSubpageSlug = $isSettingsDashboard ? 'dashboard' : (string) $tabMeta['slug'];
 
 require_once Environment::appHome() . 'html/header.php';
 require __DIR__ . '/_partials/modals.php';

@@ -7,7 +7,7 @@ namespace PayCal\Domain;
   <form id="account_calendar_form" method="POST" action="<?php echo Environment::appURL('api/v1/settings/calendar/update/'); ?>" aria-label="<?php echo settings_index_i18n('SETTINGS_ARIA_CALENDAR_PREFERENCES_FORM'); ?>">
     <input class="visually_hidden" type="text" name="username" value="NOTUSED" autocomplete="username" hidden tabindex="-1" aria-hidden="true">
     <input type="hidden" name="csrf_token" value="<?php echo $csrfNonce; ?>">
-    <h2 class="heading-accent"><?php echo settings_index_i18n('CALENDAR'); ?></h2>
+    <h2 class="heading-accent settings_card_title"><?php echo settings_index_i18n('CALENDAR'); ?></h2>
     <div class="flex f_baseline w100">
       <label class="w25"><?php echo settings_index_i18n('FOCUS'); ?></label>
       <div class="w75">

@@ -69,6 +69,7 @@
       </div>
 
       __STRIPE_HEALTH_HTML__
+      __GOLDMASTER_CARD_HTML__
     </div>
   </section>
 </section>
@@ -82,6 +83,8 @@
     </div>
   </section>
 </section>
+
+__SITE_COLOR_PALETTE_HTML__
 
 <section class='flex f_row panel w100 mar_sm pad_md' aria-label='__ADMIN_DASHBOARD_TESTING_TOOLS_ARIA__'>
   <section class='f_column w100 pad_md'>

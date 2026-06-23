@@ -8,6 +8,7 @@ use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Database;
 use PayCal\Domain\Enums\AuthLevel;
+use PayCal\Domain\PayCalCode;
 use PayCal\Domain\RecoveryKey;
 use PayCal\Domain\UserRepository;
 use PHPUnit\Framework\TestCase;
@@ -93,7 +94,7 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
     return $this->decodeJsonPayload((string) $output);
   }
 
-  /** @return array{userUuid:string,recoverySalt:string,recoveryProofKey:string,wrappedDekRecovery:string} */
+  /** @return array{userUuid:string,recoverySalt:string,recoveryProofKey:string,wrappedDekRecovery:string,recoveryCode:string} */
   private function createUserWithRecoveryMaterial(string $email = 'recover@example.com'): array
   {
     $userUuid = 'U' . bin2hex(random_bytes(4));
@@ -107,7 +108,8 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
       ''
     );
 
-    $recoveryKeyBytes = RecoveryKey::generate();
+    $recoveryCode = RecoveryKey::generateCode();
+    $recoveryKeyBytes = RecoveryKey::secretMaterial($recoveryCode);
     $recoverySalt = base64_encode(RecoveryKey::generateRecoverySalt());
     $recoveryProofKey = base64_encode(RecoveryKey::deriveProofKey($recoveryKeyBytes, $recoverySalt));
     $wrappedDekRecovery = RecoveryKey::wrapDEK(base64_encode(random_bytes(32)), RecoveryKey::deriveKEK($recoveryKeyBytes, $recoverySalt));
@@ -129,6 +131,101 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
       'recoverySalt' => $recoverySalt,
       'recoveryProofKey' => $recoveryProofKey,
       'wrappedDekRecovery' => $wrappedDekRecovery,
+      'recoveryCode' => $recoveryCode,
+    ];
+  }
+
+  /** @return array{userUuid:string,email:string} */
+  private function createUserWithoutCryptoMaterial(string $email): array
+  {
+    $userUuid = 'U' . bin2hex(random_bytes(4));
+    UserRepository::setUser(
+      $userUuid,
+      password_hash(bin2hex(random_bytes(12)), PASSWORD_DEFAULT),
+      $email,
+      AuthLevel::USER,
+      'First Key Test User',
+      '',
+      ''
+    );
+    Database::hset(Keys::USER . ':' . $userUuid, ['email_verified' => '1']);
+
+    return [
+      'userUuid' => $userUuid,
+      'email' => $email,
+    ];
+  }
+
+  /** @return array{userUuid:string,email:string} */
+  private function createUserWithPasskeyWrapButNoRecoveryKey(string $email): array
+  {
+    $fixture = $this->createUserWithoutCryptoMaterial($email);
+    Database::hset(Keys::USER . ':' . $fixture['userUuid'], [
+      'encryption_salt' => base64_encode(random_bytes(32)),
+      'dek_version' => '1',
+      'crypto_version' => '1',
+    ]);
+    Database::hset(Keys::USER . ':' . $fixture['userUuid'] . ':passkey_wrapped_deks', [
+      'credential-test' => base64_encode('wrapped-passkey-dek'),
+    ]);
+
+    return $fixture;
+  }
+
+  /** @return array{userUuid:string,email:string,credentialId:string} */
+  private function createUserWithPasskeyButNoCryptoMaterial(string $email): array
+  {
+    $fixture = $this->createUserWithoutCryptoMaterial($email);
+    $credentialId = 'credential-existing-' . bin2hex(random_bytes(4));
+    Database::hset(Keys::webauthnCredential($credentialId), [
+      'credential_id' => $credentialId,
+      'user_uuid' => $fixture['userUuid'],
+      'public_key_pem' => 'test-public-key',
+      'sign_count' => '0',
+      'created_at' => (string) time(),
+      'last_used_at' => '',
+    ]);
+    Database::sadd(Keys::webauthnUserCredentials($fixture['userUuid']), $credentialId);
+    Database::hset(Keys::USER . ':' . $fixture['userUuid'], ['webauthn_enabled' => '1']);
+
+    return [
+      'userUuid' => $fixture['userUuid'],
+      'email' => $email,
+      'credentialId' => $credentialId,
+    ];
+  }
+
+  private function storeMagicLinkToken(AccountRecoveryTransaction $transaction, string $txnSecret, string $token): void
+  {
+    Database::hsetex(Keys::accountRecoveryMagicLink($token), [
+      'txn_id' => $transaction->id(),
+      'txn_secret' => $txnSecret,
+    ], 300);
+  }
+
+  private function validWrappedDekEnvelope(): string
+  {
+    return base64_encode(json_encode([
+      'version' => 1,
+      'nonce' => base64_encode(random_bytes(12)),
+      'ciphertext' => base64_encode(random_bytes(48)),
+    ]));
+  }
+
+  /** @return array{transaction:AccountRecoveryTransaction,txnSecret:string} */
+  private function createMagicLinkReadyTransaction(string $email, string $userUuid): array
+  {
+    $created = AccountRecoveryTransaction::create($email, $userUuid, 'First Key Test User');
+    /** @var AccountRecoveryTransaction $transaction */
+    $transaction = $created['transaction'];
+    $fingerprintHash = hash('sha256', 'PHPUnit Recovery|en-US');
+    $ipClass = '127.0.0.0/24';
+    $this->assertTrue($transaction->markEmailVerifiedByMagicLink($fingerprintHash, $ipClass));
+    $this->assertTrue($transaction->elevateForMagicLinkPasskey($fingerprintHash, $ipClass));
+
+    return [
+      'transaction' => $transaction,
+      'txnSecret' => (string) $created['txnSecret'],
     ];
   }
 
@@ -204,14 +301,18 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
     $created = AccountRecoveryTransaction::create('recover@example.com', $fixture['userUuid'], 'Recovery Test User');
     /** @var AccountRecoveryTransaction $transaction */
     $transaction = $created['transaction'];
-    $transaction->storeEmailCode('ABC123');
+    $emailCode = PayCalCode::appendChecksum('ABCD');
+    $transaction->storeEmailCode($emailCode);
 
     $verify = $this->runControllerCall('verifyEmail', [
       'txnId' => $transaction->id(),
       'txnSecret' => $created['txnSecret'],
-      'code' => 'ABC123',
+      'code' => $emailCode,
     ]);
     $this->assertSame('success', $verify['status'] ?? null);
+    $this->assertTrue((bool) ($verify['recoveryKeyRequired'] ?? false));
+    $this->assertFalse((bool) ($verify['passkeyReady'] ?? true));
+    $this->assertFalse((bool) ($verify['firstPasskeySetup'] ?? true));
 
     $proofPayload = $this->runControllerCall('proofPayload', [
       'txnId' => $transaction->id(),
@@ -232,6 +333,7 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
       'txnSecret' => $created['txnSecret'],
       'proofNonce' => $proofPayload['proofNonce'],
       'proof' => $proof,
+      'recoveryCode' => $fixture['recoveryCode'],
     ]);
     $this->assertSame('success', $prove['status'] ?? null);
 
@@ -244,6 +346,249 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
     $this->assertNotEmpty($bootstrap['encryptionSalt'] ?? '');
 
     $this->cleanupUser($fixture['userUuid'], 'recover@example.com');
+  }
+
+  public function testVerifyEmailAllowsFirstPasskeySetupWhenAccountHasNoCryptoMaterial(): void
+  {
+    $email = 'first-code-' . bin2hex(random_bytes(4)) . '@example.com';
+    $fixture = $this->createUserWithoutCryptoMaterial($email);
+    $created = AccountRecoveryTransaction::create($email, $fixture['userUuid'], 'First Key Test User');
+    /** @var AccountRecoveryTransaction $transaction */
+    $transaction = $created['transaction'];
+    $emailCode = PayCalCode::appendChecksum('FQRT');
+    $transaction->storeEmailCode($emailCode);
+
+    $verify = $this->runControllerCall('verifyEmail', [
+      'txnId' => $transaction->id(),
+      'txnSecret' => $created['txnSecret'],
+      'code' => $emailCode,
+    ]);
+
+    $this->assertSame('success', $verify['status'] ?? null);
+    $this->assertFalse((bool) ($verify['recoveryKeyRequired'] ?? true));
+    $this->assertTrue((bool) ($verify['passkeyReady'] ?? false));
+    $this->assertTrue((bool) ($verify['firstPasskeySetup'] ?? false));
+    $this->assertSame('', Database::hget(Keys::USER . ':' . $fixture['userUuid'], 'encryption_salt'));
+
+    $bootstrap = $this->runControllerCall('bootstrap', [
+      'txnId' => $transaction->id(),
+      'txnSecret' => $created['txnSecret'],
+    ]);
+
+    $this->assertSame('success', $bootstrap['status'] ?? null);
+    $this->assertTrue((bool) ($bootstrap['allowDekGeneration'] ?? false));
+    $this->assertNotEmpty($bootstrap['encryptionSalt'] ?? '');
+
+    $this->cleanupUser($fixture['userUuid'], $email);
+  }
+
+  public function testVerifyEmailReportsUnavailableWhenPasskeyAccountHasNoRecoveryKey(): void
+  {
+    $email = 'missing-recovery-key-' . bin2hex(random_bytes(4)) . '@example.com';
+    $fixture = $this->createUserWithPasskeyWrapButNoRecoveryKey($email);
+    $created = AccountRecoveryTransaction::create($email, $fixture['userUuid'], 'Passkey Without Recovery Key');
+    /** @var AccountRecoveryTransaction $transaction */
+    $transaction = $created['transaction'];
+    $emailCode = PayCalCode::appendChecksum('NKEY');
+    $transaction->storeEmailCode($emailCode);
+
+    $verify = $this->runControllerCall('verifyEmail', [
+      'txnId' => $transaction->id(),
+      'txnSecret' => $created['txnSecret'],
+      'code' => $emailCode,
+    ]);
+
+    $this->assertSame('success', $verify['status'] ?? null);
+    $this->assertFalse((bool) ($verify['recoveryKeyRequired'] ?? true));
+    $this->assertFalse((bool) ($verify['recoveryKeyAvailable'] ?? true));
+    $this->assertTrue((bool) ($verify['recoveryUnavailable'] ?? false));
+    $this->assertFalse((bool) ($verify['passkeyReady'] ?? true));
+    $this->assertFalse((bool) ($verify['firstPasskeySetup'] ?? true));
+
+    $this->cleanupUser($fixture['userUuid'], $email);
+  }
+
+  public function testVerifyEmailDoesNotAllowFirstPasskeySetupWhenExistingPasskeyExists(): void
+  {
+    $email = 'existing-passkey-' . bin2hex(random_bytes(4)) . '@example.com';
+    $fixture = $this->createUserWithPasskeyButNoCryptoMaterial($email);
+    $created = AccountRecoveryTransaction::create($email, $fixture['userUuid'], 'Existing Passkey User');
+    /** @var AccountRecoveryTransaction $transaction */
+    $transaction = $created['transaction'];
+    $emailCode = PayCalCode::appendChecksum('PATR');
+    $transaction->storeEmailCode($emailCode);
+
+    $verify = $this->runControllerCall('verifyEmail', [
+      'txnId' => $transaction->id(),
+      'txnSecret' => $created['txnSecret'],
+      'code' => $emailCode,
+    ]);
+
+    $this->assertSame('success', $verify['status'] ?? null);
+    $this->assertFalse((bool) ($verify['passkeyReady'] ?? true));
+    $this->assertFalse((bool) ($verify['firstPasskeySetup'] ?? true));
+    $this->assertTrue((bool) ($verify['recoveryUnavailable'] ?? false));
+
+    $this->cleanupUser($fixture['userUuid'], $email);
+  }
+
+  public function testMagicLinkRequiresRecoveryCodeForProtectedAccount(): void
+  {
+    $fixture = $this->createUserWithRecoveryMaterial('magic-protected@example.com');
+    $created = AccountRecoveryTransaction::create('magic-protected@example.com', $fixture['userUuid'], 'Recovery Test User');
+    /** @var AccountRecoveryTransaction $transaction */
+    $transaction = $created['transaction'];
+    $token = 'magic-protected-' . bin2hex(random_bytes(8));
+    $this->storeMagicLinkToken($transaction, (string) $created['txnSecret'], $token);
+
+    $response = $this->runControllerCall('consumeMagicLink', ['token' => $token]);
+
+    $this->assertSame('success', $response['status'] ?? null);
+    $this->assertFalse((bool) ($response['passkeyReady'] ?? true));
+    $this->assertTrue((bool) ($response['recoveryKeyRequired'] ?? false));
+    $reloaded = AccountRecoveryTransaction::load($transaction->id());
+    $this->assertSame(AccountRecoveryTransaction::STATUS_EMAIL_VERIFIED, $reloaded?->status());
+
+    $this->cleanupUser($fixture['userUuid'], 'magic-protected@example.com');
+  }
+
+  public function testMagicLinkAllowsFirstPasskeyOnlyWithoutCryptoOrPasskeys(): void
+  {
+    $email = 'magic-first-' . bin2hex(random_bytes(4)) . '@example.com';
+    $fixture = $this->createUserWithoutCryptoMaterial($email);
+    $created = AccountRecoveryTransaction::create($email, $fixture['userUuid'], 'First Key Test User');
+    /** @var AccountRecoveryTransaction $transaction */
+    $transaction = $created['transaction'];
+    $token = 'magic-first-' . bin2hex(random_bytes(8));
+    $this->storeMagicLinkToken($transaction, (string) $created['txnSecret'], $token);
+
+    $response = $this->runControllerCall('consumeMagicLink', ['token' => $token]);
+
+    $this->assertSame('success', $response['status'] ?? null);
+    $this->assertTrue((bool) ($response['passkeyReady'] ?? false));
+    $this->assertTrue((bool) ($response['firstPasskeySetup'] ?? false));
+    $reloaded = AccountRecoveryTransaction::load($transaction->id());
+    $this->assertSame(AccountRecoveryTransaction::STATUS_PROOF_VERIFIED, $reloaded?->status());
+
+    $this->cleanupUser($fixture['userUuid'], $email);
+  }
+
+  public function testCompleteRequiresRegisteredCredentialIdMatch(): void
+  {
+    $fixture = $this->createUserWithoutCryptoMaterial('complete-mismatch@example.com');
+    $created = $this->createMagicLinkReadyTransaction('complete-mismatch@example.com', $fixture['userUuid']);
+    $transaction = $created['transaction'];
+    $this->assertTrue($transaction->issueBootstrap());
+    $registeredCredentialId = 'credential-new-' . bin2hex(random_bytes(4));
+    $transaction->markReplacementPasskeyRegistered($registeredCredentialId);
+    Database::hset(Keys::webauthnCredential($registeredCredentialId), [
+      'credential_id' => $registeredCredentialId,
+      'user_uuid' => $fixture['userUuid'],
+      'public_key_pem' => 'test-public-key',
+      'sign_count' => '0',
+      'created_at' => (string) time(),
+      'last_used_at' => '',
+    ]);
+    Database::sadd(Keys::webauthnUserCredentials($fixture['userUuid']), $registeredCredentialId);
+
+    $response = $this->runControllerCall('complete', [
+      'txnId' => $transaction->id(),
+      'txnSecret' => $created['txnSecret'],
+      'credentialId' => 'credential-other',
+      'wrappedDekPasskey' => $this->validWrappedDekEnvelope(),
+    ]);
+
+    $this->assertSame('error', $response['status'] ?? null);
+    $this->assertSame('Recovery completion failed.', $response['message'] ?? null);
+
+    $this->cleanupUser($fixture['userUuid'], 'complete-mismatch@example.com');
+  }
+
+  public function testCompleteRevokesPreviousPasskeysAfterRecovery(): void
+  {
+    $fixture = $this->createUserWithoutCryptoMaterial('complete-revokes@example.com');
+    $created = $this->createMagicLinkReadyTransaction('complete-revokes@example.com', $fixture['userUuid']);
+    $transaction = $created['transaction'];
+    $this->assertTrue($transaction->issueBootstrap());
+    $oldCredentialId = 'credential-old-' . bin2hex(random_bytes(4));
+    $newCredentialId = 'credential-new-' . bin2hex(random_bytes(4));
+    foreach ([$oldCredentialId, $newCredentialId] as $credentialId) {
+      Database::hset(Keys::webauthnCredential($credentialId), [
+        'credential_id' => $credentialId,
+        'user_uuid' => $fixture['userUuid'],
+        'public_key_pem' => 'test-public-key',
+        'sign_count' => '0',
+        'created_at' => (string) time(),
+        'last_used_at' => '',
+      ]);
+      Database::sadd(Keys::webauthnUserCredentials($fixture['userUuid']), $credentialId);
+    }
+    $transaction->markReplacementPasskeyRegistered($newCredentialId);
+
+    $response = $this->runControllerCall('complete', [
+      'txnId' => $transaction->id(),
+      'txnSecret' => $created['txnSecret'],
+      'credentialId' => $newCredentialId,
+      'wrappedDekPasskey' => $this->validWrappedDekEnvelope(),
+    ]);
+
+    $this->assertSame('success', $response['status'] ?? null);
+    $oldCredential = Database::hgetall(Keys::webauthnCredential($oldCredentialId));
+    $newCredential = Database::hgetall(Keys::webauthnCredential($newCredentialId));
+    $this->assertNotSame('', (string) ($oldCredential['revoked_at'] ?? ''));
+    $this->assertSame('account_recovery', $oldCredential['revoked_reason'] ?? null);
+    $this->assertSame('', (string) ($newCredential['revoked_at'] ?? ''));
+
+    $this->cleanupUser($fixture['userUuid'], 'complete-revokes@example.com');
+  }
+
+  public function testBootstrapAllowsFirstDekGenerationWhenAccountHasNoCryptoMaterial(): void
+  {
+    $email = 'first-key-' . bin2hex(random_bytes(4)) . '@example.com';
+    $fixture = $this->createUserWithoutCryptoMaterial($email);
+    $created = $this->createMagicLinkReadyTransaction($email, $fixture['userUuid']);
+
+    $bootstrap = $this->runControllerCall('bootstrap', [
+      'txnId' => $created['transaction']->id(),
+      'txnSecret' => $created['txnSecret'],
+    ]);
+
+    $this->assertSame('success', $bootstrap['status'] ?? null);
+    $this->assertTrue((bool) ($bootstrap['allowDekGeneration'] ?? false));
+    $this->assertFalse((bool) ($bootstrap['hasExistingCryptoMaterial'] ?? true));
+    $this->assertFalse((bool) ($bootstrap['hasEncryptedEntries'] ?? true));
+    $this->assertNotEmpty($bootstrap['encryptionSalt'] ?? '');
+    $this->assertSame(
+      (string) ($bootstrap['encryptionSalt'] ?? ''),
+      Database::hget(Keys::USER . ':' . $fixture['userUuid'], 'encryption_salt')
+    );
+
+    $this->cleanupUser($fixture['userUuid'], $email);
+  }
+
+  public function testBootstrapDoesNotAllowFirstDekGenerationWhenEncryptedWorkExists(): void
+  {
+    $email = 'encrypted-work-' . bin2hex(random_bytes(4)) . '@example.com';
+    $fixture = $this->createUserWithoutCryptoMaterial($email);
+    $workKey = Keys::WORK . ':' . $fixture['userUuid'] . ':encrypted-fixture';
+    Database::hset($workKey, ['encrypted_blob' => base64_encode('encrypted-fixture')]);
+    $created = $this->createMagicLinkReadyTransaction($email, $fixture['userUuid']);
+
+    try {
+      $bootstrap = $this->runControllerCall('bootstrap', [
+        'txnId' => $created['transaction']->id(),
+        'txnSecret' => $created['txnSecret'],
+      ]);
+
+      $this->assertSame('success', $bootstrap['status'] ?? null);
+      $this->assertFalse((bool) ($bootstrap['allowDekGeneration'] ?? true));
+      $this->assertFalse((bool) ($bootstrap['hasExistingCryptoMaterial'] ?? true));
+      $this->assertTrue((bool) ($bootstrap['hasEncryptedEntries'] ?? false));
+      $this->assertSame('', (string) ($bootstrap['encryptionSalt'] ?? ''));
+    } finally {
+      Database::unlink($workKey);
+      $this->cleanupUser($fixture['userUuid'], $email);
+    }
   }
 
   public function testBackfillRecoveryMaterialStoresFields(): void

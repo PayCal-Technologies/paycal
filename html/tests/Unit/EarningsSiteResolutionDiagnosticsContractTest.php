@@ -75,7 +75,7 @@ final class EarningsSiteResolutionDiagnosticsContractTest extends TestCase
     $page = (string) file_get_contents($projectRoot . '/html/reports/_partials/team_earnings_data.php');
 
     $this->assertStringContainsString('earnings.team.site_resolution.fallback_ratio_warn', $builder);
-    $this->assertStringContainsString('Team Earnings: fallback ratio warning', $builder);
+    $this->assertStringContainsString('Business Reports: fallback ratio warning', $builder);
     $this->assertStringContainsString("'warning'", $builder);
     $this->assertStringContainsString('$teamSiteFallbackWarnThreshold = 15.0;', $page);
   }
@@ -91,7 +91,7 @@ final class EarningsSiteResolutionDiagnosticsContractTest extends TestCase
     $panel = (string) file_get_contents($projectRoot . '/html/reports/_partials/team_earnings_panel.php');
 
     $this->assertStringContainsString('earnings.team.site_resolution.unlinked_only_warn', $builder);
-    $this->assertStringContainsString('Team Earnings: unlinked-only guard', $builder);
+    $this->assertStringContainsString('Business Reports: unlinked-only guard', $builder);
     $this->assertStringContainsString('included_unlinked', $page);
     $this->assertStringContainsString('$teamUnlinkedOnlyWarn = false;', $page);
     $this->assertStringContainsString('EARNINGS_TEAM_UNLINKED_ONLY_GUARD', $panel);

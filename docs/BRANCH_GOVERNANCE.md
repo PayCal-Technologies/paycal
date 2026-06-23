@@ -11,7 +11,7 @@ Authority:     Local machine + scripts/paycal + hooks
 Storage:       GitHub private repo, GitHub public repo
 Optional:      GitHub Actions workflows (manual / informational)
 Public safety: Signed commits, no force-push, no branch deletion (GitHub)
-Private safety: Local hooks, policy-meta, test boundaries, public-health check
+Private safety: Local hooks, policy-meta, test boundaries, public-health check, private release ledger check
 ```
 
 PayCal does **not** depend on GitHub-hosted CI as the source of truth. GitHub must not block development because of queued Actions, billing limits, or paid-plan branch-protection gaps on private repos.
@@ -21,7 +21,9 @@ PayCal does **not** depend on GitHub-hosted CI as the source of truth. GitHub mu
 ```bash
 scripts/paycal checks:policy-meta
 scripts/paycal checks:test-boundaries
+scripts/paycal checks:ledger-private
 scripts/paycal checks:public-health          # from private, before promotion
+scripts/paycal release:candidate             # after local gates pass
 composer run test:quick
 composer run test:compliance                 # private: quick + soc2
 # PHPStan L9 — pre-push and checks:public-health
@@ -29,6 +31,18 @@ composer run test:compliance                 # private: quick + soc2
 ```
 
 See `docs/PUBLIC_PROMOTION.md` for the promotion checklist.
+
+### Release ledger gate
+
+`scripts/paycal checks:ledger-private` verifies that `/private/var/www/paycal-ledgers` is a Git repo and that its GitHub remote is private. Release candidates and target desired state are recorded with:
+
+```bash
+scripts/paycal release:candidate
+scripts/paycal release:promote prod --reason "Production release"
+scripts/paycal deploy:status prod
+```
+
+The private visibility lookup is cached for one hour to keep repeated local pre-push runs fast. Use `PAYCAL_LEDGER_VISIBILITY_CACHE_TTL=0` when a fresh GitHub visibility check is required.
 
 ## Target controls
 

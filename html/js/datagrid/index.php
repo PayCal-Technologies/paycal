@@ -13,101 +13,539 @@ Javascript::renderDocBlock();
 ?>
 
 import PC from "<?php echo Environment::appURL('js/'); ?>";
+import { formatPhpTemplate } from '/js/core/template.js';
 
 
 window.PAYCAL_DEBUG = typeof window.PAYCAL_DEBUG !== 'undefined' ? window.PAYCAL_DEBUG : false;
 
-const COLUMN_WIDTH_STORAGE_PREFIX = 'paycal:datagrid:widths:';
-const COLUMN_RESIZE_MIN_PX = 48;
-const COLUMN_WIDTH_SNAP_PX = 8;
-const COLUMN_WIDTH_CLASS_PREFIX = 'dg_col_';
-const COLUMN_WIDTH_CLASS_PATTERN = /^dg_col_[a-z0-9]+_w_\d+$/;
-const COLUMN_RESIZE_MOBILE_MAX = 719;
-const VIRTUAL_ROW_HEIGHT_PX = 30;
-const VIRTUAL_BUFFER_ROWS = 3;
-const VIRTUAL_MIN_ROWS = 16;
-const CURRENT_ROW_STORAGE_PREFIX = 'paycal:datagrid:current-row:';
+const COLUMN_VISIBILITY_STORAGE_PREFIX = 'paycal:datagrid:columns:';
+const DATAGRID_KEYBOARD_PAGE_STEP = 25;
 
-function resolveDataGridRowId(row)
+const DATAGRID_T = {
+  reloadFailed: '<?php echo addslashes(Strings::i18n('DATAGRID_RELOAD_FAILED')); ?>',
+  invalidResponse: '<?php echo addslashes(Strings::i18n('DATAGRID_INVALID_RESPONSE')); ?>',
+  columnShown: '<?php echo addslashes(Strings::i18n('DATAGRID_COLUMN_SHOWN')); ?>',
+  columnHidden: '<?php echo addslashes(Strings::i18n('DATAGRID_COLUMN_HIDDEN')); ?>',
+};
+
+const DATAGRID_KEYBOARD_INTERACTIVE_SELECTOR = [
+  'a',
+  'button',
+  'input',
+  'select',
+  'textarea',
+  'label',
+  '[contenteditable="true"]',
+  '.datagrid_action',
+  '.datagrid_sort',
+  '.datagrid_search',
+  '.datagrid_pager',
+  '.datagrid_pagination',
+  '.datagrid_column_toggle',
+  '.datagrid_column_toggle_input',
+  '.datagrid_column_menu',
+  '.datagrid_column_menu_toggle',
+  '.datagrid_column_menu_panel',
+].join(', ');
+
+function isElementVisible(element)
 {
-  if (!(row instanceof HTMLElement)) {
-    return '';
-  }
-
-  return String(row.dataset.id || row.dataset.memberId || '').trim();
+  return element instanceof HTMLElement
+    && !element.hidden
+    && element.getClientRects().length > 0
+    && !element.closest('[hidden]');
 }
 
-function getDataGridRows(container)
-{
-  const innerGrid = resolveInnerDataGrid(container) || resolveDataGridRoot(container);
-  const root = innerGrid instanceof HTMLElement ? innerGrid : container;
-  return Array.from(root.querySelectorAll('.datagrid_row:not(.datagrid_row_empty)'));
-}
-
-function isDataGridRowNavigationBlockedTarget(target)
+function isTextInputTarget(target)
 {
   if (!(target instanceof Element)) {
     return false;
   }
 
-  return !!target.closest(
-    'input, textarea, select, button, a, .datagrid_action, .datagrid_sort, .datagrid_search, .datagrid_pager, .datagrid_pagination, .datagrid_column_toggle, .datagrid_column_toggle_input, .datagrid_fullscreen_toggle, .businesses_member_role_trigger',
-  );
+  if (target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) {
+    return true;
+  }
+
+  if (target instanceof HTMLInputElement) {
+    return !['button', 'checkbox', 'color', 'file', 'hidden', 'image', 'radio', 'range', 'reset', 'submit'].includes(target.type);
+  }
+
+  return target.closest('[contenteditable="true"]') instanceof HTMLElement;
 }
 
-function readStoredCurrentRowId(gridId)
+function isKeyboardSpace(event)
 {
-  try {
-    return String(sessionStorage.getItem(`${CURRENT_ROW_STORAGE_PREFIX}${gridId}`) || '').trim();
-  }
-  catch (_error) {
-    return '';
-  }
+  return event.key === ' '
+    || event.key === 'Space'
+    || event.key === 'Spacebar'
+    || event.code === 'Space';
 }
 
-function writeStoredCurrentRowId(gridId, rowId)
+function scrollDocumentToTop()
 {
-  try {
-    const nextId = String(rowId || '').trim();
-    if (nextId === '') {
-      sessionStorage.removeItem(`${CURRENT_ROW_STORAGE_PREFIX}${gridId}`);
+  const scrollingElement = document.scrollingElement || document.documentElement;
+  if (scrollingElement instanceof Element && typeof scrollingElement.scrollTo === 'function') {
+    scrollingElement.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    return;
+  }
+
+  window.scrollTo(0, 0);
+}
+
+function scrollDocumentToBottom()
+{
+  const scrollingElement = document.scrollingElement || document.documentElement;
+  const maxTop = scrollingElement instanceof Element
+    ? Math.max(0, scrollingElement.scrollHeight - scrollingElement.clientHeight)
+    : Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  if (scrollingElement instanceof Element && typeof scrollingElement.scrollTo === 'function') {
+    scrollingElement.scrollTo({ top: maxTop, left: 0, behavior: 'auto' });
+    return;
+  }
+
+  window.scrollTo(0, maxTop);
+}
+
+function resolveKeyboardRoot(root)
+{
+  if (root instanceof HTMLElement) {
+    return root;
+  }
+
+  if (typeof root === 'string' && root.trim() !== '') {
+    const selector = root.trim();
+    let element = document.getElementById(selector);
+    if (!(element instanceof HTMLElement)) {
+      try {
+        element = document.querySelector(selector);
+      } catch (_error) {
+        element = null;
+      }
+    }
+    return element instanceof HTMLElement ? element : null;
+  }
+
+  return null;
+}
+
+export function bindDataGridKeyboardNavigation(config = {})
+{
+  const root = resolveKeyboardRoot(config.root);
+  if (!(root instanceof HTMLElement)) {
+    return null;
+  }
+
+  if (root.__datagridKeyboardNavigation) {
+    if (typeof root.__datagridKeyboardNavigation.syncRows === 'function') {
+      root.__datagridKeyboardNavigation.syncRows();
+    }
+    return root.__datagridKeyboardNavigation;
+  }
+
+  const rowSelector = typeof config.rowSelector === 'string' && config.rowSelector.trim() !== ''
+    ? config.rowSelector
+    : '.datagrid_body .datagrid_row:not(.datagrid_row_empty)';
+  const searchSelector = typeof config.searchSelector === 'string' && config.searchSelector.trim() !== ''
+    ? config.searchSelector
+    : '.datagrid_search';
+  const activeRowClass = typeof config.activeRowClass === 'string' && config.activeRowClass.trim() !== ''
+    ? config.activeRowClass
+    : 'datagrid_row_keyboard_active';
+  const interactiveSelector = typeof config.interactiveSelector === 'string' && config.interactiveSelector.trim() !== ''
+    ? config.interactiveSelector
+    : DATAGRID_KEYBOARD_INTERACTIVE_SELECTOR;
+  const pageStep = Number.isFinite(Number(config.pageStep))
+    ? Math.max(1, Number(config.pageStep))
+    : DATAGRID_KEYBOARD_PAGE_STEP;
+  const isEnabled = typeof config.isEnabled === 'function'
+    ? config.isEnabled
+    : () => true;
+
+  let activeRow = null;
+  let autofocusPending = config.autofocusSearch === true;
+
+  const getRows = () => Array.from(root.querySelectorAll(rowSelector))
+    .filter((row) => row instanceof HTMLElement && isElementVisible(row));
+
+  const getSearchInput = () => Array.from(root.querySelectorAll(searchSelector))
+    .find((input) => input instanceof HTMLInputElement && isElementVisible(input)) || null;
+
+  const clearActiveRow = () => {
+    root.querySelectorAll(`.${activeRowClass}`).forEach((row) => {
+      if (row instanceof HTMLElement) {
+        row.classList.remove(activeRowClass);
+      }
+    });
+  };
+
+  const syncRows = () => {
+    const rows = getRows();
+    rows.forEach((row) => {
+      row.tabIndex = row === activeRow ? 0 : -1;
+    });
+
+    if (!(activeRow instanceof HTMLElement) || !rows.includes(activeRow)) {
+      clearActiveRow();
+      activeRow = null;
+    }
+
+    return rows;
+  };
+
+  const setActiveRow = (row, options = {}) => {
+    if (!(row instanceof HTMLElement) || !isElementVisible(row)) {
+      return false;
+    }
+
+    clearActiveRow();
+    activeRow = row;
+    row.classList.add(activeRowClass);
+    syncRows();
+
+    if (options.scroll !== false && typeof row.scrollIntoView === 'function') {
+      row.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+    if (options.focus !== false) {
+      row.focus({ preventScroll: true });
+    }
+
+    return true;
+  };
+
+  const focusSearch = (options = {}) => {
+    const searchInput = getSearchInput();
+    if (!(searchInput instanceof HTMLInputElement)) {
+      return false;
+    }
+
+    clearActiveRow();
+    activeRow = null;
+    syncRows();
+
+    if (options.scrollTop === true) {
+      scrollDocumentToTop();
+    }
+    searchInput.focus({ preventScroll: options.scrollTop === true });
+    if (options.select !== false) {
+      searchInput.select();
+    }
+
+    return true;
+  };
+
+  const shouldIgnoreGlobalShortcut = (event) => {
+    if (!isEnabled() || !isElementVisible(root) || isTextInputTarget(event.target)) {
+      return true;
+    }
+
+    const activeDialog = document.querySelector('dialog[open]');
+    return activeDialog instanceof HTMLDialogElement && !activeDialog.contains(root);
+  };
+
+  const maybeAutofocusSearch = () => {
+    if (!autofocusPending || !isEnabled() || !isElementVisible(root)) {
+      return false;
+    }
+
+    const activeDialog = document.querySelector('dialog[open]');
+    if (activeDialog instanceof HTMLDialogElement && !activeDialog.contains(root)) {
+      return false;
+    }
+
+    if (isTextInputTarget(document.activeElement)) {
+      return false;
+    }
+
+    const didFocus = focusSearch({ select: false });
+    if (didFocus) {
+      autofocusPending = false;
+    }
+
+    return didFocus;
+  };
+
+  const focusRowAt = (index, options = {}) => {
+    const rows = syncRows();
+    if (rows.length === 0) {
+      return false;
+    }
+
+    const targetIndex = Math.max(0, Math.min(rows.length - 1, index));
+    return setActiveRow(rows[targetIndex], options);
+  };
+
+  const focusRelativeRow = (offset, options = {}) => {
+    const rows = syncRows();
+    if (rows.length === 0) {
+      return false;
+    }
+
+    const currentIndex = activeRow instanceof HTMLElement ? rows.indexOf(activeRow) : -1;
+    if (currentIndex < 0) {
+      return focusRowAt(offset > 0 ? 0 : rows.length - 1, options);
+    }
+
+    return focusRowAt(currentIndex + offset, options);
+  };
+
+  const focusContextAction = (row) => {
+    if (typeof config.onContextAction === 'function' && config.onContextAction(row) === true) {
+      return true;
+    }
+
+    const action = row instanceof HTMLElement
+      ? row.querySelector('.datagrid_action:not([disabled])')
+      : null;
+    if (action instanceof HTMLElement) {
+      action.focus({ preventScroll: true });
+      return true;
+    }
+
+    return false;
+  };
+
+  const activateRow = (row, event) => {
+    if (!(row instanceof HTMLElement)) {
+      return false;
+    }
+
+    if (typeof config.onActivate === 'function') {
+      return config.onActivate(row, event) === true;
+    }
+
+    const content = row.querySelector('.datagrid_row_content');
+    if (content instanceof HTMLElement) {
+      content.click();
+      return true;
+    }
+
+    row.click();
+    return true;
+  };
+
+  const handleSearchKeydown = (event) => {
+    if (!(event.target instanceof HTMLInputElement) || !event.target.classList.contains('datagrid_search')) {
+      return false;
+    }
+
+    if (event.key === 'ArrowRight') {
+      const valueLength = String(event.target.value || '').length;
+      const selectionStart = Number.isInteger(event.target.selectionStart) ? event.target.selectionStart : valueLength;
+      const selectionEnd = Number.isInteger(event.target.selectionEnd) ? event.target.selectionEnd : selectionStart;
+      if (selectionStart === valueLength
+        && selectionEnd === valueLength
+        && focusFirstColumnVisibilityToggle(event.target.closest('.datagrid[data-grid]'))) {
+        event.preventDefault();
+        return true;
+      }
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      focusRowAt(0);
+      return true;
+    }
+
+    if (event.key === 'Home') {
+      event.preventDefault();
+      scrollDocumentToTop();
+      focusRowAt(0, { scroll: false });
+      return true;
+    }
+
+    if (event.key === 'End') {
+      event.preventDefault();
+      scrollDocumentToBottom();
+      focusRowAt(syncRows().length - 1, { scroll: false });
+      return true;
+    }
+
+    if (event.key === 'PageDown') {
+      event.preventDefault();
+      focusRowAt(pageStep - 1);
+      return true;
+    }
+
+    if (event.key === 'PageUp') {
+      event.preventDefault();
+      focusRowAt(0);
+      return true;
+    }
+
+    return false;
+  };
+
+  const handleRowKeydown = (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const row = target?.closest(rowSelector);
+    if (!(row instanceof HTMLElement) || !root.contains(row)) {
+      return false;
+    }
+
+    if (target instanceof Element && target.closest(interactiveSelector)) {
+      return false;
+    }
+
+    setActiveRow(row, { focus: false, scroll: false });
+
+    const currentRows = syncRows();
+    const currentIndex = currentRows.indexOf(row);
+    const isContextKey = event.key === 'ContextMenu'
+      || (event.shiftKey && event.key === 'F10')
+      || (event.shiftKey && event.key === 'Enter')
+      || (event.shiftKey && isKeyboardSpace(event));
+
+    if (isContextKey) {
+      event.preventDefault();
+      focusContextAction(row);
+      return true;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      focusRelativeRow(1);
+      return true;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (currentIndex <= 0) {
+        focusSearch({ select: false });
+        return true;
+      }
+      focusRelativeRow(-1);
+      return true;
+    }
+
+    if (event.key === 'Home') {
+      event.preventDefault();
+      scrollDocumentToTop();
+      focusRowAt(0, { scroll: false });
+      return true;
+    }
+
+    if (event.key === 'End') {
+      event.preventDefault();
+      scrollDocumentToBottom();
+      focusRowAt(currentRows.length - 1, { scroll: false });
+      return true;
+    }
+
+    if (event.key === 'PageDown') {
+      event.preventDefault();
+      focusRowAt(currentIndex + pageStep);
+      return true;
+    }
+
+    if (event.key === 'PageUp') {
+      event.preventDefault();
+      focusRowAt(Math.max(0, currentIndex - pageStep));
+      return true;
+    }
+
+    if (event.key === 'Enter' || isKeyboardSpace(event)) {
+      event.preventDefault();
+      activateRow(row, event);
+      return true;
+    }
+
+    return false;
+  };
+
+  const handleKeydown = (event) => {
+    if (!isEnabled()) {
       return;
     }
 
-    sessionStorage.setItem(`${CURRENT_ROW_STORAGE_PREFIX}${gridId}`, nextId);
+    if (event.key === '/' && !isTextInputTarget(event.target)) {
+      event.preventDefault();
+      focusSearch({ scrollTop: true });
+      return;
+    }
+
+    if (handleSearchKeydown(event)) {
+      return;
+    }
+
+    handleRowKeydown(event);
+  };
+
+  const handleFocusIn = (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const row = target?.closest(rowSelector);
+    if (row instanceof HTMLElement && root.contains(row)) {
+      setActiveRow(row, { focus: false, scroll: false });
+    }
+  };
+
+  const handleReload = () => {
+    syncRows();
+    if (autofocusPending) {
+      window.setTimeout(maybeAutofocusSearch, 0);
+    }
+  };
+
+  const handleDocumentKeydown = (event) => {
+    if (event.defaultPrevented || event.key !== '/' || shouldIgnoreGlobalShortcut(event)) {
+      return;
+    }
+
+    event.preventDefault();
+    focusSearch({ scrollTop: true });
+  };
+
+  root.addEventListener('keydown', handleKeydown);
+  root.addEventListener('focusin', handleFocusIn);
+  document.addEventListener('paycal:datagrid-reloaded', handleReload);
+  document.addEventListener('keydown', handleDocumentKeydown);
+  syncRows();
+
+  const api = {
+    syncRows,
+    focusSearch,
+    destroy() {
+      root.removeEventListener('keydown', handleKeydown);
+      root.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('paycal:datagrid-reloaded', handleReload);
+      document.removeEventListener('keydown', handleDocumentKeydown);
+      root.querySelectorAll(rowSelector).forEach((row) => {
+        if (row instanceof HTMLElement) {
+          row.classList.remove(activeRowClass);
+          row.tabIndex = 0;
+        }
+      });
+      delete root.__datagridKeyboardNavigation;
+    },
+  };
+
+  root.__datagridKeyboardNavigation = api;
+
+  if (config.autofocusSearch === true) {
+    window.setTimeout(() => {
+      maybeAutofocusSearch();
+    }, 0);
   }
-  catch (_error) {
-    // Ignore storage failures (private mode, quota, etc.).
-  }
+
+  return api;
 }
 
-function isMobileGridLayout()
-{
-  return window.matchMedia(`(max-width: ${COLUMN_RESIZE_MOBILE_MAX}px)`).matches;
-}
-
-function getDataGridKey(grid)
-{
-  return String(grid.dataset.grid || grid.id || '');
-}
-
-function resolveDataGridRoot(root)
+function resolveColumnVisibilityGrid(root)
 {
   if (!(root instanceof HTMLElement)) {
     return null;
   }
 
-  if (root.classList.contains('datagrid')) {
+  if (root.dataset.columnVisibility === '1') {
     return root;
   }
 
-  return root.querySelector('.datagrid');
+  return root.querySelector('[data-column-visibility="1"]');
 }
 
-function readStoredColumnWidths(gridId)
+function readStoredColumnVisibility(gridId)
 {
   try {
-    const raw = localStorage.getItem(`${COLUMN_WIDTH_STORAGE_PREFIX}${gridId}`);
+    const raw = localStorage.getItem(`${COLUMN_VISIBILITY_STORAGE_PREFIX}${gridId}`);
     if (!raw) {
       return null;
     }
@@ -120,12 +558,12 @@ function readStoredColumnWidths(gridId)
   }
 }
 
-function writeStoredColumnWidths(gridId, widths)
+function writeStoredColumnVisibility(gridId, visibility)
 {
   try {
     localStorage.setItem(
-      `${COLUMN_WIDTH_STORAGE_PREFIX}${gridId}`,
-      JSON.stringify(widths),
+      `${COLUMN_VISIBILITY_STORAGE_PREFIX}${gridId}`,
+      JSON.stringify(visibility),
     );
   }
   catch (_error) {
@@ -133,889 +571,411 @@ function writeStoredColumnWidths(gridId, widths)
   }
 }
 
-function columnClassSuffix(columnKey)
+function countVisibleDataColumns(grid)
 {
-  return String(columnKey).toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  const headers = Array.from(grid.querySelectorAll('.datagrid_header_content .datagrid_heading[data-col-key]'));
+  return headers.filter((header) => !header.classList.contains('datagrid_col_hidden')).length;
 }
 
-function snapColumnWidth(widthPx)
+function syncVisibleColumnState(grid)
 {
-  const snapped = Math.round(widthPx / COLUMN_WIDTH_SNAP_PX) * COLUMN_WIDTH_SNAP_PX;
-  return Math.max(COLUMN_RESIZE_MIN_PX, snapped);
-}
-
-function columnWidthClass(columnKey, widthPx)
-{
-  return `${COLUMN_WIDTH_CLASS_PREFIX}${columnClassSuffix(columnKey)}_w_${snapColumnWidth(widthPx)}`;
-}
-
-function clearColumnWidthClasses(grid)
-{
-  const staleClasses = Array.from(grid.classList).filter((className) => COLUMN_WIDTH_CLASS_PATTERN.test(className));
-  staleClasses.forEach((className) => {
-    grid.classList.remove(className);
-  });
-  grid.classList.remove('datagrid_layout_custom');
-}
-
-function applyColumnWidthClasses(grid, widthByKey)
-{
-  clearColumnWidthClasses(grid);
-
-  const entries = Object.entries(widthByKey).filter(([, width]) => typeof width === 'number' && width > 0);
-  if (entries.length === 0) {
-    return;
-  }
-
-  entries.forEach(([columnKey, width]) => {
-    grid.classList.add(columnWidthClass(columnKey, width));
-  });
-  grid.classList.add('datagrid_layout_custom');
-}
-
-function applyColumnLayout(grid, widthByKey = null)
-{
-  if (isMobileGridLayout()) {
-    clearColumnWidthClasses(grid);
-    return;
-  }
-
-  const gridKey = getDataGridKey(grid);
-  const stored = widthByKey || readStoredColumnWidths(gridKey) || {};
-  applyColumnWidthClasses(grid, stored);
-}
-
-export function initColumnLayout(root)
-{
-  const grid = resolveDataGridRoot(root);
   if (!(grid instanceof HTMLElement)) {
-    return null;
-  }
-
-  applyColumnLayout(grid);
-  return { apply: () => applyColumnLayout(grid) };
-}
-
-export function initColumnResize(root)
-{
-  const grid = resolveDataGridRoot(root);
-  if (!(grid instanceof HTMLElement) || grid.dataset.columnResize !== '1') {
-    return null;
-  }
-
-  const gridKey = getDataGridKey(grid);
-  if (gridKey === '') {
-    return null;
-  }
-
-  if (grid.__columnResizeInstance) {
-    applyColumnLayout(grid, grid.__columnResizeInstance.widths);
-    return grid.__columnResizeInstance;
-  }
-
-  const widths = { ...(readStoredColumnWidths(gridKey) || {}) };
-
-  const apply = () => {
-    applyColumnLayout(grid, widths);
-  };
-
-  let activeResize = null;
-
-  const handlePointerDown = (event) => {
-    if (isMobileGridLayout()) {
-      return;
-    }
-
-    const handle = event.target.closest('.datagrid_col_resize');
-    if (!(handle instanceof HTMLElement) || !grid.contains(handle)) {
-      return;
-    }
-
-    const columnKey = String(handle.dataset.resizeCol || '');
-    if (columnKey === '') {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const header = handle.closest('.datagrid_heading[data-col-key]');
-    if (!(header instanceof HTMLElement)) {
-      return;
-    }
-
-    const startWidth = header.getBoundingClientRect().width;
-    const pointerId = event.pointerId;
-    handle.classList.add('datagrid_col_resize_active');
-    handle.setPointerCapture(pointerId);
-
-    activeResize = {
-      columnKey,
-      startX: event.clientX,
-      startWidth,
-      pointerId,
-      handle,
-    };
-  };
-
-  const handlePointerMove = (event) => {
-    if (!activeResize || event.pointerId !== activeResize.pointerId) {
-      return;
-    }
-
-    const deltaX = event.clientX - activeResize.startX;
-    widths[activeResize.columnKey] = snapColumnWidth(activeResize.startWidth + deltaX);
-    apply();
-  };
-
-  const finishResize = (event) => {
-    if (!activeResize || event.pointerId !== activeResize.pointerId) {
-      return;
-    }
-
-    activeResize.handle.classList.remove('datagrid_col_resize_active');
-    activeResize.handle.releasePointerCapture(activeResize.pointerId);
-    writeStoredColumnWidths(gridKey, widths);
-    activeResize = null;
-  };
-
-  const handleWindowResize = () => {
-    if (isMobileGridLayout()) {
-      clearColumnWidthClasses(grid);
-      return;
-    }
-
-    apply();
-  };
-
-  grid.addEventListener('pointerdown', handlePointerDown);
-  grid.addEventListener('pointermove', handlePointerMove);
-  grid.addEventListener('pointerup', finishResize);
-  grid.addEventListener('pointercancel', finishResize);
-  window.addEventListener('resize', handleWindowResize);
-
-  apply();
-
-  const api = {
-    widths,
-    apply,
-    destroy() {
-      grid.removeEventListener('pointerdown', handlePointerDown);
-      grid.removeEventListener('pointermove', handlePointerMove);
-      grid.removeEventListener('pointerup', finishResize);
-      grid.removeEventListener('pointercancel', finishResize);
-      window.removeEventListener('resize', handleWindowResize);
-      clearColumnWidthClasses(grid);
-      delete grid.__columnResizeInstance;
-    },
-  };
-
-  grid.__columnResizeInstance = api;
-
-  return api;
-}
-
-function resolveInnerDataGrid(container)
-{
-  if (!(container instanceof HTMLElement)) {
-    return null;
-  }
-
-  if (container.classList.contains('datagrid')) {
-    return container;
-  }
-
-  return container.querySelector('.datagrid');
-}
-
-function syncStateFromInnerGrid(container, state)
-{
-  const innerGrid = resolveInnerDataGrid(container);
-  if (!(innerGrid instanceof HTMLElement)) {
     return;
   }
 
-  if (typeof innerGrid.dataset.search !== 'undefined') {
-    state.search = innerGrid.dataset.search || '';
-  }
-  if (typeof innerGrid.dataset.sort !== 'undefined') {
-    state.sort = innerGrid.dataset.sort || '';
-  }
-  if (typeof innerGrid.dataset.direction !== 'undefined') {
-    state.direction = innerGrid.dataset.direction || state.direction;
-  }
-  if (typeof innerGrid.dataset.page !== 'undefined') {
-    state.page = parseInt(innerGrid.dataset.page || String(state.page), 10) || state.page;
-  }
-  if (typeof innerGrid.dataset.totalPages !== 'undefined') {
-    state.totalPages = parseInt(innerGrid.dataset.totalPages || String(state.totalPages), 10) || state.totalPages;
-  }
+  const headerContent = grid.querySelector('.datagrid_header_content');
+  const visibleCount = headerContent instanceof HTMLElement
+    ? Array.from(headerContent.children)
+      .filter((child) => child instanceof HTMLElement
+        && !child.classList.contains('datagrid_col_hidden')
+        && !child.hasAttribute('aria-hidden'))
+      .length
+    : 0;
+
+  grid.dataset.visibleColumns = String(visibleCount);
 }
 
-export function syncSearchInput(container, searchValue)
+function announceColumnVisibilityStatus(grid, columnLabel, visible)
 {
-  if (!(container instanceof HTMLElement)) {
+  const status = grid.querySelector('.datagrid_column_strip_status')
+    || grid.querySelector('.datagrid_column_menu_panel .datagrid_column_strip_status');
+  if (!(status instanceof HTMLElement)) {
     return;
   }
 
-  const searchInput = container.querySelector('.datagrid_search');
-  if (!(searchInput instanceof HTMLInputElement)) {
-    return;
-  }
-
-  const nextValue = String(searchValue ?? '');
-  if (searchInput.value !== nextValue) {
-    searchInput.value = nextValue;
-  }
+  status.textContent = visible
+    ? formatPhpTemplate(DATAGRID_T.columnShown, [columnLabel])
+    : formatPhpTemplate(DATAGRID_T.columnHidden, [columnLabel]);
 }
 
-function initStateFromGrid(container, state)
+function getColumnVisibilityMenuFocusables(panel)
 {
-  syncStateFromInnerGrid(container, state);
-
-  const searchInput = container.querySelector('.datagrid_search');
-  if (searchInput instanceof HTMLInputElement && searchInput.value !== '') {
-    state.search = searchInput.value;
+  if (!(panel instanceof HTMLElement)) {
+    return [];
   }
+
+  return Array.from(panel.querySelectorAll(
+    'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+  )).filter((element) => element instanceof HTMLElement && !element.closest('[hidden]'));
 }
 
-export function initFullscreen(root)
+function getColumnVisibilityToggleInputs(scope)
 {
-  const grid = resolveDataGridRoot(root) || resolveInnerDataGrid(root);
+  if (!(scope instanceof HTMLElement)) {
+    return [];
+  }
+
+  return Array.from(scope.querySelectorAll('.datagrid_column_toggle_input[data-col-key]'))
+    .filter((element) => element instanceof HTMLInputElement
+      && !element.disabled
+      && element.getClientRects().length > 0
+      && !element.closest('[hidden]'));
+}
+
+function focusFirstDatagridRow(grid)
+{
   if (!(grid instanceof HTMLElement)) {
+    return false;
+  }
+
+  const row = Array.from(grid.querySelectorAll('.datagrid_body .datagrid_row:not(.datagrid_row_empty)'))
+    .find((candidate) => candidate instanceof HTMLElement
+      && candidate.getClientRects().length > 0
+      && !candidate.closest('[hidden]'));
+  if (!(row instanceof HTMLElement)) {
+    return false;
+  }
+
+  row.focus({ preventScroll: true });
+  if (typeof row.scrollIntoView === 'function') {
+    row.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+
+  return true;
+}
+
+function focusDatagridSearch(grid)
+{
+  if (!(grid instanceof HTMLElement)) {
+    return false;
+  }
+
+  const search = grid.querySelector('.datagrid_search');
+  if (!(search instanceof HTMLInputElement)
+    || search.getClientRects().length === 0
+    || search.closest('[hidden]')) {
+    return false;
+  }
+
+  search.focus({ preventScroll: true });
+  return true;
+}
+
+function focusFirstColumnVisibilityToggle(grid)
+{
+  if (!(grid instanceof HTMLElement)) {
+    return false;
+  }
+
+  const toggles = getColumnVisibilityToggleInputs(
+    grid.querySelector('.datagrid_column_strip') || grid.querySelector('.datagrid_column_menu_panel') || grid,
+  );
+  if (!(toggles[0] instanceof HTMLInputElement)) {
+    return false;
+  }
+
+  toggles[0].focus({ preventScroll: true });
+  return true;
+}
+
+function initColumnVisibilityMenu(grid)
+{
+  const menu = grid.querySelector('.datagrid_column_menu');
+  if (!(menu instanceof HTMLElement) || menu.dataset.columnMenuBound === '1') {
     return null;
   }
 
-  const toggle = grid.querySelector('.datagrid_fullscreen_toggle');
-  if (!(toggle instanceof HTMLButtonElement)) {
+  const toggle = menu.querySelector('.datagrid_column_menu_toggle');
+  const panel = menu.querySelector('.datagrid_column_menu_panel');
+  if (!(toggle instanceof HTMLButtonElement) || !(panel instanceof HTMLElement)) {
     return null;
   }
 
-  if (grid.__fullscreenInstance) {
-    return grid.__fullscreenInstance;
-  }
-
-  const enterLabel = String(toggle.dataset.labelEnter || toggle.getAttribute('aria-label') || 'Expand grid to fullscreen');
-  const exitLabel = String(toggle.dataset.labelExit || 'Exit grid fullscreen');
+  menu.dataset.columnMenuBound = '1';
   let previousFocus = null;
 
-  const isFullscreen = () => grid.classList.contains('datagrid_fullscreen');
-
-  const updateToggle = () => {
-    const expanded = isFullscreen();
-    toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-    toggle.setAttribute('aria-label', expanded ? exitLabel : enterLabel);
+  const closePanel = (restoreFocus = true) => {
+    panel.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+    if (restoreFocus && previousFocus instanceof HTMLElement) {
+      previousFocus.focus();
+    }
+    previousFocus = null;
   };
 
-  const exit = () => {
-    if (!isFullscreen()) {
-      return;
-    }
-
-    grid.classList.remove('datagrid_fullscreen');
-    document.body.classList.remove('datagrid_fullscreen_active');
-    updateToggle();
-
-    if (previousFocus instanceof HTMLElement && document.contains(previousFocus)) {
-      previousFocus.focus({ preventScroll: true });
-    } else {
-      toggle.focus({ preventScroll: true });
-    }
-  };
-
-  const enter = () => {
-    if (isFullscreen()) {
-      return;
-    }
-
-    previousFocus = document.activeElement;
-    grid.classList.add('datagrid_fullscreen');
-    document.body.classList.add('datagrid_fullscreen_active');
-    updateToggle();
-    toggle.focus({ preventScroll: true });
-  };
-
-  const handleToggleClick = (event) => {
-    const button = event.target.closest('.datagrid_fullscreen_toggle');
-    if (!(button instanceof HTMLButtonElement) || !grid.contains(button)) {
-      return;
-    }
-
-    event.preventDefault();
-    if (isFullscreen()) {
-      exit();
-    } else {
-      enter();
-    }
-  };
-
-  const handleToggleKeydown = (event) => {
-    if (event.target !== toggle) {
-      return;
-    }
-
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      if (isFullscreen()) {
-        exit();
-      } else {
-        enter();
+  const openPanel = () => {
+    grid.querySelectorAll('.datagrid_column_menu_panel:not([hidden])').forEach((openPanelEl) => {
+      if (openPanelEl instanceof HTMLElement && openPanelEl !== panel) {
+        openPanelEl.hidden = true;
       }
+    });
+
+    previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    panel.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+    const focusables = getColumnVisibilityMenuFocusables(panel);
+    if (focusables[0] instanceof HTMLElement) {
+      focusables[0].focus();
+    }
+  };
+
+  const handleDocumentClick = (event) => {
+    if (panel.hidden || !menu.contains(event.target)) {
+      closePanel(false);
     }
   };
 
   const handleDocumentKeydown = (event) => {
-    if (event.key !== 'Escape' || !isFullscreen()) {
+    if (panel.hidden) {
       return;
     }
 
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closePanel(true);
+      return;
+    }
+
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const focusables = getColumnVisibilityMenuFocusables(panel);
+    if (focusables.length === 0) {
+      return;
+    }
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement;
+    if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+      return;
+    }
+
+    if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  toggle.addEventListener('click', (event) => {
     event.preventDefault();
-    exit();
-  };
+    if (panel.hidden) {
+      openPanel();
+      return;
+    }
+    closePanel(true);
+  });
 
-  grid.addEventListener('click', handleToggleClick);
-  toggle.addEventListener('keydown', handleToggleKeydown);
+  document.addEventListener('click', handleDocumentClick);
   document.addEventListener('keydown', handleDocumentKeydown);
-  updateToggle();
 
-  const api = {
-    enter,
-    exit,
-    toggle() {
-      if (isFullscreen()) {
-        exit();
-      } else {
-        enter();
-      }
-    },
-    isActive: isFullscreen,
+  return {
     destroy() {
-      exit();
-      grid.removeEventListener('click', handleToggleClick);
-      toggle.removeEventListener('keydown', handleToggleKeydown);
+      document.removeEventListener('click', handleDocumentClick);
       document.removeEventListener('keydown', handleDocumentKeydown);
-      delete grid.__fullscreenInstance;
+      delete menu.dataset.columnMenuBound;
     },
   };
-
-  grid.__fullscreenInstance = api;
-
-  return api;
 }
 
-function fillPhantomSpacer(spacer, rowCount)
+function applyColumnVisibility(grid, visibilityByKey)
 {
-  if (!(spacer instanceof HTMLElement)) {
-    return;
-  }
+  const table = grid.querySelector('.datagrid_table');
+  // Scope to grid headers/cells only — column-toggle checkboxes also carry data-col-key
+  // and must stay focusable (never aria-hidden while focused).
+  const columnElements = Array.from(grid.querySelectorAll('.datagrid_table [data-col-key]'));
 
-  spacer.textContent = '';
-  for (let index = 0; index < rowCount; index += 1) {
-    const phantom = document.createElement('div');
-    phantom.className = 'datagrid_virtual_phantom';
-    spacer.appendChild(phantom);
-  }
-}
-
-export function initVirtualScroll(root, options = {})
-{
-  const container = root instanceof HTMLElement ? root : null;
-  const innerGrid = resolveInnerDataGrid(container) || resolveDataGridRoot(root);
-  if (!(innerGrid instanceof HTMLElement)) {
-    return null;
-  }
-
-  const virtualizeEnabled = options.force === true
-    || options.virtualize === true
-    || innerGrid.dataset.virtualize === '1';
-
-  if (!virtualizeEnabled || isMobileGridLayout()) {
-    return null;
-  }
-
-  if (innerGrid.__virtualScrollInstance?.destroy) {
-    innerGrid.__virtualScrollInstance.destroy();
-  }
-
-  const body = innerGrid.querySelector('.datagrid_table > .datagrid_body');
-  if (!(body instanceof HTMLElement)) {
-    return null;
-  }
-
-  const sourceRows = Array.from(body.querySelectorAll('.datagrid_row:not(.datagrid_row_empty)'));
-  const minRows = typeof options.minRows === 'number' ? options.minRows : VIRTUAL_MIN_ROWS;
-  if (sourceRows.length < minRows) {
-    return null;
-  }
-
-  const measuredHeight = sourceRows[0].getBoundingClientRect().height;
-  const rowHeight = Math.max(
-    VIRTUAL_ROW_HEIGHT_PX,
-    Math.ceil(Number.isFinite(measuredHeight) && measuredHeight > 0 ? measuredHeight : VIRTUAL_ROW_HEIGHT_PX),
-  );
-  const rowStore = sourceRows.map((row) => row.cloneNode(true));
-
-  body.classList.add('datagrid_virtual_scroll');
-  body.textContent = '';
-
-  const spacerTop = document.createElement('div');
-  spacerTop.className = 'datagrid_virtual_spacer datagrid_virtual_spacer_top';
-  spacerTop.setAttribute('aria-hidden', 'true');
-
-  const windowEl = document.createElement('div');
-  windowEl.className = 'datagrid_virtual_window';
-  windowEl.setAttribute('role', 'presentation');
-
-  const spacerBottom = document.createElement('div');
-  spacerBottom.className = 'datagrid_virtual_spacer datagrid_virtual_spacer_bottom';
-  spacerBottom.setAttribute('aria-hidden', 'true');
-
-  body.appendChild(spacerTop);
-  body.appendChild(windowEl);
-  body.appendChild(spacerBottom);
-
-  let rafId = null;
-
-  const renderWindow = () => {
-    const scrollTop = body.scrollTop;
-    const viewportHeight = body.clientHeight;
-    const firstVisible = Math.max(0, Math.floor(scrollTop / rowHeight) - VIRTUAL_BUFFER_ROWS);
-    const visibleCount = Math.ceil(viewportHeight / rowHeight) + (VIRTUAL_BUFFER_ROWS * 2);
-    const lastVisible = Math.min(rowStore.length, firstVisible + visibleCount);
-
-    fillPhantomSpacer(spacerTop, firstVisible);
-    fillPhantomSpacer(spacerBottom, Math.max(0, rowStore.length - lastVisible));
-
-    windowEl.textContent = '';
-    for (let index = firstVisible; index < lastVisible; index += 1) {
-      windowEl.appendChild(rowStore[index].cloneNode(true));
-    }
-  };
-
-  const scheduleRender = () => {
-    if (rafId !== null) {
+  columnElements.forEach((element) => {
+    const columnKey = String(element.dataset.colKey || '');
+    if (columnKey === '') {
       return;
     }
 
-    rafId = window.requestAnimationFrame(() => {
-      rafId = null;
-      renderWindow();
-    });
-  };
-
-  const handleScroll = () => {
-    scheduleRender();
-  };
-
-  const resolveStoredRowId = (row) => {
-    if (!(row instanceof HTMLElement)) {
-      return '';
+    const visible = visibilityByKey[columnKey] !== false;
+    element.classList.toggle('datagrid_col_hidden', !visible);
+    if (visible) {
+      element.removeAttribute('aria-hidden');
+    } else {
+      element.setAttribute('aria-hidden', 'true');
     }
+  });
 
-    return String(row.dataset.id || row.dataset.memberId || '').trim();
-  };
+  if (table instanceof HTMLElement) {
+    const visibleCount = countVisibleDataColumns(grid);
+    const hasActions = !!grid.querySelector('.datagrid_heading_actions');
+    table.setAttribute('aria-colcount', String(visibleCount + (hasActions ? 1 : 0)));
+  }
 
-  const api = {
-    destroy() {
-      if (rafId !== null) {
-        window.cancelAnimationFrame(rafId);
-        rafId = null;
-      }
+  syncVisibleColumnState(grid);
 
-      body.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleResize);
-      body.classList.remove('datagrid_virtual_scroll');
-      body.textContent = '';
-      rowStore.forEach((row) => {
-        body.appendChild(row.cloneNode(true));
-      });
-      delete innerGrid.__virtualScrollInstance;
-    },
-    refresh() {
-      scheduleRender();
-    },
-    getRowIds() {
-      return rowStore.map((row) => resolveStoredRowId(row)).filter((rowId) => rowId !== '');
-    },
-    scrollToRowId(rowId) {
-      const targetId = String(rowId || '').trim();
-      if (targetId === '') {
-        return;
-      }
-
-      const index = rowStore.findIndex((row) => resolveStoredRowId(row) === targetId);
-      if (index < 0) {
-        return;
-      }
-
-      const viewportHeight = body.clientHeight;
-      const centeredScrollTop = (index * rowHeight) - Math.floor(viewportHeight / 2) + Math.floor(rowHeight / 2);
-      body.scrollTop = Math.max(0, centeredScrollTop);
-      renderWindow();
-    },
-  };
-
-  const handleResize = () => {
-    if (isMobileGridLayout()) {
-      api.destroy();
+  const toggles = Array.from(grid.querySelectorAll('.datagrid_column_toggle_input[data-col-key]'));
+  toggles.forEach((toggle) => {
+    if (!(toggle instanceof HTMLInputElement)) {
       return;
     }
 
-    scheduleRender();
-  };
+    const columnKey = String(toggle.dataset.colKey || '');
+    if (columnKey === '') {
+      return;
+    }
 
-  body.addEventListener('scroll', handleScroll, { passive: true });
-  window.addEventListener('resize', handleResize);
-
-  innerGrid.__virtualScrollInstance = api;
-  renderWindow();
-
-  return api;
+    toggle.checked = visibilityByKey[columnKey] !== false;
+  });
 }
 
-function refreshGridEnhancements(container, config = {})
+export function initColumnVisibility(root)
 {
-  const innerGrid = resolveInnerDataGrid(container) || resolveDataGridRoot(container);
-  if (!(innerGrid instanceof HTMLElement)) {
-    return;
-  }
-
-  initColumnLayout(innerGrid);
-  initColumnResize(innerGrid);
-  initVirtualScroll(container, config);
-  initFullscreen(container);
-}
-
-function initRowNavigation(container, state, config = {})
-{
-  if (!(container instanceof HTMLElement)) {
+  const grid = resolveColumnVisibilityGrid(root);
+  if (!(grid instanceof HTMLElement)) {
     return null;
   }
 
-  const gridId = String(config.id || getDataGridKey(container) || container.id || '');
-
-  if (container.__rowNavigationInstance) {
-    container.__rowNavigationInstance.refresh();
-    return container.__rowNavigationInstance;
+  const gridId = String(grid.dataset.grid || grid.id || '');
+  if (gridId === '') {
+    return null;
   }
 
-  if (!Object.prototype.hasOwnProperty.call(state, 'currentRowId')) {
-    state.currentRowId = String(config.initialRowId || readStoredCurrentRowId(gridId) || '').trim();
+  if (grid.__columnVisibilityInstance) {
+    applyColumnVisibility(grid, grid.__columnVisibilityInstance.visibility);
+    initColumnVisibilityMenu(grid);
+    return grid.__columnVisibilityInstance;
   }
 
-  const getVirtualScrollInstance = () => {
-    const innerGrid = resolveInnerDataGrid(container);
-    return innerGrid?.__virtualScrollInstance || null;
-  };
+  const visibility = {};
+  const toggles = Array.from(grid.querySelectorAll('.datagrid_column_toggle_input[data-col-key]'));
+  const stored = readStoredColumnVisibility(gridId);
 
-  const getRowIds = () => {
-    const virtualScroll = getVirtualScrollInstance();
-    if (virtualScroll && typeof virtualScroll.getRowIds === 'function') {
-      return virtualScroll.getRowIds();
-    }
-
-    return getDataGridRows(container)
-      .map((row) => resolveDataGridRowId(row))
-      .filter((rowId) => rowId !== '');
-  };
-
-  const findRowById = (rowId) => {
-    const targetId = String(rowId || '').trim();
-    if (targetId === '') {
-      return null;
-    }
-
-    return getDataGridRows(container).find((row) => resolveDataGridRowId(row) === targetId) || null;
-  };
-
-  const resolveCurrentRowId = () => {
-    const rowIds = getRowIds();
-    const storedId = String(state.currentRowId || '').trim();
-
-    if (storedId !== '' && rowIds.includes(storedId)) {
-      return storedId;
-    }
-
-    if (rowIds.length > 0) {
-      return rowIds[0];
-    }
-
-    state.currentRowId = '';
-    return '';
-  };
-
-  const applyCurrentRow = (options = {}) => {
-    const focus = options.focus === true;
-    const scroll = options.scroll === true;
-    const currentId = resolveCurrentRowId();
-    state.currentRowId = currentId;
-
-    const virtualScroll = getVirtualScrollInstance();
-    if (scroll && currentId !== '' && virtualScroll && typeof virtualScroll.scrollToRowId === 'function') {
-      virtualScroll.scrollToRowId(currentId);
-    }
-
-    const rows = getDataGridRows(container);
-    let currentRow = null;
-
-    rows.forEach((row) => {
-      const rowId = resolveDataGridRowId(row);
-      const isCurrent = rowId !== '' && rowId === currentId;
-      row.classList.toggle('datagrid_row_current', isCurrent);
-      row.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
-      row.setAttribute('tabindex', isCurrent ? '0' : '-1');
-      if (isCurrent) {
-        currentRow = row;
-      }
-    });
-
-    if (currentId !== '') {
-      writeStoredCurrentRowId(gridId, currentId);
-    }
-    else {
-      writeStoredCurrentRowId(gridId, '');
-    }
-
-    if (currentRow instanceof HTMLElement) {
-      if (focus) {
-        currentRow.focus({ preventScroll: true });
-      }
-      else if (scroll) {
-        currentRow.scrollIntoView({ block: 'nearest' });
-      }
-    }
-
-    return currentRow;
-  };
-
-  const setCurrentRowId = (rowId, options = {}) => {
-    const nextId = String(rowId || '').trim();
-    state.currentRowId = nextId;
-    return applyCurrentRow(options);
-  };
-
-  const moveCurrentRow = (delta) => {
-    const rowIds = getRowIds();
-    if (rowIds.length === 0) {
-      return null;
-    }
-
-    const currentId = resolveCurrentRowId();
-    let index = rowIds.indexOf(currentId);
-    if (index < 0) {
-      index = 0;
-    }
-
-    const nextIndex = Math.max(0, Math.min(rowIds.length - 1, index + delta));
-    if (nextIndex === index) {
-      return findRowById(currentId);
-    }
-
-    state.currentRowId = rowIds[nextIndex];
-    return applyCurrentRow({ focus: true, scroll: true });
-  };
-
-  const handleKeydown = (event) => {
-    if (isDataGridRowNavigationBlockedTarget(event.target)) {
+  toggles.forEach((toggle) => {
+    if (!(toggle instanceof HTMLInputElement)) {
       return;
     }
 
-    const focusedRow = event.target instanceof Element
-      ? event.target.closest('.datagrid_row:not(.datagrid_row_empty)')
-      : null;
-    if (!(focusedRow instanceof HTMLElement) || !container.contains(focusedRow)) {
+    const columnKey = String(toggle.dataset.colKey || '');
+    if (columnKey === '') {
+      return;
+    }
+
+    visibility[columnKey] = stored && Object.prototype.hasOwnProperty.call(stored, columnKey)
+      ? stored[columnKey] !== false
+      : toggle.checked;
+  });
+
+  const persistAndApply = () => {
+    writeStoredColumnVisibility(gridId, visibility);
+    applyColumnVisibility(grid, visibility);
+  };
+
+  const handleToggleChange = (event) => {
+    const toggle = event.target;
+    if (!(toggle instanceof HTMLInputElement) || !grid.contains(toggle)) {
+      return;
+    }
+
+    const columnKey = String(toggle.dataset.colKey || '');
+    if (columnKey === '') {
+      return;
+    }
+
+    visibility[columnKey] = toggle.checked;
+    persistAndApply();
+
+    const label = toggle.closest('.datagrid_column_toggle')
+      ?.querySelector('.datagrid_column_toggle_label')?.textContent?.trim() || columnKey;
+    announceColumnVisibilityStatus(grid, label, toggle.checked);
+  };
+
+  const handleToggleKeydown = (event) => {
+    const toggle = event.target;
+    if (!(toggle instanceof HTMLInputElement)
+      || !toggle.classList.contains('datagrid_column_toggle_input')
+      || !grid.contains(toggle)) {
       return;
     }
 
     if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      moveCurrentRow(1);
-      return;
-    }
-
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      moveCurrentRow(-1);
-      return;
-    }
-
-    if ((event.key === 'Enter' || event.key === ' ') && typeof config.onRowEnter === 'function') {
-      const currentRow = findRowById(resolveCurrentRowId());
-      if (!(currentRow instanceof HTMLElement)) {
-        return;
+      if (focusFirstDatagridRow(grid)) {
+        event.preventDefault();
       }
-
-      event.preventDefault();
-      config.onRowEnter(resolveDataGridRowId(currentRow), currentRow);
+      return;
     }
+
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') {
+      return;
+    }
+
+    const toggles = getColumnVisibilityToggleInputs(
+      toggle.closest('.datagrid_column_strip, .datagrid_column_menu_panel') || grid,
+    );
+    const currentIndex = toggles.indexOf(toggle);
+    if (currentIndex < 0) {
+      return;
+    }
+
+    const delta = event.key === 'ArrowRight' ? 1 : -1;
+    const nextIndex = currentIndex + delta;
+    if (nextIndex < 0) {
+      if (focusDatagridSearch(grid)) {
+        event.preventDefault();
+      }
+      return;
+    }
+
+    if (nextIndex < 0 || nextIndex >= toggles.length) {
+      return;
+    }
+
+    event.preventDefault();
+    toggles[nextIndex].focus();
   };
 
-  const handleFocusIn = (event) => {
-    const target = event.target;
-    if (!(target instanceof Element) || !container.contains(target)) {
-      return;
-    }
-
-    if (isDataGridRowNavigationBlockedTarget(target)) {
-      return;
-    }
-
-    const row = target.closest('.datagrid_row:not(.datagrid_row_empty)');
-    if (!(row instanceof HTMLElement)) {
-      return;
-    }
-
-    const currentId = resolveCurrentRowId();
-    const rowId = resolveDataGridRowId(row);
-    if (rowId === '' || rowId === currentId) {
-      return;
-    }
-
-    const currentRow = findRowById(currentId);
-    if (currentRow instanceof HTMLElement) {
-      window.requestAnimationFrame(() => {
-        currentRow.focus({ preventScroll: true });
-      });
-    }
-  };
-
-  container.addEventListener('keydown', handleKeydown);
-  container.addEventListener('focusin', handleFocusIn);
-  applyCurrentRow();
+  grid.addEventListener('change', handleToggleChange);
+  grid.addEventListener('keydown', handleToggleKeydown);
+  persistAndApply();
+  initColumnVisibilityMenu(grid);
 
   const api = {
-    refresh(options = {}) {
-      return applyCurrentRow(options);
-    },
-    setCurrentRowId,
-    getCurrentRowId() {
-      return String(state.currentRowId || '').trim();
-    },
+    visibility,
     destroy() {
-      container.removeEventListener('keydown', handleKeydown);
-      container.removeEventListener('focusin', handleFocusIn);
-      delete container.__rowNavigationInstance;
+      grid.removeEventListener('change', handleToggleChange);
+      grid.removeEventListener('keydown', handleToggleKeydown);
+      delete grid.__columnVisibilityInstance;
     },
   };
 
-  container.__rowNavigationInstance = api;
+  grid.__columnVisibilityInstance = api;
 
   return api;
 }
 
-const searchHotkeyGrids = new Set();
-let searchHotkeyDocumentListenerAttached = false;
-let lastSearchHotkeyGrid = null;
-
-function isEditableKeyboardTarget(target)
+function isDatagridAbortError(error)
 {
-  if (!(target instanceof Element)) {
-    return false;
-  }
-
-  return !!target.closest(
-    'input, textarea, select, [contenteditable=""], [contenteditable="true"], [contenteditable="plaintext-only"]',
-  );
+  return !!error && typeof error === 'object' && error.name === 'AbortError';
 }
 
-function isSearchHotkeyGridVisible(grid)
+function formatDatagridReloadError(error)
 {
-  if (!(grid instanceof HTMLElement)) {
-    return false;
+  if (error instanceof Error && error.message.trim() !== '') {
+    return error.message;
   }
 
-  return grid.getClientRects().length > 0;
-}
-
-function resolveSearchHotkeyGrid(eventTarget)
-{
-  if (eventTarget instanceof Element) {
-    for (const grid of searchHotkeyGrids) {
-      if (grid.contains(eventTarget) && isSearchHotkeyGridVisible(grid)) {
-        return grid;
-      }
-    }
+  if (error && typeof error === 'object' && typeof error.message === 'string' && error.message.trim() !== '') {
+    return error.message;
   }
 
-  if (lastSearchHotkeyGrid instanceof HTMLElement
-    && searchHotkeyGrids.has(lastSearchHotkeyGrid)
-    && isSearchHotkeyGridVisible(lastSearchHotkeyGrid)) {
-    return lastSearchHotkeyGrid;
-  }
-
-  for (const grid of searchHotkeyGrids) {
-    if (isSearchHotkeyGridVisible(grid) && grid.querySelector('.datagrid_search')) {
-      return grid;
-    }
-  }
-
-  return null;
-}
-
-function handleDocumentSearchHotkey(event)
-{
-  if (event.key !== '/' || event.altKey || event.metaKey || event.ctrlKey) {
-    return;
-  }
-
-  if (isEditableKeyboardTarget(event.target)) {
-    return;
-  }
-
-  const grid = resolveSearchHotkeyGrid(event.target);
-  if (!(grid instanceof HTMLElement)) {
-    return;
-  }
-
-  const searchInput = grid.querySelector('.datagrid_search');
-  if (!(searchInput instanceof HTMLInputElement)) {
-    return;
-  }
-
-  event.preventDefault();
-  searchInput.focus({ preventScroll: true });
-}
-
-function handleSearchHotkeyGridFocusIn(event)
-{
-  const grid = event.currentTarget;
-  if (searchHotkeyGrids.has(grid)) {
-    lastSearchHotkeyGrid = grid;
-  }
-}
-
-function registerSearchHotkeyGrid(grid)
-{
-  if (!(grid instanceof HTMLElement) || searchHotkeyGrids.has(grid)) {
-    return;
-  }
-
-  searchHotkeyGrids.add(grid);
-  grid.addEventListener('focusin', handleSearchHotkeyGridFocusIn);
-
-  if (!searchHotkeyDocumentListenerAttached) {
-    document.addEventListener('keydown', handleDocumentSearchHotkey);
-    searchHotkeyDocumentListenerAttached = true;
-  }
-}
-
-function unregisterSearchHotkeyGrid(grid)
-{
-  if (!(grid instanceof HTMLElement) || !searchHotkeyGrids.has(grid)) {
-    return;
-  }
-
-  grid.removeEventListener('focusin', handleSearchHotkeyGridFocusIn);
-  searchHotkeyGrids.delete(grid);
-
-  if (lastSearchHotkeyGrid === grid) {
-    lastSearchHotkeyGrid = null;
-  }
-
-  if (searchHotkeyGrids.size === 0 && searchHotkeyDocumentListenerAttached) {
-    document.removeEventListener('keydown', handleDocumentSearchHotkey);
-    searchHotkeyDocumentListenerAttached = false;
-  }
+  return DATAGRID_T.reloadFailed;
 }
 
 export function createDataGrid(config)
@@ -1040,7 +1000,7 @@ export function createDataGrid(config)
     return grid.__datagridInstance;
   }
 
-  const body = grid.querySelector(".datagrid_body");
+  const body = grid.querySelector(":scope > .datagrid_body") || grid.querySelector(".datagrid_body");
   if (!body) {
     console.error('Datagrid body not found for grid:', config.id);
     return null;
@@ -1048,28 +1008,26 @@ export function createDataGrid(config)
 
   let abortController = null;
   let searchDebounceId = null;
-  let restoreSearchFocus = false;
-  let searchSelectionStart = null;
-  let searchSelectionEnd = null;
+  let activeReloadToken = 0;
 
-  const state = {
-    page: parseInt(grid.dataset.page || "1", 10),
-    totalPages: parseInt(grid.dataset.totalPages || "1", 10),
-    search: grid.dataset.search || "",
-    sort: grid.dataset.sort || "",
-    direction: grid.dataset.direction || "asc",
-    currentRowId: String(config.initialRowId || readStoredCurrentRowId(config.id) || '').trim(),
-  };
-
-  let rowNavigation = null;
-
-  function refreshRowNavigation(options = {})
+  function resolveStateGrid()
   {
-    rowNavigation = initRowNavigation(grid, state, config);
-    if (rowNavigation && typeof rowNavigation.refresh === 'function') {
-      rowNavigation.refresh(options);
-    }
+    const inner = body.querySelector(".datagrid[data-grid]");
+    return inner instanceof HTMLElement ? inner : grid;
   }
+
+  function readStateFromGrid(stateGrid)
+  {
+    return {
+      page: parseInt(stateGrid.dataset.page || "1", 10),
+      totalPages: parseInt(stateGrid.dataset.totalPages || "1", 10),
+      search: stateGrid.dataset.search || "",
+      sort: stateGrid.dataset.sort || "",
+      direction: stateGrid.dataset.direction || "asc",
+    };
+  }
+
+  const state = readStateFromGrid(resolveStateGrid());
 
   function syncDataset()
   {
@@ -1077,6 +1035,66 @@ export function createDataGrid(config)
     grid.dataset.search = state.search;
     grid.dataset.sort = state.sort;
     grid.dataset.direction = state.direction;
+    grid.dataset.totalPages = String(state.totalPages);
+
+    const stateGrid = resolveStateGrid();
+    if (stateGrid !== grid) {
+      stateGrid.dataset.page = String(state.page);
+      stateGrid.dataset.search = state.search;
+      stateGrid.dataset.sort = state.sort;
+      stateGrid.dataset.direction = state.direction;
+      stateGrid.dataset.totalPages = String(state.totalPages);
+    }
+  }
+
+  function syncStateFromDom()
+  {
+    const nextState = readStateFromGrid(resolveStateGrid());
+    state.page = nextState.page;
+    state.totalPages = nextState.totalPages;
+    state.search = nextState.search;
+    state.sort = nextState.sort;
+    state.direction = nextState.direction;
+
+    const searchInput = grid.querySelector(".datagrid_search");
+    if (searchInput instanceof HTMLInputElement) {
+      const inputSearch = String(searchInput.value || "").trim();
+      if (inputSearch !== state.search) {
+        state.search = inputSearch;
+      }
+    }
+  }
+
+  function syncSearchFromInput()
+  {
+    const searchInput = grid.querySelector(".datagrid_search");
+    if (searchInput instanceof HTMLInputElement) {
+      state.search = String(searchInput.value || "").trim();
+    }
+  }
+
+  function readExtraParams()
+  {
+    const params = {};
+    grid.querySelectorAll("[data-datagrid-param]").forEach((control) => {
+      if (!(control instanceof HTMLInputElement)
+        && !(control instanceof HTMLSelectElement)
+        && !(control instanceof HTMLTextAreaElement)) {
+        return;
+      }
+
+      const key = String(control.dataset.datagridParam || "").trim();
+      if (key === "") {
+        return;
+      }
+
+      const value = String(control.value || "").trim();
+      if (value !== "") {
+        params[key] = value;
+      }
+    });
+
+    return params;
   }
 
   function buildPayload()
@@ -1085,36 +1103,16 @@ export function createDataGrid(config)
       page: state.page,
       search: state.search,
       sort: state.sort,
-      direction: state.direction
+      direction: state.direction,
+      ...readExtraParams(),
     };
     return payload;
   }
 
-  function focusSearchInput()
+  function isStaleReload(reloadToken, requestSignal)
   {
-    const searchInput = grid.querySelector('.datagrid_search');
-    if (!(searchInput instanceof HTMLInputElement)) {
-      return;
-    }
-
-    searchInput.focus({ preventScroll: true });
-
-    if (searchSelectionStart !== null && searchSelectionEnd !== null) {
-      try {
-        searchInput.setSelectionRange(searchSelectionStart, searchSelectionEnd);
-      }
-      catch (_error) {
-        // Some input types do not support selection ranges.
-      }
-    }
-  }
-
-  function clearSearchDebounce()
-  {
-    if (searchDebounceId !== null) {
-      window.clearTimeout(searchDebounceId);
-      searchDebounceId = null;
-    }
+    return reloadToken !== activeReloadToken
+      || (requestSignal instanceof AbortSignal && requestSignal.aborted);
   }
 
   async function reload()
@@ -1124,138 +1122,243 @@ export function createDataGrid(config)
       abortController.abort();
     }
 
+    const reloadToken = ++activeReloadToken;
     abortController = new AbortController();
+    const requestSignal = abortController.signal;
 
-    syncDataset();
-
-    // Use GET for endpoints that are data fetch (like sites/grid)
-    let url = config.endpoint;
-    let fetchOptions = {
-      method: "GET",
-      signal: abortController.signal
-    };
-    
-    // For endpoints that use query-parameter pagination/search/sort, use GET
-    const baseEndpoint = config.endpoint.split('?')[0];
-    const isGetQueryGridEndpoint = baseEndpoint.includes('sites/grid')
-      || baseEndpoint.includes('members/grid')
-      || baseEndpoint.includes('audit/grid')
-      || baseEndpoint.includes('audit/member/grid')
-      || baseEndpoint.includes('invites/history/grid');
-    
-    if (isGetQueryGridEndpoint) {
-      const payload = buildPayload();
-      
-      // Parse existing query params from endpoint
-      const existingParams = new URLSearchParams(config.endpoint.includes('?') ? config.endpoint.split('?')[1] : '');
-      
-      // Merge with payload
-      Object.entries(payload).forEach(([key, value]) => {
-        if (value) existingParams.set(key, value);
-      });
-      
-      url = `${baseEndpoint}?${existingParams.toString()}`;
-    } else {
-      // For other endpoints, use POST with JSON body
-      fetchOptions = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildPayload()),
-        signal: abortController.signal
-      };
-    }
-
-    const response = await fetch(url, fetchOptions);
-
-    // Read response body once since it can only be consumed once
-    const text = await response.text();
-
-    if (!response.ok)
-    {
-      console.error(`DataGrid request failed: ${response.status}`, text);
-      return;
-    }
-
-    let result;
     try {
-      result = JSON.parse(text);
-    } catch (e) {
-      console.error('JSON parse error:', e);
-      console.error('Response text:', text.substring(0, 500));
-      return;
-    }
-
-    if (result.status !== "success")
-    {
-      console.warn('Invalid DataGrid response:', result);
-      console.error(`Invalid DataGrid response status: ${result.status}`, result);
-      return;
-    }
-
-    if (typeof result.html === "string")
-    {
-      PC.setHTML(body, result.html);
-      refreshGridEnhancements(grid, config);
-      refreshRowNavigation({ scroll: true });
-      syncStateFromInnerGrid(grid, state);
+      syncSearchFromInput();
       syncDataset();
-      syncSearchInput(grid, state.search);
-    }
 
-    if (result.meta)
-    {
-      if (typeof result.meta.page !== "undefined")
+      // Use GET for endpoints that are data fetch (like sites/grid)
+      let url = config.endpoint;
+      let fetchOptions = {
+        method: "GET",
+        credentials: "same-origin",
+        headers: {
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        signal: requestSignal
+      };
+
+      // For endpoints that use query-parameter pagination/search/sort, use GET
+      const baseEndpoint = config.endpoint.split('?')[0];
+      const isGetQueryGridEndpoint = baseEndpoint.includes('sites/grid')
+        || baseEndpoint.includes('/sites/grid')
+        || baseEndpoint.includes('groups/grid')
+        || baseEndpoint.includes('/groups/grid')
+        || baseEndpoint.includes('members/grid')
+        || baseEndpoint.includes('audit/grid')
+        || baseEndpoint.includes('audit/member/grid')
+        || baseEndpoint.includes('invites/history/grid');
+
+      if (isGetQueryGridEndpoint) {
+        const payload = buildPayload();
+
+        // Parse existing query params from endpoint
+        const existingParams = new URLSearchParams(config.endpoint.includes('?') ? config.endpoint.split('?')[1] : '');
+
+        // Merge with payload
+        Object.entries(payload).forEach(([key, value]) => {
+          if (value) existingParams.set(key, value);
+        });
+
+        url = `${baseEndpoint}?${existingParams.toString()}`;
+      } else {
+        // For other endpoints, use POST with JSON body
+        fetchOptions = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(buildPayload()),
+          signal: requestSignal
+        };
+      }
+
+      const response = await fetch(url, fetchOptions);
+
+      if (isStaleReload(reloadToken, requestSignal)) {
+        return;
+      }
+
+      // Read response body once since it can only be consumed once
+      const text = await response.text();
+
+      if (isStaleReload(reloadToken, requestSignal)) {
+        return;
+      }
+
+      if (!response.ok)
       {
-        state.page = parseInt(result.meta.page, 10);
+        console.error(`DataGrid request failed: ${response.status}`, text);
+        throw new Error(`DataGrid request failed (${response.status}).`);
       }
 
-      if (typeof result.meta.totalPages !== "undefined")
+      let result;
+      try {
+        result = JSON.parse(text);
+      } catch (e) {
+        console.error('JSON parse error:', e);
+        console.error('Response text:', text.substring(0, 500));
+        throw new Error(DATAGRID_T.invalidResponse);
+      }
+
+      if (result.status !== "success")
       {
-        state.totalPages = parseInt(result.meta.totalPages, 10);
+        console.warn('Invalid DataGrid response:', result);
+        console.error(`Invalid DataGrid response status: ${result.status}`, result);
+        throw new Error(typeof result.message === 'string' && result.message.trim() !== ''
+          ? result.message
+          : DATAGRID_T.invalidResponse);
       }
+
+      if (isStaleReload(reloadToken, requestSignal)) {
+        return;
+      }
+
+      const searchFocusPreserve = captureSearchInputFocusState();
+
+      if (typeof result.html === "string")
+      {
+        document.dispatchEvent(new CustomEvent('paycal:datagrid-before-reload', {
+          detail: {
+            gridId: config.id,
+            state: { ...state },
+          }
+        }));
+
+        PC.setHTML(body, result.html);
+        initColumnVisibility(grid);
+        initColumnVisibilityMenu(resolveColumnVisibilityGrid(grid) || grid);
+        syncStateFromDom();
+      }
+
+      if (result.meta)
+      {
+        if (typeof result.meta.page !== "undefined")
+        {
+          state.page = parseInt(result.meta.page, 10);
+        }
+
+        if (typeof result.meta.totalPages !== "undefined")
+        {
+          state.totalPages = parseInt(result.meta.totalPages, 10);
+        }
+      }
+
+      syncDataset();
+
+      const rowCount = grid.querySelectorAll('.datagrid_row').length;
+      document.dispatchEvent(new CustomEvent('paycal:datagrid-reloaded', {
+        detail: {
+          gridId: config.id,
+          state: { ...state },
+          rowCount
+        }
+      }));
+
+      restoreSearchInputFocus(searchFocusPreserve);
     }
-
-    syncDataset();
-
-    const innerGrid = resolveInnerDataGrid(grid);
-    const rowCount = innerGrid
-      ? innerGrid.querySelectorAll('.datagrid_row:not(.datagrid_row_empty)').length
-      : grid.querySelectorAll('.datagrid_row:not(.datagrid_row_empty)').length;
-    document.dispatchEvent(new CustomEvent('paycal:datagrid-reloaded', {
-      detail: {
-        gridId: config.id,
-        state: { ...state },
-        rowCount,
-        currentRowId: String(state.currentRowId || '').trim(),
+    catch (error) {
+      if (isDatagridAbortError(error) || isStaleReload(reloadToken, requestSignal)) {
+        return;
       }
-    }));
 
-    syncSearchInput(grid, state.search);
-
-    if (restoreSearchFocus) {
-      restoreSearchFocus = false;
-      focusSearchInput();
+      throw error;
     }
   }
 
-  function handleSearchInput(event)
+  function handlePagination(e)
   {
-    const searchInput = event.target.closest('.datagrid_search');
-    if (!(searchInput instanceof HTMLInputElement) || !grid.contains(searchInput)) {
+    const button = e.target.closest(".datagrid_pagination_btn");
+    if (!(button instanceof HTMLButtonElement) || button.disabled || !grid.contains(button)) {
       return;
     }
 
-    const search = String(searchInput.value || '');
-    searchSelectionStart = searchInput.selectionStart;
-    searchSelectionEnd = searchInput.selectionEnd;
+    // Prefer server-rendered pager state (data-page / disabled buttons) over in-memory
+    // defaults that may be stale when init ran against a loading skeleton.
+    syncStateFromDom();
 
-    clearSearchDebounce();
-    searchDebounceId = window.setTimeout(() => {
-      searchDebounceId = null;
-      restoreSearchFocus = true;
-      state.search = search;
-      state.page = 1;
+    const direction = String(button.dataset.direction || "");
+    if (direction === "prev") {
+      state.page = Math.max(1, state.page - 1);
       reload();
+      return;
+    }
+
+    if (direction === "next") {
+      state.page += 1;
+      reload();
+    }
+  }
+
+  function captureSearchInputFocusState()
+  {
+    const activeSearch = document.activeElement;
+    if (!(activeSearch instanceof HTMLInputElement) || !activeSearch.classList.contains("datagrid_search")) {
+      return null;
+    }
+
+    if (!grid.contains(activeSearch)) {
+      return null;
+    }
+
+    return {
+      value: activeSearch.value,
+      selectionStart: activeSearch.selectionStart,
+      selectionEnd: activeSearch.selectionEnd,
+    };
+  }
+
+  function restoreSearchInputFocus(preserve)
+  {
+    if (!preserve) {
+      return;
+    }
+
+    const newInput = grid.querySelector(".datagrid_search");
+    if (!(newInput instanceof HTMLInputElement)) {
+      return;
+    }
+
+    if (typeof preserve.value === "string" && newInput.value !== preserve.value) {
+      newInput.value = preserve.value;
+    }
+
+    window.requestAnimationFrame(() => {
+      newInput.focus({ preventScroll: true });
+
+      if (typeof preserve.selectionStart === "number" && typeof preserve.selectionEnd === "number") {
+        try {
+          const len = newInput.value.length;
+          newInput.setSelectionRange(
+            Math.min(preserve.selectionStart, len),
+            Math.min(preserve.selectionEnd, len),
+          );
+        } catch (_err) {
+          // setSelectionRange is unsupported on some input types.
+        }
+      }
+    });
+  }
+
+  function handleSearchInput(e)
+  {
+    const input = e.target.closest(".datagrid_search");
+    if (!(input instanceof HTMLInputElement) || !grid.contains(input)) {
+      return;
+    }
+
+    if (searchDebounceId !== null) {
+      window.clearTimeout(searchDebounceId);
+    }
+
+    searchDebounceId = window.setTimeout(() => {
+      state.search = String(input.value || "").trim();
+      state.page = 1;
+      reload().catch((error) => {
+        console.error(`DataGrid reload failed (${config.id}): ${formatDatagridReloadError(error)}`);
+      });
     }, 250);
   }
 
@@ -1281,32 +1384,6 @@ export function createDataGrid(config)
     reload();
   }
 
-  function handlePaginationClick(e)
-  {
-    const button = e.target.closest('.datagrid_pagination_btn');
-    if (!(button instanceof HTMLButtonElement) || !grid.contains(button) || button.disabled) {
-      return;
-    }
-
-    if (button.dataset.direction === 'prev') {
-      state.page = Math.max(1, state.page - 1);
-      reload();
-      return;
-    }
-
-    if (button.dataset.direction === 'next') {
-      state.page = Math.min(state.totalPages || 1, state.page + 1);
-      reload();
-      return;
-    }
-
-    const pageNumber = parseInt(button.dataset.page || '', 10);
-    if (Number.isFinite(pageNumber) && pageNumber >= 1 && pageNumber <= (state.totalPages || 1)) {
-      state.page = pageNumber;
-      reload();
-    }
-  }
-
   function handleRowClick(e)
   {
     if (e.target.closest(".datagrid_action")) return;
@@ -1314,32 +1391,32 @@ export function createDataGrid(config)
     const row = e.target.closest(".datagrid_row");
     if (!row || !grid.contains(row)) return;
 
-    const rowId = resolveDataGridRowId(row);
-    if (rowId !== '' && rowNavigation && typeof rowNavigation.setCurrentRowId === 'function') {
-      rowNavigation.setCurrentRowId(rowId);
-    }
-
     if (typeof config.onRowClick === "function")
     {
       config.onRowClick(row.dataset.id, row);
     }
   }
 
+  const workspaceManagedSearch = document.getElementById("business-workspace") instanceof HTMLElement;
+
   function bindEvents()
   {
+    grid.addEventListener("click", handlePagination);
     grid.addEventListener("click", handleSort);
-    grid.addEventListener("click", handlePaginationClick);
     grid.addEventListener("click", handleRowClick);
-    grid.addEventListener("input", handleSearchInput);
+    if (!workspaceManagedSearch) {
+      grid.addEventListener("input", handleSearchInput);
+    }
   }
 
   function unbindEvents()
   {
+    grid.removeEventListener("click", handlePagination);
     grid.removeEventListener("click", handleSort);
-    grid.removeEventListener("click", handlePaginationClick);
     grid.removeEventListener("click", handleRowClick);
-    grid.removeEventListener("input", handleSearchInput);
-    clearSearchDebounce();
+    if (!workspaceManagedSearch) {
+      grid.removeEventListener("input", handleSearchInput);
+    }
   }
 
   function destroy()
@@ -1349,35 +1426,21 @@ export function createDataGrid(config)
       abortController.abort();
     }
 
-    restoreSearchFocus = false;
-    unbindEvents();
-    if (rowNavigation && typeof rowNavigation.destroy === 'function') {
-      rowNavigation.destroy();
-      rowNavigation = null;
+    if (searchDebounceId !== null) {
+      window.clearTimeout(searchDebounceId);
+      searchDebounceId = null;
     }
-    unregisterSearchHotkeyGrid(grid);
-    const innerGrid = resolveInnerDataGrid(grid) || resolveDataGridRoot(grid);
-    if (innerGrid instanceof HTMLElement) {
-      if (innerGrid.__virtualScrollInstance?.destroy) {
-        innerGrid.__virtualScrollInstance.destroy();
-      }
-      if (innerGrid.__columnResizeInstance?.destroy) {
-        innerGrid.__columnResizeInstance.destroy();
-      }
-      if (innerGrid.__fullscreenInstance?.destroy) {
-        innerGrid.__fullscreenInstance.destroy();
-      }
+
+    unbindEvents();
+    const innerGrid = resolveColumnVisibilityGrid(grid);
+    if (innerGrid instanceof HTMLElement && innerGrid.__columnVisibilityInstance?.destroy) {
+      innerGrid.__columnVisibilityInstance.destroy();
     }
     delete grid.__datagridInstance;
   }
 
   bindEvents();
-  registerSearchHotkeyGrid(grid);
-  initStateFromGrid(grid, state);
-  syncDataset();
-  syncSearchInput(grid, state.search);
-  refreshGridEnhancements(grid, config);
-  refreshRowNavigation();
+  initColumnVisibility(grid);
 
   const api = {
     reload,
@@ -1386,26 +1449,13 @@ export function createDataGrid(config)
     {
       return { ...state };
     },
-    getCurrentRowId()
+    setSearch(value)
     {
-      return String(state.currentRowId || '').trim();
-    },
-    setCurrentRowId(rowId, options = {})
-    {
-      if (rowNavigation && typeof rowNavigation.setCurrentRowId === 'function') {
-        return rowNavigation.setCurrentRowId(rowId, options);
-      }
-
-      state.currentRowId = String(rowId || '').trim();
-      writeStoredCurrentRowId(config.id, state.currentRowId);
-      return null;
-    },
-    setSearch(value, options = {})
-    {
-      state.search = String(value);
+      state.search = String(value || "").trim();
       state.page = 1;
-      restoreSearchFocus = options.restoreFocus === true;
-      reload();
+      reload().catch((error) => {
+        console.error(`DataGrid reload failed (${config.id}): ${formatDatagridReloadError(error)}`);
+      });
     },
     setPage(page)
     {

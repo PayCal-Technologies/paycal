@@ -74,7 +74,7 @@
       <h2>Für wen es ist</h2>
       <ul class="doc-fact-list">
         <li><strong>Einzelpersonen:</strong> Arbeit und Gehaltshistorie kostenlos erfassen</li>
-        <li><strong>Teams:</strong> Business für gemeinsamen Zugriff und Koordination nutzen</li>
+        <li><strong>Groups:</strong> Business für gemeinsamen Zugriff und Koordination nutzen</li>
       </ul>
 
       <h2>Sicherheit und Datenschutz</h2>

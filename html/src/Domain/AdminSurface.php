@@ -126,6 +126,27 @@ final class AdminSurface
       ];
     }
 
+    $links[] = [
+      'href' => '/admin/feedback/',
+      'label_key' => 'ADMIN_FEEDBACK',
+      'icon' => 'admin',
+      'match_prefix' => '/admin/feedback',
+    ];
+
+    $links[] = [
+      'href' => '/admin/release-ledger/',
+      'label_key' => 'ADMIN_RELEASE_LEDGER',
+      'icon' => 'admin',
+      'match_prefix' => '/admin/release-ledger',
+    ];
+
+    $links[] = [
+      'href' => '/admin/goldmaster/',
+      'label_key' => 'GoldMaster',
+      'icon' => 'admin',
+      'match_prefix' => '/admin/goldmaster',
+    ];
+
     return $links;
   }
 
@@ -159,6 +180,15 @@ final class AdminSurface
     }
 
     $pagePaths = self::pagePaths();
+    if ($normalizedRequest === '/admin/feedback' || str_starts_with($normalizedRequest, '/admin/feedback/')) {
+      return true;
+    }
+    if ($normalizedRequest === '/admin/release-ledger' || str_starts_with($normalizedRequest, '/admin/release-ledger/')) {
+      return true;
+    }
+    if ($normalizedRequest === '/admin/goldmaster' || str_starts_with($normalizedRequest, '/admin/goldmaster/')) {
+      return true;
+    }
     if ($pagePaths !== []) {
       foreach ($pagePaths as $pagePath) {
         $item = [
@@ -228,4 +258,3 @@ final class AdminSurface
   }
 
 }
-

@@ -50,7 +50,7 @@ final class BusinessTrustPolicy
   }
 
   /**
-   * TODO: Document resolveTrustLevel.
+   * Resolve trust level.
    */
   public static function resolveTrustLevel(string $userUUID): string
   {

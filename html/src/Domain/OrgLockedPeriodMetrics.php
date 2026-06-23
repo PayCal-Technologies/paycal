@@ -5,7 +5,7 @@ namespace PayCal\Domain;
 use PayCal\Domain\Constants\Keys;
 
 /**
- * Immutable org locked-period metrics (Redis hash org_locked_period_metrics:{org}:{year}).
+ * Immutable org locked-period metrics (Redis hash business_locked_period_metrics:{org}:{year}).
  */
 final class OrgLockedPeriodMetrics
 {
@@ -26,7 +26,7 @@ final class OrgLockedPeriodMetrics
       return null;
     }
 
-    $raw = Database::hget(Keys::orgLockedPeriodMetrics($businessId, $year), $memberUuid);
+    $raw = Database::hget(Keys::businessLockedPeriodMetrics($businessId, $year), $memberUuid);
     if ($raw === '') {
       return null;
     }
@@ -50,7 +50,7 @@ final class OrgLockedPeriodMetrics
    *   ot_hours: float,
    *   trailing_baseline: float
    * } $summary
-   * @param array<string, string> $relationship
+   * @param array<string, string> $connection
    * @param array<string, array{
    *   site_owner_uuid: string,
    *   site_id: string,
@@ -62,7 +62,7 @@ final class OrgLockedPeriodMetrics
     string $memberUuid,
     int $year,
     array $summary,
-    array $relationship = [],
+    array $connection = [],
     array $orgSiteIndex = [],
   ): void {
     $businessId = trim($businessId);
@@ -71,7 +71,7 @@ final class OrgLockedPeriodMetrics
       return;
     }
 
-    if (!BusinessWorkVisibilityPolicy::canAggregateForOrg($businessId, $memberUuid, $relationship, $orgSiteIndex)) {
+    if (!BusinessWorkVisibilityPolicy::canAggregateForOrg($businessId, $memberUuid, $connection, $orgSiteIndex)) {
       return;
     }
 
@@ -80,11 +80,11 @@ final class OrgLockedPeriodMetrics
       return;
     }
 
-    Database::hset(Keys::orgLockedPeriodMetrics($businessId, $year), [$memberUuid => $encoded]);
+    Database::hset(Keys::businessLockedPeriodMetrics($businessId, $year), [$memberUuid => $encoded]);
   }
 
   /**
-   * TODO: Document has.
+   * Has.
    */
   public static function has(string $businessId, string $memberUuid, int $year): bool
   {

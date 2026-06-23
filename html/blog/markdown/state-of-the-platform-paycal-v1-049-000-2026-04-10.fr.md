@@ -67,9 +67,9 @@ Orphaned Work Recovery détecte les enregistrements non liés après suppression
 
 ## Premium : collaboration sans compromis
 
-Les fonctionnalités premium pour organisations apportent un contrôle opérationnel renforcé sans sacrifier la confidentialité individuelle.
+Les fonctionnalités premium pour les entreprises apportent un contrôle opérationnel renforcé sans sacrifier la confidentialité individuelle.
 
-◆ Organization Hub pour les flux employeurs et équipes
+◆ Business Hub pour les flux employeurs et équipes
 ◆ Modèle de portée des rôles affiné avec autorisations granulaires
 ◆ Vues calendrier déléguées pour la supervision managériale
 ◆ DEK Auto-Bootstrap pour une préparation de chiffrement immédiate à l'ouverture de page

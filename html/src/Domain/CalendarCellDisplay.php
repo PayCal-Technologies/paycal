@@ -168,6 +168,9 @@ final class CalendarCellDisplay
     }
   }
 
+  /**
+   * Is date in same period.
+   */
   private static function isDateInSamePeriod(User $user, string $dateYmd, string $otherYmd): bool
   {
     if ($dateYmd === $otherYmd) {

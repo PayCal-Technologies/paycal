@@ -49,7 +49,7 @@ final class ForecastWindow
   public readonly \DateTimeImmutable $end;
 
   /**
-   * TODO: Document __construct.
+   * Construct.
    */
   private function __construct(
     ForecastWindowType $type,

@@ -2,10 +2,10 @@
 
 return [
   'id' => 'admin-surface',
-  'name' => 'Admin Surface (Public Override)',
-  'version' => '1.0.0-public',
-  'description' => 'Enables the Core admin surface for public deployments.',
-  'author' => 'PayCal Technologies',
+  'name' => 'Admin Surface (Private Override)',
+  'version' => '1.0.0-private',
+  'description' => 'Enables the Core admin surface for private deployments.',
+  'author' => 'PayCal Private',
   'license' => 'Proprietary',
   'core_compat' => '>=1.0.0',
   'enabled' => true,
@@ -13,6 +13,7 @@ return [
     'admin.surface.enabled' => true,
     'admin.page.paths' => [
       '/admin/',
+      '/admin/soc2/',
       '/admin/metrics/',
       '/admin/language-editor/',
       '/admin/stripe/',
@@ -23,6 +24,7 @@ return [
     ],
     'admin.nav.links' => [
       ['href' => '/admin/', 'label_key' => 'ADMIN', 'icon' => 'admin', 'match_prefix' => '/admin'],
+      ['href' => '/admin/soc2/', 'label_key' => 'ADMIN', 'icon' => 'admin', 'match_prefix' => '/admin/soc2'],
       ['href' => '/admin/metrics/', 'label_key' => 'METRICS', 'icon' => 'metrics', 'match_prefix' => '/admin/metrics'],
       ['href' => '/admin/language-editor/', 'label_key' => 'ADMIN_DASHBOARD_LANGUAGES', 'icon' => 'settings', 'match_prefix' => '/admin/language-editor'],
       ['href' => '/admin/stripe/', 'label_key' => 'STRIPE', 'icon' => 'metrics', 'match_prefix' => '/admin/stripe'],

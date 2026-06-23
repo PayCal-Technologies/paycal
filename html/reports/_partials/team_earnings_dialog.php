@@ -3,7 +3,7 @@
 namespace PayCal\Domain;
 
 ?>
-<!-- Team member earnings breakdown dialog -->
+<!-- Group member earnings breakdown dialog -->
 <dialog id="earnings_team_member_dialog"
         class="dialog earnings_team_member_dialog"
         data-dialog-close-on-backdrop="true"

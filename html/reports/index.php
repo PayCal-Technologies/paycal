@@ -21,7 +21,8 @@ use PayCal\Observability\Lens;
 
 require_once '../config.php';
 
-if (InputSanitizer::getString('view') === 'team') {
+$legacyReportsView = InputSanitizer::getString('view');
+if ($legacyReportsView === 'team' || $legacyReportsView === 'group') {
   $redirectParams = [];
   $org = InputSanitizer::getString('org');
   if ($org !== '') {
@@ -58,6 +59,7 @@ $pageTitle = $i18n['REPORTS'] . ' - [' . $i18n['SITE_NAME'] . ']';
 $pageLabel = $i18n['REPORTS'];
 $pageLanguage = (string) (User::current()->language ?? 'en');
 $earningsMode = InputSanitizer::getString('earnings_mode') === 'eager' ? 'eager' : 'lazy';
+$earningsRenderMode = $earningsMode === 'eager' ? 'eager' : 'shell';
 $isLensMode = InputSanitizer::getString('lens') === '1';
 
 $user = User::current();
@@ -117,7 +119,7 @@ require_once Environment::appHome().'html/header.php';
   <h1 class="visually_hidden"><?php echo htmlspecialchars($i18n['REPORTS'], ENT_QUOTES, 'UTF-8'); ?></h1>
   <div class="status centered" role="status" aria-live="polite"><?php echo $message; ?></div>
 
-  <?php echo Earnings::getInstance()->renderSections($earningsMode); ?>
+  <?php echo Earnings::getInstance()->renderSections($earningsRenderMode); ?>
 
 </section><!-- page wrapper -->
 <?php
@@ -125,5 +127,6 @@ require_once Environment::appHome().'html/header.php';
 echo PHP_EOL."<link rel=\"stylesheet\" href=\"" . Render::cssURL('earnings') . "\">".PHP_EOL;
 echo PHP_EOL."<link rel=\"stylesheet\" href=\"" . Render::cssURL('datagrid') . "\">".PHP_EOL;
 echo PHP_EOL.Render::jsScript('earnings');
+echo PHP_EOL.Render::jsScript('reports-print');
 
 require_once Environment::appHome().'html/footer.php';

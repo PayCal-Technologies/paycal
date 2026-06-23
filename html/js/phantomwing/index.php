@@ -151,7 +151,7 @@ const _pw_telemetry_delivery = {
   disabledUntil: 0,
 };
 
-const _pw_sensitive_key_pattern = /(user|org|organization|site)[_-]?(uuid|id)$/i;
+const _pw_sensitive_key_pattern = /(user|org|business|site)[_-]?(uuid|id)$/i;
 const _pw_uuid_pattern = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
 
 // Store original console before we patch it

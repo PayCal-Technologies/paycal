@@ -79,6 +79,24 @@ final class WorkEntryTest extends TestCase
     $this->assertSame('2', (string) ($normalized['overtime_hours'] ?? ''));
   }
 
+  #[Test]
+  public function calculateEarningsSnapshotIncludesWageGrossAndPayComponents(): void
+  {
+    $snapshot = WorkEntry::calculateEarningsSnapshot(
+      regularHours: 8.0,
+      overtimeHours: 2.0,
+      travelHours: 1.0,
+      livingOutAllowance: 50.0,
+      wage: 25.0
+    );
+
+    $this->assertSame(200.0, $snapshot['regular_amount']);
+    $this->assertSame(75.0, $snapshot['overtime_amount']);
+    $this->assertSame(25.0, $snapshot['travel_amount']);
+    $this->assertSame(50.0, $snapshot['living_out_amount']);
+    $this->assertSame(350.0, $snapshot['gross']);
+  }
+
   // =========================================================================
   // Object Instantiation and Properties Tests
   // =========================================================================

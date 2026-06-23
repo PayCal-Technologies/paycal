@@ -129,6 +129,11 @@ final class SettingsPageTest extends TestCase
   {
     $validValues = [
       'paycal',
+      'paycal_blue',
+      'paycal_black',
+      'paycal_red',
+      'paycal_green',
+      'paycal_white',
       'macos',
       'macos9',
       'system8',
@@ -144,9 +149,23 @@ final class SettingsPageTest extends TestCase
       'win98',
       'winxp',
       'win10',
+      'win11',
       'retro',
       'garden',
       'bluejeans',
+      'arcade',
+      'c64',
+      'amiga',
+      'workbench',
+      'nextstep',
+      'openstep',
+      'solaris',
+      'terminal',
+      'irix',
+      'os2_warp',
+      'palm_os',
+      'cyberdeck',
+      'solarpunk',
       'blade_runner',
       'space_odyssey',
       'tron',
@@ -157,10 +176,11 @@ final class SettingsPageTest extends TestCase
       'akira',
       'star_trek',
       'star_wars',
+      'vaporwave',
     ];
     $fieldName = 'theme';
     
-    $this->assertCount(29, $validValues, "theme should have exactly 29 options");
+    $this->assertCount(49, $validValues, "theme should have exactly 49 accepted values including legacy paycal");
     $this->assertContains('paycal', $validValues);
     $this->assertContains('macos', $validValues);
     $this->assertContains('macos9', $validValues);
@@ -173,6 +193,10 @@ final class SettingsPageTest extends TestCase
     $this->assertContains('matrix', $validValues);
     $this->assertContains('win95', $validValues);
     $this->assertContains('winxp', $validValues);
+    $this->assertContains('win11', $validValues);
+    $this->assertContains('c64', $validValues);
+    $this->assertContains('solarpunk', $validValues);
+    $this->assertContains('vaporwave', $validValues);
   }
 
   #[Test]

@@ -3,6 +3,7 @@ const RuntimeIntegrity = (() => {
   let timer = null;
   let observer = null;
   let currentState = 'SAFE';
+  let auditDepth = 0;
 
   const BASELINE = {
     fetchRef: null,
@@ -23,6 +24,7 @@ const RuntimeIntegrity = (() => {
 
   function buildRiskResult() {
     const drifts = [];
+    const auditInProgress = isAuditInProgress();
 
     if (window.fetch !== BASELINE.fetchRef) {
       drifts.push('fetch_monkeypatch_detected');
@@ -33,11 +35,11 @@ const RuntimeIntegrity = (() => {
     }
 
     const iframes = document.querySelectorAll('iframe');
-    if (iframes.length > BASELINE.iframeCount) {
+    if (!auditInProgress && iframes.length > BASELINE.iframeCount) {
       drifts.push('unexpected_iframe_growth');
     }
 
-    const overlay = detectSuspiciousOverlay();
+    const overlay = auditInProgress ? '' : detectSuspiciousOverlay();
     if (overlay) {
       drifts.push(overlay);
     }
@@ -49,6 +51,7 @@ const RuntimeIntegrity = (() => {
       drifts,
       state: scoreToState(riskScore),
       iframeCount: iframes.length,
+      auditInProgress,
       timestamp: new Date().toISOString(),
     };
   }
@@ -135,6 +138,14 @@ const RuntimeIntegrity = (() => {
     }
 
     observer = new MutationObserver(() => {
+      if (isAuditInProgress()) {
+        safeReport(report, 'runtime_integrity_audit_window', {
+          state: currentState,
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
       const result = buildRiskResult();
       applyState(result.state, result.riskScore, report, result.drifts);
       if (result.drifts.length > 0) {
@@ -190,7 +201,38 @@ const RuntimeIntegrity = (() => {
     started = false;
   }
 
+  function isAuditInProgress() {
+    return auditDepth > 0 || window.__PAYCAL_RUNTIME_AUDIT_IN_PROGRESS === true;
+  }
+
+  function beginAudit() {
+    auditDepth += 1;
+    window.__PAYCAL_RUNTIME_AUDIT_IN_PROGRESS = true;
+
+    return () => {
+      endAudit();
+    };
+  }
+
+  function endAudit() {
+    auditDepth = Math.max(0, auditDepth - 1);
+    if (auditDepth === 0) {
+      window.__PAYCAL_RUNTIME_AUDIT_IN_PROGRESS = false;
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    window.PayCalRuntimeIntegrity = {
+      beginAudit,
+      endAudit,
+      isAuditInProgress,
+    };
+  }
+
   return {
+    beginAudit,
+    endAudit,
+    isAuditInProgress,
     start,
     stop,
   };

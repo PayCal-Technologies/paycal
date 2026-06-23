@@ -14,7 +14,7 @@ enum Subscription: string
   case BUSINESS = 'business';
 
   /**
-   * TODO: Document priceInCents.
+   * Price in cents.
    */
   public function priceInCents(): int
   {
@@ -26,7 +26,7 @@ enum Subscription: string
   }
 
   /**
-   * TODO: Document annualPriceInCents.
+   * Annual price in cents.
    */
   public function annualPriceInCents(): int
   {
@@ -38,7 +38,7 @@ enum Subscription: string
   }
 
   /**
-   * TODO: Document maxMembersPerOrg.
+   * Max members per org.
    */
   public function maxMembersPerOrg(): int
   {
@@ -50,7 +50,7 @@ enum Subscription: string
   }
 
   /**
-   * TODO: Document canCreateSharedOrgs.
+   * Can create shared orgs.
    */
   public function canCreateSharedOrgs(): bool
   {
@@ -58,7 +58,7 @@ enum Subscription: string
   }
 
   /**
-   * TODO: Document includesPremiumReporting.
+   * Includes premium reporting.
    */
   public function includesPremiumReporting(): bool
   {
@@ -66,7 +66,7 @@ enum Subscription: string
   }
 
   /**
-   * TODO: Document includesBusinessFeatures.
+   * Includes business features.
    */
   public function includesBusinessFeatures(): bool
   {
@@ -74,7 +74,7 @@ enum Subscription: string
   }
 
   /**
-   * TODO: Document displayLabel.
+   * Display label.
    */
   public function displayLabel(): string
   {

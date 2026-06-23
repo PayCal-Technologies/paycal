@@ -207,7 +207,7 @@ final class BillingController
     }
 
     $service = new StripeBillingService();
-    $result = $service->createPortalSession($userUUID, $returnURL);
+    $result = $service->createPortalSession($userUUID, $returnURL, User::current()->email);
 
     if ($result['success']) {
       Response::success('[Billing] Billing portal session created.', $result['data'], HttpStatus::HTTP_CREATED);
@@ -315,6 +315,165 @@ final class BillingController
     }
 
     Response::error('[Billing] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+  }
+
+  /**
+   * POST billing/change-plan
+   *
+   * Switches the current paid subscription to another PayCal paid plan. Stripe
+   * plan changes replace the existing subscription item's price.
+   */
+  #[Route('billing/change-plan', ['POST'])]
+  /**
+   * Handles changeSubscriptionPlan operation.
+   */
+  public function changeSubscriptionPlan(): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    if (!$this->validateBillingCsrf()) {
+      return;
+    }
+
+    $userUUID = User::currentUUID();
+    if ($userUUID === '') {
+      Response::error('[Billing] Missing authenticated user context.', [], HttpStatus::HTTP_UNAUTHORIZED);
+      return;
+    }
+
+    $plan = strtolower(trim($this->requestString('plan', 'premium')));
+    if (!in_array($plan, ['premium', 'business'], true)) {
+      Response::error('[Billing] Unsupported subscription plan.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    if (!BillingProvider::isStripe()) {
+      if ($plan === 'business') {
+        SubscriptionRepository::upgradeToBusiness($userUUID);
+        $tier = Subscription::BUSINESS;
+      } else {
+        SubscriptionRepository::upgradeToPremium($userUUID);
+        $tier = Subscription::PREMIUM;
+      }
+
+      Response::success('[Billing] Subscription plan changed.', [
+        'billing_provider' => BillingProvider::current(),
+        'tier' => $tier->value,
+        'plan' => $plan,
+      ], HttpStatus::HTTP_OK);
+      return;
+    }
+
+    $prorationBehavior = strtolower(trim($this->requestString('proration_behavior', 'create_prorations')));
+    $service = new StripeBillingService();
+    $result = $service->changeSubscriptionPlan($userUUID, $plan, $prorationBehavior);
+
+    if ($result['success']) {
+      Response::success('[Billing] Subscription plan changed.', $result['data'], HttpStatus::HTTP_OK);
+      return;
+    }
+
+    Response::error('[Billing] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+  }
+
+  /**
+   * POST billing/plan-change-portal-session
+   *
+   * Creates a Stripe-hosted portal flow for a customer-confirmed plan change.
+   */
+  #[Route('billing/plan-change-portal-session', ['POST'])]
+  #[BillingProviderMode([BillingProvider::STRIPE])]
+  /**
+   * Handles createPlanChangePortalSession operation.
+   */
+  public function createPlanChangePortalSession(): void
+  {
+    Authentication::abortIfUnauthenticated();
+
+    if (!$this->billingProviderAllows(__FUNCTION__)) {
+      Response::error('[Billing] Plan changes are unavailable in public toggle mode.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    if (!$this->validateBillingCsrf()) {
+      return;
+    }
+
+    $userUUID = User::currentUUID();
+    if ($userUUID === '') {
+      Response::error('[Billing] Missing authenticated user context.', [], HttpStatus::HTTP_UNAUTHORIZED);
+      return;
+    }
+
+    $plan = strtolower(trim($this->requestString('plan', 'business')));
+    if (!in_array($plan, ['premium', 'business'], true)) {
+      Response::error('[Billing] Unsupported subscription plan.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    $returnRaw = $this->requestString('return_url', '/settings/subscription/?billing=plan-change');
+    $returnTarget = $this->normalizeAppURL($returnRaw, '/settings/subscription/?billing=plan-change');
+    $sessionHash = Authentication::getSessionHashFromCookie() ?? '';
+    $returnPath = '/api/v1/billing/plan-change-return?next=' . rawurlencode($returnTarget);
+    if ($sessionHash !== '') {
+      $returnPath .= '&nxt_sig=' . hash_hmac('sha256', $returnTarget, $sessionHash);
+    }
+    $returnURL = $this->normalizeAppURL($returnPath, '/api/v1/billing/plan-change-return');
+
+    $service = new StripeBillingService();
+    $result = $service->createPlanChangePortalSession($userUUID, $plan, $returnURL, User::current()->email);
+
+    if ($result['success']) {
+      Response::success('[Billing] Plan change portal session created.', $result['data'], HttpStatus::HTTP_CREATED);
+      return;
+    }
+
+    Response::error('[Billing] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
+  }
+
+  /**
+   * GET billing/plan-change-return
+   *
+   * Stripe Customer Portal return target after a hosted plan-change flow.
+   * Reconciles Stripe first so /settings/subscription renders the current tier.
+   */
+  #[Route('billing/plan-change-return', ['GET'])]
+  #[BillingProviderMode([BillingProvider::STRIPE])]
+  /**
+   * Handles handlePlanChangeReturn operation.
+   */
+  public function handlePlanChangeReturn(): void
+  {
+    Authentication::redirectHomeIfUnauthenticated();
+
+    $nextRaw = $_GET['next'] ?? '';
+    $sigRaw = $_GET['nxt_sig'] ?? '';
+    /** @psalm-taint-escape header */
+    $nextUrl = $this->verifiedRedirectTarget($nextRaw, $sigRaw);
+
+    if (!$this->billingProviderAllows(__FUNCTION__)) {
+      header('Location: ' . $this->appendQueryParam($nextUrl, 'billing', 'delayed'), true, 302);
+      exit;
+    }
+
+    $userUUID = User::currentUUID();
+    if ($userUUID === '') {
+      header('Location: ' . $this->appendQueryParam($nextUrl, 'billing', 'delayed'), true, 302);
+      exit;
+    }
+
+    $result = (new StripeBillingService())->reconcileSubscriptionState($userUUID);
+    $subscription = SubscriptionRepository::get($userUUID);
+    $isActive = $result['success'] && $subscription['status']->grantsAccess();
+    $billingResult = 'delayed';
+    if ($isActive && $subscription['tier'] === Subscription::BUSINESS) {
+      $billingResult = 'business-upgrade';
+    } elseif ($isActive && $subscription['tier'] === Subscription::PREMIUM) {
+      $billingResult = 'success';
+    }
+
+    header('Location: ' . $this->appendQueryParam($nextUrl, 'billing', $billingResult), true, 302);
+    exit;
   }
 
   /**
@@ -691,8 +850,20 @@ final class BillingController
       $url = substr($url, 0, $hashPos);
     }
 
-    $separator = str_contains($url, '?') ? '&' : '?';
-    return $url . $separator . rawurlencode($key) . '=' . rawurlencode($value) . $fragment;
+    $parts = parse_url($url);
+    $query = [];
+    if (is_array($parts) && is_string($parts['query'] ?? null)) {
+      parse_str((string) $parts['query'], $query);
+    }
+
+    $query[$key] = $value;
+    $queryString = http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+    $baseUrl = preg_replace('/\?.*$/', '', $url);
+    if (!is_string($baseUrl) || $baseUrl === '') {
+      return $url;
+    }
+
+    return $baseUrl . ($queryString !== '' ? '?' . $queryString : '') . $fragment;
   }
 
   /** @return array<string, mixed> */
@@ -718,5 +889,3 @@ final class BillingController
     return $payload;
   }
 }
-
-

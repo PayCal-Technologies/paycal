@@ -48,6 +48,9 @@ final class UserSessionService
     return $sessions;
   }
 
+  /**
+   * Revoke other sessions.
+   */
   public static function revokeOtherSessions(string $userUUID, string $currentSessionHash): int
   {
     if ($userUUID === '' || $currentSessionHash === '') {

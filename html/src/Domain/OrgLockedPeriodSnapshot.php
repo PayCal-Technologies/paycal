@@ -11,7 +11,7 @@ final class OrgLockedPeriodSnapshot
 {
   /**
    * @param array<string, array<string, string>> $workEntries
-   * @param array<string, string> $relationship
+   * @param array<string, string> $connection
    * @param array<string, array{
    *   site_owner_uuid: string,
    *   site_id: string,
@@ -24,7 +24,7 @@ final class OrgLockedPeriodSnapshot
     string $memberUuid,
     int $year,
     array $workEntries,
-    array $relationship,
+    array $connection,
     array $orgSiteIndex,
   ): void {
     $businessId = trim($businessId);
@@ -36,7 +36,7 @@ final class OrgLockedPeriodSnapshot
     if (!BusinessWorkVisibilityPolicy::canAggregateForOrg(
       $businessId,
       $memberUuid,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     )) {
       return;
@@ -56,7 +56,7 @@ final class OrgLockedPeriodSnapshot
       $memberUuid,
       $year,
       $workEntries,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
     $summary = self::buildSummaryFromSnapshot($lockedSnapshot, $year);
@@ -70,7 +70,7 @@ final class OrgLockedPeriodSnapshot
       $memberUuid,
       $year,
       $summary,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
   }
@@ -110,7 +110,7 @@ final class OrgLockedPeriodSnapshot
   }
 
   /**
-   * TODO: Document yearHasLockedDates.
+   * Year has locked dates.
    */
   private static function yearHasLockedDates(string $memberUuid, int $year): bool
   {
@@ -122,7 +122,7 @@ final class OrgLockedPeriodSnapshot
 
   /**
    * @param array<string, array<string, string>> $workEntries
-   * @param array<string, string> $relationship
+   * @param array<string, string> $connection
    * @param array<string, array{
    *   site_owner_uuid: string,
    *   site_id: string,
@@ -139,7 +139,7 @@ final class OrgLockedPeriodSnapshot
     string $memberUuid,
     int $year,
     array $workEntries,
-    array $relationship,
+    array $connection,
     array $orgSiteIndex,
   ): array {
     /** @var array<int, array{reg_hours: float, ot_hours: float, gross: float}> $byYear */
@@ -173,7 +173,7 @@ final class OrgLockedPeriodSnapshot
         $memberUuid,
         (string) $workKey,
         $entry,
-        $relationship,
+        $connection,
         $orgSiteIndex,
       );
       if (!$decision['allowed']) {
@@ -255,7 +255,7 @@ final class OrgLockedPeriodSnapshot
   }
 
   /**
-   * TODO: Document resolveBusinessOwnerUuid.
+   * Resolve business owner UUID.
    */
   public static function resolveBusinessOwnerUuid(string $businessId): string
   {

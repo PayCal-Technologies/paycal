@@ -74,7 +74,7 @@
       <h2>Voor wie</h2>
       <ul class="doc-fact-list">
         <li><strong>Individuen:</strong> Volg je werk- en betaalgeschiedenis gratis</li>
-        <li><strong>Teams:</strong> Gebruik Premium voor gedeelde toegang en coördinatie</li>
+        <li><strong>Groups:</strong> Gebruik Business voor gedeelde toegang en coördinatie</li>
       </ul>
 
       <h2>Beveiliging en privacy</h2>

@@ -23,9 +23,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 #main:has(.sites_main_container) > .sites_main_container {
-  width: min(80vw, 1240px);
-  margin-left: auto;
-  margin-right: auto;
+  width: var(--app-content-width, 100%);
+  margin-left: 0;
+  margin-right: 0;
   flex-direction: column;
   align-items: flex-start;
   gap: clamp(0.9rem, 1.8vw, 1.45rem);
@@ -38,6 +38,22 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 #main:has(.sites_main_container) section.panel {
   padding: clamp(1rem, 2vw, 1.5rem);
+}
+
+#sites_list_panel,
+#sites_earnings_panel {
+  width: 100%;
+  max-width: none;
+}
+
+#sites_list_panel {
+  --business-page-border: color-mix(in srgb, var(--panel-border, #6b7280) 76%, transparent);
+  --business-page-primary-bg: #0b63ce;
+  --business-page-primary-bg-hover: #0d70e8;
+  --business-page-primary-text: #ffffff;
+  --business-page-secondary-bg: color-mix(in srgb, var(--panel-bg, #151b24) 78%, #ffffff 8%);
+  --business-page-secondary-bg-hover: color-mix(in srgb, var(--panel-bg, #151b24) 68%, #ffffff 14%);
+  --business-page-secondary-text: #f4f8ff;
 }
 
 /* SITES GRID */
@@ -148,6 +164,99 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 #modal_create_site .modal_footer > .flex,
 #modal_edit_site .modal_footer > .flex {
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+#modal_confirm_delete_site,
+#modal_finality_delete,
+#modal_archived_work {
+  width: min(42rem, calc(100vw - 2rem));
+  max-width: min(42rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  border: 1px solid var(--business-page-border, var(--panel-border, #2a2a2a));
+  border-radius: 0.5rem;
+  background: var(--business-page-elevated-bg, var(--panel-bg, #171d24));
+  color: var(--panel-text, #f4f8ff);
+  overflow: hidden;
+}
+
+#modal_archived_work {
+  width: min(56rem, calc(100vw - 2rem));
+  max-width: min(56rem, calc(100vw - 2rem));
+}
+
+#modal_confirm_delete_site[open],
+#modal_finality_delete[open],
+#modal_archived_work[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+#modal_confirm_delete_site .modal_header,
+#modal_finality_delete .modal_header,
+#modal_archived_work .modal_header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 3.75rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+}
+
+#modal_confirm_delete_site .modal_title,
+#modal_finality_delete .modal_title,
+#modal_archived_work .modal_title {
+  grid-column: 1;
+  justify-self: start;
+  margin: 0;
+  padding: 0;
+  text-align: left !important;
+}
+
+#modal_confirm_delete_site .modal_header .btn_close,
+#modal_finality_delete .modal_header .btn_close,
+#modal_archived_work .modal_header .btn_close {
+  grid-column: 2;
+  justify-self: end;
+}
+
+#modal_confirm_delete_site .modal_content,
+#modal_finality_delete .modal_content,
+#modal_archived_work .modal_content {
+  display: block;
+  min-height: 0;
+  padding: 1rem;
+  overflow: auto;
+  border-top: 1px solid var(--business-page-border, var(--panel-border, #2a2a2a));
+  border-bottom: 1px solid var(--business-page-border, var(--panel-border, #2a2a2a));
+}
+
+#modal_confirm_delete_site .modal_content p,
+#modal_finality_delete .modal_content p {
+  margin: 0;
+  color: var(--panel-text, #f4f8ff);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+#modal_confirm_delete_site .modal_footer,
+#modal_finality_delete .modal_footer,
+#modal_archived_work .modal_footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.8rem 1rem 1rem;
+}
+
+#modal_confirm_delete_site .modal_footer > .flex,
+#modal_finality_delete .modal_footer > .flex,
+#modal_archived_work .modal_footer > .flex {
   justify-content: center;
   gap: 0.75rem;
   width: 100%;
@@ -283,7 +392,7 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
   border: 2px solid transparent;
   cursor: pointer;
   padding: 0;
-  transition: transform 0.1s ease, border-color 0.1s ease;
+  transition: border-color 0.1s ease;
 }
 
 .site_color_swatch:hover {
@@ -375,13 +484,11 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
   line-height: 1.5;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(2px);
-  transition: opacity 0.12s ease, transform 0.12s ease;
+  transition: opacity 0.12s ease;
 }
 
 .hover_help_tooltip.is-visible {
   opacity: 1;
-  transform: translateY(0);
 }
 
 .modal_orphaned_work .modal_header .btn_close {
@@ -390,25 +497,20 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 
 /* ── Sites DataGrid column layout ───────────────────────────────────────
    Source of truth for --grid-template-columns.
-   Tracks: Name | Wage | LOA | Travel | Province | Entries | Actions
-   Includes the actions track so header and body share the same track count.
-   data-grid values come from DataGrid::create("sites-{$status}") where
-   $status = 'active' | 'archived'.
+   Tracks: Site | Entries | Gross Pay | Wage | Last worked | Budget | Used | Actions
+   Matches the Business Sites summary grid while keeping planning columns optional.
    ──────────────────────────────────────────────────────────────────────── */
 [data-grid="sites-active"],
 [data-grid="sites-archived"] {
   --grid-template-columns:
     minmax(14rem, 3fr)
-    minmax(7rem, 1fr)
-    minmax(5rem, 1fr)
-    minmax(5rem, 1fr)
-    minmax(5rem, 1fr)
-    minmax(8rem, 1.5fr)
     minmax(4rem, 0.75fr)
     minmax(6rem, 1fr)
+    minmax(5rem, 0.85fr)
+    minmax(7rem, 1fr)
     minmax(6rem, 1fr)
-    minmax(6rem, 1fr)
-    minmax(3rem, max-content);
+    minmax(7rem, 1.1fr)
+    minmax(5.5rem, max-content);
   font-size: 0.9em;
 }
 
@@ -420,30 +522,31 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
   padding: 0.4rem 0.5rem;
 }
 
-/* Explicit column template: Name | Ownership | Wage | LOA | Travel | Province | Entries | Gross | Budget | Used | Action */
+/* Explicit column template: Site | Entries | Gross Pay | Wage | Last worked | Budget | Used | Action */
 [data-grid="sites-active"] .datagrid_header_content,
 [data-grid="sites-active"] .datagrid_row_content,
 [data-grid="sites-archived"] .datagrid_header_content,
 [data-grid="sites-archived"] .datagrid_row_content {
   grid-template-columns:
-    minmax(10rem, 3fr)
-    minmax(6.5rem, 1fr)
-    minmax(4.5rem, 1fr)
-    minmax(4rem, 1fr)
-    minmax(4rem, 1fr)
-    minmax(6rem, 1.4fr)
-    minmax(3.5rem, 0.7fr)
-    minmax(5rem, 1fr)
-    minmax(5rem, 1fr)
-    minmax(5rem, 1fr)
-    2.5rem;
+    minmax(14rem, 3fr)
+    minmax(4rem, 0.75fr)
+    minmax(6rem, 1fr)
+    minmax(5rem, 0.85fr)
+    minmax(7rem, 1fr)
+    minmax(6rem, 1fr)
+    minmax(7rem, 1.1fr)
+    minmax(5.5rem, max-content);
 }
 
 [data-grid="sites-active"] .datagrid_heading,
 [data-grid="sites-archived"] .datagrid_heading {
   padding: 0.5rem 0.5rem 0.6rem 0.5rem;
-  font-size: var(--font-md);
   font-weight: 600;
+}
+
+[data-grid^="sites-"] .datagrid_body .datagrid_row:not(:last-child) > .datagrid_row_content {
+  border-bottom: var(--border-size, 1px) solid rgba(255, 255, 255, 0.06);
+  border-bottom-color: color-mix(in srgb, var(--panel-border, currentColor) 28%, transparent);
 }
 
 /* Tighter numeric data cells (headings stay uniform above) */
@@ -452,6 +555,7 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 [data-grid="sites-active"] .datagrid_item.datagrid_col_travel_hours,
 [data-grid="sites-active"] .datagrid_item.datagrid_col_entries,
 [data-grid="sites-active"] .datagrid_item.datagrid_col_work_gross,
+[data-grid="sites-active"] .datagrid_item.datagrid_col_last_worked,
 [data-grid="sites-active"] .datagrid_item.datagrid_col_budget_amount,
 [data-grid="sites-active"] .datagrid_item.datagrid_col_budget_used,
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_wage,
@@ -459,10 +563,66 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_travel_hours,
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_entries,
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_work_gross,
+[data-grid="sites-archived"] .datagrid_item.datagrid_col_last_worked,
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_budget_amount,
 [data-grid="sites-archived"] .datagrid_item.datagrid_col_budget_used {
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
+}
+
+[data-grid="sites-active"] .business_sites_site_name_cell,
+[data-grid="sites-archived"] .business_sites_site_name_cell {
+  display: inline-grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+[data-grid="sites-active"] .business_sites_site_name_primary,
+[data-grid="sites-archived"] .business_sites_site_name_primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+[data-grid="sites-active"] .business_sites_site_name_text,
+[data-grid="sites-archived"] .business_sites_site_name_text {
+  min-width: 0;
+  font-weight: 700;
+  color: var(--color-text, #f4f8ff);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-grid="sites-active"] .business_sites_ownership_symbol,
+[data-grid="sites-archived"] .business_sites_ownership_symbol {
+  flex: 0 0 auto;
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  background: #2dd4bf;
+}
+
+[data-grid="sites-active"] .business_sites_ownership_symbol--personal,
+[data-grid="sites-archived"] .business_sites_ownership_symbol--personal {
+  border-radius: 2px;
+}
+
+[data-grid="sites-active"] .business_sites_ownership_status,
+[data-grid="sites-archived"] .business_sites_ownership_status {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+[data-grid="sites-active"] .business_sites_ownership_status--personal,
+[data-grid="sites-archived"] .business_sites_ownership_status--personal {
+  background: color-mix(in srgb, #22c55e 72%, transparent);
+  color: #ffffff;
 }
 
 /* Budget data cells: accent colour when set, muted when empty */
@@ -526,9 +686,11 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
     minmax(14rem, 3fr)
     minmax(4rem, 0.75fr)
     minmax(6rem, 1fr)
+    minmax(5rem, 0.85fr)
+    minmax(7rem, 1fr)
     minmax(6rem, 1fr)
     minmax(7rem, 1.1fr)
-    minmax(3rem, max-content);
+    minmax(5.5rem, max-content);
   font-size: 0.9em;
 }
 
@@ -537,12 +699,14 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 [data-grid="business-sites-archived"] .datagrid_header_content,
 [data-grid="business-sites-archived"] .datagrid_row_content {
   grid-template-columns:
-    minmax(12rem, 3fr)
-    minmax(3.5rem, 0.7fr)
-    minmax(5.5rem, 1fr)
-    minmax(5.5rem, 1fr)
-    minmax(6.5rem, 1fr)
-    2.5rem;
+    minmax(14rem, 3fr)
+    minmax(4rem, 0.75fr)
+    minmax(6rem, 1fr)
+    minmax(5rem, 0.85fr)
+    minmax(7rem, 1fr)
+    minmax(6rem, 1fr)
+    minmax(7rem, 1.1fr)
+    minmax(5.5rem, max-content);
 }
 
 [data-grid="business-sites-active"] .datagrid_item,
@@ -613,6 +777,10 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
     gap: 5px;
   }
 
+  #main:has(.sites_main_container) > .sites_main_container > .f_column + .f_column {
+    margin-top: 0.85rem;
+  }
+
   #main:has(.sites_main_container) section.panel {
     width: 100%;
     max-width: 100%;
@@ -639,11 +807,15 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 @media (max-width: 450px) {
   #main:has(.sites_main_container) > .sites_main_container {
     width: 100%;
-    gap: 0.4rem;
+    gap: 5px;
+  }
+
+  #main:has(.sites_main_container) > .sites_main_container > .f_column + .f_column {
+    margin-top: 12px;
   }
 
   #main:has(.sites_main_container) section.panel {
-    padding: 0.5rem;
+    padding: 5px;
   }
 
   #sites_list_panel .tabs,
@@ -687,15 +859,9 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
     width: 100%;
   }
 
-  [data-grid="sites-active"] .datagrid_column_menu,
-  [data-grid="sites-archived"] .datagrid_column_menu {
+  [data-grid="sites-active"] .datagrid_column_strip,
+  [data-grid="sites-archived"] .datagrid_column_strip {
     margin: 0 0 0.65rem;
-  }
-
-  [data-grid="sites-active"] .datagrid_column_menu_toggle,
-  [data-grid="sites-archived"] .datagrid_column_menu_toggle {
-    min-height: 2.25rem;
-    border-radius: 999px;
   }
 
   [data-grid="sites-active"] .datagrid_header_row,
@@ -726,8 +892,8 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
     grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
     grid-template-areas:
       "site site action"
-      "ownership ownership action"
       "entries gross gross"
+      "wage last last"
       "budget budget budget"
       "used used used";
     gap: 0.7rem;
@@ -788,11 +954,9 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
     content: none;
   }
 
-  [data-grid="sites-active"] .datagrid_item.datagrid_col_wage,
   [data-grid="sites-active"] .datagrid_item.datagrid_col_living_out_allowance,
   [data-grid="sites-active"] .datagrid_item.datagrid_col_travel_hours,
   [data-grid="sites-active"] .datagrid_item.datagrid_col_province,
-  [data-grid="sites-archived"] .datagrid_item.datagrid_col_wage,
   [data-grid="sites-archived"] .datagrid_item.datagrid_col_living_out_allowance,
   [data-grid="sites-archived"] .datagrid_item.datagrid_col_travel_hours,
   [data-grid="sites-archived"] .datagrid_item.datagrid_col_province {
@@ -801,8 +965,12 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 
   [data-grid="sites-active"] .datagrid_col_entries,
   [data-grid="sites-active"] .datagrid_col_work_gross,
+  [data-grid="sites-active"] .datagrid_item.datagrid_col_wage,
+  [data-grid="sites-active"] .datagrid_item.datagrid_col_last_worked,
   [data-grid="sites-archived"] .datagrid_col_entries,
-  [data-grid="sites-archived"] .datagrid_col_work_gross {
+  [data-grid="sites-archived"] .datagrid_col_work_gross,
+  [data-grid="sites-archived"] .datagrid_item.datagrid_col_wage,
+  [data-grid="sites-archived"] .datagrid_item.datagrid_col_last_worked {
     min-width: 0;
     padding: 0.55rem 0.65rem;
     border: 1px solid color-mix(in srgb, var(--panel-border, #555) 78%, transparent);
@@ -821,6 +989,16 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
   [data-grid="sites-active"] .datagrid_col_work_gross,
   [data-grid="sites-archived"] .datagrid_col_work_gross {
     grid-area: gross;
+  }
+
+  [data-grid="sites-active"] .datagrid_item.datagrid_col_wage,
+  [data-grid="sites-archived"] .datagrid_item.datagrid_col_wage {
+    grid-area: wage;
+  }
+
+  [data-grid="sites-active"] .datagrid_item.datagrid_col_last_worked,
+  [data-grid="sites-archived"] .datagrid_item.datagrid_col_last_worked {
+    grid-area: last;
   }
 
   [data-grid="sites-active"] .datagrid_col_budget_amount,
@@ -909,8 +1087,8 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-areas:
       "site action"
-      "ownership ownership"
       "entries gross"
+      "wage last"
       "budget budget"
       "used used";
     gap: 0.55rem;
@@ -919,8 +1097,12 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 
   [data-grid="sites-active"] .datagrid_col_entries,
   [data-grid="sites-active"] .datagrid_col_work_gross,
+  [data-grid="sites-active"] .datagrid_item.datagrid_col_wage,
+  [data-grid="sites-active"] .datagrid_item.datagrid_col_last_worked,
   [data-grid="sites-archived"] .datagrid_col_entries,
-  [data-grid="sites-archived"] .datagrid_col_work_gross {
+  [data-grid="sites-archived"] .datagrid_col_work_gross,
+  [data-grid="sites-archived"] .datagrid_item.datagrid_col_wage,
+  [data-grid="sites-archived"] .datagrid_item.datagrid_col_last_worked {
     padding: 0.5rem;
     font-size: 0.95rem;
   }
@@ -1182,14 +1364,39 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
   gap: 0.4rem;
 }
 
-.site_earnings_totals_datagrid {
+.site_earnings_totals_summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.55rem;
   width: 100%;
-  --grid-template-columns: minmax(8.5rem, 1.2fr) minmax(5.5rem, 0.9fr) minmax(4.5rem, 0.8fr) minmax(4rem, 0.7fr) minmax(7rem, 1fr);
 }
 
-.site_earnings_totals_datagrid .datagrid_heading,
-.site_earnings_totals_datagrid .datagrid_item {
-  text-align: right;
+.site_earnings_total_item {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--panel-border, #555) 78%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--panel-bg, #151515) 82%, var(--button-bg, #333) 18%);
+}
+
+.site_earnings_total_label {
+  color: var(--text-muted, #888);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.site_earnings_total_value {
+  min-width: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .site_earnings_row {
@@ -1341,6 +1548,14 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 .site_earnings_bar_fill[data-width="100"] { width: 100%; }
 
 @media (max-width: 600px) {
+  .site_earnings_totals_summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site_earnings_total_item_primary {
+    grid-column: 1 / -1;
+  }
+
   .site_earnings_row {
     padding: 0.9rem;
   }
@@ -1381,6 +1596,147 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
   text-align: center;
   font-size: 1.6rem;
   font-weight: 700;
+}
+
+/* Personal Sites controls: mirror the compact Groups page pattern. */
+#sites_list_panel .sites_status_row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin: 0 0 1rem;
+}
+
+#sites_list_panel .sites_status_action_group {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem;
+  border: var(--border-size) solid var(--panel-border);
+  border-radius: var(--border-radius);
+  background-color: var(--panel-bg);
+  box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.75);
+}
+
+#sites_list_panel .sites_status_action_group > .tabs {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+
+#sites_list_panel .sites_status_action_group .tab,
+#sites_list_panel .sites_status_action_group .sites_status_add_button {
+  min-height: 2.25rem;
+  padding: 0.45rem 0.7rem;
+  line-height: 1.2;
+}
+
+#sites_list_panel .sites_status_action_group .tab {
+  border: 1px solid var(--business-page-border, var(--button-border));
+  border-radius: 0.4rem;
+  background: var(--business-page-secondary-bg, color-mix(in srgb, var(--panel-bg, #151b24) 78%, #ffffff 8%));
+  color: var(--business-page-secondary-text, #f4f8ff);
+}
+
+#sites_list_panel .sites_status_action_group .tab[aria-selected="true"],
+#sites_list_panel .sites_status_action_group .tab.active {
+  border-color: color-mix(in srgb, var(--business-page-primary-bg, #0b63ce) 44%, var(--business-page-border, var(--panel-border, #6b7280)) 56%);
+  background: color-mix(in srgb, var(--business-page-primary-bg, #0b63ce) 20%, var(--business-page-secondary-bg, var(--panel-bg, #151b24)) 80%);
+  color: #ffffff;
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--business-page-primary-bg-hover, #0d70e8) 56%, transparent);
+}
+
+#sites_list_panel .sites_status_action_group .tab:hover,
+#sites_list_panel .sites_status_action_group .tab:focus-visible {
+  border-color: color-mix(in srgb, var(--business-page-primary-bg-hover, #0d70e8) 60%, #ffffff 40%);
+  color: #ffffff;
+}
+
+#sites_list_panel .sites_status_action_group .sites_status_add_button {
+  border-color: color-mix(in srgb, var(--business-page-primary-bg, #0b63ce) 82%, #ffffff 18%);
+  background-color: var(--business-page-primary-bg, #0b63ce);
+  color: var(--business-page-primary-text, #ffffff);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+#sites_list_panel .sites_status_add_button:hover,
+#sites_list_panel .sites_status_add_button:focus-visible {
+  background-color: var(--business-page-primary-bg-hover, #0d70e8);
+  color: var(--business-page-primary-text, #ffffff);
+}
+
+#sites_list_panel .sites_ownership_legend {
+  display: flex;
+  flex: 1 1 16rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem 0.85rem;
+  margin: 0;
+}
+
+#sites_list_panel .sites_ownership_legend_item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-text, #f4f8ff);
+  font-size: var(--font-sm, 0.875rem);
+  font-weight: 600;
+}
+
+#sites_list_panel [data-grid="sites-active"],
+#sites_list_panel [data-grid="sites-archived"] {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) auto;
+  align-items: start;
+  gap: 0 0.75rem;
+  width: 100%;
+  max-width: none;
+  --grid-template-columns:
+    minmax(14rem, 3fr)
+    minmax(4rem, 0.75fr)
+    minmax(6rem, 1fr)
+    minmax(5rem, 0.85fr)
+    minmax(7rem, 1fr)
+    minmax(6rem, 1fr)
+    minmax(7rem, 1.1fr)
+    minmax(5.5rem, max-content);
+}
+
+#sites_list_panel [data-grid^="sites-"] .datagrid_controls,
+#sites_list_panel [data-grid^="sites-"] .datagrid_column_strip {
+  margin-bottom: 0.75rem;
+}
+
+#sites_list_panel [data-grid^="sites-"] .datagrid_controls {
+  grid-column: 1;
+  min-width: 0;
+}
+
+#sites_list_panel [data-grid^="sites-"] .datagrid_search {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+#sites_list_panel [data-grid^="sites-"] .datagrid_column_strip {
+  grid-column: 2;
+  align-self: start;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+#sites_list_panel [data-grid^="sites-"] .datagrid_table,
+#sites_list_panel [data-grid^="sites-"] .datagrid_pagination_bottom {
+  grid-column: 1 / -1;
 }
 
 /* ── Org Planning section: right/advanced column of Edit Site dialog ── */

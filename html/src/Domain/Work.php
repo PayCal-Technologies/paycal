@@ -38,6 +38,12 @@ class Work
 {
   private string $userUUID;
 
+  /** @var array<string, list<string>> */
+  private static array $availableYearsCache = [];
+
+  /** @var array<string, array<string, array<string, mixed>>> */
+  private static array $workRangeCache = [];
+
   /**
    * Initialize Work instance for a specific user.
    *
@@ -71,28 +77,18 @@ class Work
    */
   public function getWorkForDate(string $date): \stdClass
   {
-    Log::debug('Work::getWorkForDate called');
     $workForDate = new \stdClass();
     
     // Scan for both active and archived work entries
     $redisSearch = Keys::WORK . ':'.$this->userUUID.':'.$date.':*';
     $keys = Database::scanKeys($redisSearch);
     
-    Log::debug("Work::getWorkForDate active pattern: {$redisSearch}, keys found: " . count($keys));
-    if (!empty($keys)) {
-      foreach (array_slice($keys, 0, 3) as $k) {
-        Log::debug("  - Active: {$k}");
-      }
-    }
-    
     // Also include archived work entries
     $archivedSearch = Keys::WORK . ':archived:'.$this->userUUID.':'.$date.':*';
     $archivedKeys = Database::scanKeys($archivedSearch);
-    Log::debug("Work::getWorkForDate archived pattern: {$archivedSearch}, keys found: " . count($archivedKeys));
     
     // Merge both sets of keys
     $allKeys = array_merge($keys, $archivedKeys);
-    Log::debug("Work::getWorkForDate total merged keys: " . count($allKeys));
     
     foreach ($allKeys as $i => $key) {
       $entry = WorkEntry::getWorkEntry($key);
@@ -117,13 +113,6 @@ class Work
    */
   public static function getWorkInRange(\DateTimeImmutable $start, \DateTimeImmutable $end, ?string $userUUID = null): \Generator
   {
-    Log::debug('Work::getWorkInRange called');
-    // Removed invalid array argument from debug call
-    // Extra debug: log all Redis work keys for this user
-    $debugUUID = $userUUID ?? User::uuid();
-    $redis = Database::getInstance();
-    $allWorkKeysDirect = $redis->keys(Keys::WORK . ':' . $debugUUID . ':*');
-    Log::debug('[DEBUG][getWorkInRange] All Redis work keys for user: ' . json_encode($allWorkKeysDirect));
     if ($end < $start) {
       return;
     }
@@ -137,6 +126,20 @@ class Work
 		  }
 		}
 
+    $rangeCacheKey = implode('|', [
+      $userUUID,
+      $start->format('c'),
+      $end->format('c'),
+      $start->getTimezone()->getName(),
+    ]);
+    if (isset(self::$workRangeCache[$rangeCacheKey])) {
+      foreach (self::$workRangeCache[$rangeCacheKey] as $key => $row) {
+        yield $key => $row;
+      }
+
+      return;
+    }
+
     // Scan for both regular and archived work keys
     $redisSearch = Keys::WORK . ':'.$userUUID.':*';
     $allKeys = Database::scanKeys($redisSearch);
@@ -148,7 +151,6 @@ class Work
     // Merge both sets
     $allKeys = array_merge($allKeys, $archivedKeys);
     
-    Log::debug('Work::getWorkInRange allKeys');
     $matchingKeys = [];
     foreach ($allKeys as $key) {
       $parts = explode(':', $key);
@@ -172,7 +174,8 @@ class Work
         $matchingKeys[] = $key;
       }
     }
-    Log::debug('Work::getWorkInRange matchingKeys');
+    sort($matchingKeys);
+
     $redis = Database::getInstance();
     $pipe = $redis->pipeline();
     $keyMap = [];
@@ -181,7 +184,8 @@ class Work
       $keyMap[] = $key;
     }
     $results = $pipe->exec();
-    Log::debug('Work::getWorkInRange results');
+
+    $rangeRows = [];
     foreach ($results as $i => $data) {
       $key = $keyMap[$i];
       $parts = explode(':', $key);
@@ -229,12 +233,15 @@ class Work
       $livingOutAllowance = is_numeric($data['living_out_allowance'] ?? null) ? (float) $data['living_out_allowance'] : 0.0;
       $travelHours = is_numeric($data['travel_hours'] ?? null) ? (float) $data['travel_hours'] : 0.0;
       $wage = is_numeric($data['wage'] ?? null) ? (float) $data['wage'] : 0.0;
+      $regularAmount = is_numeric($data['regular_amount'] ?? null) ? (float) $data['regular_amount'] : null;
+      $overtimeAmount = is_numeric($data['overtime_amount'] ?? null) ? (float) $data['overtime_amount'] : null;
+      $travelAmount = is_numeric($data['travel_amount'] ?? null) ? (float) $data['travel_amount'] : null;
+      $livingOutAmount = is_numeric($data['living_out_amount'] ?? null) ? (float) $data['living_out_amount'] : null;
       $gross = is_numeric($data['gross'] ?? null) ? (float) $data['gross'] : null;
       $tax = is_numeric($data['tax'] ?? null) ? (float) $data['tax'] : null;
       $net = is_numeric($data['net'] ?? null) ? (float) $data['net'] : null;
       $other = is_numeric($data['other'] ?? null) ? (float) $data['other'] : null;
 
-      Log::debug('Work::getWorkInRange yield');
       $siteColor = isset($data['site_color']) && preg_match('/^#[0-9A-Fa-f]{6}$/', (string) $data['site_color'])
         ? strtoupper((string) $data['site_color'])
         : '';
@@ -255,6 +262,18 @@ class Work
       if ($gross !== null) {
         $yieldRow['gross'] = $gross;
       }
+      if ($regularAmount !== null) {
+        $yieldRow['regular_amount'] = $regularAmount;
+      }
+      if ($overtimeAmount !== null) {
+        $yieldRow['overtime_amount'] = $overtimeAmount;
+      }
+      if ($travelAmount !== null) {
+        $yieldRow['travel_amount'] = $travelAmount;
+      }
+      if ($livingOutAmount !== null) {
+        $yieldRow['living_out_amount'] = $livingOutAmount;
+      }
       if ($tax !== null) {
         $yieldRow['tax'] = $tax;
       }
@@ -265,7 +284,12 @@ class Work
         $yieldRow['other'] = $other;
       }
 
-      yield $key => $yieldRow;
+      $rangeRows[$key] = $yieldRow;
+    }
+
+    self::$workRangeCache[$rangeCacheKey] = $rangeRows;
+    foreach ($rangeRows as $key => $row) {
+      yield $key => $row;
     }
   }
 
@@ -278,6 +302,14 @@ class Work
    */
   public static function getAvailableYears(string $userUUID): \Generator
   {
+    if (isset(self::$availableYearsCache[$userUUID])) {
+      foreach (self::$availableYearsCache[$userUUID] as $year) {
+        yield (int) $year;
+      }
+
+      return;
+    }
+
     // Search for both regular and archived work keys
     $keys = Database::scanKeys("work:{$userUUID}:*");
     $archivedKeys = Database::scanKeys("work:archived:{$userUUID}:*");
@@ -305,6 +337,7 @@ class Work
 
     $uniqueYears = $years ? array_map('intval', array_keys($years)) : [(int) date('Y')];
     rsort($uniqueYears);  // Sort in reverse chronological order (newest first)
+    self::$availableYearsCache[$userUUID] = array_map('strval', $uniqueYears);
     foreach ($uniqueYears as $year) {
       yield $year;
     }
@@ -408,21 +441,34 @@ class Work
         $parts = explode(':', $siteKey);
         $isArchived = (isset($parts[1]) && 'archived' === $parts[1]);
         $siteID = $isArchived ? ($parts[4] ?? '') : ($parts[3] ?? '');
-        if ('' === $siteID || !isset($siteWages[$siteID])) {
+        if ('' === $siteID) {
           continue;
         }
 
-        // Use Money class for drift-free gross calculation
-        $wage = $siteWages[$siteID]; // String dollar amount (e.g., "25.50")
-        $grossCents = Money::calculateGross(
+        $wage = is_numeric($siteWages[$siteID] ?? null)
+          ? (float) $siteWages[$siteID]
+          : (is_numeric($workData['wage'] ?? $workData['w'] ?? null) ? (float) ($workData['wage'] ?? $workData['w']) : 0.0);
+        $travelHours = is_numeric($workData['travel_hours'] ?? $workData['t'] ?? null) ? (float) ($workData['travel_hours'] ?? $workData['t']) : 0.0;
+        $livingOutAllowance = is_numeric($workData['living_out_allowance'] ?? $workData['l'] ?? null) ? (float) ($workData['living_out_allowance'] ?? $workData['l']) : 0.0;
+        $snapshot = WorkEntry::calculateEarningsSnapshot(
           $calculatedHours['regular_hours'],
           $calculatedHours['overtime_hours'],
+          $travelHours,
+          $livingOutAllowance,
           $wage
         );
 
-        Database::hset($siteKey, ['regular_hours' => (string) $calculatedHours['regular_hours']]);
-        Database::hset($siteKey, ['overtime_hours' => (string) $calculatedHours['overtime_hours']]);
-        Database::hset($siteKey, ['gross' => Money::centsToDollars($grossCents)]);
+        Database::hset($siteKey, [
+          'regular_hours' => number_format($calculatedHours['regular_hours'], 2, '.', ''),
+          'overtime_hours' => number_format($calculatedHours['overtime_hours'], 2, '.', ''),
+          'wage' => number_format($wage, 2, '.', ''),
+          'regular_amount' => number_format($snapshot['regular_amount'], 2, '.', ''),
+          'overtime_amount' => number_format($snapshot['overtime_amount'], 2, '.', ''),
+          'travel_amount' => number_format($snapshot['travel_amount'], 2, '.', ''),
+          'living_out_amount' => number_format($snapshot['living_out_amount'], 2, '.', ''),
+          'gross' => number_format($snapshot['gross'], 2, '.', ''),
+          'earnings_snapshot_version' => '1',
+        ]);
       }
 
       if ($dayEntries > 0) {

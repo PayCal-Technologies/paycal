@@ -188,7 +188,7 @@ require_once HTML.'/header.php';
             <li><?php echo $i18n['TRANSPARENCY_HUB_ACCESSIBILITY_FACT_5']; ?></li>
             <li><?php echo $i18n['TRANSPARENCY_HUB_ACCESSIBILITY_FACT_6']; ?></li>
           </ul>
-          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/accessibility/'); ?>"><?php echo $i18n['TRANSPARENCY_HUB_ACCESSIBILITY_READ_MORE']; ?></a></p>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/accessibility/'); ?>" aria-label="Read our accessibility standard, recent work, and feedback path"><?php echo $i18n['TRANSPARENCY_HUB_ACCESSIBILITY_READ_MORE']; ?></a></p>
         </section>
 
         <section class="doc-section">
@@ -254,6 +254,24 @@ require_once HTML.'/header.php';
             <li>The audit/fix command repaired known Redis index drift and ended with drift=0, owner=0, other=0</li>
           </ul>
           <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/redis-connections-reconciliation-2026-06/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
+          <h2>Readable Recovery Codes Without Weakening Account Recovery</h2>
+
+          <p class="doc-article-meta">Published: <time datetime="2026-06-21">2026-06-21</time> &middot; Last updated: <time datetime="2026-06-21">2026-06-21</time></p>
+          <p>
+            This article explains PayCal's June 2026 account recovery redesign:
+            shorter human-readable Recovery Codes, email Verification Codes,
+            checksum typo detection, rate limits, and passkey replacement
+            boundaries that keep recovery strict without making it painful.
+          </p>
+          <ul class="doc-fact-list">
+            <li>Recovery Codes use 12 secret characters from a 28-character accessibility alphabet plus 2 checksum characters</li>
+            <li>The email Verification Code is short-lived, single-use, attempt-limited, and expires after 10 minutes</li>
+            <li>Protected recovery still requires both inbox access and the saved account secret</li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/account-recovery-readable-codes-2026-06/'); ?>"><?php echo $readMoreLabel; ?></a></p>
         </section>
 
         <section class="doc-section">
@@ -466,6 +484,23 @@ require_once HTML.'/header.php';
             <li><?php echo $i18n['TRANSPARENCY_HUB_SUPERHEROES_MAP_FACT_3']; ?></li>
           </ul>
           <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/superheroes/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
+          <h2>GoldMaster Canonical Examples</h2>
+
+          <p class="doc-article-meta">Published: <time datetime="2026-06-21">2026-06-21</time></p>
+          <p>
+            GoldMaster is PayCal's internal tool for managing canonical reference
+            examples. It keeps future code, UI, tests, and architecture aligned
+            with reviewed patterns before similar work begins.
+          </p>
+          <ul class="doc-fact-list">
+            <li>Defines a static <code>golden_masters</code> directory and metadata format</li>
+            <li>Adds an admin-only, read-only browser for canonical examples</li>
+            <li>Publishes the Calendar dialog pattern as the first active golden master</li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/goldmaster/'); ?>"><?php echo $readMoreLabel; ?></a></p>
         </section>
 
         <section class="doc-section">

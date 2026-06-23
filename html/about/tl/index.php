@@ -74,7 +74,7 @@
       <h2>Para Kanino Ito</h2>
       <ul class="doc-fact-list">
         <li><strong>Individuals:</strong> I-track nang libre ang iyong work at pay history</li>
-        <li><strong>Teams:</strong> Gamitin ang Business para sa shared access at coordination</li>
+        <li><strong>Groups:</strong> Gamitin ang Business para sa shared access at coordination</li>
       </ul>
 
       <h2>Seguridad at Privacy</h2>

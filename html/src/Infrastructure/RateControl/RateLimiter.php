@@ -30,6 +30,7 @@ final class RateLimiter
   // Rate limit constants (requests per minute)
   private const LIMIT_CALENDAR = 120;
   private const LIMIT_TELEMETRY = 90;
+  private const LIMIT_FEEDBACK = 8;
   private const LIMIT_IP_CALENDAR = 240;
   private const WINDOW_TTL_SECONDS = 70;
 
@@ -54,6 +55,16 @@ final class RateLimiter
   }
 
   /**
+   * Check if user has exceeded product-feedback submission rate limit.
+   *
+   * @return array{allowed: bool, remaining: int}
+   */
+  public static function checkFeedbackLimit(string $userUUID): array
+  {
+    return self::checkLimit($userUUID, 'feedback', self::LIMIT_FEEDBACK);
+  }
+
+  /**
    * Check per-route account recovery rate limits with explicit windows.
    *
    * @return array{allowed: bool, remaining: int, limit: int, window_seconds: int, reset_at: int}
@@ -65,7 +76,7 @@ final class RateLimiter
     /** @var array<string, array{config: string, fallback: int, window: int, withTxn: bool}> $policies */
     $policies = [
       'start' => ['config' => 'account_recovery_max_starts_per_day', 'fallback' => 5, 'window' => 86400, 'withTxn' => false],
-      'magic-link-consume' => ['config' => 'account_recovery_max_verify_attempts', 'fallback' => 25, 'window' => 3600, 'withTxn' => true],
+      'magic-link-consume' => ['config' => 'account_recovery_max_verify_attempts', 'fallback' => 5, 'window' => 3600, 'withTxn' => true],
       'resend' => ['config' => 'account_recovery_max_resends_per_hour', 'fallback' => 5, 'window' => 3600, 'withTxn' => true],
       'verify-email' => ['config' => 'account_recovery_max_verify_attempts', 'fallback' => 5, 'window' => 3600, 'withTxn' => true],
       'proof-payload' => ['config' => 'account_recovery_max_verify_attempts', 'fallback' => 5, 'window' => 3600, 'withTxn' => true],

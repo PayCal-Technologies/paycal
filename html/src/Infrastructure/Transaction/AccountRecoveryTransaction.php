@@ -5,6 +5,7 @@ namespace PayCal\Infrastructure\Transaction;
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Database;
+use PayCal\Domain\PayCalCode;
 
 /**
  * AccountRecoveryTransaction.php
@@ -186,7 +187,7 @@ final class AccountRecoveryTransaction
   {
     $expiresAt = time() + max(300, (int) SystemConfig::get('account_recovery_code_ttl_minutes') * 60);
     $this->write([
-      'email_code_hash' => hash('sha256', strtoupper(trim($code))),
+      'email_code_hash' => hash('sha256', PayCalCode::normalize($code)),
       'email_code_expires_at' => (string) $expiresAt,
       'resend_count' => (string) (((int) ($this->data['resend_count'] ?? '0')) + 1),
     ]);
@@ -207,7 +208,7 @@ final class AccountRecoveryTransaction
   {
     $valid = $this->status() === self::STATUS_PENDING
       && !$this->isExpired()
-      && hash_equals((string) ($this->data['email_code_hash'] ?? ''), hash('sha256', strtoupper(trim($code))))
+      && hash_equals((string) ($this->data['email_code_hash'] ?? ''), hash('sha256', PayCalCode::normalize($code)))
       && time() <= (int) ($this->data['email_code_expires_at'] ?? '0');
 
     if (!$valid) {
@@ -223,6 +224,14 @@ final class AccountRecoveryTransaction
     ]);
 
     return true;
+  }
+
+  /**
+   * Increment the verification attempt counter after a rejected recovery step.
+   */
+  public function recordFailedAttempt(): void
+  {
+    $this->write(['verify_attempts' => (string) (((int) ($this->data['verify_attempts'] ?? '0')) + 1)]);
   }
 
   /**
@@ -250,6 +259,23 @@ final class AccountRecoveryTransaction
    * Handles elevateForMagicLinkPasskey operation.
    */
   public function elevateForMagicLinkPasskey(string $fingerprintHash, string $ipClass): bool
+  {
+    return $this->elevateVerifiedEmailForPasskeyBootstrap($fingerprintHash, $ipClass);
+  }
+
+  /**
+   * Allows first-passkey setup after a verified email code when no protected
+   * crypto material exists yet.
+   */
+  public function elevateForEmailCodePasskeyBootstrap(string $fingerprintHash, string $ipClass): bool
+  {
+    return $this->elevateVerifiedEmailForPasskeyBootstrap($fingerprintHash, $ipClass);
+  }
+
+  /**
+   * Handles elevateVerifiedEmailForPasskeyBootstrap operation.
+   */
+  private function elevateVerifiedEmailForPasskeyBootstrap(string $fingerprintHash, string $ipClass): bool
   {
     if ($this->isExpired() || !$this->matchesClientBinding($fingerprintHash, $ipClass)) {
       return false;

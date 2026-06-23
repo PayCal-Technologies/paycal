@@ -60,6 +60,22 @@ final class GuardianSanitizerTest extends TestCase
     $this->assertStringContainsString('start', $content);
   }
 
+  public function testRuntimeIntegrityAllowsExplicitAuditWindow(): void
+  {
+    $runtimeFile = __DIR__ . '/../../js/runtime-integrity.js';
+    $captureFile = __DIR__ . '/../../js/plaintext-work-capture.js';
+    $calendarFile = __DIR__ . '/../../js/calendar/calendar.js';
+
+    $runtime = (string) file_get_contents($runtimeFile);
+    $this->assertStringContainsString('beginAudit', $runtime);
+    $this->assertStringContainsString('isAuditInProgress', $runtime);
+    $this->assertStringContainsString('runtime_integrity_audit_window', $runtime);
+    $this->assertStringContainsString('window.PayCalRuntimeIntegrity', $runtime);
+
+    $this->assertStringContainsString('beginRuntimeAudit', (string) file_get_contents($captureFile));
+    $this->assertStringContainsString('beginRuntimeAudit', (string) file_get_contents($calendarFile));
+  }
+
   /**
    * Test that blocked element selectors are documented
    */
@@ -129,4 +145,3 @@ final class GuardianSanitizerTest extends TestCase
     }
   }
 }
-

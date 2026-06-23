@@ -7,7 +7,6 @@ use PayCal\Infrastructure\Session\ActivityMonitor;
 use PayCal\Domain\Authentication;
 use PayCal\Domain\Config\Environment;
 use PayCal\Domain\Database;
-use PayCal\Domain\EmailGarum;
 use PayCal\Domain\Encryption\EnvelopeFormat;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\Constants\Keys;
@@ -268,57 +267,36 @@ class AccountController
         $recoveryKey = trim($this->scalarString($payload['recoveryKey'] ?? ''));
 
         if ($wrappedDekRecovery === '' || $accountRecoverySalt === '' || $recoveryProofKey === '' || $recoveryKey === '') {
-            $this->fail('Recovery key payload incomplete.', HttpStatus::HTTP_BAD_REQUEST);
+            $this->fail('Recovery code payload incomplete.', HttpStatus::HTTP_BAD_REQUEST);
         }
 
         if (!RecoveryKey::validate($recoveryKey)) {
-            $this->fail('Recovery key payload incomplete.', HttpStatus::HTTP_BAD_REQUEST);
+            $this->fail('Recovery code payload incomplete.', HttpStatus::HTTP_BAD_REQUEST);
         }
 
         if (base64_decode($accountRecoverySalt, true) === false || base64_decode($recoveryProofKey, true) === false) {
-            $this->fail('Recovery key payload incomplete.', HttpStatus::HTTP_BAD_REQUEST);
+            $this->fail('Recovery code payload incomplete.', HttpStatus::HTTP_BAD_REQUEST);
         }
 
         $decodedEnvelopeJson = base64_decode($wrappedDekRecovery, true);
         if (!is_string($decodedEnvelopeJson) || $decodedEnvelopeJson === '') {
-            $this->fail('Recovery key payload incomplete.', HttpStatus::HTTP_BAD_REQUEST);
+            $this->fail('Recovery code payload incomplete.', HttpStatus::HTTP_BAD_REQUEST);
         }
 
         try {
             EnvelopeFormat::fromJson($decodedEnvelopeJson);
         } catch (\Throwable) {
-            $this->fail('Recovery key payload incomplete.', HttpStatus::HTTP_BAD_REQUEST);
+            $this->fail('Recovery code payload incomplete.', HttpStatus::HTTP_BAD_REQUEST);
         }
 
         $user = User::current();
-        $emailSent = false;
-        try {
-            $emailSent = EmailGarum::sendRecoveryKeyEmail($recoveryKey, $user->email, $user->full_name);
-        } catch (\Throwable $exception) {
-            SecurityLog::log('recovery_key_created_from_settings_email_exception', [
-                'user_uuid' => $user->user_uuid,
-                'email' => $user->email,
-                'error' => $exception->getMessage(),
-            ]);
-
-            $this->fail('Unable to email Recovery Key right now. No changes were saved.', HttpStatus::HTTP_SERVICE_UNAVAILABLE);
-        }
-
-        if (!$emailSent) {
-            SecurityLog::log('recovery_key_created_from_settings_email_failed', [
-                'user_uuid' => $user->user_uuid,
-                'email' => $user->email,
-            ]);
-
-            $this->fail('Unable to email Recovery Key right now. No changes were saved.', HttpStatus::HTTP_SERVICE_UNAVAILABLE);
-        }
-
         $userKey = Keys::USER . ':' . $user->user_uuid;
 
         Database::hset($userKey, [
             UserFields::ACCOUNT_RECOVERY_SALT->value => $accountRecoverySalt,
             UserFields::WRAPPED_DEK_RECOVERY->value => $wrappedDekRecovery,
             UserFields::RECOVERY_KEY_GENERATED->value => '1',
+            UserFields::RECOVERY_KEY_UPDATED_AT->value => date('c'),
             UserFields::RECOVERY_PROOF_KEY->value => $recoveryProofKey,
             UserFields::RECOVERY_PROOF_KEY_VERSION->value => '1',
         ]);
@@ -334,7 +312,7 @@ class AccountController
         } catch (\Throwable) {
         }
 
-        Response::success('Recovery key created and emailed.', ['emailSent' => true]);
+        Response::success('Recovery code created.', ['delivery' => 'display-only']);
     }
 
     /**
@@ -387,5 +365,3 @@ class AccountController
         throw new \RuntimeException($message);
     }
 }
-
-

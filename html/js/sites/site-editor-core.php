@@ -19,7 +19,114 @@ namespace PayCal\Domain;
   let siteEditorDeleteOwnerUUID = '';
   let siteEditorHooksBound = false;
 
+  const SITE_EDITOR_DIALOG_IDS = new Set([
+    'modal_create_site',
+    'modal_edit_site',
+    'modal_confirm_delete_site',
+    'modal_archived_work',
+    'modal_finality_delete',
+  ]);
+
   const siteEditorGetElement = (id) => document.getElementById(id);
+
+  const siteEditorOpenDialog = (dialog) => {
+    if (!(dialog instanceof HTMLDialogElement)) {
+      return;
+    }
+
+    dialog.setAttribute('aria-hidden', 'false');
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+  };
+
+  const siteEditorCloseDialog = (dialog) => {
+    if (!(dialog instanceof HTMLDialogElement)) {
+      return;
+    }
+
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && dialog.contains(active)) {
+      active.blur();
+    }
+    if (dialog.open) {
+      dialog.close();
+    }
+    dialog.setAttribute('aria-hidden', 'true');
+  };
+
+  const siteEditorConfirmAction = ({
+    title = '',
+    message = '',
+    confirmText = '',
+    confirmClass = 'btn btn_primary',
+  } = {}) => new Promise((resolve) => {
+    const modal = siteEditorGetElement('modal_confirm_delete_site');
+    const titleEl = siteEditorGetElement('modal_confirm_delete_site_title');
+    const messageEl = siteEditorGetElement('confirm_delete_site_message');
+    const confirmBtn = siteEditorGetElement('confirm_delete_site_yes');
+    const cancelBtn = siteEditorGetElement('confirm_delete_site_no');
+    const ariaEl = siteEditorGetElement('confirm_delete_site_aria');
+    if (!(modal instanceof HTMLDialogElement) || !(confirmBtn instanceof HTMLButtonElement)) {
+      resolve(false);
+      return;
+    }
+
+    siteEditorDeleteSiteId = null;
+    siteEditorDeleteSiteName = null;
+    siteEditorDeleteOwnerUUID = '';
+    siteEditorDeleteSiteStatus = 'active';
+
+    if (titleEl instanceof HTMLElement) {
+      titleEl.textContent = String(title || '');
+    }
+    if (ariaEl instanceof HTMLElement) {
+      ariaEl.textContent = String(title || '');
+    }
+    if (messageEl instanceof HTMLElement) {
+      messageEl.textContent = String(message || '');
+    }
+    confirmBtn.textContent = String(confirmText || title || 'Confirm');
+    confirmBtn.className = confirmClass;
+    confirmBtn.disabled = false;
+    if (cancelBtn instanceof HTMLButtonElement) {
+      cancelBtn.textContent = SITES_T.CANCEL;
+    }
+
+    let settled = false;
+    const cleanup = () => {
+      confirmBtn.removeEventListener('click', onConfirm);
+      cancelBtn?.removeEventListener('click', onCancel);
+      modal.removeEventListener('cancel', onCancel);
+      modal.removeEventListener('close', onClose);
+    };
+    const settle = (confirmed) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      cleanup();
+      if (modal.open) {
+        siteEditorCloseDialog(modal);
+      }
+      resolve(confirmed === true);
+    };
+    const onConfirm = () => settle(true);
+    const onCancel = (event) => {
+      if (event instanceof Event) {
+        event.preventDefault();
+      }
+      settle(false);
+    };
+    const onClose = () => settle(false);
+
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn?.addEventListener('click', onCancel);
+    modal.addEventListener('cancel', onCancel);
+    modal.addEventListener('close', onClose);
+    siteEditorOpenDialog(modal);
+    window.requestAnimationFrame(() => confirmBtn.focus());
+  });
 
   const siteEditorResolveGridSiteName = (row) => {
     if (!(row instanceof HTMLElement)) {
@@ -51,6 +158,17 @@ namespace PayCal\Domain;
     if (statusEl instanceof HTMLElement) {
       statusEl.textContent = String(message || '');
     }
+  };
+
+  const siteEditorSetDeleteButtonState = (siteStatus, canDelete) => {
+    const deleteBtn = siteEditorGetElement('edit_site_delete');
+    if (!(deleteBtn instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    const isArchived = String(siteStatus || '').trim().toLowerCase() === 'archived';
+    deleteBtn.hidden = !isArchived;
+    deleteBtn.disabled = !isArchived || !canDelete;
   };
 
   const siteEditorSetFieldError = (input, errorElementId, message) => {
@@ -106,7 +224,9 @@ namespace PayCal\Domain;
       if (!(swatch instanceof HTMLElement)) {
         return;
       }
-      swatch.classList.toggle('is-selected', String(swatch.dataset.hex || '').toLowerCase() === hex.toLowerCase());
+      const selected = String(swatch.dataset.hex || '').toLowerCase() === hex.toLowerCase();
+      swatch.classList.toggle('is-selected', selected);
+      swatch.setAttribute('aria-pressed', selected ? 'true' : 'false');
     });
   };
 
@@ -126,7 +246,7 @@ namespace PayCal\Domain;
       if (!(sw instanceof HTMLElement) || !sw.dataset.hex) {
         return;
       }
-      siteEditorApplyColorSelection(String(sw.dataset.hex), sw.getAttribute('aria-label') || '');
+      siteEditorApplyColorSelection(String(sw.dataset.hex), String(sw.dataset.label || ''));
       const editForm = siteEditorGetElement('edit_site_form');
       if (editForm instanceof HTMLFormElement) {
         siteEditorColorPickSave = true;
@@ -141,12 +261,15 @@ namespace PayCal\Domain;
         return;
       }
       button.dataset.siteEditorCloseBound = '1';
-      button.addEventListener('click', () => {
+      button.addEventListener('click', (event) => {
         const dialogId = String(button.dataset.dialogClose || '');
-        const dialog = siteEditorGetElement(dialogId);
-        if (dialog instanceof HTMLDialogElement) {
-          dialog.close();
+        if (!SITE_EDITOR_DIALOG_IDS.has(dialogId)) {
+          return;
         }
+        event.preventDefault();
+        event.stopPropagation();
+        const dialog = siteEditorGetElement(dialogId);
+        siteEditorCloseDialog(dialog);
       });
     });
 
@@ -157,6 +280,7 @@ namespace PayCal\Domain;
         siteEditorDeleteSiteId = null;
         siteEditorDeleteSiteName = null;
         siteEditorDeleteOwnerUUID = '';
+        siteEditorDeleteSiteStatus = 'active';
         const confirmBtn = siteEditorGetElement('confirm_delete_site_yes');
         if (confirmBtn instanceof HTMLButtonElement) {
           confirmBtn.disabled = false;
@@ -223,6 +347,28 @@ namespace PayCal\Domain;
     }
   };
 
+  const siteEditorHidePlanningFields = (message = '') => {
+    const orgPlanningEl = siteEditorGetElement('edit_site_org_planning');
+    const orgEmptyEl = siteEditorGetElement('edit_site_org_planning_empty');
+    if (orgPlanningEl instanceof HTMLElement) {
+      orgPlanningEl.setAttribute('hidden', '');
+    }
+    if (orgEmptyEl instanceof HTMLElement) {
+      if (!orgEmptyEl.dataset.defaultText) {
+        orgEmptyEl.dataset.defaultText = String(orgEmptyEl.textContent || '').trim();
+      }
+      orgEmptyEl.textContent = String(message || orgEmptyEl.dataset.defaultText || '');
+      orgEmptyEl.hidden = false;
+    }
+
+    ['edit_site_plan_org_id', 'edit_site_plan_owner_uuid'].forEach((id) => {
+      const field = siteEditorGetElement(id);
+      if (field instanceof HTMLInputElement) {
+        field.value = '';
+      }
+    });
+  };
+
   const siteEditorPopulateSiteFields = (site, ownerUUID) => {
     const siteId = String(site?.id || site?.site_id || '');
     const idInput = siteEditorGetElement('edit_site_id');
@@ -240,6 +386,12 @@ namespace PayCal\Domain;
         el.value = value;
       }
     };
+    const setChecked = (id, value) => {
+      const el = siteEditorGetElement(id);
+      if (el instanceof HTMLInputElement) {
+        el.checked = String(value || '') === '1';
+      }
+    };
 
     setValue('edit_site_name_input', site?.site_name || '');
     setValue('edit_site_wage_input', site?.wage || '');
@@ -248,6 +400,8 @@ namespace PayCal\Domain;
     setValue('edit_site_province_select', site?.province || '');
     setValue('edit_site_status_select', site?.status || 'active');
     setValue('edit_site_default_hours_input', site?.default_hours || '');
+    setChecked('edit_site_is_on_reserve_input', site?.is_on_reserve || '0');
+    setValue('edit_site_reserve_name_input', site?.reserve_name || '');
 
     const savedColor = String(site?.site_color || '').toLowerCase() || '#6aa6ff';
     siteEditorApplyColorSelection(savedColor, '');
@@ -257,25 +411,55 @@ namespace PayCal\Domain;
     }
   };
 
-  const siteEditorSetReadOnly = (readOnly) => {
+  const siteEditorSetSiteFieldsReadOnly = (readOnly) => {
     const form = siteEditorGetElement('edit_site_form');
     if (!(form instanceof HTMLFormElement)) {
       return;
     }
-    form.querySelectorAll('input, select, textarea, button[type="submit"]').forEach((field) => {
+    form.querySelectorAll('.edit_site_col_basic input, .edit_site_col_basic select, .edit_site_col_basic textarea, .edit_site_col_basic button').forEach((field) => {
       if (!(field instanceof HTMLElement)) {
-        return;
-      }
-      if (field.id === 'edit_site_cancel' || field.id === 'edit_site_unlink_business') {
         return;
       }
       if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement) {
         field.disabled = readOnly;
       }
-      if (field instanceof HTMLButtonElement && field.type === 'submit') {
+      if (field instanceof HTMLButtonElement) {
         field.disabled = readOnly;
       }
     });
+  };
+
+  const siteEditorSetPlanningFieldsReadOnly = (readOnly) => {
+    const planningEl = siteEditorGetElement('edit_site_org_planning');
+    if (!(planningEl instanceof HTMLElement)) {
+      return;
+    }
+    planningEl.querySelectorAll('input, select, textarea, button').forEach((field) => {
+      if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement || field instanceof HTMLButtonElement) {
+        field.disabled = readOnly;
+      }
+    });
+  };
+
+  const siteEditorSetEditorAccess = (canWriteSite, canWritePlanning) => {
+    const form = siteEditorGetElement('edit_site_form');
+    if (!(form instanceof HTMLFormElement)) {
+      return;
+    }
+
+    form.dataset.canWriteSite = canWriteSite ? '1' : '0';
+    form.dataset.canWritePlanning = canWritePlanning ? '1' : '0';
+    siteEditorSetSiteFieldsReadOnly(!canWriteSite);
+    siteEditorSetPlanningFieldsReadOnly(!canWritePlanning);
+
+    const submitBtn = siteEditorGetElement('edit_site_submit');
+    if (submitBtn instanceof HTMLButtonElement) {
+      submitBtn.disabled = !canWriteSite && !canWritePlanning;
+    }
+  };
+
+  const siteEditorSetReadOnly = (readOnly) => {
+    siteEditorSetEditorAccess(!readOnly, !readOnly);
   };
 
   const initSiteEditor = (config) => {
@@ -311,12 +495,28 @@ namespace PayCal\Domain;
       const deleteNoBtn = siteEditorGetElement('confirm_delete_site_no');
       deleteNoBtn?.addEventListener('click', () => {
         const modal = siteEditorGetElement('modal_confirm_delete_site');
-        modal?.close();
+        siteEditorCloseDialog(modal);
       });
 
       const unlinkBtn = siteEditorGetElement('edit_site_unlink_business');
       unlinkBtn?.addEventListener('click', () => {
         handleSiteEditorUnlinkFromBusiness().catch((error) => PW.error(error));
+      });
+
+      const editDeleteBtn = siteEditorGetElement('edit_site_delete');
+      editDeleteBtn?.addEventListener('click', () => {
+        const siteId = siteEditorGetElement('edit_site_id')?.value || '';
+        const siteName = siteEditorGetElement('edit_site_name_input')?.value || SITES_T.SITES_THIS_SITE;
+        const ownerUUID = siteEditorGetElement('edit_site_owner_uuid')?.value || '';
+        if (siteId !== '') {
+          const editModal = siteEditorGetElement('modal_edit_site');
+          if (editModal instanceof HTMLDialogElement && editModal.open) {
+            siteEditorCloseDialog(editModal);
+            window.requestAnimationFrame(() => openDeleteSiteDialog(siteId, siteName, 'archived', ownerUUID));
+            return;
+          }
+          openDeleteSiteDialog(siteId, siteName, 'archived', ownerUUID);
+        }
       });
     }
 
@@ -338,7 +538,7 @@ namespace PayCal\Domain;
         statusInput.value = status;
       }
       siteEditorSetFormStatus('create_site_form_status', '');
-      modal.showModal();
+      siteEditorOpenDialog(modal);
     };
 
     const openEditSiteDialog = async (rowId) => {
@@ -367,24 +567,31 @@ namespace PayCal\Domain;
           }
 
           siteEditorPopulateSiteFields(data.site, data.site_owner_uuid || siteOwnerUUID);
-          siteEditorPopulatePlanningFields(
-            data.business?.name || '',
-            data.settings || {},
-            businessId,
-            data.site_owner_uuid || siteOwnerUUID,
-          );
+          const canWriteSite = !!data.can_write_site && canWrite();
+          const canViewPlanning = !!data.can_view_planning;
+          const canWritePlanning = canViewPlanning && !!data.can_write_planning;
+          if (canViewPlanning) {
+            siteEditorPopulatePlanningFields(
+              data.business?.name || '',
+              data.settings || {},
+              businessId,
+              data.site_owner_uuid || siteOwnerUUID,
+            );
+          } else {
+            siteEditorHidePlanningFields(SITES_T.SITES_BUSINESS_PLANNING_LOCKED || '');
+          }
 
-          const writable = !!(data.can_write_site || data.can_write_planning) && canWrite();
-          siteEditorSetReadOnly(!writable);
-          if (!writable) {
+          siteEditorSetEditorAccess(canWriteSite, canWritePlanning);
+          siteEditorSetDeleteButtonState(data.site?.status || getGridStatus(), canWriteSite);
+          if (!canWriteSite && !canWritePlanning) {
             siteEditorSetFormStatus('edit_site_form_status', SITES_T.SITES_READ_ONLY_ACCESS);
           } else {
             siteEditorSetFormStatus('edit_site_form_status', '');
           }
 
-          modal.showModal();
+          siteEditorOpenDialog(modal);
           const nameInput = siteEditorGetElement('edit_site_name_input');
-          if (nameInput instanceof HTMLInputElement && writable) {
+          if (nameInput instanceof HTMLInputElement && canWriteSite) {
             window.requestAnimationFrame(() => nameInput.focus());
           }
         } catch (error) {
@@ -408,20 +615,24 @@ namespace PayCal\Domain;
         siteEditorPopulateSiteFields(payload.site, '');
         const orgCtx = payload.org_context;
         const orgPlanningEl = siteEditorGetElement('edit_site_org_planning');
-        const orgEmptyEl = siteEditorGetElement('edit_site_org_planning_empty');
         if (orgPlanningEl instanceof HTMLElement) {
           if (orgCtx && orgCtx.org_id) {
-            siteEditorPopulatePlanningFields(orgCtx.org_name || '', orgCtx.settings || {}, orgCtx.org_id, orgCtx.owner_uuid || '');
-          } else {
-            orgPlanningEl.setAttribute('hidden', '');
-            if (orgEmptyEl instanceof HTMLElement) {
-              orgEmptyEl.hidden = false;
+            const canViewPlanning = orgCtx.can_view_planning !== false;
+            const canWritePlanning = canViewPlanning && orgCtx.can_write_planning !== false;
+            if (canViewPlanning) {
+              siteEditorPopulatePlanningFields(orgCtx.org_name || '', orgCtx.settings || {}, orgCtx.org_id, orgCtx.owner_uuid || '');
+            } else {
+              siteEditorHidePlanningFields(SITES_T.SITES_BUSINESS_PLANNING_LOCKED || '');
             }
+            siteEditorSetEditorAccess(true, canWritePlanning);
+          } else {
+            siteEditorHidePlanningFields();
+            siteEditorSetEditorAccess(true, false);
           }
         }
 
-        siteEditorSetReadOnly(false);
-        modal.showModal();
+        siteEditorSetDeleteButtonState(payload.site?.status || getGridStatus(), true);
+        siteEditorOpenDialog(modal);
       } catch (error) {
         PW.error(error);
         PC.showToast(SITES_T.SITES_ERROR_LOADING, 'error', 7000, true);
@@ -484,7 +695,7 @@ namespace PayCal\Domain;
       siteEditorDeleteSiteName = siteName;
       siteEditorDeleteSiteStatus = siteStatus;
       siteEditorDeleteOwnerUUID = siteOwnerUUID;
-      modal.showModal();
+      siteEditorOpenDialog(modal);
     };
 
     async function handleSiteEditorCreateSubmit(event) {
@@ -518,7 +729,7 @@ namespace PayCal\Domain;
           throw new Error(payload?.message || SITES_T.SITES_ERROR_CREATING);
         }
 
-        siteEditorGetElement('modal_create_site')?.close();
+          siteEditorCloseDialog(siteEditorGetElement('modal_create_site'));
         PC.showToast(mode === 'business' ? (T.businessSitesCreated || SITES_T.SITES_CREATED_SUCCESS) : SITES_T.SITES_CREATED_SUCCESS, 'save', 5000, true);
         form.reset();
         await reloadGrids();
@@ -531,47 +742,44 @@ namespace PayCal\Domain;
 
     async function handleSiteEditorEditSubmit(event) {
       event.preventDefault();
-      if (!canWrite()) {
-        return;
-      }
 
       const form = event.target;
       if (!(form instanceof HTMLFormElement)) {
         return;
       }
 
-      const nameInput = siteEditorGetElement('edit_site_name_input');
-      const wageInput = siteEditorGetElement('edit_site_wage_input');
-      if (!siteEditorValidateRequiredSiteFields(nameInput, wageInput, 'edit_site_form_status', 'edit_site_name_error', 'edit_site_wage_error')) {
+      const canWriteSite = form.dataset.canWriteSite !== '0';
+      const canWritePlanning = form.dataset.canWritePlanning === '1';
+      if (!canWriteSite && !canWritePlanning) {
         return;
       }
 
-      const formData = new FormData(form);
+      const nameInput = siteEditorGetElement('edit_site_name_input');
+      const wageInput = siteEditorGetElement('edit_site_wage_input');
+      if (canWriteSite && !siteEditorValidateRequiredSiteFields(nameInput, wageInput, 'edit_site_form_status', 'edit_site_name_error', 'edit_site_wage_error')) {
+        return;
+      }
 
       try {
-        const response = await fetch(`${apiBase}/sites/update`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: SITE_EDITOR_FORM_HEADERS,
-          body: new URLSearchParams(formData),
-        });
-        const payload = await response.json();
-        if (payload?.status !== 'success') {
-          throw new Error(payload?.message || SITES_T.SITES_ERROR_UPDATING);
+        if (canWriteSite) {
+          const formData = new FormData(form);
+          const response = await fetch(`${apiBase}/sites/update`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: SITE_EDITOR_FORM_HEADERS,
+            body: new URLSearchParams(formData),
+          });
+          const payload = await response.json();
+          if (payload?.status !== 'success') {
+            throw new Error(payload?.message || SITES_T.SITES_ERROR_UPDATING);
+          }
         }
-
-        if (!siteEditorColorPickSave) {
-          siteEditorGetElement('modal_edit_site')?.close();
-        }
-        siteEditorColorPickSave = false;
-        siteEditorSetFormStatus('edit_site_form_status', '');
-        PC.showToast(SITES_T.SITES_UPDATED_SUCCESS, 'save', 5000, true);
 
         const planningEl = siteEditorGetElement('edit_site_org_planning');
         const planOrgId = siteEditorGetElement('edit_site_plan_org_id')?.value || getBusinessId();
         const planOwner = siteEditorGetElement('edit_site_plan_owner_uuid')?.value || siteEditorGetElement('edit_site_owner_uuid')?.value || '';
         const planSiteId = siteEditorGetElement('edit_site_id')?.value || '';
-        if (planningEl instanceof HTMLElement && !planningEl.hasAttribute('hidden') && planOrgId && planOwner && planSiteId) {
+        if (canWritePlanning && planningEl instanceof HTMLElement && !planningEl.hasAttribute('hidden') && planOrgId && planOwner && planSiteId) {
           const planBody = new URLSearchParams({
             budget_amount: siteEditorGetElement('edit_site_plan_budget')?.value || '',
             budget_type: 'annual',
@@ -583,11 +791,22 @@ namespace PayCal\Domain;
             start_date: siteEditorGetElement('edit_site_start_date_input')?.value || '',
             end_date: siteEditorGetElement('edit_site_end_date_input')?.value || '',
           });
-          await fetch(
+          const planResponse = await fetch(
             `${apiBase}/businesses/${encodeURIComponent(planOrgId)}/sites/${encodeURIComponent(planOwner)}/${encodeURIComponent(planSiteId)}/settings/update`,
             { method: 'POST', credentials: 'include', headers: SITE_EDITOR_FORM_HEADERS, body: planBody },
           );
+          const planPayload = await planResponse.json();
+          if (planPayload?.status !== 'success') {
+            throw new Error(planPayload?.message || SITES_T.SITES_ERROR_UPDATING);
+          }
         }
+
+        if (!siteEditorColorPickSave) {
+          siteEditorCloseDialog(siteEditorGetElement('modal_edit_site'));
+        }
+        siteEditorColorPickSave = false;
+        siteEditorSetFormStatus('edit_site_form_status', '');
+        PC.showToast(SITES_T.SITES_UPDATED_SUCCESS, 'save', 5000, true);
 
         await reloadGrids();
       } catch (error) {
@@ -608,11 +827,22 @@ namespace PayCal\Domain;
       }
 
       try {
-        const url = siteEditorDeleteSiteStatus === 'archived'
+        const body = new URLSearchParams({ id: siteEditorDeleteSiteId });
+        let url = siteEditorDeleteSiteStatus === 'archived'
           ? `${apiBase}/sites/permanent-delete`
           : `${apiBase}/sites/delete`;
-        const body = new URLSearchParams({ id: siteEditorDeleteSiteId });
-        if (siteEditorDeleteOwnerUUID) {
+
+        if (mode === 'business') {
+          const businessId = String(getBusinessId() || '').trim();
+          const ownerUUID = String(siteEditorDeleteOwnerUUID || '').trim();
+          const siteId = String(siteEditorDeleteSiteId || '').trim();
+          if (businessId === '' || ownerUUID === '' || siteId === '') {
+            throw new Error(SITES_T.SITES_ERROR_DELETING);
+          }
+          url = siteEditorDeleteSiteStatus === 'archived'
+            ? `${apiBase}/businesses/${encodeURIComponent(businessId)}/sites/${encodeURIComponent(ownerUUID)}/${encodeURIComponent(siteId)}/permanent-delete`
+            : `${apiBase}/businesses/${encodeURIComponent(businessId)}/sites/${encodeURIComponent(ownerUUID)}/${encodeURIComponent(siteId)}/archive`;
+        } else if (siteEditorDeleteOwnerUUID) {
           body.set('owner_uuid', siteEditorDeleteOwnerUUID);
         }
 
@@ -627,7 +857,7 @@ namespace PayCal\Domain;
           throw new Error(payload?.message || SITES_T.SITES_ERROR_DELETING);
         }
 
-        siteEditorGetElement('modal_confirm_delete_site')?.close();
+        siteEditorCloseDialog(siteEditorGetElement('modal_confirm_delete_site'));
         PC.showToast(siteEditorDeleteSiteStatus === 'archived' ? SITES_T.SITES_PERMANENTLY_DELETED_SHORT : SITES_T.SITES_ARCHIVED_SHORT, 'save', 5000, true);
         await reloadGrids();
       } catch (error) {
@@ -648,7 +878,13 @@ namespace PayCal\Domain;
       }
 
       const siteName = siteEditorGetElement('edit_site_name_input')?.value || SITES_T.SITES_THIS_SITE;
-      const confirmed = window.confirm(sitesFormatMessage(SITES_T.BUSINESS_SITES_UNLINK_CONFIRM_NAMED, { name: siteName }));
+      const unlinkLabel = T.businessSitesUnlink || SITES_T.BUSINESS_SITES_UNLINK || 'Unlink';
+      const confirmed = await siteEditorConfirmAction({
+        title: `${unlinkLabel} site?`,
+        message: sitesFormatMessage(SITES_T.BUSINESS_SITES_UNLINK_CONFIRM_NAMED, { name: siteName }),
+        confirmText: unlinkLabel,
+        confirmClass: 'btn btn_primary',
+      });
       if (!confirmed) {
         return;
       }
@@ -657,7 +893,7 @@ namespace PayCal\Domain;
         `${apiBase}/businesses/${encodeURIComponent(businessId)}/sites/${encodeURIComponent(siteOwnerUUID)}/${encodeURIComponent(siteId)}/unlink`,
         {},
       );
-      siteEditorGetElement('modal_edit_site')?.close();
+      siteEditorCloseDialog(siteEditorGetElement('modal_edit_site'));
       PC.showToast(T.businessSitesUnlinked || SITES_T.BUSINESS_SITES_UNLINKED, 'save', 5000, true);
       await reloadGrids();
     }
@@ -682,10 +918,45 @@ namespace PayCal\Domain;
         const rowId = row instanceof HTMLElement ? String(row.dataset.id || actionBtn.dataset.id || '').trim() : '';
         const siteName = siteEditorResolveGridSiteName(row);
 
-        if (action === 'delete' && rowId !== '') {
+        if ((action === 'archive-site' || action === 'delete') && rowId !== '') {
           const ownerUUID = mode === 'business' ? String(rowId.split(':')[0] || '') : '';
           const siteId = mode === 'business' ? String(rowId.split(':')[1] || rowId) : rowId;
-          openDeleteSiteDialog(siteId, siteName, getGridStatus(), ownerUUID);
+          openDeleteSiteDialog(siteId, siteName, 'active', ownerUUID);
+        }
+        if (action === 'restore-site' && rowId !== '' && mode === 'business') {
+          const businessId = String(getBusinessId() || '').trim();
+          const ownerUUID = String(rowId.split(':')[0] || '');
+          const siteId = String(rowId.split(':')[1] || rowId);
+          if (businessId !== '' && ownerUUID !== '' && siteId !== '') {
+            const message = String(SITES_T.SITES_RESTORE_CONFIRM || 'Restore "{name}"?').replace('{name}', siteName || SITES_T.SITES_THIS_SITE);
+            const restoreLabel = SITES_T.SITES_RESTORE_ACTION || 'Restore';
+            siteEditorConfirmAction({
+              title: `${restoreLabel} site?`,
+              message,
+              confirmText: restoreLabel,
+              confirmClass: 'btn btn_primary',
+            }).then((confirmed) => {
+              if (!confirmed) {
+                return;
+              }
+              fetch(
+                `${apiBase}/businesses/${encodeURIComponent(businessId)}/sites/${encodeURIComponent(ownerUUID)}/${encodeURIComponent(siteId)}/restore`,
+                { method: 'POST', credentials: 'include', headers: SITE_EDITOR_FORM_HEADERS, body: new URLSearchParams() },
+              )
+                .then((response) => response.json())
+                .then(async (payload) => {
+                  if (payload?.status !== 'success') {
+                    throw new Error(payload?.message || SITES_T.SITES_RESTORE_FAILED);
+                  }
+                  PC.showToast(SITES_T.SITES_RESTORED || 'Site restored.', 'save', 5000, true);
+                  await reloadGrids();
+                })
+                .catch((error) => {
+                  PW.error(error);
+                  PC.showToast(SITES_T.SITES_RESTORE_FAILED || 'Unable to restore site.', 'error', 7000, true);
+                });
+            });
+          }
         }
         return;
       }
@@ -713,6 +984,7 @@ namespace PayCal\Domain;
       openCreateSiteDialog,
       openEditSiteDialog,
       openDeleteSiteDialog,
+      confirmAction: siteEditorConfirmAction,
       handleBusinessSiteGridClick,
     };
   };

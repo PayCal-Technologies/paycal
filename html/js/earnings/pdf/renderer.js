@@ -1,5 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from '/js/third-party/pdf-lib/index.js';
-import { resolveUserLocale } from '/js/earnings/locale.js';
+import { resolveUserLocale } from '/js/core/locale.js';
 
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;

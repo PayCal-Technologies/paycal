@@ -1,11 +1,10 @@
 <?php
 /**
- * Public Transparency: Organization Membership and Role Philosophy
+ * Public Transparency: Business Connections and Role Philosophy
  *
  * PURPOSE:
- * Explain why PayCal uses an Organization <-> Member relationship model,
- * how role changes are governed, and what architectural philosophy guides
- * capability, scope, and security decisions.
+ * Explain how PayCal separates business connections, active membership,
+ * role changes, consent, and explicit access grants.
  */
 
 declare(strict_types=1);
@@ -31,17 +30,17 @@ require_once HTML.'/header.php';
   <nav class="doc-breadcrumb" aria-label="<?php echo $i18n['BREADCRUMB']; ?>">
     <a href="<?php echo transparency_href('/transparency/'); ?>"><?php echo $i18n['HELP_TOC_TRANSPARENCY_HUB']; ?></a>
     <span class="separator">/</span>
-    <span class="current">संगठन सदस्यता और भूमिका दर्शन</span>
+    <span class="current">व्यावसायिक कनेक्शन और भूमिका दर्शन</span>
   </nav>
 
   <header class="doc-article-header">
     <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_BUSINESS_MEMBERSHIP_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
-      यह पृष्ठ शिथिल रूप से जुड़ी टीम सिमेंटिक्स से एक स्पष्ट संगठन <strong>&lt;-&gt;</strong> सदस्य
-      संबंध मॉडल की ओर बदलाव, वर्तमान भूमिका नीति, और उन सिद्धांतों की व्याख्या करता है जिनका उपयोग
-      हम अनुमतियों को ऑडिट-योग्य और सुरक्षित रखने के लिए करते हैं।
+      यह पृष्ठ शिथिल रूप से जुड़ी टीम सिमेंटिक्स से स्पष्ट Connections की ओर बदलाव समझाता है।
+      Connection बताता है कि कौन किससे जुड़ा है। सदस्यता, भूमिका, सहमति और protected data access
+      अलग-अलग policy decisions बने रहते हैं।
     </p>
-    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time> &middot; <a href="<?php echo transparency_href('/transparency/business-membership-2026-06-19-pre-connections/'); ?>">Previous version</a></p>
   </header>
 
   <div class="doc-article-body">
@@ -52,19 +51,37 @@ require_once HTML.'/header.php';
         ऑडिट करने में आसान हो, बिखरी हुई एकल जाँचों से बने मॉडल से अधिक सुरक्षित है।
       </p>
       <p>
-        संगठन <strong>&lt;-&gt;</strong> सदस्य संरचना प्रत्येक अभिकर्ता को नीति-जागरूक स्थिति, भूमिका
-        और दायरे के व्यवहार के साथ एक संगठन से स्पष्ट संबंध देती है।
+        Business <strong>&lt;-&gt;</strong> Member connection हर actor को business से स्पष्ट identity link देता है।
+        Active membership, role authority, protected data consent और भविष्य के person-to-person grants
+        उस link से अलग रहते हैं।
       </p>
     </section>
 
     <section class="doc-section">
-      <h2>संगठन <strong>&lt;-&gt;</strong> सदस्य संबंध परिवर्तन</h2>
+      <h2>Business <strong>&lt;-&gt;</strong> Member Connection परिवर्तन</h2>
       <ul class="doc-list">
-        <li>सदस्यता को एक अंतर्निहित UI स्थिति के बजाय एक स्पष्ट संबंध के रूप में दर्शाया जाता है।</li>
+        <li>Connections को UI state से अनुमानित करने के बजाय स्पष्ट रूप से दर्शाया जाता है।</li>
         <li>पहुँच-अनुरोध, आमंत्रण, अनुमोदन, सक्रियण और निरसन जीवनचक्र अवस्थाएँ बैकएंड नीति द्वारा लागू की जाती हैं।</li>
-        <li>संगठन पैनल और सूचनाएँ अब संबंध संक्रमणों और भूमिका परिणामों को अधिक सुसंगत रूप से दर्शाती हैं।</li>
-        <li>साझा संगठन व्यवहार विशेषाधिकार प्राप्त क्रियाओं के संसाधन से पहले सदस्यता अवस्था द्वारा नियंत्रित होता है।</li>
+        <li>Business panels और notifications अब connection transitions और role outcomes को अधिक consistent रूप से दिखाते हैं।</li>
+        <li>Shared Business behavior privileged actions से पहले active membership और role policy द्वारा नियंत्रित होता है।</li>
       </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2>Connection, membership, consent और grants</h2>
+      <p>
+        PayCal अब इन concepts को अलग-अलग रखता है:
+      </p>
+      <ul class="doc-list">
+        <li><strong>Connection:</strong> किसी person और business के बीच, या दो people के बीच identity link.</li>
+        <li><strong>Membership:</strong> workspace collaboration के लिए active Business participation state.</li>
+        <li><strong>Consent:</strong> protected work data sharing के लिए member की approval.</li>
+        <li><strong>Grant:</strong> explicit permission, जैसे delegated calendar viewing या भविष्य की trusted recovery capability.</li>
+      </ul>
+      <p>
+        केवल connection protected reports, exports, payroll visibility, recovery authority,
+        या किसी और person की ओर से act करने की ability नहीं देता।
+      </p>
     </section>
 
     <section class="doc-section">
@@ -87,8 +104,9 @@ require_once HTML.'/header.php';
     <section class="doc-section">
       <h2>सुरक्षा और एन्क्रिप्शन दर्शन</h2>
       <p>
-        संगठन सहयोग एन्क्रिप्शन और सहमति नियंत्रणों के साथ प्रतिच्छेद करता है। सदस्यता और भूमिका जाँच
-        साझा संगठन एनवलप व्यवहार को नियंत्रित करती है ताकि संवेदनशील ऑपरेशन नीति-बद्ध रहें।
+        Business collaboration encryption और consent controls से जुड़ा है। Active membership,
+        role checks और consent state shared Business envelope behavior को नियंत्रित करते हैं
+        ताकि sensitive operations policy-bound रहें।
       </p>
       <ul class="doc-list">
         <li>सदस्यता और सहमति अवस्था साझा सुरक्षित ऑपरेशन आगे बढ़ने से पहले सत्यापित की जाती है।</li>

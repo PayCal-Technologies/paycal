@@ -29,6 +29,19 @@ final class ForecastPreviewEndpointContractTest extends TestCase
   }
 
   #[Test]
+  public function earningsForecastAndPaidExportFormatsRequirePremiumReporting(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $controller = (string) file_get_contents($projectRoot . '/html/src/Controllers/EarningsController.php');
+
+    $this->assertStringContainsString('use PayCal\Domain\SubscriptionRepository;', $controller);
+    $this->assertStringContainsString('currentUserCanExportFormat', $controller);
+    $this->assertStringContainsString('Premium subscription required for this export format.', $controller);
+    $this->assertStringContainsString('currentUserHasPremiumReporting', $controller);
+    $this->assertStringContainsString('Premium subscription required for Forecast.', $controller);
+  }
+
+  #[Test]
   public function forecastProjectionServiceHasNoRedisWrites(): void
   {
     $projectRoot = dirname(__DIR__, 4);

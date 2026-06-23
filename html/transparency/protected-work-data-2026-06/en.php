@@ -24,7 +24,7 @@ foreach ($i18nKeys as $key) {
 $currentPage = 'PAGE_TRANSPARENCY';
 $pageTitle = 'How PayCal Hardened Protected Business Work Data - [PayCal]';
 $pageLabel = 'How PayCal Hardened Protected Business Work Data';
-$pageMetaDescription = 'PayCal hardened protected business work data so business-scoped reads and exports pass through one canonical access gate with membership, consent, encryption, audit, revocation, and regression tests.';
+$pageMetaDescription = 'PayCal hardened protected business work data so business-scoped reads and exports pass through one canonical access gate with active business connections, consent, encryption, audit, revocation, and regression tests.';
 $pageMetaDescriptionLong = 'PayCal hardened its protected business work data lifecycle in June 2026 by enforcing one canonical server-side access boundary before member work rows can be read, reported, exported, cached, or audited.';
 $pageSocialTitle = 'How PayCal Hardened Protected Business Work Data';
 $pageOgDescription = 'PayCal closed alternate protected-work read and export paths, added regression tests, and verified the full suite for the June 2026 protected-data boundary release.';
@@ -49,7 +49,7 @@ require_once HTML.'/header.php';
       only become readable, reportable, exportable, cacheable, or auditable after
       the same access checks have passed every time.
     </p>
-    <p class="doc-article-meta">Published: <time datetime="2026-06-19">2026-06-19</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-06-19">2026-06-19</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time> &middot; <a href="<?php echo transparency_href('/transparency/protected-work-data-2026-06-19-pre-connections/'); ?>">Previous version</a></p>
   </header>
 
   <div class="doc-article-body">
@@ -84,8 +84,9 @@ require_once HTML.'/header.php';
     <section class="doc-section">
       <h2>The Boundary We Wanted</h2>
       <p>
-        Business work data is sensitive because it combines identity, membership,
-        work history, pay-related calculations, and organization context. A correct
+        Business work data is sensitive because it combines identity, connection state,
+        active membership,
+        work history, pay-related calculations, and business context. A correct
         system must not let every report, export, dashboard, or cache decide on
         its own whether that data is readable.
       </p>
@@ -97,9 +98,9 @@ require_once HTML.'/header.php';
       </div>
       <p>
         That gate checks the same access basis before protected rows exist for
-        downstream features: actor authority, active business membership, member
-        visibility, consent, encryption key-wrap state, encrypted envelope context,
-        and business-scoped work visibility.
+        downstream features: actor authority, active business connection and
+        membership state, member visibility, consent, encryption key-wrap state,
+        encrypted envelope context, and business-scoped work visibility.
       </p>
     </section>
 
@@ -111,7 +112,7 @@ require_once HTML.'/header.php';
       </p>
       <ul class="doc-list">
         <li>Business member reports now read protected work through the same server-side gate.</li>
-        <li>Business summaries, team earnings, and workspace warmers no longer materialize protected rows through weaker no-actor fallbacks.</li>
+        <li>Business summaries, business reports, and workspace warmers no longer materialize protected rows through weaker no-actor fallbacks.</li>
         <li>Binary business exports are rebuilt server-side from authorized data instead of trusting client-supplied rows.</li>
         <li>Legacy personal export endpoints reject business-marked or protected-looking payloads.</li>
         <li>Revocation and cache behavior now have regression coverage proving stale cached data is denied after access is revoked.</li>
@@ -123,17 +124,18 @@ require_once HTML.'/header.php';
     <section class="doc-section">
       <h2>Consent, Encryption, and Revocation</h2>
       <p>
-        Consent is not treated as a one-time UI checkbox. For protected business
-        work data, PayCal checks active membership, active consent, and active
-        encryption key-wrap state before protected rows are released. If access is
-        revoked or the required encryption state is no longer valid, protected
-        reads and exports fail closed.
+        Consent is not treated as a one-time UI checkbox. A business connection
+        identifies who is linked to the business, but protected business work data
+        still requires active membership, active consent, and active encryption
+        key-wrap state before protected rows are released. If access is revoked or
+        the required encryption state is no longer valid, protected reads and
+        exports fail closed.
       </p>
       <p>
         We also updated the member-facing consent panel so users can see a clearer
-        permission matrix: who can access protected work data, what membership
-        state is required, what credential/envelope checks apply, what consent
-        value is current, and what revocation means.
+        permission matrix: which connection can access protected work data, what
+        membership state is required, what credential/envelope checks apply, what
+        consent value is current, and what revocation means.
       </p>
     </section>
 
@@ -178,7 +180,7 @@ require_once HTML.'/header.php';
       <ul class="doc-list">
         <li>Architecture tests fail if protected business work rows are fetched outside the canonical gate.</li>
         <li>Legacy export endpoint tests cover forged business/member payloads and business-marked current-user payloads.</li>
-        <li>Revocation tests cover stale cached reports, summaries, exports, and team earnings.</li>
+        <li>Revocation tests cover stale cached reports, summaries, exports, and business reports.</li>
         <li>Bulk audit tests cover a 100-member report batch as one coherent audit event.</li>
         <li>Full PHPUnit passed with 2,274 tests and 18,892 assertions.</li>
         <li>The pre-commit suite passed with 1,397 tests and 9,351 assertions.</li>

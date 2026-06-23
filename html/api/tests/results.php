@@ -67,6 +67,10 @@ $lastRun = null;
 if (file_exists($lastRunPath)) {
   $content = file_get_contents($lastRunPath);
   $lastRun = ($content !== false) ? json_decode($content, true) : null;
+  if (is_array($lastRun)) {
+    unset($lastRun['output']);
+    $lastRun['rawOutputStored'] = false;
+  }
 }
 
 echo json_encode([

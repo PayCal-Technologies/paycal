@@ -11,6 +11,7 @@ use PayCal\Domain\EmailGarum;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
+use PayCal\Domain\PayCalCode;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
 use PayCal\Infrastructure\Telemetry\SecurityLog;
@@ -136,10 +137,10 @@ final class ChangeEmailController
       );
 
       // Generate codes
-      $oldCode = Security::generateVerificationCode(6);
-      $newCode = Security::generateVerificationCode(6);
-      $txn->setOldCodeHash(hash('sha256', $oldCode));
-      $txn->setNewCodeHash(hash('sha256', $newCode));
+      $oldCode = Security::generateVerificationCode(PayCalCode::EMAIL_TOTAL_LENGTH);
+      $newCode = Security::generateVerificationCode(PayCalCode::EMAIL_TOTAL_LENGTH);
+      $txn->setOldCodeHash(hash('sha256', PayCalCode::normalize($oldCode)));
+      $txn->setNewCodeHash(hash('sha256', PayCalCode::normalize($newCode)));
 
       // Save transaction
       $txn->save();
@@ -225,8 +226,8 @@ final class ChangeEmailController
       }
 
       $txnId = InputSanitizer::sanitizeString($input['txn_id']);
-      $oldCode = strtoupper(InputSanitizer::sanitizeString($input['old_code']));
-      $newCode = strtoupper(InputSanitizer::sanitizeString($input['new_code']));
+      $oldCode = PayCalCode::normalize(InputSanitizer::sanitizeString($input['old_code']));
+      $newCode = PayCalCode::normalize(InputSanitizer::sanitizeString($input['new_code']));
 
       // Load transaction
       $txn = EmailChangeTransaction::load($txnId);
@@ -253,6 +254,13 @@ final class ChangeEmailController
       if ($txn->getVerifyAttempts() >= $maxAttempts) {
         $txn->delete();
         Response::error('Too many failed attempts.', [], HttpStatus::HTTP_TOO_MANY_REQUESTS);
+        return;
+      }
+
+      if (!PayCalCode::validate($oldCode, PayCalCode::EMAIL_SECRET_LENGTH) || !PayCalCode::validate($newCode, PayCalCode::EMAIL_SECRET_LENGTH)) {
+        $txn->incrementVerifyAttempts();
+        $txn->save();
+        Response::error('Invalid verification code.', [], HttpStatus::HTTP_UNAUTHORIZED);
         return;
       }
 
@@ -380,10 +388,10 @@ final class ChangeEmailController
       }
 
       // Regenerate codes
-      $oldCode = Security::generateVerificationCode(6);
-      $newCode = Security::generateVerificationCode(6);
-      $txn->setOldCodeHash(hash('sha256', $oldCode));
-      $txn->setNewCodeHash(hash('sha256', $newCode));
+      $oldCode = Security::generateVerificationCode(PayCalCode::EMAIL_TOTAL_LENGTH);
+      $newCode = Security::generateVerificationCode(PayCalCode::EMAIL_TOTAL_LENGTH);
+      $txn->setOldCodeHash(hash('sha256', PayCalCode::normalize($oldCode)));
+      $txn->setNewCodeHash(hash('sha256', PayCalCode::normalize($newCode)));
       $txn->setLastSentAt($now);
       $txn->incrementResendCount();
 
@@ -528,4 +536,3 @@ final class ChangeEmailController
     return $_POST !== [] ? $_POST : null;
   }
 }
-

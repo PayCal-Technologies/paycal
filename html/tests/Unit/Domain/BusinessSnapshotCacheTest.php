@@ -31,7 +31,7 @@ final class BusinessSnapshotCacheTest extends TestCase
       business_id: $this->businessId,
       member_count: 2,
       site_count: 1,
-      relationships: [],
+      connections: [],
       members: [],
       pending_invites: 0,
       pending_requests: 0,
@@ -55,7 +55,7 @@ final class BusinessSnapshotCacheTest extends TestCase
       business_id: $this->businessId,
       member_count: 0,
       site_count: 0,
-      relationships: [],
+      connections: [],
       members: [],
     ));
 

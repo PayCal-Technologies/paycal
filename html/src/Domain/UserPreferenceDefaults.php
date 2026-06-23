@@ -46,6 +46,14 @@ final class UserPreferenceDefaults
   public const DEFAULT_SPACING = '0';
 
   /**
+   * Default z-axis surface depth.
+   *
+   * Options: 'flat', 'low', 'standard', 'high'
+   * Controls shared button, input, panel, dialog, and chrome elevation tokens.
+   */
+  public const DEFAULT_DEPTH = 'standard';
+
+  /**
    * Default dyslexia-friendly typography mode.
    *
    * Options: 'off', 'on'
@@ -160,22 +168,63 @@ final class UserPreferenceDefaults
   public const DEFAULT_ACCENT_PRESET = 'blue';
   public const ACCENT_PRESETS = [
     'red' => ['label' => 'Red', 'hex' => '#EF4444'],
-    'orange' => ['label' => 'Orange', 'hex' => '#F97316'],
-    'amber' => ['label' => 'Amber', 'hex' => '#F59E0B'],
-    'yellow' => ['label' => 'Yellow', 'hex' => '#EAB308'],
-    'lime' => ['label' => 'Lime', 'hex' => '#84CC16'],
-    'green' => ['label' => 'Green', 'hex' => '#22C55E'],
-    'emerald' => ['label' => 'Emerald', 'hex' => '#10B981'],
-    'teal' => ['label' => 'Teal', 'hex' => '#14B8A6'],
-    'cyan' => ['label' => 'Cyan', 'hex' => '#06B6D4'],
-    'sky' => ['label' => 'Sky', 'hex' => '#0EA5E9'],
-    'blue' => ['label' => 'Blue', 'hex' => '#3B82F6'],
-    'indigo' => ['label' => 'Indigo', 'hex' => '#6366F1'],
-    'violet' => ['label' => 'Violet', 'hex' => '#8B5CF6'],
-    'purple' => ['label' => 'Purple', 'hex' => '#A855F7'],
-    'fuchsia' => ['label' => 'Fuchsia', 'hex' => '#D946EF'],
+    'coral' => ['label' => 'Coral', 'hex' => '#F87171'],
     'rose' => ['label' => 'Rose', 'hex' => '#F43F5E'],
+    'salmon' => ['label' => 'Salmon', 'hex' => '#FB7185'],
+    'orange' => ['label' => 'Orange', 'hex' => '#F97316'],
+    'tangerine' => ['label' => 'Tangerine', 'hex' => '#FB923C'],
+    'peach' => ['label' => 'Peach', 'hex' => '#FDBA74'],
+    'amber' => ['label' => 'Amber', 'hex' => '#F59E0B'],
+    'gold' => ['label' => 'Gold', 'hex' => '#FBBF24'],
+    'yellow' => ['label' => 'Yellow', 'hex' => '#EAB308'],
+    'honey' => ['label' => 'Honey', 'hex' => '#FACC15'],
+    'pear' => ['label' => 'Pear', 'hex' => '#BEF264'],
+    'chartreuse' => ['label' => 'Chartreuse', 'hex' => '#A3E635'],
+    'lime' => ['label' => 'Lime', 'hex' => '#84CC16'],
+    'moss' => ['label' => 'Moss', 'hex' => '#65A30D'],
+    'green' => ['label' => 'Green', 'hex' => '#22C55E'],
+    'spring' => ['label' => 'Spring', 'hex' => '#4ADE80'],
+    'fern' => ['label' => 'Fern', 'hex' => '#16A34A'],
+    'jade' => ['label' => 'Jade', 'hex' => '#34D399'],
+    'emerald' => ['label' => 'Emerald', 'hex' => '#10B981'],
+    'mint' => ['label' => 'Mint', 'hex' => '#5EEAD4'],
+    'seafoam' => ['label' => 'Seafoam', 'hex' => '#2DD4BF'],
+    'lagoon' => ['label' => 'Lagoon', 'hex' => '#0D9488'],
+    'teal' => ['label' => 'Teal', 'hex' => '#14B8A6'],
+    'aqua' => ['label' => 'Aqua', 'hex' => '#22D3EE'],
+    'cyan' => ['label' => 'Cyan', 'hex' => '#06B6D4'],
+    'azure' => ['label' => 'Azure', 'hex' => '#38BDF8'],
+    'glacier' => ['label' => 'Glacier', 'hex' => '#7DD3FC'],
+    'sky' => ['label' => 'Sky', 'hex' => '#0EA5E9'],
+    'denim' => ['label' => 'Denim', 'hex' => '#0284C7'],
+    'cerulean' => ['label' => 'Cerulean', 'hex' => '#60A5FA'],
+    'blue' => ['label' => 'Blue', 'hex' => '#3B82F6'],
+    'cobalt' => ['label' => 'Cobalt', 'hex' => '#2563EB'],
+    'royal' => ['label' => 'Royal', 'hex' => '#1D4ED8'],
+    'periwinkle' => ['label' => 'Periwinkle', 'hex' => '#818CF8'],
+    'indigo' => ['label' => 'Indigo', 'hex' => '#6366F1'],
+    'iris' => ['label' => 'Iris', 'hex' => '#4F46E5'],
+    'lavender' => ['label' => 'Lavender', 'hex' => '#A78BFA'],
+    'violet' => ['label' => 'Violet', 'hex' => '#8B5CF6'],
+    'amethyst' => ['label' => 'Amethyst', 'hex' => '#7C3AED'],
+    'orchid' => ['label' => 'Orchid', 'hex' => '#C084FC'],
+    'purple' => ['label' => 'Purple', 'hex' => '#A855F7'],
+    'plum' => ['label' => 'Plum', 'hex' => '#9333EA'],
+    'fuchsia' => ['label' => 'Fuchsia', 'hex' => '#D946EF'],
+    'magenta' => ['label' => 'Magenta', 'hex' => '#E879F9'],
+    'bubblegum' => ['label' => 'Bubblegum', 'hex' => '#F472B6'],
+    'pink' => ['label' => 'Pink', 'hex' => '#EC4899'],
+    'hotpink' => ['label' => 'Hot Pink', 'hex' => '#DB2777'],
   ];
+
+  /**
+   * @return array<string, array{label: string, hex: string}>
+   */
+  public static function accentPresets(): array
+  {
+    return self::ACCENT_PRESETS;
+  }
+
   public const DEFAULT_HIGH_CONTRAST_ENABLED = '0';
   public const DEFAULT_REDUCED_MOTION_ENABLED = 'system';
   public const DEFAULT_SR_VERBOSITY = 'standard';
@@ -241,12 +290,4 @@ final class UserPreferenceDefaults
    * '3' = 3 days grace period (maximum)
    */
   public const DEFAULT_EDITING_GRACE_DAYS = '1';
-
-  /**
-   * @return array<string, array{label: string, hex: string}>
-   */
-  public static function accentPresets(): array
-  {
-    return self::ACCENT_PRESETS;
-  }
 }

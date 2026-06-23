@@ -103,6 +103,10 @@ final class Security
    */
   public static function generateVerificationCode(?int $length = null): string
   {
+    if ($length === PayCalCode::EMAIL_TOTAL_LENGTH) {
+      return PayCalCode::generateEmailVerificationCode();
+    }
+
     $set = \PayCal\Domain\Config\SystemConfig::PC_VERIFICATION_SET;
     $len = $length ?? \PayCal\Domain\Config\SystemConfig::PC_VERIFICATION_LENGTH;
     $maxLength = strlen($set);
@@ -111,6 +115,14 @@ final class Security
       $code .= $set[random_int(0, $maxLength - 1)];
     }
     return strtoupper($code);
+  }
+
+  /**
+   * Generate an account recovery code through the shared PayCal code helper.
+   */
+  public static function generateRecoveryCode(): string
+  {
+    return PayCalCode::generateRecoveryCode();
   }
 
   /**
@@ -133,4 +145,3 @@ final class Security
     header("Permissions-Policy: accelerometer=(), camera=(), microphone=(), geolocation=(), usb=(), unload=()");
   }
 }
-

@@ -228,6 +228,7 @@ final class CalendarLocaleTest extends TestCase
   {
     $projectRoot = dirname(__DIR__, 4);
     $calendarJs = (string) file_get_contents($projectRoot . '/html/js/calendar/calendar.js');
+    $calendarI18nJs = (string) file_get_contents($projectRoot . '/html/js/calendar/i18n.js');
     $index = (string) file_get_contents($projectRoot . '/html/index.php');
 
     $this->assertStringContainsString('WORK_ENTRY_COLUMN_HEADINGS', $calendarJs);
@@ -236,7 +237,7 @@ final class CalendarLocaleTest extends TestCase
     $this->assertStringContainsString('CALENDAR_MODAL_SELECT_SITE', $calendarJs);
     $this->assertStringContainsString('id="calendar-page-i18n"', $index);
     $this->assertStringContainsString('type="application/json"', $index);
-    $this->assertStringContainsString('calendar-page-i18n', $calendarJs);
+    $this->assertStringContainsString('calendar-page-i18n', $calendarI18nJs);
     $this->assertStringContainsString('formatCalendarLocaleDate', $calendarJs);
     $this->assertStringNotContainsString('>LOA<', $calendarJs);
 
@@ -244,6 +245,46 @@ final class CalendarLocaleTest extends TestCase
     $this->assertSame('Seleccionar sitio...', Strings::i18n('CALENDAR_MODAL_SELECT_SITE', 'es'));
     $this->assertSame('Select site...', Strings::i18n('CALENDAR_MODAL_SELECT_SITE', 'en'));
     $this->assertNotSame('Add Entry', Strings::i18n('CALENDAR_MODAL_ADD_ENTRY', 'fr'));
+  }
+
+  #[Test]
+  public function calendarClassicHelpersLoadBeforeCalendarScript(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $index = (string) file_get_contents($projectRoot . '/html/index.php');
+    $calendarJs = (string) file_get_contents($projectRoot . '/html/js/calendar/calendar.js');
+    $i18nJs = (string) file_get_contents($projectRoot . '/html/js/calendar/i18n.js');
+    $ariaEchoJs = (string) file_get_contents($projectRoot . '/html/js/calendar/aria-echo.js');
+    $platformJs = (string) file_get_contents($projectRoot . '/html/js/calendar/platform.js');
+
+    $this->assertStringContainsString('js/calendar/i18n.js', $index);
+    $this->assertStringContainsString('js/calendar/aria-echo.js', $index);
+    $this->assertStringContainsString('js/calendar/platform.js', $index);
+    $this->assertStringContainsString('js/calendar/calendar.js', $index);
+    $this->assertLessThan(
+      strpos($index, 'js/calendar/aria-echo.js'),
+      strpos($index, 'js/calendar/i18n.js'),
+    );
+    $this->assertLessThan(
+      strpos($index, 'js/calendar/platform.js'),
+      strpos($index, 'js/calendar/aria-echo.js'),
+    );
+    $this->assertLessThan(
+      strpos($index, 'js/calendar/calendar.js'),
+      strpos($index, 'js/calendar/platform.js'),
+    );
+    $this->assertStringContainsString('window.PayCalCalendarI18n = Object.freeze', $i18nJs);
+    $this->assertStringContainsString('pageI18nMap', $i18nJs);
+    $this->assertStringContainsString('window.PayCalAriaEcho = class AriaEcho', $ariaEchoJs);
+    $this->assertStringContainsString('static cadence(input', $ariaEchoJs);
+    $this->assertStringContainsString('window.PayCalCalendarPlatform = Object.freeze', $platformJs);
+    $this->assertStringContainsString('normalizePlatformToken', $platformJs);
+    $this->assertStringContainsString('window.PayCalAriaEcho.cadence', $calendarJs);
+    $this->assertStringContainsString('window.PayCalCalendarPlatform', $calendarJs);
+    $this->assertStringContainsString('window.PayCalCalendarI18n', $calendarJs);
+    $this->assertStringNotContainsString('function pageI18nMap()', $calendarJs);
+    $this->assertStringNotContainsString('window.PayCalAriaEcho = class AriaEcho', $calendarJs);
+    $this->assertStringNotContainsString('const PLATFORM_TOKENS =', $calendarJs);
   }
 
   #[Test]

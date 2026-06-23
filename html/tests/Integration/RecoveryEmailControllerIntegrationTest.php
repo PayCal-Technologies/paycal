@@ -5,6 +5,7 @@ namespace Tests\Integration;
 use PayCal\Controllers\RecoveryEmailController;
 use PayCal\Domain\Database;
 use PayCal\Domain\Constants\Keys;
+use PayCal\Domain\PayCalCode;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -237,15 +238,16 @@ final class RecoveryEmailControllerIntegrationTest extends TestCase
     
     // Store expired code (6 characters)
     $now = time();
+    $code = PayCalCode::appendChecksum('ABCD');
     Database::hset(Keys::recoveryEmailCode($uuid), [
-      'code_hash' => hash('sha256', 'ABC123'),
+      'code_hash' => hash('sha256', $code),
       'expires_at' => (string) ($now - 3600),
       'created_at' => (string) ($now - 3610),
       'verify_attempts' => '0',
     ]);
     
     $response = $this->runRecoveryEmailCall('verify', [
-      'code' => 'ABC123',
+      'code' => $code,
       'csrf_token' => $this->createSettingsCsrfToken($session),
     ], $session);
     

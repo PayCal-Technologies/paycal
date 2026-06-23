@@ -11,6 +11,9 @@ const DEFAULT_MESSAGES = {
   portalRedirect: 'Updating Premium status...',
   checkoutError: 'Unable to enable Premium right now.',
   portalError: 'Unable to update Premium status right now.',
+  planChangeWorking: 'Changing subscription plan...',
+  planChangeDone: 'Premium is now active.',
+  planChangeError: 'Unable to change subscription plan right now.',
   refreshReady: 'Billing status refreshed.',
   downgradeWorking: 'Disabling Premium...',
   downgradeDone: 'Premium has been disabled and your account is now on Free.',
@@ -28,6 +31,226 @@ const ACTIVE_BADGE_LABELS = {
 };
 
 const sleep = (delayMs) => new Promise((resolve) => window.setTimeout(resolve, delayMs));
+
+const animationFrame = () => new Promise((resolve) => {
+  if (typeof window.requestAnimationFrame === 'function') {
+    window.requestAnimationFrame(resolve);
+    return;
+  }
+
+  window.setTimeout(resolve, 0);
+});
+
+const resolveAudioFeedbackMode = () => {
+  const candidates = [
+    window.tts?.audio_feedback,
+    window.PC?.state?.audio_feedback,
+  ];
+
+  const mode = candidates.find((candidate) => typeof candidate === 'string' && candidate.trim() !== '');
+  return String(mode || 'all').trim().toLowerCase();
+};
+
+let businessUpgradeAudioContext = null;
+let businessUpgradeCelebrationActive = false;
+let businessUpgradeHighlightTimer = 0;
+let businessUpgradeCleanupTimer = 0;
+let businessUpgradeStatusResetTimer = 0;
+
+const getBusinessUpgradeAudioContext = async () => {
+  if (resolveAudioFeedbackMode() === 'none') {
+    return null;
+  }
+
+  const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+  if (typeof AudioContextConstructor !== 'function') {
+    return null;
+  }
+
+  try {
+    if (!businessUpgradeAudioContext || businessUpgradeAudioContext.state === 'closed') {
+      businessUpgradeAudioContext = new AudioContextConstructor();
+    }
+
+    const audioContext = businessUpgradeAudioContext;
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
+    }
+
+    return audioContext;
+  } catch {
+    return null;
+  }
+};
+
+const primeBusinessUpgradeAudio = () => {
+  void getBusinessUpgradeAudioContext();
+};
+
+const playBusinessUpgradeSound = async () => {
+  const audioContext = await getBusinessUpgradeAudioContext();
+  if (!audioContext || audioContext.state !== 'running') {
+    return;
+  }
+
+  try {
+    const now = audioContext.currentTime;
+    const masterGain = audioContext.createGain();
+    const configuredVolume = Number(window.tts?.voice_volume ?? 1);
+    const volume = Number.isFinite(configuredVolume) ? Math.min(Math.max(configuredVolume, 0), 1) : 1;
+
+    masterGain.gain.setValueAtTime(0.0001, now);
+    masterGain.gain.exponentialRampToValueAtTime(0.075 * volume, now + 0.30);
+    masterGain.gain.exponentialRampToValueAtTime(0.12 * volume, now + 0.95);
+    masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.42);
+    masterGain.connect(audioContext.destination);
+
+    const noiseBuffer = audioContext.createBuffer(1, Math.floor(audioContext.sampleRate * 1.45), audioContext.sampleRate);
+    const noiseData = noiseBuffer.getChannelData(0);
+    for (let index = 0; index < noiseData.length; index += 1) {
+      noiseData[index] = (Math.random() * 2) - 1;
+    }
+
+    const noiseSource = audioContext.createBufferSource();
+    const noiseFilter = audioContext.createBiquadFilter();
+    const noiseGain = audioContext.createGain();
+    noiseSource.buffer = noiseBuffer;
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.setValueAtTime(240, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(3400, now + 0.95);
+    noiseFilter.frequency.exponentialRampToValueAtTime(900, now + 1.42);
+    noiseFilter.Q.setValueAtTime(0.7, now);
+    noiseGain.gain.setValueAtTime(0.0001, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.72, now + 0.38);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.42);
+    noiseSource.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+    noiseSource.start(now);
+    noiseSource.stop(now + 1.45);
+
+    [
+      { frequency: 146.83, endFrequency: 98.00, start: 0.00, duration: 1.25, type: 'sine', gain: 0.18 },
+      { frequency: 440.00, endFrequency: 659.25, start: 0.66, duration: 0.62, type: 'triangle', gain: 0.16 },
+      { frequency: 880.00, endFrequency: 1174.66, start: 0.92, duration: 0.42, type: 'sine', gain: 0.10 },
+    ].forEach((note) => {
+      const oscillator = audioContext.createOscillator();
+      const noteGain = audioContext.createGain();
+      const startAt = now + note.start;
+      const stopAt = startAt + note.duration;
+
+      oscillator.type = note.type;
+      oscillator.frequency.setValueAtTime(note.frequency, startAt);
+      oscillator.frequency.exponentialRampToValueAtTime(note.endFrequency, stopAt);
+      noteGain.gain.setValueAtTime(0.0001, startAt);
+      noteGain.gain.exponentialRampToValueAtTime(note.gain, startAt + 0.08);
+      noteGain.gain.exponentialRampToValueAtTime(0.0001, stopAt);
+      oscillator.connect(noteGain);
+      noteGain.connect(masterGain);
+      oscillator.start(startAt);
+      oscillator.stop(stopAt + 0.02);
+    });
+
+    window.setTimeout(() => {
+      masterGain.disconnect();
+    }, 1700);
+  } catch {
+    // Browser autoplay policy can block return-page audio; visual confirmation remains authoritative.
+  }
+};
+
+const triggerBusinessUpgradeCelebration = () => {
+  if (!(document.body instanceof HTMLElement)) {
+    return;
+  }
+
+  if (businessUpgradeCelebrationActive) {
+    return;
+  }
+  businessUpgradeCelebrationActive = true;
+  window.clearTimeout(businessUpgradeHighlightTimer);
+  window.clearTimeout(businessUpgradeCleanupTimer);
+  window.clearTimeout(businessUpgradeStatusResetTimer);
+
+  const existingVortex = document.getElementById('business-upgrade-vortex');
+  if (existingVortex instanceof HTMLElement) {
+    existingVortex.remove();
+  }
+
+  const overlay = document.getElementById('business-upgrade-wormhole') ?? document.createElement('div');
+  overlay.id = 'business-upgrade-wormhole';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.className = '';
+  overlay.textContent = '';
+  ['wormhole-strand strand-1', 'wormhole-strand strand-2', 'wormhole-strand strand-3', 'wormhole-strand strand-4'].forEach((strandClass) => {
+    const strandEl = document.createElement('span');
+    strandEl.className = strandClass;
+    overlay.appendChild(strandEl);
+  });
+  const coreEl = document.createElement('span');
+  coreEl.className = 'wormhole-core';
+  overlay.appendChild(coreEl);
+  const flashEl = document.createElement('span');
+  flashEl.className = 'wormhole-flash';
+  overlay.appendChild(flashEl);
+
+  if (!overlay.parentElement) {
+    document.body.appendChild(overlay);
+  }
+
+  const status = document.getElementById('business-upgrade-status');
+  if (status instanceof HTMLElement) {
+    status.hidden = false;
+    status.classList.remove('is-highlighted');
+  }
+
+  void animationFrame().then(() => {
+    const targetRect = status instanceof HTMLElement
+      ? status.getBoundingClientRect()
+      : {
+        left: window.innerWidth / 2,
+        top: window.innerHeight / 2,
+        width: 1,
+        height: 1,
+      };
+    const targetX = targetRect.left + (targetRect.width / 2);
+    const targetY = targetRect.top + (targetRect.height / 2);
+    const widthScale = targetRect.width > 0 ? (targetRect.width / window.innerWidth) * 1.8 : 0.16;
+    const heightScale = targetRect.height > 0 ? (targetRect.height / window.innerHeight) * 1.8 : 0.16;
+    const targetScale = Math.min(Math.max(Math.max(widthScale, heightScale), 0.10), 0.28);
+
+    overlay.style.setProperty('--upgrade-target-x', `${targetX}px`);
+    overlay.style.setProperty('--upgrade-target-y', `${targetY}px`);
+    overlay.style.setProperty('--upgrade-target-width', `${targetRect.width}px`);
+    overlay.style.setProperty('--upgrade-target-height', `${targetRect.height}px`);
+    overlay.style.setProperty('--upgrade-target-scale', String(targetScale));
+
+    document.body.classList.remove('business-upgrade-celebrate');
+    overlay.classList.remove('is-landing');
+    void overlay.offsetWidth;
+    overlay.classList.add('is-landing');
+    document.body.classList.add('business-upgrade-celebrate');
+    void playBusinessUpgradeSound();
+
+    businessUpgradeHighlightTimer = window.setTimeout(() => {
+      if (status instanceof HTMLElement) {
+        status.classList.add('is-highlighted');
+      }
+    }, 5200);
+  });
+
+  businessUpgradeCleanupTimer = window.setTimeout(() => {
+    document.body.classList.remove('business-upgrade-celebrate');
+    overlay.remove();
+    businessUpgradeCelebrationActive = false;
+  }, 7000);
+
+  businessUpgradeStatusResetTimer = window.setTimeout(() => {
+    if (status instanceof HTMLElement) {
+      status.classList.remove('is-highlighted');
+    }
+  }, 7900);
+};
 
 const isRecord = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 
@@ -182,6 +405,50 @@ export const initializeBillingSection = async (options = {}) => {
   const checkoutCancelUrl = resolveCallbackUrl(cancelUrl);
   const portalReturnUrl = resolveCallbackUrl(returnUrl);
 
+  const startCheckout = async (plan, statusEl, button) => {
+    const csrfToken = resolveCsrfToken();
+    const { response, payload } = await fetchJson('/api/v1/billing/checkout-session', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        plan,
+        success_url: checkoutSuccessUrl,
+        cancel_url: checkoutCancelUrl,
+        csrf_token: csrfToken,
+      }),
+    }, {
+      retries: 0,
+    });
+    const data = extractPayloadData(payload);
+
+    if (response.ok && payload?.status === 'success') {
+      if (isStripeBilling) {
+        const checkoutUrl = typeof data.checkout_url === 'string' ? data.checkout_url : '';
+        if (checkoutUrl !== '') {
+          window.location.href = checkoutUrl;
+          return true;
+        }
+      }
+
+      await refreshSubscription({ silent: false });
+      setInlineStatus(statusEl, messages.success);
+      setScreenReaderStatus(messages.success);
+      if (subscription?.has_paid_plan) {
+        announcePaidActivation(subscription);
+      }
+      if (button instanceof HTMLButtonElement) {
+        button.disabled = false;
+      }
+      return true;
+    }
+
+    throw new Error(extractMessage(payload, messages.checkoutError));
+  };
+
   const resolveCsrfToken = () => {
     const candidates = [
       root.querySelector('#settings_csrf_token'),
@@ -219,6 +486,16 @@ export const initializeBillingSection = async (options = {}) => {
   const upgradeStatus = root.querySelector('#billing_upgrade_status');
   const portalBtn = root.querySelector('#billing_portal_btn');
   const portalStatus = root.querySelector('#billing_portal_status');
+  const downgradePremiumBtn = root.querySelector('#billing_downgrade_premium_btn');
+  const downgradePremiumStatus = root.querySelector('#billing_downgrade_premium_status');
+  const downgradeFreeBtn = root.querySelector('#billing_downgrade_free_btn');
+  const downgradeFreeStatus = root.querySelector('#billing_downgrade_free_status');
+  const downgradeFreeDialog = root.querySelector('#billing_downgrade_free_dialog');
+  const downgradeFreeDialogBody = root.querySelector('#billing_downgrade_free_dialog_body');
+  const downgradeFreeCancelBtn = root.querySelector('#billing_downgrade_free_cancel');
+  const downgradeFreeContinueBtn = root.querySelector('#billing_downgrade_free_continue');
+  const upgradeBusinessPlanBtn = root.querySelector('#billing_upgrade_business_plan_btn');
+  const upgradeBusinessPlanStatus = root.querySelector('#billing_upgrade_business_plan_status');
   const refreshBtn = root.querySelector('#billing_refresh_btn');
   const refreshBtnPremium = root.querySelector('#billing_refresh_btn_premium');
   const startDateEl = root.querySelector('#billing_start_date');
@@ -230,6 +507,7 @@ export const initializeBillingSection = async (options = {}) => {
   const dateTimePopoverEl = root.querySelector('#billing_datetime_popover');
   const dateTimePopoverRowsEl = root.querySelector('#billing_datetime_popover_rows');
   const downgradeHelpEl = root.querySelector('#billing_downgrade_help');
+  const downgradeZoneEl = root.querySelector('#billing_downgrade_zone');
   const statusBadge = root.querySelector('#billing_plan_status_badge');
   const downgradePhraseInput = root.querySelector('#billing_downgrade_phrase');
   const downgradeConfirmBtn = root.querySelector('#billing_downgrade_confirm');
@@ -420,10 +698,21 @@ export const initializeBillingSection = async (options = {}) => {
     }
   };
 
+  const setElementHidden = (element, hidden) => {
+    if (element instanceof HTMLElement) {
+      element.hidden = hidden;
+    }
+  };
+
   const setBillingState = (nextSubscription) => {
     const hasPaid = Boolean(nextSubscription?.has_paid_plan);
+    const isBusiness = Boolean(nextSubscription?.is_business);
     freeView.hidden = hasPaid;
     premiumView.hidden = !hasPaid;
+    setElementHidden(upgradeBusinessPlanBtn, !hasPaid || isBusiness);
+    setElementHidden(downgradePremiumBtn, !hasPaid || !isBusiness);
+    setElementHidden(downgradeFreeBtn, !hasPaid);
+    setElementHidden(portalBtn, !hasPaid);
 
     if (billingPanel instanceof HTMLElement) {
       const tier = typeof nextSubscription?.tier === 'string' ? nextSubscription.tier : 'free';
@@ -479,6 +768,9 @@ export const initializeBillingSection = async (options = {}) => {
       if (hasPaid && nextSubscription?.renewal_date && !nextSubscription?.is_pending_cancellation) {
         renewalDateEl.textContent = formatStartDate(nextSubscription.renewal_date);
         renewalLineEl.hidden = false;
+      } else if (hasPaid) {
+        renewalDateEl.textContent = isStripeBilling ? 'Stripe' : 'Local';
+        renewalLineEl.hidden = false;
       } else {
         renewalLineEl.hidden = true;
         renewalDateEl.textContent = '—';
@@ -503,8 +795,20 @@ export const initializeBillingSection = async (options = {}) => {
     if (downgradeHelpEl instanceof HTMLElement) {
       if (hasPaid && nextSubscription?.is_pending_cancellation) {
         downgradeHelpEl.textContent = messages.downgradeHelpScheduled || DEFAULT_MESSAGES.downgradeHelpScheduled;
+      } else if (nextSubscription?.is_business) {
+        downgradeHelpEl.textContent = 'This removes Business and Premium access immediately.';
+      } else if (hasPaid) {
+        downgradeHelpEl.textContent = 'This removes Premium access immediately.';
       } else {
         downgradeHelpEl.textContent = messages.downgradeHelpDefault || DEFAULT_MESSAGES.downgradeHelpDefault;
+      }
+    }
+
+    if (downgradeFreeDialogBody instanceof HTMLElement) {
+      if (nextSubscription?.is_business) {
+        downgradeFreeDialogBody.textContent = 'Free removes paid plan access immediately. You will lose Business workspace access, group viewing, sites, listings, roles, reports, aggregate analysis, audit tools, Premium reports, and paid export formats.';
+      } else {
+        downgradeFreeDialogBody.textContent = 'Free removes paid plan access immediately. You will lose Premium forecasting, additional export formats, advanced graphs, and financial reports.';
       }
     }
 
@@ -745,6 +1049,25 @@ export const initializeBillingSection = async (options = {}) => {
         replaceSearchParam('session_id', null);
       }
     }
+  } else if (billingQuery === 'business-upgrade') {
+    const currentSubscription = await refreshSubscription({ silent: true });
+    if (currentSubscription?.is_business) {
+      triggerBusinessUpgradeCelebration();
+      setScreenReaderStatus('Business unlocked.');
+    } else {
+      setScreenReaderStatus(messages.confirming);
+      const confirmedSubscription = await waitForPaidActivation();
+      if (confirmedSubscription?.is_business) {
+        triggerBusinessUpgradeCelebration();
+        setScreenReaderStatus('Business unlocked.');
+      } else {
+        setScreenReaderStatus(messages.delayed);
+      }
+    }
+
+    if (cleanupQueryParam) {
+      replaceSearchParam('billing', null);
+    }
   } else if (billingQuery === 'cancel') {
     setScreenReaderStatus(messages.cancel);
     if (cleanupQueryParam) {
@@ -762,45 +1085,7 @@ export const initializeBillingSection = async (options = {}) => {
       setInlineStatus(statusEl, messages.checkoutRedirect);
 
       try {
-        const csrfToken = resolveCsrfToken();
-        const { response, payload } = await fetchJson('/api/v1/billing/checkout-session', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            plan,
-            success_url: checkoutSuccessUrl,
-            cancel_url: checkoutCancelUrl,
-            csrf_token: csrfToken,
-          }),
-        }, {
-          retries: 0,
-        });
-        const data = extractPayloadData(payload);
-
-        if (response.ok && payload?.status === 'success') {
-          if (isStripeBilling) {
-            const checkoutUrl = typeof data.checkout_url === 'string' ? data.checkout_url : '';
-            if (checkoutUrl !== '') {
-              window.location.href = checkoutUrl;
-              return;
-            }
-          }
-
-          await refreshSubscription({ silent: false });
-          setInlineStatus(statusEl, messages.success);
-          setScreenReaderStatus(messages.success);
-          if (subscription?.has_paid_plan) {
-            announcePaidActivation(subscription);
-          }
-          button.disabled = false;
-          return;
-        }
-
-        throw new Error(extractMessage(payload, messages.checkoutError));
+        await startCheckout(plan, statusEl, button);
       } catch (error) {
         button.disabled = false;
         setInlineStatus(statusEl, error instanceof Error ? error.message : messages.checkoutError);
@@ -812,6 +1097,155 @@ export const initializeBillingSection = async (options = {}) => {
   bindUpgradeButton(root.querySelector('#billing_upgrade_business_btn'), root.querySelector('#billing_upgrade_business_status'), 'business');
   bindUpgradeButton(root.querySelector('#billing_upgrade_business_subscribed_btn'), root.querySelector('#billing_upgrade_business_subscribed_status'), 'business');
   bindUpgradeButton(upgradeBtn, upgradeStatus, 'premium');
+
+  const bindPlanChangeButton = (button, statusEl, plan = 'premium') => {
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      setInlineStatus(statusEl, messages.planChangeWorking);
+
+      try {
+        const csrfToken = resolveCsrfToken();
+        const { response, payload } = await fetchJson('/api/v1/billing/change-plan', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            plan,
+            proration_behavior: 'create_prorations',
+            csrf_token: csrfToken,
+          }),
+        }, {
+          retries: 0,
+        });
+
+        if (!response.ok || payload?.status !== 'success') {
+          throw new Error(extractMessage(payload, messages.planChangeError));
+        }
+
+        await refreshSubscription({ silent: false });
+        const doneMessage = plan === 'business' ? 'Business is now active.' : messages.planChangeDone;
+        setInlineStatus(statusEl, doneMessage);
+        setScreenReaderStatus(doneMessage);
+      } catch (error) {
+        setInlineStatus(statusEl, error instanceof Error ? error.message : messages.planChangeError);
+      } finally {
+        button.disabled = false;
+      }
+    });
+  };
+
+  bindPlanChangeButton(downgradePremiumBtn, downgradePremiumStatus, 'premium');
+
+  const bindPlanChangePortalButton = (button, statusEl, plan = 'business') => {
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    if (plan === 'business') {
+      button.addEventListener('pointerdown', primeBusinessUpgradeAudio, { passive: true });
+      button.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          primeBusinessUpgradeAudio();
+        }
+      });
+    }
+
+    button.addEventListener('click', async () => {
+      if (plan === 'business') {
+        primeBusinessUpgradeAudio();
+      }
+
+      button.disabled = true;
+      setInlineStatus(statusEl, messages.portalRedirect);
+
+      try {
+        const csrfToken = resolveCsrfToken();
+        const { response, payload } = await fetchJson('/api/v1/billing/plan-change-portal-session', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            plan,
+            return_url: portalReturnUrl,
+            csrf_token: csrfToken,
+          }),
+        }, {
+          retries: 0,
+        });
+        const data = extractPayloadData(payload);
+
+        if (response.ok && payload?.status === 'success') {
+          const portalUrl = typeof data.portal_url === 'string' ? data.portal_url : '';
+          if (portalUrl !== '') {
+            window.location.href = portalUrl;
+            return;
+          }
+        }
+
+        throw new Error(extractMessage(payload, messages.portalError));
+      } catch (error) {
+        button.disabled = false;
+        setInlineStatus(statusEl, error instanceof Error ? error.message : messages.portalError);
+      }
+    });
+  };
+
+  bindPlanChangePortalButton(upgradeBusinessPlanBtn, upgradeBusinessPlanStatus, 'business');
+
+  if (downgradeFreeBtn instanceof HTMLButtonElement) {
+    downgradeFreeBtn.addEventListener('click', () => {
+      setInlineStatus(downgradeFreeStatus, '');
+      if (typeof HTMLDialogElement !== 'undefined' && downgradeFreeDialog instanceof HTMLDialogElement && typeof downgradeFreeDialog.showModal === 'function') {
+        downgradeFreeDialog.showModal();
+        return;
+      }
+
+      const message = downgradeFreeDialogBody instanceof HTMLElement
+        ? downgradeFreeDialogBody.textContent || 'Free removes paid plan access immediately.'
+        : 'Free removes paid plan access immediately.';
+      if (window.confirm(message)) {
+        if (typeof HTMLDetailsElement !== 'undefined' && downgradeZoneEl instanceof HTMLDetailsElement) {
+          downgradeZoneEl.open = true;
+        }
+        if (downgradePhraseInput instanceof HTMLInputElement) {
+          downgradePhraseInput.focus();
+        }
+      }
+    });
+  }
+
+  if (downgradeFreeCancelBtn instanceof HTMLButtonElement) {
+    downgradeFreeCancelBtn.addEventListener('click', () => {
+      if (typeof HTMLDialogElement !== 'undefined' && downgradeFreeDialog instanceof HTMLDialogElement) {
+        downgradeFreeDialog.close('cancel');
+      }
+    });
+  }
+
+  if (downgradeFreeContinueBtn instanceof HTMLButtonElement) {
+    downgradeFreeContinueBtn.addEventListener('click', () => {
+      if (typeof HTMLDialogElement !== 'undefined' && downgradeFreeDialog instanceof HTMLDialogElement) {
+        downgradeFreeDialog.close('continue');
+      }
+      if (typeof HTMLDetailsElement !== 'undefined' && downgradeZoneEl instanceof HTMLDetailsElement) {
+        downgradeZoneEl.open = true;
+      }
+      if (downgradePhraseInput instanceof HTMLInputElement) {
+        downgradePhraseInput.focus();
+      }
+      setInlineStatus(downgradeFreeStatus, 'Type DOWNGRADE ME in Danger Zone to confirm.');
+    });
+  }
 
   if (portalBtn instanceof HTMLButtonElement) {
     portalBtn.addEventListener('click', async () => {

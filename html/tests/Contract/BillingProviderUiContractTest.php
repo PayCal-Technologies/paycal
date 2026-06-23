@@ -24,8 +24,30 @@ final class BillingProviderUiContractTest extends TestCase
     $billing = $this->readProjectFile('settings/_partials/panel_account_billing.php');
 
     $this->assertStringContainsString('<?php if ($isStripeBilling) { ?>', $billing);
-    $this->assertStringContainsString('<?php } else { ?>', $billing);
+    $this->assertStringNotContainsString('Stripe manages billing. PayCal does not store card details.', $billing);
     $this->assertStringContainsString('id="billing_downgrade_zone"', $billing);
+    $this->assertStringContainsString('id="billing_downgrade_premium_btn"', $billing);
+    $this->assertStringContainsString('id="billing_downgrade_free_btn"', $billing);
+    $this->assertStringContainsString('id="billing_downgrade_free_dialog"', $billing);
+    $this->assertStringContainsString('id="billing_upgrade_business_plan_btn"', $billing);
+    $this->assertStringContainsString('id="business-upgrade-status"', $billing);
+    $this->assertStringContainsString('Now upgraded to Business!', $billing);
+  }
+
+  public function testFreeSubscriptionPanelStaysMinimalWithDirectUpgradeActions(): void
+  {
+    $billing = $this->readProjectFile('settings/_partials/panel_account_billing.php');
+
+    $freeViewStart = strpos($billing, 'id="billing_free_view"');
+    $premiumViewStart = strpos($billing, 'id="billing_premium_view"');
+    $this->assertIsInt($freeViewStart);
+    $this->assertIsInt($premiumViewStart);
+
+    $freeView = substr($billing, $freeViewStart, $premiumViewStart - $freeViewStart);
+    $this->assertStringContainsString('No paid subscription', $freeView);
+    $this->assertStringContainsString('id="billing_upgrade_premium_btn"', $freeView);
+    $this->assertStringContainsString('id="billing_upgrade_business_btn"', $freeView);
+    $this->assertStringNotContainsString('<dt>Team</dt>', $freeView);
   }
 
   public function testBillingJsReadsProviderFromPanelDataset(): void
@@ -35,6 +57,9 @@ final class BillingProviderUiContractTest extends TestCase
     $this->assertStringContainsString('const billingProvider = billingPanel instanceof HTMLElement', $billingJs);
     $this->assertStringContainsString("String(billingPanel.dataset.billingProvider || 'public-toggle').trim().toLowerCase()", $billingJs);
     $this->assertStringContainsString("const isStripeBilling = billingProvider === 'stripe';", $billingJs);
+    $this->assertStringContainsString("fetchJson('/api/v1/billing/change-plan'", $billingJs);
+    $this->assertStringContainsString("bindPlanChangeButton(downgradePremiumBtn, downgradePremiumStatus, 'premium');", $billingJs);
+    $this->assertStringNotContainsString("message.includes('No active Stripe subscription')", $billingJs);
   }
 
   private function readProjectFile(string $relativePath): string

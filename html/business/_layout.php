@@ -3,9 +3,11 @@
 namespace PayCal\Domain;
 
 /**
- * Shared bootstrap for /business/* sub-pages (public extension preview shell).
+ * Shared bootstrap for /business/* sub-pages (excludes dashboard monolith).
  *
- * Expects $currentPage (Page enum value string) to be set before include.
+ * Expects $currentPage (Page enum value string, e.g. PAGE_BUSINESS_DETAILS)
+ * to be set before include. Use a string literal — config.php is not loaded yet,
+ * so Page::* cannot be referenced in the including file.
  */
 if (!isset($currentPage) || !is_string($currentPage) || $currentPage === '') {
   throw new \RuntimeException('Business sub-page requires $currentPage.');
@@ -15,11 +17,11 @@ require_once dirname(__DIR__) . '/config.php';
 require __DIR__ . '/_partials/i18n.php';
 
 Authentication::redirectHomeIfUnauthenticated();
-BusinessSurface::redirectHomeIfPageUnavailable(parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/business/'), PHP_URL_PATH) ?: '/business/');
+BusinessNav::requirePremiumAccess();
 
 require __DIR__ . '/_partials/vars.php';
 
-$titleKey = BusinessSurface::pageTitleKeyFor($currentPage);
+$titleKey = BusinessNav::pageTitleKeyFor($currentPage);
 if (!isset($pageTitle) || $pageTitle === '') {
   $pageTitle = Strings::i18n($titleKey) . ' - [' . Strings::i18n('SITE_NAME') . ']';
 }
@@ -28,9 +30,4 @@ if (!isset($pageLabel) || $pageLabel === '') {
 }
 
 require_once \PayCal\Domain\Config\Environment::appHome() . 'html/header.php';
-
-$cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
-$cspNonce = is_scalar($cspNonceRaw) ? (string) $cspNonceRaw : '';
-echo PHP_EOL . '<link rel="stylesheet" href="' . Render::cssURL('business') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL;
-
 require __DIR__ . '/_context_header.php';

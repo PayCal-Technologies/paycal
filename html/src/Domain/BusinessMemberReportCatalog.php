@@ -8,14 +8,29 @@ namespace PayCal\Domain;
 final class BusinessMemberReportCatalog
 {
   /**
-   * @return array<int, array{key: string, label: string, scope: string}>
+   * @return array<int, array{key: string, label: string, scope: string, description: string}>
    */
   public static function reports(): array
   {
     return [
-      ['key' => 'ytd', 'label' => 'Yearly work summary', 'scope' => 'yearly'],
-      ['key' => 'monthly', 'label' => 'Monthly work summary', 'scope' => 'monthly'],
-      ['key' => 'daily', 'label' => 'Daily work summary', 'scope' => 'daily'],
+      [
+        'key' => 'ytd',
+        'label' => 'Yearly work summary',
+        'scope' => 'yearly',
+        'description' => 'Includes hours, sites, gross totals, allowances, and yearly totals.',
+      ],
+      [
+        'key' => 'monthly',
+        'label' => 'Monthly work summary',
+        'scope' => 'monthly',
+        'description' => 'Groups member work by month with hours, sites, gross totals, and allowances.',
+      ],
+      [
+        'key' => 'daily',
+        'label' => 'Daily work summary',
+        'scope' => 'daily',
+        'description' => 'Lists daily work entries with sites, hours, allowances, and daily totals.',
+      ],
     ];
   }
 
@@ -25,8 +40,8 @@ final class BusinessMemberReportCatalog
   public static function formats(): array
   {
     return [
-      ['key' => 'csv', 'label' => 'CSV (browser convenience)'],
-      ['key' => 'txt', 'label' => 'TXT (browser convenience)'],
+      ['key' => 'csv', 'label' => 'CSV'],
+      ['key' => 'txt', 'label' => 'TXT'],
       ['key' => 'xlsx', 'label' => 'XLSX'],
       ['key' => 'pdf', 'label' => 'PDF'],
     ];

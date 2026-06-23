@@ -67,9 +67,9 @@ Orphaned Work Recovery erkennt nicht mehr verknüpfte Arbeitseinträge nach Site
 
 ## Premium: Zusammenarbeit ohne Kompromisse
 
-Premium-Organisationsfunktionen bieten stärkere operative Steuerung, ohne die Privatsphäre auf Nutzerebene aufzugeben.
+Premium-Business-Funktionen bieten stärkere operative Steuerung, ohne die Privatsphäre auf Nutzerebene aufzugeben.
 
-◆ Organization Hub für Arbeitgeber- und Team-Workflows
+◆ Business Hub für Arbeitgeber- und Team-Workflows
 ◆ Verfeinertes Rollenmodell mit granularen Berechtigungen
 ◆ Delegierte Kalenderansichten für Management-Überblick
 ◆ DEK Auto-Bootstrap für sofortige Verschlüsselungsbereitschaft beim Seitenaufruf

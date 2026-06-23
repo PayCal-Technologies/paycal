@@ -63,6 +63,18 @@ final class BusinessMemberReportExportService
       return $this->fail('invalid_format', 'Unsupported member report export format.');
     }
 
+    if ($format !== 'pdf' && !SubscriptionRepository::isPremiumActive($actorUUID)) {
+      $this->audit($businessId, 'business.member.report.export.denied', $actorUUID, [
+        'target_member_uuid' => $memberUUID,
+        'report_scope' => $scope,
+        'format' => $format,
+        'year' => (string) $year,
+        'result' => 'denied',
+        'reason' => 'premium_required',
+      ]);
+      return $this->fail('premium_required', 'Premium subscription required for this export format.');
+    }
+
     $protectedRead = (new BusinessProtectedDataAccess())->readMemberWork(
       $actorUUID,
       $businessId,

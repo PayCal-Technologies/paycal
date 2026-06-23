@@ -257,9 +257,9 @@ final class ForensicTaxSupport
     return $result;
   }
 
-  public static function formatTemplateCurrency(float $dollars): string
+  public static function formatDataGridCurrency(float $dollars): string
   {
-    return '&dollar;' . number_format($dollars, 2, '.', ',');
+    return '$' . number_format($dollars, 2, '.', ',');
   }
 
   /**

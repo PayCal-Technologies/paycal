@@ -1,11 +1,11 @@
-__PC_NAME__ Account Recovery Link
+__PC_NAME__ <?php echo Strings::i18n('EMAIL_ACCOUNT_RECOVERY_LINK_NOUN'); ?>
 =================================
 
-Hi __USER_NAME__,
+<?php echo Strings::i18n('EMAIL_HI'); ?> __USER_NAME__,
 
-Open this link to continue account recovery and register a new passkey:
+<?php echo Strings::i18n('EMAIL_ACCOUNT_RECOVERY_LINK_OPEN'); ?>
 __RECOVERY_LINK__
 
-This link expires in __EXPIRES_IN_MINUTES__ minutes and can only be used once.
+<?php echo Strings::i18n('EMAIL_ACCOUNT_RECOVERY_LINK_EXPIRES_PREFIX'); ?> __EXPIRES_IN_MINUTES__ <?php echo Strings::i18n('EMAIL_MINUTES'); ?> <?php echo Strings::i18n('EMAIL_ACCOUNT_RECOVERY_LINK_EXPIRES_SUFFIX'); ?>
 
-If you did not request this, you can ignore this email.
+<?php echo Strings::i18n('EMAIL_IF_NOT_REQUESTED_IGNORE'); ?>

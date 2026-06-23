@@ -137,6 +137,10 @@ class TestsPageController
       $lastRun = ($content !== false) ? json_decode($content, true) : null;
     }
     $lastRun = self::normalizeAssoc(is_array($lastRun) ? $lastRun : null);
+    if ($lastRun !== null) {
+      unset($lastRun['output']);
+      $lastRun['rawOutputStored'] = false;
+    }
 
     // Generate phase progress HTML
     $phaseProgressHtml = self::generatePhaseProgressHtml($metrics);
@@ -394,16 +398,8 @@ class TestsPageController
     $html .= '<div class="stat"><label>' . self::batchI18n('TESTS_DASHBOARD_DURATION') . ':</label> <span>' . Strings::formatLocalizedNumber($duration, 2, 2) . 's</span></div>';
     $html .= '</div>';
 
-    if (!empty($lastRun['output'])) {
-      $html .= '<details class="test_output">';
-      $html .= '<summary>' . self::batchI18n('TESTS_DASHBOARD_VIEW_OUTPUT') . '</summary>';
-      $html .= '<pre>'.htmlspecialchars(self::asString($lastRun['output'])).'</pre>';
-      $html .= '</details>';
-    }
-
     $html .= '</div>';
 
     return $html;
   }
 }
-

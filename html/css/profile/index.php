@@ -17,9 +17,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 }
 
 #main:has(#panel-billing) > section.panel {
-  width: min(80vw, 1240px);
-  margin-left: auto;
-  margin-right: auto;
+  width: var(--app-content-width, 100%);
+  margin-left: 0;
+  margin-right: 0;
   padding: var(--gap-md) var(--gap-lg);
 }
 
@@ -204,12 +204,30 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 #panel-internationalization .profile_i18n_preview_rows {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem 1rem;
+  gap: 0.45rem 1rem;
 }
 
-#panel-internationalization .profile_i18n_preview_rows > div {
+#panel-internationalization .profile_i18n_preview_pair {
+  grid-template-columns: minmax(7rem, 38%) minmax(0, 1fr);
+  gap: 0.25rem;
+  align-items: baseline;
+  padding: 0;
   font-size: var(--font-sm, 1rem);
   line-height: 1.4;
+}
+
+#panel-internationalization .profile_i18n_preview_pair .item_label {
+  color: color-mix(in srgb, var(--panel-text, #fff) 82%, transparent);
+  font-size: var(--font-xs, 0.75rem);
+  letter-spacing: 0;
+}
+
+#panel-internationalization .profile_i18n_preview_pair .item_value {
+  display: block;
+  justify-items: start;
+  text-align: left;
+  color: var(--panel-text, var(--text, #fff));
+  word-break: break-word;
 }
 
 #panel-internationalization:has(.currency_finder[aria-expanded="true"]),
@@ -578,7 +596,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   border: 1px solid var(--color-border, var(--border, #2a2a2a));
   background: var(--dialog-bg, var(--panel-bg, #151515));
   color: var(--dialog-text, var(--color-text, var(--text, #f5f5f5)));
-  box-shadow: var(--dialog-shadow, var(--shadow-md, 0 8px 18px rgba(0, 0, 0, 0.28)));
+  box-shadow: var(--depth-dialog-shadow, var(--dialog-shadow, var(--shadow-md, 0 8px 18px rgba(0, 0, 0, 0.28))));
   padding: 0.65rem 0.75rem;
   display: grid;
   gap: 0.55rem;
@@ -682,7 +700,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   color: var(--text, #f5f5f5);
   font-weight: 700;
   text-decoration: none;
-  transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+  transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
 }
 
 #panel-billing .billing_businesses_link a:hover,
@@ -690,7 +708,6 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   background: color-mix(in srgb, var(--theme-signature-color, #3fa8ff) 24%, var(--panel-bg, #151515));
   border-color: color-mix(in srgb, var(--theme-signature-color, #3fa8ff) 72%, #9ccc65);
   box-shadow: 0 8px 18px color-mix(in srgb, var(--theme-signature-color, #3fa8ff) 20%, transparent);
-  transform: translateY(-1px);
 }
 
 #panel-billing .billing_businesses_link a:focus-visible {
@@ -734,94 +751,180 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   width: auto;
 }
 
-#panel-danger-zone h2,
-#panel-danger-zone h3 {
+#billing_downgrade_zone .btn_delete {
+  background: #c91515;
+  background-image: none;
+  border-color: #ff5252;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+#billing_downgrade_zone .btn_delete:hover,
+#billing_downgrade_zone .btn_delete:focus-visible {
+  background: #e02020;
+  background-image: none;
+  border-color: #ff7a7a;
+  box-shadow: none;
+}
+
+#panel-danger-zone.settings_danger_zone {
+  --settings-danger-bg: color-mix(in srgb, var(--panel-bg, #0b1722) 94%, #240707);
+  --settings-danger-card-bg: color-mix(in srgb, var(--panel-bg, #0b1722) 88%, #170507);
+  --settings-danger-border: color-mix(in srgb, #ff4f4f 42%, var(--panel-border, #26394a));
+  --settings-danger-red: #d61515;
+  --settings-danger-red-hover: #e02020;
+}
+
+#panel-danger-zone .settings_danger_header {
+  display: grid;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+#panel-danger-zone .settings_danger_header h2 {
   color: #ff6a6a;
+  text-shadow: none;
 }
 
-#panel-danger-zone h2 {
-  text-shadow: 0 0 12px rgba(255, 59, 59, 0.22);
+#panel-danger-zone .settings_danger_intro {
+  margin: 0;
+  color: color-mix(in srgb, var(--panel-text, #fff) 84%, transparent);
+  font-size: var(--font-sm);
+  line-height: 1.35;
 }
 
-#panel-danger-zone .danger_zone_intro {
-  text-align: center;
-  margin: 0.35rem 0 0;
-}
-
-#panel-danger-zone .danger_zone_actions {
+#panel-danger-zone .settings_danger_actions {
   display: grid;
-  gap: 1rem;
-  margin-top: 0.8rem;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
 }
 
-#panel-danger-zone .danger_zone_row {
-  padding-top: 0.9rem;
-  border-top: 1px solid color-mix(in srgb, #ff4f4f 22%, var(--border, #2a2a2a));
+#panel-danger-zone .settings_danger_action {
   display: grid;
-  gap: 0.5rem;
-}
-
-#panel-danger-zone .danger_zone_text .help_text {
+  gap: 0.7rem;
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid var(--settings-danger-border);
+  border-radius: 8px;
+  background: var(--settings-danger-card-bg);
+  box-sizing: border-box;
   text-align: center;
-  font-size: 0.88rem;
-  opacity: 0.82;
 }
 
-#panel-danger-zone .danger_confirm_pill {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  justify-content: center;
-  flex-wrap: wrap;
+#panel-danger-zone .settings_danger_action_text {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: center;
 }
 
-#panel-danger-zone .danger_confirm_pill > span {
-  white-space: nowrap;
+#panel-danger-zone .settings_danger_action_text h3 {
+  margin: 0;
+  color: #ff8b8b;
+  font-size: var(--font-md);
+  line-height: 1.2;
 }
 
-#panel-danger-zone .danger_confirm_pill input[type="text"] {
-  flex: 0 1 22rem;
+#panel-danger-zone .settings_danger_action_text p {
+  max-width: 32rem;
+  margin: 0;
+  color: color-mix(in srgb, var(--panel-text, #fff) 82%, transparent);
+  font-size: var(--font-sm);
+  line-height: 1.35;
 }
 
-#panel-danger-zone .danger_confirm_pill .btn_delete {
-  flex: 0 0 auto;
-  width: auto;
+#panel-danger-zone .settings_danger_confirm_form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.45rem;
+  width: 100%;
+  margin: 0;
 }
 
-#panel-danger-zone .danger_confirm_pill form {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  flex: 0 1 auto;
+#panel-danger-zone .settings_danger_phrase_label {
+  display: block;
+  width: 100%;
+  margin: 0;
+  color: var(--panel-text, #fff);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
 }
 
-#panel-danger-zone .danger_confirm_pill form input[type="text"] {
-  flex: 0 1 22rem;
-  min-width: 14rem;
+#panel-danger-zone .settings_danger_phrase_label code {
+  color: #ffffff;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  letter-spacing: 0.08em;
 }
 
-.danger_confirm_pill input[type="text"] {
-  border: 1px solid color-mix(in srgb, #ff4f4f 48%, var(--input-border, #3a3a3a));
+#panel-danger-zone .settings_danger_confirm_form input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  height: 2.18rem !important;
+  min-height: 2.18rem !important;
+  max-height: 2.18rem;
+  margin: 0 !important;
+  padding: 0.36rem 0.65rem !important;
+  border: 1px solid var(--settings-danger-border);
+  border-radius: var(--radius-input, 6px);
+  background: color-mix(in srgb, var(--panel-bg, #0b1722) 94%, #000);
+  color: var(--panel-text, #fff);
+  box-shadow: none;
+  box-sizing: border-box;
+  text-align: center;
+  text-transform: uppercase;
 }
 
-.danger_confirm_pill input[type="text"]:focus-visible {
+#panel-danger-zone .settings_danger_confirm_form input[type="text"]:focus-visible {
   outline: 2px solid color-mix(in srgb, #ff4f4f 78%, #ffffff);
   outline-offset: 1px;
 }
 
-#panel-danger-zone .btn_delete,
-#billing_downgrade_zone .btn_delete {
-  background: #c91515;
-  border-color: #ff5252;
+#panel-danger-zone .settings_danger_confirm_form .btn_delete {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 2.3rem;
+  margin: 0 !important;
+  padding: 0.36rem 0.72rem !important;
+  border: 1px solid #ff5252;
+  border-radius: var(--radius-button, 6px);
+  background: var(--settings-danger-red) !important;
+  background-color: var(--settings-danger-red) !important;
+  background-image: none !important;
+  box-shadow: none !important;
   color: #ffffff;
+  filter: none !important;
+  font: inherit;
+  font-weight: 800;
+  text-align: center;
+  text-shadow: none;
 }
 
-#panel-danger-zone .btn_delete:hover,
-#panel-danger-zone .btn_delete:focus-visible,
-#billing_downgrade_zone .btn_delete:hover,
-#billing_downgrade_zone .btn_delete:focus-visible {
-  background: #e02020;
+#panel-danger-zone .settings_danger_confirm_form .btn_delete:hover,
+#panel-danger-zone .settings_danger_confirm_form .btn_delete:focus-visible {
+  background: var(--settings-danger-red-hover) !important;
+  background-color: var(--settings-danger-red-hover) !important;
+  background-image: none !important;
   border-color: #ff7a7a;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+#panel-danger-zone .settings_danger_status {
+  margin: 0;
+  text-align: center;
+}
+
+#panel-danger-zone .settings_danger_status:empty {
+  display: none;
 }
 
 /* Tablet: single-column grids */
@@ -1072,33 +1175,38 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     padding: 0.4rem 0.45rem;
   }
 
-  #panel-danger-zone .danger_zone_actions {
-    gap: 0.45rem;
-    margin-top: 0.35rem;
+  #panel-danger-zone .settings_danger_actions {
+    gap: 0.55rem;
+    margin-top: 0.55rem;
   }
 
-  #panel-danger-zone .danger_zone_row {
-    padding-top: 0.45rem;
-    gap: 0.3rem;
+  #panel-danger-zone .settings_danger_action {
+    gap: 0.55rem;
+    padding: 0.65rem;
   }
 
-  #panel-danger-zone .danger_zone_text .help_text,
-  #panel-danger-zone .danger_zone_intro {
-    text-align: left;
+  #panel-danger-zone .settings_danger_intro,
+  #panel-danger-zone .settings_danger_action_text p {
     font-size: 0.82rem;
   }
 
-  #panel-danger-zone .danger_confirm_pill,
-  #billing_downgrade_zone .danger_confirm_pill {
-    gap: 0.35rem;
-    justify-content: flex-start;
+  #panel-danger-zone .settings_danger_confirm_form input[type="text"] {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    text-align: center;
   }
 
-  #panel-danger-zone .danger_confirm_pill input[type="text"],
+  #billing_downgrade_zone .danger_confirm_pill {
+    gap: 0.35rem;
+    justify-content: center;
+  }
+
   #billing_downgrade_zone .danger_confirm_pill input[type="text"] {
     flex: 1 1 100%;
     min-width: 0;
     max-width: none;
     text-align: left;
   }
+
 }

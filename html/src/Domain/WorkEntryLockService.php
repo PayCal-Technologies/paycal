@@ -233,11 +233,6 @@ final class WorkEntryLockService
   {
     $deleted = 0;
 
-    // Remove legacy key from earlier fixed-TTL implementation.
-    $legacyKey = Keys::LOCK_BOUNDARY . ":{$userUUID}";
-    $deleted += Database::del($legacyKey);
-
-    // Remove current date-scoped cache entries.
     $pattern = Keys::LOCK_BOUNDARY . ":{$userUUID}:*";
     foreach (Database::scanKeys($pattern) as $cacheKey) {
       $deleted += Database::unlink($cacheKey);

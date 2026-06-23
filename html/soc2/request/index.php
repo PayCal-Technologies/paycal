@@ -223,7 +223,7 @@ function soc2NdaHtml(string $recipientName = '[Full Legal Name]', string $effect
       <p>Name: ______________________<br>Title: ______________________<br>Signature: __________________<br>Date: _______________________</p>
       <hr style="margin:18px 0;border:none;border-top:1px solid #d9e2ec;">
       <p><strong>Recipient</strong></p>
-      <p>Name: ______________________<br>Title: ______________________<br>Organization: _______________<br>Signature: __________________<br>Date: _______________________</p>
+      <p>Name: ______________________<br>Title: ______________________<br>Business: ___________________<br>Signature: __________________<br>Date: _______________________</p>
     </div>
 
     <h3>14. Optional Addendum (SOC 2 Access Scope)</h3>
@@ -299,7 +299,7 @@ function soc2NdaText(string $recipientName = '[Full Legal Name]', string $effect
   Recipient
   Name: __________________________
   Title: __________________________
-  Organization: ____________________
+  Business: ________________________
   Signature: ______________________
   Date: ___________________________
 
@@ -337,7 +337,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors[] = 'Provide a valid email address.';
   }
   if ($company === '') {
-    $errors[] = 'Company or organization name is required.';
+    $errors[] = 'Company or business name is required.';
   }
   if ($purpose === '') {
     $errors[] = 'Purpose is required.';
@@ -425,7 +425,7 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . \PayCal\Domain\Render::cssURL('
             <input id="soc2-email" name="email" type="email" required maxlength="254" autocomplete="email">
           </p>
           <p>
-            <label for="soc2-company"><strong>Company / Organization</strong></label><br>
+            <label for="soc2-company"><strong>Company / Business</strong></label><br>
             <input id="soc2-company" name="company" type="text" required maxlength="180" autocomplete="organization">
           </p>
           <p>

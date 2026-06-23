@@ -4,14 +4,24 @@
   // Entry: openMembersPage via refreshIndex; loadBusinessMembersGrid fetches the datagrid.
 
   const BUSINESS_MEMBERS_LENS_PREFIX = '[PayCal Lens][business/members]';
+  const MEMBERS_KEYBOARD_PAGE_STEP = 25;
   const MEMBER_REPORT_CONFIRM_THRESHOLD = 25;
   const MEMBER_REPORT_REPEAT_COOLDOWN_MS = 3000;
-  const MEMBER_REPORT_TEXT_ENCODER = new TextEncoder();
   let memberReportBatchRunning = false;
   let memberReportLastStartedAt = 0;
   let memberReportLastBatch = null;
+  let memberReportAllMembers = [];
+  let memberReportSelectionMembers = [];
+  let memberGroupOptionsCache = null;
+  let membersKeyboardActiveRowId = '';
 
   const isBusinessMembersSubPage = () => resolveBusinessSubPage() === 'members';
+  const safeAttr = (value) => safeText(value).replace(/'/g, '&#039;');
+  const setText = (element, value) => {
+    if (element instanceof HTMLElement) {
+      element.textContent = String(value ?? '');
+    }
+  };
 
   const resolveBusinessMembersLensBootOptions = () => {
     const fromWindow = window.__PAYCAL_LENS_PERF__?.['business/members'];
@@ -151,17 +161,25 @@
     elements.membersGridContainer = document.getElementById('businesses-members-grid');
     elements.membersGridStatus = document.getElementById('businesses_members_grid_sr_status');
     elements.membersBulkToolbar = document.getElementById('business_members_bulk_toolbar');
-    elements.membersSelectAllButton = document.getElementById('business_members_select_all');
+    elements.membersSelectAllCheckbox = document.getElementById('business_members_select_all_checkbox');
     elements.membersClearSelectionButton = document.getElementById('business_members_clear_selection');
     elements.membersSelectionCount = document.getElementById('business_members_selection_count');
     elements.membersSelectionBadgeCount = document.getElementById('business_members_selection_badge_count');
-    elements.membersMetricSelected = document.getElementById('business_members_metric_selected');
-    elements.membersApplySiteSelect = document.getElementById('business_members_apply_site_select');
-    elements.membersApplyWorkSiteButton = document.getElementById('business_members_apply_work_site');
     elements.membersBulkStatus = document.getElementById('business_members_bulk_status');
+    elements.membersBulkGroupControl = document.getElementById('business_members_bulk_group_control');
+    elements.membersBulkGroupToggle = document.getElementById('business_members_bulk_group_toggle');
+    elements.membersBulkGroupMenu = document.getElementById('business_members_bulk_group_menu');
     elements.membersReportToggle = document.getElementById('business_members_report_toggle');
     elements.membersReportPanel = document.getElementById('business_members_report_panel');
+    elements.membersReportClose = document.getElementById('business_members_report_close');
+    elements.membersReportMemberFilter = document.getElementById('business_members_report_member_filter');
+    elements.membersReportMemberAdd = document.getElementById('business_members_report_member_add');
+    elements.membersReportMemberPills = document.getElementById('business_members_report_member_pills');
+    elements.membersReportMemberEmpty = document.getElementById('business_members_report_member_empty');
+    elements.membersReportMemberAddResults = document.getElementById('business_members_report_member_add_results');
+    elements.membersReportSelectedCount = document.getElementById('business_members_report_selected_count');
     elements.membersReportType = document.getElementById('business_members_report_type');
+    elements.membersReportDescription = document.getElementById('business_members_report_description');
     elements.membersReportFormat = document.getElementById('business_members_report_format');
     elements.membersReportDelivery = document.getElementById('business_members_report_delivery');
     elements.membersReportYear = document.getElementById('business_members_report_year');
@@ -184,10 +202,12 @@
     elements.membersMetricPending = document.getElementById('business_members_metric_pending');
     elements.membersMetricPendingChip = document.getElementById('business_members_metric_pending_chip');
     elements.membersMetricPendingStatic = document.getElementById('business_members_metric_pending_static');
+    elements.membersInfoButton = document.getElementById('business_members_info_button');
+    elements.membersInfoDialog = document.getElementById('business_members_info_dialog');
   };
 
   const formatMembersPendingSummaryLabel = (count = 0) => (
-    T.membersPendingSummary.replace('%d', String(Math.max(0, Number(count || 0))))
+    formatPhpTemplate(T.membersPendingSummary, [Math.max(0, Number(count || 0))])
   );
 
   const formatMembersPendingMetricAria = (count = 0) => {
@@ -196,15 +216,205 @@
       return T.pending;
     }
 
-    return T.membersPendingMetricAria
-      .replace('%d', String(normalized))
-      .replace('%s', normalized === 1 ? '' : 's');
+    return formatPhpTemplate(T.membersPendingMetricAria, [
+      normalized,
+      normalized === 1 ? '' : 's',
+    ]);
   };
 
   const announceMembersPendingStatus = (message) => {
-    if (elements.membersPendingStatus instanceof HTMLElement) {
-      elements.membersPendingStatus.textContent = String(message || '');
+    setPlainStatusText(elements.membersPendingStatus, message);
+  };
+
+  const membersGridRowSelector = '[data-grid="business-members"] .datagrid_body .datagrid_row:not(.datagrid_row_empty)';
+
+  const getMembersGridRows = () => {
+    syncMembersGridElementRefs();
+    if (!(elements.membersGridContainer instanceof HTMLElement)) {
+      return [];
     }
+
+    return Array.from(elements.membersGridContainer.querySelectorAll(membersGridRowSelector))
+      .filter((row) => row instanceof HTMLElement && !row.hidden);
+  };
+
+  const getMembersGridSearchInput = () => {
+    syncMembersGridElementRefs();
+    if (!(elements.membersGridContainer instanceof HTMLElement)) {
+      return null;
+    }
+
+    const searchInput = elements.membersGridContainer.querySelector('[data-grid="business-members"] .datagrid_search');
+    return searchInput instanceof HTMLInputElement ? searchInput : null;
+  };
+
+  const scrollMembersPageToTop = () => {
+    const scrollingElement = document.scrollingElement || document.documentElement;
+    if (scrollingElement instanceof Element && typeof scrollingElement.scrollTo === 'function') {
+      scrollingElement.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      return;
+    }
+
+    window.scrollTo(0, 0);
+  };
+
+  const scrollMembersPageToBottom = () => {
+    const scrollingElement = document.scrollingElement || document.documentElement;
+    const maxTop = scrollingElement instanceof Element
+      ? Math.max(0, scrollingElement.scrollHeight - scrollingElement.clientHeight)
+      : Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    if (scrollingElement instanceof Element && typeof scrollingElement.scrollTo === 'function') {
+      scrollingElement.scrollTo({ top: maxTop, left: 0, behavior: 'auto' });
+      return;
+    }
+
+    window.scrollTo(0, maxTop);
+  };
+
+  const focusMembersGridSearch = (scrollToTop = false) => {
+    const searchInput = getMembersGridSearchInput();
+    if (!(searchInput instanceof HTMLInputElement)) {
+      return false;
+    }
+
+    if (scrollToTop) {
+      scrollMembersPageToTop();
+    }
+
+    searchInput.focus({ preventScroll: true });
+    return true;
+  };
+
+  const focusMembersGridSearchSoon = (scrollToTop = false) => {
+    window.requestAnimationFrame(() => {
+      focusMembersGridSearch(scrollToTop);
+    });
+  };
+
+  const memberRowId = (row) => (
+    row instanceof HTMLElement
+      ? String(row.dataset.memberId || row.dataset.id || '').trim()
+      : ''
+  );
+
+  const resolveMembersGridRowFromTarget = (target) => {
+    if (!(target instanceof Element)) {
+      return null;
+    }
+
+    const row = target.closest('.businesses_member_row_clickable, .datagrid_row');
+    return row instanceof HTMLElement && !row.classList.contains('datagrid_row_empty') ? row : null;
+  };
+
+  const syncMembersGridKeyboardRows = (preferredRow = null) => {
+    const rows = getMembersGridRows();
+    if (rows.length === 0) {
+      membersKeyboardActiveRowId = '';
+      return;
+    }
+
+    let activeRow = preferredRow instanceof HTMLElement && rows.includes(preferredRow)
+      ? preferredRow
+      : null;
+
+    if (!(activeRow instanceof HTMLElement)) {
+      const focusedRow = resolveMembersGridRowFromTarget(document.activeElement);
+      activeRow = focusedRow instanceof HTMLElement && rows.includes(focusedRow)
+        ? focusedRow
+        : null;
+    }
+
+    if (!(activeRow instanceof HTMLElement) && membersKeyboardActiveRowId !== '') {
+      activeRow = rows.find((row) => memberRowId(row) === membersKeyboardActiveRowId) || null;
+    }
+
+    if (!(activeRow instanceof HTMLElement)) {
+      activeRow = rows[0];
+    }
+
+    rows.forEach((row) => {
+      row.tabIndex = row === activeRow ? 0 : -1;
+      const checkbox = row.querySelector('.business_members_row_checkbox');
+      row.setAttribute('aria-selected', checkbox instanceof HTMLInputElement && checkbox.checked ? 'true' : 'false');
+    });
+
+    membersKeyboardActiveRowId = memberRowId(activeRow);
+  };
+
+  const focusMembersGridRow = (row, options = {}) => {
+    if (!(row instanceof HTMLElement)) {
+      return false;
+    }
+
+    syncMembersGridKeyboardRows(row);
+    if (options.scroll === 'top') {
+      scrollMembersPageToTop();
+      window.requestAnimationFrame(() => {
+        syncMembersGridKeyboardRows(row);
+        row.focus({ preventScroll: true });
+      });
+    } else if (options.scroll === 'bottom') {
+      scrollMembersPageToBottom();
+      window.requestAnimationFrame(() => {
+        syncMembersGridKeyboardRows(row);
+        row.focus({ preventScroll: true });
+      });
+    } else if (options.scroll === 'nearest' && typeof row.scrollIntoView === 'function') {
+      row.focus({ preventScroll: true });
+      row.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+    } else {
+      row.focus();
+    }
+    return true;
+  };
+
+  const focusMembersGridRowByIndex = (index, options = {}) => {
+    const rows = getMembersGridRows();
+    if (rows.length === 0) {
+      return false;
+    }
+
+    const boundedIndex = Math.max(0, Math.min(index, rows.length - 1));
+    return focusMembersGridRow(rows[boundedIndex], options);
+  };
+
+  const focusMembersGridRelativeRow = (row, direction, options = {}) => {
+    const rows = getMembersGridRows();
+    const currentIndex = rows.indexOf(row);
+    if (currentIndex === -1) {
+      return false;
+    }
+
+    return focusMembersGridRowByIndex(currentIndex + direction, options);
+  };
+
+  const focusMembersGridPagedRow = (row, direction) => {
+    const rows = getMembersGridRows();
+    const currentIndex = rows.indexOf(row);
+    if (currentIndex === -1) {
+      return false;
+    }
+
+    return focusMembersGridRowByIndex(
+      currentIndex + (direction * MEMBERS_KEYBOARD_PAGE_STEP),
+      { scroll: 'nearest' },
+    );
+  };
+
+  const toggleMembersGridRowSelection = (row) => {
+    if (!(row instanceof HTMLElement)) {
+      return false;
+    }
+
+    const checkbox = row.querySelector('.business_members_row_checkbox');
+    if (!(checkbox instanceof HTMLInputElement) || checkbox.disabled) {
+      return false;
+    }
+
+    checkbox.checked = !checkbox.checked;
+    handleMembersBulkCheckboxChange(checkbox);
+    syncMembersGridKeyboardRows(row);
+    return true;
   };
 
   const syncMembersPendingMetricUi = (count = 0) => {
@@ -330,11 +540,10 @@
     const rows = pendingInvites.map(renderMembersPendingInviteRow)
       .concat(pendingRequests.map(renderMembersPendingRequestRow));
     Guardian.setHTML(list, rows.join(''));
-    announceMembersPendingStatus(
-      T.membersPendingLoaded
-        .replace('%d', String(total))
-        .replace('%s', total === 1 ? '' : 's'),
-    );
+    announceMembersPendingStatus(formatPhpTemplate(T.membersPendingLoaded, [
+      total,
+      total === 1 ? '' : 's',
+    ]));
 
     return total;
   };
@@ -372,12 +581,17 @@
     }
 
     const business = findBusiness(orgId);
-    if (business && !canUsePremiumOrgFeatures(business)) {
+    if (!business) {
+      setMembersPendingAccordionMessage(ACCESS_MANAGE_WARNING);
+      return 0;
+    }
+
+    if (!canUsePremiumOrgFeatures(business)) {
       setMembersPendingAccordionMessage(T.premiumAdminLockedDetailed);
       return 0;
     }
 
-    if (business && !canManageBusinessAccess(business)) {
+    if (!canManageBusinessAccess(business)) {
       setMembersPendingAccordionMessage(ACCESS_MANAGE_WARNING);
       return 0;
     }
@@ -447,7 +661,7 @@
       return T.membersSelectionCountNone;
     }
 
-    return T.membersSelectionCount.replace('%d', String(normalized));
+    return formatPhpTemplate(T.membersSelectionCount, [normalized]);
   };
 
   const updateMembersBulkSelectionUi = () => {
@@ -462,15 +676,16 @@
       elements.membersSelectionCount.setAttribute('aria-label', formatMembersSelectionCountLabel(count));
     }
 
-    if (elements.membersMetricSelected instanceof HTMLElement) {
-      elements.membersMetricSelected.textContent = countLabel;
+    if (elements.membersSelectAllCheckbox instanceof HTMLInputElement) {
+      const visibleCheckboxes = Array.from(
+        elements.membersGridContainer?.querySelectorAll('.business_members_row_checkbox') || [],
+      ).filter((checkbox) => checkbox instanceof HTMLInputElement);
+      const checkedVisible = visibleCheckboxes.filter((checkbox) => checkbox.checked).length;
+      elements.membersSelectAllCheckbox.checked = visibleCheckboxes.length > 0 && checkedVisible === visibleCheckboxes.length;
+      elements.membersSelectAllCheckbox.indeterminate = checkedVisible > 0 && checkedVisible < visibleCheckboxes.length;
     }
 
-    const siteSelected = elements.membersApplySiteSelect instanceof HTMLSelectElement
-      && String(elements.membersApplySiteSelect.value || '').trim() !== '';
-    if (elements.membersApplyWorkSiteButton instanceof HTMLButtonElement) {
-      elements.membersApplyWorkSiteButton.disabled = count === 0 || !siteSelected;
-    }
+    setMembersBulkToolbarSelectedState(count > 0);
 
     if (elements.membersGenerateReportsButton instanceof HTMLButtonElement) {
       elements.membersGenerateReportsButton.disabled = count === 0;
@@ -478,6 +693,7 @@
   };
 
   const syncMembersBulkCheckboxes = () => {
+    syncMembersGridElementRefs();
     const container = elements.membersGridContainer;
     if (!(container instanceof HTMLElement)) {
       return;
@@ -493,20 +709,47 @@
       checkbox.checked = state.membersBulkSelectAllActive || (memberId !== '' && selected.has(memberId));
     });
 
+    syncMembersGridKeyboardRows();
     updateMembersBulkSelectionUi();
   };
 
-  const clearMembersBulkSelection = () => {
+  const clearMembersBulkSelection = (focusSearch = false) => {
     state.membersBulkSelectAllActive = false;
     state.membersBulkSelectedIds = [];
     syncMembersBulkCheckboxes();
+    if (focusSearch) {
+      focusMembersGridSearchSoon(false);
+    }
   };
 
   const setMembersBulkToolbarVisible = (visible) => {
     if (elements.membersBulkToolbar instanceof HTMLElement) {
-      elements.membersBulkToolbar.classList.toggle('hidden', !visible);
+      elements.membersBulkToolbar.dataset.accessAllowed = visible ? '1' : '0';
+      elements.membersBulkToolbar.classList.toggle('hidden', !visible || getMembersBulkSelectedCount() === 0);
     }
     integrateMembersToolbarLayout();
+  };
+
+  const setMembersBulkToolbarSelectedState = (hasSelection) => {
+    if (!(elements.membersBulkToolbar instanceof HTMLElement)) {
+      return;
+    }
+
+    const canAccess = String(elements.membersBulkToolbar.dataset.accessAllowed || '0') === '1';
+    elements.membersBulkToolbar.classList.toggle('hidden', !canAccess || !hasSelection);
+    elements.membersBulkToolbar.dataset.hasSelection = hasSelection ? '1' : '0';
+
+    const filters = document.querySelector('[data-grid="business-members"] .business_members_toolbar_filters');
+    if (filters instanceof HTMLElement) {
+      filters.hidden = canAccess && hasSelection;
+    }
+
+    if (!hasSelection) {
+      closeMembersBulkGroupMenu();
+      if (elements.membersBulkToolbar.contains(document.activeElement)) {
+        focusMembersGridSearchSoon(false);
+      }
+    }
   };
 
   const evacuateMembersBulkToolbar = () => {
@@ -537,23 +780,26 @@
       return;
     }
 
-    let bulkSlot = datagridToolbar.querySelector('.business_members_toolbar_bulk');
+    const filterSlot = datagridToolbar.querySelector('.business_members_toolbar_filters');
+    if (!(filterSlot instanceof HTMLElement)) {
+      return;
+    }
+
+    const columnMenu = gridEl.querySelector('.datagrid_column_menu');
+    if (columnMenu instanceof HTMLElement && !filterSlot.contains(columnMenu)) {
+      filterSlot.appendChild(columnMenu);
+    }
+
+    const bulkSlot = datagridToolbar.querySelector('.business_members_toolbar_bulk');
     if (!(bulkSlot instanceof HTMLElement)) {
-      bulkSlot = document.createElement('div');
-      bulkSlot.className = 'datagrid_toolbar_bulk business_members_toolbar_bulk';
-      const columnMenu = gridEl.querySelector('.datagrid_column_menu');
-      const toolbarCenter = datagridToolbar.querySelector('.datagrid_toolbar_center');
-      if (columnMenu instanceof HTMLElement) {
-        datagridToolbar.insertBefore(columnMenu, toolbarCenter);
-      }
-      datagridToolbar.insertBefore(bulkSlot, toolbarCenter);
+      return;
     }
 
     if (!bulkSlot.contains(bulkToolbar)) {
       bulkSlot.appendChild(bulkToolbar);
     }
 
-    bulkToolbar.classList.toggle('hidden', bulkToolbar.classList.contains('hidden'));
+    setMembersBulkToolbarSelectedState(getMembersBulkSelectedCount() > 0);
   };
 
   const closeAllMemberRowMenus = (exceptMenu = null) => {
@@ -579,6 +825,7 @@
         panel.hidden = true;
       }
       menu.classList.remove('is_open');
+      menu.closest('.datagrid_row')?.classList.remove('business_member_row_menu_open');
     });
   };
 
@@ -596,6 +843,330 @@
       panel.hidden = !isOpen;
     }
     menu.classList.toggle('is_open', isOpen);
+    menu.closest('.datagrid_row')?.classList.toggle('business_member_row_menu_open', isOpen);
+    if (!isOpen) {
+      menu.querySelectorAll('.business_member_row_submenu').forEach((submenu) => {
+        submenu.hidden = true;
+      });
+      menu.querySelectorAll('.business_member_row_menu_item_has_submenu').forEach((submenuToggle) => {
+        submenuToggle.setAttribute('aria-expanded', 'false');
+      });
+    }
+  };
+
+  const getMemberRowMenuDirectItems = (scope) => {
+    if (!(scope instanceof HTMLElement)) {
+      return [];
+    }
+
+    return Array.from(scope.children).filter((item) => {
+      if (!(item instanceof HTMLElement) || item.getAttribute('role') !== 'menuitem') {
+        return false;
+      }
+      if (item.closest('[hidden]') || item.getAttribute('aria-disabled') === 'true') {
+        return false;
+      }
+      return !(item instanceof HTMLButtonElement) || !item.disabled;
+    });
+  };
+
+  const focusMemberRowMenuItem = (item) => {
+    if (item instanceof HTMLElement) {
+      item.focus({ preventScroll: true });
+      return true;
+    }
+
+    return false;
+  };
+
+  const focusFirstMemberRowMenuItem = (menu) => {
+    const panel = menu instanceof HTMLElement
+      ? menu.querySelector('.business_member_row_menu_panel')
+      : null;
+    const firstItem = panel instanceof HTMLElement
+      ? getMemberRowMenuDirectItems(panel)[0]
+      : null;
+
+    return focusMemberRowMenuItem(firstItem);
+  };
+
+  const focusMemberRowMenuItemByOffset = (scope, activeItem, offset) => {
+    const items = getMemberRowMenuDirectItems(scope);
+    if (items.length === 0) {
+      return false;
+    }
+
+    const currentIndex = Math.max(0, items.indexOf(activeItem));
+    const nextIndex = (currentIndex + offset + items.length) % items.length;
+    return focusMemberRowMenuItem(items[nextIndex]);
+  };
+
+  const findMemberRowMenuParentToggle = (menu, submenu) => {
+    if (!(menu instanceof HTMLElement) || !(submenu instanceof HTMLElement)) {
+      return null;
+    }
+
+    if (submenu.classList.contains('business_member_role_submenu')) {
+      return menu.querySelector('[data-member-action="edit-role"]');
+    }
+
+    if (submenu.classList.contains('business_member_group_submenu')) {
+      return menu.querySelector('[data-member-action="add-to-group"]');
+    }
+
+    return null;
+  };
+
+  const openMemberRowMenuForRow = (row, focusFirst = true) => {
+    if (!(row instanceof HTMLElement)) {
+      return false;
+    }
+
+    const menu = row.querySelector('.business_member_row_menu');
+    if (!(menu instanceof HTMLElement)) {
+      return false;
+    }
+
+    closeAllMemberRowMenus(menu);
+    syncMembersGridKeyboardRows(row);
+    setMemberRowMenuOpen(menu, true);
+    if (focusFirst) {
+      focusFirstMemberRowMenuItem(menu);
+    }
+
+    return true;
+  };
+
+  const closeMemberRowMenuToSearch = (menu) => {
+    if (!(menu instanceof HTMLElement)) {
+      return false;
+    }
+
+    setMemberRowMenuOpen(menu, false);
+    focusMembersGridSearchSoon(false);
+
+    return true;
+  };
+
+  const loadActiveMemberGroups = async () => {
+    if (Array.isArray(memberGroupOptionsCache)) {
+      return memberGroupOptionsCache;
+    }
+
+    const businessId = String(state.selectedBusinessId || resolveWorkspaceBusinessId() || '').trim();
+    if (businessId === '') {
+      return [];
+    }
+
+    const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(businessId)}/groups?active=1`);
+    memberGroupOptionsCache = Array.isArray(payload?.groups) ? payload.groups : [];
+    return memberGroupOptionsCache;
+  };
+
+  const closeSiblingMemberRowSubmenus = (menu, keepSubmenu) => {
+    if (!(menu instanceof HTMLElement)) {
+      return;
+    }
+
+    menu.querySelectorAll('.business_member_row_submenu').forEach((submenu) => {
+      if (submenu !== keepSubmenu) {
+        submenu.hidden = true;
+      }
+    });
+
+    menu.querySelectorAll('.business_member_row_menu_item_has_submenu').forEach((toggle) => {
+      const action = String(toggle.dataset.memberAction || '').trim();
+      const keepGroup = keepSubmenu?.classList.contains('business_member_group_submenu') && action === 'add-to-group';
+      const keepRole = keepSubmenu?.classList.contains('business_member_role_submenu') && action === 'edit-role';
+      toggle.setAttribute('aria-expanded', keepGroup || keepRole ? 'true' : 'false');
+    });
+  };
+
+  const openMemberRoleSubmenu = (menu) => {
+    if (!(menu instanceof HTMLElement)) {
+      return;
+    }
+
+    const submenu = menu.querySelector('.business_member_role_submenu');
+    const toggle = menu.querySelector('[data-member-action="edit-role"]');
+    if (!(submenu instanceof HTMLElement)) {
+      return;
+    }
+
+    closeSiblingMemberRowSubmenus(menu, submenu);
+    submenu.hidden = false;
+    if (toggle instanceof HTMLElement) {
+      toggle.setAttribute('aria-expanded', 'true');
+    }
+  };
+
+  const renderMemberGroupSubmenuHtml = (groups, options = {}) => {
+    const memberUuid = String(options.memberUuid || '').trim();
+    const itemClass = options.bulk === true
+      ? 'business_members_bulk_group_menu_item'
+      : 'business_member_group_menu_item';
+    const groupItems = groups.map((group) => {
+      const groupId = String(group.group_id || '').trim();
+      const memberAttr = memberUuid !== ''
+        ? ' data-member-id="' + safeAttr(memberUuid) + '"'
+        : '';
+
+      return '<button type="button" class="business_member_row_submenu_item ' + itemClass + '" role="menuitem" data-group-id="' + safeAttr(groupId) + '"' + memberAttr + '>'
+        + '<span>' + safeText(group.name || 'Group') + '</span>'
+        + '<span class="business_member_row_submenu_meta">' + safeText(String(group.member_count ?? 0)) + ' members</span>'
+        + '</button>';
+    }).join('');
+
+    return (groupItems !== '' ? groupItems : '<p class="business_member_row_submenu_note">' + safeText(T.businessGroupsEmpty || 'No active groups yet.') + '</p>')
+      + '<a class="business_member_row_submenu_item business_member_row_submenu_link" role="menuitem" href="/business/groups/?create=1">' + safeText(T.businessGroupsCreateNew || 'Create new group') + '</a>';
+  };
+
+  const memberGroupNameFromMenuItem = (menuItem) => {
+    if (!(menuItem instanceof HTMLElement)) {
+      return '';
+    }
+    const label = menuItem.querySelector('span');
+    return String(label?.textContent || '').trim();
+  };
+
+  const memberGroupToastLabel = (groupName) => {
+    const normalized = String(groupName || '').trim();
+    if (normalized === '') {
+      return 'selected group';
+    }
+    return /\bgroup$/i.test(normalized) ? normalized : normalized + ' group';
+  };
+
+  const formatMemberGroupToast = (template, groupName, count = null) => {
+    const numericCount = Number(count || 0);
+    const fallback = count === null
+      ? 'Added to {group}.'
+      : '{count} member{plural} added to {group}.';
+    const message = String(template || '').trim() || fallback;
+
+    return message
+      .replace(/\{group\}/g, memberGroupToastLabel(groupName))
+      .replace(/\{count\}/g, String(numericCount))
+      .replace(/\{plural\}/g, numericCount === 1 ? '' : 's');
+  };
+
+  const openMemberGroupSubmenu = async (menu, memberUuid) => {
+    if (!(menu instanceof HTMLElement) || memberUuid === '') {
+      return;
+    }
+
+    const submenu = menu.querySelector('.business_member_group_submenu');
+    const toggle = menu.querySelector('[data-member-action="add-to-group"]');
+    if (!(submenu instanceof HTMLElement)) {
+      return;
+    }
+
+    closeSiblingMemberRowSubmenus(menu, submenu);
+    submenu.hidden = false;
+    if (toggle instanceof HTMLElement) {
+      toggle.setAttribute('aria-expanded', 'true');
+    }
+    Guardian.setHTML(submenu, '<p class="business_member_row_submenu_note">' + safeText(T.loading) + '</p>');
+
+    const groups = await loadActiveMemberGroups();
+    Guardian.setHTML(submenu, renderMemberGroupSubmenuHtml(groups, { memberUuid }));
+  };
+
+  const closeMembersBulkGroupMenu = (options = {}) => {
+    const menu = elements.membersBulkGroupMenu;
+    const toggle = elements.membersBulkGroupToggle;
+    if (menu instanceof HTMLElement) {
+      menu.hidden = true;
+    }
+    if (toggle instanceof HTMLButtonElement) {
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    if (options.focusSearch === true) {
+      focusMembersGridSearchSoon(false);
+    }
+  };
+
+  const openMembersBulkGroupMenu = async () => {
+    syncMembersGridElementRefs();
+    const menu = elements.membersBulkGroupMenu;
+    const toggle = elements.membersBulkGroupToggle;
+    if (!(menu instanceof HTMLElement) || !(toggle instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    closeAllMemberRowMenus();
+    const willOpen = menu.hidden;
+    if (!willOpen) {
+      closeMembersBulkGroupMenu({ focusSearch: true });
+      return;
+    }
+
+    menu.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+    Guardian.setHTML(menu, '<p class="business_member_row_submenu_note">' + safeText(T.loading) + '</p>');
+
+    try {
+      const groups = await loadActiveMemberGroups();
+      Guardian.setHTML(menu, renderMemberGroupSubmenuHtml(groups, { bulk: true }));
+    } catch (error) {
+      PW.error(error);
+      Guardian.setHTML(menu, '<p class="business_member_row_submenu_note">' + safeText(T.businessGroupsLoadFailed || 'Unable to load groups.') + '</p>');
+    }
+  };
+
+  const addSelectedMembersToGroup = async (groupId, trigger = null) => {
+    const businessId = String(state.selectedBusinessId || resolveWorkspaceBusinessId() || '').trim();
+    const normalizedGroupId = String(groupId || '').trim();
+    if (businessId === '' || normalizedGroupId === '') {
+      return;
+    }
+
+    const selectedMembers = await resolveMembersForReportGeneration(businessId);
+    const memberIds = selectedMembers
+      .map((member) => String(member?.id || '').trim())
+      .filter((memberId, index, ids) => memberId !== '' && ids.indexOf(memberId) === index);
+    if (memberIds.length === 0) {
+      PC.showToast(T.businessGroupsAddNoMembers || 'Select at least one member first.', 'error', 5000, true);
+      closeMembersBulkGroupMenu({ focusSearch: true });
+      return;
+    }
+
+    if (trigger instanceof HTMLElement) {
+      trigger.setAttribute('aria-disabled', 'true');
+    }
+    if (trigger instanceof HTMLButtonElement) {
+      trigger.disabled = true;
+    }
+    if (elements.membersBulkGroupToggle instanceof HTMLButtonElement) {
+      elements.membersBulkGroupToggle.disabled = true;
+    }
+
+    try {
+      await postForm(`/api/v1/businesses/${encodeURIComponent(businessId)}/groups/${encodeURIComponent(normalizedGroupId)}/members`, {
+        member_uuids: memberIds,
+      });
+      memberGroupOptionsCache = null;
+      closeMembersBulkGroupMenu({ focusSearch: true });
+      const message = formatMemberGroupToast(
+        T.businessGroupsMembersAddedNamed,
+        memberGroupNameFromMenuItem(trigger),
+        memberIds.length
+      );
+      PC.showToast(message, 'success', 3500, true);
+    } catch (error) {
+      PW.error(error);
+      PC.showToast(T.businessGroupsAddFailed || 'Unable to add members to group.', 'error', 6000, true);
+    } finally {
+      if (trigger instanceof HTMLElement) {
+        trigger.removeAttribute('aria-disabled');
+      }
+      if (trigger instanceof HTMLButtonElement) {
+        trigger.disabled = false;
+      }
+      if (elements.membersBulkGroupToggle instanceof HTMLButtonElement) {
+        elements.membersBulkGroupToggle.disabled = false;
+      }
+    }
   };
 
   const handleMemberRowMenuAction = (menuItem, row) => {
@@ -610,12 +1181,16 @@
     }
 
     if (action === 'edit-role') {
-      const roleTrigger = row instanceof HTMLElement
-        ? row.querySelector('.businesses_member_role_trigger')
-        : null;
-      if (roleTrigger instanceof HTMLElement) {
-        toggleMemberRolePopover(roleTrigger, memberUuid);
-      }
+      const menu = menuItem.closest('.business_member_row_menu');
+      openMemberRoleSubmenu(menu);
+      return;
+    }
+
+    if (action === 'add-to-group') {
+      const menu = menuItem.closest('.business_member_row_menu');
+      openMemberGroupSubmenu(menu, memberUuid).catch((error) => {
+        PW.error(error);
+      });
       return;
     }
 
@@ -624,85 +1199,156 @@
     }
   };
 
-  const populateMembersApplySiteOptions = (sites = []) => {
-    if (!(elements.membersApplySiteSelect instanceof HTMLSelectElement)) {
-      return;
-    }
+  const focusFirstMemberRowSubmenuItem = (submenu) => {
+    const firstItem = submenu instanceof HTMLElement
+      ? getMemberRowMenuDirectItems(submenu)[0]
+      : null;
 
-    const previousValue = String(elements.membersApplySiteSelect.value || '');
-    const options = ['<option value="">' + safeText(T.membersApplySitePlaceholder) + '</option>'];
-    (Array.isArray(sites) ? sites : []).forEach((site) => {
-      if (!site || typeof site !== 'object') {
-        return;
-      }
-
-      const siteId = String(site.site_id || '').trim();
-      const siteOwnerUuid = String(site.site_owner_uuid || '').trim();
-      const siteName = String(site.site_name || siteId).trim();
-      if (siteId === '' || siteOwnerUuid === '') {
-        return;
-      }
-
-      const value = siteOwnerUuid + ':' + siteId;
-      options.push(
-        '<option value="' + safeText(value) + '">' + safeText(siteName) + '</option>',
-      );
-    });
-
-    Guardian.setHTML(elements.membersApplySiteSelect, options.join(''));
-    if (previousValue !== '' && elements.membersApplySiteSelect.querySelector('option[value="' + CSS.escape(previousValue) + '"]')) {
-      elements.membersApplySiteSelect.value = previousValue;
-    }
-
-    updateMembersBulkSelectionUi();
+    return focusMemberRowMenuItem(firstItem);
   };
 
-  const loadMembersApplySiteOptions = async (orgId) => {
-    const businessId = String(orgId || '').trim();
-    if (businessId === '') {
-      populateMembersApplySiteOptions([]);
-      return;
+  const openMemberRowSubmenuFromToggle = (menuItem) => {
+    if (!(menuItem instanceof HTMLElement)) {
+      return false;
     }
 
-    if (state.membersBulkSitesLoadedOrgId === businessId
-      && elements.membersApplySiteSelect instanceof HTMLSelectElement
-      && elements.membersApplySiteSelect.options.length > 1) {
-      return;
+    const menu = menuItem.closest('.business_member_row_menu');
+    if (!(menu instanceof HTMLElement)) {
+      return false;
     }
 
-    try {
-      const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(businessId)}/sites`);
-      const sites = Array.isArray(payload?.sites) ? payload.sites : [];
-      populateMembersApplySiteOptions(sites);
-      state.membersBulkSitesLoadedOrgId = businessId;
-    } catch (error) {
-      PW.error(error);
-      populateMembersApplySiteOptions([]);
+    const action = String(menuItem.dataset.memberAction || '').trim();
+    const memberUuid = String(menuItem.dataset.memberId || '').trim();
+    if (action === 'edit-role') {
+      openMemberRoleSubmenu(menu);
+      focusFirstMemberRowSubmenuItem(menu.querySelector('.business_member_role_submenu'));
+      return true;
     }
+
+    if (action === 'add-to-group' && memberUuid !== '') {
+      openMemberGroupSubmenu(menu, memberUuid).then(() => {
+        focusFirstMemberRowSubmenuItem(menu.querySelector('.business_member_group_submenu'));
+      }).catch((error) => {
+        PW.error(error);
+      });
+      return true;
+    }
+
+    return false;
+  };
+
+  const chooseMemberRowMenuItem = (menuItem) => {
+    if (!(menuItem instanceof HTMLElement)) {
+      return false;
+    }
+
+    if (menuItem.classList.contains('business_member_row_menu_item_has_submenu')) {
+      return openMemberRowSubmenuFromToggle(menuItem);
+    }
+
+    menuItem.click();
+    return true;
+  };
+
+  const handleMemberRowMenuKeyboard = (event, container) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!(container instanceof HTMLElement) || target === null || !container.contains(target)) {
+      return false;
+    }
+
+    const menuToggle = target.closest('.business_member_row_menu_toggle');
+    if (menuToggle instanceof HTMLElement) {
+      if (
+        event.key === 'Enter'
+        || event.key === ' '
+        || event.key === 'Space'
+        || event.key === 'Spacebar'
+        || event.code === 'Space'
+        || event.key === 'ArrowDown'
+        || event.key === 'ArrowRight'
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        const row = menuToggle.closest('.businesses_member_row_clickable, .datagrid_row');
+        return openMemberRowMenuForRow(row, true);
+      }
+
+      return false;
+    }
+
+    const menu = target.closest('.business_member_row_menu');
+    const panel = target.closest('.business_member_row_menu_panel');
+    if (!(menu instanceof HTMLElement) || !(panel instanceof HTMLElement)) {
+      return false;
+    }
+
+    const submenu = target.closest('.business_member_row_submenu:not([hidden])');
+    const scope = submenu instanceof HTMLElement ? submenu : panel;
+    const activeItem = target.closest('[role="menuitem"]');
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      return closeMemberRowMenuToSearch(menu);
+    }
+
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      event.stopPropagation();
+      return focusMemberRowMenuItemByOffset(scope, activeItem, event.key === 'ArrowDown' ? 1 : -1);
+    }
+
+    if (event.key === 'ArrowRight') {
+      if (activeItem instanceof HTMLElement && activeItem.classList.contains('business_member_row_menu_item_has_submenu')) {
+        event.preventDefault();
+        event.stopPropagation();
+        return openMemberRowSubmenuFromToggle(activeItem);
+      }
+
+      return false;
+    }
+
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      event.stopPropagation();
+      if (submenu instanceof HTMLElement) {
+        submenu.hidden = true;
+        const parentToggle = findMemberRowMenuParentToggle(menu, submenu);
+        if (parentToggle instanceof HTMLElement) {
+          parentToggle.setAttribute('aria-expanded', 'false');
+          parentToggle.focus({ preventScroll: true });
+        }
+        return true;
+      }
+
+      return closeMemberRowMenuToSearch(menu);
+    }
+
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Space' || event.key === 'Spacebar' || event.code === 'Space') {
+      if (activeItem instanceof HTMLElement) {
+        event.preventDefault();
+        event.stopPropagation();
+        return chooseMemberRowMenuItem(activeItem);
+      }
+    }
+
+    return false;
   };
 
   const refreshMembersBulkToolbar = async (orgId = '') => {
     syncMembersGridElementRefs();
     const businessId = String(orgId || resolveWorkspaceBusinessId() || state.selectedBusinessId || '').trim();
-    const business = findBusiness(businessId);
-    const canBulkApply = canWriteBusinessSites(business);
 
-    setMembersBulkToolbarVisible(canBulkApply);
-    if (!canBulkApply) {
-      clearMembersBulkSelection();
-      return;
-    }
+    setMembersBulkToolbarVisible(true);
 
     if (businessId !== '') {
       try {
-        const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(businessId)}/relationships`);
+        const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(businessId)}/connections`);
         const members = Array.isArray(payload?.members) ? payload.members : [];
         state.membersBulkTotalCount = members.length;
       } catch (_error) {
         state.membersBulkTotalCount = 0;
       }
-
-      await loadMembersApplySiteOptions(businessId);
     }
 
     syncMembersBulkCheckboxes();
@@ -726,36 +1372,37 @@
       selected.delete(memberId);
     }
     state.membersBulkSelectedIds = Array.from(selected);
+    syncMembersGridKeyboardRows(checkbox.closest('.businesses_member_row_clickable, .datagrid_row'));
     updateMembersBulkSelectionUi();
   };
 
-  const selectAllBusinessMembers = () => {
-    state.membersBulkSelectAllActive = true;
-    state.membersBulkSelectedIds = [];
+  const toggleAllVisibleBusinessMembers = (checked) => {
+    state.membersBulkSelectAllActive = false;
+    const selected = new Set(state.membersBulkSelectedIds);
+
+    if (elements.membersGridContainer instanceof HTMLElement) {
+      elements.membersGridContainer.querySelectorAll('.business_members_row_checkbox').forEach((checkbox) => {
+        if (!(checkbox instanceof HTMLInputElement)) {
+          return;
+        }
+        const memberId = String(checkbox.dataset.memberId || '').trim();
+        if (memberId === '') {
+          return;
+        }
+        if (checked) {
+          selected.add(memberId);
+        } else {
+          selected.delete(memberId);
+        }
+      });
+    }
+
+    state.membersBulkSelectedIds = Array.from(selected);
     syncMembersBulkCheckboxes();
   };
 
-  const MEMBERS_APPLY_WORK_SITE_BATCH_SIZE = 25;
-
-  const resolveMemberIdsForWorkSiteApply = async (orgId) => {
-    if (state.membersBulkSelectAllActive) {
-      const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(orgId)}/relationships`);
-      const members = Array.isArray(payload?.members) ? payload.members : [];
-
-      return members
-        .map((member) => String(member?.user_uuid || member?.uuid || '').trim())
-        .filter((memberId) => memberId !== '');
-    }
-
-    return state.membersBulkSelectedIds
-      .map((memberId) => String(memberId || '').trim())
-      .filter((memberId) => memberId !== '');
-  };
-
   const setMembersReportStatus = (message = '') => {
-    if (elements.membersReportStatus instanceof HTMLElement) {
-      elements.membersReportStatus.textContent = String(message || '');
-    }
+    setPlainStatusText(elements.membersReportStatus, message);
   };
 
   const setMembersReportSummaryVisible = (isVisible) => {
@@ -764,12 +1411,126 @@
     }
   };
 
-  const setMembersReportPanelOpen = (isOpen) => {
-    if (!(elements.membersReportPanel instanceof HTMLElement)) {
+  const memberMatchesQuery = (member, query) => (
+    query === ''
+    || String(member.name || '').toLowerCase().includes(query)
+    || String(member.id || '').toLowerCase().includes(query)
+  );
+
+  const normalizeReportMember = (member) => {
+    const id = String(member?.id || member?.user_uuid || member?.uuid || '').trim();
+    if (id === '') {
+      return null;
+    }
+
+    return {
+      id,
+      name: String(member?.name || member?.full_name || member?.email || id).trim() || id,
+    };
+  };
+
+  const loadAllMembersForReportDialog = async (orgId) => {
+    const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(orgId)}/connections`);
+    const members = Array.isArray(payload?.members) ? payload.members : [];
+    const unique = new Map();
+    members.forEach((member) => {
+      const normalized = normalizeReportMember(member);
+      if (normalized !== null) {
+        unique.set(normalized.id, normalized);
+      }
+    });
+    memberReportAllMembers = Array.from(unique.values()).sort((a, b) => a.name.localeCompare(b.name));
+  };
+
+  const syncReportDialogSelectionToBulkState = () => {
+    state.membersBulkSelectAllActive = false;
+    state.membersBulkSelectedIds = memberReportSelectionMembers.map((member) => member.id);
+    syncMembersBulkCheckboxes();
+  };
+
+  const renderMembersReportSelectionList = () => {
+    const selectedQuery = elements.membersReportMemberFilter instanceof HTMLInputElement
+      ? String(elements.membersReportMemberFilter.value || '').trim().toLowerCase()
+      : '';
+    const addQuery = elements.membersReportMemberAdd instanceof HTMLInputElement
+      ? String(elements.membersReportMemberAdd.value || '').trim().toLowerCase()
+      : '';
+    const selectedIds = new Set(memberReportSelectionMembers.map((member) => member.id));
+    const selectedMatches = memberReportSelectionMembers.filter((member) => memberMatchesQuery(member, selectedQuery));
+    const addMatches = addQuery === ''
+      ? []
+      : memberReportAllMembers
+        .filter((member) => !selectedIds.has(member.id) && memberMatchesQuery(member, addQuery))
+        .slice(0, 12);
+
+    setText(elements.membersReportSelectedCount, String(memberReportSelectionMembers.length));
+
+    if (elements.membersReportMemberPills instanceof HTMLElement) {
+      Guardian.setHTML(
+        elements.membersReportMemberPills,
+        selectedMatches.map((member) => (
+          '<span class="business_members_report_member_pill" role="listitem">'
+          + '<span class="business_members_report_member_pill_name">' + safeText(member.name) + '</span>'
+          + '<button type="button" class="business_members_report_member_remove" data-member-id="' + safeAttr(member.id) + '" aria-label="Remove ' + safeAttr(member.name) + '">&times;</button>'
+          + '</span>'
+        )).join(''),
+      );
+    }
+
+    if (elements.membersReportMemberEmpty instanceof HTMLElement) {
+      elements.membersReportMemberEmpty.hidden = selectedMatches.length > 0;
+    }
+
+    if (elements.membersReportMemberAddResults instanceof HTMLElement) {
+      Guardian.setHTML(
+        elements.membersReportMemberAddResults,
+        addMatches.map((member) => (
+          '<button type="button" class="business_members_report_member_pill business_members_report_member_add" data-member-id="' + safeAttr(member.id) + '">'
+          + '<span class="business_members_report_member_pill_name">' + safeText(member.name) + '</span>'
+          + '<span aria-hidden="true">+</span>'
+          + '</button>'
+        )).join(''),
+      );
+    }
+  };
+
+  const refreshMembersReportSelectionDialog = async () => {
+    const orgId = String(state.selectedBusinessId || resolveWorkspaceBusinessId() || '').trim();
+    if (orgId === '') {
+      memberReportAllMembers = [];
+      memberReportSelectionMembers = [];
+      renderMembersReportSelectionList();
       return;
     }
 
-    elements.membersReportPanel.hidden = !isOpen;
+    await loadAllMembersForReportDialog(orgId);
+    const selectedMembers = await resolveMembersForReportGeneration(orgId);
+    const unique = new Map();
+    selectedMembers.forEach((member) => {
+      const normalized = normalizeReportMember(member);
+      if (normalized !== null) {
+        unique.set(normalized.id, normalized);
+      }
+    });
+    memberReportSelectionMembers = Array.from(unique.values()).sort((a, b) => a.name.localeCompare(b.name));
+    renderMembersReportSelectionList();
+  };
+
+  const setMembersReportPanelOpen = (isOpen, options = {}) => {
+    if (!(elements.membersReportPanel instanceof HTMLDialogElement)) {
+      return;
+    }
+
+    if (isOpen && !elements.membersReportPanel.open) {
+      if (typeof elements.membersReportPanel.showModal === 'function') {
+        elements.membersReportPanel.showModal();
+      } else {
+        elements.membersReportPanel.setAttribute('open', '');
+      }
+    } else if (!isOpen && elements.membersReportPanel.open) {
+      elements.membersReportPanel.close();
+    }
+
     if (elements.membersReportToggle instanceof HTMLButtonElement) {
       elements.membersReportToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     }
@@ -778,15 +1539,23 @@
       if (memberReportLastBatch === null) {
         setMembersReportSummaryVisible(false);
       }
+      updateMembersReportDescription();
+      refreshMembersReportSelectionDialog().catch((error) => {
+        PW.error(error);
+        setMembersReportStatus('Unable to load selected members.');
+      });
+    } else if (options.focusSearch === true) {
+      focusMembersGridSearchSoon(false);
     }
   };
 
   const toggleMembersReportPanel = () => {
-    if (!(elements.membersReportPanel instanceof HTMLElement)) {
+    if (!(elements.membersReportPanel instanceof HTMLDialogElement)) {
       return;
     }
 
-    setMembersReportPanelOpen(elements.membersReportPanel.hidden);
+    const willOpen = !elements.membersReportPanel.open;
+    setMembersReportPanelOpen(willOpen, { focusSearch: !willOpen });
   };
 
   const sanitizeMemberReportFilenamePart = (value) => {
@@ -812,6 +1581,17 @@
 
     const selected = elements.membersReportType.selectedOptions[0];
     return String(selected?.textContent || 'Yearly work summary').trim();
+  };
+
+  const updateMembersReportDescription = () => {
+    if (!(elements.membersReportDescription instanceof HTMLElement)) {
+      return;
+    }
+
+    const selected = elements.membersReportType instanceof HTMLSelectElement
+      ? elements.membersReportType.selectedOptions[0]
+      : null;
+    setText(elements.membersReportDescription, String(selected?.dataset?.reportDescription || '').trim());
   };
 
   const selectedReportScope = () => {
@@ -862,7 +1642,7 @@
 
   const resolveMembersForReportGeneration = async (orgId) => {
     if (state.membersBulkSelectAllActive) {
-      const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(orgId)}/relationships`);
+      const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(orgId)}/connections`);
       const members = Array.isArray(payload?.members) ? payload.members : [];
       return members
         .map((member) => {
@@ -948,34 +1728,18 @@
     throw new Error('Unsupported report type.');
   };
 
-  const downloadBlob = (blob, filename) => {
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  };
-
   const postProtectedMemberReportBlob = async (orgId, memberId, scope, format, year) => {
-    const response = await fetch(
+    return postJsonBlob(
       `/api/v1/businesses/${encodeURIComponent(orgId)}/members/${encodeURIComponent(memberId)}/reports/export/${encodeURIComponent(format)}`,
       {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scope, year }),
+        scope,
+        year,
+      },
+      {
+        errorPrefix: 'Report export failed',
+        timeoutMs: 60000,
       },
     );
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Report export failed (${response.status}): ${text}`);
-    }
-
-    return response.blob();
   };
 
   const buildProtectedMemberReportFile = async (orgId, scope, format, year, member) => {
@@ -1007,103 +1771,6 @@
     }
 
     throw new Error('Unsupported report format.');
-  };
-
-  const crc32 = (bytes) => {
-    let table = crc32.table;
-    if (!Array.isArray(table)) {
-      table = [];
-      for (let index = 0; index < 256; index += 1) {
-        let value = index;
-        for (let bit = 0; bit < 8; bit += 1) {
-          value = (value & 1) ? (0xEDB88320 ^ (value >>> 1)) : (value >>> 1);
-        }
-        table[index] = value >>> 0;
-      }
-      crc32.table = table;
-    }
-
-    let crc = 0xFFFFFFFF;
-    for (let index = 0; index < bytes.length; index += 1) {
-      crc = (crc >>> 8) ^ table[(crc ^ bytes[index]) & 0xFF];
-    }
-
-    return (crc ^ 0xFFFFFFFF) >>> 0;
-  };
-
-  const uint16 = (value) => {
-    const bytes = new Uint8Array(2);
-    bytes[0] = value & 0xFF;
-    bytes[1] = (value >>> 8) & 0xFF;
-    return bytes;
-  };
-
-  const uint32 = (value) => {
-    const bytes = new Uint8Array(4);
-    bytes[0] = value & 0xFF;
-    bytes[1] = (value >>> 8) & 0xFF;
-    bytes[2] = (value >>> 16) & 0xFF;
-    bytes[3] = (value >>> 24) & 0xFF;
-    return bytes;
-  };
-
-  const concatUint8 = (parts) => {
-    const total = parts.reduce((sum, part) => sum + part.length, 0);
-    const out = new Uint8Array(total);
-    let offset = 0;
-    parts.forEach((part) => {
-      out.set(part, offset);
-      offset += part.length;
-    });
-    return out;
-  };
-
-  const zipDosTime = (date) => (
-    (date.getHours() << 11)
-    | (date.getMinutes() << 5)
-    | Math.floor(date.getSeconds() / 2)
-  );
-
-  const zipDosDate = (date) => (
-    ((date.getFullYear() - 1980) << 9)
-    | ((date.getMonth() + 1) << 5)
-    | date.getDate()
-  );
-
-  const createZipBlob = async (files) => {
-    const localParts = [];
-    const centralParts = [];
-    let offset = 0;
-    const now = new Date();
-    const time = zipDosTime(now);
-    const date = zipDosDate(now);
-
-    for (const file of files) {
-      const nameBytes = MEMBER_REPORT_TEXT_ENCODER.encode(file.filename);
-      const content = new Uint8Array(await file.blob.arrayBuffer());
-      const checksum = crc32(content);
-      const localHeader = concatUint8([
-        uint32(0x04034b50), uint16(20), uint16(0x0800), uint16(0),
-        uint16(time), uint16(date), uint32(checksum), uint32(content.length),
-        uint32(content.length), uint16(nameBytes.length), uint16(0), nameBytes,
-      ]);
-      localParts.push(localHeader, content);
-      centralParts.push(concatUint8([
-        uint32(0x02014b50), uint16(20), uint16(20), uint16(0x0800), uint16(0),
-        uint16(time), uint16(date), uint32(checksum), uint32(content.length),
-        uint32(content.length), uint16(nameBytes.length), uint16(0), uint16(0),
-        uint16(0), uint16(0), uint32(0), uint32(offset), nameBytes,
-      ]));
-      offset += localHeader.length + content.length;
-    }
-
-    const centralDirectory = concatUint8(centralParts);
-    const end = concatUint8([
-      uint32(0x06054b50), uint16(0), uint16(0), uint16(files.length), uint16(files.length),
-      uint32(centralDirectory.length), uint32(offset), uint16(0),
-    ]);
-
-    return new Blob([concatUint8([...localParts, centralDirectory, end])], { type: 'application/zip' });
   };
 
   const buildReportManifest = (batch) => {
@@ -1149,10 +1816,7 @@
     }, null, 2)
   );
 
-  const csvEscape = (value) => {
-    const text = String(value ?? '');
-    return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-  };
+  const csvEscape = businessCsvEscape;
 
   const buildReportManifestCsv = (batch) => {
     const columns = ['generated_at', 'actor_id', 'business_id', 'member_id', 'member_name', 'report', 'scope', 'year', 'format', 'delivery', 'generation_path', 'trust_level', 'trust_note', 'status', 'filename', 'error'];
@@ -1258,7 +1922,7 @@
 
     const members = await resolveMembersForReportGeneration(orgId);
     if (members.length === 0) {
-      PC.showToast(T.membersApplyWorkSiteNoSelection, 'error', 6000, true);
+      PC.showToast(T.memberReportsNoSelectedMembers, 'error', 6000, true);
       return;
     }
 
@@ -1283,9 +1947,7 @@
     }
     if (members.length > MEMBER_REPORT_CONFIRM_THRESHOLD) {
       const confirmed = window.confirm(
-        T.memberReportsConfirm
-          .replace('%d', String(members.length))
-          .replace('%s', format.toUpperCase()),
+        formatPhpTemplate(T.memberReportsConfirm, [members.length, format.toUpperCase()]),
       );
       if (!confirmed) {
         return;
@@ -1341,12 +2003,11 @@
 
       for (let index = 0; index < members.length; index += 1) {
         const member = members[index];
-        setMembersReportStatus(
-          T.memberReportsProgress
-            .replace('%d', String(index + 1))
-            .replace('%d', String(members.length))
-            .replace('%s', member.name),
-        );
+        setMembersReportStatus(formatPhpTemplate(T.memberReportsProgress, [
+          index + 1,
+          members.length,
+          member.name,
+        ]));
         try {
           if (format === 'xlsx' || format === 'pdf') {
             const file = await buildProtectedMemberReportFile(orgId, scope, format, year, member);
@@ -1396,13 +2057,15 @@
       await recordMembersReportAudit(batch, batch.failed > 0 ? 'failed' : 'completed', batch.failed > 0 ? 'one_or_more_member_reports_failed' : '');
 
       const message = batch.failed > 0
-        ? T.memberReportsGeneratedFailed
-          .replace('%d', String(batch.generated))
-          .replace('%s', batch.generated === 1 ? '' : 's')
-          .replace('%d', String(batch.failed))
-        : T.memberReportsGeneratedSuccess
-          .replace('%d', String(batch.generated))
-          .replace('%s', batch.generated === 1 ? '' : 's');
+        ? formatPhpTemplate(T.memberReportsGeneratedFailed, [
+          batch.generated,
+          batch.generated === 1 ? '' : 's',
+          batch.failed,
+        ])
+        : formatPhpTemplate(T.memberReportsGeneratedSuccess, [
+          batch.generated,
+          batch.generated === 1 ? '' : 's',
+        ]);
       setMembersReportStatus(message);
       PC.showToast(message, batch.failed > 0 ? 'error' : 'save', 7000, true);
     } catch (error) {
@@ -1418,106 +2081,6 @@
     }
   };
 
-  const applyWorkSiteToSelectedMembers = async () => {
-    const orgId = String(state.selectedBusinessId || resolveWorkspaceBusinessId() || '').trim();
-    if (orgId === '') {
-      return;
-    }
-
-    if (!(elements.membersApplySiteSelect instanceof HTMLSelectElement)) {
-      return;
-    }
-
-    const selectedCount = getMembersBulkSelectedCount();
-    if (selectedCount === 0) {
-      PC.showToast(T.membersApplyWorkSiteNoSelection, 'error', 6000, true);
-      return;
-    }
-
-    const siteValue = String(elements.membersApplySiteSelect.value || '').trim();
-    if (siteValue === '') {
-      PC.showToast(T.membersApplyWorkSiteNoSite, 'error', 6000, true);
-      return;
-    }
-
-    const [siteOwnerUuid, siteId] = siteValue.split(':');
-    if (!siteOwnerUuid || !siteId) {
-      PC.showToast(T.membersApplyWorkSiteNoSite, 'error', 6000, true);
-      return;
-    }
-
-    const confirmed = window.confirm(
-      T.membersApplyWorkSiteConfirm.replace('%d', String(selectedCount)),
-    );
-    if (!confirmed) {
-      return;
-    }
-
-    if (elements.membersApplyWorkSiteButton instanceof HTMLButtonElement) {
-      elements.membersApplyWorkSiteButton.disabled = true;
-    }
-
-    try {
-      const memberIds = await resolveMemberIdsForWorkSiteApply(orgId);
-      if (memberIds.length === 0) {
-        PC.showToast(T.membersApplyWorkSiteNoSelection, 'error', 6000, true);
-        return;
-      }
-
-      const requestBase = {
-        site_owner_uuid: siteOwnerUuid,
-        site_id: siteId,
-        apply_scope: 'unlinked',
-      };
-
-      let membersUpdated = 0;
-      let entriesMigrated = 0;
-
-      for (let offset = 0; offset < memberIds.length; offset += MEMBERS_APPLY_WORK_SITE_BATCH_SIZE) {
-        const batch = memberIds.slice(offset, offset + MEMBERS_APPLY_WORK_SITE_BATCH_SIZE);
-        const processed = Math.min(offset + batch.length, memberIds.length);
-        if (elements.membersBulkStatus instanceof HTMLElement) {
-          elements.membersBulkStatus.textContent = T.membersApplyWorkSiteProgress
-            .replace('%d', String(processed))
-            .replace('%d', String(memberIds.length));
-        }
-
-        const payload = await postForm(
-          `/api/v1/businesses/${encodeURIComponent(orgId)}/members/apply-work-site`,
-          {
-            ...requestBase,
-            member_uuids: batch,
-          },
-        );
-
-        membersUpdated += Number(payload?.members_updated || 0);
-        entriesMigrated += Number(payload?.entries_migrated || 0);
-      }
-
-      const successMessage = T.membersApplyWorkSiteSuccess
-        .replace('%d', String(membersUpdated))
-        .replace('%d', String(entriesMigrated));
-      PC.showToast(successMessage, 'save', 7000, true);
-      if (elements.membersBulkStatus instanceof HTMLElement) {
-        elements.membersBulkStatus.textContent = successMessage;
-      }
-
-      clearMembersBulkSelection();
-      await loadBusinessMembersGrid(orgId);
-    } catch (error) {
-      PW.error(error);
-      const message = error instanceof Error && error.message
-        ? error.message
-        : T.membersApplyWorkSiteFailed;
-      PC.showToast(message, 'error', 7000, true);
-      if (elements.membersBulkStatus instanceof HTMLElement) {
-        elements.membersBulkStatus.textContent = message;
-      }
-    } finally {
-      updateMembersBulkSelectionUi();
-    }
-  };
-
   const bindMembersBulkToolbar = () => {
     syncMembersGridElementRefs();
     const toolbar = elements.membersBulkToolbar;
@@ -1526,29 +2089,52 @@
     }
     toolbar.dataset.membersBulkBound = '1';
 
-    if (elements.membersSelectAllButton instanceof HTMLButtonElement) {
-      elements.membersSelectAllButton.addEventListener('click', () => {
-        selectAllBusinessMembers();
-      });
-    }
-
     if (elements.membersClearSelectionButton instanceof HTMLButtonElement) {
       elements.membersClearSelectionButton.addEventListener('click', () => {
-        clearMembersBulkSelection();
-      });
-    }
-
-    if (elements.membersApplyWorkSiteButton instanceof HTMLButtonElement) {
-      elements.membersApplyWorkSiteButton.addEventListener('click', () => {
-        applyWorkSiteToSelectedMembers().catch((error) => PW.error(error));
+        clearMembersBulkSelection(true);
       });
     }
 
     if (elements.membersReportToggle instanceof HTMLButtonElement) {
       elements.membersReportToggle.addEventListener('click', () => {
+        closeMembersBulkGroupMenu();
         toggleMembersReportPanel();
       });
     }
+
+    if (elements.membersBulkGroupToggle instanceof HTMLButtonElement) {
+      elements.membersBulkGroupToggle.addEventListener('click', () => {
+        setMembersReportPanelOpen(false);
+        openMembersBulkGroupMenu().catch((error) => {
+          PW.error(error);
+        });
+      });
+    }
+
+    if (elements.membersBulkGroupMenu instanceof HTMLElement) {
+      elements.membersBulkGroupMenu.addEventListener('click', (event) => {
+        const menuItem = event.target instanceof Element
+          ? event.target.closest('.business_members_bulk_group_menu_item')
+          : null;
+        if (!(menuItem instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        addSelectedMembersToGroup(menuItem.dataset.groupId || '', menuItem).catch((error) => {
+          PW.error(error);
+        });
+      });
+    }
+
+    toolbar.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') {
+        return;
+      }
+
+      closeMembersBulkGroupMenu({ focusSearch: true });
+    });
 
     if (elements.membersGenerateReportsButton instanceof HTMLButtonElement) {
       elements.membersGenerateReportsButton.addEventListener('click', () => {
@@ -1564,15 +2150,75 @@
       });
     }
 
-    if (elements.membersReportPanel instanceof HTMLElement) {
+    if (elements.membersReportPanel instanceof HTMLDialogElement) {
       elements.membersReportPanel.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
           event.preventDefault();
-          setMembersReportPanelOpen(false);
-          if (elements.membersReportToggle instanceof HTMLButtonElement) {
-            elements.membersReportToggle.focus();
-          }
+          setMembersReportPanelOpen(false, { focusSearch: true });
         }
+      });
+
+      elements.membersReportPanel.addEventListener('close', () => {
+        if (elements.membersReportToggle instanceof HTMLButtonElement) {
+          elements.membersReportToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    if (elements.membersReportClose instanceof HTMLButtonElement) {
+      elements.membersReportClose.addEventListener('click', () => {
+        setMembersReportPanelOpen(false, { focusSearch: true });
+      });
+    }
+
+    if (elements.membersReportType instanceof HTMLSelectElement) {
+      elements.membersReportType.addEventListener('change', updateMembersReportDescription);
+      updateMembersReportDescription();
+    }
+
+    if (elements.membersReportMemberFilter instanceof HTMLInputElement) {
+      elements.membersReportMemberFilter.addEventListener('input', renderMembersReportSelectionList);
+    }
+
+    if (elements.membersReportMemberAdd instanceof HTMLInputElement) {
+      elements.membersReportMemberAdd.addEventListener('input', renderMembersReportSelectionList);
+    }
+
+    if (elements.membersReportMemberPills instanceof HTMLElement) {
+      elements.membersReportMemberPills.addEventListener('click', (event) => {
+        const button = event.target instanceof Element
+          ? event.target.closest('.business_members_report_member_remove')
+          : null;
+        if (!(button instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        const memberId = String(button.dataset.memberId || '').trim();
+        memberReportSelectionMembers = memberReportSelectionMembers.filter((member) => member.id !== memberId);
+        syncReportDialogSelectionToBulkState();
+        renderMembersReportSelectionList();
+      });
+    }
+
+    if (elements.membersReportMemberAddResults instanceof HTMLElement) {
+      elements.membersReportMemberAddResults.addEventListener('click', (event) => {
+        const button = event.target instanceof Element
+          ? event.target.closest('.business_members_report_member_add')
+          : null;
+        if (!(button instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        const memberId = String(button.dataset.memberId || '').trim();
+        const member = memberReportAllMembers.find((candidate) => candidate.id === memberId);
+        if (!member || memberReportSelectionMembers.some((selected) => selected.id === member.id)) {
+          return;
+        }
+
+        memberReportSelectionMembers = [...memberReportSelectionMembers, member]
+          .sort((a, b) => a.name.localeCompare(b.name));
+        syncReportDialogSelectionToBulkState();
+        renderMembersReportSelectionList();
       });
     }
 
@@ -1606,11 +2252,6 @@
       });
     }
 
-    if (elements.membersApplySiteSelect instanceof HTMLSelectElement) {
-      elements.membersApplySiteSelect.addEventListener('change', () => {
-        updateMembersBulkSelectionUi();
-      });
-    }
   };
 
   document.addEventListener('click', (event) => {
@@ -1619,12 +2260,19 @@
     }
 
     const reportControl = document.getElementById('business_members_report_control');
+    const groupControl = document.getElementById('business_members_bulk_group_control');
     const target = event.target instanceof Node ? event.target : null;
-    if (!(reportControl instanceof HTMLElement) || target === null || reportControl.contains(target)) {
+    if (target === null) {
       return;
     }
 
-    setMembersReportPanelOpen(false);
+    if (reportControl instanceof HTMLElement && !reportControl.contains(target)) {
+      setMembersReportPanelOpen(false);
+    }
+
+    if (groupControl instanceof HTMLElement && !groupControl.contains(target)) {
+      closeMembersBulkGroupMenu();
+    }
   });
 
   const membersGridEndpoint = (orgId) => (
@@ -1662,11 +2310,10 @@
     const rowCount = container.querySelectorAll(
       '[data-grid="business-members"] .datagrid_row:not(.datagrid_row_empty)',
     ).length;
-    announceMembersGridStatus(
-      T.membersGridReady
-        .replace('%d', String(rowCount))
-        .replace('%s', rowCount === 1 ? '' : 's'),
-    );
+    announceMembersGridStatus(formatPhpTemplate(T.membersGridReady, [
+      rowCount,
+      rowCount === 1 ? '' : 's',
+    ]));
   };
 
   const ensureBusinessMembersGridManager = (orgId) => {
@@ -1683,15 +2330,12 @@
       endpoint: membersGridEndpoint(orgId),
     });
     state.membersGridOrgId = orgId;
-    state.membersGridRoleFilter = '';
 
     return state.membersGridManager;
   };
 
   const announceMembersGridStatus = (message) => {
-    if (elements.membersGridStatus instanceof HTMLElement) {
-      elements.membersGridStatus.textContent = String(message || '');
-    }
+    setPlainStatusText(elements.membersGridStatus, message);
   };
 
   const isMembersGridInteractiveTarget = (target) => {
@@ -1700,7 +2344,7 @@
     }
 
     return !!target.closest(
-      'a, button, input, select, textarea, label, .datagrid_action, .businesses_member_role_trigger, .business_members_row_checkbox, .business_members_row_select, .business_member_row_menu, .business_member_row_menu_toggle, .business_member_row_menu_item, .datagrid_sort, .datagrid_search, .datagrid_pager, .datagrid_pagination, .datagrid_column_toggle, .datagrid_column_toggle_input, .datagrid_column_menu, .datagrid_column_menu_toggle, .datagrid_column_menu_panel, .business_members_bulk_toolbar, .business_members_toolbar_bulk',
+      'a, button, input, select, textarea, label, .datagrid_action, .business_members_row_checkbox, .business_members_row_select, .business_member_row_menu, .business_member_row_menu_toggle, .business_member_row_menu_item, .datagrid_sort, .datagrid_search, .datagrid_pager, .datagrid_pagination, .datagrid_column_toggle, .datagrid_column_toggle_input, .datagrid_column_menu, .datagrid_column_menu_toggle, .datagrid_column_menu_panel, .business_members_bulk_toolbar, .business_members_toolbar_bulk',
     );
   };
 
@@ -1735,6 +2379,132 @@
     });
   };
 
+  const handleMembersGridSearchKeyboard = (event) => {
+    const searchInput = getMembersGridSearchInput();
+    if (!(searchInput instanceof HTMLInputElement) || event.target !== searchInput) {
+      return false;
+    }
+
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return false;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      return focusMembersGridRowByIndex(0);
+    }
+
+    if (event.key === 'Home') {
+      event.preventDefault();
+      return focusMembersGridRowByIndex(0, { scroll: 'top' });
+    }
+
+    if (event.key === 'End') {
+      const rows = getMembersGridRows();
+      if (rows.length === 0) {
+        return false;
+      }
+
+      event.preventDefault();
+      return focusMembersGridRowByIndex(rows.length - 1, { scroll: 'bottom' });
+    }
+
+    if (event.key === 'PageDown') {
+      event.preventDefault();
+      return focusMembersGridRowByIndex(MEMBERS_KEYBOARD_PAGE_STEP - 1, { scroll: 'nearest' });
+    }
+
+    if (event.key === 'PageUp') {
+      event.preventDefault();
+      return focusMembersGridRowByIndex(0, { scroll: 'nearest' });
+    }
+
+    return false;
+  };
+
+  const handleMembersGridRowKeyboard = (event, container) => {
+    if (isMembersGridInteractiveTarget(event.target)) {
+      return false;
+    }
+
+    const row = resolveMembersGridRowFromTarget(event.target);
+    if (!(row instanceof HTMLElement) || !container.contains(row)) {
+      return false;
+    }
+
+    if (
+      event.key === 'ContextMenu'
+      || (event.shiftKey && event.key === 'F10')
+      || (event.shiftKey && event.key === 'Enter')
+      || (
+        event.shiftKey
+        && (
+          event.key === ' '
+          || event.key === 'Space'
+          || event.key === 'Spacebar'
+          || event.code === 'Space'
+        )
+      )
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      return openMemberRowMenuForRow(row, true);
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      return focusMembersGridRelativeRow(row, 1);
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const rows = getMembersGridRows();
+      if (rows.indexOf(row) <= 0) {
+        return focusMembersGridSearch(false);
+      }
+
+      return focusMembersGridRelativeRow(row, -1);
+    }
+
+    if (event.key === 'Home') {
+      event.preventDefault();
+      return focusMembersGridRowByIndex(0, { scroll: 'top' });
+    }
+
+    if (event.key === 'End') {
+      const rows = getMembersGridRows();
+      if (rows.length === 0) {
+        return false;
+      }
+
+      event.preventDefault();
+      return focusMembersGridRowByIndex(rows.length - 1, { scroll: 'bottom' });
+    }
+
+    if (event.key === 'PageDown') {
+      event.preventDefault();
+      return focusMembersGridPagedRow(row, 1);
+    }
+
+    if (event.key === 'PageUp') {
+      event.preventDefault();
+      return focusMembersGridPagedRow(row, -1);
+    }
+
+    if (event.key === ' ' || event.key === 'Space' || event.key === 'Spacebar' || event.code === 'Space') {
+      event.preventDefault();
+      return toggleMembersGridRowSelection(row);
+    }
+
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      activateMemberReportsFromRow(row, row);
+      return true;
+    }
+
+    return false;
+  };
+
   const bindBusinessMembersGridInteractions = () => {
     const perf = resolveBusinessMembersLensPerf();
     const bind = () => {
@@ -1750,6 +2520,7 @@
 
       bindMemberRolePopoverDismissals();
       bindMembersBulkToolbar();
+      syncMembersGridKeyboardRows();
 
       container.addEventListener('change', (event) => {
         const checkbox = event.target instanceof Element
@@ -1757,6 +2528,20 @@
           : null;
         if (checkbox instanceof HTMLInputElement && container.contains(checkbox)) {
           handleMembersBulkCheckboxChange(checkbox);
+        }
+
+        const selectAllCheckbox = event.target instanceof Element
+          ? event.target.closest('.business_members_select_all_checkbox')
+          : null;
+        if (selectAllCheckbox instanceof HTMLInputElement && container.contains(selectAllCheckbox)) {
+          toggleAllVisibleBusinessMembers(selectAllCheckbox.checked);
+        }
+      });
+
+      container.addEventListener('focusin', (event) => {
+        const row = resolveMembersGridRowFromTarget(event.target);
+        if (row instanceof HTMLElement && container.contains(row)) {
+          syncMembersGridKeyboardRows(row);
         }
       });
 
@@ -1770,6 +2555,8 @@
         closeAllMemberRowMenus();
         if (menu instanceof HTMLElement && !isOpen) {
           setMemberRowMenuOpen(menu, true);
+        } else if (isOpen) {
+          focusMembersGridSearchSoon(false);
         }
         return;
       }
@@ -1780,8 +2567,12 @@
         event.stopPropagation();
         const row = rowMenuItem.closest('.datagrid_row');
         const menu = rowMenuItem.closest('.business_member_row_menu');
+        const action = String(rowMenuItem.dataset.memberAction || '').trim();
         if (!rowMenuItem.disabled) {
           handleMemberRowMenuAction(rowMenuItem, row);
+        }
+        if (action === 'add-to-group' || action === 'edit-role') {
+          return;
         }
         if (menu instanceof HTMLElement) {
           setMemberRowMenuOpen(menu, false);
@@ -1790,18 +2581,65 @@
         return;
       }
 
-      if (!(event.target instanceof Element) || !event.target.closest('.business_member_row_menu_panel')) {
-        closeAllMemberRowMenus();
+      const groupMenuItem = event.target.closest('.business_member_group_menu_item');
+      if (groupMenuItem instanceof HTMLElement && container.contains(groupMenuItem)) {
+        event.preventDefault();
+        event.stopPropagation();
+        const businessId = String(state.selectedBusinessId || resolveWorkspaceBusinessId() || '').trim();
+        const groupId = String(groupMenuItem.dataset.groupId || '').trim();
+        const memberUuid = String(groupMenuItem.dataset.memberId || '').trim();
+        const groupName = memberGroupNameFromMenuItem(groupMenuItem);
+        if (businessId === '' || groupId === '' || memberUuid === '') {
+          return;
+        }
+
+        groupMenuItem.setAttribute('aria-disabled', 'true');
+        postForm(`/api/v1/businesses/${encodeURIComponent(businessId)}/groups/${encodeURIComponent(groupId)}/members`, {
+          member_uuids: [memberUuid],
+        }).then(() => {
+          memberGroupOptionsCache = null;
+          closeAllMemberRowMenus();
+          focusMembersGridSearchSoon(false);
+          PC.showToast(formatMemberGroupToast(T.businessGroupsMemberAddedNamed, groupName), 'success', 3500, true);
+        }).catch((error) => {
+          PW.error(error);
+          groupMenuItem.removeAttribute('aria-disabled');
+          PC.showToast(T.businessGroupsAddFailed || 'Unable to add member to group.', 'error', 6000, true);
+        });
+        return;
       }
 
-      const roleTrigger = event.target.closest('.businesses_member_role_trigger');
-      if (roleTrigger instanceof HTMLElement && container.contains(roleTrigger)) {
+      const roleMenuItem = event.target.closest('.business_member_role_menu_item');
+      if (roleMenuItem instanceof HTMLElement && container.contains(roleMenuItem)) {
         event.preventDefault();
-        const memberUuid = String(roleTrigger.dataset.memberId || '').trim();
-        if (memberUuid !== '') {
-          toggleMemberRolePopover(roleTrigger, memberUuid);
+        event.stopPropagation();
+        if (roleMenuItem.hasAttribute('disabled')) {
+          return;
         }
+        const memberUuid = String(roleMenuItem.dataset.memberId || '').trim();
+        const nextRole = String(roleMenuItem.dataset.role || '').trim();
+        const menu = roleMenuItem.closest('.business_member_row_menu');
+        const trigger = menu?.querySelector('[data-member-action="edit-role"]');
+        const previousRole = trigger instanceof HTMLElement
+          ? String(trigger.dataset.currentRole || '').trim()
+          : '';
+        if (!(trigger instanceof HTMLElement) || memberUuid === '' || nextRole === '') {
+          return;
+        }
+
+        roleMenuItem.setAttribute('aria-disabled', 'true');
+        submitMemberRoleChange(trigger, memberUuid, nextRole, previousRole).then(() => {
+          closeAllMemberRowMenus();
+          focusMembersGridSearchSoon(false);
+        }).catch((error) => {
+          PW.error(error);
+          roleMenuItem.removeAttribute('aria-disabled');
+        });
         return;
+      }
+
+      if (!(event.target instanceof Element) || !event.target.closest('.business_member_row_menu_panel')) {
+        closeAllMemberRowMenus();
       }
 
       const actionBtn = event.target.closest('.datagrid_action');
@@ -1829,31 +2667,15 @@
     });
 
     container.addEventListener('keydown', (event) => {
-      if (event.key !== 'Enter' && event.key !== ' ') {
+      if (handleMemberRowMenuKeyboard(event, container)) {
         return;
       }
 
-      const roleTrigger = event.target.closest('.businesses_member_role_trigger');
-      if (roleTrigger instanceof HTMLElement && container.contains(roleTrigger)) {
-        event.preventDefault();
-        const memberUuid = String(roleTrigger.dataset.memberId || '').trim();
-        if (memberUuid !== '') {
-          toggleMemberRolePopover(roleTrigger, memberUuid);
-        }
+      if (handleMembersGridSearchKeyboard(event)) {
         return;
       }
 
-      if (isMembersGridInteractiveTarget(event.target)) {
-        return;
-      }
-
-      const row = event.target.closest('.businesses_member_row_clickable, .datagrid_row');
-      if (!(row instanceof HTMLElement) || !container.contains(row)) {
-        return;
-      }
-
-      event.preventDefault();
-      activateMemberReportsFromRow(row, row);
+      handleMembersGridRowKeyboard(event, container);
     });
     };
 
@@ -1884,9 +2706,17 @@
 
   let membersSearchInitialFocusDone = false;
 
-  const canFocusMembersGridSearchOnInitialLoad = () => {
+  const canFocusMembersGridSearchOnInitialLoad = (searchInput = null) => {
     const active = document.activeElement;
     if (active instanceof HTMLElement && active !== document.body && active !== document.documentElement) {
+      if (searchInput instanceof HTMLInputElement && active === searchInput) {
+        return true;
+      }
+
+      if (active.closest('[data-grid="business-members"]')) {
+        return true;
+      }
+
       return false;
     }
 
@@ -1901,22 +2731,16 @@
     membersSearchInitialFocusDone = true;
 
     window.requestAnimationFrame(() => {
-      if (!canFocusMembersGridSearchOnInitialLoad()) {
-        return;
-      }
-
-      syncMembersGridElementRefs();
-      const container = elements.membersGridContainer;
-      if (!(container instanceof HTMLElement)) {
-        return;
-      }
-
-      const searchInput = container.querySelector('[data-grid="business-members"] .datagrid_search');
+      const searchInput = getMembersGridSearchInput();
       if (!(searchInput instanceof HTMLInputElement)) {
         return;
       }
 
-      searchInput.focus({ preventScroll: true });
+      if (!canFocusMembersGridSearchOnInitialLoad(searchInput)) {
+        return;
+      }
+
+      focusMembersGridSearch(false);
     });
   };
 
@@ -1933,20 +2757,13 @@
       return;
     }
 
-    syncMembersGridElementRefs();
-    const container = elements.membersGridContainer;
-    if (!(container instanceof HTMLElement)) {
-      return;
-    }
-
-    const searchInput = container.querySelector('.datagrid_search');
+    const searchInput = getMembersGridSearchInput();
     if (!(searchInput instanceof HTMLInputElement)) {
       return;
     }
 
     const target = event.target instanceof Element ? event.target : null;
     if (target === searchInput) {
-      event.preventDefault();
       return;
     }
 
@@ -1955,16 +2772,44 @@
     }
 
     event.preventDefault();
-    searchInput.focus({ preventScroll: true });
+    focusMembersGridSearch(true);
+  };
+
+  const bindBusinessMembersInfoDialog = () => {
+    syncMembersGridElementRefs();
+    const button = elements.membersInfoButton;
+    const dialog = elements.membersInfoDialog;
+    if (!(button instanceof HTMLButtonElement) || !(dialog instanceof HTMLDialogElement)) {
+      return;
+    }
+
+    if (button.dataset.membersInfoBound === '1') {
+      return;
+    }
+
+    button.dataset.membersInfoBound = '1';
+    button.addEventListener('click', () => {
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+
+      const closeButton = dialog.querySelector('[data-dialog-close="business_members_info_dialog"]');
+      if (closeButton instanceof HTMLElement) {
+        closeButton.focus({ preventScroll: true });
+      }
+    });
+
+    dialog.addEventListener('close', () => {
+      focusMembersGridSearchSoon(false);
+    });
   };
 
   if (isBusinessMembersSubPage()) {
     bindBusinessMembersGridInteractions();
     bindMembersBulkToolbar();
     bindMembersPendingAccordion();
+    bindBusinessMembersInfoDialog();
     integrateMembersToolbarLayout();
-    refreshMembersBulkToolbar(resolveWorkspaceBusinessId()).catch((error) => PW.error(error));
-    loadBusinessMembersPendingList(resolveWorkspaceBusinessId()).catch((error) => PW.error(error));
 
     syncMembersGridElementRefs();
     const bootstrapOrgId = String(resolveWorkspaceBusinessId() || '').trim();
@@ -2014,14 +2859,26 @@
       }
 
       const business = findBusiness(orgId);
-      if (business && !canUsePremiumOrgFeatures(business)) {
+      if (!business) {
+        setDatagridMessage(elements.membersGridContainer, ACCESS_MANAGE_WARNING);
+        announceMembersGridStatus(ACCESS_MANAGE_WARNING);
+        return;
+      }
+
+      if (!canUsePremiumOrgFeatures(business)) {
         setDatagridMessage(elements.membersGridContainer, T.premiumAdminLockedDetailed);
         announceMembersGridStatus(T.premiumAdminLockedDetailed);
         return;
       }
 
-      if (business) {
-        state.selectedBusinessId = orgId;
+      state.selectedBusinessId = orgId;
+
+      if (!canManageBusinessAccess(business)) {
+        setDatagridMessage(elements.membersGridContainer, ACCESS_MANAGE_WARNING);
+        announceMembersGridStatus(ACCESS_MANAGE_WARNING);
+        closeMemberRolePopover({ restoreFocus: false });
+        await loadBusinessMembersPendingList(orgId);
+        return;
       }
 
       closeMemberRolePopover({ restoreFocus: false });

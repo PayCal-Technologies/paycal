@@ -277,6 +277,33 @@ final class InputSanitizerTest extends TestCase
     $this->assertSame('test@example.com', $result);
   }
 
+  #[Test]
+  public function canonicalEmailIdentityStripsPlusTagsForAnyDomain(): void
+  {
+    $this->assertSame(
+      'person@example.com',
+      InputSanitizer::canonicalEmailIdentity('Person+paycal@Example.COM')
+    );
+  }
+
+  #[Test]
+  public function canonicalEmailIdentityFoldsGmailDotsAndGooglemailDomain(): void
+  {
+    $this->assertSame(
+      'cshaiku@gmail.com',
+      InputSanitizer::canonicalEmailIdentity('cs.haiku+paycal@googlemail.com')
+    );
+  }
+
+  #[Test]
+  public function canonicalEmailIdentityKeepsDotsForNonGmailDomains(): void
+  {
+    $this->assertSame(
+      'first.last@example.com',
+      InputSanitizer::canonicalEmailIdentity('first.last+paycal@example.com')
+    );
+  }
+
   // =========================================================================
   // sanitizeIPAddress() Tests
   // =========================================================================

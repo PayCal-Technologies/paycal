@@ -178,16 +178,24 @@ export function calculateTaxes(incomeDollars, province = 'Alberta') {
   };
 }
 
+export function getIndigenousStatusSalesTaxExemption(province = 'Alberta') {
+  const exemptions = TAX_RATE_TABLES?.salesTaxExemptions?.indigenousStatus || {};
+  const requested = String(province || '').trim();
+  return exemptions[requested] || exemptions.Alberta || null;
+}
+
 export const TaxBrackets = {
   taxYear: ACTIVE_TAX_YEAR,
   federal: FEDERAL_BRACKETS,
   provincial: PROVINCIAL_BRACKETS,
+  salesTaxExemptions: TAX_RATE_TABLES?.salesTaxExemptions || {},
 };
 
 if (typeof window !== 'undefined') {
   window.PayCalTaxes = {
     calculateTaxes,
     calculateTaxesCents,
+    getIndigenousStatusSalesTaxExemption,
     TaxBrackets,
   };
 }

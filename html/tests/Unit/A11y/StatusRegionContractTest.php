@@ -6,24 +6,29 @@ use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
 #[Group('a11y')]
+#[Group('private-moat')]
 final class StatusRegionContractTest extends TestCase
 {
-  #[Group('private-moat')]
   #[Test]
   public function settingsAndBusinessesExposeCoreStatusRegions(): void
   {
     $projectRoot = dirname(__DIR__, 4);
-    $settings = (string) file_get_contents($projectRoot . '/html/settings/index.php');
+    $settings = (string) file_get_contents($projectRoot . '/html/settings/_partials/modals.php')
+      . (string) file_get_contents($projectRoot . '/html/settings/_partials/panel_account.php');
+    $passkeys = (string) file_get_contents($projectRoot . '/html/settings/_partials/panel_security_passkeys.php');
     $dashboard = (string) file_get_contents($projectRoot . '/html/business/index.php');
     $editorDialog = (string) file_get_contents($projectRoot . '/html/business/_archive/partials/editor_dialog.php');
     $discoveryPanel = (string) file_get_contents($projectRoot . '/html/business/_partials/editor_sites_discovery_panel.php');
     $auditPanel = (string) file_get_contents($projectRoot . '/html/business/_partials/editor_audit_panels.php');
 
     $settingsIds = [
-      'passkey_credentials_sr_status',
       'change_email_status',
       'recovery_email_send_status',
       'delete_account_status',
+    ];
+
+    $passkeysIds = [
+      'passkey_credentials_sr_status',
     ];
 
     $dashboardIds = [];
@@ -41,6 +46,10 @@ final class StatusRegionContractTest extends TestCase
 
     foreach ($settingsIds as $id) {
       $this->assertStringContainsString($id, $settings);
+    }
+
+    foreach ($passkeysIds as $id) {
+      $this->assertStringContainsString($id, $passkeys);
     }
 
     foreach ($dashboardIds as $id) {

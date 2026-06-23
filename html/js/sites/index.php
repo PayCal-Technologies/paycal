@@ -24,9 +24,45 @@ const debugLog = (...args) => {
 };
 const getErrorMessage = (error) => error?.message || String(error);
 
+const SITE_PAGE_DIALOG_IDS = new Set([
+  'modal_create_site',
+  'modal_edit_site',
+  'modal_confirm_delete_site',
+  'modal_archived_work',
+  'modal_finality_delete',
+  'modal_orphaned_work',
+  'modal_recovery_site',
+]);
+
+const openSitesDialog = (dialog) => {
+  if (!(dialog instanceof HTMLDialogElement)) {
+    return;
+  }
+
+  dialog.setAttribute('aria-hidden', 'false');
+  if (!dialog.open) {
+    dialog.showModal();
+  }
+};
+
+const closeSitesDialog = (dialog) => {
+  if (!(dialog instanceof HTMLDialogElement)) {
+    return;
+  }
+
+  const active = document.activeElement;
+  if (active instanceof HTMLElement && dialog.contains(active)) {
+    active.blur();
+  }
+  if (dialog.open) {
+    dialog.close();
+  }
+  dialog.setAttribute('aria-hidden', 'true');
+};
+
 import PC from "<?php echo Environment::appURL('js/'); ?>";
 import PW from "<?php echo Environment::appURL('js/phantomwing/'); ?>";
-import { createDataGrid } from "/js/datagrid/";
+import { createDataGrid, bindDataGridKeyboardNavigation } from "/js/datagrid/";
 
 <?php require __DIR__ . '/i18n.php'; ?>
 
@@ -117,9 +153,11 @@ document.addEventListener("DOMContentLoaded", async () =>
       const sw = /** @type {Element} */ (e.target)?.closest('.site_color_swatch');
       if (!(sw instanceof HTMLElement) || !sw.dataset.hex) { return; }
       colorHiddenInput.value = sw.dataset.hex;
-      if (colorNameEl) { colorNameEl.textContent = sw.getAttribute('aria-label') || ''; }
+      if (colorNameEl) { colorNameEl.textContent = String(sw.dataset.label || ''); }
       swatchesContainer.querySelectorAll('.site_color_swatch').forEach((s) => {
-        s.classList.toggle('is-selected', s === sw);
+        const selected = s === sw;
+        s.classList.toggle('is-selected', selected);
+        s.setAttribute('aria-pressed', selected ? 'true' : 'false');
       });
       const editForm = PC.getElement('edit_site_form');
       if (editForm instanceof HTMLFormElement) { colorPickSave = true; editForm.requestSubmit(); }
@@ -283,9 +321,7 @@ document.addEventListener("DOMContentLoaded", async () =>
       statusInput.value = status;
     }
 
-    if (!modal.open) {
-      modal.showModal();
-    }
+    openSitesDialog(modal);
   }
 
 
@@ -318,8 +354,7 @@ document.addEventListener("DOMContentLoaded", async () =>
 
       if (responseData.status === 'success') {
         debugLog('Site created successfully');
-        const modal = PC.getElement('modal_create_site');
-        modal?.close();
+        closeSitesDialog(PC.getElement('modal_create_site'));
 
         PC.showToast(SITES_T.SITES_CREATED_SUCCESS);
 
@@ -384,6 +419,11 @@ document.addEventListener("DOMContentLoaded", async () =>
 
         // Extended site detail fields (left column)
         PC.getElement('edit_site_default_hours_input').value = site.default_hours || '';
+        const onReserveInput = PC.getElement('edit_site_is_on_reserve_input');
+        if (onReserveInput instanceof HTMLInputElement) {
+          onReserveInput.checked = String(site.is_on_reserve || '') === '1';
+        }
+        PC.getElement('edit_site_reserve_name_input').value = site.reserve_name || '';
         // Site color — mark the matching swatch as selected
         const savedColor = (site.site_color || '').toLowerCase() || '#6aa6ff';
         const colorHidden = PC.getElement('edit_site_color_input');
@@ -398,6 +438,10 @@ document.addEventListener("DOMContentLoaded", async () =>
         const orgPlanningEl = PC.getElement('edit_site_org_planning');
         const orgEmptyEl    = PC.getElement('edit_site_org_planning_empty');
         const orgCtx = responseData.org_context;
+        const editForm = PC.getElement('edit_site_form');
+        if (editForm instanceof HTMLFormElement) {
+          editForm.dataset.canWritePlanning = '0';
+        }
         if (orgPlanningEl instanceof HTMLElement) {
           if (orgCtx && orgCtx.org_id) {
             const s = orgCtx.settings || {};
@@ -420,15 +464,16 @@ document.addEventListener("DOMContentLoaded", async () =>
             PC.getElement('edit_site_end_date_input').value  = s.end_date      || '';
             orgPlanningEl.removeAttribute('hidden');
             if (orgEmptyEl instanceof HTMLElement) { orgEmptyEl.hidden = true; }
+            if (editForm instanceof HTMLFormElement) {
+              editForm.dataset.canWritePlanning = orgCtx.can_write_planning === false ? '0' : '1';
+            }
           } else {
             orgPlanningEl.setAttribute('hidden', '');
             if (orgEmptyEl instanceof HTMLElement) { orgEmptyEl.hidden = false; }
           }
         }
 
-        if (!modal.open) {
-          modal.showModal();
-        }
+        openSitesDialog(modal);
 
         const editNameInput = PC.getElement('edit_site_name_input');
         if (editNameInput instanceof HTMLInputElement) {
@@ -474,8 +519,7 @@ document.addEventListener("DOMContentLoaded", async () =>
       if (responseData.status === 'success') {
         debugLog('Site updated successfully');
         if (!colorPickSave) {
-          const modal = PC.getElement('modal_edit_site');
-          modal?.close();
+          closeSitesDialog(PC.getElement('modal_edit_site'));
         }
         colorPickSave = false;
         setFormStatus('edit_site_form_status', '');
@@ -489,7 +533,7 @@ document.addEventListener("DOMContentLoaded", async () =>
         const planOrgId  = /** @type {HTMLInputElement} */ (PC.getElement('edit_site_plan_org_id'))?.value || '';
         const planOwner  = /** @type {HTMLInputElement} */ (PC.getElement('edit_site_plan_owner_uuid'))?.value || '';
         const planSiteId = /** @type {HTMLInputElement} */ (PC.getElement('edit_site_id'))?.value || '';
-        if (planningEl && !planningEl.hasAttribute('hidden') && planOrgId && planOwner && planSiteId) {
+        if (planningEl && !planningEl.hasAttribute('hidden') && form.dataset.canWritePlanning === '1' && planOrgId && planOwner && planSiteId) {
           const planBody = new URLSearchParams({
             budget_amount:      /** @type {HTMLInputElement} */ (PC.getElement('edit_site_plan_budget'))?.value || '',
             budget_type:        'annual',
@@ -584,9 +628,7 @@ document.addEventListener("DOMContentLoaded", async () =>
     currentDeleteSiteName = siteName;
     currentDeleteSiteStatus = siteStatus;
 
-    if (!modal.open) {
-      modal.showModal();
-    }
+    openSitesDialog(modal);
   }
 
 
@@ -596,7 +638,7 @@ document.addEventListener("DOMContentLoaded", async () =>
   function closeDeleteDialog() {
     debugLog('closeDeleteDialog called');
     const modal = PC.getElement('modal_confirm_delete_site');
-    modal?.close();
+    closeSitesDialog(modal);
   }
 
 
@@ -706,12 +748,18 @@ document.addEventListener("DOMContentLoaded", async () =>
       }
 
       // Update disclaimers
+      const targetKey = String(target || '').replace('#', '');
       disclaimers.forEach(disclaimer => {
         const forTab = disclaimer.dataset.forTab;
-        if (forTab === target.replace('#', '')) {
+        if (forTab === targetKey) {
           disclaimer.classList.remove('hidden');
         } else {
           disclaimer.classList.add('hidden');
+        }
+      });
+      document.querySelectorAll('[data-sites-visible-tab]').forEach((control) => {
+        if (control instanceof HTMLElement) {
+          control.hidden = String(control.dataset.sitesVisibleTab || '') !== targetKey;
         }
       });
 
@@ -773,10 +821,15 @@ document.addEventListener("DOMContentLoaded", async () =>
     const closeButtons = document.querySelectorAll('[data-dialog-close]');
 
     closeButtons.forEach(button => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', (event) => {
         const dialogId = button.dataset.dialogClose;
+        if (!SITE_PAGE_DIALOG_IDS.has(String(dialogId || ''))) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
         const dialog = PC.getElement(dialogId);
-        dialog?.close();
+        closeSitesDialog(dialog);
       });
     });
 
@@ -944,29 +997,26 @@ document.addEventListener("DOMContentLoaded", async () =>
     const avgPerSite = totals.sites_count > 0 ? totals.earnings / totals.sites_count : 0;
 
     PC.setHTML(totalsEl, `
-      <div class="datagrid datagrid_cols_5 datagrid_layout_auto site_earnings_totals_datagrid" data-grid="site-earnings-totals" role="region" aria-label="${SITES_T.SITES_EARNINGS_TOTALS_ARIA}">
-        <div class="datagrid_table" role="grid" aria-colcount="5" aria-rowcount="1">
-          <div class="datagrid_header_row" role="rowgroup">
-            <div class="datagrid_header_content" role="row">
-              <div class="datagrid_heading" role="columnheader">${SITES_T.EARNINGS}</div>
-              <div class="datagrid_heading" role="columnheader">${SITES_T.HOURS}</div>
-              <div class="datagrid_heading" role="columnheader">${SITES_T.DAYS}</div>
-              <div class="datagrid_heading" role="columnheader">${SITES_T.SITES}</div>
-              <div class="datagrid_heading" role="columnheader">${SITES_T.AVERAGE}</div>
-            </div>
-          </div>
-
-          <div class="datagrid_body" role="rowgroup">
-            <div class="datagrid_row" role="row">
-              <div class="datagrid_row_content" role="presentation">
-                <div class="datagrid_item" role="gridcell">${formatCurrencyLocale(totals.earnings)}</div>
-                <div class="datagrid_item" role="gridcell">${formatNumberLocale(totals.hours, 1, 1)}</div>
-                <div class="datagrid_item" role="gridcell">${formatNumberLocale(totals.work_days, 0, 0)}</div>
-                <div class="datagrid_item" role="gridcell">${formatNumberLocale(totals.sites_count, 0, 0)}</div>
-                <div class="datagrid_item" role="gridcell">${formatCurrencyLocale(avgPerSite)}</div>
-              </div>
-            </div>
-          </div>
+      <div class="site_earnings_totals_summary" role="region" aria-label="${SITES_T.SITES_EARNINGS_TOTALS_ARIA}">
+        <div class="site_earnings_total_item site_earnings_total_item_primary">
+          <span class="site_earnings_total_label">${SITES_T.EARNINGS}</span>
+          <span class="site_earnings_total_value">${formatCurrencyLocale(totals.earnings)}</span>
+        </div>
+        <div class="site_earnings_total_item">
+          <span class="site_earnings_total_label">${SITES_T.HOURS}</span>
+          <span class="site_earnings_total_value">${formatNumberLocale(totals.hours, 1, 1)}</span>
+        </div>
+        <div class="site_earnings_total_item">
+          <span class="site_earnings_total_label">${SITES_T.DAYS}</span>
+          <span class="site_earnings_total_value">${formatNumberLocale(totals.work_days, 0, 0)}</span>
+        </div>
+        <div class="site_earnings_total_item">
+          <span class="site_earnings_total_label">${SITES_T.SITES}</span>
+          <span class="site_earnings_total_value">${formatNumberLocale(totals.sites_count, 0, 0)}</span>
+        </div>
+        <div class="site_earnings_total_item">
+          <span class="site_earnings_total_label">${SITES_T.AVERAGE}</span>
+          <span class="site_earnings_total_value">${formatCurrencyLocale(avgPerSite)}</span>
         </div>
       </div>
     `);
@@ -1059,7 +1109,7 @@ document.addEventListener("DOMContentLoaded", async () =>
       finalityBtn.classList.add('hidden');
     }
 
-    modal.showModal();
+    openSitesDialog(modal);
 
     try {
       debugLog('Fetching archived work', siteId);
@@ -1145,7 +1195,7 @@ document.addEventListener("DOMContentLoaded", async () =>
   function closeArchivedWorkDialog() {
     debugLog('closeArchivedWorkDialog called');
     const modal = PC.getElement('modal_archived_work');
-    modal?.close();
+    closeSitesDialog(modal);
     currentArchivedSiteId = null;
     currentArchivedSiteName = null;
   }
@@ -1165,7 +1215,7 @@ document.addEventListener("DOMContentLoaded", async () =>
       PC.setHTML(messageEl, sitesFormatMessage(SITES_T.SITES_FINALITY_DELETE_BODY, { name: currentArchivedSiteName }));
     }
 
-    modal.showModal();
+    openSitesDialog(modal);
   }
 
 
@@ -1175,7 +1225,7 @@ document.addEventListener("DOMContentLoaded", async () =>
   function closeFinalityDeleteConfirm() {
     debugLog('closeFinalityDeleteConfirm called');
     const modal = PC.getElement('modal_finality_delete');
-    modal?.close();
+    closeSitesDialog(modal);
   }
 
 
@@ -1254,6 +1304,29 @@ document.addEventListener("DOMContentLoaded", async () =>
 
   // Setup tabs
   setupTabSwitching();
+  bindDataGridKeyboardNavigation({
+    root: 'sites_list_panel',
+    onActivate: (row) => {
+      const siteId = row instanceof HTMLElement ? String(row.dataset.id || '').trim() : '';
+      if (siteId === '' || !(row instanceof HTMLElement)) {
+        return false;
+      }
+
+      handleRowClick(siteId, row);
+      return true;
+    },
+    onContextAction: (row) => {
+      const action = row instanceof HTMLElement
+        ? row.querySelector('.datagrid_action:not([disabled])')
+        : null;
+      if (action instanceof HTMLElement) {
+        action.focus({ preventScroll: true });
+        return true;
+      }
+
+      return false;
+    },
+  });
 
   // Setup dialog close buttons
   setupDialogCloseButtons();
@@ -1451,7 +1524,7 @@ document.addEventListener("DOMContentLoaded", async () =>
       debugLog('Rendering orphaned groups', data.orphaned_groups || []);
       renderOrphanedGroups(data.orphaned_groups || []);
       
-      modal.showModal();
+      openSitesDialog(modal);
     } catch (error) {
       PW.error(`Failed to show orphaned work dialog: ${error?.message || String(error)}`);
       alert(SITES_T.SITES_ERROR_ORPHANED_LOAD);
@@ -1531,7 +1604,7 @@ document.addEventListener("DOMContentLoaded", async () =>
 
     // Close orphaned work modal
     const orphanedModal = PC.getElement('modal_orphaned_work');
-    orphanedModal?.close();
+    closeSitesDialog(orphanedModal);
 
     // Set form values
     PC.getElement('recovery_orphaned_site_id').value = orphanedSiteId;
@@ -1546,7 +1619,7 @@ document.addEventListener("DOMContentLoaded", async () =>
     PC.getElement('recovery_site_travel_input').value = '';
     PC.getElement('recovery_site_province_select').value = 'AB';
 
-    modal.showModal();
+    openSitesDialog(modal);
   }
 
 
@@ -1593,8 +1666,7 @@ document.addEventListener("DOMContentLoaded", async () =>
         debugLog('Recovery site created and work bound', data);
         
         // Close recovery modal
-        const modal = PC.getElement('modal_recovery_site');
-        modal?.close();
+        closeSitesDialog(PC.getElement('modal_recovery_site'));
         
         // Reload grids
         gridManagerActive.reload();

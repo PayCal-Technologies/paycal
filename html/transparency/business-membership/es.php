@@ -1,11 +1,10 @@
 <?php
 /**
- * Public Transparency: Organization Membership and Role Philosophy
+ * Public Transparency: Business Connections and Role Philosophy
  *
  * PURPOSE:
- * Explain why PayCal uses an Organization <-> Member relationship model,
- * how role changes are governed, and what architectural philosophy guides
- * capability, scope, and security decisions.
+ * Explain how PayCal separates business connections, active membership,
+ * role changes, consent, and explicit access grants.
  */
 
 declare(strict_types=1);
@@ -31,17 +30,17 @@ require_once HTML.'/header.php';
   <nav class="doc-breadcrumb" aria-label="<?php echo $i18n['BREADCRUMB']; ?>">
     <a href="<?php echo transparency_href('/transparency/'); ?>"><?php echo $i18n['HELP_TOC_TRANSPARENCY_HUB']; ?></a>
     <span class="separator">/</span>
-    <span class="current">Membresía organizacional y filosofía de roles</span>
+    <span class="current">Conexiones empresariales y filosofía de roles</span>
   </nav>
 
   <header class="doc-article-header">
     <h1><?php echo htmlspecialchars($i18n['TRANSPARENCY_BUSINESS_MEMBERSHIP_PAGE_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <p class="deck">
-      Esta página explica la transición de la semántica de equipo ligeramente acoplada a un modelo
-      explícito de relación Organización <strong>&lt;-&gt;</strong> Miembro, la política de roles
-      actual y los principios que usamos para mantener los permisos auditables y seguros.
+      Esta página explica la transición de la semántica de equipo ligeramente acoplada a
+      Conexiones explícitas. Una conexión dice quién está vinculado con quién. Membresía, rol,
+      consentimiento y acceso a datos protegidos son decisiones de política separadas.
     </p>
-    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-04-09">2026-04-09</time> &middot; Last updated: <time datetime="2026-06-19">2026-06-19</time> &middot; <a href="<?php echo transparency_href('/transparency/business-membership-2026-06-19-pre-connections/'); ?>">Previous version</a></p>
   </header>
 
   <div class="doc-article-body">
@@ -53,19 +52,37 @@ require_once HTML.'/header.php';
         puntuales dispersas.
       </p>
       <p>
-        La estructura Organización <strong>&lt;-&gt;</strong> Miembro le da a cada actor una relación
-        explícita con una organización, con comportamiento de estado, rol y alcance respaldado por política.
+        La conexión Business <strong>&lt;-&gt;</strong> Miembro le da a cada actor un vínculo de identidad
+        explícito con un negocio. La membresía activa, la autoridad de rol, el consentimiento sobre
+        datos protegidos y futuras concesiones entre personas permanecen separados de ese vínculo.
       </p>
     </section>
 
     <section class="doc-section">
-      <h2>Cambios en la relación Organización <strong>&lt;-&gt;</strong> Miembro</h2>
+      <h2>Cambios en la conexión Business <strong>&lt;-&gt;</strong> Miembro</h2>
       <ul class="doc-list">
-        <li>La membresía se representa como una relación explícita en lugar de un estado de UI implícito.</li>
+        <li>Las conexiones se representan explícitamente en lugar de inferirse del estado de la interfaz.</li>
         <li>Los estados del ciclo de vida — solicitud de acceso, invitación, aprobación, activación y revocación — son aplicados por la política del backend.</li>
-        <li>Los paneles de organización y las notificaciones ahora reflejan las transiciones de relación y los resultados de rol de manera más consistente.</li>
-        <li>El comportamiento compartido de la organización está gobernado por el estado de membresía antes de que se procesen las acciones privilegiadas.</li>
+        <li>Los paneles Business y las notificaciones ahora reflejan transiciones de conexión y resultados de rol de manera más consistente.</li>
+        <li>El comportamiento compartido de Business está gobernado por membresía activa y política de rol antes de procesar acciones privilegiadas.</li>
       </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2>Conexión, membresía, consentimiento y concesiones</h2>
+      <p>
+        PayCal ahora trata estos conceptos como separados:
+      </p>
+      <ul class="doc-list">
+        <li><strong>Conexión:</strong> un vínculo de identidad entre una persona y un negocio, o entre dos personas.</li>
+        <li><strong>Membresía:</strong> el estado activo de participación en un negocio usado para colaborar en el workspace.</li>
+        <li><strong>Consentimiento:</strong> la aprobación del miembro para compartir datos de trabajo protegidos.</li>
+        <li><strong>Concesión:</strong> un permiso explícito, como vista delegada de calendario o una futura capacidad de recuperación confiable.</li>
+      </ul>
+      <p>
+        Una conexión por sí sola no concede reportes protegidos, exportaciones, visibilidad de nómina,
+        autoridad de recuperación ni la capacidad de actuar por otra persona.
+      </p>
     </section>
 
     <section class="doc-section">
@@ -88,9 +105,9 @@ require_once HTML.'/header.php';
     <section class="doc-section">
       <h2>Filosofía de seguridad y cifrado</h2>
       <p>
-        La colaboración organizacional se intersecta con los controles de cifrado y consentimiento.
-        Las comprobaciones de membresía y roles condicionan el comportamiento compartido del sobre
-        organizacional para que las operaciones sensibles permanezcan vinculadas a la política.
+        La colaboración Business se intersecta con los controles de cifrado y consentimiento.
+        Membresía activa, comprobaciones de rol y estado de consentimiento condicionan el comportamiento
+        compartido del sobre Business para que las operaciones sensibles permanezcan vinculadas a la política.
       </p>
       <ul class="doc-list">
         <li>El estado de membresía y consentimiento se valida antes de proceder con operaciones seguras compartidas.</li>

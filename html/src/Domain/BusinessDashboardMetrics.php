@@ -62,7 +62,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document recordPendingInviteCreated.
+   * Record pending invite created.
    */
   public static function recordPendingInviteCreated(string $businessId): void
   {
@@ -70,7 +70,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document recordPendingInviteResolved.
+   * Record pending invite resolved.
    */
   public static function recordPendingInviteResolved(string $businessId): void
   {
@@ -78,7 +78,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document recordPendingRequestCreated.
+   * Record pending request created.
    */
   public static function recordPendingRequestCreated(string $businessId): void
   {
@@ -86,7 +86,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document recordPendingRequestResolved.
+   * Record pending request resolved.
    */
   public static function recordPendingRequestResolved(string $businessId): void
   {
@@ -94,7 +94,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document touchLastActivity.
+   * Touch last activity.
    */
   public static function touchLastActivity(string $businessId, ?string $timestamp = null): void
   {
@@ -132,7 +132,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document formatIntegerCount.
+   * Format integer count.
    */
   public static function formatIntegerCount(int $count): string
   {
@@ -140,7 +140,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document formatOptionalCount.
+   * Format optional count.
    */
   public static function formatOptionalCount(?int $count): string
   {
@@ -152,7 +152,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document formatTimestampLabel.
+   * Format timestamp label.
    */
   public static function formatTimestampLabel(string $iso8601): string
   {
@@ -188,7 +188,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document setSize.
+   * Set size.
    */
   private static function setSize(string $key): int
   {
@@ -198,31 +198,31 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document pendingInviteCount.
+   * Pending invite count.
    */
   private static function pendingInviteCount(string $businessId): int
   {
     return self::readOrRebuildPendingCounter(
       Keys::businessMetricsPendingInvites($businessId),
-      Keys::BUSINESS_INVITE_ORG . ':' . $businessId,
+      Keys::BUSINESS_INVITE_BUSINESS . ':' . $businessId,
       Keys::BUSINESS_INVITE . ':',
     );
   }
 
   /**
-   * TODO: Document pendingRequestCount.
+   * Pending request count.
    */
   private static function pendingRequestCount(string $businessId): int
   {
     return self::readOrRebuildPendingCounter(
       Keys::businessMetricsPendingRequests($businessId),
-      Keys::BUSINESS_ACCESS_REQUEST_ORG . ':' . $businessId,
+      Keys::BUSINESS_ACCESS_REQUEST_BUSINESS . ':' . $businessId,
       Keys::BUSINESS_ACCESS_REQUEST . ':',
     );
   }
 
   /**
-   * TODO: Document readOrRebuildPendingCounter.
+   * Read or rebuild pending counter.
    */
   private static function readOrRebuildPendingCounter(
     string $counterKey,
@@ -241,7 +241,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document countPendingStatusesFromOrgSet.
+   * Count pending statuses from org set.
    */
   private static function countPendingStatusesFromOrgSet(string $orgSetKey, string $recordKeyPrefix): int
   {
@@ -267,7 +267,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document workEntryCountForDate.
+   * Work entry count for date.
    */
   private static function workEntryCountForDate(string $businessId, string $dateYmd): int
   {
@@ -277,7 +277,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document workEntryCountForWeek.
+   * Work entry count for week.
    */
   private static function workEntryCountForWeek(
     string $businessId,
@@ -335,7 +335,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document resolveBusinessTimezone.
+   * Resolve business timezone.
    */
   private static function resolveBusinessTimezone(string $businessId): \DateTimeZone
   {
@@ -352,7 +352,7 @@ final class BusinessDashboardMetrics
   }
 
   /**
-   * TODO: Document adjustCachedCounter.
+   * Adjust cached counter.
    */
   private static function adjustCachedCounter(string $counterKey, int $delta): void
   {

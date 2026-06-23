@@ -37,6 +37,33 @@ final class BusinessSitesGridRenderer
   }
 
   /**
+   * Extract the ISO date segment from active or archived work entry keys.
+   */
+  private function workDateFromKey(string $workKey): string
+  {
+    $parts = explode(':', $workKey);
+    $date = ($parts[1] ?? '') === 'archived'
+      ? (string) ($parts[3] ?? '')
+      : (string) ($parts[2] ?? '');
+
+    return preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : '';
+  }
+
+  /**
+   * Format compact date labels for grid cells.
+   */
+  private function formatGridDate(string $date): string
+  {
+    if ($date === '') {
+      return '—';
+    }
+
+    $timestamp = strtotime($date);
+
+    return $timestamp === false ? '—' : date('M j, Y', $timestamp);
+  }
+
+  /**
    * @param array<string, mixed> $options
    * @return array{
    *   success: bool,
@@ -88,7 +115,7 @@ final class BusinessSitesGridRenderer
 
     return [
       'success' => true,
-      'message' => '[OrgC] Business sites grid rendered.',
+      'message' => '[Business] Business sites grid rendered.',
       'html' => $html,
       'site_count' => count($sites),
     ];
@@ -115,7 +142,6 @@ final class BusinessSitesGridRenderer
       : '';
     $discoveryService = new BusinessDiscoveryService();
     $canWrite = $discoveryService->canWriteBusinessSites($businessId, $actorUUID);
-    $workMetrics = $this->batchSiteWorkMetrics($sites);
 
     $rows = [];
     foreach ($sites as $site) {
@@ -154,10 +180,6 @@ final class BusinessSitesGridRenderer
       }
 
       $siteRef = $siteOwnerUUID . ':' . $siteId;
-      $metrics = $workMetrics[$siteRef] ?? ['count' => 0, 'gross' => 0.0];
-      $entries = (int) $metrics['count'];
-      $workGross = (float) $metrics['gross'];
-
       $budgetRaw = $settings['budget_amount'] ?? null;
       $budgetAmount = is_numeric($budgetRaw) ? (float) $budgetRaw : 0.0;
       $budgetDisplay = $budgetAmount > 0
@@ -175,30 +197,37 @@ final class BusinessSitesGridRenderer
 
       $siteColor = $this->normalizeSiteColor($siteHash, $site);
       $isBusinessManaged = BusinessDiscoveryService::isBusinessManagedSite($siteHash);
+      $wage = is_numeric($siteHash['wage'] ?? null) ? (float) $siteHash['wage'] : 0.0;
 
       $rows[] = [
         'id' => $siteOwnerUUID . ':' . $siteId,
         'site_owner_uuid' => $siteOwnerUUID,
         'site_id' => $siteId,
+        '_site_ref' => $siteRef,
         'site_name' => $this->formatSiteNameCellHtml($siteName, $ownershipScope, $isBusinessManaged),
         'site_color' => $siteColor,
         '_site_name' => $siteName,
         'ownership_label' => $ownership,
-        'entries' => (string) $entries,
-        'work_gross' => '$' . number_format($workGross, 0),
+        'entries' => '0',
+        'work_gross' => '$0',
+        'wage' => $wage > 0 ? '$' . number_format($wage, 2) : '—',
+        'last_worked' => '—',
         'budget_amount' => $budgetDisplay,
-        'budget_used' => $this->formatBudgetUsedHtml($workGross, $budgetAmount),
-        '_entries' => $entries,
-        '_work_gross' => $workGross,
+        'budget_used' => $this->formatBudgetUsedHtml(0.0, $budgetAmount),
+        '_entries' => 0,
+        '_work_gross' => 0.0,
+        '_wage' => $wage,
+        '_last_worked' => '',
         '_budget_amount' => $budgetAmount,
-        '_budget_used_pct' => $budgetAmount > 0 ? min(100.0, ($workGross / $budgetAmount) * 100) : 0.0,
+        '_budget_used_pct' => 0.0,
+        '_metrics_loaded' => false,
       ];
     }
 
     if ($search !== '') {
       $needle = mb_strtolower($search);
       $rows = array_values(array_filter($rows, static function (array $row) use ($needle): bool {
-        foreach (['_site_name', 'ownership_label', 'budget_amount', 'work_gross'] as $field) {
+        foreach (['_site_name', 'ownership_label', 'budget_amount', 'work_gross', 'wage', 'last_worked'] as $field) {
           if (mb_stripos((string) $row[$field], $needle) !== false) {
             return true;
           }
@@ -212,6 +241,8 @@ final class BusinessSitesGridRenderer
       'site_name',
       'entries',
       'work_gross',
+      'wage',
+      'last_worked',
       'budget_amount',
       'budget_used',
     ];
@@ -219,44 +250,77 @@ final class BusinessSitesGridRenderer
       $sort = 'site_name';
     }
 
+    $metricSort = in_array($sort, ['entries', 'work_gross', 'last_worked', 'budget_used'], true);
+    if ($metricSort) {
+      $rows = $this->hydrateSiteMetricRows($rows);
+    }
+
     usort($rows, static function (array $a, array $b) use ($sort, $direction): int {
-      if (in_array($sort, ['entries', 'work_gross', 'budget_amount', 'budget_used'], true)) {
-        $map = [
+      if ('last_worked' === $sort) {
+        $cmp = strcmp(self::scalarString($a['_last_worked'] ?? ''), self::scalarString($b['_last_worked'] ?? ''));
+      } elseif (in_array($sort, ['entries', 'work_gross', 'wage', 'budget_amount', 'budget_used'], true)) {
+        $key = match ($sort) {
           'entries' => '_entries',
           'work_gross' => '_work_gross',
+          'wage' => '_wage',
           'budget_amount' => '_budget_amount',
           'budget_used' => '_budget_used_pct',
-        ];
-        $key = $map[$sort];
-        $cmp = ((float) $a[$key]) <=> ((float) $b[$key]);
+        };
+        $cmp = self::numericFloat($a[$key] ?? 0) <=> self::numericFloat($b[$key] ?? 0);
       } else {
-        $cmp = strcasecmp((string) $a['_site_name'], (string) $b['_site_name']);
+        $cmp = strcasecmp(self::scalarString($a['_site_name'] ?? ''), self::scalarString($b['_site_name'] ?? ''));
       }
 
       return $direction === 'desc' ? -$cmp : $cmp;
     });
 
-    $grid = DataGrid::create('business-sites-' . $status, Strings::i18n('BUSINESS_SITES_TITLE'));
-    if ($canWrite && $status === SiteStatus::ACTIVE->value) {
-      $grid->addControl([
-        'type' => 'primary',
-        'label' => Strings::i18n('SITES_CREATE'),
-        'action' => 'create-business-site',
-      ]);
+    if (!$metricSort && $rows !== []) {
+      $totalRows = count($rows);
+      $totalPages = (int) ceil($totalRows / self::GRID_PAGE_SIZE);
+      $page = max(1, min($page, $totalPages ?: 1));
+      $startIndex = ($page - 1) * self::GRID_PAGE_SIZE;
+      $endIndex = min($startIndex + self::GRID_PAGE_SIZE, $totalRows);
+      $visibleRows = [];
+      for ($index = $startIndex; $index < $endIndex; $index++) {
+        $visibleRows[] = $rows[$index];
+      }
+      $visibleRows = $this->hydrateSiteMetricRows($visibleRows);
+      foreach ($visibleRows as $offset => $hydratedRow) {
+        $rows[$startIndex + $offset] = $hydratedRow;
+      }
     }
+
+    $grid = DataGrid::create('business-sites-' . $status, Strings::i18n('BUSINESS_SITES_TITLE'));
+    $grid->setClass('datagrid_mobile_cards business_sites_mobile_cards');
     $grid->enableSearch(Strings::i18n('BUSINESS_SITES_FILTER_PLACEHOLDER'));
     $grid->setSearchValue($search);
     $grid->enableSorting();
     $grid->enableColumnVisibility();
-    $grid->addColumn('site_name', Strings::i18n('SITE'), true, 'minmax(14rem, 3fr)', null, true, true, true);
+    $grid->addColumn('site_name', Strings::i18n('SITE'), true, 'minmax(14rem, 3fr)', null, true, false, true);
     $grid->addColumn('entries', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_ENTRIES'), true, 'minmax(4rem, 0.75fr)', 'right');
     $grid->addColumn('work_gross', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_WORK_GROSS'), true, 'minmax(6rem, 1fr)', 'right');
+    $grid->addColumn('wage', Strings::i18n('WAGE'), true, 'minmax(5rem, 0.85fr)', 'right', false);
+    $grid->addColumn('last_worked', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_LAST_WORKED'), true, 'minmax(7rem, 1fr)', 'right', false);
     $grid->addColumn('budget_amount', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_BUDGET'), true, 'minmax(6rem, 1fr)', 'right');
     $grid->addColumn('budget_used', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_USED'), true, 'minmax(7rem, 1.1fr)', 'right', true, true, true);
     if ($canWrite) {
-      $actionIcon = $status === SiteStatus::ACTIVE->value ? '📦' : '🗑';
-      $grid->addRowAction('delete', $actionIcon);
+      if ($status === SiteStatus::ARCHIVED->value) {
+        $grid->addRowAction(
+          'restore-site',
+          Strings::i18n('SITES_RESTORE_ACTION'),
+          Strings::i18n('SITES_RESTORE_ARIA'),
+          Strings::i18n('SITES_RESTORE_TOOLTIP'),
+        );
+      } else {
+        $grid->addRowAction(
+          'archive-site',
+          '📦',
+          Strings::i18n('SITES_ARCHIVE_SITE'),
+          Strings::i18n('SITES_ARCHIVE_SITE'),
+        );
+      }
     }
+    $grid->setRowActionsHeaderLabel('');
     $grid->setItemLabel(Strings::i18n('BUSINESS_SITES_ITEM_LABEL'));
 
     $pager = ArrayPager::fromArray($rows, ['pageSize' => self::GRID_PAGE_SIZE]);
@@ -278,7 +342,7 @@ final class BusinessSitesGridRenderer
   }
 
   /**
-   * TODO: Document loadingSkeleton.
+   * Loading skeleton.
    */
   public function loadingSkeleton(): string
   {
@@ -289,7 +353,7 @@ final class BusinessSitesGridRenderer
   }
 
   /**
-   * TODO: Document emptyMessage.
+   * Empty message.
    */
   public function emptyMessage(string $message): string
   {
@@ -297,7 +361,7 @@ final class BusinessSitesGridRenderer
   }
 
   /**
-   * TODO: Document ownershipStatusTagLabel.
+   * Ownership status tag label.
    */
   private function ownershipStatusTagLabel(string $ownershipScope): string
   {
@@ -309,7 +373,7 @@ final class BusinessSitesGridRenderer
   }
 
   /**
-   * TODO: Document formatOwnershipSymbolHtml.
+   * Format ownership symbol HTML.
    */
   private function formatOwnershipSymbolHtml(string $ownershipScope): string
   {
@@ -323,7 +387,7 @@ final class BusinessSitesGridRenderer
   }
 
   /**
-   * TODO: Document formatOwnershipStatusPillHtml.
+   * Format ownership status pill HTML.
    */
   private function formatOwnershipStatusPillHtml(string $ownershipScope): string
   {
@@ -340,7 +404,7 @@ final class BusinessSitesGridRenderer
   }
 
   /**
-   * TODO: Document formatBudgetUsedHtml.
+   * Format budget used HTML.
    */
   private function formatBudgetUsedHtml(float $workGross, float $budgetAmount): string
   {
@@ -349,8 +413,8 @@ final class BusinessSitesGridRenderer
     }
 
     $pct = min(100.0, ($workGross / $budgetAmount) * 100);
-    $pctValue = round($pct, 1);
-    $pctDisplay = number_format($pct, 1) . '%';
+    $pctValue = $pct > 0.0 && $pct < 0.1 ? 0.1 : round($pct, 1);
+    $pctDisplay = $pct > 0.0 && $pct < 0.1 ? '<0.1%' : number_format($pct, 1) . '%';
 
     return '<div class="business_sites_used_cell">'
       . '<meter class="business_sites_used_meter" min="0" max="100" value="'
@@ -379,7 +443,7 @@ final class BusinessSitesGridRenderer
   }
 
   /**
-   * TODO: Document formatSiteNameCellHtml.
+   * Format site name cell HTML.
    */
   private function formatSiteNameCellHtml(string $siteName, string $ownershipScope, bool $isBusinessManaged): string
   {
@@ -395,10 +459,56 @@ final class BusinessSitesGridRenderer
   }
 
   /**
+   * @param list<array<string, mixed>> $rows
+   * @return list<array<string, mixed>>
+   */
+  private function hydrateSiteMetricRows(array $rows): array
+  {
+    if ($rows === []) {
+      return [];
+    }
+
+    $workMetrics = $this->batchSiteWorkMetrics($rows);
+    foreach ($rows as &$row) {
+      if (($row['_metrics_loaded'] ?? false) === true) {
+        continue;
+      }
+
+      $siteRef = isset($row['_site_ref']) && is_scalar($row['_site_ref'])
+        ? trim((string) $row['_site_ref'])
+        : '';
+      if ($siteRef === '') {
+        $siteOwnerUUID = isset($row['site_owner_uuid']) && is_scalar($row['site_owner_uuid']) ? trim((string) $row['site_owner_uuid']) : '';
+        $siteId = isset($row['site_id']) && is_scalar($row['site_id']) ? trim((string) $row['site_id']) : '';
+        $siteRef = $siteOwnerUUID !== '' && $siteId !== '' ? $siteOwnerUUID . ':' . $siteId : '';
+      }
+
+      $metrics = $workMetrics[$siteRef] ?? ['count' => 0, 'gross' => 0.0, 'last_worked' => ''];
+      $entries = (int) $metrics['count'];
+      $workGross = (float) $metrics['gross'];
+      $lastWorked = $metrics['last_worked'];
+      $budgetAmount = is_numeric($row['_budget_amount'] ?? null) ? (float) $row['_budget_amount'] : 0.0;
+
+      $row['entries'] = (string) $entries;
+      $row['work_gross'] = '$' . number_format($workGross, 0);
+      $row['last_worked'] = $this->formatGridDate($lastWorked);
+      $row['budget_used'] = $this->formatBudgetUsedHtml($workGross, $budgetAmount);
+      $row['_entries'] = $entries;
+      $row['_work_gross'] = $workGross;
+      $row['_last_worked'] = $lastWorked;
+      $row['_budget_used_pct'] = $budgetAmount > 0 ? min(100.0, ($workGross / $budgetAmount) * 100) : 0.0;
+      $row['_metrics_loaded'] = true;
+    }
+    unset($row);
+
+    return $rows;
+  }
+
+  /**
    * Count work entries and sum gross pay per linked site (one SCAN pair per unique owner).
    *
    * @param array<int, mixed> $sites
-   * @return array<string, array{count: int, gross: float}> "ownerUUID:siteId" => metrics
+   * @return array<string, array{count: int, gross: float, last_worked: string}> "ownerUUID:siteId" => metrics
    */
   private function batchSiteWorkMetrics(array $sites): array
   {
@@ -444,16 +554,36 @@ final class BusinessSitesGridRenderer
 
         $ref = $ownerUUID . ':' . $siteIdFromKey;
         if (!isset($metrics[$ref])) {
-          $metrics[$ref] = ['count' => 0, 'gross' => 0.0];
+          $metrics[$ref] = ['count' => 0, 'gross' => 0.0, 'last_worked' => ''];
         }
 
         $metrics[$ref]['count']++;
+        $workDate = $this->workDateFromKey((string) $workKey);
+        if ($workDate !== '' && strcmp($workDate, $metrics[$ref]['last_worked']) > 0) {
+          $metrics[$ref]['last_worked'] = $workDate;
+        }
         $grossRaw = $entry['gross'] ?? $entry['g'] ?? 0;
         $metrics[$ref]['gross'] += is_numeric($grossRaw) ? (float) $grossRaw : 0.0;
       }
     }
 
     return $metrics;
+  }
+
+  /**
+   * Return a trimmed scalar string or the supplied fallback.
+   */
+  private static function scalarString(mixed $value, string $default = ''): string
+  {
+    return is_scalar($value) ? trim((string) $value) : $default;
+  }
+
+  /**
+   * Return a numeric value as float or the supplied fallback.
+   */
+  private static function numericFloat(mixed $value, float $default = 0.0): float
+  {
+    return is_numeric($value) ? (float) $value : $default;
   }
 
 }

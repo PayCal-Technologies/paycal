@@ -3,6 +3,7 @@
 namespace Tests\Unit\Domain;
 
 use PayCal\Domain\RecoveryKey;
+use PayCal\Domain\PayCalCode;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -32,6 +33,37 @@ final class RecoveryKeyTest extends TestCase
 
     $this->assertIsString($salt);
     $this->assertSame(32, strlen($salt));
+  }
+
+  public function testPayCalA11yAlphabetExcludesConfusingChars(): void
+  {
+    $this->assertSame('ABCDEFGHJKLMNPQRTUWXYZ346789', PayCalCode::ALPHABET);
+    foreach (['I', 'O', 'S', 'V', '0', '1', '2', '5'] as $char) {
+      $this->assertStringNotContainsString($char, PayCalCode::ALPHABET);
+    }
+  }
+
+  public function testPayCalChecksumVectors(): void
+  {
+    $this->assertSame('C9', PayCalCode::checksum('K3HWR7QTMAPG'));
+    $this->assertSame('Q9', PayCalCode::checksum('R7QT'));
+  }
+
+  public function testGenerateCodeUsesShortRecoveryFormat(): void
+  {
+    $code = RecoveryKey::generateCode();
+
+    $this->assertMatchesRegularExpression('/^[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}-[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}-[ABCDEFGHJKLMNPQRTUWXYZ346789]{2}$/', $code);
+    $this->assertTrue(RecoveryKey::validate($code));
+  }
+
+  public function testPayCalCodeNormalizationAndChecksumValidation(): void
+  {
+    $this->assertSame('K3HWR7QTMAPGC9', PayCalCode::normalize(' k3hwr7-qtmapg-c9 '));
+    $this->assertTrue(PayCalCode::validate(' k3hwr7-qtmapg-c9 ', PayCalCode::RECOVERY_SECRET_LENGTH));
+    $this->assertTrue(PayCalCode::validate('r7qt-q9', PayCalCode::EMAIL_SECRET_LENGTH));
+    $this->assertFalse(PayCalCode::validate('K3HWR7-QTMAPG-C8', PayCalCode::RECOVERY_SECRET_LENGTH));
+    $this->assertFalse(PayCalCode::validate('R7QTQ8', PayCalCode::EMAIL_SECRET_LENGTH));
   }
 
   /**

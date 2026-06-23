@@ -17,6 +17,7 @@
     window.PayCalSetUtils?.uniqueTruthy?.(values)
       ?? values.filter((value, index, arr) => value && arr.indexOf(value) === index)
   );
+  const calendarI18nHelper = window.PayCalCalendarI18n;
 
   // Immediate check that script loaded
   window.CALENDAR_SCRIPT_LOADED = true;
@@ -122,54 +123,18 @@
     }
   }
 
-  function calendarConfig() {
-    return window.PayCalCore?.config ?? window.PC?.config ?? null;
-  }
-
-  /** @type {Record<string, string>|null} */
-  let calendarPageI18nCache = null;
-
-  function calendarPageI18nMap() {
-    if (calendarPageI18nCache !== null) {
-      return calendarPageI18nCache;
-    }
-
-    const legacy = window.__CALENDAR_I18N__;
-    if (legacy && typeof legacy === 'object') {
-      calendarPageI18nCache = legacy;
-      return calendarPageI18nCache;
-    }
-
-    const node = document.getElementById('calendar-page-i18n');
-    if (node instanceof HTMLScriptElement && node.textContent.trim() !== '') {
-      try {
-        const parsed = JSON.parse(node.textContent);
-        if (parsed && typeof parsed === 'object') {
-          calendarPageI18nCache = parsed;
-          return calendarPageI18nCache;
-        }
-      } catch {
-        // Fall through to empty map.
-      }
-    }
-
-    calendarPageI18nCache = {};
-    return calendarPageI18nCache;
+  if (!calendarI18nHelper || typeof calendarI18nHelper.get !== 'function') {
+    throw new Error('PayCalCalendarI18n helper is required before calendar.js');
   }
 
   function calendarI18n(key, fallback = '') {
-    const fromPage = String(calendarPageI18nMap()[key] ?? '').trim();
-    if (fromPage !== '') {
-      return fromPage;
-    }
-
-    const fromConfig = String(calendarConfig()?.[key] ?? '').trim();
-    return fromConfig !== '' ? fromConfig : fallback;
+    return calendarI18nHelper.get(key, fallback);
   }
 
   function calendarUserLocale() {
-    const locale = String(calendarConfig()?.USER_LOCALE ?? '').trim();
-    return locale !== '' ? locale : undefined;
+    return typeof calendarI18nHelper.userLocale === 'function'
+      ? calendarI18nHelper.userLocale()
+      : undefined;
   }
 
   // Payroll column headings stay English in every UI locale.
@@ -186,16 +151,37 @@
   }
 
   function formatCalendarLocaleDate(date, options) {
-    return date.toLocaleDateString(calendarUserLocale(), options);
+    return typeof calendarI18nHelper.formatDate === 'function'
+      ? calendarI18nHelper.formatDate(date, options)
+      : date.toLocaleDateString(calendarUserLocale(), options);
   }
 
   function calendarI18nFormat(key, fallback, params = {}) {
-    let label = calendarI18n(key, fallback);
-    Object.entries(params).forEach(([paramKey, paramValue]) => {
-      const token = new RegExp(`\\{${paramKey}\\}`, 'g');
-      label = label.replace(token, String(paramValue));
+    return typeof calendarI18nHelper.format === 'function'
+      ? calendarI18nHelper.format(key, fallback, params)
+      : calendarI18n(key, fallback);
+  }
+
+  function buildEncryptedWorkUnlockMismatchMessage(dateId = '') {
+    const fallback = dateId
+      ? 'This passkey cannot decrypt existing PayCal work entries for {dateLabel}. Sign out and sign back in with a passkey that previously unlocked your calendar, then try again.'
+      : 'This passkey cannot decrypt existing PayCal work entries. Sign out and sign back in with a passkey that previously unlocked your calendar, then try again.';
+    const key = dateId
+      ? 'CALENDAR_DECRYPT_FAILED_FOR_DATE'
+      : 'CALENDAR_DECRYPT_FAILED_UNLOCK_MISMATCH';
+
+    return calendarI18nFormat(key, fallback, {
+      dateLabel: dateId ? formatStatusDateLabel(dateId) : '',
     });
-    return label;
+  }
+
+  function buildEncryptedWorkUnlockError(dateId = '', cause = null) {
+    const error = new Error(buildEncryptedWorkUnlockMismatchMessage(dateId));
+    error.code = 'paycal_decrypt_unlock_mismatch';
+    if (cause) {
+      error.cause = cause;
+    }
+    return error;
   }
 
   function isDelegatedCalendarViewActive() {
@@ -209,66 +195,11 @@
     return actorUUID !== '' && selectedUUID !== '' && actorUUID !== selectedUUID;
   }
 
-  const PLATFORM_TOKENS = new Set(['mac', 'win', 'linux', 'ios', 'android', 'unknown']);
-
-  function normalizePlatformToken(value) {
-    const normalized = (value || '').toString().trim().toLowerCase().replace(/^['"]|['"]$/g, '');
-
-    if (normalized === 'iphone' || normalized === 'ipad' || normalized === 'ios') {
-      return 'ios';
-    }
-
-    if (normalized === 'android') {
-      return 'android';
-    }
-
-    if (normalized === 'mac' || normalized === 'macos' || normalized === 'macintosh' || normalized === 'mac os x') {
-      return 'mac';
-    }
-
-    if (normalized === 'win' || normalized === 'windows' || normalized === 'win32' || normalized === 'win64') {
-      return 'win';
-    }
-
-    if (normalized === 'linux' || normalized === 'x11') {
-      return 'linux';
-    }
-
-    return PLATFORM_TOKENS.has(normalized) ? normalized : 'unknown';
-  }
-
-  function resolvePlatformToken() {
-    const override = (() => {
-      try {
-        return normalizePlatformToken(localStorage.getItem('platformOverride') || '');
-      } catch {
-        return 'unknown';
-      }
-    })();
-    if (override !== 'unknown') {
-      return override;
-    }
-
-    const userAgentDataPlatform = normalizePlatformToken(navigator.userAgentData && navigator.userAgentData.platform ? navigator.userAgentData.platform : '');
-    if (userAgentDataPlatform !== 'unknown') {
-      return userAgentDataPlatform;
-    }
-
-    const navigatorPlatform = normalizePlatformToken(navigator.platform || '');
-    if (navigatorPlatform !== 'unknown') {
-      return navigatorPlatform;
-    }
-
-    const serverToken = normalizePlatformToken(document.documentElement.dataset.os || '');
-    if (serverToken !== 'unknown') {
-      return serverToken;
-    }
-
-    return 'win';
-  }
-
   function applyResolvedPlatformToken() {
-    const token = resolvePlatformToken();
+    const platform = window.PayCalCalendarPlatform;
+    const token = platform && typeof platform.resolvePlatformToken === 'function'
+      ? platform.resolvePlatformToken()
+      : String(document.documentElement.dataset.os || 'win').trim().toLowerCase();
     document.documentElement.dataset.os = token;
 
     try {
@@ -756,6 +687,7 @@
         PayCalCryptoState.userId = bootstrapData.userId || null;
         PayCalCryptoState.dekVersion = Number(bootstrapData.dekVersion || 1);
         PayCalCryptoState.cryptoVersion = Number(bootstrapData.cryptoVersion || 1);
+        bootstrapData.wrappedCredentialCount = Number(bootstrapData.wrappedCredentialCount || 0);
         
         // Deterministic credential selection priority:
         // If backend returned a passkey wrapper, bootstrapData.credentialId is the
@@ -789,6 +721,7 @@
           userIdPresent: !!PayCalCryptoState.userId,
           userIdFp: safeFingerprint(PayCalCryptoState.userId || ''),
           hasWrappedDekPasskey: !!bootstrapData.wrappedDekPasskey,
+          wrappedCredentialCount: bootstrapData.wrappedCredentialCount,
           wrappedDekPasskeyMeta: envelopeMeta(bootstrapData.wrappedDekPasskey || ''),
           hasEncryptionSalt: !!bootstrapData.encryptionSalt,
           encryptionSaltLen: (bootstrapData.encryptionSalt || '').length,
@@ -989,7 +922,7 @@
       }
     }
 
-      if (PayCalCryptoState.credentialId && !bootstrapData.wrappedDekPasskey && bootstrapData.wrappedDek) {
+    if (PayCalCryptoState.credentialId && !bootstrapData.wrappedDekPasskey && bootstrapData.wrappedDek) {
       cryptoLog('[CRYPTO] No passkey wrapper found for active credential; password fallback is disabled');
 
       // Compatibility path: some historical accounts may have passkey envelope data
@@ -1002,20 +935,28 @@
       return false;
     }
 
-      if (PayCalCryptoState.credentialId && !bootstrapData.wrappedDekPasskey && !bootstrapData.wrappedDek) {
+    if (PayCalCryptoState.credentialId && !bootstrapData.wrappedDekPasskey && bootstrapData.wrappedCredentialCount > 0) {
+      cryptoLog('[CRYPTO] Existing passkey wrappers belong to other credentials; refusing DEK regeneration', {
+        credentialFp: safeFingerprint(PayCalCryptoState.credentialId || ''),
+        wrappedCredentialCount: bootstrapData.wrappedCredentialCount,
+      });
+      return false;
+    }
+
+    if (PayCalCryptoState.credentialId && !bootstrapData.wrappedDekPasskey && !bootstrapData.wrappedDek) {
       cryptoLog('[CRYPTO] No existing DEK wrappers found; generating new passkey-backed DEK');
       // Continue to first-time DEK generation path below.
     }
 
-      if (!PayCalCryptoState.credentialId) {
+    if (!PayCalCryptoState.credentialId) {
       cryptoLog('[CRYPTO] Passkey unlock unavailable: missing credential');
       return false;
     }
 
     // Hard safety guard: do not regenerate DEK when any wrapper already exists.
-      if (bootstrapData.wrappedDek || bootstrapData.wrappedDekPasskey) {
-        throw new Error('[CRYPTO] DEK regeneration forbidden while wrapped DEK exists');
-      }
+    if (bootstrapData.wrappedDek || bootstrapData.wrappedDekPasskey || bootstrapData.wrappedCredentialCount > 0) {
+      throw new Error('[CRYPTO] DEK regeneration forbidden while wrapped DEK exists');
+    }
 
     // Generate new DEK and wrap with active session credential
     // This runs only for first-time setup with no existing wrappers.
@@ -1149,6 +1090,182 @@
     });
   }
 
+  let plaintextWorkCapturePromise = null;
+
+  async function fetchWithTimeout(url, options, timeoutMs = 10000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function fetchCalendarNonce() {
+    const nonceResponse = await fetchWithTimeout('/api/v1/calendar/nonce', {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!nonceResponse.ok) {
+      throw new Error(`Nonce HTTP ${nonceResponse.status}`);
+    }
+
+    const noncePayload = await nonceResponse.json();
+    const csrfToken = noncePayload?.data?.nonce || noncePayload?.nonce || '';
+    if (!csrfToken) {
+      throw new Error('Missing csrf nonce');
+    }
+
+    return csrfToken;
+  }
+
+  function beginRuntimeAudit() {
+    if (window.PayCalRuntimeIntegrity?.beginAudit) {
+      return window.PayCalRuntimeIntegrity.beginAudit();
+    }
+
+    window.__PAYCAL_RUNTIME_AUDIT_IN_PROGRESS = true;
+    return () => {
+      window.__PAYCAL_RUNTIME_AUDIT_IN_PROGRESS = false;
+    };
+  }
+
+  async function capturePlaintextWorkEntries(options = {}) {
+    if (plaintextWorkCapturePromise) {
+      return plaintextWorkCapturePromise;
+    }
+
+    plaintextWorkCapturePromise = (async () => {
+      const endRuntimeAudit = beginRuntimeAudit();
+      try {
+        if (!PayCalCryptoState.hasDek) {
+          return { status: 'skipped', reason: 'dek_unavailable', encrypted: 0 };
+        }
+
+        const batchLimit = Math.max(1, Math.min(100, Number(options.limit || 25)));
+        const maxBatches = Math.max(1, Math.min(20, Number(options.maxBatches || 12)));
+        let encryptedTotal = 0;
+        let skippedTotal = 0;
+        let failedTotal = 0;
+
+      for (let batch = 0; batch < maxBatches; batch += 1) {
+        const queueResponse = await fetchWithTimeout(
+          `/api/v1/calendar/plaintext-capture?limit=${encodeURIComponent(String(batchLimit))}&include_archived=1`,
+          {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Accept': 'application/json' },
+          },
+          15000
+        );
+
+        if (!queueResponse.ok) {
+          throw new Error(`Plaintext capture queue HTTP ${queueResponse.status}`);
+        }
+
+        const queuePayload = await queueResponse.json();
+        const queueData = queuePayload?.data || {};
+        const entries = Array.isArray(queueData.entries) ? queueData.entries : [];
+        if (entries.length === 0) {
+          return {
+            status: 'complete',
+            encrypted: encryptedTotal,
+            skipped: skippedTotal,
+            failed: failedTotal,
+          };
+        }
+
+        const finalized = [];
+        for (const item of entries) {
+          if (!item || typeof item !== 'object' || !item.key || !item.capture_token || !item.entry) {
+            continue;
+          }
+
+          const encrypted = await encryptEntry(item.entry);
+          finalized.push({
+            key: String(item.key),
+            capture_token: String(item.capture_token),
+            encrypted_blob: encrypted.encrypted_blob,
+          });
+        }
+
+        if (finalized.length === 0) {
+          return {
+            status: 'stalled',
+            encrypted: encryptedTotal,
+            skipped: skippedTotal,
+            failed: failedTotal,
+          };
+        }
+
+        const csrfToken = await fetchCalendarNonce();
+        const finalizeResponse = await fetchWithTimeout('/api/v1/calendar/plaintext-capture', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            csrf_token: csrfToken,
+            entries: finalized,
+          }),
+        }, 20000);
+
+        const finalizePayload = await finalizeResponse.json().catch(() => ({}));
+        const finalizeData = finalizePayload?.data || {};
+        encryptedTotal += Number(finalizeData.encrypted || 0);
+        skippedTotal += Number(finalizeData.skipped || 0);
+        failedTotal += Number(finalizeData.failed || 0);
+
+        if (!finalizeResponse.ok || Number(finalizeData.failed || 0) > 0) {
+          return {
+            status: 'partial',
+            encrypted: encryptedTotal,
+            skipped: skippedTotal,
+            failed: failedTotal,
+          };
+        }
+
+        if (Number(queueData.remaining || 0) <= 0) {
+          return {
+            status: 'complete',
+            encrypted: encryptedTotal,
+            skipped: skippedTotal,
+            failed: failedTotal,
+          };
+        }
+      }
+
+        return {
+          status: 'limited',
+          encrypted: encryptedTotal,
+          skipped: skippedTotal,
+          failed: failedTotal,
+        };
+      } finally {
+        endRuntimeAudit();
+      }
+    })();
+
+    try {
+      const result = await plaintextWorkCapturePromise;
+      cryptoLog('[CRYPTO] Plaintext work capture finished', result);
+      return result;
+    } catch (error) {
+      cryptoLog('[CRYPTO] Plaintext work capture failed', { error: error?.message || String(error) });
+      return { status: 'failed', reason: error?.message || String(error), encrypted: 0 };
+    } finally {
+      plaintextWorkCapturePromise = null;
+    }
+  }
+
   async function decryptEntry(entry) {
     if (!PayCalCryptoState.hasDek) {
       cryptoLog('[CRYPTO] decryptEntry called without DEK');
@@ -1184,7 +1301,74 @@
         blobPrefix: entry.encrypted_blob?.substring(0, 50),
         blobMeta,
       });
-      throw err;
+      throw buildEncryptedWorkUnlockError('', err);
+    }
+  }
+
+  function serverWeekDateIdsForDate(dateId) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateId || ''))) {
+      return [];
+    }
+
+    const [year, month, day] = String(dateId).split('-').map((part) => Number(part));
+    const date = new Date(Date.UTC(year, month - 1, day));
+    if (
+      date.getUTCFullYear() !== year
+      || date.getUTCMonth() !== month - 1
+      || date.getUTCDate() !== day
+    ) {
+      return [];
+    }
+
+    const weekStart = new Date(date.getTime() - (date.getUTCDay() * 86400000));
+    return Array.from({ length: 7 }, (_, offset) => {
+      const cursor = new Date(weekStart.getTime() + (offset * 86400000));
+      const y = String(cursor.getUTCFullYear()).padStart(4, '0');
+      const m = String(cursor.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(cursor.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    });
+  }
+
+  async function assertVisibleEncryptedWeekDecryptable(activeDate) {
+    if (!PayCalCryptoState.hasDek) {
+      return;
+    }
+
+    const grid = document.getElementById('calendar-grid');
+    if (!grid) {
+      return;
+    }
+
+    const dateIds = serverWeekDateIdsForDate(activeDate);
+    for (const dateId of dateIds) {
+      const cell = grid.querySelector(`.datagrid_month_cell[data-id="${dateId}"]`);
+      const raw = cell?.getAttribute('data-work-entries') || '[]';
+      let parsedEntries = [];
+      try {
+        parsedEntries = JSON.parse(raw);
+      } catch (parseError) {
+        cryptoLog('[CRYPTO] Unable to parse visible entries before save', {
+          dateId,
+          error: parseError?.message || String(parseError),
+        });
+        parsedEntries = [];
+      }
+
+      for (const entry of Array.isArray(parsedEntries) ? parsedEntries : []) {
+        if (!entry || typeof entry !== 'object' || typeof entry.encrypted_blob !== 'string' || entry.encrypted_blob.trim() === '') {
+          continue;
+        }
+
+        try {
+          await decryptEntry(entry);
+        } catch (decryptError) {
+          if (decryptError?.code === 'paycal_decrypt_unlock_mismatch') {
+            throw buildEncryptedWorkUnlockError(dateId, decryptError);
+          }
+          throw decryptError;
+        }
+      }
     }
   }
   
@@ -1392,6 +1576,7 @@
           for (const calendarGrid of grids) {
             await hydrateEncryptedCalendarGrid(calendarGrid);
           }
+          void capturePlaintextWorkEntries({ reason: 'calendar_boot' });
           cryptoLog('[CRYPTO] Boot: hydration complete');
           calendarConsoleDebug('boot crypto hydration complete', {
             hasDek: true,
@@ -2051,8 +2236,8 @@
     const pad = 16;
     const offset = 18;
 
-    tooltip.style.left = '0px';
-    tooltip.style.top = '0px';
+    tooltip.style.setProperty('--calendar-hover-tooltip-left', '0px');
+    tooltip.style.setProperty('--calendar-hover-tooltip-top', '0px');
 
     const rect = tooltip.getBoundingClientRect();
     let left = clientX + offset;
@@ -2065,8 +2250,8 @@
       top = Math.max(pad, clientY - rect.height - offset);
     }
 
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
+    tooltip.style.setProperty('--calendar-hover-tooltip-left', `${left}px`);
+    tooltip.style.setProperty('--calendar-hover-tooltip-top', `${top}px`);
   }
 
   function showCalendarHoverTooltip(cell, clientX, clientY) {
@@ -4650,6 +4835,44 @@
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 1.5;
   }
 
+  function roundMoneyNumber(value) {
+    const numeric = Number.isFinite(value) ? value : parseMoneyValue(value);
+    return Number(Number(numeric || 0).toFixed(2));
+  }
+
+  function buildWorkEntryEarningsSnapshot(entry) {
+    const regular = parseFloat(entry?.regular_hours ?? entry?.regular ?? entry?.r ?? 0) || 0;
+    const overtime = parseFloat(entry?.overtime_hours ?? entry?.overtime ?? entry?.o ?? 0) || 0;
+    const travel = parseFloat(entry?.travel_hours ?? entry?.travel ?? entry?.t ?? 0) || 0;
+    const livingOut = parseMoneyValue(entry?.living_out_allowance ?? entry?.living_out ?? entry?.loa ?? entry?.l ?? 0);
+    const directWage = parseMoneyValue(entry?.wage ?? entry?.w ?? 0);
+    const siteWage = getSiteWageForEntry(entry);
+    const wage = directWage > 0 ? directWage : siteWage;
+    const overtimeScale = resolveOvertimeScale();
+    const regularAmount = roundMoneyNumber(regular * wage);
+    const overtimeAmount = roundMoneyNumber(overtime * wage * overtimeScale);
+    const travelAmount = roundMoneyNumber(travel * wage);
+    const livingOutAmount = roundMoneyNumber(livingOut);
+
+    return {
+      wage: roundMoneyNumber(wage),
+      regular_amount: regularAmount,
+      overtime_amount: overtimeAmount,
+      travel_amount: travelAmount,
+      living_out_amount: livingOutAmount,
+      gross: roundMoneyNumber(regularAmount + overtimeAmount + travelAmount + livingOutAmount),
+      earnings_snapshot_version: 1,
+    };
+  }
+
+  function applyWorkEntryEarningsSnapshot(entry) {
+    if (!entry || typeof entry !== 'object') {
+      return entry;
+    }
+    Object.assign(entry, buildWorkEntryEarningsSnapshot(entry));
+    return entry;
+  }
+
   function getEntriesFromCalendarCell(cell) {
     if (!cell) {
       return [];
@@ -4821,7 +5044,6 @@
 
   function computeCalendarTotals(entries, dateId = '') {
     const list = Array.isArray(entries) ? entries : [];
-    const overtimeScale = resolveOvertimeScale();
     let regularTotal = 0;
     let overtimeTotal = 0;
     let grossTotal = 0;
@@ -4876,11 +5098,12 @@
       const explicitGross = parseMoneyValue(entry.gross ?? entry.g ?? 0);
       const explicitNet = parseMoneyValue(entry.net ?? entry.nv ?? 0);
       const explicitTax = parseMoneyValue(entry.tax ?? entry.tx ?? entry.deductions ?? 0);
-
-      const directWage = parseMoneyValue(entry.wage ?? entry.w ?? 0);
-      const siteWage = getSiteWageForEntry(entry);
-      const wage = directWage > 0 ? directWage : siteWage;
-      const computedGross = wage > 0 ? (regular * wage) + (overtime * wage * overtimeScale) : 0;
+      const snapshot = buildWorkEntryEarningsSnapshot({
+        ...entry,
+        regular_hours: regular,
+        overtime_hours: overtime,
+      });
+      const computedGross = snapshot.gross;
       const gross = hasGross ? explicitGross : computedGross;
       const net = hasNet ? explicitNet : (hasTax ? (gross - explicitTax) : gross);
 
@@ -5005,8 +5228,8 @@
   }
 
   function getWorkEntryFieldPrefs() {
-    if (typeof CAL_WORK_ENTRY_FIELDS === 'object' && CAL_WORK_ENTRY_FIELDS !== null) {
-      return CAL_WORK_ENTRY_FIELDS;
+    if (typeof window.CAL_WORK_ENTRY_FIELDS === 'object' && window.CAL_WORK_ENTRY_FIELDS !== null) {
+      return window.CAL_WORK_ENTRY_FIELDS;
     }
 
     const root = document.getElementById('calendar-v2-root');
@@ -5158,53 +5381,6 @@
     cell.setAttribute('data-total-hours', formatted);
   }
 
-  if (!window.PayCalAriaEcho) {
-    window.PayCalAriaEcho = class AriaEcho {
-      static normalizeText(text) {
-        return String(text ?? '')
-          .trim()
-          .replace(/\s*\/\s*/g, ', ')
-          .replace(/\s*,\s*/g, ', ')
-          .replace(/\s*;\s*/g, '; ')
-          .replace(/\s*\.\s*/g, '. ')
-          .replace(/\s+/g, ' ')
-          .trim();
-      }
-
-      static cadence(input, delimiter = ', ') {
-        if (Array.isArray(input)) {
-          const filtered = input
-            .map((part) => this.normalizeText(part))
-            .filter((part) => part !== '');
-          if (filtered.length === 0) return '';
-          if (filtered.length === 1) return filtered[0];
-          const sep = String(delimiter || '').trim() === '' ? ', ' : delimiter;
-          return `${filtered.slice(0, -1).join(sep)}${sep}and ${filtered[filtered.length - 1]}`;
-        }
-
-        const normalized = this.normalizeText(input);
-        if (normalized === '') return '';
-
-        let parts = [];
-        if (String(delimiter || '').trim() !== '' && normalized.includes(delimiter)) {
-          parts = normalized.split(delimiter);
-        } else if (/[|/;]/.test(normalized)) {
-          parts = normalized.split(/\s*(?:\||\/|;)\s*/);
-        }
-
-        if (parts.length > 1) {
-          return this.cadence(parts, delimiter);
-        }
-
-        return normalized;
-      }
-
-      static cadenceList(parts) {
-        return this.cadence(parts, ', ');
-      }
-    };
-  }
-
   function renderWorkEntriesMarkup(workEntries, workEntryPosition = null, dateAria = '') {
     if (!Array.isArray(workEntries) || workEntries.length === 0) {
       return '';
@@ -5252,8 +5428,7 @@
         const placeholderAria = escapeText(window.PayCalAriaEcho.cadence(
           spokenSiteName ? `${spokenSiteName}. ${encryptedUnavailable}` : encryptedUnavailable
         ));
-        const placeholderSiteColorSource = entry.site_color || entry.siteColor || entry.sc || entry.c;
-        const placeholderSiteColorRaw = placeholderSiteColorSource ? String(placeholderSiteColorSource).toUpperCase() : '';
+        const placeholderSiteColorRaw = entry.site_color ? String(entry.site_color).toUpperCase() : '';
         const placeholderSiteColorValid = /^#[0-9A-Fa-f]{6}$/i.test(placeholderSiteColorRaw);
         const placeholderSiteColorAttr = placeholderSiteColorValid ? ` data-site-color="${escapeText(placeholderSiteColorRaw)}"` : '';
         return `<div class="work work_${posClass}"${placeholderSiteColorAttr} aria-label="${placeholderAria}"><strong>${siteName}</strong>${placeholderFieldsMarkup}</div>`;
@@ -5292,8 +5467,7 @@
         spokenSummary ? `${lead}. ${spokenSummary}.` : `${lead}.`
       ));
 
-      const siteColorSource = entry.site_color || entry.siteColor || entry.sc || entry.c;
-      const siteColorRaw = siteColorSource ? String(siteColorSource).toUpperCase() : '';
+      const siteColorRaw = (entry.site_color || entry.siteColor || entry.sc || entry.c) ? String(entry.site_color || entry.siteColor || entry.sc || entry.c).toUpperCase() : '';
       const siteColorValid = /^#[0-9A-Fa-f]{6}$/i.test(siteColorRaw);
       const siteColorAttr = siteColorValid ? ` data-site-color="${escapeText(siteColorRaw)}"` : '';
       const fieldsMarkup = fields.length > 0 ? `<br />${fields.join('&nbsp;/&nbsp;')}` : '';
@@ -5329,7 +5503,15 @@
           throw new Error(`Week payload integrity error for ${dateId}: missing encrypted_blob.`);
         }
 
-        const decrypted = await decryptEntry(entry);
+        let decrypted = null;
+        try {
+          decrypted = await decryptEntry(entry);
+        } catch (decryptError) {
+          if (decryptError?.code === 'paycal_decrypt_unlock_mismatch') {
+            throw buildEncryptedWorkUnlockError(dateId, decryptError);
+          }
+          throw decryptError;
+        }
         if (!decrypted || typeof decrypted !== 'object') {
           throw new Error(`Week payload decrypt returned empty data for ${dateId}.`);
         }
@@ -5368,7 +5550,44 @@
 
       const dateAria = cell.getAttribute('data-date-aria') || cell.getAttribute('data-date') || dateId;
       Guardian.setHTML(content, renderWorkEntriesMarkup(decryptedEntries, workEntryPosition, dateAria));
+      if (dateId === activeDate) {
+        markCalendarCellSaveState(activeCellForDate(dateId), 'committed');
+      }
       modalLog('[Calendar Modal] Grid cell refreshed', { dateId, entryCount: decryptedEntries.length });
+    }
+  }
+
+  function activeCellForDate(dateId) {
+    if (!dateId) {
+      return null;
+    }
+    return document.querySelector(`.datagrid_month_cell[data-id="${dateId}"]`);
+  }
+
+  function markCalendarCellSaveState(cell, state) {
+    if (!(cell instanceof HTMLElement)) {
+      return;
+    }
+
+    window.clearTimeout(Number(cell.dataset.saveStateTimer || 0));
+    cell.classList.remove('calendar_cell_save_pending', 'calendar_cell_save_committed', 'calendar_cell_save_error');
+    delete cell.dataset.saveState;
+
+    if (!state) {
+      delete cell.dataset.saveStateTimer;
+      return;
+    }
+
+    cell.dataset.saveState = state;
+    cell.classList.add(`calendar_cell_save_${state}`);
+
+    const timeoutMs = state === 'pending' ? 0 : 1800;
+    if (timeoutMs > 0) {
+      cell.dataset.saveStateTimer = String(window.setTimeout(() => {
+        cell.classList.remove(`calendar_cell_save_${state}`);
+        delete cell.dataset.saveState;
+        delete cell.dataset.saveStateTimer;
+      }, timeoutMs));
     }
   }
 
@@ -5423,8 +5642,11 @@
         ));
       }
 
+      await assertVisibleEncryptedWeekDecryptable(activeDate);
+
       const optimisticEntries = normalizeEntriesForSave(entries);
       updateGridCellFromEntries(activeDate, optimisticEntries);
+      markCalendarCellSaveState(activeCellForDate(activeDate), 'pending');
       optimisticApplied = true;
 
       const encryptedEntries = [];
@@ -5433,36 +5655,9 @@
         encryptedEntries.push(await encryptEntry(entry));
       }
 
-      const fetchWithTimeout = async (url, options, timeoutMs = 10000) => {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), timeoutMs);
-        try {
-          return await fetch(url, {
-            ...options,
-            signal: controller.signal,
-          });
-        } finally {
-          clearTimeout(timer);
-        }
-      };
-
       coreLog('[Calendar Save] nonce fetch start', { activeDate });
-      const nonceResponse = await fetchWithTimeout('/api/v1/calendar/nonce', {
-        method: 'GET',
-        credentials: 'include',
-      });
-      coreLog('[Calendar Save] nonce fetch response', { status: nonceResponse.status, ok: nonceResponse.ok });
-
-      if (!nonceResponse.ok) {
-        throw new Error(`Nonce HTTP ${nonceResponse.status}`);
-      }
-
-      const noncePayload = await nonceResponse.json();
-      coreLog('[Calendar Save] nonce payload received', noncePayload);
-      const csrfToken = noncePayload?.data?.nonce || noncePayload?.nonce || '';
-      if (!csrfToken) {
-        throw new Error('Missing csrf nonce');
-      }
+      const csrfToken = await fetchCalendarNonce();
+      coreLog('[Calendar Save] nonce received', { hasToken: !!csrfToken });
 
       const formData = new FormData();
       formData.append('entries', JSON.stringify(encryptedEntries));
@@ -5512,6 +5707,7 @@
       const weekPayload = savePayload?.week || savePayload?.data?.week || null;
       if (weekPayload) {
         await updateGridCellFromWeekPayload(activeDate, weekPayload);
+        markCalendarCellSaveState(activeCellForDate(activeDate), 'committed');
       } else {
         throw new Error('Calendar save response is missing week reconciliation payload.');
       }
@@ -5520,6 +5716,7 @@
     } catch (error) {
       if (optimisticApplied) {
         updateGridCellFromEntries(activeDate, previousEntries);
+        markCalendarCellSaveState(activeCellForDate(activeDate), 'error');
         coreLog('[Calendar Save] Optimistic update rolled back', { activeDate, restoredCount: previousEntries.length });
       }
       console.error('[Calendar Save] saveEntriesForDate failed', { activeDate, error });
@@ -5596,6 +5793,7 @@
         e.overtime_hours = ot;
         e.hours = total;
         dailyRegularUsed += reg;
+        applyWorkEntryEarningsSnapshot(e);
       }
     }
 
@@ -5679,6 +5877,7 @@
     wrapDEKWithPasskeyCredential: wrapDEKWithPasskeyCredential,
     ensureDEK: ensurePayCalDEK,
     createRecoveryMaterial: createRecoveryMaterial,
+    capturePlaintextWorkEntries: capturePlaintextWorkEntries,
     // Expose worker-backed unlock state only (DEK is never exposed to main thread)
     get hasDek() { return PayCalCryptoState.hasDek; },
     get dekVersion() { return PayCalCryptoState.dekVersion; },

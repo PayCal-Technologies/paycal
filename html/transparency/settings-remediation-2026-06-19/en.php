@@ -128,11 +128,11 @@ require_once HTML.'/header.php';
       </p>
       <ul class="doc-list">
         <li>Added and enforced <code>BusinessProtectedDataAccess</code> for actor authority, active target membership, consent, active wrap state, envelope metadata, and business site visibility.</li>
-        <li>Routed member reports, financial summaries, workspace warmers, team earnings, daily member JSON, and member XLSX/PDF export paths through the protected gate.</li>
+        <li>Routed member reports, financial summaries, workspace warmers, business reports, daily member JSON, and member XLSX/PDF export paths through the protected gate.</li>
         <li>Locked generic PDF/XLSX endpoints to personal current-user payloads and added negative tests for forged business/member payloads.</li>
         <li>Moved protected business XLSX/PDF export to server-side rebuilds from authorized rows. Browser code now sends export intent, not trusted rows.</li>
         <li>Expanded audit events for requested, denied, started, completed, and failed protected read/export outcomes.</li>
-        <li>Added revocation tests proving stale reports, exports, summaries, team earnings, and caches are denied or purged after access changes.</li>
+        <li>Added revocation tests proving stale reports, exports, summaries, business reports, and caches are denied or purged after access changes.</li>
       </ul>
     </section>
 
@@ -256,8 +256,8 @@ require_once HTML.'/header.php';
             <td>Removed where it duplicated the current rate-limit path.</td>
           </tr>
           <tr>
-            <td>Runtime bare <code>work.write</code> organization mutation compatibility</td>
-            <td>Removed. The connection audit reports bare-scope drift, <code>--fix</code> migrates it, and runtime grants require explicit self/org scope or manager authority.</td>
+            <td>Runtime bare <code>work.write</code> business mutation compatibility</td>
+            <td>Removed. The connection audit reports bare-scope drift, <code>--fix</code> migrates it, and runtime grants require explicit self/business scope or manager authority.</td>
           </tr>
           <tr>
             <td>Generated <code>TODO: Document...</code> comments</td>

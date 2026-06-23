@@ -93,9 +93,23 @@ final class BusinessMemberReportsServiceTest extends TestCase
     $this->assertStringContainsString('member_reports_pay_periods_', $serviceSource);
     $this->assertStringContainsString('member_reports_monthly_', $serviceSource);
     $this->assertStringContainsString('member_reports_daily_earnings_', $serviceSource);
-    $this->assertStringContainsString('data-member-export-scope="yearly"', $serviceSource);
+    $this->assertStringContainsString('renderMemberExportButtons', $serviceSource);
+    $this->assertStringContainsString('data-member-export-scope="', $serviceSource);
+    $this->assertStringContainsString('data-member-reports-premium="{$premiumAttr}"', $serviceSource);
     $this->assertStringContainsString("self::TAB_ID_PREFIX . 'forecast'", $serviceSource);
     $this->assertStringContainsString('member_reports_forecast_content', $serviceSource);
     $this->assertStringContainsString('earnings_view_tabs', $serviceSource);
+  }
+
+  #[Test]
+  public function memberReportsBrowserConvenienceExportsRequirePremiumFlag(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $memberReportsJs = (string) file_get_contents(
+      $projectRoot . '/html/js/earnings/member-reports-view.js',
+    );
+
+    $this->assertStringContainsString('root.dataset.memberReportsPremium', $memberReportsJs);
+    $this->assertStringContainsString('Premium subscription required for this export format.', $memberReportsJs);
   }
 }

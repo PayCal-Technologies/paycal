@@ -1,4 +1,12 @@
 import { fromBase64, latin1FromBase64, latin1ToBase64, toBase64 } from '/js/core/binary-codec.js';
+import {
+  PAYCAL_A11Y_ALPHABET,
+  PAYCAL_RECOVERY_SECRET_LENGTH,
+  formatRecoveryCode,
+  payCalChecksum,
+  recoverySecretMaterial,
+  validatePayCalCode,
+} from '/js/core/paycal-code.js';
 
 /**
  * HKDF KEY DERIVATION NOTE
@@ -54,31 +62,20 @@ function safeFingerprint(value) {
 const b64ToBytes = fromBase64;
 const bytesToB64 = toBase64;
 
-function encodeCrockfordBase32(bytes) {
-  const alphabet = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-  let bits = 0;
-  let value = 0;
-  let output = '';
-
+function generatePayCalRecoveryCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(PAYCAL_RECOVERY_SECRET_LENGTH));
+  let secret = '';
   bytes.forEach((byte) => {
-    value = (value << 8) | byte;
-    bits += 8;
-
-    while (bits >= 5) {
-      output += alphabet[(value >>> (bits - 5)) & 31];
-      bits -= 5;
-    }
+    secret += PAYCAL_A11Y_ALPHABET[byte % PAYCAL_A11Y_ALPHABET.length];
   });
-
-  if (bits > 0) {
-    output += alphabet[(value << (5 - bits)) & 31];
-  }
-
-  return output;
+  return formatRecoveryCode(`${secret}${payCalChecksum(secret)}`);
 }
 
-function formatRecoveryKey(encodedKey) {
-  return String(encodedKey || '').match(/.{1,4}/g)?.join('-') || '';
+function recoveryKeyMaterial(recoveryKey) {
+  if (validatePayCalCode(recoveryKey, PAYCAL_RECOVERY_SECRET_LENGTH)) {
+    return encoder.encode(recoverySecretMaterial(recoveryKey));
+  }
+  return decodeCrockfordBase32(recoveryKey);
 }
 
 function decodeEnvelope(base64Envelope) {
@@ -139,7 +136,7 @@ function decodeCrockfordBase32(str) {
   for (const char of normalized) {
     const idx = ALPHABET.indexOf(char);
     if (idx === -1) {
-      throw new Error('Invalid character. Note that the recovery key only uses numbers and certain letters (excluding I, L, O, and U).');
+      throw new Error('Invalid character. Note that the recovery code only uses PayCal code characters.');
     }
     
     value = (value << 5) | idx;
@@ -155,14 +152,13 @@ function decodeCrockfordBase32(str) {
 }
 
 /**
- * Derive recovery KEK from recovery key (Crockford Base32 encoded)
- * @param {string} recoveryKeyEncoded - Recovery key in Crockford Base32 format
+ * Derive recovery KEK from recovery code.
+ * @param {string} recoveryKeyEncoded - Recovery code
  * @param {string} saltBase64 - Account recovery salt (base64)
  * @returns {Promise<CryptoKey>} AES-GCM key for unwrapping DEK
  */
 async function deriveRecoveryKEK(recoveryKeyEncoded, saltBase64) {
-  // Decode Crockford Base32 to raw bytes
-  const recoveryKeyBytes = decodeCrockfordBase32(recoveryKeyEncoded);
+  const recoveryKeyBytes = recoveryKeyMaterial(recoveryKeyEncoded);
   const saltBytes = b64ToBytes(saltBase64);
   
   const ikm = await crypto.subtle.importKey(
@@ -205,7 +201,8 @@ async function generateRecoveryMaterial(payload) {
     throw new Error('DEK unavailable');
   }
 
-  const recoveryKeyBytes = crypto.getRandomValues(new Uint8Array(32));
+  const recoveryCode = generatePayCalRecoveryCode();
+  const recoveryKeyBytes = recoveryKeyMaterial(recoveryCode);
   const saltBytes = crypto.getRandomValues(new Uint8Array(32));
   const recoveryKek = await deriveRecoveryKEKFromBytes(recoveryKeyBytes, saltBytes);
   const wrapIv = crypto.getRandomValues(new Uint8Array(12));
@@ -223,10 +220,8 @@ async function generateRecoveryMaterial(payload) {
     hash: 'SHA-256',
   }, proofIkm, 256);
 
-  const encodedRecoveryKey = encodeCrockfordBase32(recoveryKeyBytes);
-
   return {
-    recoveryKey: formatRecoveryKey(encodedRecoveryKey),
+    recoveryKey: recoveryCode,
     accountRecoverySalt: bytesToB64(saltBytes),
     recoveryProofKey: bytesToB64(new Uint8Array(proofKeyBits)),
     wrappedDekRecovery: latin1ToBase64(JSON.stringify({
@@ -246,7 +241,7 @@ async function deriveRecoveryProof(payload) {
     throw new Error('Missing recovery proof inputs');
   }
 
-  const recoveryKeyBytes = decodeCrockfordBase32(recoveryKey);
+  const recoveryKeyBytes = recoveryKeyMaterial(recoveryKey);
   const saltBytes = b64ToBytes(accountRecoverySalt);
   const ikm = await crypto.subtle.importKey('raw', recoveryKeyBytes, 'HKDF', false, ['deriveBits']);
   const proofKeyBits = await crypto.subtle.deriveBits({
@@ -294,7 +289,7 @@ async function unwrapWithPasskeyCredential(payload) {
 }
 
 /**
- * Unwrap DEK with recovery key
+ * Unwrap DEK with recovery code
  * @param {Object} payload - { wrappedDekRecovery, recoveryKey, accountRecoverySalt, dekVersion, cryptoVersion }
  * @returns {Promise<Object>} { ok: true, diagnostics: {...} }
  */
@@ -302,10 +297,10 @@ async function unwrapWithRecoveryKey(payload) {
   const { wrappedDekRecovery, recoveryKey, accountRecoverySalt, dekVersion, cryptoVersion } = payload;
 
   if (!wrappedDekRecovery || !recoveryKey || !accountRecoverySalt) {
-    throw new Error('Missing recovery key unwrap inputs');
+    throw new Error('Missing recovery code unwrap inputs');
   }
 
-  // recoveryKey is the Crockford Base32 encoded string (with or without dashes)
+  // New recovery codes use the PayCal a11y alphabet; legacy Crockford keys still unwrap old accounts.
   const kekRecovery = await deriveRecoveryKEK(recoveryKey, accountRecoverySalt);
   const envelope = decodeEnvelope(wrappedDekRecovery);
 
@@ -317,7 +312,7 @@ async function unwrapWithRecoveryKey(payload) {
       envelope.ct
     );
   } catch {
-    throw new Error('Recovery Key does not match this account. Check the key and try again.');
+    throw new Error('Recovery Code does not match this account. Check the code and try again.');
   }
 
   self.cryptoState.dek = await crypto.subtle.importKey('raw', dekRaw, 'AES-GCM', false, ['encrypt', 'decrypt']);

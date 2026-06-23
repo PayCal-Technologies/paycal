@@ -77,7 +77,7 @@ final class TelemetryPolicy
   }
 
   /**
-   * TODO: Document canAccess.
+   * Can access.
    */
   public static function canAccess(string $stream, string $role): bool
   {

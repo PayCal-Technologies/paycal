@@ -67,7 +67,7 @@ final class ShadowTalon
   private static bool $handling = false;
 
   /**
-   * Handles register operation.
+   * Register PayCal's error, exception, and shutdown handlers once.
    */
   public static function register(): void
   {
@@ -85,19 +85,6 @@ final class ShadowTalon
     set_error_handler([self::class, 'handleError']);
     set_exception_handler([self::class, 'handleException']);
     register_shutdown_function([self::class, 'handleShutdown']);
-  }
-
-  /**
-   * Backward-compatible bootstrap alias.
-   *
-   * Older snippets use `ShadowTalon::init([...])`; the runtime handler is now
-   * static and idempotent via `register()`, so config is intentionally ignored.
-   *
-   * @param array<string, mixed> $_config
-   */
-  public static function init(array $_config = []): void
-  {
-    self::register();
   }
 
   /**
@@ -538,4 +525,3 @@ HTML;
     return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
   }
 }
-

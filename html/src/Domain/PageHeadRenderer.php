@@ -20,8 +20,7 @@ final class PageHeadRenderer
     'PAGE_FAQ' => 'content',
     'PAGE_HELP' => 'help',
     'PAGE_INDEX' => 'calendar',
-    'PAGE_JOIN_BUSINESS' => 'business',
-    'PAGE_MY_BUSINESS' => 'business',
+    'PAGE_CONNECTIONS' => 'business',
     'PAGE_POLICIES' => 'content',
     'PAGE_ADMIN' => 'admin',
     'PAGE_SETTINGS' => 'settings',
@@ -38,6 +37,7 @@ final class PageHeadRenderer
     'PAGE_BUSINESS_DASHBOARD' => 'business',
     'PAGE_BUSINESS_DETAILS' => 'business',
     'PAGE_BUSINESS_MEMBERS' => 'business',
+    'PAGE_BUSINESS_GROUPS' => 'business',
     'PAGE_BUSINESS_SITES' => 'business',
     'PAGE_BUSINESS_PAYROLL' => 'business',
     'PAGE_BUSINESS_AUDIT' => 'business',
@@ -53,7 +53,7 @@ final class PageHeadRenderer
   ];
 
   /**
-   * TODO: Document pageFileFor.
+   * Page file for.
    */
   public static function pageFileFor(string $currentPage): string
   {

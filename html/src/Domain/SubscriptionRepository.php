@@ -95,15 +95,6 @@ final class SubscriptionRepository
 
     Database::hset($key, $fields);
 
-    // Also update User model in-memory cache
-    $user = User::current();
-    if ($user->user_uuid === $userUUID) {
-      $user->subscription_tier = Subscription::PREMIUM;
-      $user->subscription_status = SubscriptionStatus::ACTIVE;
-      $user->subscription_id = $externalSubscriptionId;
-      $user->subscription_start_date = $now;
-      $user->subscription_renewal_date = $renewalDate;
-    }
   }
 
   /**
@@ -127,13 +118,6 @@ final class SubscriptionRepository
       'subscription_cancel_date' => $now,
     ]);
 
-    // Also update User model in-memory cache
-    $user = User::current();
-    if ($user->user_uuid === $userUUID) {
-      $user->subscription_tier = Subscription::FREE;
-      $user->subscription_status = SubscriptionStatus::CANCELED;
-      $user->subscription_cancel_date = $now;
-    }
   }
 
   /**
@@ -215,7 +199,7 @@ final class SubscriptionRepository
   }
 
   /**
-   * TODO: Document isBusinessActive.
+   * Is business active.
    */
   public static function isBusinessActive(string $userUUID): bool
   {
@@ -256,14 +240,6 @@ final class SubscriptionRepository
 
     Database::hset($key, $fields);
 
-    $user = User::current();
-    if ($user->user_uuid === $userUUID) {
-      $user->subscription_tier = Subscription::BUSINESS;
-      $user->subscription_status = SubscriptionStatus::ACTIVE;
-      $user->subscription_id = $externalSubscriptionId;
-      $user->subscription_start_date = $now;
-      $user->subscription_renewal_date = $renewalDate;
-    }
   }
 
   /**
@@ -298,4 +274,3 @@ final class SubscriptionRepository
     };
   }
 }
-

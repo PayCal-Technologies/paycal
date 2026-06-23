@@ -2,6 +2,8 @@
 
 namespace PayCal\Domain;
 
+use PayCal\Domain\Constants\Keys;
+
 /**
  * Builds the business members datagrid HTML shared by the API and SSR page shell.
  */
@@ -105,7 +107,7 @@ final class BusinessMembersGridRenderer
     }
 
     $service = new BusinessDiscoveryService();
-    $result = $service->listRelationships($actorUUID, $businessId);
+    $result = $service->listConnections($actorUUID, $businessId);
 
     if (!$result['success']) {
       $message = trim($result['message']) !== ''
@@ -138,7 +140,7 @@ final class BusinessMembersGridRenderer
 
     return [
       'success' => true,
-      'message' => '[OrgC] Members grid rendered.',
+      'message' => '[Business] Members grid rendered.',
       'html' => $html,
       'member_count' => count($members),
       'metrics' => self::summarizePageMetrics($members, $businessId),
@@ -202,7 +204,9 @@ final class BusinessMembersGridRenderer
       )
       : [];
 
-    $rows = array_map(function (mixed $member) use ($financialByMember): array {
+    $lastActiveByMember = $this->lastActiveTimestampsForMembers($memberUuids);
+
+    $rows = array_map(function (mixed $member) use ($financialByMember, $lastActiveByMember, $businessId): array {
       if (!is_array($member)) {
         return [
           'id' => '',
@@ -213,6 +217,8 @@ final class BusinessMembersGridRenderer
           'status' => '',
           'joined_at' => '',
           'joined_at_sort' => '',
+          'last_active_at' => '',
+          'last_active_at_sort' => '',
           'hours' => '',
           'hours_sort' => '',
           'earnings' => '',
@@ -239,6 +245,10 @@ final class BusinessMembersGridRenderer
         ? (string) $member['user_uuid']
         : (isset($member['uuid']) && is_scalar($member['uuid']) ? (string) $member['uuid'] : '');
       $financial = is_array($financialByMember[$memberUuid] ?? null) ? $financialByMember[$memberUuid] : [];
+      $connectionStatus = isset($member['status']) && is_scalar($member['status']) ? strtolower(trim((string) $member['status'])) : '';
+      $hasActiveConsent = $businessId !== '' && $memberUuid !== '' && $this->hasActiveBusinessConsent($businessId, $memberUuid);
+      $dataAccess = $this->businessDataAccessStatus($connectionStatus, $hasActiveConsent);
+      $lastActiveAt = $lastActiveByMember[$memberUuid] ?? 0;
 
       $totalHours = (float) ($financial['total_hours'] ?? 0);
       $regHours = (float) ($financial['reg_hours'] ?? 0);
@@ -253,8 +263,13 @@ final class BusinessMembersGridRenderer
         'role_slug' => $roleSlug,
         'role' => BusinessNav::roleDisplayLabel($roleSlug),
         'status' => isset($member['status']) && is_scalar($member['status']) ? (string) $member['status'] : '',
+        'data_access_label' => $dataAccess['label'],
+        'data_access_class' => $dataAccess['class'],
+        'data_access_title' => $dataAccess['title'],
         'joined_at' => $this->formatJoinedDateLabel($joinedAt),
         'joined_at_sort' => $joinedAt,
+        'last_active_at' => $this->formatLastActiveDateLabel($lastActiveAt),
+        'last_active_at_sort' => $lastActiveAt > 0 ? sprintf('%020d', $lastActiveAt) : '',
         'hours' => $this->formatHoursPrimaryLine($totalHours),
         'hours_sort' => sprintf('%.2f', $totalHours),
         'hours_reg' => $regHours,
@@ -277,6 +292,8 @@ final class BusinessMembersGridRenderer
           $row['status'],
           $row['joined_at'],
           $row['joined_at_sort'],
+          $row['last_active_at'],
+          $row['last_active_at_sort'],
           $row['hours'],
           $row['hours_sort'],
           $row['earnings'],
@@ -299,6 +316,7 @@ final class BusinessMembersGridRenderer
       'role' => 'role',
       'status' => 'status',
       'joined_at' => 'joined_at_sort',
+      'last_active_at' => 'last_active_at_sort',
       'hours' => 'hours_sort',
       'total_hours' => 'hours_sort',
       'earnings' => 'earnings_sort',
@@ -324,11 +342,13 @@ final class BusinessMembersGridRenderer
     $grid->enableSearch(Strings::i18n('BUSINESSES_MEMBERS_FILTER_PLACEHOLDER'));
     $grid->setSearchValue($search);
     $grid->setToolbarLayout('search_pagination');
+    $grid->setToolbarAfterStartHtml($this->membersToolbarSlotSkeleton());
     $grid->setPaginationArrowsOnly();
     $grid->enableSorting();
     $grid->enableColumnVisibility();
     $grid->addColumn('full_name', Strings::i18n('BUSINESSES_MEMBERS_COL_NAME_DETAILS'), true, null, null, true, false);
     $grid->addColumn('joined_at', Strings::i18n('BUSINESSES_MEMBERS_COL_JOINED'), true, null, null, true, true);
+    $grid->addColumn('last_active_at', Strings::i18n('BUSINESSES_MEMBERS_COL_LAST_ACTIVE'), true, null, null, true, true);
     $grid->addColumn('hours', Strings::i18n('BUSINESSES_MEMBERS_COL_HOURS'), true, null, 'right', true, true);
     $grid->addColumn('earnings', Strings::i18n('BUSINESSES_MEMBERS_COL_EARNINGS'), true, null, 'right', true, true);
     $grid->addRowAction('revoke', Strings::i18n('BUSINESSES_REVOKE'));
@@ -336,9 +356,9 @@ final class BusinessMembersGridRenderer
     $grid->setItemLabel(Strings::i18n('BUSINESSES_MEMBERS_ITEM_LABEL'));
 
     $pager = ArrayPager::fromArray($rows, [
-      'pageSize' => 25,
+      'pageSize' => max(1, count($rows)),
     ]);
-    $pager->setPage($page);
+    $pager->setPage(1);
     $html = $this->injectMemberRowEnhancements($grid->table($pager), array_values($pager->getRows()), $businessId);
 
     $start = $pager->getTotal() === 0 ? 0 : (($pager->getPage() - 1) * $pager->getPageSize()) + 1;
@@ -355,7 +375,7 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document loadingSkeleton.
+   * Loading skeleton.
    */
   public function loadingSkeleton(): string
   {
@@ -366,7 +386,7 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document emptyMessage.
+   * Empty message.
    */
   public function emptyMessage(string $message): string
   {
@@ -374,7 +394,7 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document formatJoinedDateLabel.
+   * Format joined date label.
    */
   private function formatJoinedDateLabel(string $raw): string
   {
@@ -414,7 +434,109 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document resolveUserLocale.
+   * Format last active timestamp label.
+   */
+  private function formatLastActiveDateLabel(int $timestamp): string
+  {
+    if ($timestamp <= 0) {
+      return Strings::i18n('NEVER');
+    }
+
+    $date = (new \DateTimeImmutable('@' . $timestamp))->setTimezone(new \DateTimeZone('UTC'));
+    $today = new \DateTimeImmutable('today', new \DateTimeZone('UTC'));
+    $activeDay = $date->setTime(0, 0, 0);
+    $dayDiff = (int) $today->diff($activeDay)->format('%r%a');
+
+    if ($dayDiff === 0) {
+      return Strings::i18n('TODAY');
+    }
+
+    if ($dayDiff === -1) {
+      return Strings::i18n('BUSINESSES_MEMBERS_JOINED_YESTERDAY');
+    }
+
+    if ($dayDiff < 0 && $dayDiff >= -6) {
+      return sprintf(Strings::i18n('BUSINESSES_MEMBERS_JOINED_DAYS_AGO'), abs($dayDiff));
+    }
+
+    $currentYear = (int) $today->format('Y');
+    $activeYear = (int) $activeDay->format('Y');
+    if ($activeYear === $currentYear) {
+      return $this->formatLocalizedJoinDate($activeDay, false);
+    }
+
+    return $this->formatLocalizedJoinDate($activeDay, true);
+  }
+
+  /**
+   * @param array<int, string> $memberUuids
+   * @return array<string, int>
+   */
+  private function lastActiveTimestampsForMembers(array $memberUuids): array
+  {
+    $memberUuids = array_values(array_unique(array_filter(array_map(
+      static fn (string $uuid): string => trim($uuid),
+      $memberUuids,
+    ))));
+    if ($memberUuids === []) {
+      return [];
+    }
+
+    $lastActive = array_fill_keys($memberUuids, 0);
+    $userKeys = array_map(static fn (string $uuid): string => Keys::USER . ':' . $uuid, $memberUuids);
+    $userHashes = Database::pipelineHgetall($userKeys);
+
+    foreach ($memberUuids as $index => $uuid) {
+      $userKey = $userKeys[$index];
+      $hash = $userHashes[$userKey] ?? [];
+      $lastActive[$uuid] = max(
+        $lastActive[$uuid],
+        $this->timestampFromStoredValue($hash['last_signin'] ?? ''),
+      );
+    }
+
+    $memberSet = array_fill_keys($memberUuids, true);
+    $sessionPrefix = Keys::SESSION . ':';
+    $sessionKeys = array_values(array_filter(
+      Database::scanKeys($sessionPrefix . '*'),
+      static fn (string $key): bool => preg_match('/^' . preg_quote($sessionPrefix, '/') . '[a-f0-9]{64}$/', $key) === 1,
+    ));
+    $sessionHashes = Database::pipelineHgetall($sessionKeys);
+
+    foreach ($sessionHashes as $session) {
+      $uuid = trim($session['user_uuid'] ?? '');
+      if ($uuid === '' || !isset($memberSet[$uuid])) {
+        continue;
+      }
+
+      $activity = $session['last_activity'] ?? ($session['created_at'] ?? '');
+      $lastActive[$uuid] = max($lastActive[$uuid], $this->timestampFromStoredValue($activity));
+    }
+
+    return $lastActive;
+  }
+
+  /**
+   * Parse stored timestamp values from unix seconds or date strings.
+   */
+  private function timestampFromStoredValue(string $raw): int
+  {
+    $raw = trim($raw);
+    if ($raw === '') {
+      return 0;
+    }
+
+    if (ctype_digit($raw)) {
+      return (int) $raw;
+    }
+
+    $date = $this->parseJoinedTimestamp($raw);
+
+    return $date instanceof \DateTimeImmutable ? $date->getTimestamp() : 0;
+  }
+
+  /**
+   * Resolve user locale.
    */
   private function resolveUserLocale(): string
   {
@@ -429,7 +551,7 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document formatLocalizedJoinDate.
+   * Format localized join date.
    */
   private function formatLocalizedJoinDate(\DateTimeImmutable $date, bool $includeYear): string
   {
@@ -455,7 +577,7 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document parseJoinedTimestamp.
+   * Parse joined timestamp.
    */
   private function parseJoinedTimestamp(string $raw): ?\DateTimeImmutable
   {
@@ -488,7 +610,7 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document formatHoursPrimaryLine.
+   * Format hours primary line.
    */
   private function formatHoursPrimaryLine(float $totalHours): string
   {
@@ -496,7 +618,7 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document formatHoursCompact.
+   * Format hours compact.
    */
   private function formatHoursCompact(float $hours): string
   {
@@ -508,7 +630,7 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document formatHoursSubline.
+   * Format hours subline.
    */
   private function formatHoursSubline(float $regHours, float $otHours): string
   {
@@ -523,7 +645,7 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document formatEarningsCompact.
+   * Format earnings compact.
    */
   private function formatEarningsCompact(float $amount): string
   {
@@ -543,7 +665,7 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document formatEarningsTrend.
+   * Format earnings trend.
    */
   private function formatEarningsTrend(float $ytdGross, float $trailingBaseline): string
   {
@@ -558,29 +680,77 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document formatStatusLabel.
+   * Has active business consent.
    */
-  private function formatStatusLabel(string $status): string
+  private function hasActiveBusinessConsent(string $businessId, string $memberUUID): bool
   {
-    $status = trim($status);
-    if ($status === '') {
-      return '—';
+    $businessId = trim($businessId);
+    $memberUUID = trim($memberUUID);
+    if ($businessId === '' || $memberUUID === '') {
+      return false;
     }
 
-    return ucfirst(strtolower($status));
+    foreach (Database::smembers(Keys::businessConsentsByUser($memberUUID)) as $consentIdRaw) {
+      $consentId = trim((string) $consentIdRaw);
+      if ($consentId === '') {
+        continue;
+      }
+
+      $consent = Database::hgetall(Keys::businessConsent($consentId));
+      if (
+        $consent !== []
+        && (string) ($consent['business_id'] ?? '') === $businessId
+        && (string) ($consent['user_uuid'] ?? '') === $memberUUID
+        && (string) ($consent['status'] ?? '') === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
-  /**
-   * TODO: Document truncateEmail.
-   */
-  private function truncateEmail(string $email, int $maxLength = 28): string
+  /** @return array{label: string, class: string, title: string} */
+  private function businessDataAccessStatus(string $connectionStatus, bool $hasActiveConsent): array
   {
-    $email = trim($email);
-    if ($email === '' || mb_strlen($email) <= $maxLength) {
-      return $email;
+    $connectionStatus = strtolower(trim($connectionStatus));
+    if ($connectionStatus === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE && $hasActiveConsent) {
+      return [
+        'label' => Strings::i18n('SETTINGS_DATA_CONSENT_ACTIVE_PILL'),
+        'class' => 'is-active',
+        'title' => Strings::i18n('SETTINGS_DATA_CONSENT_ACTIVE_DESC'),
+      ];
     }
 
-    return mb_substr($email, 0, max(1, $maxLength - 3)) . '...';
+    if ($connectionStatus === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
+      return [
+        'label' => Strings::i18n('SETTINGS_DATA_CONSENT_SETUP_PILL'),
+        'class' => 'is-setup',
+        'title' => Strings::i18n('BUSINESS_CONSENT_STATUS_MISSING_SETUP'),
+      ];
+    }
+
+    if ($connectionStatus === BusinessDiscoveryService::MEMBERSHIP_STATE_PENDING || $connectionStatus === BusinessDiscoveryService::MEMBERSHIP_STATE_CONSENTED) {
+      return [
+        'label' => Strings::i18n('SETTINGS_DATA_CONSENT_WAITING_PILL'),
+        'class' => 'is-waiting',
+        'title' => Strings::i18n('BUSINESS_CONSENT_STATUS_PENDING'),
+      ];
+    }
+
+    if ($connectionStatus === BusinessDiscoveryService::MEMBERSHIP_STATE_REVOKED) {
+      return [
+        'label' => Strings::i18n('SETTINGS_DATA_CONSENT_REVOKED_PILL'),
+        'class' => 'is-revoked',
+        'title' => Strings::i18n('BUSINESS_CONSENT_STATUS_REVOKED'),
+      ];
+    }
+
+    return [
+      'label' => Strings::i18n('SETTINGS_DATA_CONSENT_UNAVAILABLE_PILL'),
+      'class' => 'is-unavailable',
+      'title' => Strings::i18n('BUSINESS_CONSENT_STATUS_SKIPPED'),
+    ];
   }
 
   /**
@@ -632,7 +802,16 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * TODO: Document injectColumnGearMenu.
+   * Stable toolbar slots rendered with the grid so hydration does not move controls.
+   */
+  private function membersToolbarSlotSkeleton(): string
+  {
+    return '<div class="datagrid_toolbar_filters business_members_toolbar_filters"></div>'
+      . '<div class="datagrid_toolbar_bulk business_members_toolbar_bulk"></div>';
+  }
+
+  /**
+   * Inject column gear menu.
    */
   private function injectColumnGearMenu(string $html): string
   {
@@ -650,18 +829,26 @@ final class BusinessMembersGridRenderer
       . '</div>';
 
     $pattern = '/<div\s+class="datagrid_column_strip"[^>]*>(.*?)<span class="datagrid_column_strip_status[^>]*><\/span>\s*<\/div>/s';
+    $htmlWithoutColumnStrip = (string) preg_replace($pattern, '', $html, 1);
+    $toolbarSlot = '<div class="datagrid_toolbar_filters business_members_toolbar_filters"></div>';
+    $toolbarSlotWithMenu = '<div class="datagrid_toolbar_filters business_members_toolbar_filters">' . $replacement . '</div>';
+
+    if (str_contains($htmlWithoutColumnStrip, $toolbarSlot)) {
+      return str_replace($toolbarSlot, $toolbarSlotWithMenu, $htmlWithoutColumnStrip);
+    }
 
     return (string) preg_replace($pattern, $replacement, $html, 1);
   }
 
   /**
-   * TODO: Document injectMemberSelectionHeaderColumn.
+   * Inject member selection header column.
    */
   private function injectMemberSelectionHeaderColumn(string $html): string
   {
     $selectLabel = htmlspecialchars(Strings::i18n('BUSINESSES_MEMBERS_SELECT_MEMBER'), ENT_QUOTES, 'UTF-8');
+    $selectAllLabel = htmlspecialchars(Strings::i18n('BUSINESSES_MEMBERS_SELECT_ALL'), ENT_QUOTES, 'UTF-8');
     $headerCell = '<div class="datagrid_heading datagrid_col_select business_members_header_select" role="columnheader" aria-label="' . $selectLabel . '">'
-      . '<span class="visually_hidden">' . $selectLabel . '</span>'
+      . '<input type="checkbox" class="business_members_select_all_checkbox" id="business_members_select_all_checkbox" aria-label="' . $selectAllLabel . '">'
       . '</div>';
     $pattern = '/(<div class="datagrid_header_content" role="row">)/';
 
@@ -721,7 +908,6 @@ final class BusinessMembersGridRenderer
         ? strtolower(trim((string) $row['role_slug']))
         : '';
       $roleDisplay = BusinessNav::roleDisplayLabel($role);
-      $statusLabel = $this->formatStatusLabel(isset($row['status']) && is_scalar($row['status']) ? (string) $row['status'] : '');
 
       if ($memberId === '' || $fullName === '') {
         continue;
@@ -730,40 +916,41 @@ final class BusinessMembersGridRenderer
       $escapedMemberId = preg_quote(htmlspecialchars($memberId, ENT_QUOTES, 'UTF-8'), '/');
       $escapedFullName = htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8');
       $escapedEmail = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
-      $truncatedEmail = htmlspecialchars($this->truncateEmail($email), ENT_QUOTES, 'UTF-8');
       $escapedRoleDisplay = htmlspecialchars($roleDisplay, ENT_QUOTES, 'UTF-8');
       $escapedRole = htmlspecialchars($role, ENT_QUOTES, 'UTF-8');
-      $escapedStatus = htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8');
+      $dataAccessClass = isset($row['data_access_class']) && is_scalar($row['data_access_class']) ? (string) $row['data_access_class'] : 'is-unavailable';
+      $dataAccessTitle = isset($row['data_access_title']) && is_scalar($row['data_access_title']) ? (string) $row['data_access_title'] : '';
+      $escapedDataAccessClass = htmlspecialchars($dataAccessClass, ENT_QUOTES, 'UTF-8');
+      $dataAccessIcon = '';
+      if ($dataAccessTitle !== '' && $dataAccessClass === 'is-active') {
+        $verifiedLabel = trim(Strings::i18n('BUSINESSES_MEMBERS_SECURITY_VERIFIED'));
+        $iconLabel = $verifiedLabel !== '' ? $verifiedLabel . ': ' . $dataAccessTitle : $dataAccessTitle;
+        $dataAccessIcon = self::shieldCheckIconMarkup($iconLabel, 'business_member_data_access_icon ' . $escapedDataAccessClass);
+      } elseif ($dataAccessTitle !== '' && $dataAccessClass === 'is-setup') {
+        $dataAccessIcon = self::shieldWrenchIconMarkup($dataAccessTitle, 'business_member_data_access_icon ' . $escapedDataAccessClass);
+      }
 
       $roleMarkup = '';
       if ($role !== '' && $roleDisplay !== '' && $roleDisplay !== '—') {
-        if ($role === 'owner') {
-          $roleMarkup = '<span class="business_member_details_role businesses_member_role_cell_static">' . $escapedRoleDisplay . '</span>';
-        } else {
-          $ariaLabel = htmlspecialchars(sprintf(Strings::i18n('BUSINESSES_MEMBERS_CHANGE_ROLE_ARIA'), $roleDisplay), ENT_QUOTES, 'UTF-8');
-          $roleMarkup = '<button type="button" class="businesses_member_role_trigger business_member_details_role"'
-            . ' data-member-id="' . htmlspecialchars($memberId, ENT_QUOTES, 'UTF-8') . '"'
-            . ' data-current-role="' . $escapedRole . '"'
-            . $businessIdAttr
-            . ' aria-haspopup="listbox" aria-expanded="false"'
-            . ' aria-label="' . $ariaLabel . '">'
-            . $escapedRoleDisplay
-            . '</button>';
-        }
+        $roleMarkup = '<span class="business_member_details_role businesses_member_role_cell_static" data-current-role="' . $escapedRole . '">' . $escapedRoleDisplay . '</span>';
       } else {
         $roleMarkup = '<span class="business_member_details_role">—</span>';
       }
 
-      $detailsCell = '<div class="business_member_details_cell">'
+      $detailsCellClass = $dataAccessIcon !== ''
+        ? 'business_member_details_cell business_member_details_cell_with_icon'
+        : 'business_member_details_cell';
+      $detailsCell = '<div class="' . $detailsCellClass . '">'
+        . $dataAccessIcon
+        . '<div class="business_member_details_stack">'
         . '<span class="business_member_details_name">' . $escapedFullName . '</span>'
         . ($email !== ''
-          ? '<span class="business_member_details_email" title="' . $escapedEmail . '">' . $truncatedEmail . '</span>'
+          ? '<span class="business_member_details_email" title="' . $escapedEmail . '">' . $escapedEmail . '</span>'
           : '')
         . '<span class="business_member_details_meta">'
         . $roleMarkup
-        . '<span class="business_member_details_sep" aria-hidden="true"> • </span>'
-        . '<span class="business_member_details_status">' . $escapedStatus . '</span>'
         . '</span>'
+        . '</div>'
         . '</div>';
 
       $pattern = '/(<div class="datagrid_row"[^>]*data-id="' . $escapedMemberId . '"[^>]*>.*?<div class="datagrid_item datagrid_col_full_name[^"]*" role="gridcell"[^>]*data-col-key="full_name"[^>]*>)[^<]*(<\/div>)/s';
@@ -918,9 +1105,10 @@ final class BusinessMembersGridRenderer
   private function injectMemberRowActionMenus(string $html, array $rows): string
   {
     $editRoleLabel = htmlspecialchars(Strings::i18n('BUSINESSES_MEMBERS_ACTION_EDIT_ROLE'), ENT_QUOTES, 'UTF-8');
-    $assignSiteLabel = htmlspecialchars(Strings::i18n('BUSINESSES_MEMBERS_ACTION_ASSIGN_SITE'), ENT_QUOTES, 'UTF-8');
+    $addToGroupLabel = htmlspecialchars(Strings::i18n('BUSINESS_GROUPS_ADD_TO_GROUP'), ENT_QUOTES, 'UTF-8');
     $suspendLabel = htmlspecialchars(Strings::i18n('BUSINESSES_MEMBERS_ACTION_SUSPEND'), ENT_QUOTES, 'UTF-8');
     $revokeLabel = htmlspecialchars(Strings::i18n('BUSINESSES_REVOKE'), ENT_QUOTES, 'UTF-8');
+    $roleOptions = ['coordinator', 'contributor', 'viewer', 'member'];
 
     foreach ($rows as $row) {
       if (!is_array($row)) {
@@ -929,12 +1117,29 @@ final class BusinessMembersGridRenderer
 
       $memberId = isset($row['id']) && is_scalar($row['id']) ? trim((string) $row['id']) : '';
       $memberName = isset($row['full_name']) && is_scalar($row['full_name']) ? trim((string) $row['full_name']) : '';
+      $memberRole = isset($row['role_slug']) && is_scalar($row['role_slug'])
+        ? strtolower(trim((string) $row['role_slug']))
+        : '';
       if ($memberId === '') {
         continue;
       }
 
       $escapedMemberId = preg_quote(htmlspecialchars($memberId, ENT_QUOTES, 'UTF-8'), '/');
       $escapedMemberIdAttr = htmlspecialchars($memberId, ENT_QUOTES, 'UTF-8');
+      $escapedMemberRoleAttr = htmlspecialchars($memberRole, ENT_QUOTES, 'UTF-8');
+      $roleSubmenu = '<div class="business_member_row_submenu business_member_role_submenu" role="menu" hidden>';
+      foreach ($roleOptions as $roleOption) {
+        $roleOptionLabel = htmlspecialchars(BusinessNav::roleDisplayLabel($roleOption), ENT_QUOTES, 'UTF-8');
+        $roleOptionAttr = htmlspecialchars($roleOption, ENT_QUOTES, 'UTF-8');
+        $currentAttr = $roleOption === $memberRole ? ' aria-current="true" disabled' : '';
+        $roleSubmenu .= '<button type="button" class="business_member_row_submenu_item business_member_role_menu_item" role="menuitem" data-role="' . $roleOptionAttr . '" data-member-id="' . $escapedMemberIdAttr . '"' . $currentAttr . '>'
+          . '<span>' . $roleOptionLabel . '</span>'
+          . '</button>';
+      }
+      if ($memberRole === 'owner') {
+        $roleSubmenu .= '<p class="business_member_row_submenu_note">' . htmlspecialchars(Strings::i18n('BUSINESSES_MEMBERS_OWNER_ROLE_LOCKED'), ENT_QUOTES, 'UTF-8') . '</p>';
+      }
+      $roleSubmenu .= '</div>';
       $menuAria = htmlspecialchars(
         $memberName !== ''
           ? sprintf(Strings::i18n('BUSINESSES_MEMBERS_ROW_MENU_ARIA'), $memberName)
@@ -948,8 +1153,10 @@ final class BusinessMembersGridRenderer
         . '<span class="business_member_row_menu_icon" aria-hidden="true">&#8942;</span>'
         . '</button>'
         . '<div class="business_member_row_menu_panel" role="menu" hidden>'
-        . '<button type="button" class="business_member_row_menu_item" role="menuitem" data-member-action="edit-role" data-member-id="' . $escapedMemberIdAttr . '">' . $editRoleLabel . '</button>'
-        . '<button type="button" class="business_member_row_menu_item" role="menuitem" data-member-action="assign-site" data-member-id="' . $escapedMemberIdAttr . '" disabled>' . $assignSiteLabel . '</button>'
+        . '<button type="button" class="business_member_row_menu_item business_member_row_menu_item_has_submenu" role="menuitem" aria-haspopup="menu" aria-expanded="false" data-member-action="edit-role" data-member-id="' . $escapedMemberIdAttr . '" data-current-role="' . $escapedMemberRoleAttr . '">' . $editRoleLabel . '</button>'
+        . $roleSubmenu
+        . '<button type="button" class="business_member_row_menu_item business_member_row_menu_item_has_submenu" role="menuitem" aria-haspopup="menu" aria-expanded="false" data-member-action="add-to-group" data-member-id="' . $escapedMemberIdAttr . '">' . $addToGroupLabel . '</button>'
+        . '<div class="business_member_row_submenu business_member_group_submenu" role="menu" hidden></div>'
         . '<button type="button" class="business_member_row_menu_item" role="menuitem" data-member-action="suspend" data-member-id="' . $escapedMemberIdAttr . '" disabled>' . $suspendLabel . '</button>'
         . '<button type="button" class="business_member_row_menu_item business_member_row_menu_item_danger datagrid_action" role="menuitem" data-member-action="revoke" data-action="revoke" data-id="' . $escapedMemberIdAttr . '" data-member-id="' . $escapedMemberIdAttr . '">' . $revokeLabel . '</button>'
         . '</div>'
@@ -967,5 +1174,70 @@ final class BusinessMembersGridRenderer
     }
 
     return $html;
+  }
+
+  /**
+   * Render the compact shield+wrench security setup icon.
+   */
+  public static function shieldWrenchIconMarkup(string $label, string $class = 'business_member_data_access_icon', bool $decorative = false): string
+  {
+    $label = trim($label);
+    if ($label === '') {
+      return '';
+    }
+
+    $titleId = 'shield_wrench_' . substr(sha1($label . ':' . $class), 0, 12);
+    $escapedTitleId = htmlspecialchars($titleId, ENT_QUOTES, 'UTF-8');
+    $escapedLabel = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+    $escapedClass = htmlspecialchars($class, ENT_QUOTES, 'UTF-8');
+
+    $spanAttrs = $decorative
+      ? ' aria-hidden="true"'
+      : ' title="' . $escapedLabel . '" aria-label="' . $escapedLabel . '"';
+    $svgAttrs = $decorative
+      ? 'aria-hidden="true"'
+      : 'role="img" aria-labelledby="' . $escapedTitleId . '"';
+    $titleMarkup = $decorative ? '' : '<title id="' . $escapedTitleId . '">' . $escapedLabel . '</title>';
+
+    return '<span class="' . $escapedClass . '"' . $spanAttrs . '>'
+      . '<svg viewBox="0 0 24 24" ' . $svgAttrs . ' focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+      . $titleMarkup
+      . '<path class="business_member_data_access_icon_shield" d="M12 3 5 6v5.5c0 4.1 2.7 7.8 7 9.5 4.3-1.7 7-5.4 7-9.5V6l-7-3Z"/>'
+      . '<path class="business_member_data_access_icon_wrench" d="M14.8 8.2a2.7 2.7 0 0 0 3 3l-4.9 4.9-2.1-2.1 4-4Z"/>'
+      . '<path class="business_member_data_access_icon_wrench" d="m9.7 15.1-1.9 1.9a1.1 1.1 0 0 0 1.6 1.6l1.9-1.9"/>'
+      . '</svg>'
+      . '</span>';
+  }
+
+  /**
+   * Render the compact verified shield security icon.
+   */
+  public static function shieldCheckIconMarkup(string $label, string $class = 'business_member_data_access_icon', bool $decorative = false): string
+  {
+    $label = trim($label);
+    if ($label === '') {
+      return '';
+    }
+
+    $titleId = 'shield_check_' . substr(sha1($label . ':' . $class), 0, 12);
+    $escapedTitleId = htmlspecialchars($titleId, ENT_QUOTES, 'UTF-8');
+    $escapedLabel = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+    $escapedClass = htmlspecialchars($class, ENT_QUOTES, 'UTF-8');
+
+    $spanAttrs = $decorative
+      ? ' aria-hidden="true"'
+      : ' title="' . $escapedLabel . '" aria-label="' . $escapedLabel . '"';
+    $svgAttrs = $decorative
+      ? 'aria-hidden="true"'
+      : 'role="img" aria-labelledby="' . $escapedTitleId . '"';
+    $titleMarkup = $decorative ? '' : '<title id="' . $escapedTitleId . '">' . $escapedLabel . '</title>';
+
+    return '<span class="' . $escapedClass . '"' . $spanAttrs . '>'
+      . '<svg viewBox="0 0 24 24" ' . $svgAttrs . ' focusable="false" fill="none" stroke-linecap="round" stroke-linejoin="round">'
+      . $titleMarkup
+      . '<path class="business_member_data_access_icon_verified_shield" d="M12 2.8 4.8 5.9v5.4c0 4.4 2.8 8.2 7.2 9.9 4.4-1.7 7.2-5.5 7.2-9.9V5.9L12 2.8Z"/>'
+      . '<path class="business_member_data_access_icon_verified_check" d="m8.4 12.2 2.4 2.4 4.9-5.1"/>'
+      . '</svg>'
+      . '</span>';
   }
 }

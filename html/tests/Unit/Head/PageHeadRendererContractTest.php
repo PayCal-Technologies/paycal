@@ -25,7 +25,11 @@ final class PageHeadRendererContractTest extends TestCase
     $this->assertSame('business', PageHeadRenderer::pageFileFor('PAGE_BUSINESS_DETAILS'));
     $this->assertSame('business', PageHeadRenderer::pageFileFor('PAGE_BUSINESS_DASHBOARD'));
     $this->assertSame('business', PageHeadRenderer::pageFileFor('PAGE_BUSINESS_REPORTS'));
+    $this->assertSame('business', PageHeadRenderer::pageFileFor('PAGE_CONNECTIONS'));
     $this->assertSame('earnings', PageHeadRenderer::pageFileFor('PAGE_REPORTS'));
+    $this->assertSame('settings', PageHeadRenderer::pageFileFor('PAGE_SETTINGS_SUBSCRIPTION'));
+    $this->assertSame('pricing', PageHeadRenderer::pageFileFor('PAGE_PRICING'));
+    $this->assertSame('transparency', PageHeadRenderer::pageFileFor('PAGE_STATUS'));
     $this->assertSame('content', PageHeadRenderer::pageFileFor('PAGE_UNKNOWN'));
   }
 

@@ -217,7 +217,7 @@ return [
         'category' => 'account_security',
         'default' => true,
         'label' => 'Enable Account Recovery',
-        'help' => 'Enable emailed Recovery Key based account recovery flow',
+        'help' => 'Enable email-code and saved Recovery Code based account recovery flow',
     ],
     'account_recovery_auto_block_enabled' => [
         'type' => 'bool',
@@ -229,9 +229,9 @@ return [
     'account_recovery_code_ttl_minutes' => [
         'type' => 'int',
         'category' => 'account_security',
-        'default' => 15,
+        'default' => 10,
         'min' => 5,
-        'max' => 60,
+        'max' => 30,
         'label' => 'Account Recovery Code TTL (min)',
         'help' => 'Expiration time for recovery email codes',
     ],

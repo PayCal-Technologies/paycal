@@ -2,27 +2,15 @@
 
 namespace PayCal\Domain;
 
-/**
- * Settings root — HTTP redirect to the default sub-page (Account).
- *
- * Legacy hash anchors (#panel-style, etc.) are handled on sub-pages via
- * footer_shared.php (CSP nonce script). Do not render header/footer here.
- */
-require_once __DIR__ . '/../config.php';
+$currentPage = 'PAGE_SETTINGS';
 
-Authentication::redirectHomeIfUnauthenticated();
+require_once __DIR__ . '/_layout.php';
+?>
 
-if (!headers_sent()) {
-  header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-  header('Pragma: no-cache');
-  header('Expires: 0');
-}
+<?php
+require __DIR__ . '/_partials/panel_dashboard.php';
+?>
 
-$target = SettingsNav::defaultSubPageHref();
-$queryString = $_SERVER['QUERY_STRING'] ?? '';
-if ($queryString !== '') {
-  $target .= '?' . $queryString;
-}
-
-header('Location: ' . $target, true, 302);
-exit;
+<?php
+require __DIR__ . '/_partials/footer_shared.php';
+require_once Environment::appHome() . 'html/footer.php';

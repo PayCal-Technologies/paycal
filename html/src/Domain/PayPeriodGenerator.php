@@ -16,7 +16,7 @@ use PayCal\Domain\Enums\PayFrequency;
  *   Avoid duplicating date-window generation in controllers or pages.
  * - Frequency, anchor, epoch, and timezone behavior must remain internally
  *   consistent because downstream features depend on exact period boundaries.
- * - Regeneration has side effects across earnings, locking, and organization
+ * - Regeneration has side effects across earnings, locking, and business
  *   pay-period views; treat schedule format changes as cross-system changes.
  *
  * @category   Domain

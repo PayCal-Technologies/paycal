@@ -264,7 +264,7 @@ final class TheLedger
   }
 
   /**
-   * TODO: Document previousHashForSequence.
+   * Previous hash for sequence.
    */
   private static function previousHashForSequence(int $sequence): string
   {
@@ -318,7 +318,7 @@ final class TheLedger
   }
 
   /**
-   * TODO: Document resolveBlockchainGateway.
+   * Resolve blockchain gateway.
    */
   private static function resolveBlockchainGateway(): SystemAuditBlockchainGateway
   {
@@ -330,7 +330,7 @@ final class TheLedger
 
     return new class implements SystemAuditBlockchainGateway {
       /**
-       * TODO: Document publish.
+       * Publish.
        */
       public function publish(string $anchorId, string $blockHash, int $sequence): array
       {
@@ -343,7 +343,7 @@ final class TheLedger
       }
 
       /**
-       * TODO: Document provider.
+       * Provider.
        */
       public function provider(): string
       {

@@ -25,6 +25,121 @@ final class G4PublicDocsAdminA11yContractTest extends TestCase
   }
 
   #[Test]
+  public function cssDoesNotUseDecorativeTranslationMotion(): void
+  {
+    $cssRoot = $this->htmlRoot() . '/css';
+    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($cssRoot));
+
+    foreach ($iterator as $file) {
+      if (!$file instanceof SplFileInfo || !$file->isFile()) {
+        continue;
+      }
+
+      $path = $file->getPathname();
+      if (!preg_match('/\.(?:css|php)$/', $path)) {
+        continue;
+      }
+
+      $css = (string) file_get_contents($path);
+      $relativePath = substr($path, strlen($this->projectRoot()) + 1);
+
+      $this->assertDoesNotMatchRegularExpression(
+        '/@keyframes\s+[^{]*(?:slide|shift|shake|drop|reveal|materialize)/i',
+        $css,
+        $relativePath . ' must not define decorative translation keyframes',
+      );
+      $this->assertDoesNotMatchRegularExpression(
+        '/animation(?:-[a-z-]+)?\s*:\s*[^;]*(?:slide|shift|shake|drop|reveal|materialize)/i',
+        $css,
+        $relativePath . ' must not attach decorative translation animations',
+      );
+      $this->assertDoesNotMatchRegularExpression(
+        '/transform\s*:\s*[^;]*translate[XY]\([^)]*(?:px|rem)/i',
+        $css,
+        $relativePath . ' must not use pixel/rem translation effects',
+      );
+    }
+  }
+
+  #[Test]
+  public function compactNavStateDoesNotAdjustPageContentLayout(): void
+  {
+    foreach (['css/navigation/index.php', 'css/responsive/index.php'] as $relativePath) {
+      $css = (string) file_get_contents($this->htmlRoot() . '/' . $relativePath);
+
+      $this->assertDoesNotMatchRegularExpression(
+        '/body\[data-nav-viewport-compact\][^{]+#main\s*\{[^}]*padding\s*:/',
+        $css,
+        $relativePath . ' must not change #main padding from JS-applied compact nav state',
+      );
+      $this->assertDoesNotMatchRegularExpression(
+        '/body\[data-nav-viewport-compact\][^{]+(?:#main\s*>\s*section\.panel|\.panel|\.sites_main_container\s*>\s*section\.panel)\s*\{[^}]*(?:border-left|border-right|border-radius)\s*:/',
+        $css,
+        $relativePath . ' must not change panel chrome from JS-applied compact nav state',
+      );
+    }
+  }
+
+  #[Test]
+  public function interactivePageScriptsUseCssVariablesForDynamicPositioning(): void
+  {
+    $scripts = [
+      'js/business/workspace.js.php',
+      'js/calendar/calendar.js',
+      'js/signal-panel.js',
+    ];
+
+    foreach ($scripts as $relativePath) {
+      $js = (string) file_get_contents($this->htmlRoot() . '/' . $relativePath);
+
+      $this->assertDoesNotMatchRegularExpression(
+        '/\.style\.(?:left|top|right|bottom|width|height|transform|display|gridTemplateColumns|position)\s*=/',
+        $js,
+        $relativePath . ' must not write CSS layout properties directly',
+      );
+    }
+
+    $coreJs = (string) file_get_contents($this->htmlRoot() . '/js/core/index.php');
+    $this->assertStringContainsString('--nav-admin-popover-left', $coreJs);
+    $this->assertStringContainsString('--nav-admin-popover-top', $coreJs);
+    $this->assertStringContainsString('--dashboard-panel-left', $coreJs);
+    $this->assertStringContainsString('--dashboard-panel-width', $coreJs);
+    $this->assertStringNotContainsString('adminPopover.style.left', $coreJs);
+    $this->assertStringNotContainsString('adminPopover.style.top', $coreJs);
+    $this->assertDoesNotMatchRegularExpression(
+      '/dashboardEl\.style\.(?:width|height|transform)\s*=/',
+      $coreJs,
+      'core dashboard must use CSS variables for dynamic geometry',
+    );
+  }
+
+  #[Test]
+  public function adminSoc2DatagridsDoNotUseInlineGridTemplateStyles(): void
+  {
+    $soc2Page = (string) file_get_contents($this->htmlRoot() . '/admin/soc2/index.php');
+    $soc2Css = (string) file_get_contents($this->htmlRoot() . '/css/admin/soc2/index.php');
+
+    foreach ([
+      'soc2-latest-generated-files',
+      'soc2-gcs-inventory',
+      'soc2-audit-artifacts',
+      'soc2-admin-actions',
+      'soc2-full-artifact-index',
+    ] as $gridId) {
+      $this->assertStringContainsString('data-grid="' . $gridId . '"', $soc2Page);
+      $this->assertStringContainsString('[data-grid="' . $gridId . '"]', $soc2Css);
+      $this->assertStringContainsString('--grid-template-columns:', $soc2Css);
+    }
+
+    $this->assertDoesNotMatchRegularExpression(
+      '/data-grid="soc2-[^"]+"[^>]*style="/',
+      $soc2Page,
+      'SOC2 admin datagrids must not use inline style attributes',
+    );
+    $this->assertNoInlineStyles($soc2Page, 'html/admin/soc2/index.php');
+  }
+
+  #[Test]
   public function socPortalPageDoesNotUseInlineStyles(): void
   {
     $socPage = (string) file_get_contents($this->htmlRoot() . '/soc/index.php');
@@ -100,8 +215,10 @@ final class G4PublicDocsAdminA11yContractTest extends TestCase
       'admin/metrics/index.php' => "metrics_index_i18n('ADMIN_METRICS_DASHBOARD_TITLE')",
       'admin/redis/index.php' => "Strings::i18n('ADMIN_REDIS_TIER0_RELIABILITY')",
       'admin/stripe/index.php' => "Strings::i18n('ADMIN_STRIPE_DASHBOARD')",
+      'admin/argus/index.php' => "Strings::i18n('ARGUS_CONSOLE')",
       'admin/user-roles/index.php' => "Strings::i18n('ADMIN_USER_ROLES_TITLE')",
       'admin/language-dashboard/index.php' => "language_dashboard_i18n('ADMIN_LANGUAGE_DASHBOARD_TITLE')",
+      'admin/business-moderation/index.php' => "Strings::i18n('ADMIN_BUSINESS_MODERATION_TITLE')",
     ];
 
     foreach ($adminPages as $relativePath => $expectedSnippet) {
@@ -130,8 +247,21 @@ final class G4PublicDocsAdminA11yContractTest extends TestCase
   {
     $page = (string) file_get_contents($this->htmlRoot() . '/media/index.php');
 
-    $this->assertStringContainsString("Strings::i18n('MEDIA_PAGE_TITLE')", $page);
+    $this->assertStringContainsString("'MEDIA_PAGE_TITLE'", $page);
+    $this->assertStringContainsString("<h1 id=\"media-page-title\">{\$mediaI18n['MEDIA_PAGE_TITLE']}</h1>", $page);
     $this->assertStringNotContainsString('<h1>Media</h1>', $page);
+  }
+
+  #[Test]
+  public function mediaPageUsesHeadingsForArticleAndPlayerNames(): void
+  {
+    $page = (string) file_get_contents($this->htmlRoot() . '/media/index.php');
+
+    $this->assertStringContainsString('<article class="article doc-article" aria-labelledby="media-page-title" aria-describedby="media-page-deck">', $page);
+    $this->assertStringContainsString('<section class="doc-section highlight" aria-labelledby="media-featured-title">', $page);
+    $this->assertStringContainsString('<div class="media-embed" role="region" aria-labelledby="media-player-title">', $page);
+    $this->assertStringContainsString('<h3 id="media-player-title" class="visually_hidden">', $page);
+    $this->assertStringContainsString("title=\"{\$mediaI18n['MEDIA_PAGE_VIDEO_TITLE']}\"", $page);
   }
 
   #[Test]
@@ -158,6 +288,75 @@ final class G4PublicDocsAdminA11yContractTest extends TestCase
 
     $this->assertStringContainsString("en_index_i18n('HELP_CENTER_HEADING')", $page);
     $this->assertStringNotContainsString("en_index_i18n('FAQ_TITLE')", $page);
+  }
+
+  #[Test]
+  public function publicHelpIndexCardsExposeNamedRegionsAndSpecificReadMoreLinks(): void
+  {
+    $page = (string) file_get_contents($this->htmlRoot() . '/help/en.php');
+
+    $this->assertStringContainsString('role="list" aria-label="<?php echo htmlspecialchars(help_index_i18n(\'HELP_TOC_ARIA\')', $page);
+    foreach ([
+      'getting-started',
+      'work-site',
+      'work-hours',
+      'tax-brackets',
+      'account-settings',
+      'troubleshooting',
+      'policies-legal',
+      'requirements',
+      'webauthn-security',
+    ] as $slug) {
+      $this->assertStringContainsString('role="listitem" aria-labelledby="help-card-' . $slug . '"', $page);
+      $this->assertStringContainsString('id="help-card-' . $slug . '"', $page);
+      $this->assertStringContainsString('aria-labelledby="help-card-' . $slug . ' help-read-more-' . $slug . '"', $page);
+    }
+  }
+
+  #[Test]
+  public function statusPageTablesAndPanelsHaveAccessibleNames(): void
+  {
+    $page = (string) file_get_contents($this->htmlRoot() . '/status/index.php');
+
+    $this->assertStringContainsString('<section class="doc-section highlight" aria-labelledby="status-summary-heading">', $page);
+    $this->assertStringContainsString('<caption class="visually_hidden">PayCal public status summary by area, status, and public detail.</caption>', $page);
+    $this->assertStringContainsString('<div class="doc-panel-grid doc-panel-grid--responsive-3" role="list" aria-label="Status panels">', $page);
+    $this->assertStringContainsString('role="listitem" aria-labelledby="status-platform-heading"', $page);
+    $this->assertStringContainsString('role="listitem" aria-labelledby="status-data-boundary-heading"', $page);
+    $this->assertStringContainsString('<section id="language-coverage" class="doc-section success" aria-labelledby="language-coverage-heading">', $page);
+    $this->assertStringContainsString('<caption class="visually_hidden">Language coverage status by content layer, current state, and status.</caption>', $page);
+    $this->assertStringContainsString('aria-label="Status: In progress"', $page);
+    $this->assertStringContainsString('aria-label="Open Transparency Hub on paycaltech.com"', $page);
+  }
+
+  #[Test]
+  public function helpImagePopoversExposeDialogNamesAndExpandedState(): void
+  {
+    $articleFiles = [
+      'help/getting-started/en.php' => 'pay-period-example-popover',
+      'help/work-site/en.php' => 'work-site-setup-popover',
+      'help/work-hours/en.php' => 'work-hours-entry-surface-popover',
+    ];
+
+    foreach ($articleFiles as $relativePath => $popoverId) {
+      $page = (string) file_get_contents($this->htmlRoot() . '/' . $relativePath);
+      $titleId = $popoverId . '-title';
+
+      $this->assertStringContainsString('data-help-popover-open="' . $popoverId . '"', $page);
+      $this->assertStringContainsString('aria-haspopup="dialog"', $page);
+      $this->assertStringContainsString('aria-controls="' . $popoverId . '"', $page);
+      $this->assertStringContainsString('aria-expanded="false"', $page);
+      $this->assertStringContainsString('id="' . $popoverId . '"', $page);
+      $this->assertStringContainsString('role="dialog"', $page);
+      $this->assertStringContainsString('aria-labelledby="' . $titleId . '"', $page);
+      $this->assertStringContainsString('<h4 id="' . $titleId . '">', $page);
+    }
+
+    $helpJs = (string) file_get_contents($this->htmlRoot() . '/js/help/index.php');
+    $this->assertStringContainsString('function setPopoverExpanded(popover, expanded)', $helpJs);
+    $this->assertStringContainsString("button.setAttribute('aria-expanded', expanded ? 'true' : 'false');", $helpJs);
+    $this->assertStringContainsString("popover.addEventListener('toggle'", $helpJs);
+    $this->assertStringNotContainsString('style.display', $helpJs);
   }
 
   #[Test]

@@ -97,17 +97,49 @@ require_once Environment::appHome().'html/header.php';
     <!-- LEFT PANEL: Sites DataGrid -->
     <div class='f_column w50'>
       <section id='sites_list_panel' class='f_column panel tab-content sites_list_panel' title='<?php echo sites_index_i18n('SITES_GRID_BROWSE_HELP'); ?>' data-hover-help='<?php echo sites_index_i18n('SITES_GRID_BROWSE_HELP'); ?>'>
-        <ul class='tabs' role="tablist" aria-label="<?php echo sites_index_i18n('SITES_TABS_ARIA_LABEL'); ?>">
-          <li id="tab-active_sites" data-tab-target='#active_sites' class='tab active' tabindex="0" role="tab" aria-selected="true" aria-controls="active_sites"><?php echo sites_index_i18n('ACTIVE'); ?></li>
-          <li id="tab-archived_sites" data-tab-target='#archived_sites' class='tab' tabindex="-1" role="tab" aria-selected="false" aria-controls="archived_sites"><?php echo sites_index_i18n('ARCHIVED'); ?></li>
-        </ul>
-        <p class='tab-disclaimer' data-for-tab='active_sites'>
-          <?php echo sites_index_i18n('SITES_ACTIVE_TAB_DISCLAIMER'); ?>
-          <span class='sites_personal_scope_note'><?php echo sites_index_i18n('SITES_PERSONAL_SCOPE_NOTE'); ?></span>
-        </p>
-        <p class='tab-disclaimer hidden' data-for-tab='archived_sites'>
-          <span class='tab_disclaimer_warning'><?php echo sites_index_i18n('SITES_ARCHIVED_DELETE_WARNING'); ?></span>
-        </p>
+        <div class="sites_status_row">
+          <div class="sites_status_action_group" role="group" aria-label="<?php echo sites_index_i18n('SITES_TABS_ARIA_LABEL'); ?>">
+            <ul class='tabs sites_status_tabs' role="tablist" aria-label="<?php echo sites_index_i18n('SITES_TABS_ARIA_LABEL'); ?>">
+              <li>
+                <button
+                  id="tab-active_sites"
+                  type="button"
+                  data-tab-target="#active_sites"
+                  class="tab active"
+                  tabindex="0"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="active_sites"
+                ><?php echo sites_index_i18n('ACTIVE'); ?></button>
+              </li>
+              <li>
+                <button
+                  id="tab-archived_sites"
+                  type="button"
+                  data-tab-target="#archived_sites"
+                  class="tab"
+                  tabindex="-1"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="archived_sites"
+                ><?php echo sites_index_i18n('ARCHIVED'); ?></button>
+              </li>
+            </ul>
+            <button
+              type="button"
+              class="btn btn_primary sites_status_add_button"
+              data-action="create-site"
+              data-sites-visible-tab="active_sites"
+              aria-label="<?php echo sites_index_i18n('BUSINESS_SITES_ADD_ARIA'); ?>"
+            ><?php echo sites_index_i18n('BUSINESS_STATUS_ADD_SHORT'); ?></button>
+          </div>
+          <div class="sites_ownership_legend" aria-label="<?php echo sites_index_i18n('BUSINESS_SITES_OWNERSHIP_LEGEND_ARIA'); ?>">
+            <span class="sites_ownership_legend_item">
+              <span class="business_sites_ownership_symbol business_sites_ownership_symbol--personal" aria-hidden="true"></span>
+              <span><?php echo sites_index_i18n('BUSINESS_SITES_STATUS_TAG_PERSONAL'); ?></span>
+            </span>
+          </div>
+        </div>
 
         <div id='active_sites' data-tab-content='active_sites' class='active' role="tabpanel" aria-labelledby="tab-active_sites">
           <div class="visually_hidden">

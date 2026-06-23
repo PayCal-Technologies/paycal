@@ -16,25 +16,25 @@ final class BusinessWorkVisibilityPolicyTest extends TestCase
   private const MEMBER_UUID = 'member-policy-test';
 
   #[Test]
-  public function canAggregateForOrgRefusesRevokedRelationship(): void
+  public function canAggregateForOrgRefusesRevokedConnection(): void
   {
-    $relationship = [
+    $connection = [
       'status' => 'revoked',
       'role' => 'contributor',
-      'scopes' => 'work.read,work.scope.org',
+      'scopes' => 'work.read,work.scope.business',
     ];
 
     $this->assertFalse(BusinessWorkVisibilityPolicy::canAggregateForOrg(
       self::BUSINESS_ID,
       self::MEMBER_UUID,
-      $relationship,
+      $connection,
       $this->orgSiteIndex(),
     ));
 
     $decision = BusinessWorkVisibilityPolicy::evaluateOrgAggregation(
       self::BUSINESS_ID,
       self::MEMBER_UUID,
-      $relationship,
+      $connection,
       $this->orgSiteIndex(),
     );
 
@@ -42,10 +42,46 @@ final class BusinessWorkVisibilityPolicyTest extends TestCase
   }
 
   #[Test]
+  public function connectionPermitsPayrollVisibilityForActiveSelfScopedMember(): void
+  {
+    $connection = [
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+      'role' => 'member',
+      'scopes' => 'work.read,work.scope.self',
+    ];
+
+    $this->assertTrue(BusinessWorkVisibilityPolicy::connectionPermitsPayrollVisibility($connection));
+  }
+
+  #[Test]
+  public function connectionPermitsPayrollVisibilityForLegacyAllScope(): void
+  {
+    $connection = [
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+      'role' => 'admin',
+      'scopes' => 'all',
+    ];
+
+    $this->assertTrue(BusinessWorkVisibilityPolicy::connectionPermitsPayrollVisibility($connection));
+  }
+
+  #[Test]
+  public function connectionDoesNotPermitPayrollVisibilityForReadOnlyViewer(): void
+  {
+    $connection = [
+      'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
+      'role' => 'viewer',
+      'scopes' => 'work.read',
+    ];
+
+    $this->assertFalse(BusinessWorkVisibilityPolicy::connectionPermitsPayrollVisibility($connection));
+  }
+
+  #[Test]
   public function evaluateWorkEntryRefusesPersonalLinkedSite(): void
   {
     $orgSiteIndex = [];
-    $relationship = $this->payrollVisibleRelationship();
+    $connection = $this->payrollVisibleConnection();
 
     $decision = BusinessWorkVisibilityPolicy::evaluateWorkEntry(
       self::BUSINESS_ID,
@@ -53,7 +89,7 @@ final class BusinessWorkVisibilityPolicyTest extends TestCase
       self::MEMBER_UUID,
       'work:' . self::MEMBER_UUID . ':2026-01-10:site-personal',
       ['regular_hours' => '8', 'gross' => '100'],
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
 
@@ -64,7 +100,7 @@ final class BusinessWorkVisibilityPolicyTest extends TestCase
   #[Test]
   public function evaluateWorkEntryRefusesSharedSite(): void
   {
-    $relationship = $this->payrollVisibleRelationship();
+    $connection = $this->payrollVisibleConnection();
     $orgSiteIndex = [
       'site-shared' => [
         'site_owner_uuid' => 'other-member',
@@ -82,7 +118,7 @@ final class BusinessWorkVisibilityPolicyTest extends TestCase
       self::MEMBER_UUID,
       'work:' . self::MEMBER_UUID . ':2026-01-10:site-shared',
       ['regular_hours' => '8', 'gross' => '100'],
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
 
@@ -120,9 +156,50 @@ final class BusinessWorkVisibilityPolicyTest extends TestCase
   }
 
   #[Test]
+  public function evaluateWorkEntryAllowsMemberReportLinkedBusinessSiteWhenExplicitlyEnabled(): void
+  {
+    $connection = $this->payrollVisibleConnection();
+    $siteIndex = [
+      'site-linked' => [
+        'site_owner_uuid' => self::MEMBER_UUID,
+        'site_id' => 'site-linked',
+        'site_hash' => [
+          'ownership_scope' => BusinessDiscoveryService::BUSINESS_SITE_OWNERSHIP_LINKED,
+          'business_id' => self::BUSINESS_ID,
+        ],
+      ],
+    ];
+
+    $defaultDecision = BusinessWorkVisibilityPolicy::evaluateWorkEntry(
+      self::BUSINESS_ID,
+      self::OWNER_UUID,
+      self::MEMBER_UUID,
+      'work:' . self::MEMBER_UUID . ':2026-01-10:site-linked',
+      ['regular_hours' => '8', 'gross' => '100'],
+      $connection,
+      $siteIndex,
+    );
+    $memberReportDecision = BusinessWorkVisibilityPolicy::evaluateWorkEntry(
+      self::BUSINESS_ID,
+      self::OWNER_UUID,
+      self::MEMBER_UUID,
+      'work:' . self::MEMBER_UUID . ':2026-01-10:site-linked',
+      ['regular_hours' => '8', 'gross' => '100'],
+      $connection,
+      $siteIndex,
+      true,
+    );
+
+    $this->assertFalse($defaultDecision['allowed']);
+    $this->assertSame(BusinessWorkVisibilityPolicy::REFUSAL_PERSONAL_SITE, $defaultDecision['reason']);
+    $this->assertTrue($memberReportDecision['allowed']);
+    $this->assertSame('', $memberReportDecision['reason']);
+  }
+
+  #[Test]
   public function evaluateWorkEntryAllowsOrgOwnedOrgOnlySite(): void
   {
-    $relationship = $this->payrollVisibleRelationship();
+    $connection = $this->payrollVisibleConnection();
     $orgSiteIndex = [
       'site-org' => [
         'site_owner_uuid' => self::OWNER_UUID,
@@ -141,7 +218,7 @@ final class BusinessWorkVisibilityPolicyTest extends TestCase
       self::MEMBER_UUID,
       'work:' . self::MEMBER_UUID . ':2026-01-10:site-org',
       ['regular_hours' => '8', 'gross' => '100'],
-      $relationship,
+      $connection,
       $orgSiteIndex,
     );
 
@@ -152,12 +229,12 @@ final class BusinessWorkVisibilityPolicyTest extends TestCase
   /**
    * @return array<string, string>
    */
-  private function payrollVisibleRelationship(): array
+  private function payrollVisibleConnection(): array
   {
     return [
       'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
       'role' => 'contributor',
-      'scopes' => 'work.read,work.scope.org',
+      'scopes' => 'work.read,work.scope.business',
     ];
   }
 

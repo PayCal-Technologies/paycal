@@ -75,14 +75,15 @@ $reasonError = (string) ($formFieldErrors['reason'] ?? '');
 $hasError = static fn (string $key): bool => isset($formFieldErrors[$key]) && $formFieldErrors[$key] !== '';
 ?>
 
-<article class="article doc-article contact-page" aria-label="<?php echo htmlspecialchars($i18n['CONTACT_PAGE_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
+<article class="article doc-article contact-page" aria-labelledby="contact-page-title" aria-describedby="contact-page-deck">
   <header class="doc-article-header pad_md">
-    <h1><?php echo htmlspecialchars($i18n['CONTACT_US'], ENT_QUOTES, 'UTF-8'); ?></h1>
-    <p class="deck"><?php echo htmlspecialchars($i18n['CONTACT_DECK_INTRO'], ENT_QUOTES, 'UTF-8'); ?> <a href="mailto:info@paycal.app">info@paycal.app</a></p>
+    <h1 id="contact-page-title"><?php echo htmlspecialchars($i18n['CONTACT_US'], ENT_QUOTES, 'UTF-8'); ?></h1>
+    <p id="contact-page-deck" class="deck"><?php echo htmlspecialchars($i18n['CONTACT_DECK_INTRO'], ENT_QUOTES, 'UTF-8'); ?> <a href="mailto:info@paycal.app">info@paycal.app</a></p>
   </header>
 
   <section class="doc-article-body">
-    <section class="doc-section pad_md">
+    <section class="doc-section pad_md" aria-labelledby="contact-form-heading">
+      <h2 id="contact-form-heading" class="visually_hidden"><?php echo htmlspecialchars($i18n['CONTACT_PAGE_ARIA'], ENT_QUOTES, 'UTF-8'); ?></h2>
       <div class="contact-status-slot" aria-live="polite">
         <div
           id="contact_status"
@@ -96,10 +97,10 @@ $hasError = static fn (string $key): bool => isset($formFieldErrors[$key]) && $f
         ><?php echo htmlspecialchars($contactStatusText, ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
 
-      <div id="contact_success_card" class="contact-success-card" hidden>
+      <div id="contact_success_card" class="contact-success-card" role="status" aria-live="polite" aria-atomic="true" aria-labelledby="contact_success_title" hidden>
         <div class="contact-success-icon">✓</div>
         <div class="contact-success-content">
-          <h3 class="contact-success-title"><?php echo htmlspecialchars($i18n['CONTACT_SUCCESS_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h3>
+          <h3 id="contact_success_title" class="contact-success-title"><?php echo htmlspecialchars($i18n['CONTACT_SUCCESS_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h3>
           <p class="contact-success-time"><?php echo htmlspecialchars($i18n['CONTACT_SUCCESS_SENT_AT'], ENT_QUOTES, 'UTF-8'); ?> <span id="contact_sent_time">-</span></p>
           <p class="contact-success-note"><?php echo htmlspecialchars($i18n['CONTACT_SUCCESS_NOTE'], ENT_QUOTES, 'UTF-8'); ?></p>
           <p id="contact_success_cooldown" class="contact-success-cooldown" aria-live="polite" aria-atomic="true" hidden></p>
@@ -113,7 +114,8 @@ $hasError = static fn (string $key): bool => isset($formFieldErrors[$key]) && $f
         action="<?php echo Environment::appURL('contact/'); ?>"
         method="POST"
         novalidate
-        aria-describedby="contact_status"
+        aria-labelledby="contact-form-heading"
+        aria-describedby="contact-page-deck contact_status"
         data-cooldown-remaining="<?php echo (int) $contactCooldownRemaining; ?>"
         data-cooldown-duration="<?php echo (int) $contactCooldownDuration; ?>"
       >
@@ -122,7 +124,8 @@ $hasError = static fn (string $key): bool => isset($formFieldErrors[$key]) && $f
         <input type="hidden" name="contact_form_time" value="0">
         <input type="hidden" name="contact_form_token" value="<?php echo htmlspecialchars($contactFormToken, ENT_QUOTES, 'UTF-8'); ?>">
 
-        <section class="contact-form-section contact-form-section--top" aria-label="<?php echo htmlspecialchars($i18n['CONTACT_FORM_BASICS_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
+        <section class="contact-form-section contact-form-section--top" aria-labelledby="contact-form-basics-heading">
+          <h3 id="contact-form-basics-heading" class="visually_hidden"><?php echo htmlspecialchars($i18n['CONTACT_FORM_BASICS_ARIA'], ENT_QUOTES, 'UTF-8'); ?></h3>
           <div class="contact-form-top-grid">
             <div class="contact-field">
               <label for="name"><?php echo htmlspecialchars($i18n['YOUR_NAME'], ENT_QUOTES, 'UTF-8'); ?></label>
@@ -189,7 +192,8 @@ $hasError = static fn (string $key): bool => isset($formFieldErrors[$key]) && $f
           </div>
         </section>
 
-        <section class="contact-form-section contact-form-section--bottom" aria-label="<?php echo htmlspecialchars($i18n['CONTACT_FORM_NOTES_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
+        <section class="contact-form-section contact-form-section--bottom" aria-labelledby="contact-form-notes-heading">
+          <h3 id="contact-form-notes-heading" class="visually_hidden"><?php echo htmlspecialchars($i18n['CONTACT_FORM_NOTES_ARIA'], ENT_QUOTES, 'UTF-8'); ?></h3>
           <div class="contact-form-bottom-grid">
             <div class="contact-field contact-field--notes">
               <label for="message"><?php echo htmlspecialchars($i18n['MESSAGE'], ENT_QUOTES, 'UTF-8'); ?></label>
@@ -208,12 +212,13 @@ $hasError = static fn (string $key): bool => isset($formFieldErrors[$key]) && $f
               <p id="message_error" class="contact-field-error"<?php if (!$hasError('message')) { ?> hidden<?php } ?>><?php echo htmlspecialchars($messageError, ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
 
-            <aside class="contact-details-panel" aria-label="<?php echo htmlspecialchars($i18n['CONTACT_DETAILS_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
+            <aside class="contact-details-panel" aria-labelledby="contact-details-heading">
+              <h3 id="contact-details-heading" class="visually_hidden"><?php echo htmlspecialchars($i18n['CONTACT_DETAILS_ARIA'], ENT_QUOTES, 'UTF-8'); ?></h3>
               <p id="contact-sla-info" class="contact-sla-info contact-sla-info--center"><strong><?php echo htmlspecialchars($i18n['CONTACT_SLA_LABEL'], ENT_QUOTES, 'UTF-8'); ?></strong> <?php echo htmlspecialchars($i18n['CONTACT_SLA_TEXT'], ENT_QUOTES, 'UTF-8'); ?></p>
               <div class="contact-help-divider"></div>
               <div class="contact-details-split">
-                <div class="contact-guide-block">
-                  <h2 class="contact-help-section-title"><?php echo htmlspecialchars($i18n['CONTACT_HELP_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h2>
+                <div class="contact-guide-block" aria-labelledby="contact-help-heading">
+                  <h2 id="contact-help-heading" class="contact-help-section-title"><?php echo htmlspecialchars($i18n['CONTACT_HELP_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h2>
                   <p class="contact-help-desc"><?php echo htmlspecialchars($i18n['CONTACT_HELP_INTRO'], ENT_QUOTES, 'UTF-8'); ?></p>
                   <ul class="contact-help-tips">
                     <li><?php echo htmlspecialchars($i18n['CONTACT_HELP_TIP_1'], ENT_QUOTES, 'UTF-8'); ?></li>
@@ -222,10 +227,10 @@ $hasError = static fn (string $key): bool => isset($formFieldErrors[$key]) && $f
                   </ul>
                 </div>
 
-                <div class="contact-optional-block">
-                  <h2 class="contact-help-section-title contact-help-section-title--diagnostics"><?php echo htmlspecialchars($i18n['CONTACT_DIAGNOSTICS_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h2>
-                  <p class="contact-help-desc"><?php echo htmlspecialchars($i18n['CONTACT_DIAGNOSTICS_INTRO'], ENT_QUOTES, 'UTF-8'); ?></p>
-                  <div class="contact-help-chips">
+                <div class="contact-optional-block" aria-labelledby="contact-diagnostics-heading">
+                  <h2 id="contact-diagnostics-heading" class="contact-help-section-title contact-help-section-title--diagnostics"><?php echo htmlspecialchars($i18n['CONTACT_DIAGNOSTICS_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h2>
+                  <p id="contact-diagnostics-desc" class="contact-help-desc"><?php echo htmlspecialchars($i18n['CONTACT_DIAGNOSTICS_INTRO'], ENT_QUOTES, 'UTF-8'); ?></p>
+                  <div class="contact-help-chips" role="group" aria-labelledby="contact-diagnostics-heading" aria-describedby="contact-diagnostics-desc">
                     <label class="contact-chip">
                       <input type="checkbox" name="include_browser_device" value="1" class="contact-chip-input">
                       <span class="contact-chip-label"><?php echo htmlspecialchars($i18n['CONTACT_CONTEXT_BROWSER'], ENT_QUOTES, 'UTF-8'); ?></span>

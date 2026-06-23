@@ -24,6 +24,8 @@ final class SecurityLogHookContractTest extends TestCase
     $source = $this->readProjectFile('src/Infrastructure/Telemetry/SecurityLog.php');
 
     $this->assertStringContainsString('Log::error(\'[SECURITY] \' . json_encode($payload));', $source);
+    $this->assertStringContainsString('public static function writeRecord(string $event, array $context = []): void', $source);
+    $this->assertStringContainsString('SecurityEventCatalog::resolve', $source);
   }
 
   private function readProjectFile(string $relativePath): string

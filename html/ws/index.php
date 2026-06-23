@@ -287,7 +287,7 @@ if ($channel === 'test_suite_stream') {
       'duration' => round($duration, 2),
       'exitCode' => $exitCode,
       'cancelled' => $cancelled,
-      'output' => $fullOutput,
+      'rawOutputStored' => false,
     ];
 
     $lastRunPath = HTML . '/tests/.last-run.json';

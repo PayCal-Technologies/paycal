@@ -40,10 +40,10 @@ use PayCal\Observability\Lens;
  * Business coordination and policy engine.
  *
  * Responsibilities:
- * - Create and manage business relationships and role assignments.
+ * - Create and manage connections and role assignments.
  * - Enforce scope-based authorization for sites, work, settings, and audit.
  * - Drive invite, access-request, and notification workflows.
- * - Synchronize consent-driven shared encryption metadata for org members.
+ * - Synchronize consent-driven shared encryption metadata for business members.
  *
  * This file is intentionally large because it centralizes cross-cutting org
  * rules. If extracting helpers, preserve this class as the canonical policy
@@ -52,11 +52,11 @@ use PayCal\Observability\Lens;
 final class BusinessDiscoveryService
 {
   /**
-   * Allowed org-level relationship roles.
+   * Allowed business-level connection roles.
    * 'owner'       – full control, not revokable except via transfer
   * 'coordinator' – manager role with every permission except ownership transfer
    * 'contributor' – work and sites operator with delegated work write access
-   * 'viewer'      – read-only access to non-org-sensitive data
+   * 'viewer'      – read-only access to non-business-sensitive data
   * 'member'      – baseline member with non-sensitive read access and self-scoped work write
    */
   public const MEMBERSHIP_STATE_ACTIVE = 'active';
@@ -74,12 +74,13 @@ final class BusinessDiscoveryService
   public const BUSINESS_SITE_OWNERSHIP_LINKED = 'linked';
   public const BUSINESS_SITE_OWNERSHIP_SHARED = 'shared';
 
-  public const ORG_DEK_SEGMENT_CURRENT_PERIOD = 'current_period';
-  public const ORG_DEK_SEGMENT_ARCHIVE = 'archive';
+  public const BUSINESS_DEK_SEGMENT_CURRENT_PERIOD = 'current_period';
+  public const BUSINESS_DEK_SEGMENT_ARCHIVE = 'archive';
+  public const BUSINESS_DEK_VERSION_CURRENT = 'v1';
 
   private const DEFAULT_TIMEZONE = 'America/Edmonton';
   private const DEFAULT_CURRENCY = 'CAD';
-  private const ACCESS_REQUEST_DEFAULT_SCOPES = ['sites.read', 'work.read'];
+  private const ACCESS_REQUEST_DEFAULT_SCOPES = ['sites.read', 'work.read', 'work.scope.self'];
   private const BULK_IMPORT_MAX_INPUT_EMAILS = 500;
   private const BULK_IMPORT_MAX_ACCEPTED_EMAILS = 200;
   private const BULK_IMPORT_PREPARE_TTL_SECONDS = 1200;
@@ -89,17 +90,17 @@ final class BusinessDiscoveryService
   private const SCOPE_POLICY_VERSION = '2026-06-18';
 
   /**
-   * TODO: Document isDelegatedWorkMode.
+   * Is delegated work mode.
    */
   public static function isDelegatedWorkMode(string $mode): bool
   {
     $mode = strtolower(trim($mode));
 
-    return in_array($mode, [self::ENCRYPTION_MODE_BUSINESS, 'organization'], true);
+    return $mode === self::ENCRYPTION_MODE_BUSINESS;
   }
 
   /**
-   * TODO: Document isBusinessEncryptionMode.
+   * Is business encryption mode.
    */
   public static function isBusinessEncryptionMode(string $mode): bool
   {
@@ -124,7 +125,7 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * TODO: Document resolvePostedBusinessId.
+   * Resolve posted business ID.
    */
   public static function resolvePostedBusinessId(string ...$candidates): string
   {
@@ -139,16 +140,16 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * Allowed org-level relationship roles.
+   * Allowed business-level connection roles.
    * 'owner'       – full control, not revokable except via transfer
     * 'coordinator' – manager role: settings + access + audit
     * 'contributor' – work and sites write access
-    * 'viewer'      – read-only access to non-org-sensitive data
+    * 'viewer'      – read-only access to non-business-sensitive data
     * 'member'      – baseline member with read-only access plus self-scoped work write
    *
    * @var array<string, bool>
    */
-  public const VALID_ORG_ROLES = [
+  public const VALID_BUSINESS_ROLES = [
     'owner'       => true,
     'coordinator' => true,
     'contributor' => true,
@@ -163,8 +164,8 @@ final class BusinessDiscoveryService
    * @var array<string, array<string>>
    */
   public const ROLE_SCOPE_PRESETS = [
-    'coordinator' => ['access.manage', 'audit.read', 'org.settings.read', 'org.settings.write', 'payperiod.read', 'payperiod.write', 'sites.read', 'sites.write', 'wage.read', 'wage.write', 'work.read', 'work.scope.org', 'work.write'],
-    'contributor' => ['payperiod.read', 'sites.read', 'sites.write', 'wage.read', 'work.read', 'work.scope.org', 'work.write'],
+    'coordinator' => ['access.manage', 'audit.read', 'business.settings.read', 'business.settings.write', 'payperiod.read', 'payperiod.write', 'sites.read', 'sites.write', 'wage.read', 'wage.write', 'work.read', 'work.scope.business', 'work.write'],
+    'contributor' => ['payperiod.read', 'sites.read', 'sites.write', 'wage.read', 'work.read', 'work.scope.business', 'work.write'],
     'viewer'      => ['payperiod.read', 'sites.read', 'wage.read', 'work.read'],
     'member'      => ['payperiod.read', 'sites.read', 'wage.read', 'work.read', 'work.scope.self', 'work.write'],
   ];
@@ -174,7 +175,7 @@ final class BusinessDiscoveryService
     'work.read' => true,
     'work.write' => true,
     'work.scope.self' => true,
-    'work.scope.org' => true,
+    'work.scope.business' => true,
     'sites.read' => true,
     'sites.write' => true,
     'audit.read' => true,
@@ -182,19 +183,19 @@ final class BusinessDiscoveryService
     'payperiod.write' => true,
     'wage.read' => true,
     'wage.write' => true,
-    'org.settings.read' => true,
-    'org.settings.write' => true,
+    'business.settings.read' => true,
+    'business.settings.write' => true,
     'access.manage' => true,
   ];
 
   /**
-   * Valid status transitions for org relationships.
-   * Key = current status (empty string = no prior relationship).
+   * Valid status transitions for business connections.
+   * Key = current status (empty string = no prior connection).
    * Value = set of allowed next statuses.
    *
    * @var array<string, array<string, bool>>
    */
-  private const RELATIONSHIP_TRANSITIONS = [
+  private const CONNECTION_TRANSITIONS = [
     ''                               => [
       self::MEMBERSHIP_STATE_ACTIVE => true,
       self::MEMBERSHIP_STATE_CONSENTED => true,
@@ -237,27 +238,27 @@ final class BusinessDiscoveryService
    *   HIGH     — access removal, key management, configuration changes
    *
    * Events NOT listed here (invite.sent, access.requested, site.linked,
-   * access.request.notification, org.consent.accepted) remain in org audit
+   * access.request.notification, business.consent.accepted) remain in business audit
    * only — they are operational/informational and not SOC2 evidence events.
    *
    * @var array<string, string> event_type => 'critical'|'high'
    */
   private const LEDGER_EVENTS = [
-    // CRITICAL — CC6.1: new org / access grants / privilege changes
+    // CRITICAL — CC6.1: new business / access grants / privilege changes
     'business.created'         => 'critical',
     'ownership.transferred'        => 'critical',
-    'relationship.revoked'         => 'critical',
-    'relationship.role_updated'    => 'critical',
+    'connection.revoked'         => 'critical',
+    'connection.role_updated'    => 'critical',
     'access.request.approved'      => 'critical',
     'invite.accepted'              => 'critical',
     'invite.bulk_import_committed' => 'critical',
     // HIGH — CC6.1/CC6.2/CC6.7/CC9.1: access decisions, key mgmt, config
     'access.request.rejected'      => 'high',
     'invite.revoked'               => 'high',
-    'relationship.withdrawn'       => 'high',
+    'connection.withdrawn'       => 'high',
     'settings.updated'             => 'high',
-    'org.dek.wrap.bootstrap'       => 'high',
-    'org.dek.wrap.bootstrap.bulk'  => 'high',
+    'business.dek.wrap.bootstrap'       => 'high',
+    'business.dek.wrap.bootstrap.bulk'  => 'high',
   ];
 
   /**
@@ -345,7 +346,7 @@ final class BusinessDiscoveryService
 
     Database::sadd(Keys::BUSINESS_OWNER . ':' . $ownerUUID, $businessId);
 
-    $this->setRelationship($businessId, $ownerUUID, [
+    $this->setConnection($businessId, $ownerUUID, [
       'role' => 'owner',
       'status' => 'active',
       'scopes' => 'all',
@@ -422,7 +423,7 @@ final class BusinessDiscoveryService
    * Resolve whether profile pay-period settings are owned by a shared business.
    *
    * When the user owns an active shared business, profile settings APIs prefer
-   * that organization over a personal-business record.
+   * that business over a personal-business record.
    *
    * @return array{business_id: string, name: string, payroll_href: string}|null
    */
@@ -467,7 +468,7 @@ final class BusinessDiscoveryService
    * List all businesses the user belongs to, including personal and shared.
    *
    * Ensures the personal business exists, resolves unread notification counts
-   * per org, and sorts results with the personal org first.
+   * per business, and sorts results with the personal business first.
    *
    * @param string $userUUID Authenticated user UUID.
    *
@@ -480,7 +481,7 @@ final class BusinessDiscoveryService
     $notificationSummary = (new BusinessNotificationService())->summarizeUnreadForUser($userUUID);
     $unreadByOrg = $notificationSummary['by_org'];
 
-    $businessIds = $this->relationshipBusinessIdsForUser($userUUID);
+    $businessIds = $this->connectionBusinessIdsForUser($userUUID);
 
     $businesses = [];
     foreach ($businessIds as $businessId) {
@@ -489,13 +490,13 @@ final class BusinessDiscoveryService
         continue;
       }
 
-      $relationship = $this->relationship($businessId, $userUUID);
-      $relationshipStatus = (string) ($relationship['status'] ?? '');
+      $connection = $this->connection($businessId, $userUUID);
+      $connectionStatus = (string) ($connection['status'] ?? '');
       $businessType = (string) ($business['business_type'] ?? 'shared');
       $isBusinessOwner = (string) ($business['owner_uuid'] ?? '') === $userUUID;
-      $isCurrentRelationship = $relationshipStatus === 'active' || $relationshipStatus === 'pending';
+      $isCurrentConnection = $connectionStatus === 'active' || $connectionStatus === 'pending';
 
-      if (!$this->isSelfBusiness($business, $userUUID) && !$isBusinessOwner && !$isCurrentRelationship) {
+      if (!$this->isSelfBusiness($business, $userUUID) && !$isBusinessOwner && !$isCurrentConnection) {
         continue;
       }
 
@@ -510,10 +511,10 @@ final class BusinessDiscoveryService
         'owner_email' => $owner instanceof User ? $owner->email : '',
         'business_type' => $businessType,
         'status' => (string) ($business['status'] ?? 'active'),
-        'role' => (string) ($relationship['role'] ?? ''),
-        'relationship_status' => $relationshipStatus,
-        'scopes' => $this->scopeList((string) ($relationship['scopes'] ?? '')),
-        'joined_at' => (string) ($relationship['accepted_at'] ?? $relationship['created_at'] ?? ''),
+        'role' => (string) ($connection['role'] ?? ''),
+        'connection_status' => $connectionStatus,
+        'scopes' => $this->scopeList((string) ($connection['scopes'] ?? '')),
+        'joined_at' => (string) ($connection['accepted_at'] ?? $connection['created_at'] ?? ''),
         'legal_name' => (string) ($settings['legal_name'] ?? ''),
         'industry' => (string) ($settings['industry'] ?? ''),
         'registration_number' => (string) ($settings['registration_number'] ?? ''),
@@ -523,6 +524,9 @@ final class BusinessDiscoveryService
         'contact_email' => (string) ($settings['contact_email'] ?? ''),
         'contact_phone' => (string) ($settings['contact_phone'] ?? ''),
         'website' => (string) ($settings['website'] ?? ''),
+        'indigenous_owned' => (string) ($settings['indigenous_owned'] ?? '0'),
+        'resident_on_reserve' => (string) ($settings['resident_on_reserve'] ?? '0'),
+        'reserve_name' => (string) ($settings['reserve_name'] ?? ''),
         'address_line1' => (string) ($settings['address_line1'] ?? ''),
         'address_line2' => (string) ($settings['address_line2'] ?? ''),
         'address_city' => (string) ($settings['address_city'] ?? ''),
@@ -575,9 +579,9 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_BUSINESS_NOT_FOUND'));
     }
 
-    $relationship = $this->relationship($businessId, $actorUUID);
+    $connection = $this->connection($businessId, $actorUUID);
     $isOwner = (string) ($business['owner_uuid'] ?? '') === $actorUUID;
-    $status = strtolower(trim((string) ($relationship['status'] ?? '')));
+    $status = strtolower(trim((string) ($connection['status'] ?? '')));
     if (!$isOwner && !in_array($status, [self::MEMBERSHIP_STATE_ACTIVE, self::MEMBERSHIP_STATE_PENDING], true)) {
       return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_BUSINESS_NOTIFICATI'));
     }
@@ -631,8 +635,8 @@ final class BusinessDiscoveryService
 
     $inviteUUID = UserRepository::getUUIDFromEmail($email);
     if ($inviteUUID !== '') {
-      $existingRelationship = $this->relationship($businessId, $inviteUUID);
-      $existingStatus = (string) ($existingRelationship['status'] ?? '');
+      $existingConnection = $this->connection($businessId, $inviteUUID);
+      $existingStatus = (string) ($existingConnection['status'] ?? '');
       if (in_array($existingStatus, [self::MEMBERSHIP_STATE_ACTIVE, self::MEMBERSHIP_STATE_PENDING, self::MEMBERSHIP_STATE_CONSENTED], true)) {
         return $this->fail(Strings::i18n('BUSINESSES_API_YOU_ALREADY_HAVE_ACTIVE_ACCESS_TO_THIS_BUSINESS'));
       }
@@ -654,10 +658,10 @@ final class BusinessDiscoveryService
 
     Database::set(Keys::BUSINESS_INVITE_TOKEN . ':' . $token, $inviteId, 7 * 24 * 3600);
     Database::sadd(Keys::BUSINESS_INVITE_EMAIL . ':' . $email, $inviteId);
-    Database::sadd(Keys::BUSINESS_INVITE_ORG . ':' . $businessId, $inviteId);
+    Database::sadd(Keys::BUSINESS_INVITE_BUSINESS . ':' . $businessId, $inviteId);
 
     if ($inviteUUID !== '') {
-      $this->setRelationship($businessId, $inviteUUID, [
+      $this->setConnection($businessId, $inviteUUID, [
         'role' => 'member',
         'status' => self::MEMBERSHIP_STATE_PENDING,
         'scopes' => implode(',', $normalizedScopes),
@@ -678,7 +682,7 @@ final class BusinessDiscoveryService
         $sent = EmailGarum::sendBusinessInvite(
           inviteToken: $token,
           inviteeEmail: $email,
-          organizationName: (string) ($business['name'] ?? 'Business'),
+          businessName: (string) ($business['name'] ?? 'Business'),
           inviterName: (string) ($inviter?->full_name ?: $inviter?->email ?: 'PayCal User'),
           scopes: $normalizedScopes,
           batchCode: $normalizedBatchCode
@@ -751,8 +755,8 @@ final class BusinessDiscoveryService
 
       $memberUUID = UserRepository::getUUIDFromEmail($email);
       if ($memberUUID !== '') {
-        $relationship = $this->relationship($businessIdClean, $memberUUID);
-        $status = (string) ($relationship['status'] ?? '');
+        $connection = $this->connection($businessIdClean, $memberUUID);
+        $status = (string) ($connection['status'] ?? '');
         if ($status === 'active' || $status === 'pending') {
           $alreadyMember[] = $email;
           continue;
@@ -1160,8 +1164,8 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_NO_ACTIVE_BUSINESS_WAS_FOUND_FOR_THAT_OWNER'));
     }
 
-    $existingRelationship = $this->relationship($businessId, $requesterUUID);
-    if ([] !== $existingRelationship && (string) ($existingRelationship['status'] ?? '') === 'active') {
+    $existingConnection = $this->connection($businessId, $requesterUUID);
+    if ([] !== $existingConnection && (string) ($existingConnection['status'] ?? '') === 'active') {
       return $this->fail(Strings::i18n('BUSINESSES_API_YOU_ALREADY_HAVE_ACTIVE_ACCESS_TO_THIS_BUSINESS'));
     }
 
@@ -1170,7 +1174,7 @@ final class BusinessDiscoveryService
     if ($activeRequestId !== '') {
       $existingRequest = Database::hgetall(Keys::BUSINESS_ACCESS_REQUEST . ':' . $activeRequestId);
       if ([] !== $existingRequest && (string) ($existingRequest['status'] ?? '') === 'pending') {
-        return $this->ok('Access request already pending for this business.', [
+        return $this->ok('Your request is already waiting for this business.', [
           'request_id' => $activeRequestId,
           'business_id' => $businessId,
           'status' => 'pending',
@@ -1227,11 +1231,11 @@ final class BusinessDiscoveryService
       'expires_at' => $expiresAt,
     ]);
 
-    Database::sadd(Keys::BUSINESS_ACCESS_REQUEST_ORG . ':' . $businessId, $requestId);
+    Database::sadd(Keys::BUSINESS_ACCESS_REQUEST_BUSINESS . ':' . $businessId, $requestId);
     Database::sadd(Keys::BUSINESS_ACCESS_REQUEST_REQUESTER . ':' . $requesterUUID, $requestId);
     Database::set($activeKey, $requestId, 14 * 24 * 3600);
 
-    $this->setRelationship($businessId, $requesterUUID, [
+    $this->setConnection($businessId, $requesterUUID, [
       'role' => 'member',
       'status' => self::MEMBERSHIP_STATE_PENDING,
       'scopes' => implode(',', $this->normalizeScopes(self::ACCESS_REQUEST_DEFAULT_SCOPES)),
@@ -1256,7 +1260,7 @@ final class BusinessDiscoveryService
       try {
         $emailSent = EmailGarum::sendBusinessAccessRequest(
           ownerEmail: $normalizedOwnerEmail,
-          organizationName: $businessName,
+          businessName: $businessName,
           requesterName: $requesterDisplayName,
           requesterEmail: $requesterContactEmail,
           requestId: $requestId
@@ -1272,7 +1276,7 @@ final class BusinessDiscoveryService
       'email_dispatch' => $emailSent ? 'sent' : 'failed',
     ]);
 
-    return $this->ok('Access request submitted.', [
+    return $this->ok('Request sent. No protected work data is shared by this request.', [
       'request_id' => $requestId,
       'business_id' => $businessId,
       'owner_uuid' => $ownerUUID,
@@ -1304,7 +1308,7 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_INVITES'));
     }
 
-    $inviteIds = Database::smembers(Keys::BUSINESS_INVITE_ORG . ':' . $businessId);
+    $inviteIds = Database::smembers(Keys::BUSINESS_INVITE_BUSINESS . ':' . $businessId);
     sort($inviteIds, SORT_STRING);
 
     $invites = [];
@@ -1356,7 +1360,7 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_INVITE_HISTORY'));
     }
 
-    $inviteIds = Database::smembers(Keys::BUSINESS_INVITE_ORG . ':' . $businessId);
+    $inviteIds = Database::smembers(Keys::BUSINESS_INVITE_BUSINESS . ':' . $businessId);
     sort($inviteIds, SORT_STRING);
 
     $invites = [];
@@ -1391,7 +1395,7 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * List resolved (approved or rejected) access request history for an business.
+   * List resolved access request history for an business.
    *
    * Excludes pending requests. Requires manage-access or manage-business
    * permission.
@@ -1412,7 +1416,7 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_ACCESS_REQUEST_HISTOR'));
     }
 
-    $requestIds = Database::smembers(Keys::BUSINESS_ACCESS_REQUEST_ORG . ':' . $businessId);
+    $requestIds = Database::smembers(Keys::BUSINESS_ACCESS_REQUEST_BUSINESS . ':' . $businessId);
     sort($requestIds, SORT_STRING);
 
     $requests = [];
@@ -1435,7 +1439,7 @@ final class BusinessDiscoveryService
         'request_id' => (string) ($request['request_id'] ?? $requestId),
         'requester_contact_email' => (string) ($request['requester_contact_email'] ?? ''),
         'status' => $status,
-        'resolved_at' => (string) ($request['approved_at'] ?? $request['rejected_at'] ?? $request['created_at'] ?? ''),
+        'resolved_at' => (string) ($request['approved_at'] ?? $request['rejected_at'] ?? $request['withdrawn_at'] ?? $request['created_at'] ?? ''),
       ];
     }
 
@@ -1470,7 +1474,7 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_ACCESS_REQUESTS'));
     }
 
-    $requestIds = Database::smembers(Keys::BUSINESS_ACCESS_REQUEST_ORG . ':' . $businessId);
+    $requestIds = Database::smembers(Keys::BUSINESS_ACCESS_REQUEST_BUSINESS . ':' . $businessId);
     $requests = [];
 
     foreach ($requestIds as $requestId) {
@@ -1550,9 +1554,12 @@ final class BusinessDiscoveryService
       }
     }
 
+    $businessSharedEncryptionEnabled = (bool) SystemConfig::get('business_shared_encryption_enabled');
     $consentId = '';
     $credentialId = '';
-    if ((bool) SystemConfig::get('org_shared_encryption_enabled')) {
+    $protectedAccessReady = !$businessSharedEncryptionEnabled;
+    $secureBootstrapMessage = '';
+    if ($businessSharedEncryptionEnabled) {
       $consentGate = $this->ensureActivationConsent($businessId, $requesterUUID, $consentContext);
       if (!$consentGate['success']) {
         return $consentGate;
@@ -1565,42 +1572,80 @@ final class BusinessDiscoveryService
       if ($consentId === '') {
         return $this->fail(Strings::i18n('BUSINESSES_API_ACTIVATION_REQUIRES_A_VALID_CONSENT_ID_FOR_DEK_WRAP_BIND'));
       }
-
-      $wrapBootstrap = $this->bootstrapOrgDekWrapForMember(
-        $businessId,
-        $requesterUUID,
-        $consentId,
-        self::ORG_DEK_SEGMENT_CURRENT_PERIOD,
-        '1'
-      );
-      if (!$wrapBootstrap['success']) {
-        return $wrapBootstrap;
-      }
-
-      $credentialId = self::scalarString($wrapBootstrap['data']['credential_id'] ?? '');
     }
 
     $timestamp = date('c');
     $normalizedScopes = $this->normalizeScopes(self::ACCESS_REQUEST_DEFAULT_SCOPES);
     $scopeCSV = implode(',', $normalizedScopes);
+    $currentConnection = $this->connection($businessId, $requesterUUID);
+    $currentStatus = (string) ($currentConnection['status'] ?? '');
 
-    $this->setRelationship($businessId, $requesterUUID, [
-      'role' => 'member',
-      'status' => self::MEMBERSHIP_STATE_CONSENTED,
-      'scopes' => $scopeCSV,
-      'invited_by' => $actorUUID,
-      'created_at' => $timestamp,
-      'consented_at' => $timestamp,
-    ]);
+    if ($currentStatus !== self::MEMBERSHIP_STATE_ACTIVE) {
+      $this->setConnection($businessId, $requesterUUID, [
+        'role' => 'member',
+        'status' => self::MEMBERSHIP_STATE_CONSENTED,
+        'scopes' => $scopeCSV,
+        'invited_by' => $actorUUID,
+        'created_at' => $timestamp,
+        'consented_at' => $timestamp,
+        'consent_id' => $consentId,
+        'credential_id' => $credentialId,
+      ]);
+    }
 
-    $this->setRelationship($businessId, $requesterUUID, [
-      'role' => 'member',
+    $activeConnection = [
       'status' => self::MEMBERSHIP_STATE_ACTIVE,
-      'scopes' => $scopeCSV,
       'invited_by' => $actorUUID,
-      'created_at' => $timestamp,
       'accepted_at' => $timestamp,
-    ]);
+      'consent_id' => $consentId,
+      'credential_id' => $credentialId,
+    ];
+    if ($currentStatus !== self::MEMBERSHIP_STATE_ACTIVE) {
+      $activeConnection['role'] = 'member';
+      $activeConnection['scopes'] = $scopeCSV;
+      $activeConnection['created_at'] = $timestamp;
+    } else {
+      if (trim((string) ($currentConnection['role'] ?? '')) === '') {
+        $activeConnection['role'] = 'member';
+      }
+      if (trim((string) ($currentConnection['scopes'] ?? '')) === '') {
+        $activeConnection['scopes'] = $scopeCSV;
+      }
+      if (trim((string) ($currentConnection['created_at'] ?? '')) === '') {
+        $activeConnection['created_at'] = $timestamp;
+      }
+    }
+
+    $this->setConnection($businessId, $requesterUUID, $activeConnection);
+
+    if ($businessSharedEncryptionEnabled) {
+      $wrapBootstrap = $this->bootstrapBusinessDekWrapForMember(
+        $businessId,
+        $requesterUUID,
+        $consentId,
+        self::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
+        self::BUSINESS_DEK_VERSION_CURRENT
+      );
+      if ($wrapBootstrap['success']) {
+        $credentialId = self::scalarString($wrapBootstrap['data']['credential_id'] ?? '');
+        $protectedAccessReady = $credentialId !== '';
+        $activeConnectionWithCredential = [
+          'status' => self::MEMBERSHIP_STATE_ACTIVE,
+          'invited_by' => $actorUUID,
+          'accepted_at' => $timestamp,
+          'consent_id' => $consentId,
+          'credential_id' => $credentialId,
+        ];
+        if ($currentStatus !== self::MEMBERSHIP_STATE_ACTIVE) {
+          $activeConnectionWithCredential['role'] = 'member';
+          $activeConnectionWithCredential['scopes'] = $scopeCSV;
+          $activeConnectionWithCredential['created_at'] = $timestamp;
+        }
+        $this->setConnection($businessId, $requesterUUID, $activeConnectionWithCredential);
+      } else {
+        $secureBootstrapMessage = self::scalarString($wrapBootstrap['message']);
+      }
+    }
 
     Database::hset($requestKey, [
       'status' => 'approved',
@@ -1627,6 +1672,8 @@ final class BusinessDiscoveryService
       'scopes' => $normalizedScopes,
       'consent_id' => $consentId,
       'credential_id' => $credentialId,
+      'protected_access_ready' => $protectedAccessReady,
+      'secure_bootstrap_message' => $secureBootstrapMessage,
     ]);
   }
 
@@ -1678,9 +1725,9 @@ final class BusinessDiscoveryService
 
     if ($requesterUUID !== '') {
       Database::unlink($this->accessRequestActiveKey($businessId, $requesterUUID));
-      $relationship = $this->relationship($businessId, $requesterUUID);
-      if ((string) ($relationship['status'] ?? '') === self::MEMBERSHIP_STATE_PENDING) {
-        $this->setRelationship($businessId, $requesterUUID, [
+      $connection = $this->connection($businessId, $requesterUUID);
+      if ((string) ($connection['status'] ?? '') === self::MEMBERSHIP_STATE_PENDING) {
+        $this->setConnection($businessId, $requesterUUID, [
           'status' => self::MEMBERSHIP_STATE_REJECTED,
           'rejected_by' => $actorUUID,
           'rejected_at' => $timestamp,
@@ -1749,9 +1796,9 @@ final class BusinessDiscoveryService
 
     $inviteeUUID = (string) ($invite['invitee_uuid'] ?? '');
     if ($inviteeUUID !== '') {
-      $relationship = $this->relationship($businessId, $inviteeUUID);
-      if ((string) ($relationship['status'] ?? '') === self::MEMBERSHIP_STATE_PENDING) {
-        $this->setRelationship($businessId, $inviteeUUID, [
+      $connection = $this->connection($businessId, $inviteeUUID);
+      if ((string) ($connection['status'] ?? '') === self::MEMBERSHIP_STATE_PENDING) {
+        $this->setConnection($businessId, $inviteeUUID, [
           'status' => self::MEMBERSHIP_STATE_REVOKED,
           'revoked_by' => $actorUUID,
           'revoked_at' => date('c'),
@@ -1803,9 +1850,9 @@ final class BusinessDiscoveryService
     if (false === $expiresAt || $expiresAt < time()) {
       Database::hset($inviteKey, ['status' => 'expired']);
       if ($inviteeBound !== '') {
-        $relationship = $this->relationship((string) ($invite['business_id'] ?? ''), $inviteeBound);
-        if ((string) ($relationship['status'] ?? '') === self::MEMBERSHIP_STATE_PENDING) {
-          $this->setRelationship((string) ($invite['business_id'] ?? ''), $inviteeBound, [
+        $connection = $this->connection((string) ($invite['business_id'] ?? ''), $inviteeBound);
+        if ((string) ($connection['status'] ?? '') === self::MEMBERSHIP_STATE_PENDING) {
+          $this->setConnection((string) ($invite['business_id'] ?? ''), $inviteeBound, [
             'status' => self::MEMBERSHIP_STATE_EXPIRED,
             'expired_at' => date('c'),
           ]);
@@ -1829,7 +1876,7 @@ final class BusinessDiscoveryService
 
     $consentId = '';
     $credentialId = '';
-    if ((bool) SystemConfig::get('org_shared_encryption_enabled')) {
+    if ((bool) SystemConfig::get('business_shared_encryption_enabled')) {
       $consentGate = $this->ensureActivationConsent($businessId, $inviteeUUID, $consentContext);
       if (!$consentGate['success']) {
         return $consentGate;
@@ -1840,12 +1887,12 @@ final class BusinessDiscoveryService
         return $this->fail(Strings::i18n('BUSINESSES_API_ACTIVATION_REQUIRES_A_VALID_CONSENT_ID_FOR_DEK_WRAP_BIND'));
       }
 
-      $wrapBootstrap = $this->bootstrapOrgDekWrapForMember(
+      $wrapBootstrap = $this->bootstrapBusinessDekWrapForMember(
         $businessId,
         $inviteeUUID,
         $consentId,
-        self::ORG_DEK_SEGMENT_CURRENT_PERIOD,
-        '1'
+        self::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
+        self::BUSINESS_DEK_VERSION_CURRENT
       );
       if (!$wrapBootstrap['success']) {
         return $wrapBootstrap;
@@ -1857,22 +1904,26 @@ final class BusinessDiscoveryService
     $timestamp = date('c');
     $scopes = (string) ($invite['scopes'] ?? '');
 
-    $this->setRelationship($businessId, $inviteeUUID, [
+    $this->setConnection($businessId, $inviteeUUID, [
       'role' => 'member',
       'status' => self::MEMBERSHIP_STATE_CONSENTED,
       'scopes' => $scopes,
       'invited_by' => (string) ($invite['invited_by'] ?? ''),
       'created_at' => $timestamp,
       'consented_at' => $timestamp,
+      'consent_id' => $consentId,
+      'credential_id' => $credentialId,
     ]);
 
-    $this->setRelationship($businessId, $inviteeUUID, [
+    $this->setConnection($businessId, $inviteeUUID, [
       'role' => 'member',
       'status' => self::MEMBERSHIP_STATE_ACTIVE,
       'scopes' => $scopes,
       'invited_by' => (string) ($invite['invited_by'] ?? ''),
       'created_at' => $timestamp,
       'accepted_at' => $timestamp,
+      'consent_id' => $consentId,
+      'credential_id' => $credentialId,
     ]);
 
     Database::hset($inviteKey, [
@@ -1996,10 +2047,193 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * Revoke a member's active relationship, removing their access and encrypted key wraps.
+   * Grant protected business data sharing consent for the current member.
+   *
+   * This does not change membership status. It records consent and refreshes
+   * the member's business DEK wrap so protected reports can be generated while the
+   * membership remains active.
+   *
+   * @param array<string, mixed> $payload
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
+  public function grantBusinessDataConsent(string $actorUUID, string $businessId, array $payload = []): array
+  {
+    $actorUUID = trim(InputSanitizer::sanitizeString($actorUUID));
+    $businessId = trim(InputSanitizer::sanitizeString($businessId));
+    if ($actorUUID === '' || $businessId === '') {
+      return $this->fail(Strings::i18n('BUSINESSES_API_CONSENT_REQUIRES_VALID_BUSINESS_AND_USER_IDENTIFIERS'));
+    }
+
+    if (!Database::exists(Keys::BUSINESS . ':' . $businessId)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_BUSINESS_NOT_FOUND'));
+    }
+
+    $connection = $this->connection($businessId, $actorUUID);
+    if ((string) ($connection['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_NO_ACTIVE_CONNECTION_FOUND'));
+    }
+
+    $consent = $this->loadActiveBusinessConsent($businessId, $actorUUID);
+    $consentId = self::scalarString($consent['consent_id'] ?? '');
+    if ($consentId === '') {
+      $consentAcknowledgedRaw = $payload['consent_acknowledged'] ?? '1';
+      $consentAcknowledged = filter_var($consentAcknowledgedRaw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
+      if (!$consentAcknowledged) {
+        return $this->fail(Strings::i18n('BUSINESSES_API_ACTIVATION_REQUIRES_EXPLICIT_CONSENT_ACKNOWLEDGMENT'));
+      }
+
+      $consentVersion = self::scalarString($payload['consent_version'] ?? 'v1');
+      if ($consentVersion === '') {
+        $consentVersion = 'v1';
+      }
+      $disclaimerText = self::scalarString($payload['disclaimer_text'] ?? '');
+      if ($disclaimerText === '') {
+        $disclaimerText = 'Business shared encryption consent accepted.';
+      }
+
+      $consentGate = $this->recordBusinessConsent(
+        $businessId,
+        $actorUUID,
+        $consentVersion,
+        $disclaimerText,
+        self::scalarString($payload['ip'] ?? ''),
+        self::scalarString($payload['user_agent'] ?? '')
+      );
+      if (!$consentGate['success']) {
+        return $consentGate;
+      }
+
+      $consentId = self::scalarString($consentGate['data']['consent_id'] ?? '');
+      if ($consentId === '') {
+        return $this->fail(Strings::i18n('BUSINESSES_API_ACTIVATION_REQUIRES_A_VALID_CONSENT_ID_FOR_DEK_WRAP_BIND'));
+      }
+    }
+
+    if (!(bool) SystemConfig::get('business_shared_encryption_enabled')) {
+      BusinessWorkspaceCache::invalidate($businessId);
+
+      $this->appendAuditEvent($businessId, 'business.consent.granted_from_settings', $actorUUID, [
+        'consent_id' => $consentId,
+        'user_uuid' => $actorUUID,
+        'secure_bootstrap_skipped' => 'business_shared_encryption_disabled',
+      ]);
+
+      return $this->ok('Business data consent granted.', [
+        'business_id' => $businessId,
+        'user_uuid' => $actorUUID,
+        'status' => self::MEMBERSHIP_STATE_ACTIVE,
+        'consent_id' => $consentId,
+        'protected_access_ready' => true,
+        'secure_bootstrap_required' => false,
+        'credential_id' => '',
+      ]);
+    }
+
+    $wrapBootstrap = $this->bootstrapBusinessDekWrapForMember(
+      $businessId,
+      $actorUUID,
+      $consentId,
+      self::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
+      self::BUSINESS_DEK_VERSION_CURRENT
+    );
+    if (!$wrapBootstrap['success']) {
+      return $wrapBootstrap;
+    }
+
+    BusinessWorkspaceCache::invalidate($businessId);
+
+    $this->appendAuditEvent($businessId, 'business.consent.granted_from_settings', $actorUUID, [
+      'consent_id' => $consentId,
+      'user_uuid' => $actorUUID,
+    ]);
+
+    return $this->ok('Business data consent granted.', [
+      'business_id' => $businessId,
+      'user_uuid' => $actorUUID,
+      'status' => self::MEMBERSHIP_STATE_ACTIVE,
+      'consent_id' => $consentId,
+      'protected_access_ready' => true,
+      'secure_bootstrap_required' => true,
+      'credential_id' => self::scalarString($wrapBootstrap['data']['credential_id'] ?? ''),
+    ]);
+  }
+
+  /**
+   * Revoke protected business data sharing consent without leaving the business.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
+  public function revokeBusinessDataConsent(string $actorUUID, string $businessId): array
+  {
+    $actorUUID = trim(InputSanitizer::sanitizeString($actorUUID));
+    $businessId = trim(InputSanitizer::sanitizeString($businessId));
+    if ($actorUUID === '' || $businessId === '') {
+      return $this->fail(Strings::i18n('BUSINESSES_API_CONSENT_REQUIRES_VALID_BUSINESS_AND_USER_IDENTIFIERS'));
+    }
+
+    if (!Database::exists(Keys::BUSINESS . ':' . $businessId)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_BUSINESS_NOT_FOUND'));
+    }
+
+    if ([] === $this->connection($businessId, $actorUUID)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_CONNECTION_NOT_FOUND'));
+    }
+
+    $timestamp = date('c');
+    $revokedConsentCount = 0;
+    foreach (Database::smembers(Keys::businessConsentsByUser($actorUUID)) as $consentIdRaw) {
+      $consentId = trim((string) $consentIdRaw);
+      if ($consentId === '') {
+        continue;
+      }
+
+      $consentKey = Keys::businessConsent($consentId);
+      $consent = Database::hgetall($consentKey);
+      if (
+        $consent === []
+        || (string) ($consent['business_id'] ?? '') !== $businessId
+        || (string) ($consent['user_uuid'] ?? '') !== $actorUUID
+        || (string) ($consent['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE
+      ) {
+        continue;
+      }
+
+      Database::hset($consentKey, [
+        'status' => self::MEMBERSHIP_STATE_REVOKED,
+        'revoked_at' => $timestamp,
+        'revoked_by' => $actorUUID,
+        'updated_at' => $timestamp,
+      ]);
+      $revokedConsentCount++;
+    }
+
+    $wrapRevocation = (new BusinessEncryptionService())
+      ->revokeWrapsForMembership($businessId, $actorUUID, 'consent_revoked');
+    $revokedWrapCount = self::scalarInt($wrapRevocation['data']['revoked_wrap_count'] ?? 0);
+
+    BusinessWorkspaceCache::invalidate($businessId);
+
+    $this->appendAuditEvent($businessId, 'business.consent.revoked_from_settings', $actorUUID, [
+      'user_uuid' => $actorUUID,
+      'revoked_consent_count' => $revokedConsentCount,
+      'revoked_wrap_count' => $revokedWrapCount,
+    ]);
+
+    return $this->ok('Business data consent revoked.', [
+      'business_id' => $businessId,
+      'user_uuid' => $actorUUID,
+      'status' => self::MEMBERSHIP_STATE_REVOKED,
+      'revoked_consent_count' => $revokedConsentCount,
+      'revoked_wrap_count' => $revokedWrapCount,
+    ]);
+  }
+
+  /**
+   * Revoke a member's active connection, removing their access and encrypted key wraps.
    *
    * Owners cannot be removed via this path. Triggers DEK-wrap revocation for
-   * the target member before deleting the relationship record.
+   * the target member before deleting the connection record.
    *
    * @param string $actorUUID  Authenticated actor UUID performing the revocation.
    * @param string $businessId      Business ID.
@@ -2007,7 +2241,7 @@ final class BusinessDiscoveryService
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
-  public function revokeRelationship(string $actorUUID, string $businessId, string $targetUUID): array
+  public function revokeConnection(string $actorUUID, string $businessId, string $targetUUID): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $businessId);
     if (null !== $gate) {
@@ -2027,11 +2261,11 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_CANNOT_REVOKE_THE_BUSINESS_OWNER'));
     }
 
-    if ([] === $this->relationship($businessId, $targetUUID)) {
-      return $this->fail(Strings::i18n('BUSINESSES_API_RELATIONSHIP_NOT_FOUND'));
+    if ([] === $this->connection($businessId, $targetUUID)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_CONNECTION_NOT_FOUND'));
     }
 
-    $this->setRelationship($businessId, $targetUUID, [
+    $this->setConnection($businessId, $targetUUID, [
       'status'     => 'revoked',
       'revoked_by' => $actorUUID,
       'revoked_at' => date('c'),
@@ -2040,12 +2274,12 @@ final class BusinessDiscoveryService
     $wrapRevocation = (new BusinessEncryptionService())
       ->revokeWrapsForMembership($businessId, $targetUUID, 'membership_revoked');
 
-    $this->appendAuditEvent($businessId, 'relationship.revoked', $actorUUID, [
+    $this->appendAuditEvent($businessId, 'connection.revoked', $actorUUID, [
       'target_user_uuid' => $targetUUID,
       'revoked_wrap_count' => self::scalarInt($wrapRevocation['data']['revoked_wrap_count'] ?? 0),
     ]);
 
-    return $this->ok('Relationship revoked.', [
+    return $this->ok('Connection revoked.', [
       'business_id' => $businessId,
       'user_uuid' => $targetUUID,
       'revoked_wrap_count' => self::scalarInt($wrapRevocation['data']['revoked_wrap_count'] ?? 0),
@@ -2065,7 +2299,7 @@ final class BusinessDiscoveryService
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
-  public function updateRelationshipRole(string $actorUUID, string $businessId, string $targetUUID, string $role): array
+  public function updateConnectionRole(string $actorUUID, string $businessId, string $targetUUID, string $role): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $businessId);
     if (null !== $gate) {
@@ -2077,7 +2311,7 @@ final class BusinessDiscoveryService
     }
 
     $targetRole = strtolower(trim($role));
-    if ($targetRole === '' || !isset(self::VALID_ORG_ROLES[$targetRole])) {
+    if ($targetRole === '' || !isset(self::VALID_BUSINESS_ROLES[$targetRole])) {
       return $this->fail(Strings::i18n('BUSINESSES_API_INVALID_BUSINESS_ROLE'));
     }
 
@@ -2086,17 +2320,17 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_BUSINESS_NOT_FOUND'));
     }
 
-    $relationship = $this->relationship($businessId, $targetUUID);
-    if ([] === $relationship) {
-      return $this->fail(Strings::i18n('BUSINESSES_API_RELATIONSHIP_NOT_FOUND'));
+    $connection = $this->connection($businessId, $targetUUID);
+    if ([] === $connection) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_CONNECTION_NOT_FOUND'));
     }
 
-    $actorRelationship = $this->relationship($businessId, $actorUUID);
+    $actorConnection = $this->connection($businessId, $actorUUID);
     $actorIsOwner = (string) ($business['owner_uuid'] ?? '') === $actorUUID;
     $actorRole = $actorIsOwner
       ? 'owner'
-      : strtolower(trim((string) ($actorRelationship['role'] ?? '')));
-    $currentTargetRole = strtolower(trim((string) ($relationship['role'] ?? '')));
+      : strtolower(trim((string) ($actorConnection['role'] ?? '')));
+    $currentTargetRole = strtolower(trim((string) ($connection['role'] ?? '')));
 
     if (!$actorIsOwner && $actorRole === 'coordinator') {
       if ((string) ($business['owner_uuid'] ?? '') === $targetUUID || $currentTargetRole === 'owner') {
@@ -2112,7 +2346,7 @@ final class BusinessDiscoveryService
       }
     }
 
-    $status = (string) ($relationship['status'] ?? '');
+    $status = (string) ($connection['status'] ?? '');
     if ($status !== 'active' && $status !== 'pending') {
       return $this->fail(Strings::i18n('BUSINESSES_API_ONLY_ACTIVE_OR_PENDING_MEMBERSHIPS_CAN_BE_UPDATED'));
     }
@@ -2132,20 +2366,20 @@ final class BusinessDiscoveryService
       $scopeCSV = $preset['scopes'];
     }
 
-    $this->setRelationship($businessId, $targetUUID, [
+    $this->setConnection($businessId, $targetUUID, [
       'role' => $targetRole,
       'scopes' => $scopeCSV,
       'updated_by' => $actorUUID,
       'role_updated_at' => date('c'),
     ]);
 
-    $this->appendAuditEvent($businessId, 'relationship.role_updated', $actorUUID, [
+    $this->appendAuditEvent($businessId, 'connection.role_updated', $actorUUID, [
       'target_user_uuid' => $targetUUID,
       'role' => $targetRole,
       'scopes' => $scopeCSV,
     ]);
 
-    return $this->ok('Relationship role updated.', [
+    return $this->ok('Connection role updated.', [
       'business_id' => $businessId,
       'user_uuid' => $targetUUID,
       'role' => $targetRole,
@@ -2157,7 +2391,7 @@ final class BusinessDiscoveryService
    * Allow a member to voluntarily leave an business.
    *
    * Owners must transfer ownership before leaving. Triggers DEK-wrap
-   * revocation for the departing member before removing the relationship.
+   * revocation for the departing member before removing the connection.
    *
    * @param string $userUUID Authenticated user UUID.
    * @param string $businessId    Business ID to leave.
@@ -2179,27 +2413,78 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_BUSINESS_OWNER_MUST_TRANSFER_OWNERSHIP_BEFORE_LEAVING'));
     }
 
-    if ([] === $this->relationship($businessId, $userUUID)) {
-      return $this->fail(Strings::i18n('BUSINESSES_API_NO_ACTIVE_RELATIONSHIP_FOUND'));
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_NO_ACTIVE_CONNECTION_FOUND'));
     }
 
-    $this->setRelationship($businessId, $userUUID, [
+    $timestamp = date('c');
+    $previousStatus = (string) ($connection['status'] ?? '');
+    $pendingRequestId = '';
+
+    if ($previousStatus === self::MEMBERSHIP_STATE_PENDING) {
+      $activeKey = $this->accessRequestActiveKey($businessId, $userUUID);
+      $activeRequestId = (string) Database::get($activeKey);
+      $candidateRequestIds = [];
+      if ($activeRequestId !== '') {
+        $candidateRequestIds[] = $activeRequestId;
+      }
+      foreach (Database::smembers(Keys::BUSINESS_ACCESS_REQUEST_REQUESTER . ':' . $userUUID) as $requestId) {
+        $requestId = trim((string) $requestId);
+        if ($requestId !== '' && !in_array($requestId, $candidateRequestIds, true)) {
+          $candidateRequestIds[] = $requestId;
+        }
+      }
+
+      foreach ($candidateRequestIds as $requestId) {
+        $request = Database::hgetall(Keys::BUSINESS_ACCESS_REQUEST . ':' . $requestId);
+        if (
+          [] !== $request
+          && (string) ($request['business_id'] ?? '') === $businessId
+          && (string) ($request['requester_uuid'] ?? '') === $userUUID
+          && (string) ($request['status'] ?? '') === self::MEMBERSHIP_STATE_PENDING
+        ) {
+          $pendingRequestId = $requestId;
+          break;
+        }
+      }
+
+      Database::unlink($activeKey);
+
+      if ($pendingRequestId !== '') {
+        Database::hset(Keys::BUSINESS_ACCESS_REQUEST . ':' . $pendingRequestId, [
+          'status' => 'withdrawn',
+          'withdrawn_by' => $userUUID,
+          'withdrawn_at' => $timestamp,
+        ]);
+        BusinessDashboardMetrics::recordPendingRequestResolved($businessId);
+        $this->incrementAccessRequestTelemetry('withdrawn');
+      }
+    }
+
+    $this->setConnection($businessId, $userUUID, [
       'status'       => 'withdrawn',
-      'withdrawn_at' => date('c'),
+      'withdrawn_at' => $timestamp,
     ]);
 
     $wrapRevocation = (new BusinessEncryptionService())
       ->revokeWrapsForMembership($businessId, $userUUID, 'membership_withdrawn');
 
-    $this->appendAuditEvent($businessId, 'relationship.withdrawn', $userUUID, [
+    $this->appendAuditEvent($businessId, 'connection.withdrawn', $userUUID, [
       'user_uuid' => $userUUID,
+      'request_id' => $pendingRequestId,
+      'previous_status' => $previousStatus,
       'revoked_wrap_count' => self::scalarInt($wrapRevocation['data']['revoked_wrap_count'] ?? 0),
     ]);
 
-    return $this->ok('You have left the business.', [
-      'business_id' => $businessId,
-      'revoked_wrap_count' => self::scalarInt($wrapRevocation['data']['revoked_wrap_count'] ?? 0),
-    ]);
+    return $this->ok(
+      $pendingRequestId !== '' ? 'Membership request canceled.' : 'You have left the business.',
+      [
+        'business_id' => $businessId,
+        'request_id' => $pendingRequestId,
+        'revoked_wrap_count' => self::scalarInt($wrapRevocation['data']['revoked_wrap_count'] ?? 0),
+      ]
+    );
   }
 
   /**
@@ -2239,7 +2524,7 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * TODO: Document businessSiteOwnershipLabel.
+   * Business site ownership label.
    */
   public function businessSiteOwnershipLabel(string $ownershipScope): string
   {
@@ -2607,7 +2892,10 @@ final class BusinessDiscoveryService
     $siteHash = Database::hgetall($siteKey);
     $siteHash['id'] = $siteId;
 
-    $settingsResult = $this->getBusinessSiteSettings($actorUUID, $businessId, $siteOwnerUUID, $siteId);
+    $canUsePlanning = $this->canUseBusinessPlanning($businessId, $actorUUID);
+    $settingsResult = $canUsePlanning
+      ? $this->getBusinessSiteSettings($actorUUID, $businessId, $siteOwnerUUID, $siteId)
+      : $this->fail(Strings::i18n('SITES_BUSINESS_PLANNING_LOCKED'));
     $settings = $settingsResult['success']
       ? (is_array($settingsResult['data']['settings'] ?? null) ? $settingsResult['data']['settings'] : [])
       : [];
@@ -2629,7 +2917,8 @@ final class BusinessDiscoveryService
         'owner_uuid' => $businessOwnerUUID,
       ],
       'can_write_site' => $this->canMutateSitesForOwner($actorUUID, $siteOwnerUUID),
-      'can_write_planning' => $this->canWriteBusinessSites($businessId, $actorUUID),
+      'can_view_planning' => $canUsePlanning,
+      'can_write_planning' => $canUsePlanning,
     ]);
   }
 
@@ -2859,10 +3148,10 @@ final class BusinessDiscoveryService
    * Returns org planning context for a site owned by the current user.
    *
    * Searches all orgs the actor belongs to for one where (a) this site is
-   * registered and (b) the actor has owner or admin privileges.
+   * registered and (b) the actor can use Business Planning.
    * Used by the Sites page to surface per-site org planning controls.
    *
-   * @return array{org_id: string, org_name: string, owner_uuid: string, settings: array<string, mixed>}|null
+   * @return array{org_id: string, org_name: string, owner_uuid: string, can_view_planning: bool, can_write_planning: bool, settings: array<string, mixed>}|null
    */
   public function getOrgContextForSite(string $actorUUID, string $siteId): ?array
   {
@@ -2890,8 +3179,8 @@ final class BusinessDiscoveryService
 
       $business  = Database::hgetall(Keys::BUSINESS . ':' . $businessId);
       $isOrgOwner = (string) ($business['owner_uuid'] ?? '') === $actorUUID;
-      $relationship = $isOrgOwner ? ['role' => 'owner'] : $this->relationship($businessId, $actorUUID);
-      $role = strtolower(trim((string) ($relationship['role'] ?? '')));
+      $connection = $isOrgOwner ? ['role' => 'owner'] : $this->connection($businessId, $actorUUID);
+      $role = strtolower(trim((string) ($connection['role'] ?? '')));
 
       Lens::add('getOrgContextForSite:role', [
         'org_id'      => $businessId,
@@ -2899,7 +3188,8 @@ final class BusinessDiscoveryService
         'role'        => $role,
       ]);
 
-      if (!$isOrgOwner && !in_array($role, ['owner', 'admin', 'coordinator'], true)) {
+      $canUsePlanning = $this->canUseBusinessPlanning($businessId, $actorUUID);
+      if (!$canUsePlanning) {
         continue;
       }
 
@@ -2930,6 +3220,8 @@ final class BusinessDiscoveryService
         'org_id'     => $businessId,
         'org_name'   => (string) ($business['name'] ?? ''),
         'owner_uuid' => $actorUUID,
+        'can_view_planning' => true,
+        'can_write_planning' => true,
         'settings'   => $settings,
       ];
     }
@@ -3008,13 +3300,13 @@ final class BusinessDiscoveryService
     $membersProcessed = 0;
 
     foreach ($memberUUIDs as $memberUUID) {
-      $relationshipKey = Keys::BUSINESS_RELATIONSHIP . ':' . $businessId . ':' . $memberUUID;
-      if (!Database::exists($relationshipKey)) {
+      $connectionKey = Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $memberUUID;
+      if (!Database::exists($connectionKey)) {
         continue;
       }
 
-      $relationshipStatus = strtolower(trim((string) Database::hget($relationshipKey, 'status')));
-      if ($relationshipStatus !== '' && $relationshipStatus !== 'active') {
+      $connectionStatus = strtolower(trim((string) Database::hget($connectionKey, 'status')));
+      if ($connectionStatus !== '' && $connectionStatus !== 'active') {
         continue;
       }
 
@@ -3118,7 +3410,7 @@ final class BusinessDiscoveryService
    * Returns org-only site settings for a specific site within an business.
    *
    * Key: business:site_settings:{orgId}:{siteOwnerUUID}:{siteId}
-   * Access: org owner or coordinator only.
+   * Access: PayCal Business tier, owner, or coordinator/manager role.
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
@@ -3131,6 +3423,10 @@ final class BusinessDiscoveryService
     $siteRef = InputSanitizer::sanitizeString($siteOwnerUUID) . ':' . InputSanitizer::sanitizeString($siteId);
     if (!Database::sismember(Keys::BUSINESS_SITE . ':' . $businessId, $siteRef)) {
       return $this->fail(Strings::i18n('BUSINESSES_API_SITE_IS_NOT_LINKED_TO_THIS_BUSINESS'));
+    }
+
+    if (!$this->canUseBusinessPlanning($businessId, $actorUUID)) {
+      return $this->fail(Strings::i18n('SITES_BUSINESS_PLANNING_LOCKED'));
     }
 
     $key      = Keys::BUSINESS_SITE_SETTINGS . ':' . $businessId . ':' . $siteRef;
@@ -3156,8 +3452,8 @@ final class BusinessDiscoveryService
   /**
    * Persists org-only site settings for a specific site within an business.
    *
-   * Only org owners and coordinators may call this. The site must already be
-   * linked to the business. All values are strings; numeric fields are
+   * The site must already be linked to the business and the actor must be
+   * eligible for Business Planning. All values are strings; numeric fields are
    * range-clamped server-side.
    *
    * @param  array<string, mixed> $input
@@ -3165,13 +3461,17 @@ final class BusinessDiscoveryService
    */
   public function updateBusinessSiteSettings(string $actorUUID, string $businessId, string $siteOwnerUUID, string $siteId, array $input): array
   {
-    if (!$this->canWriteBusinessSites($businessId, $actorUUID)) {
-      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_SITE_SETTINGS_FOR_T'));
+    if (!$this->canReadBusinessSites($businessId, $actorUUID)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_SITE_SETTINGS_FOR_THI'));
     }
 
     $siteRef = InputSanitizer::sanitizeString($siteOwnerUUID) . ':' . InputSanitizer::sanitizeString($siteId);
     if (!Database::sismember(Keys::BUSINESS_SITE . ':' . $businessId, $siteRef)) {
       return $this->fail(Strings::i18n('BUSINESSES_API_SITE_IS_NOT_LINKED_TO_THIS_BUSINESS'));
+    }
+
+    if (!$this->canUseBusinessPlanning($businessId, $actorUUID)) {
+      return $this->fail(Strings::i18n('SITES_BUSINESS_PLANNING_LOCKED'));
     }
 
     $normalized = [];
@@ -3250,6 +3550,181 @@ final class BusinessDiscoveryService
   }
 
   /**
+   * Restore an archived linked site and any archived work entries for it.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
+  public function restoreBusinessSite(string $actorUUID, string $businessId, string $siteOwnerUUID, string $siteId): array
+  {
+    if (!$this->canWriteBusinessSites($businessId, $actorUUID)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_SITE_SETTINGS_FOR_T'));
+    }
+
+    $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $businessId);
+    if (null !== $gate) {
+      return $gate;
+    }
+
+    $siteOwnerUUID = trim(InputSanitizer::sanitizeString($siteOwnerUUID));
+    $siteId = trim(InputSanitizer::sanitizeString($siteId));
+    if ($siteOwnerUUID === '' || $siteId === '') {
+      return $this->fail(Strings::i18n('BUSINESSES_API_SITE_REFERENCE_IS_REQUIRED'));
+    }
+
+    if (!$this->canMutateSitesForOwner($actorUUID, $siteOwnerUUID)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_SITE_SETTINGS_FOR_T'));
+    }
+
+    $siteRef = $siteOwnerUUID . ':' . $siteId;
+    if (!Database::sismember(Keys::BUSINESS_SITE . ':' . $businessId, $siteRef)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_SITE_IS_NOT_LINKED_TO_THIS_BUSINESS'));
+    }
+
+    $siteKey = Keys::SITE . ':' . $siteOwnerUUID . ':' . $siteId;
+    $site = Database::hgetall($siteKey);
+    if ($site === []) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_SITE_NOT_FOUND'));
+    }
+
+    $site['status'] = SiteStatus::ACTIVE->value;
+    if (!(new SitesService())->updateSingle($siteOwnerUUID, $siteId, $site)) {
+      return $this->fail(Strings::i18n('SITES_RESTORE_FAILED'));
+    }
+
+    Database::hset(Keys::BUSINESS_SITE_SETTINGS . ':' . $businessId . ':' . $siteRef, [
+      'site_status' => SiteStatus::ACTIVE->value,
+    ]);
+    BusinessWorkspaceCache::invalidate($businessId);
+    $this->appendAuditEvent($businessId, 'site.restored', $actorUUID, [
+      'site_owner_uuid' => $siteOwnerUUID,
+      'site_id' => $siteId,
+    ]);
+
+    return $this->ok(Strings::i18n('SITES_RESTORED'), [
+      'business_id' => $businessId,
+      'site_owner_uuid' => $siteOwnerUUID,
+      'site_id' => $siteId,
+    ]);
+  }
+
+  /**
+   * Archive a business-linked site and keep it attached to the business archive list.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
+  public function archiveBusinessSite(string $actorUUID, string $businessId, string $siteOwnerUUID, string $siteId): array
+  {
+    if (!$this->canWriteBusinessSites($businessId, $actorUUID)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_SITE_SETTINGS_FOR_T'));
+    }
+
+    $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $businessId);
+    if (null !== $gate) {
+      return $gate;
+    }
+
+    $siteOwnerUUID = trim(InputSanitizer::sanitizeString($siteOwnerUUID));
+    $siteId = trim(InputSanitizer::sanitizeString($siteId));
+    if ($siteOwnerUUID === '' || $siteId === '') {
+      return $this->fail(Strings::i18n('BUSINESSES_API_SITE_REFERENCE_IS_REQUIRED'));
+    }
+
+    if (!$this->canMutateSitesForOwner($actorUUID, $siteOwnerUUID)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_SITE_SETTINGS_FOR_T'));
+    }
+
+    $siteRef = $siteOwnerUUID . ':' . $siteId;
+    if (!Database::sismember(Keys::BUSINESS_SITE . ':' . $businessId, $siteRef)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_SITE_IS_NOT_LINKED_TO_THIS_BUSINESS'));
+    }
+
+    if (!Database::exists(Keys::SITE . ':' . $siteOwnerUUID . ':' . $siteId)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_SITE_NOT_FOUND'));
+    }
+
+    $result = (new SitesService())->delete($siteOwnerUUID, $siteId);
+    if (!$result['success']) {
+      return $this->fail(Strings::i18n('SITES_ERROR_DELETING'), [
+        'locked_entries' => (int) $result['locked_entries'],
+      ]);
+    }
+
+    Database::hset(Keys::BUSINESS_SITE_SETTINGS . ':' . $businessId . ':' . $siteRef, [
+      'site_status' => SiteStatus::ARCHIVED->value,
+    ]);
+    BusinessWorkspaceCache::invalidate($businessId);
+    $this->appendAuditEvent($businessId, 'site.archived', $actorUUID, [
+      'site_owner_uuid' => $siteOwnerUUID,
+      'site_id' => $siteId,
+      'archived_count' => (int) $result['archived_count'],
+    ]);
+
+    return $this->ok(Strings::i18n('SITES_ARCHIVED_SHORT'), [
+      'business_id' => $businessId,
+      'site_owner_uuid' => $siteOwnerUUID,
+      'site_id' => $siteId,
+      'archived_count' => (int) $result['archived_count'],
+    ]);
+  }
+
+  /**
+   * Permanently delete an archived business-linked site.
+   *
+   * @return array{success: bool, message: string, data: array<string, mixed>}
+   */
+  public function permanentDeleteBusinessSite(string $actorUUID, string $businessId, string $siteOwnerUUID, string $siteId): array
+  {
+    if (!$this->canWriteBusinessSites($businessId, $actorUUID)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_SITE_SETTINGS_FOR_T'));
+    }
+
+    $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $businessId);
+    if (null !== $gate) {
+      return $gate;
+    }
+
+    $siteOwnerUUID = trim(InputSanitizer::sanitizeString($siteOwnerUUID));
+    $siteId = trim(InputSanitizer::sanitizeString($siteId));
+    if ($siteOwnerUUID === '' || $siteId === '') {
+      return $this->fail(Strings::i18n('BUSINESSES_API_SITE_REFERENCE_IS_REQUIRED'));
+    }
+
+    if (!$this->canMutateSitesForOwner($actorUUID, $siteOwnerUUID)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_UPDATE_SITE_SETTINGS_FOR_T'));
+    }
+
+    $siteRef = $siteOwnerUUID . ':' . $siteId;
+    if (!Database::sismember(Keys::BUSINESS_SITE . ':' . $businessId, $siteRef)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_SITE_IS_NOT_LINKED_TO_THIS_BUSINESS'));
+    }
+
+    if (!Database::exists(Keys::SITE . ':' . $siteOwnerUUID . ':' . $siteId)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_SITE_NOT_FOUND'));
+    }
+
+    $result = (new SitesService())->permanentDelete($siteOwnerUUID, $siteId);
+    if (!$result['success']) {
+      return $this->fail(Strings::i18n('SITES_ERROR_DELETING'), [
+        'locked_entries' => (int) $result['locked_entries'],
+      ]);
+    }
+
+    BusinessWorkspaceCache::invalidate($businessId);
+    $this->appendAuditEvent($businessId, 'site.permanent_deleted', $actorUUID, [
+      'site_owner_uuid' => $siteOwnerUUID,
+      'site_id' => $siteId,
+      'deleted_work_count' => (int) $result['deleted_work_count'],
+    ]);
+
+    return $this->ok(Strings::i18n('SITES_PERMANENTLY_DELETED_SHORT'), [
+      'business_id' => $businessId,
+      'site_owner_uuid' => $siteOwnerUUID,
+      'site_id' => $siteId,
+      'deleted_work_count' => (int) $result['deleted_work_count'],
+    ]);
+  }
+
+  /**
    * Handles canMutateSitesForOwner operation.
    */
   public function canMutateSitesForOwner(string $actorUUID, string $ownerUUID): bool
@@ -3281,12 +3756,12 @@ final class BusinessDiscoveryService
         return true;
       }
 
-      $relationship = $this->relationship($businessId, $actorUUID);
-      if ([] === $relationship || ($relationship['status'] ?? '') !== 'active') {
+      $connection = $this->connection($businessId, $actorUUID);
+      if ([] === $connection || ($connection['status'] ?? '') !== 'active') {
         continue;
       }
 
-      $scopeSet = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
+      $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
       if (isset($scopeSet['sites.write']) || isset($scopeSet['all'])) {
         return true;
       }
@@ -3309,19 +3784,19 @@ final class BusinessDiscoveryService
     }
 
     if ($businessId === '') {
-      // Without explicit business context, keep legacy self-only write behavior.
+      // Without explicit business context, only self-owned work may be changed.
       return $actorUUID === $ownerUUID;
     }
 
-    $actorRelationship = $this->relationship($businessId, $actorUUID);
-    $ownerRelationship = $this->relationship($businessId, $ownerUUID);
+    $actorConnection = $this->connection($businessId, $actorUUID);
+    $ownerConnection = $this->connection($businessId, $ownerUUID);
 
-    if ([] === $actorRelationship || [] === $ownerRelationship) {
+    if ([] === $actorConnection || [] === $ownerConnection) {
       return false;
     }
 
-    if (($actorRelationship['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE
-      || ($ownerRelationship['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE) {
+    if (($actorConnection['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE
+      || ($ownerConnection['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE) {
       return false;
     }
 
@@ -3329,7 +3804,7 @@ final class BusinessDiscoveryService
       return true;
     }
 
-    $scopeSet = $this->scopeMap((string) ($actorRelationship['scopes'] ?? ''));
+    $scopeSet = $this->scopeMap((string) ($actorConnection['scopes'] ?? ''));
 
     if (isset($scopeSet['all'])) {
       return true;
@@ -3339,7 +3814,7 @@ final class BusinessDiscoveryService
       return false;
     }
 
-    if (isset($scopeSet['work.scope.org'])) {
+    if (isset($scopeSet['work.scope.business'])) {
       return true;
     }
 
@@ -3347,14 +3822,13 @@ final class BusinessDiscoveryService
       return $actorUUID === $ownerUUID;
     }
 
-    // Legacy bare work.write grants org-wide mutation until relationship scopes are resaved.
-    return true;
+    return false;
   }
 
   /**
    * Return businesses, sites, and match candidates for the user's discovery view.
    *
-   * Aggregates personal org, shared org memberships, linked sites, and any
+   * Aggregates personal business, shared business memberships, linked sites, and any
    * discoverable businesses matching the user's verified domain.
    *
    * @param string $userUUID Authenticated user UUID.
@@ -3460,8 +3934,8 @@ final class BusinessDiscoveryService
 
     $ownerUUID = (string) ($business['owner_uuid'] ?? '');
     $owner = $ownerUUID !== '' ? UserRepository::getByUUID($ownerUUID) : null;
-    $ownerRelationship = $ownerUUID !== '' ? $this->relationship($businessId, $ownerUUID) : [];
-    $ownerSince = (string) ($ownerRelationship['owner_since'] ?? $ownerRelationship['accepted_at'] ?? $ownerRelationship['created_at'] ?? '');
+    $ownerConnection = $ownerUUID !== '' ? $this->connection($businessId, $ownerUUID) : [];
+    $ownerSince = (string) ($ownerConnection['owner_since'] ?? $ownerConnection['accepted_at'] ?? $ownerConnection['created_at'] ?? '');
 
     return $this->ok('Business settings retrieved.', [
       'business_id' => $businessId,
@@ -3563,16 +4037,16 @@ final class BusinessDiscoveryService
     if (array_key_exists('role', $settings)) {
       $targetRole = is_scalar($settings['role']) ? strtolower(trim((string) $settings['role'])) : '';
       if ($targetRole !== '') {
-        if (!isset(self::VALID_ORG_ROLES[$targetRole])) {
+        if (!isset(self::VALID_BUSINESS_ROLES[$targetRole])) {
           return $this->fail(Strings::i18n('BUSINESSES_API_ROLE_FIELD_INVALID'));
         }
 
-        $relationship = $this->relationship($businessId, $actorUUID);
-        if ([] === $relationship) {
-          return $this->fail(Strings::i18n('BUSINESSES_API_MEMBERSHIP_RELATIONSHIP_NOT_FOUND_FOR_CURRENT_USER'));
+        $connection = $this->connection($businessId, $actorUUID);
+        if ([] === $connection) {
+          return $this->fail(Strings::i18n('BUSINESSES_API_MEMBERSHIP_CONNECTION_NOT_FOUND_FOR_CURRENT_USER'));
         }
 
-        $currentRole = strtolower(trim((string) ($relationship['role'] ?? '')));
+        $currentRole = strtolower(trim((string) ($connection['role'] ?? '')));
 
         if ((string) ($business['owner_uuid'] ?? '') === $actorUUID && $targetRole !== 'owner') {
           return $this->fail(Strings::i18n('BUSINESSES_API_CANNOT_CHANGE_OWNER_ROLE'));
@@ -3586,7 +4060,7 @@ final class BusinessDiscoveryService
           ? 'all'
           : implode(',', self::ROLE_SCOPE_PRESETS[$targetRole]);
 
-        $this->setRelationship($businessId, $actorUUID, [
+        $this->setConnection($businessId, $actorUUID, [
           'role' => $targetRole,
           'scopes' => $scopeCSV,
           'updated_by' => $actorUUID,
@@ -3705,6 +4179,9 @@ final class BusinessDiscoveryService
       'contact_email' => 160,
       'contact_phone' => 32,
       'website' => 180,
+      'indigenous_owned' => 1,
+      'resident_on_reserve' => 1,
+      'reserve_name' => 120,
       'address_line1' => 120,
       'address_line2' => 120,
       'address_city' => 80,
@@ -3759,6 +4236,12 @@ final class BusinessDiscoveryService
     foreach ($extendedSettingTextLimits as $field => $maxLen) {
       if (array_key_exists($field, $settings)) {
         $normalized[$field] = $this->normalizeSettingText($settings[$field], $maxLen);
+      }
+    }
+
+    foreach (['indigenous_owned', 'resident_on_reserve'] as $flagField) {
+      if (array_key_exists($flagField, $settings)) {
+        $normalized[$flagField] = $this->isTruthySettingValue($settings[$flagField]) ? '1' : '0';
       }
     }
 
@@ -3833,7 +4316,7 @@ final class BusinessDiscoveryService
    * Transfer business ownership from the current owner to an active member.
    *
    * Validates that the target is an active member (not already the owner), then
-   * atomically updates both the org record and relationship roles.
+   * atomically updates both the org record and connection roles.
    *
    * @param string $actorUUID  Current owner UUID (or admin override).
    * @param string $businessId      Business ID.
@@ -3882,15 +4365,15 @@ final class BusinessDiscoveryService
       return $domainGate;
     }
 
-    $targetRelationship = $this->relationship($businessId, $targetUUID);
-    if ([] === $targetRelationship || (string) ($targetRelationship['status'] ?? '') !== 'active') {
+    $targetConnection = $this->connection($businessId, $targetUUID);
+    if ([] === $targetConnection || (string) ($targetConnection['status'] ?? '') !== 'active') {
       return $this->fail(Strings::i18n('BUSINESSES_API_OWNERSHIP_CAN_ONLY_BE_TRANSFERRED_TO_AN_EXISTING_ACTIVE'));
     }
 
     $timestamp = date('c');
     $previousOwnerScopes = implode(',', self::ROLE_SCOPE_PRESETS['coordinator']);
 
-    $this->setRelationship($businessId, $actorUUID, [
+    $this->setConnection($businessId, $actorUUID, [
       'role' => 'coordinator',
       'status' => 'active',
       'scopes' => $previousOwnerScopes,
@@ -3898,7 +4381,7 @@ final class BusinessDiscoveryService
       'transferred_to' => $targetUUID,
     ]);
 
-    $this->setRelationship($businessId, $targetUUID, [
+    $this->setConnection($businessId, $targetUUID, [
       'role' => 'owner',
       'status' => 'active',
       'scopes' => 'all',
@@ -3938,9 +4421,9 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_BUSINESS_NOT_FOUND'));
     }
 
-    $relationship = $this->relationship($businessId, $actorUUID);
-    if ([] === $relationship) {
-      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_AN_BUSINESS_RELATIONSHIP'));
+    $connection = $this->connection($businessId, $actorUUID);
+    if ([] === $connection) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_A_BUSINESS_CONNECTION'));
     }
 
     $canViewAccessMetrics = $this->canManageAccess($businessId, $actorUUID)
@@ -3975,24 +4458,24 @@ final class BusinessDiscoveryService
         business_id: $businessId,
         member_count: 0,
         site_count: 0,
-        relationships: [],
+        connections: [],
         members: [],
       );
     }
 
-    $relationshipHashes = Database::pipelineHgetall(
-      Database::scanKeys(Keys::BUSINESS_RELATIONSHIP . ':' . $businessId . ':*'),
+    $connectionHashes = Database::pipelineHgetall(
+      Database::scanKeys(Keys::BUSINESS_CONNECTION . ':' . $businessId . ':*'),
     );
 
     $memberUUIDs = [];
     $latestUpdatedAt = '';
-    foreach ($relationshipHashes as $relationship) {
-      $candidateUUID = trim((string) ($relationship['user_uuid'] ?? ''));
+    foreach ($connectionHashes as $connection) {
+      $candidateUUID = trim((string) ($connection['user_uuid'] ?? ''));
       if ($candidateUUID !== '') {
         $memberUUIDs[] = $candidateUUID;
       }
 
-      $updatedAt = trim((string) ($relationship['updated_at'] ?? ''));
+      $updatedAt = trim((string) ($connection['updated_at'] ?? ''));
       if ($updatedAt !== '' && strcmp($updatedAt, $latestUpdatedAt) > 0) {
         $latestUpdatedAt = $updatedAt;
       }
@@ -4000,33 +4483,33 @@ final class BusinessDiscoveryService
 
     $profiles = UserRepository::findMany($memberUUIDs);
 
-    $relationships = [];
+    $connections = [];
     $members = [];
 
-    foreach ($relationshipHashes as $relationship) {
-      if ($relationship === []) {
+    foreach ($connectionHashes as $connection) {
+      if ($connection === []) {
         continue;
       }
 
-      $role = strtolower(trim((string) ($relationship['role'] ?? '')));
-      $memberUUID = trim((string) ($relationship['user_uuid'] ?? ''));
+      $role = strtolower(trim((string) ($connection['role'] ?? '')));
+      $memberUUID = trim((string) ($connection['user_uuid'] ?? ''));
       if ($memberUUID === '') {
         continue;
       }
 
-      $relationshipEntry = [
+      $connectionEntry = [
         'user_uuid' => $memberUUID,
         'role' => $role,
-        'status' => (string) ($relationship['status'] ?? ''),
-        'scopes' => $this->scopeList((string) ($relationship['scopes'] ?? '')),
-        'created_at' => (string) ($relationship['created_at'] ?? ''),
-        'accepted_at' => (string) ($relationship['accepted_at'] ?? ''),
-        'owner_since' => (string) ($relationship['owner_since'] ?? ''),
-        'updated_at' => (string) ($relationship['updated_at'] ?? ''),
+        'status' => (string) ($connection['status'] ?? ''),
+        'scopes' => $this->scopeList((string) ($connection['scopes'] ?? '')),
+        'created_at' => (string) ($connection['created_at'] ?? ''),
+        'accepted_at' => (string) ($connection['accepted_at'] ?? ''),
+        'owner_since' => (string) ($connection['owner_since'] ?? ''),
+        'updated_at' => (string) ($connection['updated_at'] ?? ''),
       ];
-      $relationships[] = $relationshipEntry;
+      $connections[] = $connectionEntry;
 
-      $status = (string) ($relationship['status'] ?? '');
+      $status = (string) ($connection['status'] ?? '');
       $member = $profiles[$memberUUID] ?? null;
       if ($status === self::MEMBERSHIP_STATE_ACTIVE && $member instanceof User) {
         $members[] = [
@@ -4036,16 +4519,16 @@ final class BusinessDiscoveryService
           'email' => $member->email,
           'role' => $role,
           'status' => $status,
-          'scopes' => $relationshipEntry['scopes'],
-          'created_at' => (string) ($relationship['created_at'] ?? ''),
-          'accepted_at' => (string) ($relationship['accepted_at'] ?? ''),
-          'owner_since' => (string) ($relationship['owner_since'] ?? ''),
-          'updated_at' => (string) ($relationship['updated_at'] ?? ''),
+          'scopes' => $connectionEntry['scopes'],
+          'created_at' => (string) ($connection['created_at'] ?? ''),
+          'accepted_at' => (string) ($connection['accepted_at'] ?? ''),
+          'owner_since' => (string) ($connection['owner_since'] ?? ''),
+          'updated_at' => (string) ($connection['updated_at'] ?? ''),
         ];
       }
     }
 
-    usort($relationships, static function (array $a, array $b): int {
+    usort($connections, static function (array $a, array $b): int {
       return strcmp((string) $a['user_uuid'], (string) $b['user_uuid']);
     });
 
@@ -4074,7 +4557,7 @@ final class BusinessDiscoveryService
       business_id: $businessId,
       member_count: max(count($members), $dashboardMetrics['members']),
       site_count: $dashboardMetrics['sites'],
-      relationships: $relationships,
+      connections: $connections,
       members: $members,
       pending_invites: $dashboardMetrics['pending_invites'],
       pending_requests: $dashboardMetrics['pending_requests'],
@@ -4083,9 +4566,9 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * List all member relationships and their roles for an business.
+   * List all member connections and their roles for an business.
    *
-   * Returns active, pending, and revoked relationships with hydrated user
+   * Returns active, pending, and revoked connections with hydrated user
    * profile details. Requires manage-access or manage-business permission.
    *
    * @param string $actorUUID Authenticated actor UUID.
@@ -4093,7 +4576,7 @@ final class BusinessDiscoveryService
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
-  public function listRelationships(string $actorUUID, string $businessId): array
+  public function listConnections(string $actorUUID, string $businessId): array
   {
     $gate = $this->requireAdminPreviewOrSelfOrg($actorUUID, $businessId);
     if (null !== $gate) {
@@ -4101,7 +4584,7 @@ final class BusinessDiscoveryService
     }
 
     if (!$this->canManageAccess($businessId, $actorUUID) && !$this->canManageBusiness($businessId, $actorUUID)) {
-      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_BUSINESS_RELATIONSHIP'));
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_BUSINESS_CONNECTION'));
     }
 
     $business = Database::hgetall(Keys::BUSINESS . ':' . $businessId);
@@ -4114,11 +4597,11 @@ final class BusinessDiscoveryService
       fn (): BusinessSnapshot => $this->buildBusinessSnapshot($businessId, true),
     );
 
-    return $this->ok('Business relationships retrieved.', [
+    return $this->ok('Connections retrieved.', [
       'business_id' => $businessId,
       'snapshot_version' => $snapshot->snapshot_version,
       'snapshot' => $snapshot->toArray(),
-      'relationships' => $snapshot->relationships,
+      'connections' => $snapshot->connections,
       'members' => $snapshot->members,
       'member_count' => $snapshot->member_count,
       'site_count' => $snapshot->site_count,
@@ -4197,13 +4680,13 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_BUSINESS_NOT_FOUND'));
     }
 
-    $relationship = $this->relationship($businessId, $actorUUID);
-    if ([] === $relationship) {
-      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_AN_BUSINESS_RELATIONSHIP'));
+    $connection = $this->connection($businessId, $actorUUID);
+    if ([] === $connection) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_A_BUSINESS_CONNECTION'));
     }
 
-    $relationshipStatus = (string) ($relationship['status'] ?? '');
-    if ($relationshipStatus !== 'active' && $relationshipStatus !== 'pending') {
+    $connectionStatus = (string) ($connection['status'] ?? '');
+    if ($connectionStatus !== 'active' && $connectionStatus !== 'pending') {
       return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_BUSINESS_AUDIT_TIMELI'));
     }
 
@@ -4260,27 +4743,27 @@ final class BusinessDiscoveryService
       return true;
     }
 
-    $relationship = $this->relationship($businessId, $userUUID);
-    if ([] === $relationship) {
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection) {
       return false;
     }
 
-    if (($relationship['status'] ?? '') !== 'active') {
+    if (($connection['status'] ?? '') !== 'active') {
       return false;
     }
 
-    if (($relationship['role'] ?? '') === 'owner') {
+    if (($connection['role'] ?? '') === 'owner') {
       return true;
     }
 
-    $scopeSet = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
+    $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
 
-    return isset($scopeSet['org.settings.write']);
+    return isset($scopeSet['business.settings.write']);
   }
 
   /**
    * Check if the user can access shared business creation and management.
-   * Business tier grants access; admins and managers keep legacy elevated access.
+   * Business tier grants access; admins and managers keep system-level access.
    */
   private function canAccessPremiumFeatures(string $userUUID): bool
   {
@@ -4319,14 +4802,14 @@ final class BusinessDiscoveryService
 
     $isBusinessOwner = (string) ($business['owner_uuid'] ?? '') === $actorUUID;
 
-    $relationship = $this->relationship($businessId, $actorUUID);
-    $hasOrgRelationship = $relationship !== [] && in_array(
-      (string) ($relationship['status'] ?? ''),
+    $connection = $this->connection($businessId, $actorUUID);
+    $hasOrgConnection = $connection !== [] && in_array(
+      (string) ($connection['status'] ?? ''),
       [self::MEMBERSHIP_STATE_ACTIVE, self::MEMBERSHIP_STATE_PENDING, self::MEMBERSHIP_STATE_CONSENTED],
       true
     );
 
-    if ($this->canAccessPremiumFeatures($actorUUID) || $this->isSelfBusiness($business, $actorUUID) || $isBusinessOwner || $hasOrgRelationship) {
+    if ($this->canAccessPremiumFeatures($actorUUID) || $this->isSelfBusiness($business, $actorUUID) || $isBusinessOwner || $hasOrgConnection) {
       return null;
     }
 
@@ -4340,7 +4823,7 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * Count active members in an business (relationships with status 'active').
+   * Count active members in an business (connections with status 'active').
    *
    * @param string $businessId
    * @return int
@@ -4373,12 +4856,12 @@ final class BusinessDiscoveryService
       return true;
     }
 
-    $relationship = $this->relationship($businessId, $userUUID);
-    if ([] === $relationship || ($relationship['status'] ?? '') !== 'active') {
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection || ($connection['status'] ?? '') !== 'active') {
       return false;
     }
 
-    $scopeSet = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
+    $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
 
     return isset($scopeSet['access.manage']);
   }
@@ -4400,8 +4883,8 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_BUSINESS_NOT_FOUND'));
     }
 
-    $relationship = $this->relationship($businessId, $actorUUID);
-    $role = (string) ($relationship['role'] ?? '');
+    $connection = $this->connection($businessId, $actorUUID);
+    $role = (string) ($connection['role'] ?? '');
     $isOwner = (string) ($business['owner_uuid'] ?? '') === $actorUUID;
     $isOrgAdmin = $role === 'coordinator';
 
@@ -4796,12 +5279,12 @@ final class BusinessDiscoveryService
       return true;
     }
 
-    $relationship = $this->relationship($businessId, $userUUID);
-    if ([] === $relationship || ($relationship['status'] ?? '') !== 'active') {
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection || ($connection['status'] ?? '') !== 'active') {
       return false;
     }
 
-    $scopeSet = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
+    $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
 
     return isset($scopeSet['sites.read']) || isset($scopeSet['sites.write']) || isset($scopeSet['all']);
   }
@@ -4815,14 +5298,54 @@ final class BusinessDiscoveryService
       return true;
     }
 
-    $relationship = $this->relationship($businessId, $userUUID);
-    if ([] === $relationship || ($relationship['status'] ?? '') !== 'active') {
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection || ($connection['status'] ?? '') !== 'active') {
       return false;
     }
 
-    $scopeSet = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
+    $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
 
     return isset($scopeSet['sites.write']) || isset($scopeSet['all']);
+  }
+
+  /**
+   * Handles access to Business Planning fields on site editors.
+   */
+  public function canUseBusinessPlanning(string $businessId, string $userUUID): bool
+  {
+    $businessId = trim(InputSanitizer::sanitizeString($businessId));
+    $userUUID = trim(InputSanitizer::sanitizeString($userUUID));
+
+    if ($businessId === '' || $userUUID === '') {
+      return false;
+    }
+
+    $business = Database::hgetall(Keys::BUSINESS . ':' . $businessId);
+    if ([] === $business) {
+      return false;
+    }
+
+    if ((string) ($business['owner_uuid'] ?? '') === $userUUID) {
+      return true;
+    }
+
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection || ($connection['status'] ?? '') !== 'active') {
+      return false;
+    }
+
+    if (SubscriptionRepository::isBusinessActive($userUUID)) {
+      return true;
+    }
+
+    $role = strtolower(trim((string) ($connection['role'] ?? '')));
+    if (in_array($role, ['owner', 'coordinator', 'manager', 'admin'], true)) {
+      return true;
+    }
+
+    $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
+
+    return isset($scopeSet['business.settings.write']) || isset($scopeSet['all']);
   }
 
   /**
@@ -4834,14 +5357,14 @@ final class BusinessDiscoveryService
       return true;
     }
 
-    $relationship = $this->relationship($businessId, $userUUID);
-    if ([] === $relationship || ($relationship['status'] ?? '') !== 'active') {
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection || ($connection['status'] ?? '') !== 'active') {
       return false;
     }
 
-    $scopeSet = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
+    $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
 
-    return isset($scopeSet['org.settings.read']) || isset($scopeSet['org.settings.write']);
+    return isset($scopeSet['business.settings.read']) || isset($scopeSet['business.settings.write']);
   }
 
   /**
@@ -4853,14 +5376,14 @@ final class BusinessDiscoveryService
       return true;
     }
 
-    $relationship = $this->relationship($businessId, $userUUID);
-    if ([] === $relationship || ($relationship['status'] ?? '') !== 'active') {
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection || ($connection['status'] ?? '') !== 'active') {
       return false;
     }
 
-    $scopeSet = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
+    $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
 
-    return isset($scopeSet['org.settings.write']);
+    return isset($scopeSet['business.settings.write']);
   }
 
   /**
@@ -4873,17 +5396,17 @@ final class BusinessDiscoveryService
       return true;
     }
 
-    $relationship = $this->relationship($businessId, $userUUID);
-    if ([] === $relationship || ($relationship['status'] ?? '') !== 'active') {
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection || ($connection['status'] ?? '') !== 'active') {
       return false;
     }
 
-    $scopeSet = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
-    if (isset($scopeSet['payperiod.write']) || isset($scopeSet['org.settings.write']) || isset($scopeSet['all'])) {
+    $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
+    if (isset($scopeSet['payperiod.write']) || isset($scopeSet['business.settings.write']) || isset($scopeSet['all'])) {
       return true;
     }
 
-    $role = strtolower(trim((string) ($relationship['role'] ?? '')));
+    $role = strtolower(trim((string) ($connection['role'] ?? '')));
     return in_array($role, ['owner', 'coordinator', 'contributor'], true);
   }
 
@@ -4897,17 +5420,17 @@ final class BusinessDiscoveryService
       return true;
     }
 
-    $relationship = $this->relationship($businessId, $userUUID);
-    if ([] === $relationship || ($relationship['status'] ?? '') !== 'active') {
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection || ($connection['status'] ?? '') !== 'active') {
       return false;
     }
 
-    $scopeSet = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
-    if (isset($scopeSet['payperiod.read']) || isset($scopeSet['payperiod.write']) || isset($scopeSet['org.settings.read']) || isset($scopeSet['org.settings.write']) || isset($scopeSet['all'])) {
+    $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
+    if (isset($scopeSet['payperiod.read']) || isset($scopeSet['payperiod.write']) || isset($scopeSet['business.settings.read']) || isset($scopeSet['business.settings.write']) || isset($scopeSet['all'])) {
       return true;
     }
 
-    $role = strtolower(trim((string) ($relationship['role'] ?? '')));
+    $role = strtolower(trim((string) ($connection['role'] ?? '')));
     return in_array($role, ['owner', 'coordinator', 'contributor', 'member', 'viewer'], true);
   }
 
@@ -4920,20 +5443,20 @@ final class BusinessDiscoveryService
       return true;
     }
 
-    $relationship = $this->relationship($businessId, $userUUID);
-    if ([] === $relationship || ($relationship['status'] ?? '') !== 'active') {
+    $connection = $this->connection($businessId, $userUUID);
+    if ([] === $connection || ($connection['status'] ?? '') !== 'active') {
       return false;
     }
 
-    $scopeSet = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
-    $role = strtolower(trim((string) ($relationship['role'] ?? '')));
+    $scopeSet = $this->scopeMap((string) ($connection['scopes'] ?? ''));
+    $role = strtolower(trim((string) ($connection['role'] ?? '')));
 
     if ($role === 'contributor') {
       return true;
     }
 
     return isset($scopeSet['audit.read'])
-      || isset($scopeSet['org.settings.write'])
+      || isset($scopeSet['business.settings.write'])
       || isset($scopeSet['access.manage'])
       || isset($scopeSet['all']);
   }
@@ -5020,8 +5543,8 @@ final class BusinessDiscoveryService
    */
   private function ensureActivationConsent(string $businessId, string $userUUID, array $consentContext = []): array
   {
-    if (!(bool) SystemConfig::get('org_shared_encryption_enabled')) {
-      return $this->ok('Org shared encryption disabled; consent gate bypassed.', []);
+    if (!(bool) SystemConfig::get('business_shared_encryption_enabled')) {
+      return $this->ok('Business shared encryption disabled; consent gate bypassed.', []);
     }
 
     $consentIdRaw = $consentContext['consent_id'] ?? '';
@@ -5053,7 +5576,7 @@ final class BusinessDiscoveryService
       ? trim((string) $disclaimerTextRaw)
       : '';
     if ($disclaimerText === '') {
-      $disclaimerText = 'Org shared encryption consent accepted.';
+      $disclaimerText = 'Business shared encryption consent accepted.';
     }
 
     $ipRaw = $consentContext['ip'] ?? '';
@@ -5062,7 +5585,7 @@ final class BusinessDiscoveryService
     $userAgentRaw = $consentContext['user_agent'] ?? '';
     $userAgent = is_scalar($userAgentRaw) ? trim((string) $userAgentRaw) : '';
 
-    return $this->recordOrgConsent(
+    return $this->recordBusinessConsent(
       $businessId,
       $userUUID,
       $consentVersion,
@@ -5073,7 +5596,7 @@ final class BusinessDiscoveryService
   }
 
   /** @return array{success: bool, message: string, data: array<string, mixed>} */
-  private function recordOrgConsent(
+  private function recordBusinessConsent(
     string $businessId,
     string $userUUID,
     string $consentVersion,
@@ -5106,7 +5629,7 @@ final class BusinessDiscoveryService
 
     Database::hset($consentKey, [
       'consent_id' => $consentId,
-      'org_id' => $businessId,
+      'business_id' => $businessId,
       'user_uuid' => $userUUID,
       'consent_version' => $consentVersion,
       'accepted_at' => $timestamp,
@@ -5116,10 +5639,10 @@ final class BusinessDiscoveryService
       'status' => self::MEMBERSHIP_STATE_ACTIVE,
     ]);
 
-    Database::sadd(Keys::businessConsentsByOrg($businessId), $consentId);
+    Database::sadd(Keys::businessConsentsByBusiness($businessId), $consentId);
     Database::sadd(Keys::businessConsentsByUser($userUUID), $consentId);
 
-    $this->appendAuditEvent($businessId, 'org.consent.accepted', $userUUID, [
+    $this->appendAuditEvent($businessId, 'business.consent.accepted', $userUUID, [
       'consent_id' => $consentId,
       'consent_version' => $consentVersion,
       'user_uuid' => $userUUID,
@@ -5127,7 +5650,7 @@ final class BusinessDiscoveryService
 
     return $this->ok('Business consent recorded.', [
       'consent_id' => $consentId,
-      'org_id' => $businessId,
+      'business_id' => $businessId,
       'user_uuid' => $userUUID,
       'consent_version' => $consentVersion,
       'accepted_at' => $timestamp,
@@ -5135,7 +5658,7 @@ final class BusinessDiscoveryService
   }
 
   /** @return array<string, string> */
-  private function loadActiveOrgConsent(string $businessId, string $userUUID): array
+  private function loadActiveBusinessConsent(string $businessId, string $userUUID): array
   {
     $businessId = trim(InputSanitizer::sanitizeString($businessId));
     $userUUID = trim(InputSanitizer::sanitizeString($userUUID));
@@ -5155,7 +5678,7 @@ final class BusinessDiscoveryService
         continue;
       }
 
-      if ((string) ($consent['org_id'] ?? '') !== $businessId) {
+      if ((string) ($consent['business_id'] ?? '') !== $businessId) {
         continue;
       }
 
@@ -5190,12 +5713,12 @@ final class BusinessDiscoveryService
       $consent = Database::hgetall(Keys::businessConsent($consentId));
 
       return $consent !== []
-        && (string) ($consent['org_id'] ?? '') === $businessId
+        && (string) ($consent['business_id'] ?? '') === $businessId
         && (string) ($consent['user_uuid'] ?? '') === $userUUID
         && (string) ($consent['status'] ?? '') === self::MEMBERSHIP_STATE_ACTIVE;
     }
 
-    return $this->loadActiveOrgConsent($businessId, $userUUID) !== [];
+    return $this->loadActiveBusinessConsent($businessId, $userUUID) !== [];
   }
 
   /**
@@ -5203,7 +5726,7 @@ final class BusinessDiscoveryService
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
-  private function bootstrapOrgDekWrapForMember(
+  private function bootstrapBusinessDekWrapForMember(
     string $businessId,
     string $userUUID,
     string $consentId,
@@ -5217,15 +5740,15 @@ final class BusinessDiscoveryService
     $version = trim(InputSanitizer::sanitizeString($version));
 
     if ($businessId === '' || $userUUID === '' || $consentId === '' || $segment === '' || $version === '') {
-      return $this->fail(Strings::i18n('BUSINESSES_API_CANNOT_CREATE_ORG_DEK_WRAP_MISSING_BOOTSTRAP_IDENTIFIERS'));
+      return $this->fail(Strings::i18n('BUSINESSES_API_CANNOT_CREATE_BUSINESS_DEK_WRAP_MISSING_BOOTSTRAP_IDENTIFIERS'));
     }
 
     $dekId = $this->businessDekId($businessId, $segment, $userUUID, $version);
     if ($dekId === '') {
-      return $this->fail(Strings::i18n('BUSINESSES_API_CANNOT_CREATE_ORG_DEK_WRAP_INVALID_DEK_IDENTIFIER_CONTEX'));
+      return $this->fail(Strings::i18n('BUSINESSES_API_CANNOT_CREATE_BUSINESS_DEK_WRAP_INVALID_DEK_IDENTIFIER_CONTEX'));
     }
 
-    $resolvedWrap = $this->resolveMemberPasskeyWrapForOrgBootstrap($userUUID);
+    $resolvedWrap = $this->resolveMemberPasskeyWrapForBusinessBootstrap($userUUID);
     if (!$resolvedWrap['success']) {
       return $resolvedWrap;
     }
@@ -5233,10 +5756,10 @@ final class BusinessDiscoveryService
     $credentialId = self::scalarString($resolvedWrap['data']['credential_id'] ?? '');
     $wrappedDek = self::scalarString($resolvedWrap['data']['wrapped_dek'] ?? '');
     if ($credentialId === '' || $wrappedDek === '') {
-      return $this->fail(Strings::i18n('BUSINESSES_API_CANNOT_CREATE_ORG_DEK_WRAP_MISSING_CREDENTIAL_WRAPPER_MA'));
+      return $this->fail(Strings::i18n('BUSINESSES_API_CANNOT_CREATE_BUSINESS_DEK_WRAP_MISSING_CREDENTIAL_WRAPPER_MA'));
     }
 
-    $store = (new BusinessEncryptionService())->storeOrgDekWrap(
+    $store = (new BusinessEncryptionService())->storeBusinessDekWrap(
       $businessId,
       $segment,
       $version,
@@ -5252,7 +5775,7 @@ final class BusinessDiscoveryService
       return $store;
     }
 
-    $this->appendAuditEvent($businessId, 'org.dek.wrap.bootstrap', $userUUID, [
+    $this->appendAuditEvent($businessId, 'business.dek.wrap.bootstrap', $userUUID, [
       'user_uuid' => $userUUID,
       'segment' => $segment,
       'key_version' => $version,
@@ -5274,11 +5797,11 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * Bootstrap org DEK wraps for every active member in the business.
+   * Bootstrap business DEK wraps for every active member in the business.
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
-  public function bootstrapOrgDekForAllMembers(
+  public function bootstrapBusinessDekForAllMembers(
     string $actorUUID,
     string $businessId,
     string $segment,
@@ -5299,15 +5822,15 @@ final class BusinessDiscoveryService
     }
 
     if (!$this->canManageAccess($businessId, $actorUUID)) {
-      return $this->fail(Strings::i18n('BUSINESSES_API_ONLY_OWNERS_AND_MANAGERS_CAN_BOOTSTRAP_ORG_DEKS_FOR_MEMB'));
+      return $this->fail(Strings::i18n('BUSINESSES_API_ONLY_OWNERS_AND_MANAGERS_CAN_BOOTSTRAP_BUSINESS_DEKS_FOR_MEMB'));
     }
 
     $allowedSegments = [
-      self::ORG_DEK_SEGMENT_CURRENT_PERIOD => true,
-      self::ORG_DEK_SEGMENT_ARCHIVE => true,
+      self::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD => true,
+      self::BUSINESS_DEK_SEGMENT_ARCHIVE => true,
     ];
     if (!isset($allowedSegments[$segment])) {
-      return $this->fail(Strings::i18n('BUSINESSES_API_INVALID_ORG_DEK_SEGMENT'));
+      return $this->fail(Strings::i18n('BUSINESSES_API_INVALID_BUSINESS_DEK_SEGMENT'));
     }
 
     $members = array_map(
@@ -5325,8 +5848,8 @@ final class BusinessDiscoveryService
     $failed = [];
 
     foreach ($members as $memberUUID) {
-      $relationship = $this->relationship($businessId, $memberUUID);
-      if ((string) ($relationship['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE) {
+      $connection = $this->connection($businessId, $memberUUID);
+      if ((string) ($connection['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE) {
         $failed[] = [
           'user_uuid' => $memberUUID,
           'reason' => 'inactive_membership',
@@ -5335,7 +5858,7 @@ final class BusinessDiscoveryService
         continue;
       }
 
-      $consent = $this->loadActiveOrgConsent($businessId, $memberUUID);
+      $consent = $this->loadActiveBusinessConsent($businessId, $memberUUID);
       $consentId = self::scalarString($consent['consent_id'] ?? '');
       if ($consentId === '') {
         $failed[] = [
@@ -5346,7 +5869,7 @@ final class BusinessDiscoveryService
         continue;
       }
 
-      $result = $this->bootstrapOrgDekWrapForMember($businessId, $memberUUID, $consentId, $segment, $version);
+      $result = $this->bootstrapBusinessDekWrapForMember($businessId, $memberUUID, $consentId, $segment, $version);
       if ($result['success']) {
         $bootstrapped[] = [
           'user_uuid' => $memberUUID,
@@ -5400,7 +5923,7 @@ final class BusinessDiscoveryService
       }
     }
 
-    $this->appendAuditEvent($businessId, 'org.dek.wrap.bootstrap.bulk', $actorUUID, [
+    $this->appendAuditEvent($businessId, 'business.dek.wrap.bootstrap.bulk', $actorUUID, [
       'segment' => $segment,
       'key_version' => $version,
       'bootstrapped_count' => count($bootstrapped),
@@ -5435,17 +5958,17 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * Auto-bootstrap org DEK wraps for all active businesses on user page visit.
+   * Auto-bootstrap business DEK wraps for all active businesses on user page visit.
    *
-   * Iterates the user's active org memberships and triggers DEK bootstrapping
-   * where the actor has manage-access permission. Uses a per-org throttle key
+   * Iterates the user's active business memberships and triggers DEK bootstrapping
+   * where the actor has manage-access permission. Uses a per-business throttle key
    * to avoid redundant work within a short window.
    *
    * @param string $actorUUID Authenticated user UUID.
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
-  public function autoBootstrapOrgDekOnPageVisit(string $actorUUID): array
+  public function autoBootstrapBusinessDekOnPageVisit(string $actorUUID): array
   {
     $actorUUID = trim(InputSanitizer::sanitizeString($actorUUID));
     if ($actorUUID === '') {
@@ -5461,8 +5984,8 @@ final class BusinessDiscoveryService
       ? $list['data']['businesses']
       : [];
 
-    $attemptedOrgs = [];
-    $skippedOrgs = [];
+    $attemptedBusinesses = [];
+    $skippedBusinesses = [];
     $throttleSeconds = 300;
 
     foreach ($businesses as $business) {
@@ -5475,33 +5998,33 @@ final class BusinessDiscoveryService
         continue;
       }
 
-      $orgStatus = strtolower(self::scalarString($business['status'] ?? ''));
-      $relationshipStatus = strtolower(self::scalarString($business['relationship_status'] ?? ''));
-      if ($orgStatus !== self::MEMBERSHIP_STATE_ACTIVE || $relationshipStatus !== self::MEMBERSHIP_STATE_ACTIVE) {
-        $skippedOrgs[] = ['business_id' => $businessId, 'reason' => 'inactive'];
+      $businessStatus = strtolower(self::scalarString($business['status'] ?? ''));
+      $connectionStatus = strtolower(self::scalarString($business['connection_status'] ?? ''));
+      if ($businessStatus !== self::MEMBERSHIP_STATE_ACTIVE || $connectionStatus !== self::MEMBERSHIP_STATE_ACTIVE) {
+        $skippedBusinesses[] = ['business_id' => $businessId, 'reason' => 'inactive'];
         continue;
       }
 
       if (!$this->canManageAccess($businessId, $actorUUID)) {
-        $skippedOrgs[] = ['business_id' => $businessId, 'reason' => 'insufficient_access'];
+        $skippedBusinesses[] = ['business_id' => $businessId, 'reason' => 'insufficient_access'];
         continue;
       }
 
-      $throttleKey = Keys::TELEMETRY . ':org:dek:auto_bootstrap:' . $businessId . ':' . $actorUUID;
+      $throttleKey = Keys::TELEMETRY . ':business:dek:auto_bootstrap:' . $businessId . ':' . $actorUUID;
       // setnx is atomic (SET NX EX); eliminates the exists()→set() TOCTOU race.
       if (!Database::setnx($throttleKey, '1', $throttleSeconds)) {
-        $skippedOrgs[] = ['business_id' => $businessId, 'reason' => 'throttled'];
+        $skippedBusinesses[] = ['business_id' => $businessId, 'reason' => 'throttled'];
         continue;
       }
 
-      $result = $this->bootstrapOrgDekForAllMembers(
+      $result = $this->bootstrapBusinessDekForAllMembers(
         $actorUUID,
         $businessId,
-        self::ORG_DEK_SEGMENT_CURRENT_PERIOD,
-        '1'
+        self::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
+        self::BUSINESS_DEK_VERSION_CURRENT
       );
 
-      $attemptedOrgs[] = [
+      $attemptedBusinesses[] = [
         'business_id' => $businessId,
         'success' => (bool) $result['success'],
         'bootstrapped_count' => self::scalarInt($result['data']['bootstrapped_count'] ?? 0),
@@ -5511,10 +6034,10 @@ final class BusinessDiscoveryService
     }
 
     return $this->ok('Auto-bootstrap evaluated for active businesses.', [
-      'attempted_orgs' => $attemptedOrgs,
-      'skipped_orgs' => $skippedOrgs,
-      'attempted_count' => count($attemptedOrgs),
-      'skipped_count' => count($skippedOrgs),
+      'attempted_businesses' => $attemptedBusinesses,
+      'skipped_businesses' => $skippedBusinesses,
+      'attempted_count' => count($attemptedBusinesses),
+      'skipped_count' => count($skippedBusinesses),
     ]);
   }
 
@@ -5532,15 +6055,20 @@ final class BusinessDiscoveryService
       return '';
     }
 
-    return 'org-dek:' . $businessId . ':' . $segment . ':' . $userUUID . ':v' . $version;
+    $normalizedVersion = preg_replace('/^v/i', '', $version) ?? $version;
+    if ($normalizedVersion === '') {
+      return '';
+    }
+
+    return 'business-dek:' . $businessId . ':' . $segment . ':' . $userUUID . ':v' . $normalizedVersion;
   }
 
   /**
-   * Resolve a member passkey wrapper suitable for org-wrap bootstrapping.
+   * Resolve a member passkey wrapper suitable for business-wrap bootstrapping.
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
-  private function resolveMemberPasskeyWrapForOrgBootstrap(string $userUUID): array
+  private function resolveMemberPasskeyWrapForBusinessBootstrap(string $userUUID): array
   {
     $userUUID = trim(InputSanitizer::sanitizeString($userUUID));
     if ($userUUID === '') {
@@ -5644,62 +6172,62 @@ final class BusinessDiscoveryService
     return $map;
   }
 
-  /** @param array<string, string> $relationship */
-  private function setRelationship(string $businessId, string $userUUID, array $relationship): void
+  /** @param array<string, string> $connection */
+  private function setConnection(string $businessId, string $userUUID, array $connection): void
   {
     // Keep BusinessWorkspaceCache::invalidate in this mutation funnel.
-    $newRole = strtolower(trim((string) ($relationship['role'] ?? '')));
-    if ($newRole !== '' && !isset(self::VALID_ORG_ROLES[$newRole])) {
-      throw new InvalidArgumentException("Invalid org role: {$newRole}");
+    $newRole = strtolower(trim((string) ($connection['role'] ?? '')));
+    if ($newRole !== '' && !isset(self::VALID_BUSINESS_ROLES[$newRole])) {
+      throw new InvalidArgumentException("Invalid business role: {$newRole}");
     }
 
     if ($newRole !== '') {
-      $relationship['role'] = $newRole;
+      $connection['role'] = $newRole;
     }
 
-    if (array_key_exists('role', $relationship) || array_key_exists('scopes', $relationship)) {
-      $relationship['scope_preset_version'] = self::SCOPE_PRESET_VERSION;
-      $relationship['scope_policy_version'] = self::SCOPE_POLICY_VERSION;
+    if (array_key_exists('role', $connection) || array_key_exists('scopes', $connection)) {
+      $connection['scope_preset_version'] = self::SCOPE_PRESET_VERSION;
+      $connection['scope_policy_version'] = self::SCOPE_POLICY_VERSION;
     }
 
-    $existing = $this->relationship($businessId, $userUUID);
+    $existing = $this->connection($businessId, $userUUID);
     $currentStatus = (string) ($existing['status'] ?? '');
-    $newStatus = (string) ($relationship['status'] ?? $currentStatus);
+    $newStatus = (string) ($connection['status'] ?? $currentStatus);
     $effectiveRole = $newRole !== '' ? $newRole : strtolower(trim((string) ($existing['role'] ?? '')));
 
     if (
-      (bool) SystemConfig::get('org_shared_encryption_enabled')
+      (bool) SystemConfig::get('business_shared_encryption_enabled')
       && $newStatus === self::MEMBERSHIP_STATE_ACTIVE
       && $currentStatus !== self::MEMBERSHIP_STATE_ACTIVE
       && $effectiveRole !== 'owner'
     ) {
       if ($currentStatus !== self::MEMBERSHIP_STATE_CONSENTED) {
         throw new InvalidArgumentException(
-          "Invalid relationship activation: '{$currentStatus}' must transition through consented"
+          "Invalid connection activation: '{$currentStatus}' must transition through consented"
         );
       }
 
-      $consentId = is_scalar($relationship['consent_id'] ?? null)
-        ? trim((string) $relationship['consent_id'])
+      $consentId = is_scalar($connection['consent_id'] ?? null)
+        ? trim((string) $connection['consent_id'])
         : '';
       if (!$this->isConsentValidForWrap($businessId, $userUUID, $consentId)) {
-        throw new InvalidArgumentException('Invalid relationship activation: active consent is required');
+        throw new InvalidArgumentException('Invalid connection activation: active consent is required');
       }
     }
 
     if ($currentStatus !== $newStatus) {
-      $allowed = self::RELATIONSHIP_TRANSITIONS[$currentStatus] ?? [];
+      $allowed = self::CONNECTION_TRANSITIONS[$currentStatus] ?? [];
       if (!isset($allowed[$newStatus])) {
         throw new InvalidArgumentException(
-          "Invalid relationship transition: '{$currentStatus}' → '{$newStatus}'"
+          "Invalid connection transition: '{$currentStatus}' → '{$newStatus}'"
         );
       }
     }
 
-    $fields = array_merge(['business_id' => $businessId, 'user_uuid' => $userUUID], $relationship);
+    $fields = array_merge(['business_id' => $businessId, 'user_uuid' => $userUUID], $connection);
 
     $hasChange = false;
-    foreach ($relationship as $field => $value) {
+    foreach ($connection as $field => $value) {
       if (!array_key_exists($field, $existing) || $existing[$field] !== (string) $value) {
         $hasChange = true;
         break;
@@ -5710,7 +6238,7 @@ final class BusinessDiscoveryService
     }
 
     $activeStatuses = [self::MEMBERSHIP_STATE_ACTIVE => true];
-    $indexedRelationshipStatuses = [
+    $indexedConnectionStatuses = [
       self::MEMBERSHIP_STATE_ACTIVE => true,
       self::MEMBERSHIP_STATE_CONSENTED => true,
       self::MEMBERSHIP_STATE_PENDING => true,
@@ -5719,32 +6247,32 @@ final class BusinessDiscoveryService
 
     $isNowActive = isset($activeStatuses[$newStatus]);
     $wasActive = isset($activeStatuses[$currentStatus]);
-    $isNowIndexedRelationship = isset($indexedRelationshipStatuses[$newStatus]);
-    $wasIndexedRelationship = isset($indexedRelationshipStatuses[$currentStatus]);
+    $isNowIndexedConnection = isset($indexedConnectionStatuses[$newStatus]);
+    $wasIndexedConnection = isset($indexedConnectionStatuses[$currentStatus]);
     $isNowPending = isset($pendingStatuses[$newStatus]);
     $wasPending = isset($pendingStatuses[$currentStatus]);
 
-    $relKey = $this->relationshipKey($businessId, $userUUID);
+    $relKey = $this->connectionKey($businessId, $userUUID);
     $membersKey = Keys::BUSINESS_MEMBERS . ':' . $businessId;
     $userKey = Keys::BUSINESS_USER . ':' . $userUUID;
-    $relationshipsKey = Keys::BUSINESS_RELATIONSHIPS . ':' . $businessId;
-    $relationshipsUserKey = Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $userUUID;
+    $connectionsKey = Keys::BUSINESS_CONNECTIONS . ':' . $businessId;
+    $connectionsUserKey = Keys::BUSINESS_CONNECTIONS_USER . ':' . $userUUID;
     $pendingKey = Keys::BUSINESS_PENDING . ':' . $businessId;
 
     Database::transaction(static function (\Redis $r) use (
       $relKey,
       $membersKey,
       $userKey,
-      $relationshipsKey,
-      $relationshipsUserKey,
+      $connectionsKey,
+      $connectionsUserKey,
       $pendingKey,
       $businessId,
       $userUUID,
       $fields,
       $isNowActive,
       $wasActive,
-      $isNowIndexedRelationship,
-      $wasIndexedRelationship,
+      $isNowIndexedConnection,
+      $wasIndexedConnection,
       $isNowPending,
       $wasPending,
     ): void {
@@ -5758,12 +6286,12 @@ final class BusinessDiscoveryService
         $r->sRem($userKey, $businessId);
       }
 
-      if ($isNowIndexedRelationship && !$wasIndexedRelationship) {
-        $r->sAdd($relationshipsKey, $userUUID);
-        $r->sAdd($relationshipsUserKey, $businessId);
-      } elseif (!$isNowIndexedRelationship && $wasIndexedRelationship) {
-        $r->sRem($relationshipsKey, $userUUID);
-        $r->sRem($relationshipsUserKey, $businessId);
+      if ($isNowIndexedConnection && !$wasIndexedConnection) {
+        $r->sAdd($connectionsKey, $userUUID);
+        $r->sAdd($connectionsUserKey, $businessId);
+      } elseif (!$isNowIndexedConnection && $wasIndexedConnection) {
+        $r->sRem($connectionsKey, $userUUID);
+        $r->sRem($connectionsUserKey, $businessId);
       }
 
       if ($isNowPending && !$wasPending) {
@@ -5822,13 +6350,13 @@ final class BusinessDiscoveryService
   }
 
   /** @return array<string, string> */
-  private function relationship(string $businessId, string $userUUID): array
+  private function connection(string $businessId, string $userUUID): array
   {
-    return Database::hgetall($this->relationshipKey($businessId, $userUUID));
+    return Database::hgetall($this->connectionKey($businessId, $userUUID));
   }
 
   /** @return list<string> */
-  private function relationshipBusinessIdsForUser(string $userUUID): array
+  private function connectionBusinessIdsForUser(string $userUUID): array
   {
     $userUUID = trim($userUUID);
     if ($userUUID === '') {
@@ -5837,8 +6365,22 @@ final class BusinessDiscoveryService
 
     $ids = array_merge(
       Database::smembers(Keys::BUSINESS_USER . ':' . $userUUID),
-      Database::smembers(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $userUUID),
+      Database::smembers(Keys::BUSINESS_CONNECTIONS_USER . ':' . $userUUID),
     );
+
+    $connectionPrefix = Keys::BUSINESS_CONNECTION . ':';
+    $connectionSuffix = ':' . $userUUID;
+    foreach (Database::scanKeys($connectionPrefix . '*:' . $userUUID) as $connectionKey) {
+      $key = trim((string) $connectionKey);
+      if (!str_starts_with($key, $connectionPrefix) || !str_ends_with($key, $connectionSuffix)) {
+        continue;
+      }
+
+      $businessId = substr($key, strlen($connectionPrefix), -strlen($connectionSuffix));
+      if ($businessId !== '') {
+        $ids[] = $businessId;
+      }
+    }
 
     $ids = array_values(array_unique(array_filter(
       array_map(static fn (mixed $value): string => trim((string) $value), $ids),
@@ -5850,11 +6392,11 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * Handles relationshipKey operation.
+   * Handles connectionKey operation.
    */
-  private function relationshipKey(string $businessId, string $userUUID): string
+  private function connectionKey(string $businessId, string $userUUID): string
   {
-    return Keys::BUSINESS_RELATIONSHIP . ':' . $businessId . ':' . $userUUID;
+    return Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $userUUID;
   }
 
   /**
@@ -6057,7 +6599,7 @@ final class BusinessDiscoveryService
       }
     } catch (\Throwable $e) {
       Log::error(
-        '[OrgC] Personal business pay period sync failed: ' . $e->getMessage(),
+        '[Business] Personal business pay period sync failed: ' . $e->getMessage(),
         'business_id=' . $businessId . ' owner_uuid=' . $ownerUUID
       );
     }
@@ -6135,18 +6677,18 @@ final class BusinessDiscoveryService
     BusinessDashboardMetrics::touchLastActivity($businessId, $createdAt);
 
     // Mirror security-significant events into the immutable TheLedger chain.
-    // The system audit stream is the authoritative SOC2 evidence ledger; org
+    // The system audit stream is the authoritative SOC2 evidence ledger; business
     // events classified as critical or high must appear there for CC6.1/CC6.2/
     // CC6.7/CC9.1 evidence. Fire-and-forget: ledger failure must not block the
-    // org audit write or the calling business operation.
+    // business audit write or the calling business operation.
     if (isset(self::LEDGER_EVENTS[$eventType])) {
       try {
         SystemAuditRepository::append(
-          'org.' . $eventType,
+          'business.' . $eventType,
           $actorUUID,
           array_merge($normalizedDetails, [
             'business_id'   => $businessId,
-            'org_event_id'      => $eventID,
+            'business_event_id' => $eventID,
             'ledger_event_level' => self::LEDGER_EVENTS[$eventType],
           ])
         );
@@ -6224,16 +6766,16 @@ final class BusinessDiscoveryService
   }
 
   /**
-   * Return the raw relationship hash for a user in an business.
+   * Return the raw connection hash for a user in an business.
    *
-   * Returns an empty array when no relationship record exists.
+   * Returns an empty array when no connection record exists.
    *
    * @param string $businessId     Business ID.
    * @param string $userUUID  User UUID to look up.
    *
    * @return array<string, string>
    */
-  public function getRelationshipSummary(string $businessId, string $userUUID): array
+  public function getConnectionSummary(string $businessId, string $userUUID): array
   {
     $businessId = trim(InputSanitizer::sanitizeString($businessId));
     $userUUID = trim(InputSanitizer::sanitizeString($userUUID));
@@ -6242,7 +6784,7 @@ final class BusinessDiscoveryService
       return [];
     }
 
-    return $this->relationship($businessId, $userUUID);
+    return $this->connection($businessId, $userUUID);
   }
 
   /** @param array<string, mixed> $data

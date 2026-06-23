@@ -118,13 +118,14 @@ final class EarningsTaxIntegrationForensicTest extends TestCase
   }
 
   #[Test]
-  public function forensicEarningsMonthlyTemplateHasElevenColumns(): void
+  public function forensicEarningsMonthlyRendererUsesCanonicalDataGridColumns(): void
   {
-    $path = dirname(__DIR__, 4) . '/templates/earnings-month.php';
+    $path = dirname(__DIR__, 4) . '/html/extensions/overrides/earnings-monthly/hooks.php';
     $this->assertFileExists($path);
     $source = (string) file_get_contents($path);
-    $this->assertStringContainsString('__FEDERAL_TAX__', $source);
-    $this->assertStringContainsString('__TOTAL_DEDUCTIONS__', $source);
+    $this->assertStringContainsString('new DataGrid', $source);
+    $this->assertStringContainsString("'federal_tax'", $source);
+    $this->assertStringContainsString("'total_deductions'", $source);
   }
 
   #[Test]

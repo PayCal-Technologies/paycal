@@ -10,6 +10,32 @@ $hasActivePremium = SubscriptionRepository::isPremiumActive($user->user_uuid);
 $hasActiveBusiness = SubscriptionRepository::isBusinessActive($user->user_uuid);
 $hasPaidSubscription = $hasActivePremium || $hasActiveBusiness;
 $billingHint = $hasActiveBusiness ? 'business' : ($hasActivePremium ? 'premium' : 'free');
+$billingMemberships = BusinessMemberRepository::forUser($user->user_uuid);
+$billingActiveMembership = null;
+foreach ($billingMemberships as $membership) {
+  if ((string) ($membership['status'] ?? '') === 'active') {
+    $billingActiveMembership = $membership;
+    break;
+  }
+}
+$billingBusinessId = is_array($billingActiveMembership) ? (string) ($billingActiveMembership['org_id'] ?? '') : '';
+$billingBusinessRole = is_array($billingActiveMembership) ? (string) ($billingActiveMembership['role'] ?? '') : '';
+$billingBusinessMemberCount = $billingBusinessId !== '' ? BusinessMemberRepository::count($billingBusinessId, 'active') : 0;
+$billingBusinessSummary = $billingBusinessMemberCount > 0
+  ? $billingBusinessMemberCount . ' active member' . ($billingBusinessMemberCount === 1 ? '' : 's')
+  : 'No group members yet';
+$billingBusinessRoleLabel = $billingBusinessRole !== '' ? ucfirst($billingBusinessRole) : 'Member';
+$billingBusinessListingStatus = 'Not listed yet';
+if ($billingBusinessId !== '') {
+  $billingBusinessData = Database::hgetall(Keys::BUSINESS . ':' . $billingBusinessId);
+  $visibility = strtolower(trim((string) ($billingBusinessData['visibility'] ?? '')));
+  $moderation = strtolower(trim((string) ($billingBusinessData['moderation_status'] ?? '')));
+  if ($visibility === 'listed' && $moderation === 'approved') {
+    $billingBusinessListingStatus = 'Eligible';
+  } elseif ($moderation === 'pending' || $moderation === 'needs_review') {
+    $billingBusinessListingStatus = 'Pending review';
+  }
+}
 $localeOptions = [
   'en-CA' => settings_index_i18n('PROFILE_LOCALE_EN_CA'),
   'fr-CA' => settings_index_i18n('PROFILE_LOCALE_FR_CA'),

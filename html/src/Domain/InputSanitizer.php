@@ -278,6 +278,40 @@ final class InputSanitizer
   }
 
   /**
+   * Canonicalize email identity aliases. Plus tags are treated as aliases across
+   * providers; dot folding is limited to Gmail/Googlemail where dots do not
+   * distinguish inboxes. Preserve the original email elsewhere for display and
+   * delivery; use this only for account lookup/deduplication.
+   */
+  public static function canonicalEmailIdentity(string $input): string
+  {
+    $email = self::sanitizeEmail($input);
+    if ($email === '' || substr_count($email, '@') !== 1) {
+      return $email;
+    }
+
+    [$localPart, $domain] = explode('@', $email, 2);
+    $plusPosition = strpos($localPart, '+');
+    if ($plusPosition !== false) {
+      $localPart = substr($localPart, 0, $plusPosition);
+    }
+
+    if ($domain === 'googlemail.com') {
+      $domain = 'gmail.com';
+    }
+
+    if ($domain === 'gmail.com') {
+      $localPart = str_replace('.', '', $localPart);
+    }
+
+    if ($localPart === '') {
+      return $email;
+    }
+
+    return $localPart . '@' . $domain;
+  }
+
+  /**
    * Sanitize IP address - Validates and returns a valid IP or 'unknown' if invalid.
    */
   public static function sanitizeIPAddress(mixed $input): string

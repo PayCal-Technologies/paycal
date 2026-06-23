@@ -223,7 +223,7 @@ final class BusinessWorkspaceWarmer
   }
 
   /**
-   * TODO: Document dispatchWarmInBackground.
+   * Dispatch warm in background.
    */
   private static function dispatchWarmInBackground(string $businessId, string $actorUUID, int $year): bool
   {
@@ -244,7 +244,7 @@ final class BusinessWorkspaceWarmer
   }
 
   /**
-   * TODO: Document dispatchUserWarmInBackground.
+   * Dispatch user warm in background.
    */
   private static function dispatchUserWarmInBackground(string $actorUUID, int $year): bool
   {
@@ -274,7 +274,7 @@ final class BusinessWorkspaceWarmer
   }
 
   /**
-   * TODO: Document forkSingleBusinessWarm.
+   * Fork single business warm.
    */
   private static function forkSingleBusinessWarm(string $businessId, string $actorUUID, int $year): bool
   {
@@ -300,7 +300,7 @@ final class BusinessWorkspaceWarmer
   }
 
   /**
-   * TODO: Document forkUserWarm.
+   * Fork user warm.
    */
   private static function forkUserWarm(string $actorUUID, int $year): bool
   {
@@ -326,7 +326,7 @@ final class BusinessWorkspaceWarmer
   }
 
   /**
-   * TODO: Document spawnDetachedCliWarm.
+   * Spawn detached CLI warm.
    */
   private static function spawnDetachedCliWarm(string ...$args): bool
   {
@@ -350,7 +350,7 @@ final class BusinessWorkspaceWarmer
   }
 
   /**
-   * TODO: Document warmScriptPath.
+   * Warm script path.
    */
   private static function warmScriptPath(): string
   {
@@ -358,7 +358,7 @@ final class BusinessWorkspaceWarmer
   }
 
   /**
-   * TODO: Document resolveCliPhpBinary.
+   * Resolve CLI PHP binary.
    */
   private static function resolveCliPhpBinary(): string
   {
@@ -540,7 +540,7 @@ final class BusinessWorkspaceWarmer
   }
 
   /**
-   * TODO: Document normalizeYear.
+   * Normalize year.
    */
   private static function normalizeYear(?int $year): int
   {

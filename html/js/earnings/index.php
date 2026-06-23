@@ -42,8 +42,8 @@ $earningsI18nKeys = [
   'EARNINGS_FORECAST_ASSUMP_LOA', 'EARNINGS_FORECAST_ASSUMP_TRAVEL', 'EARNINGS_FORECAST_ASSUMP_PROVINCE',
   'EARNINGS_FORECAST_ASSUMP_PAY_FREQ', 'EARNINGS_FORECAST_ASSUMP_ANCHOR', 'EARNINGS_FORECAST_ASSUMP_YTD_GROSS',
   'EARNINGS_FORECAST_PREVIEW_FAILED', 'EARNINGS_FORECAST_SUMMARY_UPDATED_FMT', 'EARNINGS_FORECAST_DISCLAIMER',
-  'EARNINGS_FORECAST_NO_DATA', 'EARNINGS_FORECAST_LOAD_FAILED', 'EARNINGS_FORECAST_SETUP_NOTICE',
-  'EARNINGS_FORECAST_PROGRESS_LABEL', 'EARNINGS_FORECAST_PROGRESS_CURRENT', 'EARNINGS_FORECAST_PROGRESS_FORECAST',
+    'EARNINGS_FORECAST_NO_DATA', 'EARNINGS_FORECAST_LOAD_FAILED', 'EARNINGS_FORECAST_SETUP_NOTICE',
+    'EARNINGS_FORECAST_PROGRESS_LABEL', 'EARNINGS_FORECAST_PROGRESS_CURRENT', 'EARNINGS_FORECAST_PROGRESS_FORECAST',
 ];
 $earningsI18n = [];
 foreach ($earningsI18nKeys as $earningsI18nKey) {
@@ -61,6 +61,11 @@ import {
 } from '/js/earnings/pie-graph-core.js';
 import { createEarningsFormatHelpers } from '/js/earnings/format.js';
 import { initForecastWorkspace } from '/js/earnings/forecast-calculator.js';
+import { escapeHtml } from '/js/core/escape.js';
+import {
+  formatI18n as formatConfigI18n,
+  getI18nLabel as getConfigI18nLabel,
+} from '/js/core/template.js';
 
 // === Canonical Verification Payload Utilities ===
 // Fixed key order, no whitespace, locale-independent, v1
@@ -310,39 +315,21 @@ document.addEventListener("DOMContentLoaded", () => {
   Object.assign(PC.config, <?php echo json_encode($earningsI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
   const earningsFormatHelpers = createEarningsFormatHelpers({ locale: PC.config.USER_LOCALE });
 
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
+  const getI18nLabel = (key, fallback = '') => getConfigI18nLabel(PC?.config, key, fallback);
+  const formatI18n = (key, fallback, params = {}) => formatConfigI18n(PC?.config, key, fallback, params);
 
-  function getI18nLabel(key, fallback = '') {
-    const value = String(PC?.config?.[key] ?? '').trim();
-    return value !== '' ? value : fallback;
-  }
-
-  function formatI18n(key, fallback, params = {}) {
-    let label = getI18nLabel(key, fallback);
-    Object.entries(params).forEach(([paramKey, paramValue]) => {
-      const token = new RegExp(`\\{${paramKey}\\}`, 'g');
-      label = label.replace(token, String(paramValue));
-    });
-    return label;
-  }
-
-  function buildDailyGridCell(content, colId) {
+  function buildDailyGridCell(content, colId, colKey, colLabel) {
     const cell = document.createElement('div');
     cell.className = 'datagrid_item';
     cell.setAttribute('role', 'gridcell');
     cell.setAttribute('aria-labelledby', colId);
+    cell.dataset.colKey = String(colKey || '');
+    cell.dataset.colLabel = String(colLabel || '');
     cell.textContent = String(content ?? '');
     return cell;
   }
 
-  function buildDailyGridRow(year, row, fieldList) {
+  function buildDailyGridRow(year, row, fieldList, headers) {
     const rowElement = document.createElement('div');
     rowElement.className = 'datagrid_row';
     rowElement.setAttribute('role', 'row');
@@ -354,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     fieldList.forEach((fieldName, fieldIndex) => {
       const colId = `earnings_daily_${year}_col_${fieldIndex + 1}`;
-      rowContent.appendChild(buildDailyGridCell(row[fieldName], colId));
+      rowContent.appendChild(buildDailyGridCell(row[fieldName], colId, fieldName, headers[fieldIndex] || fieldName));
     });
 
     rowElement.appendChild(rowContent);
@@ -414,7 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const rowsFragment = document.createDocumentFragment();
       rows.forEach((row) => {
-        rowsFragment.appendChild(buildDailyGridRow(year, row, fieldList));
+        rowsFragment.appendChild(buildDailyGridRow(year, row, fieldList, headers));
       });
       bodyGroup.appendChild(rowsFragment);
     }
@@ -567,6 +554,33 @@ document.addEventListener("DOMContentLoaded", () => {
       'Earnings trend chart for {year} could not be loaded. {message}',
       { year, message: finalMessage }
     );
+  }
+
+  function isCompactTrendChart(width) {
+    const compactByWidth = Number.isFinite(width) && width <= 480;
+    const compactByPointer = typeof window !== 'undefined'
+      && typeof window.matchMedia === 'function'
+      && window.matchMedia('(pointer: coarse) and (max-width: 700px)').matches;
+    return compactByWidth || compactByPointer;
+  }
+
+  function syncTrendTouchHint(linegraphSVG, visible) {
+    const container = linegraphSVG.parentElement;
+    if (!container || typeof container.querySelectorAll !== 'function') {
+      return;
+    }
+
+    let hint = Array.from(container.querySelectorAll('.earnings-chart-touch-hint'))
+      .find((candidate) => candidate?.dataset?.chartFor === linegraphSVG.id);
+    if (!hint) {
+      hint = document.createElement('p');
+      hint.className = 'earnings-chart-touch-hint';
+      hint.dataset.chartFor = linegraphSVG.id;
+      linegraphSVG.insertAdjacentElement('afterend', hint);
+    }
+
+    hint.textContent = getI18nLabel('EARNINGS_TREND_TOUCH_HINT', 'Touch to reveal');
+    hint.hidden = !visible;
   }
 
   // === Canonical Verification: Trust-Layer Hash Check ===
@@ -798,39 +812,51 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     
-    let margin = { top: 10, right: 16, bottom: 32, left: 40 };
+    const compactChart = isCompactTrendChart(width);
+    let margin = compactChart
+      ? { top: 10, right: 8, bottom: 10, left: 8 }
+      : { top: 10, right: 16, bottom: 32, left: 40 };
 
     // probe widest Y label text (e.g., "12345 (100%)")
     linegraphSVG.setAttribute("width", width);
     linegraphSVG.setAttribute("height", height);
+    linegraphSVG.dataset.compactChart = compactChart ? 'true' : 'false';
     linegraphSVG.textContent = '';
+    syncTrendTouchHint(linegraphSVG, compactChart);
 
     // Get theme primary color for graph elements
-    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#3a86ff';
-    const graphLineColor = primaryColor;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const primaryColor = rootStyles.getPropertyValue('--color-primary').trim() || '#3a86ff';
+    const textColor = rootStyles.getPropertyValue('--color-text').trim() || '#000';
     const graphStrokeStrong = `${primaryColor}cc`;
     const graphStrokeNormal = `${primaryColor}66`;
     const graphStrokeLight = `${primaryColor}26`;
     const graphStrokeVeryLight = `${primaryColor}03`;
-    // Use light gray tooltip that works on both light and dark themes
-    const tooltipBg = 'rgba(255, 255, 255, 0.98)';
+    const tooltipBg = rootStyles.getPropertyValue('--panel-bg').trim()
+      || rootStyles.getPropertyValue('--surface').trim()
+      || 'rgba(255, 255, 255, 0.98)';
+    const tooltipBorder = rootStyles.getPropertyValue('--panel-border').trim()
+      || rootStyles.getPropertyValue('--border').trim()
+      || 'rgba(200, 200, 200, 0.8)';
 
-    const probe = document.createElementNS(SVG_NS, "text");
-    probe.setAttribute("font-size", "13");
-    probe.textContent = formatI18n(
-      'EARNINGS_TREND_Y_AXIS_LABEL',
-      '{amount} ({pct})',
-      { amount: earningsFormatHelpers.formatCurrency(yMax), pct: earningsFormatHelpers.formatPercent(100, 0) },
-    );
-    linegraphSVG.appendChild(probe);
-    let labelWidth = 0;
-    try {
-      labelWidth = Math.ceil(probe.getBBox().width);
-    } catch (error) {
-      PW.warn(`[GRAPH] Unable to measure Y-axis label width for ${svgID}`);
+    if (!compactChart) {
+      const probe = document.createElementNS(SVG_NS, "text");
+      probe.setAttribute("font-size", "13");
+      probe.textContent = formatI18n(
+        'EARNINGS_TREND_Y_AXIS_LABEL',
+        '{amount} ({pct})',
+        { amount: earningsFormatHelpers.formatCurrency(yMax), pct: earningsFormatHelpers.formatPercent(100, 0) },
+      );
+      linegraphSVG.appendChild(probe);
+      let labelWidth = 0;
+      try {
+        labelWidth = Math.ceil(probe.getBBox().width);
+      } catch (error) {
+        PW.warn(`[GRAPH] Unable to measure Y-axis label width for ${svgID}`);
+      }
+      linegraphSVG.removeChild(probe);
+      margin.left = Math.max(margin.left, labelWidth + 12);
     }
-    linegraphSVG.removeChild(probe);
-    margin.left = Math.max(margin.left, labelWidth + 12);
 
     const innerW = Math.max(0, width - margin.left - margin.right);
     const innerH = Math.max(0, height - margin.top - margin.bottom);
@@ -940,37 +966,41 @@ document.addEventListener("DOMContentLoaded", () => {
         linegraphSVG.appendChild(gl);
       }
 
-      const t = document.createElementNS(SVG_NS, "text");
-      t.setAttribute("x", margin.left - 10);
-      t.setAttribute("y", y + 3);
-      t.setAttribute("text-anchor", "end");
-      t.setAttribute("font-size", "13");
-      const textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#000';
-      t.setAttribute("fill", textColor);
-      t.textContent = formatI18n(
-        'EARNINGS_TREND_Y_AXIS_LABEL',
-        '{amount} ({pct})',
-        { amount: earningsFormatHelpers.formatCurrency(v), pct: earningsFormatHelpers.formatPercent(p * 100, 0) },
-      );
-      linegraphSVG.appendChild(t);
+      if (!compactChart) {
+        const t = document.createElementNS(SVG_NS, "text");
+        t.classList.add('earnings-chart-axis-label', 'earnings-chart-axis-label-y');
+        t.setAttribute("x", margin.left - 10);
+        t.setAttribute("y", y + 3);
+        t.setAttribute("text-anchor", "end");
+        t.setAttribute("font-size", "13");
+        t.setAttribute("fill", textColor);
+        t.textContent = formatI18n(
+          'EARNINGS_TREND_Y_AXIS_LABEL',
+          '{amount} ({pct})',
+          { amount: earningsFormatHelpers.formatCurrency(v), pct: earningsFormatHelpers.formatPercent(p * 100, 0) },
+        );
+        linegraphSVG.appendChild(t);
+      }
     });
 
     // --- month labels (localized) ---
-    const monthFormatter = new Intl.DateTimeFormat(PC.config.USER_LOCALE, { month: "short" });
-    for (let m = 0; m < 12; m++) {
-      const mid = new Date(year, m, 15).getTime();
-      const x = xScale(mid);
-      const y = margin.top + innerH + 15;
+    if (!compactChart) {
+      const monthFormatter = new Intl.DateTimeFormat(PC.config.USER_LOCALE, { month: "short" });
+      for (let m = 0; m < 12; m++) {
+        const mid = new Date(year, m, 15).getTime();
+        const x = xScale(mid);
+        const y = margin.top + innerH + 15;
 
-      const label = document.createElementNS(SVG_NS, "text");
-      label.setAttribute("x", x);
-      label.setAttribute("y", y);
-      label.setAttribute("text-anchor", "middle");
-      label.setAttribute("font-size", "13");
-      const textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#000';
-      label.setAttribute("fill", textColor);
-      label.textContent = monthFormatter.format(new Date(year, m, 1));
-      linegraphSVG.appendChild(label);
+        const label = document.createElementNS(SVG_NS, "text");
+        label.classList.add('earnings-chart-axis-label', 'earnings-chart-axis-label-x');
+        label.setAttribute("x", x);
+        label.setAttribute("y", y);
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("font-size", "13");
+        label.setAttribute("fill", textColor);
+        label.textContent = monthFormatter.format(new Date(year, m, 1));
+        linegraphSVG.appendChild(label);
+      }
     }
 
     // === Mouseover tooltip / hover tracker ===
@@ -980,6 +1010,7 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.setAttribute("width", innerW);
     overlay.setAttribute("height", innerH);
     overlay.setAttribute("fill", "transparent");
+    overlay.setAttribute("pointer-events", "all");
     overlay.classList.add("earnings-crosshair");
 
     // hairline, dot, tooltip group
@@ -999,11 +1030,11 @@ document.addEventListener("DOMContentLoaded", () => {
     tipRect.setAttribute("rx", "2");
     tipRect.setAttribute("ry", "2");
     tipRect.setAttribute("fill", tooltipBg);
-    tipRect.setAttribute("stroke", "rgba(200, 200, 200, 0.8)");
+    tipRect.setAttribute("stroke", tooltipBorder);
     tipRect.setAttribute("stroke-width", "0.5");
     const tipText = document.createElementNS(SVG_NS, "text");
     tipText.setAttribute("font-size", "14");
-    tipText.setAttribute("fill", "#1a1a1a");
+    tipText.setAttribute("fill", textColor);
     tipText.setAttribute("x", "5");
     tipText.setAttribute("y", "16");
     tipG.appendChild(tipRect);
@@ -1015,13 +1046,13 @@ document.addEventListener("DOMContentLoaded", () => {
     linegraphSVG.appendChild(overlay);
 
     // helpers
-    function getSVGX(evt) {
+    function getSVGX(clientX) {
       const ctm = linegraphSVG.getScreenCTM();
       if (!ctm) {
         return Number.NaN;
       }
       const pt = linegraphSVG.createSVGPoint();
-      pt.x = evt.clientX;
+      pt.x = clientX;
       const cursor = pt.matrixTransform(ctm.inverse());
       return cursor.x;
     }
@@ -1043,8 +1074,14 @@ document.addEventListener("DOMContentLoaded", () => {
       el.classList.toggle("svg-visible", visible);
     };
 
-    overlay.addEventListener("mousemove", evt => {
-      const px = getSVGX(evt);
+    const hideInteraction = () => {
+      setVisible(hair, false);
+      setVisible(dot, false);
+      setVisible(tipG, false);
+    };
+
+    const revealAtClientX = (clientX) => {
+      const px = getSVGX(clientX);
       if (!Number.isFinite(px)) return;
       if (px < margin.left || px > margin.left + innerW) return;
       const t = invX(px);
@@ -1073,22 +1110,56 @@ document.addEventListener("DOMContentLoaded", () => {
         { date: dateStr, amount: earningsFormatHelpers.formatCurrency(amountValue) },
       );
       const bbox = tipText.getBBox();
-      tipRect.setAttribute("width", bbox.width + 8);
-      tipRect.setAttribute("height", bbox.height + 6);
+      const tipWidth = bbox.width + 8;
+      const tipHeight = bbox.height + 6;
+      tipRect.setAttribute("width", tipWidth);
+      tipRect.setAttribute("height", tipHeight);
 
       let tx = x + 8;
-      if (tx + bbox.width + 12 > margin.left + innerW) tx = x - bbox.width - 12;
-      let ty = y - bbox.height - 8;
+      if (tx + tipWidth > margin.left + innerW) tx = x - tipWidth - 8;
+      tx = Math.max(margin.left + 2, Math.min(tx, margin.left + innerW - tipWidth - 2));
+      let ty = y - tipHeight - 8;
       if (ty < margin.top) ty = y + 12;
+      ty = Math.max(margin.top + 2, Math.min(ty, margin.top + innerH - tipHeight - 2));
 
       tipG.setAttribute("transform", `translate(${tx},${ty})`);
       setVisible(tipG, true);
+    };
+
+    overlay.addEventListener("mousemove", evt => {
+      revealAtClientX(evt.clientX);
     });
 
+    overlay.addEventListener("pointerdown", evt => {
+      if (evt.pointerType !== 'mouse') {
+        evt.preventDefault();
+        revealAtClientX(evt.clientX);
+      }
+    });
+
+    overlay.addEventListener("pointermove", evt => {
+      if (evt.pointerType !== 'mouse') {
+        evt.preventDefault();
+        revealAtClientX(evt.clientX);
+      }
+    });
+
+    overlay.addEventListener("touchstart", evt => {
+      const touch = evt.touches?.[0] || evt.changedTouches?.[0];
+      if (!touch) return;
+      evt.preventDefault();
+      revealAtClientX(touch.clientX);
+    }, { passive: false });
+
+    overlay.addEventListener("touchmove", evt => {
+      const touch = evt.touches?.[0] || evt.changedTouches?.[0];
+      if (!touch) return;
+      evt.preventDefault();
+      revealAtClientX(touch.clientX);
+    }, { passive: false });
+
     overlay.addEventListener("mouseleave", () => {
-      setVisible(hair, false);
-      setVisible(dot, false);
-      setVisible(tipG, false);
+      hideInteraction();
     });
 
   }
@@ -1397,6 +1468,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (format === 'pdf') {
+      const printMode = ['bw', 'grayscale', 'color'].includes(String(document.documentElement.dataset.printMode || '').toLowerCase())
+        ? String(document.documentElement.dataset.printMode).toLowerCase()
+        : 'color';
       await EarningsExport.downloadPdfServerSide(
         normalizedScope,
         rows,
@@ -1404,6 +1478,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `paycal-${normalizedScope}-${fileSuffix}.pdf`,
         startDate,
         endDate,
+        printMode,
       );
       return;
     }

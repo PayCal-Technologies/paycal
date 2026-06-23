@@ -37,17 +37,20 @@ final class BusinessMembersGridRendererTest extends TestCase
 
     $this->assertStringContainsString('id="business-members"', $html);
     $this->assertStringContainsString('data-grid="business-members"', $html);
-    $this->assertStringContainsString('class="business_member_details_cell"', $html);
-    $this->assertStringContainsString('class="business_member_details_status"', $html);
+    $this->assertStringContainsString('business_member_details_cell', $html);
+    $this->assertStringContainsString('class="business_member_details_stack"', $html);
+    $this->assertStringNotContainsString('business_member_details_status', $html);
     $this->assertStringContainsString('business_member_details_item', $html);
     $this->assertStringContainsString('data-joined-at-raw="2026-01-01T00:00:00Z"', $html);
     $this->assertStringContainsString('data-joined-display="Jan 1"', $html);
     $this->assertStringContainsString('business_member_joined_item', $html);
-    $this->assertStringContainsString('businesses_member_role_trigger', $html);
     $this->assertStringContainsString('data-current-role="viewer"', $html);
     $this->assertStringContainsString('data-member-id="member-alpha"', $html);
-    $this->assertStringContainsString('data-business-id="business-123"', $html);
-    $this->assertStringContainsString('aria-haspopup="listbox"', $html);
+    $this->assertStringNotContainsString('businesses_member_role_trigger', $html);
+    $this->assertStringContainsString('business_member_role_submenu', $html);
+    $this->assertStringContainsString('business_member_role_menu_item', $html);
+    $this->assertStringContainsString('data-member-action="edit-role"', $html);
+    $this->assertStringContainsString('aria-haspopup="menu"', $html);
     $this->assertStringContainsString('aria-expanded="false"', $html);
     $this->assertStringContainsString('business_member_row_menu_toggle', $html);
     $this->assertStringContainsString('data-member-action="revoke"', $html);
@@ -57,13 +60,15 @@ final class BusinessMembersGridRendererTest extends TestCase
     $this->assertStringContainsString('alpha@example.com', $html);
     $this->assertStringContainsString('zulu@example.com', $html);
     $this->assertStringContainsString('Name &amp; Details', $html);
+    $this->assertStringContainsString('Last Active', $html);
     $this->assertStringContainsString('Hours', $html);
     $this->assertStringContainsString('Earnings', $html);
-    $this->assertStringContainsString('Active', $html);
+    $this->assertStringNotContainsString('<span class="business_member_details_status">Active</span>', $html);
     $this->assertStringContainsString('data-column-visibility="1"', $html);
     $this->assertStringContainsString('datagrid_column_menu', $html);
     $this->assertStringContainsString('datagrid_column_menu_toggle', $html);
     $this->assertStringContainsString('data-col-key="joined_at"', $html);
+    $this->assertStringContainsString('data-col-key="last_active_at"', $html);
     $this->assertStringContainsString('data-col-key="hours"', $html);
     $this->assertStringContainsString('data-col-key="earnings"', $html);
     $this->assertStringNotContainsString('data-col-key="email"', $html);
@@ -73,6 +78,17 @@ final class BusinessMembersGridRendererTest extends TestCase
     $this->assertStringNotContainsString('Total Hours', $html);
     $this->assertStringNotContainsString('Trailing Baseline', $html);
     $this->assertLessThan(strpos($html, 'zulu@example.com'), strpos($html, 'alpha@example.com'));
+  }
+
+  #[Test]
+  public function shieldCheckIconMarkupRendersAccessibleVerifiedIcon(): void
+  {
+    $html = BusinessMembersGridRenderer::shieldCheckIconMarkup('Verified: protected reports enabled', 'business_member_data_access_icon is-active');
+
+    $this->assertStringContainsString('business_member_data_access_icon is-active', $html);
+    $this->assertStringContainsString('aria-label="Verified: protected reports enabled"', $html);
+    $this->assertStringContainsString('business_member_data_access_icon_verified_shield', $html);
+    $this->assertStringContainsString('business_member_data_access_icon_verified_check', $html);
   }
 
   #[Test]
@@ -94,7 +110,8 @@ final class BusinessMembersGridRendererTest extends TestCase
 
     $this->assertStringContainsString('Harry Styles', $html);
     $this->assertStringContainsString('data-current-role="coordinator"', $html);
-    $this->assertStringContainsString('>Manager</button>', $html);
+    $this->assertStringContainsString('>Manager</span>', $html);
+    $this->assertStringContainsString('data-role="coordinator" data-member-id="a1b2c3d4-e5f6-7890-abcd-ef1234567890" aria-current="true" disabled', $html);
     $this->assertStringNotContainsString('>coordinator</button>', $html);
     $this->assertStringNotContainsString('>coordinator<', $html);
   }
@@ -155,7 +172,12 @@ final class BusinessMembersGridRendererTest extends TestCase
     $this->assertStringContainsString('>Viewer<', $html);
     $this->assertStringContainsString('>Member<', $html);
     $this->assertStringNotContainsString('>coordinator<', $html);
-    $this->assertStringContainsString('aria-label="Change role, currently Manager"', $html);
+    $this->assertStringNotContainsString('aria-label="Change role, currently Manager"', $html);
+    $this->assertStringContainsString('business_member_role_submenu', $html);
+    $this->assertStringContainsString('data-role="coordinator"', $html);
+    $this->assertStringContainsString('data-role="contributor"', $html);
+    $this->assertStringContainsString('data-role="viewer"', $html);
+    $this->assertStringContainsString('data-role="member"', $html);
   }
 
   #[Test]
@@ -221,13 +243,14 @@ final class BusinessMembersGridRendererTest extends TestCase
     ]);
 
     preg_match(
-      '/<div class="datagrid_item datagrid_col_full_name business_member_details_item"[^>]*data-col-key="full_name"[^>]*>.*?<\/div>\s*<div class="datagrid_item datagrid_col_joined_at[^"]*"[^>]*>.*?<\/div>/s',
+      '/<div class="datagrid_item datagrid_col_full_name business_member_details_item"[^>]*data-col-key="full_name"[^>]*>.*?<\/div>\s*<div class="datagrid_item datagrid_col_joined_at[^"]*"[^>]*>.*?<\/div>\s*<div class="datagrid_item datagrid_col_last_active_at[^"]*"[^>]*>.*?<\/div>/s',
       $html,
       $rowSegmentMatch,
     );
     $this->assertNotFalse($rowSegmentMatch[0] ?? false);
-    $this->assertStringContainsString('business_member_details_status', $rowSegmentMatch[0]);
-    $this->assertStringContainsString('Active', $rowSegmentMatch[0]);
+    $this->assertStringContainsString('business_member_details_stack', $rowSegmentMatch[0]);
+    $this->assertStringNotContainsString('business_member_details_status', $rowSegmentMatch[0]);
+    $this->assertStringNotContainsString('>Active<', $rowSegmentMatch[0]);
 
     preg_match(
       '/<div class="datagrid_item datagrid_col_joined_at[^"]*"[^>]*>.*?<\/div>/s',
@@ -237,6 +260,14 @@ final class BusinessMembersGridRendererTest extends TestCase
     $this->assertNotFalse($joinedCellMatch[0] ?? false);
     $this->assertStringNotContainsString('business_member_details_status', $joinedCellMatch[0]);
     $this->assertStringContainsString('Jan 1', $joinedCellMatch[0]);
+
+    preg_match(
+      '/<div class="datagrid_item datagrid_col_last_active_at[^"]*"[^>]*>.*?<\/div>/s',
+      $html,
+      $lastActiveCellMatch,
+    );
+    $this->assertNotFalse($lastActiveCellMatch[0] ?? false);
+    $this->assertStringNotContainsString('business_member_details_status', $lastActiveCellMatch[0]);
   }
 
   #[Test]
@@ -285,7 +316,7 @@ final class BusinessMembersGridRendererTest extends TestCase
   }
 
   #[Test]
-  public function renderMembersUsesMergedSearchPaginationToolbar(): void
+  public function renderMembersUsesMergedSearchToolbarWithoutPagination(): void
   {
     $renderer = new BusinessMembersGridRenderer();
     $members = [];
@@ -309,29 +340,25 @@ final class BusinessMembersGridRendererTest extends TestCase
     $this->assertNotFalse($toolbarStart);
     $this->assertStringContainsString('placeholder="Filter members..."', $html);
     $this->assertStringContainsString('class="datagrid_toolbar_start"', $html);
-    $this->assertStringContainsString('class="datagrid_toolbar_center"', $html);
-    $this->assertStringContainsString('class="datagrid_toolbar_end datagrid_pagination"', $html);
-    $this->assertStringContainsString('Showing 1–25 of 30 members', $html);
-    $this->assertStringContainsString('class="datagrid_pagination_btn datagrid_pagination_btn_icon"', $html);
-    $this->assertStringContainsString('aria-label="Previous"', $html);
-    $this->assertStringContainsString('aria-label="Next"', $html);
+    $this->assertStringContainsString('class="datagrid_toolbar_filters business_members_toolbar_filters"', $html);
+    $this->assertStringContainsString('class="datagrid_toolbar_bulk business_members_toolbar_bulk"', $html);
+    $this->assertStringNotContainsString('class="datagrid_toolbar_center"', $html);
+    $this->assertStringNotContainsString('class="datagrid_toolbar_end datagrid_pagination"', $html);
+    $this->assertStringNotContainsString('Showing 1–25 of 30 members', $html);
+    $this->assertStringNotContainsString('class="datagrid_pagination_btn datagrid_pagination_btn_icon"', $html);
     $this->assertStringNotContainsString('datagrid_pagination_top', $html);
     $this->assertStringNotContainsString('datagrid_pagination_bottom', $html);
     $this->assertStringNotContainsString('class="datagrid_controls"', $html);
 
     $searchPos = strpos($html, 'class="datagrid_search"', $toolbarStart);
-    $infoPos = strpos($html, 'class="datagrid_page datagrid_page_info"', $toolbarStart);
-    $prevPos = strpos($html, 'data-direction="prev"', $toolbarStart);
-    $nextPos = strpos($html, 'data-direction="next"', $toolbarStart);
     $this->assertNotFalse($searchPos);
-    $this->assertNotFalse($infoPos);
-    $this->assertNotFalse($prevPos);
-    $this->assertNotFalse($nextPos);
-    $this->assertLessThan($infoPos, $searchPos);
-    $this->assertLessThan($prevPos, $infoPos);
-    $this->assertLessThan($nextPos, $prevPos);
 
     $this->assertStringContainsString('class="datagrid_column_menu"', $html);
+    $this->assertMatchesRegularExpression(
+      '/class="datagrid_toolbar_filters business_members_toolbar_filters"[\s\S]*class="datagrid_column_menu"/',
+      $html,
+    );
+    $this->assertStringNotContainsString('class="datagrid_column_strip"', $html);
     $this->assertStringContainsString('class="datagrid_header_row"', $html);
   }
 
@@ -365,7 +392,7 @@ final class BusinessMembersGridRendererTest extends TestCase
     $this->assertStringNotContainsString('Beta Member', $html);
     $this->assertStringContainsString('data-search="alpha"', $html);
     $this->assertStringContainsString('value="alpha"', $html);
-    $this->assertStringContainsString('Showing 1–1 of 1 members', $html);
+    $this->assertStringNotContainsString('Showing 1–1 of 1 members', $html);
   }
 
   #[Test]
@@ -407,7 +434,7 @@ final class BusinessMembersGridRendererTest extends TestCase
     $this->assertStringNotContainsString('Adrianl Tchaikovskie', $html);
     $this->assertStringContainsString('data-search="tom"', $html);
     $this->assertStringContainsString('value="tom"', $html);
-    $this->assertStringContainsString('Showing 1–2 of 2 members', $html);
+    $this->assertStringNotContainsString('Showing 1–2 of 2 members', $html);
   }
 
   #[Test]
@@ -438,16 +465,12 @@ final class BusinessMembersGridRendererTest extends TestCase
     $this->assertNotFalse($headerMatch[1] ?? false);
     preg_match_all('/class="datagrid_heading[^"]*"/', $headerMatch[1], $headerCells);
 
-    preg_match(
-      '/data-id="member-alpha".*?<div class="datagrid_row_content">(.*?)<\/div>\s*<\/div>\s*<\/div>/s',
-      $html,
-      $rowMatch,
-    );
-    $this->assertNotFalse($rowMatch[1] ?? false);
-    preg_match_all('/class="datagrid_item[^"]*"/', $rowMatch[1], $rowCells);
+    preg_match('/<div class="datagrid_row[^"]*"[^>]*data-id="member-alpha".*?<\/div>\s*<\/div>\s*<\/div>\s*<\/div>/s', $html, $rowMatch);
+    $this->assertNotFalse($rowMatch[0] ?? false);
+    preg_match_all('/class="datagrid_item (?:datagrid_col_select|datagrid_col_full_name|datagrid_col_joined_at|datagrid_col_last_active_at|datagrid_col_hours|datagrid_col_earnings|datagrid_item_actions)[^"]*"/', $rowMatch[0], $rowCells);
 
     $this->assertSame(count($headerCells[0]), count($rowCells[0]));
-    $this->assertSame(6, count($headerCells[0]));
+    $this->assertSame(7, count($headerCells[0]));
   }
 
   #[Test]

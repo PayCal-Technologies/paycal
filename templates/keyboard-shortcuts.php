@@ -1,7 +1,7 @@
 <!-- MODAL KEYBOARD SHORTCUTS -->
 <!-- Contract marker: Shortcut Safeguards -->
 <!-- Contract marker: Single-key page shortcuts are suppressed while typing in inputs and while dialogs are open. -->
-<dialog id='modal_help' data-dialog-close-on-backdrop='true' aria-labelledby='modal_help_title' aria-describedby='modal_help_aria modal_help_meta'>
+<dialog id='modal_help' data-dialog-close-on-backdrop='true' aria-modal='true' aria-labelledby='modal_help_title' aria-describedby='modal_help_aria modal_help_meta'>
   <div class='modal_aria visually_hidden'>
     <span id='modal_help_aria'>__KEYBOARD_SHORTCUTS_MODAL_ARIA__</span>
   </div>

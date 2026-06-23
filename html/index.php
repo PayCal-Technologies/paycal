@@ -79,7 +79,7 @@ if (function_exists('calendar_viewable_members_for_actor') === false) {
 			}
 
 			$ownerUUID = calendar_scalar_string($org['owner_uuid'] ?? '');
-			$actorRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $actorUUID);
+			$actorRelationship = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $actorUUID);
 			$actorStatus = calendar_scalar_string($actorRelationship['status'] ?? '');
 			$actorRole = strtolower(calendar_scalar_string($actorRelationship['role'] ?? ''));
 			$isOwner = $ownerUUID !== '' && $ownerUUID === $actorUUID;
@@ -94,7 +94,7 @@ if (function_exists('calendar_viewable_members_for_actor') === false) {
 					continue;
 				}
 
-				$memberRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $memberUUID);
+				$memberRelationship = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $memberUUID);
 				$memberStatus = calendar_scalar_string($memberRelationship['status'] ?? '');
 				if ($memberStatus !== BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
 					continue;
@@ -1125,11 +1125,17 @@ echo Render::jsScript('core');
 
 $cacheVersion = Environment::appVersion();
 if ($cacheVersion === '' || $cacheVersion === 'unknown') {
+	$calendarI18nJsPath = Environment::appHome() . 'html/js/calendar/i18n.js';
+	$calendarAriaEchoJsPath = Environment::appHome() . 'html/js/calendar/aria-echo.js';
+	$calendarPlatformJsPath = Environment::appHome() . 'html/js/calendar/platform.js';
 	$calendarJsPath = Environment::appHome() . 'html/js/calendar/calendar.js';
 	$workerJsPath = Environment::appHome() . 'html/js/calendar/crypto-worker.js';
+	$calendarI18nMtime = file_exists($calendarI18nJsPath) ? (string) filemtime($calendarI18nJsPath) : (string) time();
+	$calendarAriaEchoMtime = file_exists($calendarAriaEchoJsPath) ? (string) filemtime($calendarAriaEchoJsPath) : (string) time();
+	$calendarPlatformMtime = file_exists($calendarPlatformJsPath) ? (string) filemtime($calendarPlatformJsPath) : (string) time();
 	$calendarMtime = file_exists($calendarJsPath) ? (string) filemtime($calendarJsPath) : (string) time();
 	$workerMtime = file_exists($workerJsPath) ? (string) filemtime($workerJsPath) : (string) time();
-	$cacheVersion = 'dev-' . $calendarMtime . '-' . $workerMtime;
+	$cacheVersion = 'dev-' . $calendarI18nMtime . '-' . $calendarAriaEchoMtime . '-' . $calendarPlatformMtime . '-' . $calendarMtime . '-' . $workerMtime;
 }
 $cspNonceRaw = $_SERVER['CSP_NONCE'] ?? '';
 $cspNonce = (is_string($cspNonceRaw) && $cspNonceRaw !== '') ? $cspNonceRaw : User::nonce();
@@ -1197,7 +1203,22 @@ echo '    <script type="application/json" id="calendar-page-i18n" nonce="' . htm
 echo '    <script type="module" src="' . Environment::appURL('js/core/binary-codec.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"></script>' . PHP_EOL;
 echo '    <script type="module" src="' . Environment::appURL('js/core/set-utils.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"></script>' . PHP_EOL;
 
-// Load monolithic calendar.js directly (not the PHP-backed folder which includes PhantomWing)
+// Load classic calendar helpers and calendar.js directly (not the PHP-backed folder which includes PhantomWing)
+$calendarI18nSriAttribute = Environment::appEnv() === 'prod'
+	? Render::sriAttribute('js/calendar/i18n.js')
+	: '';
+echo '    <script src="' . Environment::appURL('js/calendar/i18n.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarI18nSriAttribute . '></script>' . PHP_EOL;
+
+$calendarAriaEchoSriAttribute = Environment::appEnv() === 'prod'
+	? Render::sriAttribute('js/calendar/aria-echo.js')
+	: '';
+echo '    <script src="' . Environment::appURL('js/calendar/aria-echo.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarAriaEchoSriAttribute . '></script>' . PHP_EOL;
+
+$calendarPlatformSriAttribute = Environment::appEnv() === 'prod'
+	? Render::sriAttribute('js/calendar/platform.js')
+	: '';
+echo '    <script src="' . Environment::appURL('js/calendar/platform.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarPlatformSriAttribute . '></script>' . PHP_EOL;
+
 $calendarSriAttribute = Environment::appEnv() === 'prod'
 	? Render::sriAttribute('js/calendar/calendar.js')
 	: '';

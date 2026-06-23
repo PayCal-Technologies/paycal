@@ -52,6 +52,11 @@ $spacingSliderValue = $normalizeSliderPreference($user->spacing ?? UserPreferenc
   'zen' => 5,
 ]);
 
+$depthPreset = strtolower(trim((string) $user->depth));
+if (!in_array($depthPreset, ['flat', 'low', 'standard', 'high'], true)) {
+  $depthPreset = UserPreferenceDefaults::DEFAULT_DEPTH;
+}
+
 // Display px per slider step (11 unique values); center matches baseline. CSS still applies rem + clamp.
 $formatSliderStepDisplayPx = static function (int $raw, float $baseRem, float $clampMinRem, float $rootFontSizePx = 16.0): string {
   $normalized = max(-5, min(5, $raw));
@@ -120,6 +125,7 @@ if (InputSanitizer::getString('lens') === '1') {
     'variant' => (string) ($user->variant ?? 'default'),
     'text' => (string) ($user->text ?? '0'),
     'spacing' => (string) ($user->spacing ?? '0'),
+    'depth' => (string) $user->depth,
     'dyslexia_typography' => (string) ($user->dyslexia_typography ?? UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY),
     'audio_feedback' => (string) ($user->audio_feedback ?? 'all'),
     'default_site_set' => !empty((string) ($user->default_site_id ?? '')),

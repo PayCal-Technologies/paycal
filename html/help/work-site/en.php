@@ -58,8 +58,9 @@ require_once HTML . '/header.php';
           type="button"
           class="help-image-button"
           data-help-popover-open="work-site-setup-popover"
-          aria-haspopup="true"
+          aria-haspopup="dialog"
           aria-controls="work-site-setup-popover"
+          aria-expanded="false"
           aria-label="<?php echo htmlspecialchars(help_ws_i18n('HELP_WORK_SITE_POPOVER_OPEN_ARIA'), ENT_QUOTES, 'UTF-8'); ?>"
         >
           <img
@@ -76,11 +77,12 @@ require_once HTML . '/header.php';
         id="work-site-setup-popover"
         class="help-image-popover"
         popover="auto"
-        aria-label="<?php echo htmlspecialchars(help_ws_i18n('HELP_WORK_SITE_POPOVER_ARIA'), ENT_QUOTES, 'UTF-8'); ?>"
+        role="dialog"
+        aria-labelledby="work-site-setup-popover-title"
       >
         <div class="help-image-popover-card">
           <div class="help-image-popover-header">
-            <h4><?php echo htmlspecialchars(help_ws_i18n('HELP_WORK_SITE_POPOVER_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h4>
+            <h4 id="work-site-setup-popover-title"><?php echo htmlspecialchars(help_ws_i18n('HELP_WORK_SITE_POPOVER_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h4>
             <button
               type="button"
               class="btn btn_secondary help-image-popover-close"

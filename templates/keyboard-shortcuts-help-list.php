@@ -34,7 +34,7 @@
         </div>
         <div class='flex pad_xs' aria-label='__OPEN_DIALOG_WITH__'>
           <div class='w33'>__OPEN_DIALOG__</div>
-          <div class='w66'>__ENTER_KEY__</div>
+          <div class='w66'><kbd>__ENTER_KEY__</kbd></div>
         </div>
       </div>
 
@@ -70,10 +70,10 @@
         </div>
         <div class='flex border_inset pad_xs' aria-label='__DELETE_WORK_WITH__'>
           <div class='w33'>__DELETE_WORK__</div>
-          <div class='w66'>__DELETE_KEY__</div>
+          <div class='w66'><kbd>__DELETE_KEY__</kbd></div>
         </div>
         <div class='flex pad_xs' aria-label='__CLOSE_DIALOG_WITH__'>
           <div class='w33'>__CLOSE_DIALOG__</div>
-          <div class='w66'>__ESCAPE_KEY__</div>
+          <div class='w66'><kbd>__ESCAPE_KEY__</kbd></div>
         </div>
       </div>

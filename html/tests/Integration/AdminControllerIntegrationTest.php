@@ -168,10 +168,6 @@ final class AdminControllerIntegrationTest extends TestCase
             'user_uuid' => $this->testUserUUID,
             'created' => (string) time(),
         ]);
-        Database::hset(Keys::EMAIL . $email, [
-            'user_uuid' => $this->testUserUUID,
-            'created' => (string) time(),
-        ]);
         Database::hset(Keys::WORK . ':' . $this->testUserUUID . ':2026-03-01:S123', ['hours' => '8']);
         Database::hset(Keys::SITE . ':' . $this->testUserUUID . ':S123', ['name' => 'Delete Me Site']);
         Database::hset(Keys::SESSION . ':' . $userSessionHash, ['user_uuid' => $this->testUserUUID]);
@@ -199,7 +195,6 @@ final class AdminControllerIntegrationTest extends TestCase
         $this->assertFalse(Database::exists(Keys::SITE . ':' . $this->testUserUUID . ':S123'));
         $this->assertFalse(Database::exists(Keys::SESSION . ':' . $userSessionHash));
         $this->assertFalse(Database::exists(Keys::EMAIL . ':' . $email));
-        $this->assertFalse(Database::exists(Keys::EMAIL . $email));
         $this->assertFalse(Database::exists(Keys::webauthnCredential($credentialId)));
     }
 

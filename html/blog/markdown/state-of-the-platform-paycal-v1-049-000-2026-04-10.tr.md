@@ -67,9 +67,9 @@ Orphaned Work Recovery, site silinmeleri sonrası bağlantısı kopan kayıtlar�
 
 ## Premium: ödünsüz iş birliği
 
-Premium organizasyon özellikleri, bireysel gizlilik sınırlarını korurken daha güçlü operasyonel kontrol sunar.
+Premium işletme özellikleri, bireysel gizlilik sınırlarını korurken daha güçlü operasyonel kontrol sunar.
 
-◆ İşveren ve ekip akışları için Organization Hub
+◆ İşveren ve ekip akışları için Business Hub
 ◆ Granüler izinler içeren geliştirilmiş rol kapsam modeli
 ◆ Yönetim gözetimi için devredilmiş takvim görünümleri
 ◆ Sayfa ziyareti anında şifreleme hazırlığı için DEK Auto-Bootstrap

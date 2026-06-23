@@ -72,7 +72,7 @@ require_once HTML.'/header.php';
   <header class="doc-article-header">
     <h1><?php echo $i18n['TRANSPARENCY_SUPERHEROES_PAGE_TITLE']; ?></h1>
     <p class="deck"><?php echo $i18n['TRANSPARENCY_SUPERHEROES_DECK']; ?></p>
-    <p class="doc-article-meta">Published: <time datetime="2026-04-02">2026-04-02</time></p>
+    <p class="doc-article-meta">Published: <time datetime="2026-04-02">2026-04-02</time> &middot; Last updated: <time datetime="2026-06-21">2026-06-21</time> &middot; <a href="<?php echo transparency_href('/transparency/superheroes-2026-06-21-pre-goldmaster/'); ?>">Previous version</a></p>
   </header>
 
   <div class="doc-article-body">
@@ -134,6 +134,12 @@ require_once HTML.'/header.php';
             <td><?php echo $i18n['TRANSPARENCY_SUPERHEROES_ECHO_USE_CASE']; ?></td>
             <td><code>html/src/Domain/AriaEcho.php</code></td>
           </tr>
+          <tr>
+            <td>GoldMaster</td>
+            <td>Canonical reference examples for PayCal code, UI, tests, and architecture.</td>
+            <td>Guides humans and AI agents toward reviewed patterns before similar work starts.</td>
+            <td><code>golden_masters/</code>, <code>html/src/Domain/GoldMasterCatalog.php</code></td>
+          </tr>
         </tbody>
       </table>
     </section>
@@ -145,6 +151,7 @@ require_once HTML.'/header.php';
         <li><strong>Browser diagnostics path:</strong> <?php echo $i18n['TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_2_TEXT']; ?></li>
         <li><strong>Account communication path:</strong> <?php echo $i18n['TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_3_TEXT']; ?></li>
         <li><strong>Assistive narration path:</strong> <?php echo $i18n['TRANSPARENCY_SUPERHEROES_WORK_TOGETHER_ITEM_4_TEXT']; ?></li>
+        <li><strong>Canonical reference path:</strong> GoldMaster records reviewed examples so future work starts from the correct PayCal pattern.</li>
       </ul>
       <p><em><?php echo $i18n['TRANSPARENCY_SUPERHEROES_MOTTO']; ?></em></p>
     </section>
@@ -164,9 +171,10 @@ require_once HTML.'/header.php';
       <ul class="doc-fact-list">
         <li><code>html/tests/Unit/ShadowTalonTest.php</code> verifies fault response safety and route-shape behavior.</li>
         <li><code>html/tests/Unit/EmailTemplateRenderTest.php</code> verifies transactional template rendering across email flows.</li>
+        <li><code>html/tests/Unit/Domain/GoldMasterCatalogTest.php</code> verifies golden master metadata and read-only file preview behavior.</li>
         <li><?php echo $i18n['TRANSPARENCY_SUPERHEROES_VERIFICATION_ITEM_3']; ?></li>
       </ul>
-      <p><strong><?php echo $i18n['TRANSPARENCY_SUPERHEROES_LAST_UPDATED_LABEL']; ?></strong> March 21, 2026.</p>
+      <p><strong><?php echo $i18n['TRANSPARENCY_SUPERHEROES_LAST_UPDATED_LABEL']; ?></strong> June 21, 2026.</p>
     </section>
   </div>
 </article>

@@ -30,10 +30,10 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     parent::setUp();
 
     $this->service = new BusinessDiscoveryService();
-    $this->originalOrgSharedEncryptionEnabled = (bool) SystemConfig::get('org_shared_encryption_enabled');
-    $this->originalOrgSharedEncryptionWriteEnabled = (bool) SystemConfig::get('org_shared_encryption_enable_write');
-    SystemConfig::set('org_shared_encryption_enabled', false);
-    SystemConfig::set('org_shared_encryption_enable_write', false);
+    $this->originalOrgSharedEncryptionEnabled = (bool) SystemConfig::get('business_shared_encryption_enabled');
+    $this->originalOrgSharedEncryptionWriteEnabled = (bool) SystemConfig::get('business_shared_encryption_enable_write');
+    SystemConfig::set('business_shared_encryption_enabled', false);
+    SystemConfig::set('business_shared_encryption_enable_write', false);
     $suffix = bin2hex(random_bytes(6));
 
     $this->ownerUUID = 'org-owner-ctrl-' . $suffix;
@@ -84,20 +84,20 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     Database::unlink(Keys::BUSINESS_OWNER . ':' . $this->ownerUUID);
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->ownerUUID);
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->requesterUUID);
-    Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->ownerUUID);
-    Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->requesterUUID);
+    Database::unlink(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->ownerUUID);
+    Database::unlink(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->requesterUUID);
     Database::unlink(Keys::BUSINESS_ACCESS_REQUEST_REQUESTER . ':' . $this->requesterUUID);
 
     $this->cleanupUser($this->ownerUUID, $this->ownerEmail);
     $this->cleanupUser($this->requesterUUID, $this->requesterEmail);
     foreach ($this->seededMembers as $memberUUID => $memberEmail) {
       Database::unlink(Keys::BUSINESS_USER . ':' . $memberUUID);
-      Database::unlink(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $memberUUID);
+      Database::unlink(Keys::BUSINESS_CONNECTIONS_USER . ':' . $memberUUID);
       $this->cleanupUser($memberUUID, $memberEmail);
     }
 
-    SystemConfig::set('org_shared_encryption_enabled', $this->originalOrgSharedEncryptionEnabled);
-    SystemConfig::set('org_shared_encryption_enable_write', $this->originalOrgSharedEncryptionWriteEnabled);
+    SystemConfig::set('business_shared_encryption_enabled', $this->originalOrgSharedEncryptionEnabled);
+    SystemConfig::set('business_shared_encryption_enable_write', $this->originalOrgSharedEncryptionWriteEnabled);
 
     parent::tearDown();
   }
@@ -116,7 +116,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     ]);
     $this->assertTrue($approved['success']);
 
-    $updated = $this->service->updateRelationshipRole($this->ownerUUID, $this->businessId, $this->requesterUUID, 'viewer');
+    $updated = $this->service->updateConnectionRole($this->ownerUUID, $this->businessId, $this->requesterUUID, 'viewer');
     $this->assertTrue($updated['success']);
 
     $alphaUUID = 'org-member-alpha-' . bin2hex(random_bytes(4));
@@ -162,12 +162,14 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
     $this->assertSame('success', $payload['status'] ?? null);
     $html = (string) ($payload['data']['html'] ?? '');
-    $this->assertStringContainsString('data-page="2"', $html);
+    $this->assertStringContainsString('data-page="1"', $html);
+    $this->assertStringContainsString('data-total-pages="1"', $html);
+    $this->assertStringContainsString('data-pagination-total="31"', $html);
   }
 
   public function testMembersGridRouteDeniedForNonPrivilegedSession(): void
   {
-    $this->seedRelationship($this->requesterUUID, 'member', 'work.read');
+    $this->seedConnection($this->requesterUUID, 'member', 'work.read');
 
     $payload = $this->invokeControllerRoute('listMembersGrid', $this->businessId, 'GET', [], [], $this->requesterSession);
     $this->assertNotSame('success', $payload['status'] ?? null);
@@ -182,7 +184,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $inviteId = (string) ($invite['data']['invite_id'] ?? '');
     $this->assertNotSame('', $inviteId);
 
-    $this->seedRelationship($this->requesterUUID, 'member', 'work.read');
+    $this->seedConnection($this->requesterUUID, 'member', 'work.read');
 
     $payload = $this->invokeControllerRoute('revokeInvite', $this->businessId, 'POST', [
       'invite_id' => $inviteId,
@@ -195,7 +197,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
   public function testMembersGridRouteDeniedForViewerSession(): void
   {
-    $this->seedRelationship($this->requesterUUID, 'viewer', 'work.read,sites.read');
+    $this->seedConnection($this->requesterUUID, 'viewer', 'work.read,sites.read');
 
     $payload = $this->invokeControllerRoute('listMembersGrid', $this->businessId, 'GET', [], [], $this->requesterSession);
     $this->assertNotSame('success', $payload['status'] ?? null);
@@ -210,7 +212,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $inviteId = (string) ($invite['data']['invite_id'] ?? '');
     $this->assertNotSame('', $inviteId);
 
-    $this->seedRelationship($this->requesterUUID, 'viewer', 'work.read,sites.read');
+    $this->seedConnection($this->requesterUUID, 'viewer', 'work.read,sites.read');
 
     $payload = $this->invokeControllerRoute('revokeInvite', $this->businessId, 'POST', [
       'invite_id' => $inviteId,
@@ -223,7 +225,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
   public function testGenerateAuditControlTestRouteDeniedForViewerSession(): void
   {
-    $this->seedRelationship($this->requesterUUID, 'viewer', 'work.read,sites.read');
+    $this->seedConnection($this->requesterUUID, 'viewer', 'work.read,sites.read');
 
     $payload = $this->invokeControllerRoute('generateAuditControlTest', $this->businessId, 'POST', [
       'summary' => 'Viewer should be denied',
@@ -421,7 +423,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
   public function testListInvitesRouteDeniedForNonPrivilegedSessionReturnsForbidden(): void
   {
-    $this->seedRelationship($this->requesterUUID, 'member', 'work.read');
+    $this->seedConnection($this->requesterUUID, 'member', 'work.read');
 
     $payload = $this->invokeControllerRoute('listInvites', $this->businessId, 'GET', [], [], $this->requesterSession);
 
@@ -431,7 +433,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
   public function testListInviteHistoryRouteDeniedForNonPrivilegedSessionReturnsForbidden(): void
   {
-    $this->seedRelationship($this->requesterUUID, 'member', 'work.read');
+    $this->seedConnection($this->requesterUUID, 'member', 'work.read');
 
     $payload = $this->invokeControllerRoute('listInviteHistory', $this->businessId, 'GET', [], [], $this->requesterSession);
 
@@ -441,7 +443,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
   public function testListInvitesRouteDeniedForViewerSessionReturnsForbidden(): void
   {
-    $this->seedRelationship($this->requesterUUID, 'viewer', 'work.read,sites.read');
+    $this->seedConnection($this->requesterUUID, 'viewer', 'work.read,sites.read');
 
     $payload = $this->invokeControllerRoute('listInvites', $this->businessId, 'GET', [], [], $this->requesterSession);
 
@@ -449,7 +451,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertSame(403, (int) ($payload['__http_code'] ?? 0));
   }
 
-  public function testAcceptInviteRouteCreatesActiveRelationshipForInvitee(): void
+  public function testAcceptInviteRouteCreatesActiveConnectionForInvitee(): void
   {
     $invite = $this->service->sendInvite($this->ownerUUID, $this->businessId, $this->requesterEmail, ['work.read']);
     $this->assertTrue($invite['success']);
@@ -467,10 +469,10 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
     $this->assertSame('success', $payload['status'] ?? null);
 
-    $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->requesterUUID);
-    $this->assertSame('active', (string) ($relationship['status'] ?? ''));
-    $this->assertSame('member', (string) ($relationship['role'] ?? ''));
-    $this->assertStringContainsString('work.read', (string) ($relationship['scopes'] ?? ''));
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->requesterUUID);
+    $this->assertSame('active', (string) ($connection['status'] ?? ''));
+    $this->assertSame('member', (string) ($connection['role'] ?? ''));
+    $this->assertStringContainsString('work.read', (string) ($connection['scopes'] ?? ''));
   }
 
   public function testAcceptInviteRouteRejectsRevokedInviteToken(): void
@@ -501,12 +503,12 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
     $this->assertNotSame('success', $payload['status'] ?? null);
 
-    $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->requesterUUID);
-    $this->assertSame('revoked', (string) ($relationship['status'] ?? ''));
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->requesterUUID);
+    $this->assertSame('revoked', (string) ($connection['status'] ?? ''));
     $this->assertSame(0, Database::sismember(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $this->requesterUUID));
     $this->assertSame(0, Database::sismember(Keys::BUSINESS_USER . ':' . $this->requesterUUID, $this->businessId));
-    $this->assertSame(0, Database::sismember(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $this->requesterUUID));
-    $this->assertSame(0, Database::sismember(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $this->requesterUUID, $this->businessId));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_CONNECTIONS . ':' . $this->businessId, $this->requesterUUID));
+    $this->assertSame(0, Database::sismember(Keys::BUSINESS_CONNECTIONS_USER . ':' . $this->requesterUUID, $this->businessId));
     $this->assertSame(0, Database::sismember(Keys::BUSINESS_PENDING . ':' . $this->businessId, $this->requesterUUID));
   }
 
@@ -527,7 +529,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
   public function testListAccessRequestsRouteDeniedForNonPrivilegedSessionReturnsForbidden(): void
   {
-    $this->seedRelationship($this->requesterUUID, 'member', 'work.read');
+    $this->seedConnection($this->requesterUUID, 'member', 'work.read');
 
     $payload = $this->invokeControllerRoute('listAccessRequests', $this->businessId, 'GET', [], [], $this->requesterSession);
 
@@ -537,7 +539,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
   public function testListAccessRequestsRouteDeniedForViewerSessionReturnsForbidden(): void
   {
-    $this->seedRelationship($this->requesterUUID, 'viewer', 'work.read,sites.read');
+    $this->seedConnection($this->requesterUUID, 'viewer', 'work.read,sites.read');
 
     $payload = $this->invokeControllerRoute('listAccessRequests', $this->businessId, 'GET', [], [], $this->requesterSession);
 
@@ -545,7 +547,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertSame(403, (int) ($payload['__http_code'] ?? 0));
   }
 
-  public function testApproveAccessRequestRouteActivatesRelationship(): void
+  public function testApproveAccessRequestRouteActivatesConnection(): void
   {
     $requested = $this->service->requestAccessByOwnerEmail($this->requesterUUID, $this->ownerEmail);
     $this->assertTrue($requested['success']);
@@ -561,8 +563,8 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
     $this->assertSame('success', $payload['status'] ?? null);
 
-    $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->requesterUUID);
-    $this->assertSame('active', (string) ($relationship['status'] ?? ''));
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->requesterUUID);
+    $this->assertSame('active', (string) ($connection['status'] ?? ''));
   }
 
   public function testRejectAccessRequestRouteMarksRequestRejected(): void
@@ -582,7 +584,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertSame('rejected', (string) ($request['status'] ?? ''));
   }
 
-  public function testListRelationshipsRouteReturnsMembersPayload(): void
+  public function testListConnectionsRouteReturnsMembersPayload(): void
   {
     $requested = $this->service->requestAccessByOwnerEmail($this->requesterUUID, $this->ownerEmail);
     $this->assertTrue($requested['success']);
@@ -605,7 +607,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $alphaEmail = 'alpha-member-' . bin2hex(random_bytes(4)) . '@example.com';
     $this->seedActiveMember($alphaUUID, $alphaEmail, 'viewer');
 
-    $payload = $this->invokeControllerRoute('listRelationships', $this->businessId, 'GET');
+    $payload = $this->invokeControllerRoute('listConnections', $this->businessId, 'GET');
     $this->assertSame('success', $payload['status'] ?? null);
 
     $members = is_array($payload['data']['members'] ?? null) ? $payload['data']['members'] : [];
@@ -626,7 +628,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertSame($this->requesterEmail, (string) ($requesterRows[0]['email'] ?? ''));
   }
 
-  public function testListForCurrentUserRejectsFreeMemberWorkspaceFeed(): void
+  public function testListForCurrentUserAllowsFreeMemberConnectionFeed(): void
   {
     Database::hset(Keys::BUSINESS_SETTINGS . ':' . $this->businessId, [
       'industry' => 'Healthcare',
@@ -638,12 +640,23 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       'support_hours' => 'Mon-Fri 9-5',
     ]);
 
-    $this->seedRelationship($this->requesterUUID, 'member', 'work.read,sites.read');
+    $requested = $this->service->requestAccessByOwnerEmail($this->requesterUUID, $this->ownerEmail);
+    $this->assertTrue($requested['success'], (string) ($requested['message'] ?? ''));
 
     $payload = $this->invokeControllerMethodWithoutBusiness('listForCurrentUser', 'GET', [], [], $this->requesterSession);
-    $this->assertNotSame('success', $payload['status'] ?? null, json_encode($payload));
-    $this->assertSame(403, $payload['__http_code'] ?? null, json_encode($payload));
-    $this->assertStringContainsString('Business workspace access requires PayCal Business', (string) ($payload['message'] ?? ''));
+    $this->assertSame('success', $payload['status'] ?? null, json_encode($payload));
+    $this->assertSame(200, $payload['__http_code'] ?? null, json_encode($payload));
+
+    $businesses = is_array($payload['data']['businesses'] ?? null)
+      ? $payload['data']['businesses']
+      : [];
+
+    $matchingRows = array_values(array_filter($businesses, function (mixed $business): bool {
+      return is_array($business) && (string) ($business['business_id'] ?? '') === $this->businessId;
+    }));
+
+    $this->assertNotSame([], $matchingRows);
+    $this->assertSame('pending', (string) ($matchingRows[0]['connection_status'] ?? ''));
   }
 
   public function testListMemberAuditTimelineReturnsProfileRelatedEventsOnly(): void
@@ -734,7 +747,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertSame($memberUuids[99], $recordedMembers[99]);
   }
 
-  public function testUpdateRelationshipRoleRouteUpdatesRoleAndScopes(): void
+  public function testUpdateConnectionRoleRouteUpdatesRoleAndScopes(): void
   {
     $requested = $this->service->requestAccessByOwnerEmail($this->requesterUUID, $this->ownerEmail);
     $this->assertTrue($requested['success']);
@@ -749,7 +762,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     ]);
     $this->assertTrue($approved['success']);
 
-    $payload = $this->invokeControllerRoute('updateRelationshipRole', $this->businessId, 'POST', [
+    $payload = $this->invokeControllerRoute('updateConnectionRole', $this->businessId, 'POST', [
       'target_user_uuid' => $this->requesterUUID,
       'role' => 'viewer',
       'csrf_token' => 'test-csrf',
@@ -757,37 +770,37 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
     $this->assertSame('success', $payload['status'] ?? null);
 
-    $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->requesterUUID);
-    $this->assertSame('viewer', (string) ($relationship['role'] ?? ''));
-    $scopeCsv = (string) ($relationship['scopes'] ?? '');
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->requesterUUID);
+    $this->assertSame('viewer', (string) ($connection['role'] ?? ''));
+    $scopeCsv = (string) ($connection['scopes'] ?? '');
     $this->assertStringContainsString('payperiod.read', $scopeCsv);
     $this->assertStringContainsString('sites.read', $scopeCsv);
     $this->assertStringContainsString('work.read', $scopeCsv);
   }
 
-  public function testRevokeRelationshipRouteRejectsOwnerTarget(): void
+  public function testRevokeConnectionRouteRejectsOwnerTarget(): void
   {
-    $payload = $this->invokeControllerRoute('revokeRelationship', $this->businessId, 'POST', [
+    $payload = $this->invokeControllerRoute('revokeConnection', $this->businessId, 'POST', [
       'target_user_uuid' => $this->ownerUUID,
       'csrf_token' => 'test-csrf',
     ]);
 
     $this->assertNotSame('success', $payload['status'] ?? null);
 
-    $ownerRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->ownerUUID);
-    $this->assertSame('owner', (string) ($ownerRelationship['role'] ?? ''));
-    $this->assertSame('active', (string) ($ownerRelationship['status'] ?? ''));
+    $ownerConnection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->ownerUUID);
+    $this->assertSame('owner', (string) ($ownerConnection['role'] ?? ''));
+    $this->assertSame('active', (string) ($ownerConnection['status'] ?? ''));
   }
 
-  public function testRevokeRelationshipRouteDeniedForNonPrivilegedActor(): void
+  public function testRevokeConnectionRouteDeniedForNonPrivilegedActor(): void
   {
     $targetUUID = 'org-member-revoke-' . bin2hex(random_bytes(4));
     $targetEmail = 'revoke-target-' . bin2hex(random_bytes(4)) . '@example.com';
     $this->seedActiveMember($targetUUID, $targetEmail, 'viewer');
 
-    $this->seedRelationship($this->requesterUUID, 'member', 'work.read');
+    $this->seedConnection($this->requesterUUID, 'member', 'work.read');
 
-    $payload = $this->invokeControllerRoute('revokeRelationship', $this->businessId, 'POST', [
+    $payload = $this->invokeControllerRoute('revokeConnection', $this->businessId, 'POST', [
       'target_user_uuid' => $targetUUID,
       'csrf_token' => 'test-csrf',
     ], [], $this->requesterSession);
@@ -795,9 +808,9 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertNotSame('success', $payload['status'] ?? null);
     $this->assertSame(403, (int) ($payload['__http_code'] ?? 0));
 
-    $targetRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $targetUUID);
-    $this->assertSame('active', (string) ($targetRelationship['status'] ?? ''));
-    $this->assertSame('viewer', (string) ($targetRelationship['role'] ?? ''));
+    $targetConnection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $targetUUID);
+    $this->assertSame('active', (string) ($targetConnection['status'] ?? ''));
+    $this->assertSame('viewer', (string) ($targetConnection['role'] ?? ''));
   }
 
   public function testTransferOwnershipRoutePromotesTargetAndDemotesCurrentOwner(): void
@@ -816,14 +829,14 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $org = Database::hgetall(Keys::BUSINESS . ':' . $this->businessId);
     $this->assertSame($targetUUID, (string) ($org['owner_uuid'] ?? ''));
 
-    $formerOwnerRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->ownerUUID);
-    $this->assertSame('active', (string) ($formerOwnerRelationship['status'] ?? ''));
-    $this->assertSame('coordinator', (string) ($formerOwnerRelationship['role'] ?? ''));
+    $formerOwnerConnection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->ownerUUID);
+    $this->assertSame('active', (string) ($formerOwnerConnection['status'] ?? ''));
+    $this->assertSame('coordinator', (string) ($formerOwnerConnection['role'] ?? ''));
 
-    $newOwnerRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $targetUUID);
-    $this->assertSame('active', (string) ($newOwnerRelationship['status'] ?? ''));
-    $this->assertSame('owner', (string) ($newOwnerRelationship['role'] ?? ''));
-    $this->assertSame('all', (string) ($newOwnerRelationship['scopes'] ?? ''));
+    $newOwnerConnection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $targetUUID);
+    $this->assertSame('active', (string) ($newOwnerConnection['status'] ?? ''));
+    $this->assertSame('owner', (string) ($newOwnerConnection['role'] ?? ''));
+    $this->assertSame('all', (string) ($newOwnerConnection['scopes'] ?? ''));
 
     $formerOwnerOrgSet = Database::smembers(Keys::BUSINESS_OWNER . ':' . $this->ownerUUID);
     $newOwnerOrgSet = Database::smembers(Keys::BUSINESS_OWNER . ':' . $targetUUID);
@@ -856,7 +869,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->seedUser($targetUUID, $targetEmail);
     $this->seededMembers[$targetUUID] = $targetEmail;
 
-    Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $targetUUID, [
+    Database::hset(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $targetUUID, [
       'business_id' => $this->businessId,
       'user_uuid' => $targetUUID,
       'role' => 'member',
@@ -864,8 +877,8 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       'scopes' => 'work.read',
       'updated_at' => date('c'),
     ]);
-    Database::sadd(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $targetUUID);
-    Database::sadd(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $targetUUID, $this->businessId);
+    Database::sadd(Keys::BUSINESS_CONNECTIONS . ':' . $this->businessId, $targetUUID);
+    Database::sadd(Keys::BUSINESS_CONNECTIONS_USER . ':' . $targetUUID, $this->businessId);
     Database::sadd(Keys::BUSINESS_PENDING . ':' . $this->businessId, $targetUUID);
 
     $payload = $this->invokeControllerRoute('transferOwnership', $this->businessId, 'POST', [
@@ -892,9 +905,9 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $org = Database::hgetall(Keys::BUSINESS . ':' . $this->businessId);
     $this->assertSame($this->ownerUUID, (string) ($org['owner_uuid'] ?? ''));
 
-    $ownerRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->ownerUUID);
-    $this->assertSame('active', (string) ($ownerRelationship['status'] ?? ''));
-    $this->assertSame('owner', (string) ($ownerRelationship['role'] ?? ''));
+    $ownerConnection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->ownerUUID);
+    $this->assertSame('active', (string) ($ownerConnection['status'] ?? ''));
+    $this->assertSame('owner', (string) ($ownerConnection['role'] ?? ''));
   }
 
   public function testFormerOwnerCanLeaveAfterSuccessfulOwnershipTransfer(): void
@@ -917,8 +930,8 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $org = Database::hgetall(Keys::BUSINESS . ':' . $this->businessId);
     $this->assertSame($targetUUID, (string) ($org['owner_uuid'] ?? ''));
 
-    $formerOwnerRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->ownerUUID);
-    $this->assertSame('withdrawn', (string) ($formerOwnerRelationship['status'] ?? ''));
+    $formerOwnerConnection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->ownerUUID);
+    $this->assertSame('withdrawn', (string) ($formerOwnerConnection['status'] ?? ''));
   }
 
   public function testGetAndUpdateSettingsRoutesAllowMemberWithSettingsWriteScope(): void
@@ -927,7 +940,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       'tier' => 'premium',
       'status' => 'active',
     ]);
-    $this->seedRelationship($this->requesterUUID, 'member', 'org.settings.write,work.read,sites.read');
+    $this->seedConnection($this->requesterUUID, 'member', 'business.settings.write,work.read,sites.read');
 
     $getPayload = $this->invokeControllerRoute('getSettings', $this->businessId, 'GET', [], [], $this->requesterSession);
     $this->assertSame('success', $getPayload['status'] ?? null);
@@ -950,7 +963,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       'tier' => 'premium',
       'status' => 'active',
     ]);
-    $this->seedRelationship($this->requesterUUID, 'viewer', 'work.read,sites.read');
+    $this->seedConnection($this->requesterUUID, 'viewer', 'work.read,sites.read');
 
     $payload = $this->invokeControllerRoute('updateSettings', $this->businessId, 'POST', [
       'default_wage' => '42.00',
@@ -971,7 +984,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       'tier' => 'premium',
       'status' => 'active',
     ]);
-    $this->seedRelationship($this->requesterUUID, 'contributor', 'payperiod.read,payperiod.write,sites.read,sites.write,work.read,work.scope.org,work.write');
+    $this->seedConnection($this->requesterUUID, 'contributor', 'payperiod.read,payperiod.write,sites.read,sites.write,work.read,work.scope.business,work.write');
 
     $payload = $this->invokeControllerRoute('updateSettings', $this->businessId, 'POST', [
       'pay_frequency' => 'weekly',
@@ -991,7 +1004,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       'tier' => 'premium',
       'status' => 'active',
     ]);
-    $this->seedRelationship($this->requesterUUID, 'contributor', 'payperiod.read,payperiod.write,sites.read,sites.write,work.read,work.scope.org,work.write');
+    $this->seedConnection($this->requesterUUID, 'contributor', 'payperiod.read,payperiod.write,sites.read,sites.write,work.read,work.scope.business,work.write');
 
     $payload = $this->invokeControllerRoute('updateSettings', $this->businessId, 'POST', [
       'name' => 'Contributor Should Not Rename Org',
@@ -1004,7 +1017,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
   public function testListAccessRequestsRouteDeniedForContributorSessionReturnsForbidden(): void
   {
-    $this->seedRelationship($this->requesterUUID, 'contributor', 'payperiod.read,payperiod.write,sites.read,sites.write,work.read,work.scope.org,work.write');
+    $this->seedConnection($this->requesterUUID, 'contributor', 'payperiod.read,payperiod.write,sites.read,sites.write,work.read,work.scope.business,work.write');
 
     $payload = $this->invokeControllerRoute('listAccessRequests', $this->businessId, 'GET', [], [], $this->requesterSession);
 
@@ -1018,7 +1031,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       'tier' => 'premium',
       'status' => 'active',
     ]);
-    $this->seedRelationship($this->requesterUUID, 'coordinator', 'access.manage,audit.read,org.settings.read,org.settings.write,payperiod.read,payperiod.write,sites.read,sites.write,wage.read,wage.write,work.read,work.scope.org,work.write');
+    $this->seedConnection($this->requesterUUID, 'coordinator', 'access.manage,audit.read,business.settings.read,business.settings.write,payperiod.read,payperiod.write,sites.read,sites.write,wage.read,wage.write,work.read,work.scope.business,work.write');
 
     $pendingUserUUID = 'org-manager-pending-' . bin2hex(random_bytes(4));
     $pendingUserEmail = 'manager-pending-' . bin2hex(random_bytes(4)) . '@example.com';
@@ -1042,7 +1055,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       'tier' => 'premium',
       'status' => 'active',
     ]);
-    $this->seedRelationship($this->requesterUUID, 'coordinator', 'access.manage,audit.read,org.settings.read,org.settings.write,payperiod.read,payperiod.write,sites.read,sites.write,wage.read,wage.write,work.read,work.scope.org,work.write');
+    $this->seedConnection($this->requesterUUID, 'coordinator', 'access.manage,audit.read,business.settings.read,business.settings.write,payperiod.read,payperiod.write,sites.read,sites.write,wage.read,wage.write,work.read,work.scope.business,work.write');
 
     $payload = $this->invokeControllerRoute('updateSettings', $this->businessId, 'POST', [
       'default_wage' => '55.25',
@@ -1059,7 +1072,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
   public function testManagerRoleCannotTransferOwnership(): void
   {
-    $this->seedRelationship($this->requesterUUID, 'coordinator', 'access.manage,audit.read,org.settings.read,org.settings.write,payperiod.read,payperiod.write,sites.read,sites.write,wage.read,wage.write,work.read,work.scope.org,work.write');
+    $this->seedConnection($this->requesterUUID, 'coordinator', 'access.manage,audit.read,business.settings.read,business.settings.write,payperiod.read,payperiod.write,sites.read,sites.write,wage.read,wage.write,work.read,work.scope.business,work.write');
 
     $targetUUID = 'org-manager-transfer-target-' . bin2hex(random_bytes(4));
     $targetEmail = 'manager-transfer-target-' . bin2hex(random_bytes(4)) . '@example.com';
@@ -1150,7 +1163,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
   public function testNonPremiumMemberCanLeaveSharedBusiness(): void
   {
     Database::unlink(Keys::USER_SUBSCRIPTION . ':' . $this->requesterUUID);
-    $this->seedRelationship($this->requesterUUID, 'member', 'work.read,sites.read');
+    $this->seedConnection($this->requesterUUID, 'member', 'work.read,sites.read');
 
     $payload = $this->invokeControllerRoute('leaveBusiness', $this->businessId, 'POST', [
       'csrf_token' => 'test-csrf',
@@ -1158,8 +1171,8 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
     $this->assertSame('success', $payload['status'] ?? null);
 
-    $relationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->requesterUUID);
-    $this->assertSame('withdrawn', (string) ($relationship['status'] ?? ''));
+    $connection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->requesterUUID);
+    $this->assertSame('withdrawn', (string) ($connection['status'] ?? ''));
   }
 
   public function testNonPremiumPersonalOwnerCanMutateOwnSitesAndWork(): void
@@ -1178,6 +1191,27 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
     $canMutateWork = $this->service->canMutateWorkForOwner($this->ownerUUID, $this->ownerUUID, $personalOrgId);
     $this->assertTrue($canMutateWork);
+  }
+
+  public function testWorkMutationRequiresExplicitScopeBoundary(): void
+  {
+    $targetUUID = 'org-work-target-' . bin2hex(random_bytes(4));
+    $targetEmail = 'work-target-' . bin2hex(random_bytes(4)) . '@example.com';
+    $this->seedActiveMember($targetUUID, $targetEmail, 'member');
+
+    $this->seedConnection($this->requesterUUID, 'member', 'work.read,work.write');
+    $this->assertFalse($this->service->canMutateWorkForOwner($this->requesterUUID, $targetUUID, $this->businessId));
+    $this->assertFalse($this->service->canMutateWorkForOwner($this->requesterUUID, $this->requesterUUID, $this->businessId));
+
+    $this->seedConnection($this->requesterUUID, 'member', 'work.read,work.scope.self,work.write');
+    $this->assertTrue($this->service->canMutateWorkForOwner($this->requesterUUID, $this->requesterUUID, $this->businessId));
+    $this->assertFalse($this->service->canMutateWorkForOwner($this->requesterUUID, $targetUUID, $this->businessId));
+
+    $this->seedConnection($this->requesterUUID, 'contributor', 'work.read,work.scope.business,work.write');
+    $this->assertTrue($this->service->canMutateWorkForOwner($this->requesterUUID, $targetUUID, $this->businessId));
+
+    $this->seedConnection($this->requesterUUID, 'coordinator', 'business.settings.write,work.write');
+    $this->assertTrue($this->service->canMutateWorkForOwner($this->requesterUUID, $targetUUID, $this->businessId));
   }
 
   /**
@@ -1321,7 +1355,7 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     }
     Database::unlink($auditSetKey);
 
-    $requestSetKey = Keys::BUSINESS_ACCESS_REQUEST_ORG . ':' . $orgId;
+    $requestSetKey = Keys::BUSINESS_ACCESS_REQUEST_BUSINESS . ':' . $orgId;
     foreach (Database::smembers($requestSetKey) as $requestId) {
       $requestKey = Keys::BUSINESS_ACCESS_REQUEST . ':' . $requestId;
       $request = Database::hgetall($requestKey);
@@ -1334,15 +1368,15 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     }
     Database::unlink($requestSetKey);
 
-    $relationshipPattern = Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':*';
-    foreach (Database::scanKeys($relationshipPattern) as $relationshipKey) {
-      Database::unlink((string) $relationshipKey);
+    $connectionPattern = Keys::BUSINESS_CONNECTION . ':' . $orgId . ':*';
+    foreach (Database::scanKeys($connectionPattern) as $connectionKey) {
+      Database::unlink((string) $connectionKey);
     }
 
     Database::unlink(Keys::BUSINESS_MEMBERS . ':' . $orgId);
-    Database::unlink(Keys::BUSINESS_RELATIONSHIPS . ':' . $orgId);
+    Database::unlink(Keys::BUSINESS_CONNECTIONS . ':' . $orgId);
     Database::unlink(Keys::BUSINESS_PENDING . ':' . $orgId);
-    Database::unlink(Keys::BUSINESS_INVITE_ORG . ':' . $orgId);
+    Database::unlink(Keys::BUSINESS_INVITE_BUSINESS . ':' . $orgId);
     Database::unlink(Keys::BUSINESS_SITE . ':' . $orgId);
     Database::unlink(Keys::BUSINESS_SETTINGS . ':' . $orgId);
     Database::unlink(Keys::BUSINESS . ':' . $orgId);
@@ -1353,14 +1387,14 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->seedUser($memberUUID, $memberEmail);
     $this->seededMembers[$memberUUID] = $memberEmail;
 
-    $this->seedRelationship($memberUUID, $role, 'work.read');
+    $this->seedConnection($memberUUID, $role, 'work.read');
   }
 
-  private function seedRelationship(string $memberUUID, string $role, string $scopes): void
+  private function seedConnection(string $memberUUID, string $role, string $scopes): void
   {
     $scopeCSV = trim($scopes) === '' ? 'work.read' : $scopes;
 
-    Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $memberUUID, [
+    Database::hset(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $memberUUID, [
       'business_id' => $this->businessId,
       'user_uuid' => $memberUUID,
       'role' => $role,
@@ -1370,8 +1404,8 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     ]);
 
     Database::sadd(Keys::BUSINESS_MEMBERS . ':' . $this->businessId, $memberUUID);
-    Database::sadd(Keys::BUSINESS_RELATIONSHIPS . ':' . $this->businessId, $memberUUID);
+    Database::sadd(Keys::BUSINESS_CONNECTIONS . ':' . $this->businessId, $memberUUID);
     Database::sadd(Keys::BUSINESS_USER . ':' . $memberUUID, $this->businessId);
-    Database::sadd(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $memberUUID, $this->businessId);
+    Database::sadd(Keys::BUSINESS_CONNECTIONS_USER . ':' . $memberUUID, $this->businessId);
   }
 }

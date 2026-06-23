@@ -6,14 +6,29 @@ $currentPage = 'PAGE_TRANSPARENCY';
 
 $i18nKeys = [
   'SECURITY_CONTACT_H2',
+  'SECURITY_CONTACT_SECURITY_INQUIRIES',
   'SECURITY_CONTROLS_H2',
+  'SECURITY_CONTROL_FAIL',
+  'SECURITY_CONTROL_PASS',
+  'SECURITY_CONTROL_WARN',
+  'SECURITY_GLOBAL_SCORE_LABEL',
   'SECURITY_LAST_UPDATED_H2',
   'SECURITY_LAST_UPDATED_NOTE',
   'SECURITY_NARRATIVE_H2',
   'SECURITY_OVERVIEW_H2',
+  'SECURITY_OVERVIEW_BODY',
   'SECURITY_PAGE_LABEL',
   'SECURITY_PAGE_TITLE',
+  'SECURITY_POSTURE_FALLBACK',
+  'SECURITY_POSTURE_LABEL',
   'SECURITY_PRACTICES_H2',
+  'SECURITY_PRACTICE_ACCESS_TELEMETRY',
+  'SECURITY_PRACTICE_BACKUP_RECOVERY',
+  'SECURITY_PRACTICE_CHANGE_GOVERNANCE',
+  'SECURITY_PRACTICE_ENCRYPTION_KEYS',
+  'SECURITY_PROGRAM_STATE_LABEL',
+  'SECURITY_PROGRAM_STATE_VALUE',
+  'SECURITY_SOC2_NDA_REPORT_REQUEST',
   'SECURITY_TABLE_CONTROL',
   'SECURITY_TABLE_STATUS',
   'SECURITY_TABLE_SYSTEM_COMPONENT',
@@ -50,20 +65,20 @@ require_once HTML . '/header.php';
   <section class="doc-article-body">
     <section class="doc-section highlight">
       <h2><?php echo htmlspecialchars($i18n['SECURITY_OVERVIEW_H2'], ENT_QUOTES, 'UTF-8'); ?></h2>
-      <p>Security controls are continuously evaluated from evidence contracts, deterministic validation, and monthly lifecycle snapshots.</p>
+      <p><?php echo htmlspecialchars($i18n['SECURITY_OVERVIEW_BODY'], ENT_QUOTES, 'UTF-8'); ?></p>
       <ul class="doc-fact-list">
-        <li><strong>Posture:</strong> <?php echo htmlspecialchars((string) ($summary['label'] ?? 'Aligned with SOC 2 security principles'), ENT_QUOTES, 'UTF-8'); ?></li>
-        <li><strong>Program State:</strong> SOC 2 readiness in progress</li>
-        <li><strong>Global Score:</strong> <?php echo htmlspecialchars((string) ($summary['global_score'] ?? '0'), ENT_QUOTES, 'UTF-8'); ?></li>
+        <li><strong><?php echo htmlspecialchars($i18n['SECURITY_POSTURE_LABEL'], ENT_QUOTES, 'UTF-8'); ?>:</strong> <?php echo htmlspecialchars((string) ($summary['label'] ?? $i18n['SECURITY_POSTURE_FALLBACK']), ENT_QUOTES, 'UTF-8'); ?></li>
+        <li><strong><?php echo htmlspecialchars($i18n['SECURITY_PROGRAM_STATE_LABEL'], ENT_QUOTES, 'UTF-8'); ?>:</strong> <?php echo htmlspecialchars($i18n['SECURITY_PROGRAM_STATE_VALUE'], ENT_QUOTES, 'UTF-8'); ?></li>
+        <li><strong><?php echo htmlspecialchars($i18n['SECURITY_GLOBAL_SCORE_LABEL'], ENT_QUOTES, 'UTF-8'); ?>:</strong> <?php echo htmlspecialchars((string) ($summary['global_score'] ?? '0'), ENT_QUOTES, 'UTF-8'); ?></li>
       </ul>
     </section>
 
     <section class="doc-section">
       <h2><?php echo htmlspecialchars($i18n['SECURITY_CONTROLS_H2'], ENT_QUOTES, 'UTF-8'); ?></h2>
       <ul class="doc-fact-list">
-        <li><strong>PASS:</strong> <?php echo (int) ($summaryCounts['PASS'] ?? 0); ?></li>
-        <li><strong>WARN:</strong> <?php echo (int) ($summaryCounts['WARN'] ?? 0); ?></li>
-        <li><strong>FAIL:</strong> <?php echo (int) ($summaryCounts['FAIL'] ?? 0); ?></li>
+        <li><strong><?php echo htmlspecialchars($i18n['SECURITY_CONTROL_PASS'], ENT_QUOTES, 'UTF-8'); ?>:</strong> <?php echo (int) ($summaryCounts['PASS'] ?? 0); ?></li>
+        <li><strong><?php echo htmlspecialchars($i18n['SECURITY_CONTROL_WARN'], ENT_QUOTES, 'UTF-8'); ?>:</strong> <?php echo (int) ($summaryCounts['WARN'] ?? 0); ?></li>
+        <li><strong><?php echo htmlspecialchars($i18n['SECURITY_CONTROL_FAIL'], ENT_QUOTES, 'UTF-8'); ?>:</strong> <?php echo (int) ($summaryCounts['FAIL'] ?? 0); ?></li>
       </ul>
       <?php if ($controlRows !== []): ?>
       <div class="soc2-summary-card">
@@ -93,10 +108,10 @@ require_once HTML . '/header.php';
     <section class="doc-section">
       <h2><?php echo htmlspecialchars($i18n['SECURITY_PRACTICES_H2'], ENT_QUOTES, 'UTF-8'); ?></h2>
       <ul class="doc-fact-list">
-        <li>RBAC and access telemetry</li>
-        <li>Encryption and key lifecycle controls</li>
-        <li>Backup, disaster recovery, and operational readiness checks</li>
-        <li>Change trace and approval governance</li>
+        <li><?php echo htmlspecialchars($i18n['SECURITY_PRACTICE_ACCESS_TELEMETRY'], ENT_QUOTES, 'UTF-8'); ?></li>
+        <li><?php echo htmlspecialchars($i18n['SECURITY_PRACTICE_ENCRYPTION_KEYS'], ENT_QUOTES, 'UTF-8'); ?></li>
+        <li><?php echo htmlspecialchars($i18n['SECURITY_PRACTICE_BACKUP_RECOVERY'], ENT_QUOTES, 'UTF-8'); ?></li>
+        <li><?php echo htmlspecialchars($i18n['SECURITY_PRACTICE_CHANGE_GOVERNANCE'], ENT_QUOTES, 'UTF-8'); ?></li>
       </ul>
     </section>
 
@@ -108,8 +123,8 @@ require_once HTML . '/header.php';
 
     <section class="doc-section highlight">
       <h2><?php echo htmlspecialchars($i18n['SECURITY_CONTACT_H2'], ENT_QUOTES, 'UTF-8'); ?></h2>
-      <p>Security inquiries: <a class="doc-read-more" href="mailto:security@paycal.app">security@paycal.app</a></p>
-      <p>SOC 2 NDA report request: <a class="doc-read-more" href="/soc2/request/">/soc2/request/</a></p>
+      <p><?php echo htmlspecialchars($i18n['SECURITY_CONTACT_SECURITY_INQUIRIES'], ENT_QUOTES, 'UTF-8'); ?>: <a class="doc-read-more" href="mailto:security@paycal.app">security@paycal.app</a></p>
+      <p><?php echo htmlspecialchars($i18n['SECURITY_SOC2_NDA_REPORT_REQUEST'], ENT_QUOTES, 'UTF-8'); ?>: <a class="doc-read-more" href="/soc2/request/">/soc2/request/</a></p>
     </section>
 
     <?php if ($narrativeRows !== []): ?>

@@ -21,14 +21,12 @@ foreach ($contactI18nKeys as $contactI18nKey) {
 }
 
 ?>
+import { setActionBusy } from '/js/core/actions.js';
+import { formatTemplate } from '/js/core/template.js';
+
 const CONTACT_T = <?php echo json_encode($contactI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 const formatContactMessage = (template, replacements = {}) => {
-  let message = String(template || '');
-  Object.entries(replacements).forEach(([key, value]) => {
-    message = message.split(`{${key}}`).join(String(value ?? ''));
-    message = message.split('%s').join(String(value ?? ''));
-  });
-  return message;
+  return formatTemplate(template, replacements, { fallbackToken: '%s' });
 };
 
 
@@ -315,11 +313,7 @@ if (form) {
       return;
     }
 
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.setAttribute('aria-disabled', 'true');
-      submitBtn.setAttribute('aria-busy', 'true');
-    }
+    setActionBusy(submitBtn, true, { ariaDisabled: true });
     setStatus('Sending your message...', 'info');
 
     try {
@@ -409,9 +403,7 @@ if (form) {
       setStatus('Network issue while sending. Please try again.', 'error');
       if (statusEl) statusEl.focus();
     } finally {
-      if (submitBtn) {
-        submitBtn.removeAttribute('aria-busy');
-      }
+      setActionBusy(submitBtn, false, { ariaBusyWhenIdle: false, disable: false });
       renderCooldownState();
     }
   });
@@ -424,6 +416,5 @@ if (form) {
     });
   }
 }
-
 
 

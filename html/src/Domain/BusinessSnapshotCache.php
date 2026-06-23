@@ -12,7 +12,7 @@ final class BusinessSnapshotCache
   public const TTL_SECONDS = BusinessWorkspaceCache::TTL_SECONDS;
 
   /**
-   * TODO: Document get.
+   * Get.
    */
   public static function get(string $businessId): ?BusinessSnapshot
   {
@@ -43,7 +43,7 @@ final class BusinessSnapshotCache
   }
 
   /**
-   * TODO: Document put.
+   * Put.
    */
   public static function put(BusinessSnapshot $snapshot): void
   {
@@ -66,7 +66,7 @@ final class BusinessSnapshotCache
   }
 
   /**
-   * TODO: Document invalidate.
+   * Invalidate.
    */
   public static function invalidate(string $businessId): void
   {

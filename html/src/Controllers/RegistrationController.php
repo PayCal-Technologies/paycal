@@ -6,6 +6,7 @@ use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Registration;
 use PayCal\Domain\Response;
+use PayCal\Observability\AuthTrace;
 
 /**
  * RegistrationController.php
@@ -56,7 +57,16 @@ class RegistrationController
     $input = self::collectInput();
     self::logInput($input);
 
+    AuthTrace::signupStart('legacy_form_post', [
+      'email_token' => AuthTrace::emailToken($input['email'] ?? ''),
+    ]);
+
     $result = Registration::register($input);
+    if (!$result['success']) {
+      AuthTrace::signupRejected('legacy_form', 'password_registration_disabled', [
+        'email_token' => AuthTrace::emailToken($input['email'] ?? ''),
+      ]);
+    }
     self::logResult($result);
 
     if ($result['success'] && $result['userUUID'] !== null && $result['userUUID'] !== '') {

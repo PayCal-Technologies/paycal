@@ -13,7 +13,7 @@ use PayCal\Domain\UserRepository;
 final class BusinessSearchIndex
 {
   /**
-   * TODO: Document entryKey.
+   * Entry key.
    */
   public static function entryKey(string $businessId): string
   {
@@ -21,7 +21,7 @@ final class BusinessSearchIndex
   }
 
   /**
-   * TODO: Document sync.
+   * Sync.
    */
   public static function sync(string $businessId): void
   {
@@ -63,7 +63,7 @@ final class BusinessSearchIndex
   }
 
   /**
-   * TODO: Document remove.
+   * Remove.
    */
   public static function remove(string $businessId): void
   {

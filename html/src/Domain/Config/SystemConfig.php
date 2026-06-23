@@ -288,33 +288,33 @@ final class SystemConfig
         'label' => 'Enable Rate Limiting',
         'help' => 'Enable API rate limiting for security',
       ],
-      'org_shared_encryption_enabled' => [
+      'business_shared_encryption_enabled' => [
         'type' => 'bool',
         'category' => 'features',
         'default' => false,
-        'label' => 'Enable Org Shared Encryption',
-        'help' => 'Enable organization-shared encryption mode and key lifecycle flows',
+        'label' => 'Enable Business Shared Encryption',
+        'help' => 'Enable business-shared encryption mode and key lifecycle flows',
       ],
-      'org_shared_encryption_enforce_strict_envelope' => [
+      'business_shared_encryption_enforce_strict_envelope' => [
         'type' => 'bool',
         'category' => 'features',
         'default' => false,
-        'label' => 'Enforce Strict Org Envelope Metadata',
-        'help' => 'Require explicit org envelope metadata fields when encryption_mode is organization',
+        'label' => 'Enforce Strict Business Envelope Metadata',
+        'help' => 'Require explicit business envelope metadata fields when encryption_mode uses the legacy business value',
       ],
-      'org_shared_encryption_enable_write' => [
+      'business_shared_encryption_enable_write' => [
         'type' => 'bool',
         'category' => 'features',
         'default' => false,
-        'label' => 'Enable Org Shared Encryption Writes',
-        'help' => 'Enable organization-mode work write paths (read can be rolled out earlier)',
+        'label' => 'Enable Business Shared Encryption Writes',
+        'help' => 'Enable business-mode work write paths (read can be rolled out earlier)',
       ],
       'account_recovery_enabled' => [
         'type' => 'bool',
         'category' => 'account_security',
         'default' => true,
         'label' => 'Enable Account Recovery',
-        'help' => 'Enable emailed Recovery Key based account recovery flow',
+        'help' => 'Enable email-code and saved Recovery Code based account recovery flow',
       ],
       'account_recovery_auto_block_enabled' => [
         'type' => 'bool',
@@ -326,9 +326,9 @@ final class SystemConfig
       'account_recovery_code_ttl_minutes' => [
         'type' => 'int',
         'category' => 'account_security',
-        'default' => 15,
+        'default' => 10,
         'min' => 5,
-        'max' => 60,
+        'max' => 30,
         'label' => 'Account Recovery Code TTL (min)',
         'help' => 'Expiration time for recovery email codes',
       ],
@@ -943,4 +943,3 @@ final class SystemConfig
     }
   }
 }
-

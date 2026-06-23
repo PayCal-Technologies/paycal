@@ -60,6 +60,6 @@ $cssVersion = \PayCal\Domain\Environment::appVersion();
     <p><a href="/auth/?auth_tab=register"><?php echo htmlspecialchars($i18n['VERIFY_BACK_TO_REGISTER'], ENT_QUOTES, 'UTF-8'); ?></a></p>
   </main>
   <?php $verifyCodeInputSriAttribute = \PayCal\Domain\Render::sriAttribute('js/signin/verify-code-input.js'); ?>
-  <script src="/js/signin/verify-code-input.js"<?php echo $verifyCodeInputSriAttribute; ?>></script>
+  <script type="module" src="/js/signin/verify-code-input.js"<?php echo $verifyCodeInputSriAttribute; ?>></script>
 </body>
 </html>

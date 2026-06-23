@@ -60,7 +60,7 @@ final class AdminSurfaceContractsTest extends TestCase
   }
 
   #[Test]
-  public function navLinksReturnEmptyWhenCapabilityMissing(): void
+  public function navLinksIncludeBuiltInFeedbackWhenCapabilityMissing(): void
   {
     $this->writeRuntimeActive([
       'admin-surface' => [
@@ -73,7 +73,26 @@ final class AdminSurfaceContractsTest extends TestCase
       ],
     ]);
 
-    $this->assertSame([], AdminSurface::navLinks());
+    $this->assertSame([
+      [
+        'href' => '/admin/feedback/',
+        'label_key' => 'ADMIN_FEEDBACK',
+        'icon' => 'admin',
+        'match_prefix' => '/admin/feedback',
+      ],
+      [
+        'href' => '/admin/release-ledger/',
+        'label_key' => 'ADMIN_RELEASE_LEDGER',
+        'icon' => 'admin',
+        'match_prefix' => '/admin/release-ledger',
+      ],
+      [
+        'href' => '/admin/goldmaster/',
+        'label_key' => 'GoldMaster',
+        'icon' => 'admin',
+        'match_prefix' => '/admin/goldmaster',
+      ],
+    ], AdminSurface::navLinks());
   }
 
   #[Test]
@@ -97,11 +116,17 @@ final class AdminSurfaceContractsTest extends TestCase
 
     $links = AdminSurface::navLinks();
 
-    $this->assertCount(1, $links);
+    $this->assertCount(4, $links);
     $this->assertSame('/admin/', $links[0]['href']);
     $this->assertSame('ADMIN', $links[0]['label_key']);
     $this->assertSame('admin', $links[0]['icon']);
     $this->assertSame('/admin', $links[0]['match_prefix']);
+    $this->assertSame('/admin/feedback/', $links[1]['href']);
+    $this->assertSame('ADMIN_FEEDBACK', $links[1]['label_key']);
+    $this->assertSame('/admin/release-ledger/', $links[2]['href']);
+    $this->assertSame('ADMIN_RELEASE_LEDGER', $links[2]['label_key']);
+    $this->assertSame('/admin/goldmaster/', $links[3]['href']);
+    $this->assertSame('GoldMaster', $links[3]['label_key']);
   }
 
   #[Test]

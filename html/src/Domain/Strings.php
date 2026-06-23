@@ -404,7 +404,6 @@ final class Strings
    * Returns the spoken ordinal word for a given day of the month (e.g., 1 → "first", 2 → "second").
    *
    * @param int $day Day of the month (1–31)
-   *                 TODO: ADD i18n constants here...
    *
    * @return string Ordinal word
    */

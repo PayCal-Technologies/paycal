@@ -74,7 +74,7 @@
       <h2>Per chi è</h2>
       <ul class="doc-fact-list">
         <li><strong>Individui:</strong> Traccia lavoro e storico paghe gratuitamente</li>
-        <li><strong>Team:</strong> Usa Premium per accesso condiviso e coordinamento</li>
+        <li><strong>Groups:</strong> Usa Business per accesso condiviso e coordinamento</li>
       </ul>
 
       <h2>Sicurezza e privacy</h2>

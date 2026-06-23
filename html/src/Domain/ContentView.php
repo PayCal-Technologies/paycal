@@ -41,6 +41,7 @@ class ContentView
     public const DOC_PAGES = [
         'PAGE_HELP',
         'PAGE_TRANSPARENCY',
+        'PAGE_STATUS',
         'PAGE_ABOUT',
         'PAGE_POLICIES',
         'PAGE_BLOG',

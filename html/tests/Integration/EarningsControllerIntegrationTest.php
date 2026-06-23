@@ -41,6 +41,10 @@ $sessionHash = hash('sha256', bin2hex(random_bytes(32)));
   'auth_level' => (string) \PayCal\Domain\Enums\AuthLevel::USER->value,
   'encryption_salt' => base64_encode(random_bytes(16)),
 ]);
+\PayCal\Domain\Database::hset(\PayCal\Domain\Constants\Keys::USER_SUBSCRIPTION . ':' . $userUUID, [
+  'tier' => 'premium',
+  'status' => 'active',
+]);
 \PayCal\Domain\Database::hset(\PayCal\Domain\Constants\Keys::SESSION . ':' . $sessionHash, [
   'user_uuid' => $userUUID,
   'created_at' => (string) time(),
@@ -76,6 +80,7 @@ stream_wrapper_restore('php');
 
 \PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::SESSION . ':' . $sessionHash);
 \PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::USER . ':' . $userUUID);
+\PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::USER_SUBSCRIPTION . ':' . $userUUID);
 
 echo json_encode([
   'status_code' => $statusCode,
@@ -124,6 +129,10 @@ $sessionHash = hash('sha256', bin2hex(random_bytes(32)));
   'auth_level' => (string) \PayCal\Domain\Enums\AuthLevel::USER->value,
   'encryption_salt' => base64_encode(random_bytes(16)),
 ]);
+\PayCal\Domain\Database::hset(\PayCal\Domain\Constants\Keys::USER_SUBSCRIPTION . ':' . $userUUID, [
+  'tier' => 'premium',
+  'status' => 'active',
+]);
 \PayCal\Domain\Database::hset(\PayCal\Domain\Constants\Keys::SESSION . ':' . $sessionHash, [
   'user_uuid' => $userUUID,
   'created_at' => (string) time(),
@@ -160,6 +169,7 @@ register_shutdown_function(static function () use ($sessionHash, $userUUID): voi
 
   \PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::SESSION . ':' . $sessionHash);
   \PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::USER . ':' . $userUUID);
+  \PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::USER_SUBSCRIPTION . ':' . $userUUID);
 
   echo json_encode([
     'status_code' => $statusCode,
@@ -303,7 +313,7 @@ PHP;
       'rows' => [
         [
           'date' => '2026-01-02',
-          'site_name' => 'Forged Org Site',
+          'site_name' => 'Forged Business Site',
           'wage' => 50,
           'hours' => 8,
           'regular_hours' => 8,
@@ -337,7 +347,7 @@ PHP;
         ],
         'rows' => [
           [
-            'site_name' => 'Forged Org Site',
+            'site_name' => 'Forged Business Site',
             'regular' => 8,
             'overtime' => 0,
             'gross' => 400,
@@ -361,7 +371,7 @@ PHP;
       'rows' => [
         [
           'date' => '2026-01-02',
-          'site_name' => 'Forged Org Site',
+          'site_name' => 'Forged Business Site',
           'business_id' => 'forged-business',
           'member_uuid' => '__CURRENT_USER_UUID__',
           'encrypted_blob' => base64_encode('not-a-real-envelope'),
@@ -398,7 +408,7 @@ PHP;
         ],
         'rows' => [
           [
-            'site_name' => 'Forged Org Site',
+            'site_name' => 'Forged Business Site',
             'regular' => 8,
             'overtime' => 0,
             'gross' => 400,
@@ -423,7 +433,7 @@ PHP;
     $this->assertContains('site_metadata:financial_payload', $decoded['decision']['denied_pairs'] ?? []);
   }
 
-  public function testGetDailyOrgEnvelopeWithoutWrapDoesNotFatal(): void
+  public function testGetDailyBusinessEnvelopeWithoutWrapDoesNotFatal(): void
   {
     $script = <<<'PHP'
 require '__BOOTSTRAP__';
@@ -435,9 +445,9 @@ $orgId = 'org-' . bin2hex(random_bytes(6));
 $credentialId = 'cred-' . bin2hex(random_bytes(6));
 $year = (int) \PayCal\Domain\Config\SystemConfig::get('year_min');
 $workDate = sprintf('%04d-06-15', $year);
-$counterKey = 'telemetry:encryption:' . \PayCal\Domain\Config\SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA . ':org:unwrap_denied_missing_wrap';
+$counterKey = 'telemetry:encryption:' . \PayCal\Domain\Config\SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA . ':business:unwrap_denied_missing_wrap';
 
-foreach (\PayCal\Domain\Database::scanKeys('telemetry:encryption:' . \PayCal\Domain\Config\SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA . ':org:unwrap_denied_*') as $key) {
+foreach (\PayCal\Domain\Database::scanKeys('telemetry:encryption:' . \PayCal\Domain\Config\SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA . ':business:unwrap_denied_*') as $key) {
   \PayCal\Domain\Database::unlink((string) $key);
 }
 
@@ -457,8 +467,8 @@ foreach (\PayCal\Domain\Database::scanKeys('telemetry:encryption:' . \PayCal\Dom
 ]);
 \PayCal\Domain\Database::expire(\PayCal\Domain\Constants\Keys::SESSION . ':' . $sessionHash, 3600);
 
-\PayCal\Domain\Database::hset(\PayCal\Domain\Constants\Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $userUUID, [
-  'organization_id' => $orgId,
+\PayCal\Domain\Database::hset(\PayCal\Domain\Constants\Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $userUUID, [
+  'business_id' => $orgId,
   'user_uuid' => $userUUID,
   'role' => 'member',
   'status' => \PayCal\Domain\BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
@@ -470,9 +480,9 @@ $envelope = [
   'nonce' => base64_encode(str_repeat('n', 12)),
   'aad' => 'work-aad',
   'meta' => [
-    'encryption_mode' => 'organization',
-    'org_id' => $orgId,
-    'segment' => \PayCal\Domain\BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+    'encryption_mode' => 'business',
+    'business_id' => $orgId,
+    'segment' => \PayCal\Domain\BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
     'key_version' => 'v1',
   ],
 ];
@@ -491,11 +501,11 @@ $response = json_decode((string) $raw, true);
 $counter = (string) \PayCal\Domain\Database::get($counterKey);
 
 \PayCal\Domain\Database::unlink($workKey);
-\PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $userUUID);
+\PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $userUUID);
 \PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::SESSION . ':' . $sessionHash);
 \PayCal\Domain\Database::unlink(\PayCal\Domain\Constants\Keys::USER . ':' . $userUUID);
 
-foreach (\PayCal\Domain\Database::scanKeys('telemetry:encryption:' . \PayCal\Domain\Config\SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA . ':org:unwrap_denied_*') as $key) {
+foreach (\PayCal\Domain\Database::scanKeys('telemetry:encryption:' . \PayCal\Domain\Config\SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA . ':business:unwrap_denied_*') as $key) {
   \PayCal\Domain\Database::unlink((string) $key);
 }
 

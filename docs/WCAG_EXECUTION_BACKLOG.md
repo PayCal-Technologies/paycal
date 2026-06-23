@@ -70,8 +70,8 @@ This plan captures the highest-value accessibility opportunities beyond the curr
 
 8. `WCAG-024` Plain-language copy pass [P2]
 - Simplify legal-heavy and high-friction UI/error/help copy with concrete recovery guidance.
-- Prioritize `/auth`, `/settings`, `/organizations/`, `/help`, and critical policy/support content.
-- Progress note (2026-03-23): Applied plain-language improvements to `strings/en.txt`: replaced field-empty messages with actionable alternatives ("Enter your email address to continue"), replaced technical jargon in calendar error strings (removed "nonce" references), standardized organization error messages to "Couldn't X. Please try again." pattern, fixed `ERROR_CAL_TOTAL_HOURS_EXCEED` to include context, and fixed FAQ copy typo ("committment" → "commitment"). 31 strings updated covering auth, calendar, and organizations flows.
+- Prioritize `/auth`, `/settings`, `/business/`, `/help`, and critical policy/support content.
+- Progress note (2026-03-23): Applied plain-language improvements to `strings/en.txt`: replaced field-empty messages with actionable alternatives ("Enter your email address to continue"), replaced technical jargon in calendar error strings (removed "nonce" references), standardized business error messages to "Couldn't X. Please try again." pattern, fixed `ERROR_CAL_TOTAL_HOURS_EXCEED` to include context, and fixed FAQ copy typo ("committment" → "commitment"). 31 strings updated covering auth, calendar, and business flows.
 - Acceptance criteria: simplified copy landed for prioritized routes with review notes. ✅ DONE
 
 9. `WCAG-025` Developer enablement standards [P2]
@@ -174,7 +174,7 @@ Progress:
 
 ### WCAG-006: Earnings/datagrid keyboard and announcement pass [DONE]
 - Priority: `P1`
-- Files: `html/src/Domain/DataGrid.php`, `html/earnings/index.php`, `html/js/earnings/*`
+- Files: `html/src/Domain/DataGrid.php`, `html/src/Domain/Earnings.php`, `html/js/earnings/*`
 - WCAG mapping: `2.1.1`, `2.4.3`, `4.1.2`, `4.1.3`
 - Acceptance criteria:
 1. Row/action interactions use semantic controls or fully compliant widget behavior.
@@ -186,10 +186,10 @@ Progress:
 
 ### WCAG-010: Extended descriptions for complex content [DONE]
 - Priority: `P2`
-- Files: `html/index.php`, `html/src/Domain/DataGrid.php`, `html/sites/index.php`, `html/organizations/index.php`, `html/src/Domain/Earnings.php`, `html/js/earnings/index.php`
+- Files: `html/index.php`, `html/src/Domain/DataGrid.php`, `html/sites/index.php`, `html/business/index.php`, `html/src/Domain/Earnings.php`, `html/js/earnings/index.php`
 - WCAG mapping: `1.3.1`, `1.3.2`, `2.4.6`
 - Progress note (2026-03-23): Added reusable datagrid `descriptionId` support and wired month-context descriptions for the calendar route, including adjacent-month and lock-state context.
-- Progress note (2026-03-23): Added extended context descriptions to active/archived sites grids, organizations results grid, and per-year daily earnings grids so non-visual users get structural and behavioral context beyond basic instructions.
+- Progress note (2026-03-23): Added extended context descriptions to active/archived sites grids, business results grid, and per-year daily earnings grids so non-visual users get structural and behavioral context beyond basic instructions.
 - Progress note (2026-03-23): Added yearly earnings SVG chart text alternatives with explicit title/description/status nodes and dynamic trend summaries (date span, point count, value range, and direction) to satisfy the charts/graphs description portion of this ticket.
 - Progress note (2026-03-23): Added text alternative semantics and live status announcements for the admin AST dependency graph canvas in `html/admin/ast/index.php` and `html/js/admin-ast/index.php` (title/description wiring plus load, focus, selection, reset, and error announcements).
 - Progress note (2026-03-23): Added automated smoke regression coverage in `tests/smoke-ui/wcag-complex-descriptions.spec.js` and script `npm run test:a11y:complex-descriptions` to lock calendar/grid/chart/canvas description contracts.
@@ -221,7 +221,7 @@ Progress:
 
 ### WCAG-015: Screen reader optimization pass [OPEN]
 - Priority: `P1`
-- Scope routes: `/`, `/auth/`, `/settings/`, `/sites/`, `/organizations/`, `/help/`, `/transparency/accessibility/`
+- Scope routes: `/`, `/auth/`, `/settings/`, `/sites/`, `/business/`, `/help/`, `/transparency/accessibility/`
 - WCAG mapping: `1.3.1`, `2.4.3`, `3.3.2`, `4.1.2`, `4.1.3`
 - Acceptance criteria:
 1. VoiceOver pass executed with route-level notes and linked issues.
@@ -241,14 +241,14 @@ Progress:
 
 ### WCAG-009: 200% zoom/reflow/text-spacing regression suite [DONE]
 - Priority: `P2`
-- Scope pages: `/`, `/auth/`, `/settings/`, `/sites/`, `/organizations/`, `/help/`
+- Scope pages: `/`, `/auth/`, `/settings/`, `/sites/`, `/business/`, `/help/`
 - WCAG mapping: `1.4.4`, `1.4.10`, `1.4.12`
-- Progress note (2026-03-22): Initial constrained-viewport baseline (~511px content width) showed no horizontal overflow on `/`, `/settings/`, `/sites/`, `/organizations/`, and `/help/`; full 200% zoom and text-spacing matrix remains pending.
-- Progress note (2026-03-22): Automated route sweep (`npm run test:a11y:wcag`) now reports zero `serious`/`critical` axe violations on `/`, `/auth/`, `/settings/`, `/sites/`, `/organizations/`, `/help/`.
-- Progress note (2026-03-22): Removed `maximum-scale=1, user-scalable=no` from shared shells (`html/header.php`, `html/src/Domain/Layout.php`) and confirmed strict sweep passes (`PAYCAL_A11Y_STRICT=1 npm run test:a11y:wcag`) across `/`, `/auth/`, `/settings/`, `/sites/`, `/organizations/`, `/help/`.
-- Progress note (2026-03-22): Added automated reflow and text-spacing sweep (`npm run test:a11y:reflow`, `PAYCAL_REFLOW_STRICT=1 npm run test:a11y:reflow`) and verified 12/12 passes across `/`, `/auth/`, `/settings/`, `/sites/`, `/organizations/`, `/help/` at 640px viewport including WCAG text-spacing overrides.
+- Progress note (2026-03-22): Initial constrained-viewport baseline (~511px content width) showed no horizontal overflow on `/`, `/settings/`, `/sites/`, `/business/`, and `/help/`; full 200% zoom and text-spacing matrix remains pending.
+- Progress note (2026-03-22): Automated route sweep (`npm run test:a11y:wcag`) now reports zero `serious`/`critical` axe violations on `/`, `/auth/`, `/settings/`, `/sites/`, `/business/`, `/help/`.
+- Progress note (2026-03-22): Removed `maximum-scale=1, user-scalable=no` from shared shells (`html/header.php`, `html/src/Domain/Layout.php`) and confirmed strict sweep passes (`PAYCAL_A11Y_STRICT=1 npm run test:a11y:wcag`) across `/`, `/auth/`, `/settings/`, `/sites/`, `/business/`, `/help/`.
+- Progress note (2026-03-22): Added automated reflow and text-spacing sweep (`npm run test:a11y:reflow`, `PAYCAL_REFLOW_STRICT=1 npm run test:a11y:reflow`) and verified 12/12 passes across `/`, `/auth/`, `/settings/`, `/sites/`, `/business/`, `/help/` at 640px viewport including WCAG text-spacing overrides.
 - Progress note (2026-03-22): Manual browser validation on public routes (`/auth/`, `/help/`, `/transparency/`) confirmed no document-level horizontal scrolling at narrow viewport, visible keyboard focus on first tab stop, and auth tablist keyboard behavior (`ArrowRight`, `Home`, `End`) updates `aria-selected`/focus as expected.
-- Progress note (2026-03-22): Signed-in manual matrix completed across `/`, `/settings/`, `/sites/`, and `/organizations/` using an authenticated local session; no document-level horizontal overflow observed at narrow viewport and visible focus styling confirmed on initial keyboard targets.
+- Progress note (2026-03-22): Signed-in manual matrix completed across `/`, `/settings/`, `/sites/`, and `/business/` using an authenticated local session; no document-level horizontal overflow observed at narrow viewport and visible focus styling confirmed on initial keyboard targets.
 - Progress note (2026-03-22): Signed-in tablist keyboard check re-verified on `/sites/` (`ArrowRight`, `Home`, `End`) with expected `aria-selected` updates and focused tab state.
 - Progress note (2026-03-23): Resolved strict `color-contrast` blockers on `/` and `/help/` by remediating calendar month-picker title contrast (`html/css/calendar/index.php`) and reducing highlighted help-section tint density (`html/css/transparency/index.php`); `npm run test:a11y:wcag:strict` now passes 6/6 routes.
 - Progress note (2026-03-23): Re-ran strict reflow/text-spacing validation (`npm run test:a11y:reflow:strict`) with 12/12 passes across the full route matrix and no overflow/clipping regressions.

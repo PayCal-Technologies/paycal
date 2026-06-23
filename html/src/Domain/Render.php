@@ -266,6 +266,7 @@ class Render
       'BUSINESS_NAV_DASHBOARD',
       'BUSINESS_NAV_DETAILS',
       'BUSINESS_NAV_MEMBERS',
+      'BUSINESS_NAV_GROUPS',
       'BUSINESS_NAV_SITES',
       'BUSINESS_NAV_PAYROLL',
       'BUSINESS_NAV_AUDIT',
@@ -297,7 +298,7 @@ class Render
         Page::EARNINGS => [
             'page' => Page::EARNINGS->value,
             'name' => (string) $i18n['REPORTS_HTML'],
-            'href' => '/reports/', // Legacy alias; /earnings/ redirects here
+            'href' => '/reports/',
             'arialabel' => (string) $i18n['REPORTS'],
             'access_key' => (string) 'R',
             'icon' => (string) Strings::html('REPORTS_SVG'),
@@ -332,7 +333,7 @@ class Render
           'href' => '/business/',
           'arialabel' => (string) $i18n['BUSINESS_NAV_DASHBOARD'],
           'access_key' => (string) 'O',
-          'icon' => (string) Strings::html('BUSINESSES_SVG'),
+          'icon' => self::businessNavSymbolIconMarkup('pc-icon-business'),
         ],
         Page::BUSINESS_DETAILS => [
           'page' => Page::BUSINESS_DETAILS->value,
@@ -340,7 +341,7 @@ class Render
           'href' => '/business/details/',
           'arialabel' => (string) $i18n['BUSINESS_NAV_DETAILS'],
           'access_key' => (string) '',
-          'icon' => (string) Strings::html('BUSINESSES_SVG'),
+          'icon' => self::businessNavSymbolIconMarkup('pc-icon-details'),
         ],
         Page::BUSINESS_MEMBERS => [
           'page' => Page::BUSINESS_MEMBERS->value,
@@ -348,7 +349,15 @@ class Render
           'href' => '/business/members/',
           'arialabel' => (string) $i18n['BUSINESS_NAV_MEMBERS'],
           'access_key' => (string) '',
-          'icon' => (string) Strings::html('BUSINESSES_SVG'),
+          'icon' => self::businessNavSymbolIconMarkup('pc-icon-members'),
+        ],
+        Page::BUSINESS_GROUPS => [
+          'page' => Page::BUSINESS_GROUPS->value,
+          'name' => (string) $i18n['BUSINESS_NAV_GROUPS'],
+          'href' => '/business/groups/',
+          'arialabel' => (string) $i18n['BUSINESS_NAV_GROUPS'],
+          'access_key' => (string) '',
+          'icon' => self::businessNavSymbolIconMarkup('pc-icon-groups'),
         ],
         Page::BUSINESS_SITES => [
           'page' => Page::BUSINESS_SITES->value,
@@ -372,7 +381,7 @@ class Render
           'href' => '/business/audit/',
           'arialabel' => (string) $i18n['BUSINESS_NAV_AUDIT'],
           'access_key' => (string) '',
-          'icon' => (string) Strings::html('BUSINESSES_SVG'),
+          'icon' => self::businessNavSymbolIconMarkup('pc-icon-audit'),
         ],
         Page::BUSINESS_REPORTS => [
           'page' => Page::BUSINESS_REPORTS->value,
@@ -385,6 +394,7 @@ class Render
         // Admin nav is extension-driven (admin.nav.links capability popover).
         // Core does not render it as a standard nav link.
         Page::ADMIN => throw new \LogicException('Page::ADMIN must not be passed to buildNavLinks; admin nav is extension-driven via the admin.nav.links capability.'),
+        Page::CONNECTIONS => throw new \LogicException('Connections links must be built with regularConnectionsNavLink().'),
       };
     }
 
@@ -396,22 +406,29 @@ class Render
    *
    * @return array{groups: array<int, array{id: string, visible: bool, heading: array<string, string>, links: array<int, array<string, string>>}>}
    */
-  public static function buildSidebarNavigation(bool $isPremiumMember = false, bool $isAdmin = false, bool $isBusinessTier = false): array
+  public static function buildSidebarNavigation(
+    bool $isPremiumMember = false,
+    bool $isAdmin = false,
+    bool $showJoinBusinessCta = false,
+    ?bool $showBusinessWorkspace = null,
+    bool $isBusinessTier = false,
+  ): array
   {
-    $showBusiness = $isPremiumMember || $isBusinessTier || $isAdmin;
+    $showBusiness = $showBusinessWorkspace ?? $isAdmin;
 
-    $paycalLinks = self::buildNavLinks([Page::SITES, Page::REPORTS], $isPremiumMember || $isBusinessTier);
+    $paycalLinks = self::buildNavLinks([Page::SITES, Page::REPORTS], $isPremiumMember);
 
     $businessLinks = [];
     if ($showBusiness) {
       $businessLinks = self::buildNavLinks([
         Page::BUSINESS_DETAILS,
         Page::BUSINESS_MEMBERS,
+        Page::BUSINESS_GROUPS,
         Page::BUSINESS_SITES,
         Page::BUSINESS_PAYROLL,
         Page::BUSINESS_REPORTS,
         Page::BUSINESS_AUDIT,
-      ], $isPremiumMember || $isBusinessTier);
+      ], $isPremiumMember);
       $businessLinks = self::applyBusinessDetailsSidebarLabel($businessLinks);
     }
 
@@ -446,6 +463,25 @@ class Render
       'access_key' => 'e',
       'icon' => (string) Strings::html('SETTINGS_SVG'),
       'item_class' => 'pages nav_sidebar_bottom_start',
+    ];
+  }
+
+  /**
+   * @return array<string, string>
+   */
+  public static function regularConnectionsNavLink(bool $hasActiveBusinessMembership): array
+  {
+    $name = 'Connections';
+
+    return [
+      'page' => Page::CONNECTIONS->value,
+      'name' => $name,
+      'href' => '/connections/',
+      'arialabel' => $name,
+      'access_key' => 'J',
+      'icon' => self::businessNavSymbolIconMarkup('pc-icon-business'),
+      'class' => '',
+      'item_class' => 'pages',
     ];
   }
 
@@ -488,7 +524,7 @@ class Render
       'href' => '/business/',
       'arialabel' => $label,
       'access_key' => 'O',
-      'icon' => (string) Strings::html('BUSINESSES_SVG'),
+      'icon' => self::businessNavSymbolIconMarkup('pc-icon-business'),
     ];
   }
 
@@ -563,6 +599,19 @@ class Render
   }
 
   /**
+   * Returns symbol-based business nav icon markup.
+   */
+  private static function businessNavSymbolIconMarkup(string $symbolId): string
+  {
+    $symbolId = preg_replace('/[^A-Za-z0-9_-]/', '', $symbolId) ?? '';
+    if ($symbolId === '') {
+      return '';
+    }
+
+    return '<svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#' . $symbolId . '"></use></svg>';
+  }
+
+  /**
    * Generates HTML navigation links from an array of link objects.
    *
    * @param array<array<string, string>> $links      array of navigation objects
@@ -576,7 +625,7 @@ class Render
     $buffer = '';
 
     foreach ($links as $link) {
-      $css = $extraCSS;
+      $css = trim((string) ($link['item_class'] ?? $extraCSS));
       $ariaCurrent = '';
 
       $linkPage = (string) ($link['page'] ?? '');
@@ -586,6 +635,20 @@ class Render
       $accessKey = (string) ($link['access_key'] ?? '');
       $iconContent = (string) ($link['icon'] ?? '');
       $extraAttrs = (string) ($link['extra_attrs'] ?? '');
+      $linkClass = (string) ($link['class'] ?? '');
+      if ($linkClass !== '') {
+        foreach (preg_split('/\s+/', trim($linkClass)) ?: [] as $className) {
+          if ($className === '') {
+            continue;
+          }
+
+          if (preg_match('/(^|\s)' . preg_quote($className, '/') . '(\s|$)/', $css) === 1) {
+            continue;
+          }
+
+          $css .= ($css !== '' ? ' ' : '') . $className;
+        }
+      }
 
       if ($activePage === $linkPage) {
         $css .= ' active';
@@ -717,6 +780,52 @@ class Render
   }
 
   /**
+   * Build the compact public language bar used by logged-out pages.
+   */
+  public static function publicLanguageBar(string $activeLanguage): string
+  {
+    $activeLanguage = strtolower($activeLanguage);
+    if (!Language::isSupported($activeLanguage)) {
+      $activeLanguage = Language::DEFAULT;
+    }
+
+    $requestUriRaw = $_SERVER['REQUEST_URI'] ?? '/';
+    $requestUri = is_scalar($requestUriRaw) ? (string) $requestUriRaw : '/';
+    $pathRaw = parse_url($requestUri, PHP_URL_PATH);
+    $path = is_string($pathRaw) && $pathRaw !== '' ? $pathRaw : '/';
+
+    $queryRaw = parse_url($requestUri, PHP_URL_QUERY);
+    $queryParams = [];
+    if (is_string($queryRaw) && $queryRaw !== '') {
+      parse_str($queryRaw, $queryParams);
+    }
+
+    $links = '';
+    $publicOrder = ['en', 'fr', 'de', 'es', 'hi', 'it', 'nl', 'pt', 'tl', 'tr'];
+    foreach ($publicOrder as $langCode) {
+      if (!Language::isSupported($langCode)) {
+        continue;
+      }
+
+      $queryParams['l'] = $langCode;
+      $query = http_build_query($queryParams);
+      $href = $path . ($query !== '' ? ('?' . $query) : '');
+      $label = strtoupper($langCode);
+      $isActive = $langCode === $activeLanguage;
+
+      $links .= '<a class="public_language_link' . ($isActive ? ' is-active' : '') . '" href="'
+        . htmlspecialchars($href, ENT_QUOTES, 'UTF-8')
+        . '" lang="' . htmlspecialchars($langCode, ENT_QUOTES, 'UTF-8') . '"'
+        . ($isActive ? ' aria-current="true"' : '')
+        . ' aria-label="' . htmlspecialchars(Language::getDisplayName($langCode), ENT_QUOTES, 'UTF-8') . '">'
+        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+        . '</a>';
+    }
+
+    return '<nav class="public_language_bar" aria-label="Language">' . $links . '</nav>';
+  }
+
+  /**
    * Generates an HTML <select> element populated with the user's work sites.
    *
    * Iterates over the available sites of the given type ("active", "inactive", or "all"),
@@ -726,8 +835,6 @@ class Render
    * @param string $type the type of sites to include: "active", "inactive", or "all"
    *
    * @return string the rendered HTML string for the site selection dropdown
-   *
-   * @todo Replace 'all' merge logic with a dedicated Sites::get_all_site_types() method when available.
    */
   public static function siteSelect(string $type = 'active'): string
   {
@@ -960,7 +1067,7 @@ class Render
       $path = $jsBase . '/';
     } else {
       // If the name matches a PHP-backed folder, do NOT append .js
-      if (in_array($name, ['encryption', 'calendar', 'earnings', 'team-earnings', 'sites', 'business', 'businesses', 'business-profile', 'settings', 'register', 'signin', 'admin', 'help', 'core', 'datagrid', 'payperiods', 'contact', 'tests', 'dev'])) {
+      if (in_array($name, ['encryption', 'calendar', 'earnings', 'reports-print', 'team-earnings', 'sites', 'business', 'businesses', 'business-profile', 'settings', 'register', 'signin', 'admin', 'help', 'core', 'datagrid', 'payperiods', 'contact', 'tests', 'dev'])) {
         $path = $jsBase . '/' . $name . '/';
       } else {
         // Otherwise, treat as a JS file

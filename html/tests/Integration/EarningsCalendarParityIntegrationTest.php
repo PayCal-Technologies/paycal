@@ -11,7 +11,6 @@ use PayCal\Domain\Earnings;
 use PayCal\Domain\Work;
 use PayCal\Controllers\EarningsController;
 use PHPUnit\Framework\Attributes\Group;
-use PHPUnit\Framework\Attributes\Skip;
 use PHPUnit\Framework\TestCase;
 use Tests\Integration\Support\EncryptedWorkTestUser;
 
@@ -104,12 +103,8 @@ final class EarningsCalendarParityIntegrationTest extends TestCase
     }
   }
 
-  #[Skip('renderSections("lazy") stalls in PHPUnit process (confirmed rendering-infra issue unrelated to gross omission). The gross-absent aggregation path is exercised by EarningsWorkTotalsIntegrationTest::getWorkTotalsForRange_returnsGrossIncomeCents. Fix stall separately before enabling this test.')]
-  #[Group('skip')]
   public function testRenderSectionsLazyDoesNotFatalWhenEncryptedWorkRowOmitsGross(): void
   {
-    $this->markTestSkipped('renderSections("lazy") stalls in PHPUnit process — see skip reason above');
-
     $year = max((int) SystemConfig::get('year_min'), 2026);
     $workDate = sprintf('%04d-06-15', $year);
     $this->fixture->seedWorkRow([
@@ -122,12 +117,14 @@ final class EarningsCalendarParityIntegrationTest extends TestCase
       'travel_hours' => 0.0,
       'living_out_allowance' => 0.0,
       'wage' => 23.0,
+      'omit_gross' => true,
     ]);
 
     $html = Earnings::getInstance()->renderSections('lazy');
 
     $this->assertNotSame('', trim($html));
-    $this->assertStringContainsString('earnings_year_tablist', $html);
+    $this->assertStringContainsString('role=\'tablist\'', $html);
+    $this->assertStringContainsString('data-earnings-mode="lazy"', $html);
     $this->assertStringContainsString((string) $year, $html);
   }
 

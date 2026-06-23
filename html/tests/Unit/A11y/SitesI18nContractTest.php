@@ -17,13 +17,15 @@ final class SitesI18nContractTest extends TestCase
     $this->assertStringContainsString('sites_index_i18n(', $page);
     $this->assertStringContainsString("sites_index_i18n('ACTIVE')", $page);
     $this->assertStringContainsString("sites_index_i18n('ARCHIVED')", $page);
-    $this->assertStringContainsString("sites_index_i18n('SITES_ACTIVE_TAB_DISCLAIMER')", $page);
-    $this->assertStringContainsString("sites_index_i18n('SITES_ARCHIVED_DELETE_WARNING')", $page);
+    $this->assertStringContainsString("sites_index_i18n('BUSINESS_STATUS_ADD_SHORT')", $page);
+    $this->assertStringContainsString("sites_index_i18n('BUSINESS_SITES_STATUS_TAG_PERSONAL')", $page);
     $this->assertStringContainsString("sites_index_i18n('SITES_EARNINGS_HISTORY_DISCLAIMER')", $page);
     $this->assertStringContainsString("sites_index_i18n('SITES_RECOVER_DATA')", $page);
     $this->assertStringNotContainsString('>Recover Data<', $page);
     $this->assertStringNotContainsString('>Active</li>', $page);
     $this->assertStringNotContainsString('>Archived</li>', $page);
+    $this->assertStringNotContainsString("sites_index_i18n('SITES_ACTIVE_TAB_DISCLAIMER')", $page);
+    $this->assertStringNotContainsString("sites_index_i18n('SITES_ARCHIVED_DELETE_WARNING')", $page);
     $this->assertStringNotContainsString('These sites are currently in use and available for new work entries.', $page);
     $this->assertStringNotContainsString('History of your earnings per site.', $page);
   }
@@ -78,6 +80,24 @@ final class SitesI18nContractTest extends TestCase
   }
 
   #[Test]
+  public function siteColorSwatchesExposeAccessibleLabelsAndSelectionState(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $partial = (string) file_get_contents($projectRoot . '/html/sites/_partials/site_editor_dialogs.php');
+    $coreJs = (string) file_get_contents($projectRoot . '/html/js/sites/site-editor-core.php');
+    $legacyJs = (string) file_get_contents($projectRoot . '/html/js/sites/index.php');
+    $palette = (string) file_get_contents($projectRoot . '/html/src/Domain/Config/SiteColorPalette.php');
+
+    $this->assertStringContainsString("data-label='{\$label}'", $partial);
+    $this->assertStringContainsString("aria-label='{\$ariaLabel}'", $partial);
+    $this->assertStringContainsString("aria-pressed='{\$pressed}'", $partial);
+    $this->assertStringContainsString("site_editor_i18n('SITES_SITE_COLOR_LABEL') . ': ' . \$sc['label'] . ' (' . \$sc['hex'] . ')'", $partial);
+    $this->assertStringContainsString("swatch.setAttribute('aria-pressed', selected ? 'true' : 'false');", $coreJs);
+    $this->assertStringContainsString("s.setAttribute('aria-pressed', selected ? 'true' : 'false');", $legacyJs);
+    $this->assertStringContainsString('foreach ([self::pickerPalette(), self::palette()] as $palette)', $palette);
+  }
+
+  #[Test]
   public function sitesJsBundleInjectsSharedSitesTranslationObject(): void
   {
     $projectRoot = dirname(__DIR__, 4);
@@ -95,17 +115,22 @@ final class SitesI18nContractTest extends TestCase
     $projectRoot = dirname(__DIR__, 4);
     $controller = (string) file_get_contents($projectRoot . '/html/src/Controllers/SitesController.php');
 
-    $this->assertStringContainsString("Strings::i18n('SITES_CREATE')", $controller);
     $this->assertStringContainsString("Strings::i18n('BUSINESS_SITES_FILTER_PLACEHOLDER')", $controller);
-    $this->assertStringContainsString("Strings::i18n('NAME')", $controller);
-    $this->assertStringContainsString("Strings::i18n('WAGE')", $controller);
-    $this->assertStringContainsString("Strings::i18n('LOA')", $controller);
-    $this->assertStringContainsString("Strings::i18n('TRAVEL')", $controller);
-    $this->assertStringContainsString("Strings::i18n('PROVINCE')", $controller);
+    $this->assertStringContainsString("Strings::i18n('SITE')", $controller);
+    $this->assertStringContainsString("Strings::i18n('BUSINESS_SITES_STATUS_TAG_PERSONAL')", $controller);
     $this->assertStringContainsString("Strings::i18n('BUSINESS_SITES_GRID_COLUMN_ENTRIES')", $controller);
+    $this->assertStringContainsString("Strings::i18n('BUSINESS_SITES_GRID_COLUMN_WORK_GROSS')", $controller);
+    $this->assertStringContainsString("Strings::i18n('WAGE')", $controller);
+    $this->assertStringContainsString("Strings::i18n('BUSINESS_SITES_GRID_COLUMN_LAST_WORKED')", $controller);
     $this->assertStringContainsString("Strings::i18n('BUSINESS_SITES_GRID_COLUMN_BUDGET')", $controller);
+    $this->assertStringContainsString("Strings::i18n('BUSINESS_SITES_GRID_COLUMN_USED')", $controller);
+    $this->assertStringContainsString("\$grid->addColumn('budget_amount', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_BUDGET'), true, 'minmax(6rem, 1fr)', 'right', false, true)", $controller);
+    $this->assertStringContainsString("\$grid->addColumn('budget_used', Strings::i18n('BUSINESS_SITES_GRID_COLUMN_USED'), true, 'minmax(7rem, 1.1fr)', 'right', false, true, true)", $controller);
     $this->assertStringNotContainsString("enableSearch('Filter sites", $controller);
     $this->assertStringNotContainsString("addColumn('site_name', 'Name'", $controller);
+    $this->assertStringNotContainsString("addColumn('living_out_allowance'", $controller);
+    $this->assertStringNotContainsString("addColumn('travel_hours'", $controller);
+    $this->assertStringNotContainsString("addColumn('province'", $controller);
   }
 
   #[Test]
@@ -116,6 +141,7 @@ final class SitesI18nContractTest extends TestCase
       'SITES_CREATE' => 'Create',
       'BUSINESS_SITES_FILTER_PLACEHOLDER' => 'Filter sites…',
       'BUSINESS_SITES_GRID_COLUMN_ENTRIES' => 'Entries',
+      'BUSINESS_SITES_GRID_COLUMN_LAST_WORKED' => 'Last worked',
     ];
 
     foreach (['de', 'es', 'fr', 'hi', 'it', 'nl', 'pt', 'tl', 'tr'] as $locale) {
@@ -153,6 +179,7 @@ final class SitesI18nContractTest extends TestCase
 
     $this->assertStringContainsString('[data-grid="sites-active"] .datagrid_heading', $css);
     $this->assertStringContainsString('[data-grid="sites-active"] .datagrid_item.datagrid_col_wage', $css);
+    $this->assertStringContainsString('[data-grid="sites-active"] .datagrid_item.datagrid_col_last_worked', $css);
     $this->assertStringContainsString('.datagrid_item.datagrid_col_budget_amount:not(:empty)', $css);
     $this->assertStringNotContainsString('[data-grid="sites-active"] .datagrid_col_wage,', $css);
   }

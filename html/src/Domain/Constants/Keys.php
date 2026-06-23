@@ -52,6 +52,8 @@ final class Keys
   public const SETTINGS           = "settings";
   public const SYSTEM             = "system";
   public const TELEMETRY          = "telemetry";
+  public const FEEDBACK           = "feedback";
+  public const FEEDBACK_INDEX     = "feedback:index";
   
     /**
      * Cache prefix for temporary cached data.
@@ -86,7 +88,7 @@ final class Keys
   
   public const SITE_SALT          = "f43i9ihsD23fGf9y3FFs34d8bg89rmnj";
 
-  // Organization discovery and delegated access model
+  // Business discovery and delegated access model
   public const BUSINESS                = 'business';
   public const BUSINESS_SETTINGS       = 'business:settings';
   public const BUSINESS_USER           = 'business:user';
@@ -94,13 +96,17 @@ final class Keys
   public const BUSINESS_SITE           = 'business:site';
   public const BUSINESS_SITE_SETTINGS  = 'business:site_settings';
   public const BUSINESS_MEMBERS        = 'business:members';
-  public const BUSINESS_RELATIONSHIPS  = 'business:relationships';
-  public const BUSINESS_RELATIONSHIPS_USER = 'business:relationships:user';
+  public const BUSINESS_CONNECTIONS    = 'business:connections';
+  public const BUSINESS_CONNECTIONS_USER = 'business:connections:user';
   public const BUSINESS_PENDING        = 'business:pending';
-  public const BUSINESS_RELATIONSHIP   = 'business:relationship';
+  public const BUSINESS_CONNECTION     = 'business:connection';
+  public const BUSINESS_GROUP          = 'business:group';
+  public const BUSINESS_GROUPS         = 'business:groups';
+  public const BUSINESS_GROUP_MEMBERS  = 'business:group:members';
+  public const BUSINESS_MEMBER_GROUPS  = 'business:member:groups';
   public const BUSINESS_INVITE         = 'business:invite';
   public const BUSINESS_INVITE_EMAIL   = 'business:invite:email';
-  public const BUSINESS_INVITE_ORG     = 'business:invite:org';
+  public const BUSINESS_INVITE_BUSINESS = 'business:invite:business';
   public const BUSINESS_INVITE_TOKEN   = 'business:invite:token';
   public const BUSINESS_INVITE_IMPORT_PREPARE = 'business:invite:import:prepare';
   public const BUSINESS_INVITE_IMPORT_CHALLENGE = 'business:invite:import:challenge';
@@ -113,13 +119,21 @@ final class Keys
   public const BUSINESS_NOTIFICATION_TOTAL_USER = 'business:notification:total:user';
   public const BUSINESS_NOTIFICATION_LAST_READ = 'business:notification:last_read';
   public const BUSINESS_NOTIFICATION_PUBSUB = 'business:notification:pubsub';
-  public const BUSINESS_NOTIFICATION_EVENTS_ORG = 'business:notification:events:org';
+  public const BUSINESS_NOTIFICATION_EVENTS_BUSINESS = 'business:notification:events:business';
   public const BUSINESS_CONSENT        = 'business:consent';
-  public const BUSINESS_CONSENTS_ORG   = 'business:consents:org';
+  public const BUSINESS_CONSENTS_BUSINESS   = 'business:consents:business';
   public const BUSINESS_CONSENTS_USER  = 'business:consents:user';
   public const BUSINESS_DEK            = 'business:dek';
   public const BUSINESS_DEK_VERSION    = 'business:dek:version';
   public const BUSINESS_DEK_WRAP       = 'business:dek:wrap';
+
+  public const USER_CONNECTION         = 'user:connection';
+  public const USER_CONNECTION_ACTIVE  = 'user:connection:active';
+  public const USER_CONNECTION_GRANT   = 'user:connection:grant';
+  public const USER_CONNECTION_GRANTS  = 'user:connection:grants';
+  public const USER_CONNECTIONS_OWNER  = 'user:connections:owner';
+  public const USER_CONNECTIONS_TARGET = 'user:connections:target';
+  public const USER_CONNECTIONS_PENDING = 'user:connections:pending';
   /**
    * Materialized members-grid cache (financial summary columns per member).
    * Format: business:cache:members:{businessId} → JSON payload
@@ -127,7 +141,7 @@ final class Keys
    */
   public const BUSINESS_CACHE_MEMBERS  = 'business:cache:members';
   /**
-   * Pre-warmed business workspace cache segments (roster, sites, team earnings, etc.).
+   * Pre-warmed business workspace cache segments (roster, sites, business reports, etc.).
    * Format: business:cache:workspace:{segment}:{businessId}[:{year}] → JSON payload
    */
   public const BUSINESS_CACHE_WORKSPACE = 'business:cache:workspace';
@@ -142,15 +156,15 @@ final class Keys
    */
   public const BUSINESS_METRICS = 'business:metrics';
   /**
-   * Versioned org metadata cache (roster snapshot + fast counters).
+   * Versioned business metadata cache (roster snapshot + fast counters).
    * Format: business:snapshot:{businessId} → HASH (snapshot_version, payload, generated_at)
    */
   public const BUSINESS_SNAPSHOT = 'business:snapshot';
   /**
-   * Immutable org locked-period payroll metrics.
-   * Format: org_locked_period_metrics:{businessId}:{year} → HASH memberUuid → JSON
+   * Immutable business locked-period payroll metrics.
+   * Format: business_locked_period_metrics:{businessId}:{year} → HASH memberUuid → JSON
    */
-  public const ORG_LOCKED_PERIOD_METRICS = 'org_locked_period_metrics';
+  public const BUSINESS_LOCKED_PERIOD_METRICS = 'business_locked_period_metrics';
   public const BUSINESS_AUDIT_CONTROL_TEST = 'business:audit:control_test';
   public const BUSINESS_AUDIT_CONTROL_TEST_INDEX = 'business:audit:control_test:index';
   public const SYSTEM_AUDIT                = 'system:audit';
@@ -167,7 +181,7 @@ final class Keys
    *  Value: JSON {"object_path":"...","object_hash":"..."} — no TTL (permanent chain anchor). */
   public const SYSTEM_AUDIT_GCS_CHAIN_TIP  = 'system:audit:gcs:chain_tip';
   public const BUSINESS_ACCESS_REQUEST  = 'business:access:request';
-  public const BUSINESS_ACCESS_REQUEST_ORG = 'business:access:request:org';
+  public const BUSINESS_ACCESS_REQUEST_BUSINESS = 'business:access:request:business';
   public const BUSINESS_ACCESS_REQUEST_REQUESTER = 'business:access:request:requester';
   public const BUSINESS_ACCESS_REQUEST_ACTIVE = 'business:access:request:active';
   public const BILLING_WEBHOOK_EVENT       = 'billing:webhook:event';
@@ -259,11 +273,11 @@ final class Keys
   }
 
   /**
-   * Handles businessConsentsByOrg operation.
+   * Handles businessConsentsByBusiness operation.
    */
-  public static function businessConsentsByOrg(string $orgId): string
+  public static function businessConsentsByBusiness(string $businessId): string
   {
-    return self::BUSINESS_CONSENTS_ORG . self::SEPARATOR . $orgId;
+    return self::BUSINESS_CONSENTS_BUSINESS . self::SEPARATOR . $businessId;
   }
 
   /**
@@ -277,31 +291,31 @@ final class Keys
   /**
    * Handles businessDekRegistry operation.
    */
-  public static function businessDekRegistry(string $orgId, string $segment): string
+  public static function businessDekRegistry(string $businessId, string $segment): string
   {
-    return self::BUSINESS_DEK . self::SEPARATOR . $orgId . self::SEPARATOR . $segment;
+    return self::BUSINESS_DEK . self::SEPARATOR . $businessId . self::SEPARATOR . $segment;
   }
 
   /**
    * Handles businessDekVersion operation.
    */
-  public static function businessDekVersion(string $orgId, string $segment, string $version): string
+  public static function businessDekVersion(string $businessId, string $segment, string $version): string
   {
-    return self::BUSINESS_DEK_VERSION . self::SEPARATOR . $orgId . self::SEPARATOR . $segment . self::SEPARATOR . $version;
+    return self::BUSINESS_DEK_VERSION . self::SEPARATOR . $businessId . self::SEPARATOR . $segment . self::SEPARATOR . $version;
   }
 
   /**
    * Handles businessDekWrap operation.
    */
   public static function businessDekWrap(
-    string $orgId,
+    string $businessId,
     string $segment,
     string $version,
     string $userUUID,
     string $credentialId
   ): string {
     return self::BUSINESS_DEK_WRAP
-      . self::SEPARATOR . $orgId
+      . self::SEPARATOR . $businessId
       . self::SEPARATOR . $segment
       . self::SEPARATOR . $version
       . self::SEPARATOR . $userUUID
@@ -319,9 +333,9 @@ final class Keys
   /**
    * Handles businessAuditControlTestIndex operation.
    */
-  public static function businessAuditControlTestIndex(string $orgId): string
+  public static function businessAuditControlTestIndex(string $businessId): string
   {
-    return self::BUSINESS_AUDIT_CONTROL_TEST_INDEX . self::SEPARATOR . $orgId;
+    return self::BUSINESS_AUDIT_CONTROL_TEST_INDEX . self::SEPARATOR . $businessId;
   }
 
   /**
@@ -344,34 +358,34 @@ final class Keys
   /**
    * Handles businessNotificationLastRead operation.
    */
-  public static function businessNotificationLastRead(string $orgId, string $userUUID): string
+  public static function businessNotificationLastRead(string $businessId, string $userUUID): string
   {
-    return self::BUSINESS_NOTIFICATION_LAST_READ . self::SEPARATOR . $orgId . self::SEPARATOR . $userUUID;
+    return self::BUSINESS_NOTIFICATION_LAST_READ . self::SEPARATOR . $businessId . self::SEPARATOR . $userUUID;
   }
 
   /**
-   * Handles businessNotificationEventsByOrg operation.
+   * Handles businessNotificationEventsByBusiness operation.
    * Redis list storing recent pub/sub event payload snapshots for pull fallback.
    */
-  public static function businessNotificationEventsByOrg(string $orgId): string
+  public static function businessNotificationEventsByBusiness(string $businessId): string
   {
-    return self::BUSINESS_NOTIFICATION_EVENTS_ORG . self::SEPARATOR . $orgId;
+    return self::BUSINESS_NOTIFICATION_EVENTS_BUSINESS . self::SEPARATOR . $businessId;
   }
 
   /**
-   * Handles businessNotificationChannelOrg operation.
+   * Handles businessNotificationChannelBusiness operation.
    */
-  public static function businessNotificationChannelOrg(string $orgId): string
+  public static function businessNotificationChannelBusiness(string $businessId): string
   {
-    return self::BUSINESS_NOTIFICATION_PUBSUB . self::SEPARATOR . 'org' . self::SEPARATOR . $orgId;
+    return self::BUSINESS_NOTIFICATION_PUBSUB . self::SEPARATOR . 'business' . self::SEPARATOR . $businessId;
   }
 
   /**
    * Handles businessNotificationChannelRole operation.
    */
-  public static function businessNotificationChannelRole(string $orgId, string $role): string
+  public static function businessNotificationChannelRole(string $businessId, string $role): string
   {
-    return self::businessNotificationChannelOrg($orgId)
+    return self::businessNotificationChannelBusiness($businessId)
       . self::SEPARATOR . 'role' . self::SEPARATOR . strtolower(trim($role));
   }
 
@@ -567,7 +581,7 @@ final class Keys
   }
 
   /**
-   * TODO: Document businessMetricsPendingInvites.
+   * Business metrics pending invites.
    */
   public static function businessMetricsPendingInvites(string $businessId): string
   {
@@ -575,7 +589,55 @@ final class Keys
   }
 
   /**
-   * TODO: Document businessMetricsPendingRequests.
+   * Redis hash key for one business group record.
+   */
+  public static function businessGroup(string $businessId, string $groupId): string
+  {
+    return self::BUSINESS_GROUP . self::SEPARATOR . $businessId . self::SEPARATOR . $groupId;
+  }
+
+  /**
+   * Redis set key containing all group IDs for a business.
+   */
+  public static function businessGroups(string $businessId): string
+  {
+    return self::BUSINESS_GROUPS . self::SEPARATOR . $businessId;
+  }
+
+  /**
+   * Redis set key containing member UUIDs assigned to a business group.
+   */
+  public static function businessGroupMembers(string $businessId, string $groupId): string
+  {
+    return self::BUSINESS_GROUP_MEMBERS . self::SEPARATOR . $businessId . self::SEPARATOR . $groupId;
+  }
+
+  /**
+   * Redis cache key for computed metrics belonging to one business group.
+   */
+  public static function businessGroupMetricsCache(string $businessId, string $groupId): string
+  {
+    return self::CACHE . self::SEPARATOR . 'business' . self::SEPARATOR . 'group_metrics' . self::SEPARATOR . $businessId . self::SEPARATOR . $groupId;
+  }
+
+  /**
+   * Redis scan pattern for all group metrics cache entries in a business.
+   */
+  public static function businessGroupMetricsCachePattern(string $businessId): string
+  {
+    return self::CACHE . self::SEPARATOR . 'business' . self::SEPARATOR . 'group_metrics' . self::SEPARATOR . $businessId . self::SEPARATOR . '*';
+  }
+
+  /**
+   * Redis set key containing group IDs assigned to one business member.
+   */
+  public static function businessMemberGroups(string $businessId, string $memberUUID): string
+  {
+    return self::BUSINESS_MEMBER_GROUPS . self::SEPARATOR . $businessId . self::SEPARATOR . $memberUUID;
+  }
+
+  /**
+   * Business metrics pending requests.
    */
   public static function businessMetricsPendingRequests(string $businessId): string
   {
@@ -583,7 +645,7 @@ final class Keys
   }
 
   /**
-   * TODO: Document businessMetricsWorkDay.
+   * Business metrics work day.
    */
   public static function businessMetricsWorkDay(string $businessId, string $dateYmd): string
   {
@@ -591,7 +653,7 @@ final class Keys
   }
 
   /**
-   * TODO: Document businessSnapshot.
+   * Business snapshot.
    */
   public static function businessSnapshot(string $businessId): string
   {
@@ -599,172 +661,10 @@ final class Keys
   }
 
   /**
-   * TODO: Document orgLockedPeriodMetrics.
+   * Business locked period metrics.
    */
-  public static function orgLockedPeriodMetrics(string $businessId, int $year): string
+  public static function businessLockedPeriodMetrics(string $businessId, int $year): string
   {
-    return self::ORG_LOCKED_PERIOD_METRICS . self::SEPARATOR . $businessId . self::SEPARATOR . (string) $year;
-  }
-
-  // Legacy organization aliases (public transitional code; same Redis namespaces as business:*).
-  public const ORGANIZATION = self::BUSINESS;
-  public const ORGANIZATION_SETTINGS = self::BUSINESS_SETTINGS;
-  public const ORGANIZATION_USER = self::BUSINESS_USER;
-  public const ORGANIZATION_OWNER = self::BUSINESS_OWNER;
-  public const ORGANIZATION_SITE = self::BUSINESS_SITE;
-  public const ORGANIZATION_SITE_SETTINGS = self::BUSINESS_SITE_SETTINGS;
-  public const ORGANIZATION_MEMBERS = self::BUSINESS_MEMBERS;
-  public const ORGANIZATION_RELATIONSHIP = self::BUSINESS_RELATIONSHIP;
-  public const ORGANIZATION_INVITE = self::BUSINESS_INVITE;
-  public const ORGANIZATION_INVITE_EMAIL = self::BUSINESS_INVITE_EMAIL;
-  public const ORGANIZATION_INVITE_ORG = self::BUSINESS_INVITE_ORG;
-  public const ORGANIZATION_INVITE_TOKEN = self::BUSINESS_INVITE_TOKEN;
-  public const ORGANIZATION_AUDIT = self::BUSINESS_AUDIT;
-  public const ORGANIZATION_AUDIT_EVENT = self::BUSINESS_AUDIT_EVENT;
-  public const ORGANIZATION_ACCESS_REQUEST = self::BUSINESS_ACCESS_REQUEST;
-  public const ORGANIZATION_ACCESS_REQUEST_ORG = self::BUSINESS_ACCESS_REQUEST_ORG;
-  public const ORGANIZATION_ACCESS_REQUEST_REQUESTER = self::BUSINESS_ACCESS_REQUEST_REQUESTER;
-  public const ORGANIZATION_ACCESS_REQUEST_ACTIVE = self::BUSINESS_ACCESS_REQUEST_ACTIVE;
-  public const ORGANIZATION_DEK_WRAP = self::BUSINESS_DEK_WRAP;
-
-  /**
-   * TODO: Document organizationInviteImportPrepare.
-   */
-  public static function organizationInviteImportPrepare(string $importId): string
-  {
-    return self::businessInviteImportPrepare($importId);
-  }
-
-  /**
-   * TODO: Document organizationInviteImportChallenge.
-   */
-  public static function organizationInviteImportChallenge(string $challengeId): string
-  {
-    return self::businessInviteImportChallenge($challengeId);
-  }
-
-  /**
-   * TODO: Document organizationConsent.
-   */
-  public static function organizationConsent(string $consentId): string
-  {
-    return self::businessConsent($consentId);
-  }
-
-  /**
-   * TODO: Document organizationConsentsByOrg.
-   */
-  public static function organizationConsentsByOrg(string $orgId): string
-  {
-    return self::businessConsentsByOrg($orgId);
-  }
-
-  /**
-   * TODO: Document organizationConsentsByUser.
-   */
-  public static function organizationConsentsByUser(string $userUUID): string
-  {
-    return self::businessConsentsByUser($userUUID);
-  }
-
-  /**
-   * TODO: Document organizationDekRegistry.
-   */
-  public static function organizationDekRegistry(string $orgId, string $segment): string
-  {
-    return self::businessDekRegistry($orgId, $segment);
-  }
-
-  /**
-   * TODO: Document organizationDekVersion.
-   */
-  public static function organizationDekVersion(string $orgId, string $segment, string $version): string
-  {
-    return self::businessDekVersion($orgId, $segment, $version);
-  }
-
-  /**
-   * TODO: Document organizationDekWrap.
-   */
-  public static function organizationDekWrap(
-    string $orgId,
-    string $segment,
-    string $version,
-    string $userUUID,
-    string $credentialId,
-  ): string {
-    return self::businessDekWrap($orgId, $segment, $version, $userUUID, $credentialId);
-  }
-
-  /**
-   * TODO: Document organizationAuditControlTest.
-   */
-  public static function organizationAuditControlTest(string $testId): string
-  {
-    return self::businessAuditControlTest($testId);
-  }
-
-  /**
-   * TODO: Document organizationAuditControlTestIndex.
-   */
-  public static function organizationAuditControlTestIndex(string $orgId): string
-  {
-    return self::businessAuditControlTestIndex($orgId);
-  }
-
-  /**
-   * TODO: Document organizationNotificationUnreadByUser.
-   */
-  public static function organizationNotificationUnreadByUser(string $userUUID): string
-  {
-    return self::businessNotificationUnreadByUser($userUUID);
-  }
-
-  /**
-   * TODO: Document organizationNotificationTotalByUser.
-   */
-  public static function organizationNotificationTotalByUser(string $userUUID): string
-  {
-    return self::businessNotificationTotalByUser($userUUID);
-  }
-
-  /**
-   * TODO: Document organizationNotificationLastRead.
-   */
-  public static function organizationNotificationLastRead(string $orgId, string $userUUID): string
-  {
-    return self::businessNotificationLastRead($orgId, $userUUID);
-  }
-
-  /**
-   * TODO: Document organizationNotificationEventsByOrg.
-   */
-  public static function organizationNotificationEventsByOrg(string $orgId): string
-  {
-    return self::businessNotificationEventsByOrg($orgId);
-  }
-
-  /**
-   * TODO: Document organizationNotificationChannelOrg.
-   */
-  public static function organizationNotificationChannelOrg(string $orgId): string
-  {
-    return self::businessNotificationChannelOrg($orgId);
-  }
-
-  /**
-   * TODO: Document organizationNotificationChannelRole.
-   */
-  public static function organizationNotificationChannelRole(string $orgId, string $role): string
-  {
-    return self::businessNotificationChannelRole($orgId, $role);
-  }
-
-  /**
-   * TODO: Document organizationNotificationChannelUser.
-   */
-  public static function organizationNotificationChannelUser(string $userUUID): string
-  {
-    return self::businessNotificationChannelUser($userUUID);
+    return self::BUSINESS_LOCKED_PERIOD_METRICS . self::SEPARATOR . $businessId . self::SEPARATOR . (string) $year;
   }
 }

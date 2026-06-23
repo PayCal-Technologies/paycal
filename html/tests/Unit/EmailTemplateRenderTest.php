@@ -67,12 +67,12 @@ final class EmailTemplateRenderTest extends TestCase
       '__USER_NAME__' => self::TEST_HEADING,
       '__VERIFICATION_CODE__' => self::TEST_HEADING,
       '__VERIFICATION_URL__' => 'https://example.test/verify?token=fake-token',
-      '__RECOVERY_KEY__' => 'TEST-RECOVERY-KEY-1234-5678',
+      '__RECOVERY_KEY__' => 'K3HWR7-QTMAPG-C9',
       '__ACCOUNT_EMAIL__' => 'test@example.test',
       '__SOURCE_URL__' => 'https://example.test/auth/',
       '__ISSUED_AT__' => '2099-01-01 00:00:00 UTC',
       '__SUPPORT_TOKEN__' => 'TESTSUPPORT01',
-      '__EXPIRES_IN_MINUTES__' => '15',
+      '__EXPIRES_IN_MINUTES__' => '10',
       '__EMAIL_TYPE__' => 'current',
       '__TXN_ID__' => 'TXN-TEST-0001',
       '__CONTEXT_LABEL__' => 'changed to',
@@ -89,6 +89,10 @@ final class EmailTemplateRenderTest extends TestCase
 
     $this->assertStringNotContainsString('<!-- Template ', $output, $templateName . ' should resolve to a real template file');
     $this->assertStringContainsString(self::TEST_HEADING, $output, $templateName . ' should include obvious fake test content');
+    $this->assertStringNotContainsString('ABCD-EFGH-JKMN', $output, $templateName . ' must not render legacy long recovery code examples');
+    if (str_contains($templateName, 'recovery-key')) {
+      $this->assertStringContainsString('K3HWR7-QTMAPG-C9', $output, $templateName . ' should render the current short recovery code format');
+    }
   }
 
   #[Test]

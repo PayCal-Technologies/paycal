@@ -7,6 +7,9 @@ namespace PayCal\Domain;
  */
 final class ContrastColor
 {
+  /**
+   * Normalize a hex color value.
+   */
   public static function normalizeHex(string $hex): string
   {
     $hex = ltrim(trim($hex), '#');
@@ -17,6 +20,9 @@ final class ContrastColor
     return '#'.strtoupper($hex);
   }
 
+  /**
+   * Calculate relative luminance for a color.
+   */
   public static function relativeLuminance(string $hex): float
   {
     $hex = self::normalizeHex($hex);
@@ -36,6 +42,9 @@ final class ContrastColor
     return (0.2126 * $linear[0]) + (0.7152 * $linear[1]) + (0.0722 * $linear[2]);
   }
 
+  /**
+   * Calculate the contrast ratio between two colors.
+   */
   public static function contrastRatio(string $foreground, string $background): float
   {
     $fg = self::relativeLuminance($foreground);
@@ -83,6 +92,9 @@ final class ContrastColor
     return self::normalizeHex($lightRatio >= $darkRatio ? $light : $dark);
   }
 
+  /**
+   * Return whether two colors meet WCAG AA contrast for normal text.
+   */
   public static function meetsWcagAaNormalText(string $foreground, string $background, float $min = 4.5): bool
   {
     return self::contrastRatio($foreground, $background) >= $min;

@@ -56,9 +56,14 @@ final class DeductionCalculationForensicTest extends TestCase
   public function forensicCppAt68500YmppMaxIsCapped(): void
   {
     $cpp = new CanadaPensionPlanCalculator();
-    $atMax = $cpp->calculateCents(6850000);
-    $aboveMax = $cpp->calculateCents(10000000);
-    $this->assertSame($atMax, $aboveMax);
+    $atOldMax = $cpp->calculateCents(6850000);
+    $atYmpe = $cpp->calculateCents(7460000);
+    $atYampe = $cpp->calculateCents(8500000);
+    $aboveYampe = $cpp->calculateCents(10000000);
+    $this->assertGreaterThan($atOldMax, $atYmpe);
+    $this->assertGreaterThan($atYmpe, $atYampe);
+    $this->assertSame($atYampe, $aboveYampe);
+    $this->assertSame(464645, $atYampe);
   }
 
   #[Test]
@@ -85,17 +90,31 @@ final class DeductionCalculationForensicTest extends TestCase
   public function forensicEiRateIs158BasisPoints(): void
   {
     $ei = new EmploymentInsuranceCalculator();
-    $this->assertSame(158, $ei->calculateCents(10000));
+    $this->assertSame(163, $ei->calculateCents(10000));
   }
 
   #[Test]
   public function forensicEiCapsAt63200Insurable(): void
   {
     $ei = new EmploymentInsuranceCalculator();
-    $atCap = $ei->calculateCents(6320000);
+    $atCap = $ei->calculateCents(6890000);
     $aboveCap = $ei->calculateCents(9000000);
     $this->assertSame($atCap, $aboveCap);
-    $this->assertSame(99856, $atCap);
+    $this->assertSame(112307, $atCap);
+  }
+
+  #[Test]
+  public function forensicQuebecEiUsesReduced2026Rate(): void
+  {
+    $ei = new EmploymentInsuranceCalculator('Quebec');
+    $this->assertSame(89570, $ei->calculateCents(6890000));
+  }
+
+  #[Test]
+  public function forensicQuebecPensionPlanUsesQpp2026RatePlusSecondAdditionalContribution(): void
+  {
+    $qpp = new CanadaPensionPlanCalculator('Quebec');
+    $this->assertSame(489530, $qpp->calculateCents(8500000));
   }
 
   #[Test]
@@ -110,9 +129,9 @@ final class DeductionCalculationForensicTest extends TestCase
   {
     $ei = new EmploymentInsuranceCalculator();
     $incomeCents = 632900;
-    $expected = (int) round($incomeCents * 158 / 10000, 0, PHP_ROUND_HALF_UP);
+    $expected = (int) round($incomeCents * 163 / 10000, 0, PHP_ROUND_HALF_UP);
     $this->assertSame($expected, $ei->calculateCents($incomeCents));
-    $this->assertSame(10000, $expected);
+    $this->assertSame(10316, $expected);
   }
 
   #[Test]

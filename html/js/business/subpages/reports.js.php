@@ -168,16 +168,12 @@
 
   const announceBusinessReportsStatus = (message) => {
     const status = document.getElementById('business_reports_sr_status');
-    if (status instanceof HTMLElement) {
-      status.textContent = String(message || '');
-    }
+    setPlainStatusText(status, message);
   };
 
   const setPayrollPackageStatus = (message = '') => {
     const status = document.getElementById('business_payroll_package_status');
-    if (status instanceof HTMLElement) {
-      status.textContent = String(message || '');
-    }
+    setPlainStatusText(status, message);
   };
 
   const setPayrollPackageSummaryVisible = (isVisible) => {
@@ -210,7 +206,7 @@
   };
 
   const resolvePayrollPackageMembers = async (orgId) => {
-    const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(orgId)}/relationships`);
+    const payload = await apiRequest(`/api/v1/businesses/${encodeURIComponent(orgId)}/connections`);
     const members = Array.isArray(payload?.members) ? payload.members : [];
     return members
       .map((member) => {
@@ -224,185 +220,6 @@
       })
       .filter((member) => member !== null);
   };
-
-  const cents = (value) => Math.round((Number(value) || 0) * 100);
-
-  const formatMoneyForCsv = (value) => (Number(value) || 0).toFixed(2);
-
-  const hashBlobSha256 = async (blob) => {
-    const digest = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
-    return Array.from(new Uint8Array(digest))
-      .map((byte) => byte.toString(16).padStart(2, '0'))
-      .join('');
-  };
-
-  const buildPayrollPackageCsv = (memberRows) => {
-    const columns = [
-      'member_id',
-      'member_name',
-      'date',
-      'site_id',
-      'site_name',
-      'regular_hours',
-      'overtime_hours',
-      'travel_hours',
-      'gross',
-      'net',
-    ];
-    const lines = [columns.join(',')];
-    memberRows.forEach(({ member, rows }) => {
-      rows.forEach((row) => {
-        lines.push([
-          member.id,
-          member.name,
-          row.date,
-          row.siteId || '',
-          row.siteName || '',
-          row.regularHours,
-          row.overtimeHours,
-          row.travel,
-          formatMoneyForCsv(row.gross),
-          formatMoneyForCsv(row.net),
-        ].map(csvEscape).join(','));
-      });
-    });
-
-    return lines.join('\n');
-  };
-
-  const buildPayrollSiteSummaryCsv = (memberRows) => {
-    const sites = new Map();
-    memberRows.forEach(({ rows }) => {
-      rows.forEach((row) => {
-        const key = String(row.siteId || row.siteName || 'unassigned');
-        const existing = sites.get(key) || {
-          site_id: row.siteId || '',
-          site_name: row.siteName || 'Unassigned',
-          regular_hours: 0,
-          overtime_hours: 0,
-          gross_cents: 0,
-          net_cents: 0,
-          entries: 0,
-        };
-        existing.regular_hours += Number(row.regularHours || 0);
-        existing.overtime_hours += Number(row.overtimeHours || 0);
-        existing.gross_cents += cents(row.gross);
-        existing.net_cents += cents(row.net);
-        existing.entries += 1;
-        sites.set(key, existing);
-      });
-    });
-
-    const columns = ['site_id', 'site_name', 'entries', 'regular_hours', 'overtime_hours', 'gross', 'net'];
-    return [
-      columns.join(','),
-      ...Array.from(sites.values()).map((site) => [
-        site.site_id,
-        site.site_name,
-        site.entries,
-        site.regular_hours.toFixed(2),
-        site.overtime_hours.toFixed(2),
-        formatMoneyForCsv(site.gross_cents / 100),
-        formatMoneyForCsv(site.net_cents / 100),
-      ].map(csvEscape).join(',')),
-    ].join('\n');
-  };
-
-  const buildPayrollExceptionsCsv = (memberRows, failures) => {
-    const rows = [];
-    failures.forEach((failure) => {
-      rows.push({
-        member_id: failure.member.id,
-        member_name: failure.member.name,
-        date: '',
-        severity: 'error',
-        issue: failure.error || 'Report generation failed.',
-      });
-    });
-    memberRows.forEach(({ member, rows: detailRows }) => {
-      if (detailRows.length === 0) {
-        rows.push({ member_id: member.id, member_name: member.name, date: '', severity: 'warning', issue: 'No report rows available.' });
-        return;
-      }
-      detailRows.forEach((row) => {
-        const totalHours = Number(row.hours || 0) + Number(row.travel || 0);
-        if (totalHours > 16) {
-          rows.push({ member_id: member.id, member_name: member.name, date: row.date, severity: 'warning', issue: `High daily hours (${totalHours.toFixed(2)}).` });
-        }
-        if (Number(row.overtimeHours || 0) > 8) {
-          rows.push({ member_id: member.id, member_name: member.name, date: row.date, severity: 'warning', issue: `High overtime hours (${Number(row.overtimeHours).toFixed(2)}).` });
-        }
-        if (String(row.siteName || '').trim() === '') {
-          rows.push({ member_id: member.id, member_name: member.name, date: row.date, severity: 'warning', issue: 'Missing site name.' });
-        }
-      });
-    });
-
-    const columns = ['member_id', 'member_name', 'date', 'severity', 'issue'];
-    return [
-      columns.join(','),
-      ...rows.map((row) => columns.map((column) => csvEscape(row[column])).join(',')),
-    ].join('\n');
-  };
-
-  const buildPayrollPackageReadme = (batch) => [
-    T.payrollPackageReadmeTitle,
-    '',
-    `Business ID: ${batch.orgId}`,
-    `Actor ID: ${batch.actorId}`,
-    `Year: ${batch.year}`,
-    `Generation path: ${batch.generationPath}`,
-    `Trust level: ${batch.trustLevel}`,
-    `Generated at: ${batch.generatedAt}`,
-    `Members completed: ${batch.generated} / ${batch.total}`,
-    `Exceptions: ${batch.exceptionCount}`,
-    '',
-    T.payrollPackageReadmeContents,
-    '- pdf/: server-authorized member reports',
-    '- csv/: browser convenience member report CSV files from authorized report data',
-    '- exports/payroll-import.csv: browser convenience aggregate payroll import data',
-    '- summaries/site-summary.csv: browser convenience labour cost by site',
-    '- exceptions/exceptions.csv: browser convenience missing or unusual entries detected during package generation',
-    '- audit/audit-manifest.json and audit/audit-manifest.csv: generation record',
-    '- consent/consent-snapshot.json: access basis snapshot at generation time',
-    '- SHA256SUMS.txt: hash ledger for package files',
-    '',
-    T.payrollPackageReadmePolicy,
-  ].join('\n');
-
-  const buildPayrollConsentSnapshot = (batch) => JSON.stringify({
-    generated_at: batch.generatedAt,
-    business_id: batch.orgId,
-    actor_uuid: batch.actorId,
-    access_basis: 'active business relationship and report endpoint authorization at generation time',
-    member_count: batch.total,
-    member_uuids: batch.results.map((result) => result.member.id),
-  }, null, 2);
-
-  const buildPayrollPackageManifestCsv = (batch) => {
-    const columns = ['generated_at', 'actor_id', 'business_id', 'report', 'year', 'generation_path', 'trust_level', 'trust_note', 'status', 'path', 'sha256', 'member_id', 'member_name', 'error'];
-    return [
-      columns.join(','),
-      ...batch.manifest.map((row) => columns.map((column) => csvEscape(row[column])).join(',')),
-    ].join('\n');
-  };
-
-  const buildPayrollPackageManifestJson = (batch) => JSON.stringify({
-    generated_at: batch.generatedAt,
-    actor_id: batch.actorId,
-    business_id: batch.orgId,
-    report: batch.reportKey,
-    year: batch.year,
-    generation_path: batch.generationPath,
-    trust_level: batch.trustLevel,
-    trust_note: batch.trustNote,
-    total: batch.total,
-    succeeded: batch.generated,
-    failed: batch.failed,
-    exceptions: batch.exceptionCount,
-    duration_ms: batch.durationMs,
-    files: batch.manifest,
-  }, null, 2);
 
   const updatePayrollPackageSummary = (batch) => {
     const setText = (id, value) => {
@@ -430,12 +247,6 @@
     setPayrollPackageSummaryVisible(true);
   };
 
-  const payrollPackageFilename = (batch) => `paycal-payroll-package-${batch.year}.zip`;
-
-  const downloadPayrollPackageZip = async (batch) => {
-    downloadBlob(await createZipBlob(batch.files), payrollPackageFilename(batch));
-  };
-
   const generatePayrollPackage = async () => {
     if (payrollPackageRunning) {
       return;
@@ -454,7 +265,7 @@
       return;
     }
 
-    if (members.length > PAYROLL_PACKAGE_CONFIRM_THRESHOLD && !window.confirm(T.payrollPackageConfirm.replace('%d', String(members.length)))) {
+    if (members.length > PAYROLL_PACKAGE_CONFIRM_THRESHOLD && !window.confirm(formatPhpTemplate(T.payrollPackageConfirm, [members.length]))) {
       return;
     }
 
@@ -508,12 +319,11 @@
 
       for (let index = 0; index < members.length; index += 1) {
         const member = members[index];
-        setPayrollPackageStatus(
-          T.payrollPackageProgress
-            .replace('%d', String(index + 1))
-            .replace('%d', String(members.length))
-            .replace('%s', member.name),
-        );
+        setPayrollPackageStatus(formatPhpTemplate(T.payrollPackageProgress, [
+          index + 1,
+          members.length,
+          member.name,
+        ]));
         try {
           const dailyPayload = await fetchMemberDailyPayloadForReport(orgId, member.id, year);
           const rows = EarningsExport.buildDetailedRows(dailyPayload);
@@ -661,10 +471,8 @@
       });
       updatePayrollPackageSummary(batch);
       const message = batch.failed > 0
-        ? T.payrollPackageGeneratedFailed
-          .replace('%d', String(batch.generated))
-          .replace('%d', String(batch.failed))
-        : T.payrollPackageGeneratedSuccess.replace('%d', String(batch.generated));
+        ? formatPhpTemplate(T.payrollPackageGeneratedFailed, [batch.generated, batch.failed])
+        : formatPhpTemplate(T.payrollPackageGeneratedSuccess, [batch.generated]);
       setPayrollPackageStatus(message);
       PC.showToast(message, batch.failed > 0 ? 'error' : 'save', 8000, true);
     } finally {
@@ -710,10 +518,408 @@
     sync();
   };
 
+  const BUSINESS_REPORT_TABS = ['overview', 'payroll', 'workforce', 'sites', 'groups', 'risks'];
+  const BUSINESS_REPORT_PRESETS = {
+    executive: ['primary-kpis', 'alerts-financial', 'payroll-trend', 'hours-overtime-trend', 'cost-drivers', 'risk-register'],
+    payroll: ['primary-kpis', 'forecast', 'budget-status', 'payroll-trend', 'payroll-composition', 'risk-register'],
+    workforce: ['primary-kpis', 'workforce-health', 'alerts-workforce', 'workforce-overview', 'hours-overtime-trend', 'risk-register'],
+    'site-manager': ['primary-kpis', 'alerts-operations', 'site-planning', 'site-payroll-cost', 'risk-register'],
+  };
+  let businessReportDefaultOrder = [];
+
+  const reportStorageKey = (suffix) => {
+    const workspace = document.getElementById('business-workspace');
+    const businessId = workspace instanceof HTMLElement
+      ? String(workspace.dataset.selectedBusinessId || workspace.dataset.businessId || 'business').trim()
+      : 'business';
+    return `paycal.businessReports.${businessId || 'business'}.${suffix}`;
+  };
+
+  const readReportPrefs = () => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(reportStorageKey('layout')) || '{}');
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const writeReportPrefs = (prefs) => {
+    localStorage.setItem(reportStorageKey('layout'), JSON.stringify(prefs));
+  };
+
+  const reportModules = () => Array.from(document.querySelectorAll('[data-report-module]'))
+    .filter((module) => module instanceof HTMLElement);
+
+  const reportModuleKey = (module) => String(module.dataset.reportModule || '').trim();
+
+  const applyReportVisibility = () => {
+    const params = new URLSearchParams(window.location.search);
+    const prefs = readReportPrefs();
+    const activeTab = BUSINESS_REPORT_TABS.includes(params.get('tab') || '')
+      ? params.get('tab')
+      : (BUSINESS_REPORT_TABS.includes(prefs.tab) ? prefs.tab : 'overview');
+    const hiddenModules = new Set(Array.isArray(prefs.hiddenModules) ? prefs.hiddenModules : []);
+    const exceptionsOnly = params.get('exceptions') === '1' || prefs.exceptionsOnly === true;
+
+    document.querySelectorAll('[data-report-tab-button]').forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) {
+        return;
+      }
+      const isActive = String(button.dataset.reportTabButton || '') === activeTab;
+      button.classList.toggle('active', isActive);
+      button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    reportModules().forEach((module) => {
+      const key = reportModuleKey(module);
+      const tab = String(module.dataset.reportTab || 'overview');
+      const exceptionModule = key.includes('risk') || key.includes('alert');
+      module.hidden = tab !== activeTab || hiddenModules.has(key) || (exceptionsOnly && !exceptionModule);
+    });
+
+    document.querySelectorAll('.et_reports_panel_row, .et_intel_row').forEach((row) => {
+      if (!(row instanceof HTMLElement)) {
+        return;
+      }
+      const childModules = Array.from(row.querySelectorAll('[data-report-module]'));
+      row.hidden = childModules.length > 0 && childModules.every((module) => module instanceof HTMLElement && module.hidden);
+    });
+
+    const exceptionsInput = document.querySelector('[data-report-filter="exceptions"]');
+    if (exceptionsInput instanceof HTMLInputElement) {
+      exceptionsInput.checked = exceptionsOnly;
+    }
+  };
+
+  const persistReportParams = (updates) => {
+    const params = new URLSearchParams(window.location.search);
+    Object.entries(updates).forEach(([key, value]) => {
+      const stringValue = String(value ?? '').trim();
+      if (stringValue === '' || stringValue === '0') {
+        params.delete(key);
+      } else {
+        params.set(key, stringValue);
+      }
+    });
+    const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}${window.location.hash}`;
+    window.history.replaceState({}, '', nextUrl);
+  };
+
+  const moveModule = (key, direction) => {
+    const modules = reportModules();
+    const module = modules.find((item) => reportModuleKey(item) === key);
+    if (!(module instanceof HTMLElement)) {
+      return;
+    }
+    const sibling = direction < 0 ? module.previousElementSibling : module.nextElementSibling;
+    if (!(sibling instanceof HTMLElement) || !sibling.matches('[data-report-module]')) {
+      return;
+    }
+    if (direction < 0) {
+      module.parentNode?.insertBefore(module, sibling);
+    } else {
+      module.parentNode?.insertBefore(sibling, module);
+    }
+    const prefs = readReportPrefs();
+    prefs.order = reportModules().map(reportModuleKey);
+    writeReportPrefs(prefs);
+    buildCustomizeModuleList();
+    applyReportVisibility();
+  };
+
+  const applySavedReportOrder = () => {
+    const prefs = readReportPrefs();
+    if (!Array.isArray(prefs.order) || prefs.order.length === 0) {
+      return;
+    }
+    const modules = new Map(reportModules().map((module) => [reportModuleKey(module), module]));
+    const anchor = document.querySelector('.business_reports_panel_shell .earnings_team_panel');
+    if (!(anchor instanceof HTMLElement)) {
+      return;
+    }
+    prefs.order.forEach((key) => {
+      const module = modules.get(key);
+      if (module instanceof HTMLElement) {
+        anchor.appendChild(module);
+      }
+    });
+  };
+
+  const applyDefaultReportOrder = () => {
+    if (businessReportDefaultOrder.length === 0) {
+      return;
+    }
+    const modules = new Map(reportModules().map((module) => [reportModuleKey(module), module]));
+    const anchor = document.querySelector('.business_reports_panel_shell .earnings_team_panel');
+    if (!(anchor instanceof HTMLElement)) {
+      return;
+    }
+    businessReportDefaultOrder.forEach((key) => {
+      const module = modules.get(key);
+      if (module instanceof HTMLElement) {
+        anchor.appendChild(module);
+      }
+    });
+  };
+
+  function buildCustomizeModuleList() {
+    const list = document.querySelector('[data-report-module-list]');
+    if (!(list instanceof HTMLElement)) {
+      return;
+    }
+    const prefs = readReportPrefs();
+    const hiddenModules = new Set(Array.isArray(prefs.hiddenModules) ? prefs.hiddenModules : []);
+    list.textContent = '';
+    reportModules().forEach((module) => {
+      const key = reportModuleKey(module);
+      const row = document.createElement('div');
+      row.className = 'business_reports_module_item';
+      row.draggable = true;
+      row.dataset.moduleKey = key;
+      row.addEventListener('dragstart', (event) => {
+        event.dataTransfer?.setData('text/plain', key);
+      });
+      row.addEventListener('dragover', (event) => {
+        event.preventDefault();
+      });
+      row.addEventListener('drop', (event) => {
+        event.preventDefault();
+        const draggedKey = event.dataTransfer?.getData('text/plain') || '';
+        if (draggedKey === '' || draggedKey === key) {
+          return;
+        }
+        const modules = new Map(reportModules().map((item) => [reportModuleKey(item), item]));
+        const draggedModule = modules.get(draggedKey);
+        const targetModule = modules.get(key);
+        if (draggedModule instanceof HTMLElement && targetModule instanceof HTMLElement) {
+          targetModule.parentNode?.insertBefore(draggedModule, targetModule);
+          const prefs = readReportPrefs();
+          prefs.order = reportModules().map(reportModuleKey);
+          writeReportPrefs(prefs);
+          buildCustomizeModuleList();
+          applyReportVisibility();
+        }
+      });
+
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = !hiddenModules.has(key);
+      checkbox.addEventListener('change', () => {
+        const nextPrefs = readReportPrefs();
+        const nextHidden = new Set(Array.isArray(nextPrefs.hiddenModules) ? nextPrefs.hiddenModules : []);
+        if (checkbox.checked) {
+          nextHidden.delete(key);
+        } else {
+          nextHidden.add(key);
+        }
+        nextPrefs.hiddenModules = Array.from(nextHidden);
+        writeReportPrefs(nextPrefs);
+        applyReportVisibility();
+      });
+      label.append(checkbox, ` ${module.dataset.reportTitle || key}`);
+
+      const up = document.createElement('button');
+      up.type = 'button';
+      up.className = 'btn btn_secondary btn_compact';
+      up.textContent = 'Up';
+      up.addEventListener('click', () => moveModule(key, -1));
+
+      const down = document.createElement('button');
+      down.type = 'button';
+      down.className = 'btn btn_secondary btn_compact';
+      down.textContent = 'Down';
+      down.addEventListener('click', () => moveModule(key, 1));
+
+      row.append(label, up, down);
+      list.appendChild(row);
+    });
+  }
+
+  const markSparseReportCharts = () => {
+    reportModules().forEach((module) => {
+      if (!(module instanceof HTMLElement) || module.querySelectorAll('.ytd_axis_label--x').length >= 3) {
+        return;
+      }
+      if (!module.querySelector('.earnings_ytd_svg')) {
+        return;
+      }
+      module.classList.add('business_reports_module--insufficient-history');
+      if (!module.querySelector('.business_reports_insufficient_history')) {
+        const note = document.createElement('p');
+        note.className = 'business_reports_insufficient_history';
+        note.textContent = 'Insufficient history for a meaningful chart.';
+        module.appendChild(note);
+      }
+    });
+  };
+
+  const exportVisibleReportCsv = () => {
+    const csvRows = [['module', 'field', 'value']];
+    reportModules().forEach((module) => {
+      if (!(module instanceof HTMLElement) || module.hidden || !module.dataset.groupRows) {
+        return;
+      }
+      let rows = [];
+      try {
+        rows = JSON.parse(module.dataset.groupRows);
+      } catch {
+        rows = [];
+      }
+      if (!Array.isArray(rows)) {
+        return;
+      }
+      const moduleName = module.dataset.reportTitle || module.dataset.groupType || reportModuleKey(module);
+      rows.forEach((row, index) => {
+        if (!row || typeof row !== 'object') {
+          return;
+        }
+        Object.entries(row).forEach(([field, value]) => {
+          csvRows.push([`${moduleName} ${index + 1}`, field, value]);
+        });
+      });
+    });
+
+    if (csvRows.length === 1) {
+      PC.showToast('No visible export rows are available for this view.', 'error', 5000, true);
+      return;
+    }
+
+    const csv = csvRows.map(reportsCsvRow).join('\n');
+    const year = document.getElementById('business-workspace')?.dataset.groupReportsYear || String(new Date().getFullYear());
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `paycal-business-reports-${year}.csv`);
+  };
+
+  const initBusinessReportHub = () => {
+    businessReportDefaultOrder = reportModules().map(reportModuleKey);
+    applySavedReportOrder();
+    markSparseReportCharts();
+    buildCustomizeModuleList();
+    applyReportVisibility();
+
+    document.querySelectorAll('[data-report-tab-button]').forEach((button) => {
+      if (!(button instanceof HTMLButtonElement) || button.dataset.reportHubBound === '1') {
+        return;
+      }
+      button.dataset.reportHubBound = '1';
+      button.addEventListener('click', () => {
+        const tab = String(button.dataset.reportTabButton || 'overview');
+        const prefs = readReportPrefs();
+        prefs.tab = tab;
+        writeReportPrefs(prefs);
+        persistReportParams({ tab });
+        applyReportVisibility();
+      });
+    });
+
+    document.querySelectorAll('[data-report-filter]').forEach((filter) => {
+      if (!(filter instanceof HTMLInputElement || filter instanceof HTMLSelectElement) || filter.dataset.reportFilterBound === '1') {
+        return;
+      }
+      filter.dataset.reportFilterBound = '1';
+      const key = String(filter.dataset.reportFilter || '');
+      const params = new URLSearchParams(window.location.search);
+      const existingValue = params.get(key);
+      if (existingValue !== null && filter instanceof HTMLSelectElement) {
+        filter.value = existingValue;
+      }
+      filter.addEventListener('change', () => {
+        if (key === 'year' && filter instanceof HTMLSelectElement && filter.value !== '') {
+          persistReportParams({ year: filter.value });
+          window.location.assign(window.location.href);
+          return;
+        }
+        const value = filter instanceof HTMLInputElement && filter.type === 'checkbox'
+          ? (filter.checked ? '1' : '')
+          : filter.value;
+        const prefs = readReportPrefs();
+        if (key === 'exceptions') {
+          prefs.exceptionsOnly = value === '1';
+        }
+        writeReportPrefs(prefs);
+        persistReportParams({ [key]: value });
+        applyReportVisibility();
+      });
+    });
+
+    const customizeDrawer = document.querySelector('[data-report-customize-drawer]');
+    document.querySelector('[data-report-customize-open]')?.addEventListener('click', () => {
+      if (customizeDrawer instanceof HTMLElement) {
+        customizeDrawer.hidden = false;
+      }
+    });
+    document.querySelector('[data-report-customize-close]')?.addEventListener('click', () => {
+      if (customizeDrawer instanceof HTMLElement) {
+        customizeDrawer.hidden = true;
+      }
+    });
+
+    const exportDrawer = document.querySelector('[data-report-export-drawer]');
+    const exportPanel = document.querySelector('[data-report-export-panel]');
+    document.querySelector('[data-report-export-open]')?.addEventListener('click', () => {
+      if (exportDrawer instanceof HTMLElement) {
+        exportDrawer.hidden = false;
+      }
+      if (exportPanel instanceof HTMLElement) {
+        exportPanel.hidden = false;
+      }
+    });
+    document.querySelector('[data-report-export-close]')?.addEventListener('click', () => {
+      if (exportDrawer instanceof HTMLElement) {
+        exportDrawer.hidden = true;
+      }
+      if (exportPanel instanceof HTMLElement) {
+        exportPanel.hidden = true;
+      }
+    });
+    document.querySelector('[data-report-export-zip-focus]')?.addEventListener('click', () => {
+      if (exportPanel instanceof HTMLElement) {
+        exportPanel.hidden = false;
+        exportPanel.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+    });
+    document.querySelector('[data-report-export-csv]')?.addEventListener('click', exportVisibleReportCsv);
+
+    document.querySelectorAll('[data-report-preset]').forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) {
+        return;
+      }
+      button.addEventListener('click', () => {
+        const preset = BUSINESS_REPORT_PRESETS[String(button.dataset.reportPreset || '')] || BUSINESS_REPORT_PRESETS.executive;
+        const prefs = readReportPrefs();
+        const allKeys = reportModules().map(reportModuleKey);
+        prefs.hiddenModules = allKeys.filter((key) => !preset.includes(key));
+        prefs.order = [...preset, ...allKeys.filter((key) => !preset.includes(key))];
+        writeReportPrefs(prefs);
+        applySavedReportOrder();
+        buildCustomizeModuleList();
+        applyReportVisibility();
+      });
+    });
+
+    document.querySelector('[data-report-save-view]')?.addEventListener('click', () => {
+      const input = document.querySelector('[data-report-view-name]');
+      const prefs = readReportPrefs();
+      prefs.name = input instanceof HTMLInputElement ? input.value.trim() : '';
+      prefs.order = reportModules().map(reportModuleKey);
+      writeReportPrefs(prefs);
+      PC.showToast('Report view saved.', 'save', 3500, true);
+    });
+
+    document.querySelector('[data-report-reset-view]')?.addEventListener('click', () => {
+      localStorage.removeItem(reportStorageKey('layout'));
+      applyDefaultReportOrder();
+      buildCustomizeModuleList();
+      applyReportVisibility();
+    });
+  };
+
   if (isBusinessReportsSubPage()) {
     logBusinessReportsLensPageDebug();
     logBusinessReportsLensDebug();
     syncBusinessReportsPanelFromDom();
+    initBusinessReportHub();
 
     const generateButton = document.getElementById('business_payroll_package_generate');
     if (generateButton instanceof HTMLButtonElement && generateButton.dataset.payrollPackageBound !== '1') {

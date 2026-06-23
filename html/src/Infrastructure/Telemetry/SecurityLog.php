@@ -7,46 +7,45 @@ use PayCal\Domain\Database;
 use PayCal\Domain\Enums\FormTTL;
 use PayCal\Domain\ExtensionHookBridge;
 use PayCal\Domain\Log;
-use PayCal\Domain\Security;
-use PayCal\Domain\User;
+use PayCal\Observability\Argus;
+use PayCal\Observability\DiagnosticSeverity;
+use PayCal\Observability\SecurityEventCatalog;
+use PayCal\Observability\TraceGatePolicy;
 
 /**
  * SecurityLog.php
  *
- * Purpose: Append-only structured security event logger: increments Redis telemetry counters and distributes audit events via the extension hook system.
- *
- * PHP version 8.4.16
- *
- * LICENSE: Part of PayCal.app, licensed under a proprietary license.
- * Unauthorized copying, modification, distribution or use is prohibited.
- *
- * @category   Infrastructure
- * @package    PayCal\Infrastructure\Telemetry
- * @author     Chris Simmons <cshaiku@gmail.com>
- * @copyright  2026 PayCal Technologies Inc.
- * @license    Proprietary License - See LICENSE.txt for full terms
- */
-
-
-
-/**
- * Class SecurityLog
- *
- * Minimal structured security event logger for audit and abuse telemetry.
+ * Low-level security event writer. Prefer Argus::emit() for new instrumentation.
+ * SecurityLogSink calls writeRecord() directly to avoid policy recursion.
  */
 final class SecurityLog
 {
   /**
-   * Record a security event with normalized context.
-   *
-   * @param string                     $event   Event name
    * @param array<string, scalar|null> $context
    */
   #[ExtensionHook('security.audit_event')]
-  /**
-   * Handles log operation.
-   */
   public static function log(string $event, array $context = []): void
+  {
+    $mapped = SecurityEventCatalog::resolve($event);
+    if ($mapped !== null) {
+      if (Argus::emit($mapped['name'], $mapped['severity'], $context)) {
+        return;
+      }
+
+      if (!TraceGatePolicy::isDevEnvironment()) {
+        return;
+      }
+    } elseif (!TraceGatePolicy::isDevEnvironment()) {
+      return;
+    }
+
+    self::writeRecord($event, $context);
+  }
+
+  /**
+   * @param array<string, scalar|null> $context
+   */
+  public static function writeRecord(string $event, array $context = []): void
   {
     $timestamp = time();
     $eventKey = 'security:event:' . $event;
@@ -73,71 +72,44 @@ final class SecurityLog
   }
 
   /**
-   * Record a triggered rate-limit event.
-   *
-   * @param string $scope      Rate-limit scope identifier
-   * @param string $identifier Scope subject identifier
-   * @param int    $remaining  Remaining attempts after enforcement
+   * Log rate limit triggered.
    */
   public static function logRateLimitTriggered(string $scope, string $identifier, int $remaining): void
   {
-    $ip = Security::getClientIPAddress();
-
-    self::log('rate_limit_triggered', [
+    Argus::emit('request_guard.rate_limit_triggered', DiagnosticSeverity::Warn, [
       'scope' => $scope,
-      'identifier' => $identifier,
       'remaining' => (string) $remaining,
-      'ip' => $ip,
-      'user_uuid' => (string) User::currentUUID(),
     ]);
   }
 
   /**
-   * Record a rejected edit attempt on a locked historical entry.
-   *
-   * @param string $userUUID User UUID
-   * @param string $date     Locked entry date
+   * Log entry locked attempt.
    */
   public static function logEntryLockedAttempt(string $userUUID, string $date): void
   {
-    $ip = Security::getClientIPAddress();
-
-    self::log('entry_locked_attempt', [
-      'user_uuid' => $userUUID,
+    Argus::emit('lock_boundary.mutation_blocked', DiagnosticSeverity::Warn, [
       'date' => $date,
-      'ip' => $ip,
     ]);
   }
 
   /**
-   * Record activation of password-only protected mode.
-   *
-   * @param string $userUUID   User UUID
-   * @param string $authMethod Auth method that triggered protected mode
+   * Log protected mode activated.
    */
   public static function logProtectedModeActivated(string $userUUID, string $authMethod): void
   {
     self::log('protected_mode_activated', [
-      'user_uuid' => $userUUID,
       'auth_method' => $authMethod,
-      'ip' => Security::getClientIPAddress(),
     ]);
   }
 
   /**
-   * Record a blocked mutation attempt while protected mode is active.
-   *
-   * @param string $userUUID User UUID
-   * @param string $method   HTTP method
-   * @param string $route    Route path
+   * Log protected mode mutation blocked.
    */
   public static function logProtectedModeMutationBlocked(string $userUUID, string $method, string $route): void
   {
     self::log('protected_mode_mutation_blocked', [
-      'user_uuid' => $userUUID,
       'method' => strtoupper($method),
       'route' => $route,
-      'ip' => Security::getClientIPAddress(),
     ]);
   }
 }

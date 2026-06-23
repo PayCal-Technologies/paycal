@@ -8,26 +8,29 @@ use PHPUnit\Framework\TestCase;
 final class SettingsIndexRedirectTest extends TestCase
 {
   #[Test]
-  public function settingsRootUsesHttpRedirectNotInlineScript(): void
+  public function settingsRootRendersDashboardNotRedirect(): void
   {
     $projectRoot = dirname(__DIR__, 3);
     $indexPhp = (string) file_get_contents($projectRoot . '/html/settings/index.php');
 
-    $this->assertStringContainsString("header('Location: ", $indexPhp);
-    $this->assertStringContainsString('SettingsNav::defaultSubPageHref()', $indexPhp);
+    $this->assertStringContainsString("\$currentPage = 'PAGE_SETTINGS'", $indexPhp);
+    $this->assertStringContainsString("require __DIR__ . '/_partials/panel_dashboard.php'", $indexPhp);
+    $this->assertStringNotContainsString("header('Location: ", $indexPhp);
+    $this->assertStringNotContainsString('SettingsNav::defaultSubPageHref()', $indexPhp);
     $this->assertStringNotContainsString('<script', $indexPhp);
-    $this->assertStringNotContainsString("require_once Environment::appHome() . 'html/header.php'", $indexPhp);
   }
 
   #[Test]
-  public function legacyHashRedirectsRunFromSettingsFooterWithCspNonce(): void
+  public function settingsFooterDoesNotEmitLegacyHashRedirectPayload(): void
   {
     $projectRoot = dirname(__DIR__, 3);
     $footerShared = (string) file_get_contents($projectRoot . '/html/settings/_partials/footer_shared.php');
+    $settingsJs = (string) file_get_contents($projectRoot . '/html/js/settings/index.php');
 
-    $this->assertStringContainsString('SettingsNav::legacyHashRedirects()', $footerShared);
-    $this->assertStringContainsString('type="application/json"', $footerShared);
-    $this->assertStringContainsString('id="settings-legacy-hash-redirects"', $footerShared);
+    $this->assertStringNotContainsString('SettingsNav::legacyHashRedirects()', $footerShared);
+    $this->assertStringNotContainsString('settings-legacy-hash-redirects', $footerShared);
+    $this->assertStringNotContainsString('settings-legacy-hash-redirects', $settingsJs);
     $this->assertStringNotContainsString('window.location.replace', $footerShared);
+    $this->assertStringNotContainsString('window.location.replace', $settingsJs);
   }
 }

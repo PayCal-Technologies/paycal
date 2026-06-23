@@ -4,9 +4,9 @@ Privacy-first payroll, work-entry, reporting, and business-member payroll visibi
 
 PayCal helps workers understand pay, taxes, sites, pay periods, and business-shared work data while keeping sensitive work records behind passkey authentication, encrypted envelopes, explicit consent, and audit trails.
 
-Latest documented release: **v1.059.000**
+Latest documented release: **v1.059.009**
 
-[![Test Suite](https://img.shields.io/badge/tests-2156%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2279%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -28,7 +28,7 @@ Latest documented release: **v1.059.000**
 
 ## Current Release
 
-Version `1.059.000` is the June 2026 remediation transparency release.
+Version `1.059.009` is the Business members reports dialog release.
 
 The current remediation boundary is:
 
@@ -54,9 +54,9 @@ This release closes the lifecycle around:
 
 Release tags:
 
-- `v1.059.000`
-- `private/v1.059.000`
-- `public/v1.059.000`
+- `v1.059.009`
+- `private/v1.059.009`
+- `public/v1.059.009`
 
 ## What PayCal Does
 
@@ -99,7 +99,7 @@ Sensitive work data is stored as encrypted envelopes. The platform uses:
 - client-side Web Crypto
 - AES-GCM data encryption keys
 - passkey-derived key wrapping for personal work data
-- organization/business shared DEK wrap records for consented business visibility
+- business-shared DEK wrap records for consented business visibility
 - envelope context validation before protected business rows can be read
 
 ### Runtime Defenses
@@ -115,6 +115,7 @@ PayCal includes layered runtime controls:
 - `Lens` for controlled diagnostics and performance instrumentation
 - `EmailGarum` for transactional email coordination
 - `AriaEcho` for assistive UI narration
+- `GoldMaster` for canonical code, UI, test, and architecture examples
 - extension runtime manifests for billing, admin, SOC2, earnings, and business-signal surfaces
 
 The Superheroes system map is published at `/transparency/superheroes/`.
@@ -196,6 +197,7 @@ The repository includes admin and governance surfaces for:
 - admin/security controls
 - SOC and SOC2 status pages
 - release ledger status
+- GoldMaster canonical-example browser
 - Transparency Hub articles
 
 ## System Components
@@ -210,6 +212,7 @@ Source code is organized primarily under:
 - `html/tests/` for PHPUnit suites
 - `strings/` for localization files
 - `docs/` and `html/transparency/` for internal and public documentation
+- `golden_masters/` for curated canonical examples used by humans and AI agents
 
 Key current domain components include:
 
@@ -232,6 +235,7 @@ Key current domain components include:
 - `WorkEntryLockService`
 - `SecurityLog`
 - `SystemAuditPolicy`
+- `GoldMasterCatalog`
 - `html/extensions/runtime.php`
 
 ## Transparency Hub
@@ -239,6 +243,7 @@ Key current domain components include:
 Public transparency pages include articles for:
 
 - protected business work data: `/transparency/protected-work-data-2026-06/`
+- GoldMaster canonical examples: `/transparency/goldmaster/`
 - Superheroes system map: `/transparency/superheroes/`
 - business membership
 - members performance
@@ -272,33 +277,33 @@ Localization source files live in `strings/`. Backup files such as `*.bak` are n
 
 ## Test And Quality Gates
 
-Suite inventory (as of 2026-06-19):
+Suite inventory (as of 2026-06-23):
 
-- **2,156 listed tests**
-- **244 repository test files**
-- **Active public suite file split:** **122 Unit**, **62 Integration**, **35 Contract**, **1 Timezone**, **12 Accessibility**
-- **SOC2 and Exploit suites are present in the tree but excluded from the public PHPUnit profile**
+- **2,279 listed tests**
+- **263 repository test files**
+- **Active public suite file split:** **130 Unit**, **63 Integration**, **40 Contract**, **1 Timezone**, **12 Accessibility**
 - **2 Manual verification files**
 
-Latest validation snapshot (2026-06-19):
+Latest validation snapshot (2026-06-22):
 
-- **1,306 public quick tests**, **7,642 assertions**
+- **2,362 tests**, **20,231 assertions**, **1 skipped**
 - **0 failures**
 - **0 errors**
 - **PHPStan Level 9 clean**
-- **Public release health clean**: quick PHPUnit, PHPStan Level 9, and policy meta checks passed during release verification
+- **JavaScript security check clean**
+- **Public repository health gate clean** via `bash scripts/check-public-repo-health.sh /private/var/www/paycal`
 
 ### Test Categories
 
 | Configured public suite | Files | Purpose |
 |------|------:|---------|
-| PayCal Unit | 122 | Domain, service, renderer, policy, and invariant behavior |
-| PayCal Integration | 62 | Controller/API flows, auth, encryption, account lifecycle, and cross-service behavior |
-| PayCal Contract | 35 | Stable API, route, manifest, persistence, and architecture boundaries |
+| PayCal Unit | 130 | Domain, service, renderer, policy, and invariant behavior |
+| PayCal Integration | 63 | Controller/API flows, auth, encryption, account lifecycle, and cross-service behavior |
+| PayCal Contract | 40 | Stable API, route, manifest, persistence, and architecture boundaries |
 | PayCal Timezone | 1 | Timezone-sensitive pay-period behavior |
 | PayCal Accessibility | 12 | ARIA, WCAG, keyboard, and accessibility contracts |
 
-Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-06-19 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes public-excluded SOC2/Exploit files and the two manual verification files.
+Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-06-23 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes public-excluded SOC2/Exploit/private-moat files and the two manual verification files.
 
 ## Developer Commands
 
@@ -341,6 +346,7 @@ vendor/bin/phpunit --configuration phpunit.xml --group soc2
 ### JavaScript And Accessibility
 
 ```bash
+npm run test:js
 npm run test:smoke:ui
 npm run test:aria:unit
 npm run test:aria:smoke
@@ -350,6 +356,51 @@ npm run test:a11y:contrast
 ```
 
 ## Recent Releases
+
+## Unreleased (2026-06-21)
+
+This work adds GoldMaster, a read-only admin/dev catalog for canonical PayCal examples, plus the first dialog golden master and related Transparency Hub documentation.
+
+## v1.059.009 (2026-06-21)
+
+This release converts Business member report options into a modal dialog with editable selected-member pillboxes, add/remove member search, and all-members grid rendering without pagination controls.
+
+## v1.059.008 (2026-06-21)
+
+This release fixes the Business members selection toolbar height so selected-row actions no longer push the member list downward.
+
+## v1.059.007 (2026-06-21)
+
+This release makes Business members selection behave more like Gmail: the header checkbox controls visible selections, selected-row actions swap into the existing control strip without moving the list, and redundant Pending/Selected metric chips are removed.
+
+## v1.059.006 (2026-06-21)
+
+This release refines the Business members workspace into a calmer, multi-row toolbar with compact count chips, a real role filter, hidden bulk actions until selection, clearer bulk labels, and grouped pagination controls.
+
+## v1.059.005 (2026-06-21)
+
+This release fixes the Business members guide info button so it renders as a compact circle instead of stretching across the metric strip.
+
+## v1.059.004 (2026-06-21)
+
+This release tightens the Business members guide into a quick-reference dialog with compact workspace controls, role capability badges, a concise role matrix, and quieter dialog controls.
+
+## v1.059.003 (2026-06-21)
+
+This release adds the Members guide dialog to the Business members page. The control strip now includes a circled info button that opens a full-width role guide explaining member metrics and each workspace role.
+
+## v1.059.002 (2026-06-21)
+
+This release adds a friendly Business members page guard for users who belong to an org but do not have access-management permissions. The page now shows the existing access-management message instead of making restricted member, invite, and access-request calls that return 403 responses.
+
+## v1.059.001 (2026-06-21)
+
+**Release Focus:** Passkey DEK guard and device-registration cache refresh
+
+- Blocked calendar DEK regeneration when an account already has passkey-wrapped DEKs for other credentials.
+- Made add-passkey setup require an existing DEK unlock before registering another passkey on accounts with encrypted work history.
+- Added a pre-save encrypted-week decryptability check and replaced raw crypto-worker diagnostics with an actionable passkey unlock mismatch message.
+- Bumped the app asset version so browsers fetch the corrected calendar and settings scripts.
 
 ## v1.059.000 (2026-06-19)
 
@@ -361,7 +412,7 @@ npm run test:a11y:contrast
 - Repaired Redis connection-index drift, migrated old relationship/metaphor data, replaced stale Redis field-migration tooling, and documented checkpoint/verification results.
 - Added crypto/passkey compatibility telemetry, plaintext work-entry audit tooling, work-entry alias audit evidence, and snapshot backfill verification while keeping real-user plaintext compatibility guarded.
 - Added bounded sidebar hover Trigger timing, grouped sidebar navigation, 16 accent swatches, live appearance preview feedback, canonical notification position values, and contrast-tested settings nav states.
-- Verified with protected-data, pay-period, Redis/connection, crypto/plaintext, security, settings, and public quick-gate coverage.
+- Verified with protected-data, pay-period, Redis/connection, crypto/plaintext, security, and settings regression suites plus full PHPUnit: 2,318 tests, 19,222 assertions, 29 skipped.
 
 ## v1.058.000 (2026-06-19)
 
@@ -413,8 +464,8 @@ Useful documentation entry points:
 - `docs/CHANGELOG.md`
 - `docs/v1.changelog.md`
 - `docs/internal/SITE_OWNERSHIP_CONSOLIDATION_POLICY.md`
-- `docs/security/ORG_SHARED_ENCRYPTION_IMPLEMENTATION_SPEC.md`
-- `docs/security/ORG_SHARED_ENCRYPTION_TASK_BREAKDOWN.md`
+- `docs/security/BUSINESS_SHARED_ENCRYPTION_IMPLEMENTATION_SPEC.md`
+- `docs/security/BUSINESS_SHARED_ENCRYPTION_TASK_BREAKDOWN.md`
 - `docs/engineering/formatter-policy.md`
 - `html/transparency/`
 

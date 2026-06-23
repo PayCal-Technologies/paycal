@@ -669,12 +669,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   padding: 1.75rem;
   border-left: 4px solid #2c5aa0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.2s ease;
 }
 
 .metric-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
 }
 
 .metric-card h2 {
@@ -828,7 +827,6 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .btn-primary:hover {
   background: #1a3a6b;
   box-shadow: 0 4px 8px rgba(44, 90, 160, 0.3);
-  transform: translateY(-1px);
 }
 
 .btn-secondary {
@@ -840,7 +838,6 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .btn-secondary:hover {
   background: #5a6268;
   box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
-  transform: translateY(-1px);
 }
 
 @media (max-width: 720px) {

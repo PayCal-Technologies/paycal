@@ -56,4 +56,23 @@ final class SettingsPayPeriodPartialContractTest extends TestCase
       $this->assertStringContainsString($id, $modals, $id . ' must exist for pay-period preview modal JS');
     }
   }
+
+  #[Test]
+  public function settingsJavascriptUsesSharedPayPeriodPreviewCore(): void
+  {
+    $projectRoot = dirname(__DIR__, 3);
+    $settingsJs = (string) file_get_contents($projectRoot . '/html/js/settings/index.php');
+    $coreJs = (string) file_get_contents($projectRoot . '/html/js/core/pay-period-preview.js');
+
+    $this->assertStringContainsString('from "../core/pay-period-preview.js"', $settingsJs);
+    $this->assertStringContainsString('buildPayPeriodPreviewState({', $settingsJs);
+    $this->assertStringContainsString('rollBiweeklyToToday: true', $settingsJs);
+    $this->assertStringNotContainsString('const currentPeriod =', $settingsJs);
+    $this->assertStringNotContainsString('const buildRibbonCalendar =', $settingsJs);
+
+    $this->assertStringContainsString('export function buildPayPeriodCurrentRange', $coreJs);
+    $this->assertStringContainsString('export function buildPayPeriodPreviewState', $coreJs);
+    $this->assertStringContainsString('export function buildPayPeriodRibbonCalendar', $coreJs);
+    $this->assertStringContainsString('export function resolvePayPeriodPreviewSelection', $coreJs);
+  }
 }

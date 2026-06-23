@@ -106,7 +106,7 @@ final class BusinessVisibilityPolicy
   }
 
   /**
-   * TODO: Document trustLevelMeetsMinimum.
+   * Trust level meets minimum.
    */
   public static function trustLevelMeetsMinimum(string $actual, string $minimum): bool
   {

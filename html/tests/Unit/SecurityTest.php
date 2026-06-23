@@ -4,6 +4,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use PayCal\Domain\Security;
+use PayCal\Domain\PayCalCode;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -249,7 +250,8 @@ final class SecurityTest extends TestCase
     $code = Security::generateVerificationCode(6);
 
     $this->assertSame(6, strlen($code));
-    $this->assertMatchesRegularExpression('/^[A-Z0-9]{6}$/', $code);
+    $this->assertMatchesRegularExpression('/^[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}$/', $code);
+    $this->assertTrue(PayCalCode::validate($code, PayCalCode::EMAIL_SECRET_LENGTH));
   }
 
   #[Test]

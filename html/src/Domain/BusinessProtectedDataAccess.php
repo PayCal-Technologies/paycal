@@ -41,10 +41,11 @@ final class BusinessProtectedDataAccess
       return $context;
     }
 
-    /** @var array<string, string> $targetRelationship */
-    $targetRelationship = $context['data']['target_relationship'];
-    /** @var array<string, array{site_owner_uuid: string, site_id: string, site_hash: array<string, string>}> $orgSiteIndex */
-    $orgSiteIndex = $context['data']['org_site_index'];
+    /** @var array<string, string> $targetConnection */
+    $targetConnection = $context['data']['target_connection'];
+    $isSelfRead = (bool) ($context['data']['is_self_read'] ?? false);
+    /** @var array<string, array{site_owner_uuid: string, site_id: string, site_hash: array<string, string>}> $businessSiteIndex */
+    $businessSiteIndex = $context['data']['business_site_index'];
     $businessOwnerUUID = $this->detailString($context['data'], 'business_owner_uuid');
 
     if ($cachedMemberWork !== null && isset($cachedMemberWork[$memberUUID])) {
@@ -72,22 +73,25 @@ final class BusinessProtectedDataAccess
         $memberUUID,
         (string) $workKey,
         $entry,
-        $targetRelationship,
-        $orgSiteIndex,
+        $targetConnection,
+        $businessSiteIndex,
+        true,
       );
       if (!$decision['allowed']) {
         continue;
       }
 
-      $entryGate = $this->validateEntryEnvelopeAndWrap($businessId, $memberUUID, $actorUUID, $entry);
-      if (!$entryGate['success']) {
-        continue;
-      }
+      if (!$isSelfRead) {
+        $entryGate = $this->validateEntryEnvelopeAndWrap($businessId, $memberUUID, $actorUUID, $entry);
+        if (!$entryGate['success']) {
+          continue;
+        }
 
-      if ($firstConsentId === '') {
-        $firstConsentId = $this->detailString($entryGate['data'], 'consent_id');
-        $firstDekId = $this->detailString($entryGate['data'], 'dek_id');
-        $firstWrapKey = $this->detailString($entryGate['data'], 'wrap_key');
+        if ($firstConsentId === '') {
+          $firstConsentId = $this->detailString($entryGate['data'], 'consent_id');
+          $firstDekId = $this->detailString($entryGate['data'], 'dek_id');
+          $firstWrapKey = $this->detailString($entryGate['data'], 'wrap_key');
+        }
       }
 
       $filtered[(string) $workKey] = $entry;
@@ -112,8 +116,8 @@ final class BusinessProtectedDataAccess
       'reason' => '',
       'data' => [
         'entries' => $filtered,
-        'relationship' => $targetRelationship,
-        'org_site_index' => $orgSiteIndex,
+        'connection' => $targetConnection,
+        'business_site_index' => $businessSiteIndex,
         'business_owner_uuid' => $businessOwnerUUID,
         'consent_id' => $firstConsentId,
         'dek_id' => $firstDekId,
@@ -171,27 +175,32 @@ final class BusinessProtectedDataAccess
       return $this->deny('missing_business', 'Business not found.');
     }
 
-    $actorRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $businessId . ':' . $actorUUID);
-    if (!$this->actorCanReadProtectedWork($actorRelationship, $actorUUID, $businessOwnerUUID)) {
+    $actorConnection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $actorUUID);
+    if (!$this->actorCanReadProtectedWork($actorConnection, $actorUUID, $businessOwnerUUID)) {
       return $this->deny('actor_not_authorized', 'Actor is not authorized to read protected business work.');
     }
 
-    $targetRelationship = Database::hgetall(Keys::BUSINESS_RELATIONSHIP . ':' . $businessId . ':' . $memberUUID);
-    if ((string) ($targetRelationship['status'] ?? '') !== BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
-      return $this->deny('target_membership_inactive', 'Target membership is not active.');
+    $targetConnection = Database::hgetall(Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $memberUUID);
+    if ((string) ($targetConnection['status'] ?? '') !== BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
+      return $this->deny('target_membership_inactive', Strings::i18n('BUSINESS_CONSENT_STATUS_SKIPPED'));
     }
 
-    if (!BusinessWorkVisibilityPolicy::relationshipPermitsPayrollVisibility($targetRelationship)) {
-      return $this->deny('target_not_payroll_visible', 'Target membership is not payroll visible.');
+    if (!BusinessWorkVisibilityPolicy::connectionPermitsPayrollVisibility($targetConnection)) {
+      return $this->deny('target_not_payroll_visible', Strings::i18n('BUSINESS_PROTECTED_WORK_NOT_AVAILABLE'));
     }
 
-    if ((bool) SystemConfig::get('org_shared_encryption_enabled') && !$this->hasActiveConsentAndWrap($businessId, $memberUUID)) {
-      return $this->deny('missing_consent_or_wrap', 'Active consent and org DEK wrap are required.');
+    $isSelfRead = $actorUUID === $memberUUID;
+    if (
+      !$isSelfRead
+      && (bool) SystemConfig::get('business_shared_encryption_enabled')
+      && !$this->hasActiveConsentAndWrap($businessId, $memberUUID)
+    ) {
+      return $this->deny('missing_consent_or_wrap', Strings::i18n('BUSINESS_CONSENT_STATUS_SKIPPED'));
     }
 
-    $orgSiteIndex = BusinessWorkVisibilityPolicy::buildOrgSiteIndex($businessId);
-    if ($orgSiteIndex === []) {
-      return $this->deny('missing_org_site_index', 'No business-visible site context is available.');
+    $businessSiteIndex = BusinessWorkVisibilityPolicy::buildMemberReportSiteIndex($businessId, $memberUUID);
+    if ($businessSiteIndex === []) {
+      return $this->deny('missing_business_site_index', Strings::i18n('BUSINESS_PROTECTED_WORK_NO_SHARED_WORK'));
     }
 
     return [
@@ -199,35 +208,39 @@ final class BusinessProtectedDataAccess
       'message' => 'Protected business member context resolved.',
       'reason' => '',
       'data' => [
-        'actor_relationship' => $actorRelationship,
-        'target_relationship' => $targetRelationship,
+        'actor_connection' => $actorConnection,
+        'target_connection' => $targetConnection,
         'business_owner_uuid' => $businessOwnerUUID,
-        'org_site_index' => $orgSiteIndex,
+        'business_site_index' => $businessSiteIndex,
+        'is_self_read' => $isSelfRead,
       ],
     ];
   }
 
-  /** @param array<string, string> $relationship */
-  private function actorCanReadProtectedWork(array $relationship, string $actorUUID, string $businessOwnerUUID): bool
+  /** @param array<string, string> $connection */
+  private function actorCanReadProtectedWork(array $connection, string $actorUUID, string $businessOwnerUUID): bool
   {
     if ($actorUUID === $businessOwnerUUID) {
       return true;
     }
 
-    if ((string) ($relationship['status'] ?? '') !== BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
+    if ((string) ($connection['status'] ?? '') !== BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE) {
       return false;
     }
 
-    $role = strtolower(trim((string) ($relationship['role'] ?? '')));
+    $role = strtolower(trim((string) ($connection['role'] ?? '')));
     if (in_array($role, ['owner', 'coordinator'], true)) {
       return true;
     }
 
-    $scopes = $this->scopeMap((string) ($relationship['scopes'] ?? ''));
+    $scopes = $this->scopeMap((string) ($connection['scopes'] ?? ''));
 
-    return isset($scopes['all']) || (isset($scopes['work.read']) && isset($scopes['work.scope.org']));
+    return isset($scopes['all']) || (isset($scopes['work.read']) && isset($scopes['work.scope.business']));
   }
 
+  /**
+   * Has active consent and wrap.
+   */
   private function hasActiveConsentAndWrap(string $businessId, string $memberUUID): bool
   {
     foreach ($this->activeConsentIds($businessId, $memberUUID) as $consentId) {
@@ -245,10 +258,10 @@ final class BusinessProtectedDataAccess
    */
   private function validateEntryEnvelopeAndWrap(string $businessId, string $memberUUID, string $actorUUID, array $entry): array
   {
-    if (!(bool) SystemConfig::get('org_shared_encryption_enabled')) {
+    if (!(bool) SystemConfig::get('business_shared_encryption_enabled')) {
       return [
         'success' => true,
-        'message' => 'Org shared encryption is disabled.',
+        'message' => 'Business shared encryption is disabled.',
         'reason' => '',
         'data' => [],
       ];
@@ -259,13 +272,13 @@ final class BusinessProtectedDataAccess
       return $this->deny('missing_encrypted_blob', 'Protected business work requires an encrypted envelope.');
     }
 
-    $contextValidation = WorkEntry::validateOrganizationEnvelopeContext($blob, $businessId);
+    $contextValidation = WorkEntry::validateBusinessEnvelopeContext($blob, $businessId);
     if (!$contextValidation['valid']) {
       return $this->deny($contextValidation['error'], 'Encrypted envelope does not match business context.');
     }
 
     $meta = $this->decodeEnvelopeMeta($blob);
-    $segment = (string) ($meta['segment'] ?? BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD);
+    $segment = (string) ($meta['segment'] ?? BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD);
     $version = (string) ($meta['key_version'] ?? '');
     $dekId = (string) ($meta['dek_id'] ?? '');
     if ($segment === '' || $version === '' || $dekId === '') {
@@ -275,7 +288,7 @@ final class BusinessProtectedDataAccess
     foreach ($this->activeConsentIds($businessId, $memberUUID) as $consentId) {
       $wrap = $this->findActiveWrap($businessId, $memberUUID, $segment, $version, $consentId, $dekId);
       if ($wrap['success']) {
-        $this->appendAuditEvent($businessId, 'business.org_dek.unwrap.succeeded', $actorUUID, [
+        $this->appendAuditEvent($businessId, 'business.dek.unwrap.succeeded', $actorUUID, [
           'target_member_uuid' => $memberUUID,
           'consent_id' => $consentId,
           'segment' => $segment,
@@ -289,7 +302,7 @@ final class BusinessProtectedDataAccess
       }
     }
 
-    return $this->deny('missing_active_wrap_for_envelope', 'No active wrap matches the encrypted envelope.');
+    return $this->deny('missing_active_wrap_for_envelope', Strings::i18n('BUSINESS_CONSENT_STATUS_MISSING_SETUP'));
   }
 
   /**
@@ -307,7 +320,7 @@ final class BusinessProtectedDataAccess
       $consent = Database::hgetall(Keys::businessConsent($consentId));
       if (
         $consent !== []
-        && (string) ($consent['org_id'] ?? '') === $businessId
+        && (string) ($consent['business_id'] ?? '') === $businessId
         && (string) ($consent['user_uuid'] ?? '') === $memberUUID
         && (string) ($consent['status'] ?? '') === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE
       ) {
@@ -355,14 +368,14 @@ final class BusinessProtectedDataAccess
       if ($resolved['success']) {
         return [
           'success' => true,
-          'message' => 'Active org DEK wrap resolved.',
+          'message' => 'Active business DEK wrap resolved.',
           'reason' => '',
           'data' => $resolved['data'],
         ];
       }
     }
 
-    return $this->deny('missing_active_wrap', 'No active org DEK wrap was found.');
+    return $this->deny('missing_active_wrap', Strings::i18n('BUSINESS_CONSENT_STATUS_MISSING_SETUP'));
   }
 
   /**
@@ -382,7 +395,7 @@ final class BusinessProtectedDataAccess
 
     $meta = is_array($envelope['meta'] ?? null) ? $envelope['meta'] : $envelope;
     $normalized = [];
-    foreach (['encryption_mode', 'org_id', 'segment', 'key_version', 'dek_id'] as $field) {
+    foreach (['encryption_mode', 'business_id', 'segment', 'key_version', 'dek_id'] as $field) {
       $value = $meta[$field] ?? null;
       if (is_scalar($value)) {
         $normalized[$field] = trim((string) $value);
@@ -463,6 +476,9 @@ final class BusinessProtectedDataAccess
     return $map;
   }
 
+  /**
+   * Normalize year.
+   */
   private function normalizeYear(?int $year): ?int
   {
     if ($year === null) {
@@ -485,6 +501,9 @@ final class BusinessProtectedDataAccess
     ];
   }
 
+  /**
+   * Audit denied.
+   */
   private function auditDenied(
     string $businessId,
     string $actorUUID,

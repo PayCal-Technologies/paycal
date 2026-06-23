@@ -77,7 +77,7 @@ class Pager
    *
    * Full signature with all parameters:
    *
-  * @param string $redisKey       Redis key or SCAN pattern (e.g. "user:*" or "organization:site:{org_id}")
+  * @param string $redisKey       Redis key or SCAN pattern (e.g. "user:*" or "business:site:{business_id}")
    * @param int    $startIndex     Zero-based starting position (default: 0)
    * @param int    $listSize       Number of records per page (default: 25, max: 100)
    * @param array<int, string>  $columnHeadings Field names to retrieve; also defines sortable columns

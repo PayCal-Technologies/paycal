@@ -5,7 +5,6 @@ namespace PayCal\Domain;
 ?>
 <section class="panel settings_card_group" id="panel-internationalization" aria-labelledby="panel-internationalization-heading" title="<?php echo settings_index_i18n('PROFILE_INTERNATIONALIZATION_TITLE'); ?>" data-hover-help="<?php echo settings_index_i18n('PROFILE_INTERNATIONALIZATION_PANEL_HELP'); ?>">
   <h2 class="heading-accent settings_card_title" id="panel-internationalization-heading"><?php echo settings_index_i18n('PROFILE_INTERNATIONALIZATION_TITLE'); ?></h2>
-  <p class="help_text"><?php echo settings_index_i18n('SETTINGS_ACCOUNT_LOCALE_DESC'); ?></p>
 
   <div class="profile_i18n_grid">
     <div class="item_pair">

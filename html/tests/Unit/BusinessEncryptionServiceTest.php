@@ -15,22 +15,22 @@ use PHPUnit\Framework\TestCase;
 #[Group('unit')]
 final class BusinessEncryptionServiceTest extends TestCase
 {
-  private string $orgId = '';
+  private string $businessId = '';
   private string $userUUID = '';
   private string $consentId = '';
   private string $credentialId = '';
 
-  private function orgUnwrapDeniedCounterKey(string $reason): string
+  private function businessUnwrapDeniedCounterKey(string $reason): string
   {
     $schema = SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
 
-    return "telemetry:encryption:{$schema}:org:unwrap_denied_{$reason}";
+    return "telemetry:encryption:{$schema}:business:unwrap_denied_{$reason}";
   }
 
-  private function clearOrgUnwrapDeniedTelemetryCounters(): void
+  private function clearBusinessUnwrapDeniedTelemetryCounters(): void
   {
     $schema = SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
-    foreach (Database::scanKeys("telemetry:encryption:{$schema}:org:unwrap_denied_*") as $key) {
+    foreach (Database::scanKeys("telemetry:encryption:{$schema}:business:unwrap_denied_*") as $key) {
       Database::unlink((string) $key);
     }
   }
@@ -40,20 +40,20 @@ final class BusinessEncryptionServiceTest extends TestCase
     parent::setUp();
 
     $suffix = bin2hex(random_bytes(4));
-    $this->orgId = 'org_enc_' . $suffix;
+    $this->businessId = 'business_enc_' . $suffix;
     $this->userUUID = 'user_enc_' . $suffix;
     $this->consentId = 'consent_' . $suffix;
     $this->credentialId = 'cred_' . $suffix;
-    $this->clearOrgUnwrapDeniedTelemetryCounters();
+    $this->clearBusinessUnwrapDeniedTelemetryCounters();
 
-    Database::hset(Keys::BUSINESS . ':' . $this->orgId, [
-      'business_id' => $this->orgId,
+    Database::hset(Keys::BUSINESS . ':' . $this->businessId, [
+      'business_id' => $this->businessId,
       'owner_uuid' => $this->userUUID,
       'status' => 'active',
     ]);
 
-    Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $this->orgId . ':' . $this->userUUID, [
-      'business_id' => $this->orgId,
+    Database::hset(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->userUUID, [
+      'business_id' => $this->businessId,
       'user_uuid' => $this->userUUID,
       'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
       'role' => 'member',
@@ -61,7 +61,7 @@ final class BusinessEncryptionServiceTest extends TestCase
 
     Database::hset(Keys::businessConsent($this->consentId), [
       'consent_id' => $this->consentId,
-      'org_id' => $this->orgId,
+      'business_id' => $this->businessId,
       'user_uuid' => $this->userUUID,
       'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
       'accepted_at' => date('c'),
@@ -70,33 +70,33 @@ final class BusinessEncryptionServiceTest extends TestCase
 
   protected function tearDown(): void
   {
-    Database::unlink(Keys::BUSINESS . ':' . $this->orgId);
-    Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $this->orgId . ':' . $this->userUUID);
+    Database::unlink(Keys::BUSINESS . ':' . $this->businessId);
+    Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->userUUID);
     Database::unlink(Keys::businessConsent($this->consentId));
 
     Database::unlink(
       Keys::businessDekWrap(
-        $this->orgId,
-        BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+        $this->businessId,
+        BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
         'v1',
         $this->userUUID,
         $this->credentialId
       )
     );
 
-    $this->clearOrgUnwrapDeniedTelemetryCounters();
+    $this->clearBusinessUnwrapDeniedTelemetryCounters();
 
     parent::tearDown();
   }
 
   #[Test]
-  public function storeOrgDekWrapRejectsMissingConsentBinding(): void
+  public function storeBusinessDekWrapRejectsMissingConsentBinding(): void
   {
     $service = new BusinessEncryptionService();
 
-    $result = $service->storeOrgDekWrap(
-      $this->orgId,
-      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+    $result = $service->storeBusinessDekWrap(
+      $this->businessId,
+      BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
       'v1',
       $this->userUUID,
       $this->credentialId,
@@ -113,9 +113,9 @@ final class BusinessEncryptionServiceTest extends TestCase
   {
     $service = new BusinessEncryptionService();
 
-    $store = $service->storeOrgDekWrap(
-      $this->orgId,
-      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+    $store = $service->storeBusinessDekWrap(
+      $this->businessId,
+      BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
       'v1',
       $this->userUUID,
       $this->credentialId,
@@ -126,8 +126,8 @@ final class BusinessEncryptionServiceTest extends TestCase
     $this->assertTrue($store['success']);
 
     $resolve = $service->resolveActiveWrapForUnwrap(
-      $this->orgId,
-      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+      $this->businessId,
+      BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
       'v1',
       $this->userUUID,
       $this->credentialId,
@@ -144,9 +144,9 @@ final class BusinessEncryptionServiceTest extends TestCase
   {
     $service = new BusinessEncryptionService();
 
-    $store = $service->storeOrgDekWrap(
-      $this->orgId,
-      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+    $store = $service->storeBusinessDekWrap(
+      $this->businessId,
+      BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
       'v1',
       $this->userUUID,
       $this->credentialId,
@@ -155,13 +155,13 @@ final class BusinessEncryptionServiceTest extends TestCase
     );
     $this->assertTrue($store['success']);
 
-    Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $this->orgId . ':' . $this->userUUID, [
+    Database::hset(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->userUUID, [
       'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_REVOKED,
     ]);
 
     $resolve = $service->resolveActiveWrapForUnwrap(
-      $this->orgId,
-      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+      $this->businessId,
+      BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
       'v1',
       $this->userUUID,
       $this->credentialId,
@@ -170,7 +170,7 @@ final class BusinessEncryptionServiceTest extends TestCase
 
     $this->assertFalse($resolve['success']);
     $this->assertSame('Membership is not active; unwrap denied.', $resolve['message']);
-    $this->assertSame('1', (string) Database::get($this->orgUnwrapDeniedCounterKey('inactive_membership')));
+    $this->assertSame('1', (string) Database::get($this->businessUnwrapDeniedCounterKey('inactive_membership')));
   }
 
   #[Test]
@@ -178,9 +178,9 @@ final class BusinessEncryptionServiceTest extends TestCase
   {
     $service = new BusinessEncryptionService();
 
-    $store = $service->storeOrgDekWrap(
-      $this->orgId,
-      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+    $store = $service->storeBusinessDekWrap(
+      $this->businessId,
+      BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
       'v1',
       $this->userUUID,
       $this->credentialId,
@@ -190,8 +190,8 @@ final class BusinessEncryptionServiceTest extends TestCase
     $this->assertTrue($store['success']);
 
     $resolve = $service->resolveActiveWrapForUnwrap(
-      $this->orgId,
-      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+      $this->businessId,
+      BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
       'v1',
       $this->userUUID,
       $this->credentialId,
@@ -200,7 +200,7 @@ final class BusinessEncryptionServiceTest extends TestCase
 
     $this->assertFalse($resolve['success']);
     $this->assertSame('Provided consent_id does not match wrap binding.', $resolve['message']);
-    $this->assertSame('1', (string) Database::get($this->orgUnwrapDeniedCounterKey('no_consent')));
+    $this->assertSame('1', (string) Database::get($this->businessUnwrapDeniedCounterKey('no_consent')));
   }
 
   #[Test]
@@ -209,8 +209,8 @@ final class BusinessEncryptionServiceTest extends TestCase
     $service = new BusinessEncryptionService();
 
     $resolve = $service->resolveActiveWrapForUnwrap(
-      $this->orgId,
-      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+      $this->businessId,
+      BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
       'v9-missing',
       $this->userUUID,
       $this->credentialId,
@@ -218,8 +218,8 @@ final class BusinessEncryptionServiceTest extends TestCase
     );
 
     $this->assertFalse($resolve['success']);
-    $this->assertSame('Org DEK wrap not found.', $resolve['message']);
-    $this->assertSame('1', (string) Database::get($this->orgUnwrapDeniedCounterKey('missing_wrap')));
+    $this->assertSame('Business DEK wrap not found.', $resolve['message']);
+    $this->assertSame('1', (string) Database::get($this->businessUnwrapDeniedCounterKey('missing_wrap')));
   }
 
   #[Test]
@@ -227,9 +227,9 @@ final class BusinessEncryptionServiceTest extends TestCase
   {
     $service = new BusinessEncryptionService();
 
-    $store = $service->storeOrgDekWrap(
-      $this->orgId,
-      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+    $store = $service->storeBusinessDekWrap(
+      $this->businessId,
+      BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
       'v1',
       $this->userUUID,
       $this->credentialId,
@@ -238,13 +238,13 @@ final class BusinessEncryptionServiceTest extends TestCase
     );
     $this->assertTrue($store['success']);
 
-    $revoke = $service->revokeWrapsForMembership($this->orgId, $this->userUUID, 'test_revocation');
+    $revoke = $service->revokeWrapsForMembership($this->businessId, $this->userUUID, 'test_revocation');
     $this->assertTrue($revoke['success']);
     $this->assertSame(1, $revoke['data']['revoked_wrap_count']);
 
     $resolve = $service->resolveActiveWrapForUnwrap(
-      $this->orgId,
-      BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+      $this->businessId,
+      BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
       'v1',
       $this->userUUID,
       $this->credentialId,
@@ -252,7 +252,7 @@ final class BusinessEncryptionServiceTest extends TestCase
     );
 
     $this->assertFalse($resolve['success']);
-    $this->assertSame('Org DEK wrap is inactive.', $resolve['message']);
-    $this->assertSame('1', (string) Database::get($this->orgUnwrapDeniedCounterKey('inactive_membership')));
+    $this->assertSame('Business DEK wrap is inactive.', $resolve['message']);
+    $this->assertSame('1', (string) Database::get($this->businessUnwrapDeniedCounterKey('inactive_membership')));
   }
 }

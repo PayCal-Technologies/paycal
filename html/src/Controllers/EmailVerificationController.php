@@ -11,8 +11,8 @@ use PayCal\Domain\Enums\FormTTL;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
+use PayCal\Domain\PayCalCode;
 use PayCal\Infrastructure\Resilience\RedisReliabilityService;
-use PayCal\Domain\RecoveryKey;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
 use PayCal\Infrastructure\Telemetry\SecurityLog;
@@ -74,7 +74,7 @@ final class EmailVerificationController
   public function verifyEmail(): void
   {
     // Rate limiting by IP
-    if (!$this->enforceRateLimit('verify', self::VERIFY_RATE_LIMIT)) {
+    if (!$this->checkRateLimit('verify', self::VERIFY_RATE_LIMIT)['allowed']) {
       $this->redirectWithError('Too many verification attempts. Please try again later.');
 
       return;
@@ -200,10 +200,7 @@ final class EmailVerificationController
         'email' => $user->email,
     ]);
 
-    // Generate and send recovery key
-    $this->generateAndSendRecoveryKey($user);
-
-    $this->redirectWithSuccess('Email verified! Your recovery key has been sent to your email.');
+    $this->redirectWithSuccess('Email verified.');
   }
 
   /**
@@ -466,73 +463,6 @@ final class EmailVerificationController
   }
 
   /**
-   * Generate recovery key and send via email
-   *
-   * @param User $user User object
-   */
-  private function generateAndSendRecoveryKey(User $user): void
-  {
-    // Check if recovery key already generated
-    if ($user->recovery_key_generated) {
-      SecurityLog::log('recovery_key_generation_skipped', [
-          'user_uuid' => $user->user_uuid,
-          'reason' => 'already_generated',
-      ]);
-
-      return;
-    }
-
-    // Generate account recovery salt if not exists
-    $recoverySalt = (string) ($user->account_recovery_salt ?? '');
-    if ($recoverySalt === '') {
-      $recoverySaltBytes = RecoveryKey::generateRecoverySalt();
-      $recoverySalt = base64_encode($recoverySaltBytes);
-
-      Database::hset(Keys::USER.':'.$user->user_uuid, [
-          'account_recovery_salt' => $recoverySalt,
-      ]);
-    }
-
-    // Generate 256-bit recovery key
-    $recoveryKeyBytes = RecoveryKey::generate();
-
-    // Encode with Crockford Base32
-    $recoveryKeyEncoded = RecoveryKey::encodeCrockford($recoveryKeyBytes);
-
-    // Format for display (8 groups of 4 = 13 groups total for 52 chars)
-    $recoveryKeyFormatted = RecoveryKey::format($recoveryKeyEncoded);
-
-    // Derive recovery KEK/proof key from raw bytes.
-    // Note: KEK is derived here only as a side-effect validation; the actual DEK wrap
-    // happens client-side when the user is logged in with the DEK in memory.
-    $recoveryProofKey = base64_encode(RecoveryKey::deriveProofKey($recoveryKeyBytes, $recoverySalt));
-
-    // Send recovery key email FIRST — only persist generated state after confirmed delivery.
-    // If the email fails and we had already written recovery_key_generated=1, the user
-    // would be permanently locked out of account recovery with no way to regenerate.
-    $sent = EmailGarum::sendRecoveryKeyEmail($recoveryKeyFormatted, $user->email, $user->full_name);
-
-    if ($sent) {
-      // Mark recovery key as generated only after successful delivery.
-      Database::hset(Keys::USER.':'.$user->user_uuid, [
-          'recovery_key_generated' => '1',
-          'recovery_proof_key' => $recoveryProofKey,
-          'recovery_proof_key_version' => '1',
-      ]);
-
-      SecurityLog::log('recovery_key_sent', [
-          'user_uuid' => $user->user_uuid,
-          'email' => $user->email,
-      ]);
-    } else {
-      SecurityLog::log('recovery_key_send_failed', [
-          'user_uuid' => $user->user_uuid,
-          'email' => $user->email,
-      ]);
-    }
-  }
-
-  /**
    * Find user by token hash
    *
    * @param string $tokenHash SHA256 hash of token
@@ -583,8 +513,11 @@ final class EmailVerificationController
    */
   private function findUserByVerificationCode(string $code): ?User
   {
-    $normalizedCode = strtoupper(trim($code));
+    $normalizedCode = PayCalCode::normalize($code);
     if ($normalizedCode === '') {
+      return null;
+    }
+    if (!PayCalCode::validate($normalizedCode, PayCalCode::EMAIL_SECRET_LENGTH)) {
       return null;
     }
 
@@ -700,17 +633,6 @@ final class EmailVerificationController
   }
 
   /**
-   * Legacy wrapper for checkRateLimit (backwards compatibility)
-   *
-   * @param string $key   Rate limit key
-   * @param int    $limit Maximum requests per hour
-   */
-  private function enforceRateLimit(string $key, int $limit): bool
-  {
-    return $this->checkRateLimit($key, $limit)['allowed'];
-  }
-
-  /**
    * Redirect to auth page with error message
    *
    * @param string $message Error message
@@ -737,4 +659,3 @@ final class EmailVerificationController
     exit;
   }
 }
-

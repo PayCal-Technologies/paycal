@@ -2,6 +2,7 @@
 
 namespace PayCal\Domain;
 
+use PayCal\Domain\Business\BusinessPermissionPresenter;
 use PayCal\Domain\Config\Environment;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Infrastructure\Email\EmailTransport;
@@ -397,9 +398,9 @@ class EmailGarum
   }
 
   /**
-   * Send recovery key via email
+   * Send recovery code via email
    *
-   * @param string $recoveryKey Recovery key (formatted with dashes)
+   * @param string $recoveryKey Recovery code (formatted with dashes)
    * @param string $emailTo     Recipient email address
    * @param string $userName    User's full name
    *
@@ -407,35 +408,8 @@ class EmailGarum
    */
   public static function sendRecoveryKeyEmail(string $recoveryKey, string $emailTo, string $userName = ''): bool
   {
-    $appName = self::appName();
-    $subject = '['.$appName.'] - Your Recovery Key';
-    $issuedAt = gmdate('Y-m-d H:i:s') . ' UTC';
-    $supportToken = strtoupper(substr(hash('sha256', $emailTo.'|'.$recoveryKey.'|'.$issuedAt), 0, 12));
-
-    $templateData = [
-        '__USER_NAME__' => htmlspecialchars($userName ?: 'there'),
-        '__RECOVERY_KEY__' => htmlspecialchars($recoveryKey),
-      '__ACCOUNT_EMAIL__' => htmlspecialchars($emailTo),
-      '__SOURCE_URL__' => htmlspecialchars(self::resolveVerificationBaseUrl()),
-      '__ISSUED_AT__' => htmlspecialchars($issuedAt),
-      '__SUPPORT_TOKEN__' => htmlspecialchars($supportToken),
-        '__PC_NAME__' => $appName,
-    ];
-
-    $htmlBody = Render::template('email-recovery-key-html', $templateData);
-    $textBody = Render::template('email-recovery-key-text', $templateData);
-
-    $transport = new EmailTransport();
-    $bcc = !empty(Environment::emailDebug()) ? [Environment::emailDebug()] : [];
-    
-    return $transport->send(
-      to: $emailTo,
-      subject: $subject,
-      htmlBody: $htmlBody,
-      textBody: $textBody,
-      from: Environment::emailReplyTo(),
-      bcc: $bcc
-    );
+    unset($recoveryKey, $emailTo, $userName);
+    throw new \LogicException('Raw Recovery Codes must not be emailed.');
   }
 
   /**
@@ -444,7 +418,7 @@ class EmailGarum
   public static function sendAccountRecoveryCode(string $emailTo, string $userName, string $code): bool
   {
     $appName = self::appName();
-    $subject = '['.$appName.'] - Account Recovery Code';
+    $subject = '['.$appName.'] - Verification Code';
     $ttlMinutes = (int) \PayCal\Domain\Config\SystemConfig::get('account_recovery_code_ttl_minutes');
     $templateData = [
       '__USER_NAME__' => htmlspecialchars($userName ?: 'there', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
@@ -647,14 +621,14 @@ class EmailGarum
    *
    * @param string           $inviteToken      Invite acceptance token
    * @param string           $inviteeEmail     Recipient email address
-   * @param string           $organizationName Business display name
+   * @param string           $businessName     Business display name
    * @param string           $inviterName      Name of inviting user
    * @param array<int,string> $scopes          Permission scopes requested
    */
   public static function sendBusinessInvite(
     string $inviteToken,
     string $inviteeEmail,
-    string $organizationName,
+    string $businessName,
     string $inviterName,
     array $scopes,
     ?string $batchCode = null
@@ -668,18 +642,18 @@ class EmailGarum
 
     $baseUrl = Environment::appBaseURL();
     $acceptUrl = rtrim($baseUrl, '/') . '/settings/account/?org_invite_token=' . urlencode($inviteToken);
-    $scopeList = implode(', ', $scopes);
+    $scopeList = BusinessPermissionPresenter::scopeListLabel($scopes);
 
     $templateData = [
       '__PC_NAME__' => self::appName(),
       '__INVITER_NAME__' => htmlspecialchars($inviterName ?: 'A PayCal user', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
-      '__ORGANIZATION_NAME__' => htmlspecialchars($organizationName ?: 'Business', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+      '__BUSINESS_NAME__' => htmlspecialchars($businessName ?: 'Business', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
       '__SCOPE_LIST__' => htmlspecialchars($scopeList, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
       '__ACCEPT_URL__' => htmlspecialchars($acceptUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
     ];
 
-    $htmlBody = Render::template('email-organization-invite-html', $templateData);
-    $textBody = Render::template('email-organization-invite-text', $templateData);
+    $htmlBody = Render::template('email-business-invite-html', $templateData);
+    $textBody = Render::template('email-business-invite-text', $templateData);
 
     $transport = new EmailTransport();
     $bcc = !empty(Environment::emailDebug()) ? [Environment::emailDebug()] : [];
@@ -705,7 +679,7 @@ class EmailGarum
    */
   public static function sendBusinessAccessRequest(
     string $ownerEmail,
-    string $organizationName,
+    string $businessName,
     string $requesterName,
     string $requesterEmail,
     string $requestId
@@ -715,7 +689,7 @@ class EmailGarum
     $reviewUrl = rtrim(Environment::appBaseURL(), '/') . '/business/';
     $templateData = [
       '__PC_NAME__' => self::appName(),
-      '__ORGANIZATION_NAME__' => htmlspecialchars($organizationName ?: 'Business', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+      '__BUSINESS_NAME__' => htmlspecialchars($businessName ?: 'Business', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
       '__REQUESTER_NAME__' => htmlspecialchars($requesterName ?: 'PayCal user', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
       '__REQUESTER_EMAIL__' => htmlspecialchars($requesterEmail ?: 'not-provided', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
       '__REQUEST_ID__' => htmlspecialchars($requestId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
@@ -723,8 +697,8 @@ class EmailGarum
       '__REQUESTED_AT_UTC__' => gmdate('Y-m-d H:i:s') . ' UTC',
     ];
 
-    $htmlBody = Render::template('email-organization-access-request-html', $templateData);
-    $textBody = Render::template('email-organization-access-request-text', $templateData);
+    $htmlBody = Render::template('email-business-access-request-html', $templateData);
+    $textBody = Render::template('email-business-access-request-text', $templateData);
 
     $transport = new EmailTransport();
     $bcc = !empty(Environment::emailDebug()) ? [Environment::emailDebug()] : [];
@@ -751,7 +725,7 @@ class EmailGarum
   public static function sendBusinessEventNotification(
     string $emailTo,
     string $recipientName,
-    string $organizationName,
+    string $businessName,
     string $eventLabel,
     string $eventDetail,
     string $eventTimeUTC
@@ -762,7 +736,7 @@ class EmailGarum
 
     $appName = self::appName();
     $subject = '[' . $appName . '] Business Notification: ' . $eventLabel;
-    $orgSafe = htmlspecialchars($organizationName ?: 'Organization', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    $businessSafe = htmlspecialchars($businessName ?: 'Business', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $nameSafe = htmlspecialchars($recipientName ?: 'there', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $eventSafe = htmlspecialchars($eventLabel, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $detailSafe = htmlspecialchars($eventDetail, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -775,7 +749,7 @@ class EmailGarum
     $htmlBody = '<!doctype html><html><body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.45;color:#1f2937;">'
       . '<h2 style="margin:0 0 12px;">Business Notification</h2>'
       . '<p style="margin:0 0 14px;">Hello ' . $nameSafe . ',</p>'
-      . '<p style="margin:0 0 14px;"><strong>' . $eventSafe . '</strong> in <strong>' . $orgSafe . '</strong>.</p>'
+      . '<p style="margin:0 0 14px;"><strong>' . $eventSafe . '</strong> in <strong>' . $businessSafe . '</strong>.</p>'
       . $detailLineHtml
       . '<p style="margin:0 0 14px;">Event time (UTC): ' . $timeSafe . '</p>'
       . '<p style="margin:0 0 16px;"><a href="' . $url . '">Open Business</a></p>'
@@ -784,7 +758,7 @@ class EmailGarum
 
     $textBody = "Business Notification\n\n"
       . "Hello {$recipientName},\n\n"
-      . "{$eventLabel} in {$organizationName}.{$detailLineText}"
+      . "{$eventLabel} in {$businessName}.{$detailLineText}"
       . "Event time (UTC): " . ($eventTimeUTC !== '' ? $eventTimeUTC : (gmdate('Y-m-d H:i:s') . ' UTC')) . "\n"
       . 'Open Business: ' . rtrim(Environment::appBaseURL(), '/') . '/business/' . "\n\n"
       . $appName . ' automated notification.';
@@ -808,64 +782,6 @@ class EmailGarum
     return $sent;
   }
 
-  /** @deprecated Use sendBusinessInvite(); legacy Organization* callers. */
-  /**
-   * @param array<int,string> $scopes
-   */
-  public static function sendOrganizationInvite(
-    string $inviteToken,
-    string $inviteeEmail,
-    string $organizationName,
-    string $inviterName,
-    array $scopes,
-    ?string $batchCode = null
-  ): bool {
-    return self::sendBusinessInvite(
-      $inviteToken,
-      $inviteeEmail,
-      $organizationName,
-      $inviterName,
-      $scopes,
-      $batchCode
-    );
-  }
-
-  /** @deprecated Use sendBusinessAccessRequest(); legacy Organization* callers. */
-  public static function sendOrganizationAccessRequest(
-    string $ownerEmail,
-    string $organizationName,
-    string $requesterName,
-    string $requesterEmail,
-    string $requestId
-  ): bool {
-    return self::sendBusinessAccessRequest(
-      $ownerEmail,
-      $organizationName,
-      $requesterName,
-      $requesterEmail,
-      $requestId
-    );
-  }
-
-  /** @deprecated Use sendBusinessEventNotification(); legacy Organization* callers. */
-  public static function sendOrganizationEventNotification(
-    string $emailTo,
-    string $recipientName,
-    string $organizationName,
-    string $eventLabel,
-    string $eventDetail,
-    string $eventTimeUTC
-  ): bool {
-    return self::sendBusinessEventNotification(
-      $emailTo,
-      $recipientName,
-      $organizationName,
-      $eventLabel,
-      $eventDetail,
-      $eventTimeUTC
-    );
-  }
-
   /**
    * Handles generateInviteBatchCode operation.
    */
@@ -882,4 +798,3 @@ class EmailGarum
     return $code;
   }
 }
-

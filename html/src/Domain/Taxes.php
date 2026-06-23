@@ -61,8 +61,21 @@ class BracketedTaxCalculator implements TaxCalculatorInterface
  */
 class EmploymentInsuranceCalculator implements TaxCalculatorInterface
 {
-  private const MAX_INSURABLE_EARNINGS_CENTS = 6320000;
-  private const RATE_BASIS_POINTS = 158;
+  private const MAX_INSURABLE_EARNINGS_CENTS = 6890000;
+  private const RATE_BASIS_POINTS = 163;
+  private const QUEBEC_RATE_BASIS_POINTS = 130;
+
+  private int $rateBasisPoints;
+
+  /**
+   * Initializes a new instance.
+   */
+  public function __construct(string $province = '')
+  {
+    $this->rateBasisPoints = $province === 'Quebec'
+      ? self::QUEBEC_RATE_BASIS_POINTS
+      : self::RATE_BASIS_POINTS;
+  }
 
   /**
    * Handles calculateCents operation.
@@ -70,7 +83,7 @@ class EmploymentInsuranceCalculator implements TaxCalculatorInterface
   public function calculateCents(int $incomeCents): int
   {
     $capped = min($incomeCents, self::MAX_INSURABLE_EARNINGS_CENTS);
-    $tax = ($capped * self::RATE_BASIS_POINTS) / 10000;
+    $tax = ($capped * $this->rateBasisPoints) / 10000;
 
     return (int) round($tax, 0, PHP_ROUND_HALF_UP);
   }
@@ -106,8 +119,23 @@ class OldAgeSecurityCalculator implements TaxCalculatorInterface
 class CanadaPensionPlanCalculator implements TaxCalculatorInterface
 {
   private const BASIC_EXEMPTION_CENTS = 350000;
-  private const MAX_PENSIONABLE_CENTS = 6850000;
+  private const MAX_PENSIONABLE_CENTS = 7460000;
+  private const ADDITIONAL_MAX_PENSIONABLE_CENTS = 8500000;
   private const RATE_BASIS_POINTS = 595;
+  private const QUEBEC_RATE_BASIS_POINTS = 630;
+  private const SECOND_ADDITIONAL_RATE_BASIS_POINTS = 400;
+
+  private int $rateBasisPoints;
+
+  /**
+   * Initializes a new instance.
+   */
+  public function __construct(string $province = '')
+  {
+    $this->rateBasisPoints = $province === 'Quebec'
+      ? self::QUEBEC_RATE_BASIS_POINTS
+      : self::RATE_BASIS_POINTS;
+  }
 
   /**
    * Handles calculateCents operation.
@@ -118,9 +146,14 @@ class CanadaPensionPlanCalculator implements TaxCalculatorInterface
     $cap = self::MAX_PENSIONABLE_CENTS - self::BASIC_EXEMPTION_CENTS;
     $capped = min($adjusted, $cap);
 
-    $tax = ($capped * self::RATE_BASIS_POINTS) / 10000;
+    $baseTax = ($capped * $this->rateBasisPoints) / 10000;
+    $secondAdditionalCents = max(
+      0,
+      min($incomeCents, self::ADDITIONAL_MAX_PENSIONABLE_CENTS) - self::MAX_PENSIONABLE_CENTS
+    );
+    $secondAdditionalTax = ($secondAdditionalCents * self::SECOND_ADDITIONAL_RATE_BASIS_POINTS) / 10000;
 
-    return (int) round($tax, 0, PHP_ROUND_HALF_UP);
+    return (int) round($baseTax + $secondAdditionalTax, 0, PHP_ROUND_HALF_UP);
   }
 }
 
@@ -147,17 +180,18 @@ class Taxes
   public function __construct(string $province = "Alberta", ?int $taxYear = null)
   {
     $resolvedYear = self::normalizeTaxYear($taxYear ?? (int) date('Y'));
+    $provinceName = self::normalizeProvinceName($province);
 
     $this->federal = new BracketedTaxCalculator(
       $this->getDefaultFederalBrackets($resolvedYear)
     );
 
     $this->provincial = new BracketedTaxCalculator(
-      $this->getDefaultProvincialBrackets($province, $resolvedYear)
+      $this->getDefaultProvincialBrackets($provinceName, $resolvedYear)
     );
 
-    $this->ei = new EmploymentInsuranceCalculator();
-    $this->cpp = new CanadaPensionPlanCalculator();
+    $this->ei = new EmploymentInsuranceCalculator($provinceName);
+    $this->cpp = new CanadaPensionPlanCalculator($provinceName);
     $this->oas = new OldAgeSecurityCalculator();
   }
 
@@ -181,7 +215,7 @@ class Taxes
   {
     $year = self::normalizeTaxYear($taxYear ?? (int) date('Y'));
     $provincialTables = self::loadRateTables()['provincial'];
-    $provinceName = isset($provincialTables[$province]) ? $province : 'Alberta';
+    $provinceName = self::normalizeProvinceName($province);
 
     /** @var array<int, array{0:int,1:int,2:int}> $brackets */
     $brackets = $provincialTables[$provinceName][$year];
@@ -297,6 +331,36 @@ class Taxes
   }
 
   /**
+   * Handles normalizeProvinceName operation.
+   */
+  private static function normalizeProvinceName(string $province): string
+  {
+    $province = trim($province);
+    $aliases = [
+      'AB' => 'Alberta',
+      'BC' => 'British Columbia',
+      'MB' => 'Manitoba',
+      'NB' => 'New Brunswick',
+      'NL' => 'Newfoundland and Labrador',
+      'NT' => 'Northwest Territories',
+      'NS' => 'Nova Scotia',
+      'NU' => 'Nunavut',
+      'ON' => 'Ontario',
+      'PE' => 'Prince Edward Island',
+      'PEI' => 'Prince Edward Island',
+      'QC' => 'Quebec',
+      'SK' => 'Saskatchewan',
+      'YT' => 'Yukon',
+    ];
+
+    $normalized = $aliases[strtoupper($province)] ?? $province;
+
+    return isset(self::loadRateTables()['provincial'][$normalized])
+      ? $normalized
+      : 'Alberta';
+  }
+
+  /**
    * Calculate all taxes on the given provincial income (in cents).
    *
    * @param int $incomeCents Income amount in cents
@@ -370,4 +434,3 @@ class Taxes
     ];
   }
 }
-

@@ -116,16 +116,15 @@ try {
       <h2>Implementation Scope</h2>
       <p>
         As of April 2026, this standardized error-handling pattern has been applied to
-        <strong>11 frontend modules</strong> with <strong>~40+ normalized catch blocks</strong>:
+        <strong>10 frontend modules</strong> with <strong>39+ normalized catch blocks</strong>:
       </p>
       <div class="doc-two-column">
         <div>
-          <h3>Authentication &amp; Settings (7 modules)</h3>
+          <h3>Authentication &amp; Settings (6 modules)</h3>
           <ul class="doc-list">
             <li><code>html/js/auth-recovery/index.php</code> (4 catches)</li>
             <li><code>html/js/signin/index.php</code> (2 catches)</li>
             <li><code>html/js/signin/verification-reminder.js</code> (2 catches)</li>
-            <li><code>html/js/signin/verification-status-banner.js</code> (1 catch)</li>
             <li><code>html/js/settings/index.php</code> (8+ catches)</li>
           </ul>
         </div>

@@ -7,17 +7,17 @@ use PayCal\Domain\Constants\Keys;
 /**
  * BusinessMemberRepository.php
  *
- * Purpose: Organization membership repository for enumerating relationships,
- * role data, and user-to-organization membership mirrors from Redis.
+ * Purpose: Business membership repository for enumerating connections,
+ * role data, and user-to-business membership mirrors from Redis.
  *
  * Developer notes:
  * - This repository is intentionally read-focused and should not absorb access
  *   control policy from calling services or controllers.
  * - Keep key-layout assumptions aligned with the structures written by the
- *   organization discovery domain.
+ *   business discovery domain.
  *
  * Architectural role:
- * - Reusable domain repository for organization membership queries and lookup
+ * - Reusable domain repository for business membership queries and lookup
  *   helpers consumed by higher-level services.
  * - Encapsulates membership data access outside the HTTP layer.
  *
@@ -37,9 +37,9 @@ use PayCal\Domain\Constants\Keys;
  * No authorization gating — callers (ODS, controllers) handle access control.
  *
  * Key layout (read-only mirrors of what ODS writes):
- *   organization:relationship:{orgId}:{userUUID}  – HASH: role, status, scopes, user_uuid, updated_at
- *   organization:user:{userUUID}                  – SET of active orgIds the user belongs to
- *   organization:relationships:user:{userUUID}    – SET of non-terminal org relationship ids
+ *   business:connection:{businessId}:{userUUID} – HASH: role, status, scopes, user_uuid, updated_at
+ *   business:user:{userUUID}                    – SET of active business ids the user belongs to
+ *   business:connections:user:{userUUID}        – SET of non-terminal business connection ids
  *
  * @category   Domain
  * @package    PayCal\Domain
@@ -50,13 +50,13 @@ use PayCal\Domain\Constants\Keys;
 final class BusinessMemberRepository
 {
   /**
-   * Enumerate all members of an organization, optionally filtered by role and/or status.
-   * Each entry includes the hydrated User plus their relationship fields.
+   * Enumerate all members of a business, optionally filtered by role and/or status.
+   * Each entry includes the hydrated User plus their connection fields.
    * Members with no matching user record are silently skipped.
    *
    * Results are sorted alphabetically by full_name.
    *
-   * @param  string      $businessId  Organization ID
+   * @param  string      $businessId  Business ID
    * @param  string|null $role        If set, only return members with this exact role
    * @param  string|null $status      If set, only return members with this exact status (e.g. 'active')
    * @return array<int, array{user: User, role: string, status: string, scopes: list<string>, updated_at: string}>
@@ -84,7 +84,7 @@ final class BusinessMemberRepository
       return [];
     }
 
-    $relationshipKeys = [];
+    $connectionKeys = [];
     $normalizedUUIDs = [];
     foreach ($memberUUIDs as $memberUUID) {
       $memberUUID = (string) $memberUUID;
@@ -92,18 +92,18 @@ final class BusinessMemberRepository
         continue;
       }
       $normalizedUUIDs[] = $memberUUID;
-      $relationshipKeys[$memberUUID] = Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $memberUUID;
+      $connectionKeys[$memberUUID] = Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $memberUUID;
     }
 
-    $relationshipHashes = $relationshipKeys !== []
-      ? Database::pipelineHgetall(array_values($relationshipKeys))
+    $connectionHashes = $connectionKeys !== []
+      ? Database::pipelineHgetall(array_values($connectionKeys))
       : [];
     $profiles = UserRepository::findMany($normalizedUUIDs);
 
     $members = [];
 
     foreach ($normalizedUUIDs as $memberUUID) {
-      $rel = $relationshipHashes[$relationshipKeys[$memberUUID]] ?? [];
+      $rel = $connectionHashes[$connectionKeys[$memberUUID]] ?? [];
       if ([] === $rel) {
         continue;
       }
@@ -183,9 +183,9 @@ final class BusinessMemberRepository
   }
 
   /**
-   * List all organization memberships for a single user.
+   * List all business memberships for a single user.
    * Useful for "which orgs is this user in, and in what role?"
-   * Uses active membership plus relationship reverse-index SETs.
+   * Uses active membership plus connection reverse-index SETs.
    *
    * @param  string $userUUID
    * @return array<int, array{org_id: string, role: string, status: string, scopes: list<string>, updated_at: string}>
@@ -198,7 +198,7 @@ final class BusinessMemberRepository
 
     $orgIds = array_merge(
       Database::smembers(Keys::BUSINESS_USER . ':' . $userUUID),
-      Database::smembers(Keys::BUSINESS_RELATIONSHIPS_USER . ':' . $userUUID),
+      Database::smembers(Keys::BUSINESS_CONNECTIONS_USER . ':' . $userUUID),
     );
     $orgIds = array_values(array_unique(array_filter(
       array_map(static fn (mixed $value): string => trim((string) $value), $orgIds),
@@ -208,17 +208,17 @@ final class BusinessMemberRepository
       return [];
     }
 
-    $relationshipKeys = [];
+    $connectionKeys = [];
     foreach ($orgIds as $orgId) {
-      $relationshipKeys[$orgId] = Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $userUUID;
+      $connectionKeys[$orgId] = Keys::BUSINESS_CONNECTION . ':' . $orgId . ':' . $userUUID;
     }
 
-    $relationshipHashes = Database::pipelineHgetall(array_values($relationshipKeys));
+    $connectionHashes = Database::pipelineHgetall(array_values($connectionKeys));
 
     $memberships = [];
 
-    foreach ($relationshipKeys as $orgId => $relationshipKey) {
-      $rel = $relationshipHashes[$relationshipKey] ?? [];
+    foreach ($connectionKeys as $orgId => $connectionKey) {
+      $rel = $connectionHashes[$connectionKey] ?? [];
       if ([] === $rel) {
         continue;
       }
@@ -236,8 +236,8 @@ final class BusinessMemberRepository
   }
 
   /**
-   * Count members of an organization, optionally filtered by status.
-   * When $status is null, every relationship key is counted regardless of status.
+   * Count members of a business, optionally filtered by status.
+   * When $status is null, every connection key is counted regardless of status.
    */
   public static function count(string $orgId, ?string $status = null): int
   {
@@ -245,7 +245,7 @@ final class BusinessMemberRepository
       return 0;
     }
 
-    $pattern = Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':*';
+    $pattern = Keys::BUSINESS_CONNECTION . ':' . $orgId . ':*';
     $n       = 0;
 
     foreach (Database::scanKeys($pattern) as $key) {

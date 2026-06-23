@@ -2,7 +2,7 @@
  * Shared locale-aware number and currency formatting for earnings charts.
  */
 
-import { resolveUserLocale } from '/js/earnings/locale.js';
+import { resolveUserLocale } from '/js/core/locale.js';
 
 /**
  * @param {object} [options]

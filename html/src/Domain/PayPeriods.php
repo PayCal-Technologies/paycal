@@ -550,7 +550,7 @@ final class PayPeriods
   {
     $u = strtoupper($anchor);
 
-    // TODO: Consider i18n support for localized weekday names.
+    // Weekday anchors are canonical storage tokens; UI translations happen before this layer.
     return match ($u) {
       'MONDAY' => 'Monday',
       'TUESDAY' => 'Tuesday',
@@ -617,11 +617,15 @@ final class PayPeriods
   private static function biweeklyStart(\DateTimeImmutable $dt, string $anchor, \DateTimeImmutable $epoch): \DateTimeImmutable
   {
     $epoch = self::alignEpochToAnchor($epoch, $anchor);
-    $days = intdiv($dt->getTimestamp() - $epoch->getTimestamp(), 86400);
-    if ($dt < $epoch) {
-      $cycles = intdiv($days - 13, 14); // floor toward -∞
-    } else {
-      $cycles = intdiv($days, 14);
+    $diff = $epoch->diff($dt);
+    $days = (int) $diff->days;
+    if ($diff->invert === 1) {
+      $days = -$days;
+    }
+
+    $cycles = intdiv($days, 14);
+    if ($days < 0 && $days % 14 !== 0) {
+      --$cycles;
     }
 
     return $epoch->modify(sprintf('+%d days', $cycles * 14));
@@ -649,7 +653,7 @@ final class PayPeriods
    * Align any epoch to the same or previous anchor weekday at local midnight.
    *
    * This prevents runtime failures when historical user settings contain a
-   * non-anchor epoch date (for example, legacy settings drift).
+   * non-anchor epoch date (for example, imported settings drift).
    */
   private static function alignEpochToAnchor(\DateTimeImmutable $epoch, string $anchor): \DateTimeImmutable
   {
@@ -718,4 +722,3 @@ final class PayPeriods
     return (($by - $ay) * 12) + ($bm - $am);
   }
 }
-

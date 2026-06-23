@@ -121,15 +121,22 @@ $ttsConfig = [
     utter.volume = Number(window.tts.voice_volume ?? 1.0);
 
     state.speaking = true;
+    document.body?.setAttribute('data-tts-speaking', 'true');
     state.lastMessage = entry.text;
     state.lastTime = entry.at;
 
     utter.onend = () => {
       state.speaking = false;
+      if (state.queue.length === 0) {
+        document.body?.removeAttribute('data-tts-speaking');
+      }
       processNext();
     };
     utter.onerror = () => {
       state.speaking = false;
+      if (state.queue.length === 0) {
+        document.body?.removeAttribute('data-tts-speaking');
+      }
       processNext();
     };
 
@@ -180,6 +187,7 @@ $ttsConfig = [
     if (!('speechSynthesis' in window)) return;
     state.queue = [];
     state.speaking = false;
+    document.body?.removeAttribute('data-tts-speaking');
     window.speechSynthesis.cancel();
   };
 

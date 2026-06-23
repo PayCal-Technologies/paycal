@@ -11,32 +11,12 @@ import {
   getPieGraphPalette,
 } from '/js/earnings/pie-graph-core.js';
 import { createEarningsFormatHelpers } from '/js/earnings/format.js';
-import { resolveUserLocale } from '/js/earnings/locale.js';
+import { resolveUserLocale } from '/js/core/locale.js';
+import { escapeHtml } from '/js/core/escape.js';
+import { formatI18n, getI18nLabel } from '/js/core/template.js';
 import { initForecastWorkspace } from '/js/earnings/forecast-calculator.js';
 
 const GRAPH_PREFIX = 'member_reports_line_graph_';
-
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function getI18nLabel(config, key, fallback = '') {
-  const value = String(config?.[key] ?? '').trim();
-  return value !== '' ? value : fallback;
-}
-
-function formatI18n(config, key, fallback, params = {}) {
-  let label = getI18nLabel(config, key, fallback);
-  Object.entries(params).forEach(([paramKey, paramValue]) => {
-    label = label.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramValue));
-  });
-  return label;
-}
 
 function parseDateKeyToLocalMs(dateKey) {
   const match = String(dateKey).match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -127,10 +107,11 @@ function buildDailyGridElement(year, headers, rows, useLegacyPrivateColumns, get
   const headerContent = document.createElement('div');
   headerContent.className = 'datagrid_header_content';
   headerContent.setAttribute('role', 'row');
-  headers.forEach((label) => {
+  headers.forEach((label, index) => {
     const heading = document.createElement('div');
     heading.className = 'datagrid_heading';
     heading.setAttribute('role', 'columnheader');
+    heading.id = `member_reports_daily_${year}_col_${index + 1}`;
     heading.textContent = String(label || '');
     headerContent.appendChild(heading);
   });
@@ -157,10 +138,15 @@ function buildDailyGridElement(year, headers, rows, useLegacyPrivateColumns, get
       const rowContent = document.createElement('div');
       rowContent.className = 'datagrid_row_content';
       rowContent.setAttribute('role', 'presentation');
-      fieldList.forEach((fieldName) => {
+      fieldList.forEach((fieldName, fieldIndex) => {
+        const colLabel = headers[fieldIndex] || fieldName;
+        const colId = `member_reports_daily_${year}_col_${fieldIndex + 1}`;
         const cell = document.createElement('div');
         cell.className = 'datagrid_item';
         cell.setAttribute('role', 'gridcell');
+        cell.setAttribute('aria-labelledby', colId);
+        cell.dataset.colKey = fieldName;
+        cell.dataset.colLabel = String(colLabel);
         cell.textContent = String(row[fieldName] ?? '');
         rowContent.appendChild(cell);
       });
@@ -250,6 +236,7 @@ export function initMemberReportsEarningsView(container, options = {}) {
   const showToast = typeof options.showToast === 'function' ? options.showToast : () => {};
   const userLocale = String(config.USER_LOCALE || resolveUserLocale()).trim() || resolveUserLocale();
   const apiBase = `/api/v1/businesses/${encodeURIComponent(businessId)}/members/${encodeURIComponent(memberUuid)}/reports`;
+  const hasPremiumReporting = root.dataset.memberReportsPremium === '1';
   const protectedExportEndpoint = (format) => (
     `${apiBase}/export/${encodeURIComponent(format)}`
   );
@@ -546,6 +533,9 @@ export function initMemberReportsEarningsView(container, options = {}) {
       button.disabled = true;
       button.textContent = '...';
       const fileSuffix = String(year);
+      if (format !== 'pdf' && !hasPremiumReporting) {
+        throw new Error('Premium subscription required for this export format.');
+      }
       if (format === 'xlsx' || format === 'pdf') {
         const response = await fetch(protectedExportEndpoint(format), {
           method: 'POST',

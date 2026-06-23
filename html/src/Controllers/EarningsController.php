@@ -4,6 +4,7 @@ namespace PayCal\Controllers;
 
 use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\Authentication;
+use PayCal\Domain\CryptoCompatibilityTelemetry;
 use PayCal\Domain\Database;
 use PayCal\Domain\Earnings;
 use PayCal\Domain\EarningsDailyExtensionBridge;
@@ -19,6 +20,7 @@ use PayCal\Domain\PayPeriods;
 use PayCal\Domain\Response;
 use PayCal\Domain\Sites;
 use PayCal\Domain\Strings;
+use PayCal\Domain\SubscriptionRepository;
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Security\CorrelationBroker;
@@ -75,6 +77,10 @@ use PayCal\Observability\Lens;
  */
 class EarningsController
 {
+  private const DEFAULT_PAYROLL_VERIFICATION_JURISDICTION = 'CA-AB';
+  private const DEFAULT_PAYROLL_VERIFICATION_BRACKET_VERSION = '2026.1';
+  private const DEFAULT_PAYROLL_VERIFICATION_ENGINE_VERSION = '1.015.000';
+
   private static bool $lensBooted = false;
 
   /**
@@ -92,6 +98,10 @@ class EarningsController
   /** @param array<string,mixed> $payload */
   private static function debug(string $label, array $payload): void
   {
+    if (!self::debugRequested()) {
+      return;
+    }
+
     Lens::add($label, $payload, 'data');
     Log::debug('[EarningsController] ' . $label . ' ' . json_encode($payload, JSON_UNESCAPED_SLASHES));
   }
@@ -206,53 +216,62 @@ class EarningsController
   }
 
   /**
-   * Resolve the correct DEK wrapper for either personal or organization envelopes.
+   * Resolve the correct DEK wrapper for either personal or business envelopes.
    */
   private static function resolveDekForEnvelope(string $blob, string $ownerUUID, string $credentialId, string $saltB64): ?string
   {
-    $orgMeta = self::parseOrganizationEnvelopeMetadata($blob);
-    if (is_array($orgMeta)) {
+    $businessMeta = self::parseBusinessEnvelopeMetadata($blob);
+    if (is_array($businessMeta)) {
       $actorUUID = User::currentUUID();
       if ($actorUUID === '' || $credentialId === '') {
-        self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'missing_actor_or_credential');
+        self::appendBusinessWorkReadAudit($businessMeta, $actorUUID, $ownerUUID, 'denied', 'missing_actor_or_credential');
         return null;
       }
 
       $wrap = (new BusinessEncryptionService())->resolveActiveWrapForUnwrap(
-        $orgMeta['org_id'],
-        $orgMeta['segment'],
-        $orgMeta['key_version'],
+        $businessMeta['business_id'],
+        $businessMeta['segment'],
+        $businessMeta['key_version'],
         $actorUUID,
         $credentialId,
         '',
-        $orgMeta['dek_id']
+        $businessMeta['dek_id']
       );
       if (!$wrap['success']) {
-        self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'wrap_resolution_failed');
+        self::appendBusinessWorkReadAudit($businessMeta, $actorUUID, $ownerUUID, 'denied', 'wrap_resolution_failed');
         return null;
       }
 
       $wrappedDek = self::scalarString($wrap['data']['wrapped_dek'] ?? '');
       if ($wrappedDek === '') {
-        self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'denied', 'missing_wrapped_dek');
+        CryptoCompatibilityTelemetry::wrapperMissing(CryptoCompatibilityTelemetry::SOURCE_BUSINESS_CURRENT);
+        self::appendBusinessWorkReadAudit($businessMeta, $actorUUID, $ownerUUID, 'denied', 'missing_wrapped_dek');
         return null;
       }
 
-      self::appendBusinessWorkReadAudit($orgMeta, $actorUUID, $ownerUUID, 'success', 'wrap_resolved');
+      CryptoCompatibilityTelemetry::wrapperPresent(CryptoCompatibilityTelemetry::SOURCE_BUSINESS_CURRENT);
+      self::appendBusinessWorkReadAudit($businessMeta, $actorUUID, $ownerUUID, 'success', 'wrap_resolved');
 
       if (self::debugRequested()) {
         self::debug('resolveDekForEnvelope:source', [
-          'mode' => 'organization',
-          'source' => 'org_wrap_resolved',
+          'mode' => 'business',
+          'source' => 'business_wrap_resolved',
           'owner_uuid_present' => true,
           'credential_present' => true,
         ]);
       }
 
-      return self::unwrapDekFromPasskeyWrapper($wrappedDek, $credentialId, $actorUUID, $saltB64);
+      return self::unwrapDekFromPasskeyWrapper(
+        $wrappedDek,
+        $credentialId,
+        $actorUUID,
+        $saltB64,
+        CryptoCompatibilityTelemetry::SOURCE_BUSINESS_CURRENT
+      );
     }
 
     if ($credentialId === '') {
+      CryptoCompatibilityTelemetry::wrapperMissing(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT);
       return null;
     }
 
@@ -260,8 +279,16 @@ class EarningsController
     $wrappedDekPasskey = self::scalarString(Database::hget($wrappedPasskeyMapKey, $credentialId));
 
     if ($wrappedDekPasskey === '') {
+      CryptoCompatibilityTelemetry::wrapperMissing(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT);
+      $legacyWrappedDek = self::scalarString(Database::hget(Keys::USER . ':' . $ownerUUID, 'wrapped_dek_passkey'));
+      if ($legacyWrappedDek !== '') {
+        CryptoCompatibilityTelemetry::wrapperPresent(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_LEGACY);
+        CryptoCompatibilityTelemetry::legacyWrapperBlocked();
+      }
       return null;
     }
+
+    CryptoCompatibilityTelemetry::wrapperPresent(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT);
 
     if (self::debugRequested()) {
       self::debug('resolveDekForEnvelope:source', [
@@ -272,37 +299,43 @@ class EarningsController
       ]);
     }
 
-    return self::unwrapDekFromPasskeyWrapper($wrappedDekPasskey, $credentialId, $ownerUUID, $saltB64);
+    return self::unwrapDekFromPasskeyWrapper(
+      $wrappedDekPasskey,
+      $credentialId,
+      $ownerUUID,
+      $saltB64,
+      CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT
+    );
   }
 
-  /** @param array{org_id: string, segment: string, key_version: string, dek_id: string} $orgMeta */
-  private static function appendBusinessWorkReadAudit(array $orgMeta, string $actorUUID, string $targetUUID, string $outcome, string $reason): void
+  /** @param array{business_id: string, segment: string, key_version: string, dek_id: string} $businessMeta */
+  private static function appendBusinessWorkReadAudit(array $businessMeta, string $actorUUID, string $targetUUID, string $outcome, string $reason): void
   {
-    if ($orgMeta['org_id'] === '') {
+    if ($businessMeta['business_id'] === '') {
       return;
     }
 
     try {
       (new BusinessDiscoveryService())->appendBusinessAuditEvent(
-        (string) $orgMeta['org_id'],
-        'org.work.read',
+        (string) $businessMeta['business_id'],
+        'business.work.read',
         $actorUUID !== '' ? $actorUUID : User::currentUUID(),
         [
           'target_user_uuid' => $targetUUID,
-          'segment' => $orgMeta['segment'],
-          'key_version' => $orgMeta['key_version'],
-          'dek_id' => $orgMeta['dek_id'],
+          'segment' => $businessMeta['segment'],
+          'key_version' => $businessMeta['key_version'],
+          'dek_id' => $businessMeta['dek_id'],
           'outcome' => $outcome,
           'reason' => $reason,
         ]
       );
     } catch (\Throwable $e) {
-      Log::debug('[EarningsController] org.work.read audit emit failed: ' . $e->getMessage());
+      Log::debug('[EarningsController] business.work.read audit emit failed: ' . $e->getMessage());
     }
   }
 
-  /** @return array{org_id: string, segment: string, key_version: string, dek_id: string}|null */
-  private static function parseOrganizationEnvelopeMetadata(string $blob): ?array
+  /** @return array{business_id: string, segment: string, key_version: string, dek_id: string}|null */
+  private static function parseBusinessEnvelopeMetadata(string $blob): ?array
   {
     $decodedEnvelope = base64_decode($blob, true);
     if ($decodedEnvelope === false) {
@@ -322,22 +355,22 @@ class EarningsController
       return null;
     }
 
-    $orgIdRaw = $meta['org_id'] ?? ($envelope['org_id'] ?? '');
+    $businessIdRaw = $meta['business_id'] ?? ($envelope['business_id'] ?? '');
     $segmentRaw = $meta['segment'] ?? ($envelope['segment'] ?? '');
     $keyVersionRaw = $meta['key_version'] ?? ($envelope['key_version'] ?? '');
     $dekIdRaw = $meta['dek_id'] ?? ($envelope['dek_id'] ?? '');
 
-    $orgId = is_scalar($orgIdRaw) ? trim((string) $orgIdRaw) : '';
+    $businessId = is_scalar($businessIdRaw) ? trim((string) $businessIdRaw) : '';
     $segment = is_scalar($segmentRaw) ? trim((string) $segmentRaw) : '';
     $keyVersion = is_scalar($keyVersionRaw) ? trim((string) $keyVersionRaw) : '';
     $dekId = is_scalar($dekIdRaw) ? trim((string) $dekIdRaw) : '';
 
-    if ($orgId === '' || $segment === '' || $keyVersion === '' || $dekId === '') {
+    if ($businessId === '' || $segment === '' || $keyVersion === '' || $dekId === '') {
       return null;
     }
 
     return [
-      'org_id' => $orgId,
+      'business_id' => $businessId,
       'segment' => $segment,
       'key_version' => $keyVersion,
       'dek_id' => $dekId,
@@ -361,27 +394,39 @@ class EarningsController
   /**
    * Handles unwrapDekFromPasskeyWrapper operation.
    */
-  private static function unwrapDekFromPasskeyWrapper(string $wrappedDekPasskey, string $credentialId, string $userUUID, string $saltB64): ?string
+  private static function unwrapDekFromPasskeyWrapper(
+    string $wrappedDekPasskey,
+    string $credentialId,
+    string $userUUID,
+    string $saltB64,
+    string $telemetrySource
+  ): ?string
   {
+    CryptoCompatibilityTelemetry::unwrapAttempt($telemetrySource);
+
     $decodedEnvelope = base64_decode($wrappedDekPasskey, true);
     if ($decodedEnvelope === false) {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
     $envelope = json_decode($decodedEnvelope, true);
     if (!is_array($envelope)) {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
     $nonceB64 = self::scalarString($envelope['nonce'] ?? $envelope['iv'] ?? '');
     $ctB64 = self::scalarString($envelope['ciphertext'] ?? $envelope['ct'] ?? '');
     if ($nonceB64 === '' || $ctB64 === '') {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
     $nonce = base64_decode($nonceB64, true);
     $ciphertextWithTag = base64_decode($ctB64, true);
     if ($nonce === false || $ciphertextWithTag === false || strlen($ciphertextWithTag) < 17) {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
@@ -393,9 +438,12 @@ class EarningsController
     if (is_string($kekCanonical) && $kekCanonical !== '') {
       $dek = openssl_decrypt($ciphertext, 'aes-256-gcm', $kekCanonical, OPENSSL_RAW_DATA, $nonce, $tag);
       if (is_string($dek) && $dek !== '') {
+        CryptoCompatibilityTelemetry::unwrapSuccess($telemetrySource);
         return $dek;
       }
     }
+
+    CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
 
     return null;
   }
@@ -602,9 +650,9 @@ class EarningsController
 
         $period = PayPeriods::fromDate($sDate, PayFrequency::BIWEEKLY, 'Monday', null, 'America/Edmonton');
         $employeeId = $userUUID;
-        $jurisdiction = 'CA-AB';
-        $bracketVersion = '2026.1';
-        $engineVersion = '1.015.000';
+        $jurisdiction = self::payrollVerificationJurisdiction();
+        $bracketVersion = self::payrollVerificationBracketVersion();
+        $engineVersion = self::payrollVerificationEngineVersion();
 
         $keyVersion = 1;
         $payload = Earnings::buildCanonicalVerificationPayload(
@@ -825,7 +873,8 @@ class EarningsController
 
     $userUUID = User::currentUUID();
     $sessionHash = Authentication::getSessionHashFromCookie();
-    if (!self::debugRequested() && is_string($sessionHash) && $sessionHash !== '') {
+    $debugRequested = self::debugRequested();
+    if (!$debugRequested && is_string($sessionHash) && $sessionHash !== '') {
       $cachedPayload = EarningsCacheService::getYearPayload($userUUID, 'gross', $year, $sessionHash);
       if (is_array($cachedPayload)) {
         Lens::add('grossYear:cache', ['year' => $year, 'hit' => true], 'cache');
@@ -848,10 +897,13 @@ class EarningsController
         // Decryption unavailable — fall through to plaintext snapshot fields
         // (gross is stored alongside the blob). Consistent with Earnings::getWorkTotalsForRange().
         $debug['decrypt_failed_rows']++;
-        self::debug('grossYear:fallthrough', [
-          'reason' => 'decrypt_failed_using_plaintext',
-          'work_key' => self::scalarString($sKey),
-        ]);
+        if ($debugRequested) {
+          self::debug('grossYear:fallthrough', [
+            'reason' => 'decrypt_failed_using_plaintext',
+            'work_key' => self::scalarString($sKey),
+          ]);
+        }
+        CryptoCompatibilityTelemetry::plaintextFallback('gross_year');
       } else {
         $aEarnings = $resolved;
       }
@@ -869,25 +921,29 @@ class EarningsController
       if (0.0 === $gross) {
         $debug['gross_zero_rows']++;
       }
-      self::debug('grossYear:row', [
-        'date' => $sDate,
-        'has_encrypted_blob' => $hasBlob,
-        'has_plaintext_gross' => $hasGross,
-        'gross_used' => $gross,
-      ]);
+      if ($debugRequested) {
+        self::debug('grossYear:row', [
+          'date' => $sDate,
+          'has_encrypted_blob' => $hasBlob,
+          'has_plaintext_gross' => $hasGross,
+          'gross_used' => $gross,
+        ]);
+      }
       if (!isset($formattedData[$sDate])) {
         $formattedData[$sDate] = 0.0;
       }
       $formattedData[$sDate] += $gross;
     }
 
-    self::debug('grossYear:summary', $debug);
+    if ($debugRequested) {
+      self::debug('grossYear:summary', $debug);
+    }
 
     $extra = $formattedData;
-    if (self::debugRequested()) {
+    if ($debugRequested) {
       $extra['_debug'] = $debug;
     }
-    if (!self::debugRequested() && is_string($sessionHash) && $sessionHash !== '') {
+    if (!$debugRequested && is_string($sessionHash) && $sessionHash !== '') {
       EarningsCacheService::putYearPayload($userUUID, 'gross', $year, $sessionHash, $formattedData);
     }
 
@@ -929,7 +985,8 @@ class EarningsController
 
     $userUUID = User::currentUUID();
     $sessionHash = Authentication::getSessionHashFromCookie();
-    if (!self::debugRequested() && is_string($sessionHash) && $sessionHash !== '') {
+    $debugRequested = self::debugRequested();
+    if (!$debugRequested && is_string($sessionHash) && $sessionHash !== '') {
       $cachedPayload = EarningsCacheService::getYearPayload($userUUID, 'daily', $year, $sessionHash);
       if (is_array($cachedPayload)) {
         Lens::add('dailyYear:cache', ['year' => $year, 'hit' => true], 'cache');
@@ -945,7 +1002,6 @@ class EarningsController
     $aData = Work::getInstance()->GetWorkInRange($dStart, $dEnd->modify('+1 day'));
     $debug = ['rows' => 0, 'encrypted_only' => 0, 'gross_zero_rows' => 0, 'hours_zero_rows' => 0, 'decrypt_failed_rows' => 0];
     $tax = new Taxes('Alberta', $year);
-    $employeeId = $userUUID;
 
     $formattedData = [];
     foreach ($aData as $sKey => $aEarnings) {
@@ -953,10 +1009,13 @@ class EarningsController
       if (!is_array($resolved)) {
         // Decryption unavailable — fall through to plaintext snapshot fields.
         $debug['decrypt_failed_rows']++;
-        self::debug('dailyYear:fallthrough', [
-          'reason' => 'decrypt_failed_using_plaintext',
-          'work_key' => self::scalarString($sKey),
-        ]);
+        if ($debugRequested) {
+          self::debug('dailyYear:fallthrough', [
+            'reason' => 'decrypt_failed_using_plaintext',
+            'work_key' => self::scalarString($sKey),
+          ]);
+        }
+        CryptoCompatibilityTelemetry::plaintextFallback('daily_year');
       } else {
         $aEarnings = $resolved;
       }
@@ -980,62 +1039,40 @@ class EarningsController
       if (0.0 === $hours) {
         $debug['hours_zero_rows']++;
       }
-      self::debug('dailyYear:row', [
-        'date' => $sDate,
-        'site_id' => self::scalarString($aEarnings['site_id'] ?? ''),
-        'has_encrypted_blob' => $hasBlob,
-        'has_plaintext_gross' => $hasGross,
-        'hours_used' => $hours,
-        'travel_used' => $travelHours,
-        'loa_used' => $livingOutAllowance,
-        'gross_used' => $g,
-      ]);
-      $grossCents = Money::dollarsToCents((string) $g);
-      $t = $tax->calculateTaxesCents($grossCents);
-      $federalCents = (int) $t['federal'];
-      $provincialCents = (int) $t['provincial'];
-      $eiCents = (int) $t['employment_insurance'];
-      $cppCents = (int) $t['canada_pension_plan'];
-      $oasCents = (int) $t['old_age_security'];
-      $taxCents = (int) $t['totalDeductions'];
-      $netCents = $grossCents - $taxCents;
-
-      // Determine pay period (biweekly, Monday anchor, default timezone)
-      $period = PayPeriods::fromDate($sDate, PayFrequency::BIWEEKLY, 'Monday', null, 'America/Edmonton');
-      $jurisdiction = 'CA-AB'; // TODO: derive from user or context
-      $bracketVersion = '2026.1'; // TODO: derive from config
-      $engineVersion = '1.015.000'; // TODO: derive from config
-      $keyVersion = defined('SIGNING_KEY_VERSION') ? SIGNING_KEY_VERSION : 1;
-
-      $payload = Earnings::buildCanonicalVerificationPayload(
-        $period,
-        $employeeId,
-        $jurisdiction,
-        $bracketVersion,
-        $engineVersion,
-        $grossCents,
-        $taxCents,
-        $netCents,
-        $keyVersion
-      );
-      $serialized = Earnings::serializeVerificationPayload($payload);
-      $verificationHash = Earnings::hashPayload($serialized);
-
+      if ($debugRequested) {
+        self::debug('dailyYear:row', [
+          'date' => $sDate,
+          'site_id' => self::scalarString($aEarnings['site_id'] ?? ''),
+          'has_encrypted_blob' => $hasBlob,
+          'has_plaintext_gross' => $hasGross,
+          'hours_used' => $hours,
+          'travel_used' => $travelHours,
+          'loa_used' => $livingOutAllowance,
+          'gross_used' => $g,
+        ]);
+      }
       if (!isset($formattedData[$sDate])) {
         $formattedData[$sDate] = [
           'date' => $sDate,
           'grossCents' => 0,
-          'taxCents' => 0,
-          'netCents' => 0,
         ];
       }
 
-      $formattedData[$sDate]['grossCents'] += $grossCents;
-      $formattedData[$sDate]['taxCents'] += $taxCents;
-      $formattedData[$sDate]['netCents'] += $netCents;
+      $formattedData[$sDate]['grossCents'] += Money::dollarsToCents((string) $g);
+    }
 
-      // Keep debug fields referenced above in scope to avoid altering diagnostics.
-      unset($federalCents, $provincialCents, $eiCents, $cppCents, $oasCents, $verificationHash);
+    ksort($formattedData);
+    $ytdGrossCents = 0;
+    $previousYtdDeductionCents = 0;
+    foreach ($formattedData as $dateKey => $row) {
+      $grossCents = (int) $row['grossCents'];
+      $ytdGrossCents += $grossCents;
+      $ytdDeductions = $tax->calculateTaxesCents($ytdGrossCents);
+      $ytdDeductionCents = (int) $ytdDeductions['totalDeductions'];
+      $dailyDeductionCents = max(0, $ytdDeductionCents - $previousYtdDeductionCents);
+      $formattedData[$dateKey]['taxCents'] = $dailyDeductionCents;
+      $formattedData[$dateKey]['netCents'] = max(0, $grossCents - $dailyDeductionCents);
+      $previousYtdDeductionCents = $ytdDeductionCents;
     }
 
     foreach ($formattedData as $dateKey => $row) {
@@ -1052,13 +1089,15 @@ class EarningsController
       $formattedData = $extensionPayload;
     }
 
-    self::debug('dailyYear:summary', $debug);
+    if ($debugRequested) {
+      self::debug('dailyYear:summary', $debug);
+    }
 
     $extra = $formattedData;
-    if (self::debugRequested()) {
+    if ($debugRequested) {
       $extra['_debug'] = $debug;
     }
-    if (!self::debugRequested() && is_string($sessionHash) && $sessionHash !== '') {
+    if (!$debugRequested && is_string($sessionHash) && $sessionHash !== '') {
       EarningsCacheService::putYearPayload($userUUID, 'daily', $year, $sessionHash, $formattedData);
     }
 
@@ -1099,13 +1138,25 @@ class EarningsController
     }
 
     // Extract and validate required fields
-    $format = isset($postData['format']) && is_string($postData['format']) ? trim($postData['format']) : '';
-    $scope = isset($postData['scope']) && is_string($postData['scope']) ? trim($postData['scope']) : 'yearly';
+    $format = isset($postData['format']) && is_string($postData['format']) ? strtolower(trim($postData['format'])) : '';
+    $scope = isset($postData['scope']) && is_string($postData['scope']) ? strtolower(trim($postData['scope'])) : 'yearly';
     $year = isset($postData['year']) && is_numeric($postData['year']) ? (int) $postData['year'] : 0;
 
     // Validate inputs
-    if ($format === '' || $year < 1900 || $year > 2100) {
+    if ($format === '' || !in_array($format, self::supportedExportFormats(), true) || $year < 1900 || $year > 2100) {
       Response::error('[EC] Invalid export parameters: format and valid year are required.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    if (!self::currentUserCanExportFormat($format)) {
+      \PayCal\Infrastructure\Telemetry\SecurityLog::log('earnings_export', [
+        'scope' => $scope,
+        'format' => $format,
+        'year' => $year,
+        'result' => 'denied',
+        'reason' => 'premium_required',
+      ]);
+      Response::error('[EC] Premium subscription required for this export format.', [], HttpStatus::HTTP_FORBIDDEN);
       return;
     }
 
@@ -1177,6 +1228,18 @@ class EarningsController
       return;
     }
 
+    if (!self::currentUserCanExportFormat('xlsx')) {
+      \PayCal\Infrastructure\Telemetry\SecurityLog::log('earnings_export', [
+        'scope' => $scope,
+        'format' => 'xlsx',
+        'year' => $year,
+        'result' => 'denied',
+        'reason' => 'premium_required',
+      ]);
+      Response::error('[EC] Premium subscription required for XLSX exports.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
     if (count($rows) === 0) {
       Response::error('[EC] No rows to export.', [], HttpStatus::HTTP_UNPROCESSABLE);
       return;
@@ -1231,6 +1294,7 @@ class EarningsController
    *   year         int     Report year (used for filename)
    *   start_date   string  ISO date (payperiod only)
    *   end_date     string  ISO date (payperiod only)
+   *   print_mode   string  Optional color mode: bw|grayscale|color
    */
   #[Route('export/pdf', ['POST'])]
   public function exportPdf(): void
@@ -1261,6 +1325,12 @@ class EarningsController
     $year      = isset($postData['year']) && is_numeric($postData['year']) ? (int) $postData['year'] : (int) date('Y');
     $startDate = isset($postData['start_date']) && is_string($postData['start_date']) ? preg_replace('/[^0-9\-]/', '', $postData['start_date']) : '';
     $endDate   = isset($postData['end_date']) && is_string($postData['end_date']) ? preg_replace('/[^0-9\-]/', '', $postData['end_date']) : '';
+    $printMode = isset($postData['print_mode']) && is_string($postData['print_mode'])
+      ? strtolower(trim($postData['print_mode']))
+      : 'color';
+    if (!in_array($printMode, ['bw', 'grayscale', 'color'], true)) {
+      $printMode = 'color';
+    }
 
     $allowedScopes = ['yearly', 'monthly', 'daily', 'payperiod'];
     if (!in_array($scope, $allowedScopes, true)) {
@@ -1292,7 +1362,7 @@ class EarningsController
     $filename = "paycal-{$scope}-{$fileSuffix}.pdf";
 
     try {
-      $pdf = EarningsPdf::generate($scope, $report);
+      $pdf = EarningsPdf::generate($scope, $report, $printMode);
     } catch (\InvalidArgumentException $e) {
       Log::error('[EC] exportPdf: PDF generation failed: ' . $e->getMessage());
       Response::error('[EC] Invalid export parameters.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1396,6 +1466,42 @@ class EarningsController
     return $value !== null;
   }
 
+  private static function payrollVerificationJurisdiction(): string
+  {
+    return self::envString(
+      'PAYROLL_VERIFICATION_JURISDICTION',
+      self::DEFAULT_PAYROLL_VERIFICATION_JURISDICTION
+    );
+  }
+
+  private static function payrollVerificationBracketVersion(): string
+  {
+    return self::envString(
+      'PAYROLL_VERIFICATION_BRACKET_VERSION',
+      self::DEFAULT_PAYROLL_VERIFICATION_BRACKET_VERSION
+    );
+  }
+
+  private static function payrollVerificationEngineVersion(): string
+  {
+    return self::envString(
+      'PAYROLL_VERIFICATION_ENGINE_VERSION',
+      self::DEFAULT_PAYROLL_VERIFICATION_ENGINE_VERSION
+    );
+  }
+
+  private static function envString(string $key, string $default): string
+  {
+    $value = $_ENV[$key] ?? $default;
+    if (!is_scalar($value)) {
+      return $default;
+    }
+
+    $sanitized = trim(InputSanitizer::sanitizeString((string) $value));
+
+    return $sanitized !== '' ? $sanitized : $default;
+  }
+
   /**
    * GET forecast/state — initial forecast workspace state (no Redis mutation).
    */
@@ -1403,6 +1509,11 @@ class EarningsController
   public static function getForecastState(): void
   {
     self::bootLens('api/forecast/state');
+
+    if (!self::currentUserHasPremiumReporting()) {
+      Response::error('[EC] Premium subscription required for Forecast.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
 
     $scenarioRaw = strtolower(trim(InputSanitizer::getString('scenario') ?? 'normal'));
     $scenario = ForecastScenario::tryFrom($scenarioRaw) ?? ForecastScenario::Normal;
@@ -1420,6 +1531,11 @@ class EarningsController
   public static function postForecastPreview(): void
   {
     self::bootLens('api/forecast/preview');
+
+    if (!self::currentUserHasPremiumReporting()) {
+      Response::error('[EC] Premium subscription required for Forecast.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
 
     $body = file_get_contents('php://input');
     $postData = [];
@@ -1445,5 +1561,23 @@ class EarningsController
 
     $state = (new ForecastProjectionService())->preview(User::current(), $overrides, $scenario);
     Response::success('[EC] Forecast preview calculated.', $state);
+  }
+
+  /**
+   * @return list<string>
+   */
+  private static function supportedExportFormats(): array
+  {
+    return ['csv', 'txt', 'xlsx', 'pdf'];
+  }
+
+  private static function currentUserCanExportFormat(string $format): bool
+  {
+    return strtolower($format) === 'pdf' || self::currentUserHasPremiumReporting();
+  }
+
+  private static function currentUserHasPremiumReporting(): bool
+  {
+    return SubscriptionRepository::isPremiumActive(User::currentUUID());
   }
 }

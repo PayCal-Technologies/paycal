@@ -59,6 +59,7 @@ enum UserFields: string
   case ACCOUNT_RECOVERY_SALT = 'account_recovery_salt';
   case WRAPPED_DEK_RECOVERY = 'wrapped_dek_recovery';
   case RECOVERY_KEY_GENERATED = 'recovery_key_generated';
+  case RECOVERY_KEY_UPDATED_AT = 'recovery_key_updated_at';
   case RECOVERY_PROOF_KEY = 'recovery_proof_key';
   case RECOVERY_PROOF_KEY_VERSION = 'recovery_proof_key_version';
 
@@ -68,6 +69,7 @@ enum UserFields: string
   case LOCALE = 'locale';
   case TEXT = 'text';
   case SPACING = 'spacing';
+  case DEPTH = 'depth';
   case DYSLEXIA_TYPOGRAPHY = 'dyslexia_typography';
   case HELP_POPUP_TIMEOUT_SECONDS = 'help_popup_timeout_seconds';
   case TOAST_POSITION = 'toast_position';
@@ -130,6 +132,9 @@ enum UserFields: string
   case DEFAULT_TRAVEL_HOURS = 'default_travel_hours';
 
   case PROVINCE = 'province';
+  case INDIGENOUS_TAX_EXEMPTION_ELIGIBLE = 'indigenous_tax_exemption_eligible';
+  case LIVES_ON_RESERVE = 'lives_on_reserve';
+  case RESERVE_NAME = 'reserve_name';
   case TIMEZONE = 'timezone';
   case CURRENCY = 'currency';
   case SESSION_TIMEOUT = 'session_timeout';

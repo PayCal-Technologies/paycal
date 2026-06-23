@@ -148,7 +148,7 @@ PayCal continues to support transparent data classification per internal policy:
 PayCal operates under GDPR compliance framework:
 - User data export available: Settings → Account → Export Data
 - Right to deletion: Users can request account erasure (180-day hold)
-- Data processing agreements available for organizational accounts
+- Data processing agreements available for business accounts
 
 ---
 

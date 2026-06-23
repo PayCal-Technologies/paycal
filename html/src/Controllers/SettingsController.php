@@ -36,12 +36,12 @@ use PayCal\Domain\WorkEntryLockService;
 /**
  * SettingsController.php
  *
- * Purpose: Authenticated profile/settings API layer for user preferences,
+ * Purpose: Authenticated account/settings API layer for user preferences,
  * pay-period settings, destructive account actions, and related recovery hooks.
  *
  * Developer notes:
  * - Settings writes here can cascade into pay-period regeneration, lock
- *   boundary changes, and organization-sync behavior.
+ *   boundary changes, and business-sync behavior.
  * - Keep field validation and normalization aligned with UserRepository and
  *   UserSettings rather than duplicating rules in controller branches.
  *
@@ -66,7 +66,7 @@ use PayCal\Domain\WorkEntryLockService;
  * Settings API surface.
  *
  * Responsibilities:
- * - Read and update user-facing settings consumed by the profile/settings UI.
+ * - Read and update user-facing settings consumed by the account settings UI.
  * - Coordinate destructive account operations through the correct safeguards.
  * - Trigger downstream recalculation flows when settings affect schedule/locks.
  */
@@ -95,12 +95,12 @@ class SettingsController
   ];
 
   /**
-   * GET profile/settings
+   * GET account/profile/settings
    *
-   * Returns the current user's profile settings, sourced from their personal
-   * organization record (pay frequency, timezone, currency, etc.).
+   * Returns the current user's account profile settings, sourced from their personal
+   * business record (pay frequency, timezone, currency, etc.).
    */
-  #[Route('profile/settings', ['GET'])]
+  #[Route('account/profile/settings', ['GET'])]
   /**
    * Handles getProfileSettings operation.
    */
@@ -111,7 +111,7 @@ class SettingsController
     if ($personal['success'] !== true) {
       $message = $personal['message'] !== ''
         ? $personal['message']
-        : 'Unable to load profile settings.';
+        : 'Unable to load account profile settings.';
       Response::error('[SC] ' . $message, [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
@@ -126,19 +126,19 @@ class SettingsController
 
     $result = $service->getBusinessSettings(User::currentUUID(), $orgId);
     if ($result['success']) {
-      Response::success('[SC] Profile settings retrieved.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[SC] Account profile settings retrieved.', $result['data'], HttpStatus::HTTP_OK);
     } else {
       Response::error('[SC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
   }
 
   /**
-   * POST profile/settings/update
+   * POST account/profile/settings/update
    *
-   * Persists updated profile settings (pay frequency, anchor date, wage, timezone,
-   * etc.) against the current user's personal organization.
+   * Persists updated account profile settings (pay frequency, anchor date, wage, timezone,
+   * etc.) against the current user's personal business.
    */
-  #[Route('profile/settings/update', ['POST'])]
+  #[Route('account/profile/settings/update', ['POST'])]
   /**
    * Handles updateProfileSettings operation.
    */
@@ -157,7 +157,7 @@ class SettingsController
     if ($personal['success'] !== true) {
       $message = $personal['message'] !== ''
         ? $personal['message']
-        : 'Unable to update profile settings.';
+        : 'Unable to update account profile settings.';
       Response::error('[SC] ' . $message, [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
@@ -172,7 +172,7 @@ class SettingsController
 
     $result = $service->updateBusinessSettings(User::currentUUID(), $orgId, $filtered);
     if ($result['success']) {
-      Response::success('[SC] Profile settings updated.', $result['data'], HttpStatus::HTTP_OK);
+      Response::success('[SC] Account profile settings updated.', $result['data'], HttpStatus::HTTP_OK);
     } else {
       Response::error('[SC] ' . $result['message'], $result['data'], HttpStatus::HTTP_BAD_REQUEST);
     }
@@ -239,7 +239,6 @@ class SettingsController
     foreach (Database::scanKeys(Keys::LOCK_BOUNDARY . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
-    Database::unlink(Keys::LOCK_BOUNDARY . ':' . $userUUID);
 
     Response::success('All account data deleted.', [], HttpStatus::HTTP_OK);
   }
@@ -377,6 +376,9 @@ class SettingsController
     ], HttpStatus::HTTP_OK);
   }
 
+  /**
+   * List account sessions.
+   */
   #[Route('account/sessions/list', ['POST'])]
   public function listAccountSessions(): void
   {
@@ -396,6 +398,9 @@ class SettingsController
     ], HttpStatus::HTTP_OK);
   }
 
+  /**
+   * Revoke other account sessions.
+   */
   #[Route('account/sessions/revoke_others', ['POST'])]
   public function revokeOtherAccountSessions(): void
   {
@@ -419,6 +424,9 @@ class SettingsController
     Response::success('[SC] Other sessions revoked.', ['revoked' => $revoked], HttpStatus::HTTP_OK);
   }
 
+  /**
+   * List export history.
+   */
   #[Route('account/export/history', ['POST'])]
   public function listExportHistory(): void
   {
@@ -712,6 +720,9 @@ class SettingsController
       'full_name' => (string) $user->full_name,
       'phone' => (string) $user->phone,
       'province' => (string) $user->province,
+      'indigenous_tax_exemption_eligible' => $user->indigenous_tax_exemption_eligible,
+      'lives_on_reserve' => $user->lives_on_reserve,
+      'reserve_name' => (string) $user->reserve_name,
       'timezone' => (string) $user->timezone,
       'currency' => (string) $user->currency,
       'language' => (string) $user->language,
@@ -728,6 +739,7 @@ class SettingsController
       'variant' => (string) $user->variant,
       'text' => (string) $user->text,
       'spacing' => (string) $user->spacing,
+      'depth' => (string) $user->depth,
       'dyslexia_typography' => (string) $user->dyslexia_typography,
       'voice' => (string) $user->voice,
       'audio_feedback' => (string) $user->audio_feedback,
@@ -750,6 +762,9 @@ class SettingsController
       'full_name',
       'phone',
       'province',
+      'indigenous_tax_exemption_eligible',
+      'lives_on_reserve',
+      'reserve_name',
       'timezone',
       'currency',
       'language',
@@ -766,6 +781,7 @@ class SettingsController
       'variant',
       'text',
       'spacing',
+      'depth',
       'dyslexia_typography',
       'voice',
       'audio_feedback',
@@ -790,6 +806,8 @@ class SettingsController
         'calendar_work_entry_fields_overtime',
         'calendar_work_entry_fields_living_out',
         'calendar_work_entry_fields_travel',
+        'indigenous_tax_exemption_eligible',
+        'lives_on_reserve',
       ], true)) {
         $write[$field] = (bool) $value ? '1' : '0';
       } else {
@@ -801,7 +819,7 @@ class SettingsController
   }
 
   /**
-   * TODO: Document scalarString.
+   * Scalar string.
    */
   private function scalarString(mixed $value): string
   {
@@ -809,7 +827,7 @@ class SettingsController
   }
 
   /**
-   * TODO: Document scalarInt.
+   * Scalar int.
    */
   private function scalarInt(mixed $value, int $default = 0): int
   {
@@ -825,7 +843,7 @@ class SettingsController
   }
 
   /**
-   * TODO: Document generateReferenceCode.
+   * Generate reference code.
    */
   private function generateReferenceCode(string $prefix): string
   {
@@ -833,7 +851,7 @@ class SettingsController
   }
 
   /**
-   * TODO: Document importSessionKey.
+   * Import session key.
    */
   private function importSessionKey(string $importId): string
   {
@@ -897,17 +915,14 @@ class SettingsController
     foreach (Database::scanKeys(Keys::LOCK_BOUNDARY . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
-    Database::unlink(Keys::LOCK_BOUNDARY . ':' . $userUUID);
     Database::unlink(Keys::VERIFICATION_CODES . ':' . $userUUID);
 
-    // Remove email index records (current + pending email; legacy and current key formats)
+    // Remove email index records (current + pending email)
     if ($email !== '') {
       Database::unlink(Keys::EMAIL . ':' . $email);
-      Database::unlink(Keys::EMAIL . $email);
     }
     if ($newEmail !== '') {
       Database::unlink(Keys::EMAIL . ':' . $newEmail);
-      Database::unlink(Keys::EMAIL . $newEmail);
     }
 
     // Remove passkey wrappers and credential records
@@ -972,23 +987,23 @@ class SettingsController
    * Handles:
    *   /v1/api/account/info/update
    *   /v1/api/settings/style/update
+   *   /v1/api/account/security/update
    *   /v1/api/settings/audio/update
    *   /v1/api/settings/calendar/update
+   *   /v1/api/settings/debug/update
    *   /v1/api/settings/pay_period/update
+   *   /v1/api/account/profile/update
    *
    * All of these update *user settings*, so the allow-list is user settings only.
    */
   #[Route('account/info/update', ['POST'])]
-  #[Route('account/personal/update', ['POST'])] // Legacy alias retained for graceful fallback submits
   #[Route('account/security/update', ['POST'])]
-  #[Route('account/audio/update', ['POST'])] // Legacy alias retained for graceful fallback submits
-  #[Route('account/pay_period/update', ['POST'])] // Legacy alias retained for graceful fallback submits
   #[Route('settings/audio/update', ['POST'])]
   #[Route('settings/calendar/update', ['POST'])]
   #[Route('settings/debug/update', ['POST'])]
   #[Route('settings/pay_period/update', ['POST'])]
   #[Route('settings/style/update', ['POST'])]
-  #[Route('profile/update', ['POST'])] // Canonical profile-page route
+  #[Route('account/profile/update', ['POST'])]
   /**
    * Handles updateSettings operation.
    */
@@ -1000,8 +1015,8 @@ class SettingsController
         $requestUri = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI'])
           ? $_SERVER['REQUEST_URI']
           : '/unknown';
-        if (strpos($requestUri, 'profile') !== false) {
-          $lens_context = 'profile/update';
+        if (strpos($requestUri, 'account/profile') !== false) {
+          $lens_context = 'account/profile/update';
         }
       } catch (\Throwable $_) {
         // Ignore
@@ -1258,9 +1273,10 @@ class SettingsController
       'macos', 'macos9', 'system8', 'system7',
       'linux', 'mint', 'fedora', 'debian',
       'beos', 'zeta', 'haiku',
-      'win10', 'win95', 'win98', 'winxp',
+      'win10', 'win11', 'win95', 'win98', 'winxp',
       'blade_runner', 'space_odyssey', 'tron', 'fifth_element', 'dune', 'matrix', 'alien', 'akira',
-      'star_trek', 'star_wars', 'paycal_blue', 'paycal_black', 'paycal_red', 'paycal_green', 'paycal_white', 'paycal', 'retro', 'bluejeans', 'garden', 'arcade'
+      'star_trek', 'star_wars', 'paycal_blue', 'paycal_black', 'paycal_red', 'paycal_green', 'paycal_white', 'paycal', 'retro', 'bluejeans', 'garden', 'arcade',
+      'amiga', 'workbench', 'nextstep', 'openstep', 'solaris', 'terminal', 'c64', 'irix', 'os2_warp', 'palm_os', 'cyberdeck', 'solarpunk', 'vaporwave'
     ];
     $allowedVariants = ['light', 'dark'];
 
@@ -1355,6 +1371,13 @@ class SettingsController
         'spacious' => 5,
         'zen' => 5,
       ], 0);
+    }
+
+    if (isset($filtered['depth'])) {
+      $depthRaw = is_scalar($filtered['depth']) ? strtolower(trim((string) $filtered['depth'])) : '';
+      $filtered['depth'] = in_array($depthRaw, ['flat', 'low', 'standard', 'high'], true)
+        ? $depthRaw
+        : UserPreferenceDefaults::DEFAULT_DEPTH;
     }
 
     if (isset($filtered['dyslexia_typography'])) {
@@ -1644,6 +1667,18 @@ class SettingsController
       }
     }
 
+    foreach (['indigenous_tax_exemption_eligible', 'lives_on_reserve'] as $flag) {
+      if (isset($filtered[$flag])) {
+        $raw = $filtered[$flag];
+        $filtered[$flag] = is_scalar($raw) && in_array(strtolower(trim((string) $raw)), ['1', 'true', 'yes', 'on'], true) ? '1' : '0';
+      }
+    }
+
+    if (isset($filtered['reserve_name'])) {
+      $reserveName = is_scalar($filtered['reserve_name']) ? trim((string) $filtered['reserve_name']) : '';
+      $filtered['reserve_name'] = mb_substr($reserveName, 0, 120);
+    }
+
     return $filtered;
   }
 
@@ -1802,6 +1837,9 @@ class SettingsController
     return $filtered;
   }
 
+  /**
+   * Expire debug preferences if needed.
+   */
   private static function expireDebugPreferencesIfNeeded(User $user): void
   {
     $untilRaw = trim($user->debug_enabled_until);
@@ -1821,6 +1859,9 @@ class SettingsController
     ]);
   }
 
+  /**
+   * Has recent passkey step up.
+   */
   private static function hasRecentPasskeyStepUp(): bool
   {
     $sessionHash = Authentication::getSessionHashFromCookie();

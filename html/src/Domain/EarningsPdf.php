@@ -62,18 +62,20 @@ final class EarningsPdf
    * Supported scopes: yearly, monthly, daily, payperiod.
    * Returns the raw PDF bytes (write to response directly).
    *
-   * @param string              $scope  Export scope (yearly|monthly|daily|payperiod)
-   * @param array<string,mixed> $report Aggregated report from buildXxxReportJson() in JS
+   * @param string              $scope     Export scope (yearly|monthly|daily|payperiod)
+   * @param array<string,mixed> $report    Aggregated report from buildXxxReportJson() in JS
+   * @param string              $printMode Color mode (bw|grayscale|color)
    * @return string Raw PDF content
    * @throws \InvalidArgumentException on unsupported scope
    */
-  public static function generate(string $scope, array $report): string
+  public static function generate(string $scope, array $report, string $printMode = 'color'): string
   {
+    $mode = self::normalizePrintMode($printMode);
     return match ($scope) {
-      'yearly'    => self::buildYearly($report),
-      'monthly'   => self::buildMonthly($report),
+      'yearly'    => self::buildYearly($report, $mode),
+      'monthly'   => self::buildMonthly($report, $mode),
       'daily',
-      'payperiod' => self::buildDaily($report, $scope),
+      'payperiod' => self::buildDaily($report, $scope, $mode),
       default     => throw new \InvalidArgumentException("Unsupported PDF scope: {$scope}"),
     };
   }
@@ -87,7 +89,7 @@ final class EarningsPdf
    *
    * @param array<string,mixed> $report
    */
-  private static function buildYearly(array $report): string
+  private static function buildYearly(array $report, string $printMode): string
   {
     $meta    = is_array($report['meta']    ?? null) ? $report['meta']    : [];
     $summary = is_array($report['summary'] ?? null) ? $report['summary'] : [];
@@ -99,7 +101,7 @@ final class EarningsPdf
     // Portrait A4 — printable width = 595.28 - 72 = 523.28 pt
     $pw = $pdf->getPrintWidth();
 
-    self::renderHeader($pdf, $meta, $summary, 'yearly');
+    self::renderHeader($pdf, $meta, $summary, 'yearly', $printMode);
 
     // Table columns: Site | Regular | OT | Gross | EI | CPP | OAS | Tax | Net
     $cols = [
@@ -114,11 +116,11 @@ final class EarningsPdf
       ['Net',      $pw * 0.101, 'R'],
     ];
 
-    $onNewPage = function (Tabularium $t) use ($cols): void {
-      self::renderTableHeader($t, $cols);
+    $onNewPage = function (Tabularium $t) use ($cols, $printMode): void {
+      self::renderTableHeader($t, $cols, $printMode);
     };
 
-    self::renderTableHeader($pdf, $cols);
+    self::renderTableHeader($pdf, $cols, $printMode);
 
     foreach ($rows as $row) {
       if (!is_array($row)) {
@@ -149,7 +151,7 @@ final class EarningsPdf
       [self::prefixDollar($summary['taxes']             ?? ''),                 $cols[7][1], 'R'],
       [self::prefixDollar($summary['net']               ?? ''),                 $cols[8][1], 'R'],
     ];
-    self::renderTotalsRow($pdf, $totals);
+    self::renderTotalsRow($pdf, $totals, $printMode);
 
     return $pdf->output('S');
   }
@@ -159,7 +161,7 @@ final class EarningsPdf
    *
    * @param array<string,mixed> $report
    */
-  private static function buildMonthly(array $report): string
+  private static function buildMonthly(array $report, string $printMode): string
   {
     $meta    = is_array($report['meta']    ?? null) ? $report['meta']    : [];
     $summary = is_array($report['summary'] ?? null) ? $report['summary'] : [];
@@ -170,7 +172,7 @@ final class EarningsPdf
 
     $pw = $pdf->getPrintWidth();
 
-    self::renderHeader($pdf, $meta, $summary, 'monthly');
+    self::renderHeader($pdf, $meta, $summary, 'monthly', $printMode);
 
     // Columns: Month | Site | Regular | OT | Gross | EI | CPP | OAS | Tax
     $cols = [
@@ -185,11 +187,11 @@ final class EarningsPdf
       ['Tax',      $pw * 0.082, 'R'],
     ];
 
-    $onNewPage = function (Tabularium $t) use ($cols): void {
-      self::renderTableHeader($t, $cols);
+    $onNewPage = function (Tabularium $t) use ($cols, $printMode): void {
+      self::renderTableHeader($t, $cols, $printMode);
     };
 
-    self::renderTableHeader($pdf, $cols);
+    self::renderTableHeader($pdf, $cols, $printMode);
 
     foreach ($rows as $row) {
       if (!is_array($row)) {
@@ -220,7 +222,7 @@ final class EarningsPdf
       [self::prefixDollar($summary['old_age_security'] ?? ''),              $cols[7][1], 'R'],
       [self::prefixDollar($summary['taxes']          ?? ''),                $cols[8][1], 'R'],
     ];
-    self::renderTotalsRow($pdf, $totals);
+    self::renderTotalsRow($pdf, $totals, $printMode);
 
     return $pdf->output('S');
   }
@@ -230,7 +232,7 @@ final class EarningsPdf
    *
    * @param array<string,mixed> $report
    */
-  private static function buildDaily(array $report, string $scope): string
+  private static function buildDaily(array $report, string $scope, string $printMode): string
   {
     $meta    = is_array($report['meta']    ?? null) ? $report['meta']    : [];
     $summary = is_array($report['summary'] ?? null) ? $report['summary'] : [];
@@ -243,7 +245,7 @@ final class EarningsPdf
     // Landscape A4 — printable width = 841.89 - 72 = 769.89 pt
     $pw = $pdf->getPrintWidth();
 
-    self::renderHeader($pdf, $meta, $summary, $scope);
+    self::renderHeader($pdf, $meta, $summary, $scope, $printMode);
 
     // Columns: Date | Site | Regular | OT | Travel | LOA | Gross | EI | CPP | OAS | Tax | Net
     $cols = [
@@ -261,11 +263,11 @@ final class EarningsPdf
       ['Net',      $pw * 0.098, 'R'],
     ];
 
-    $onNewPage = function (Tabularium $t) use ($cols): void {
-      self::renderTableHeader($t, $cols);
+    $onNewPage = function (Tabularium $t) use ($cols, $printMode): void {
+      self::renderTableHeader($t, $cols, $printMode);
     };
 
-    self::renderTableHeader($pdf, $cols);
+    self::renderTableHeader($pdf, $cols, $printMode);
 
     foreach ($rows as $row) {
       if (!is_array($row)) {
@@ -302,7 +304,7 @@ final class EarningsPdf
       [self::prefixDollar($summary['taxes']          ?? ''),                $cols[10][1], 'R'],
       [self::prefixDollar($summary['net']            ?? ''),                $cols[11][1], 'R'],
     ];
-    self::renderTotalsRow($pdf, $totals);
+    self::renderTotalsRow($pdf, $totals, $printMode);
 
     return $pdf->output('S');
   }
@@ -332,7 +334,7 @@ final class EarningsPdf
    * @param array<string,mixed> $meta
    * @param array<string,mixed> $summary
    */
-  private static function renderHeader(Tabularium $pdf, array $meta, array $summary, string $scope): void
+  private static function renderHeader(Tabularium $pdf, array $meta, array $summary, string $scope, string $printMode): void
   {
     $title     = self::s($meta['title']    ?? '', 'PayCal Earnings Report');
     $employee  = self::s($meta['full_name'] ?? null) ?: self::s($meta['employee'] ?? '');
@@ -364,7 +366,8 @@ final class EarningsPdf
     $pdf->ln(16.0);
 
     // Rule beneath subtitle
-    $pdf->setDrawColor(45, 106, 79);
+    [$accentR, $accentG, $accentB] = self::accentColor($printMode);
+    $pdf->setDrawColor($accentR, $accentG, $accentB);
     $pdf->setLineWidth(1.0);
     $pdf->rule(1.0);
     $pdf->setDrawColor(180, 180, 180);
@@ -443,7 +446,7 @@ final class EarningsPdf
     }
 
     $pdf->ln(4.0);
-    $pdf->setDrawColor(45, 106, 79);
+    $pdf->setDrawColor($accentR, $accentG, $accentB);
     $pdf->setLineWidth(0.5);
     $pdf->rule(0.5);
     $pdf->setDrawColor(180, 180, 180);
@@ -455,11 +458,13 @@ final class EarningsPdf
    *
    * @param array<int, array{0: string, 1: float, 2: string}> $cols
    */
-  private static function renderTableHeader(Tabularium $pdf, array $cols): void
+  private static function renderTableHeader(Tabularium $pdf, array $cols, string $printMode): void
   {
+    [$headerR, $headerG, $headerB] = self::tableHeaderFill($printMode);
+    [$textR, $textG, $textB] = self::tableHeaderText($printMode);
     $pdf->setFont('B', self::FONT_BODY);
-    $pdf->setFillColor(self::HDR_R, self::HDR_G, self::HDR_B);
-    $pdf->setTextColor(255, 255, 255);
+    $pdf->setFillColor($headerR, $headerG, $headerB);
+    $pdf->setTextColor($textR, $textG, $textB);
     $pdf->row($cols, self::HDR_H, '1', true);
     $pdf->setFont('', self::FONT_BODY);
     $pdf->setTextColor(30, 30, 30);
@@ -474,13 +479,57 @@ final class EarningsPdf
   private static function renderTotalsRow(
     Tabularium $pdf,
     array $cells,
+    string $printMode,
   ): void {
+    [$totalR, $totalG, $totalB] = self::totalsFill($printMode);
     $pdf->setFont('B', self::FONT_BODY);
-    $pdf->setFillColor(self::TOT_R, self::TOT_G, self::TOT_B);
+    $pdf->setFillColor($totalR, $totalG, $totalB);
     $pdf->setTextColor(30, 30, 30);
     $pdf->row($cells, self::HDR_H, '1', true);
     $pdf->setFont('', self::FONT_BODY);
     $pdf->setFillColor(255, 255, 255);
+  }
+
+  private static function normalizePrintMode(string $printMode): string
+  {
+    $mode = strtolower(trim($printMode));
+    return in_array($mode, ['bw', 'grayscale', 'color'], true) ? $mode : 'color';
+  }
+
+  /** @return array{0: int, 1: int, 2: int} */
+  private static function accentColor(string $printMode): array
+  {
+    return match ($printMode) {
+      'bw'        => [0, 0, 0],
+      'grayscale' => [45, 45, 45],
+      default     => [45, 106, 79],
+    };
+  }
+
+  /** @return array{0: int, 1: int, 2: int} */
+  private static function tableHeaderFill(string $printMode): array
+  {
+    return match ($printMode) {
+      'bw'        => [255, 255, 255],
+      'grayscale' => [65, 65, 65],
+      default     => [self::HDR_R, self::HDR_G, self::HDR_B],
+    };
+  }
+
+  /** @return array{0: int, 1: int, 2: int} */
+  private static function tableHeaderText(string $printMode): array
+  {
+    return $printMode === 'bw' ? [0, 0, 0] : [255, 255, 255];
+  }
+
+  /** @return array{0: int, 1: int, 2: int} */
+  private static function totalsFill(string $printMode): array
+  {
+    return match ($printMode) {
+      'bw'        => [255, 255, 255],
+      'grayscale' => [225, 225, 225],
+      default     => [self::TOT_R, self::TOT_G, self::TOT_B],
+    };
   }
 
   // ---------------------------------------------------------------------------

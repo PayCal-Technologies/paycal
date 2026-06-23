@@ -2,8 +2,6 @@
 
 namespace PayCal\Domain;
 
-use PayCal\Domain\Config\Environment;
-
 /**
  * CORS.php
  *
@@ -32,6 +30,22 @@ use PayCal\Domain\Config\Environment;
  */
 class CORS
 {
+  /** @var list<string> */
+  private const ALLOWED_ORIGINS = [
+    'https://paycal.app',
+    'https://www.paycal.app',
+  ];
+
+  /**
+   * Return the request origin only when it is explicitly trusted.
+   */
+  public static function allowedOrigin(string $origin): ?string
+  {
+    $origin = trim($origin);
+
+    return in_array($origin, self::ALLOWED_ORIGINS, true) ? $origin : null;
+  }
+
   /**
    * Handles CORS origin validation and response headers.
    * Allows requests only from approved PayCal domains.
@@ -41,8 +55,8 @@ class CORS
    */
   public static function handleORIGIN(): void
   {
-    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-    if ('https://paycal.app' === $origin || 'https://www.paycal.app' === $origin) {
+    $origin = self::allowedOrigin(self::requestOrigin());
+    if ($origin !== null) {
       header("Access-Control-Allow-Origin: {$origin}");
       header('Vary: Origin');
     }
@@ -58,7 +72,11 @@ class CORS
   {
     if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
       http_response_code(204);
-      header('Access-Control-Allow-Origin: '.Environment::appDomain());
+      $origin = self::allowedOrigin(self::requestOrigin());
+      if ($origin !== null) {
+        header("Access-Control-Allow-Origin: {$origin}");
+      }
+      header('Vary: Origin');
       header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
       header('Access-Control-Allow-Headers: Content-Type, X-Resource-ID');
       exit;
@@ -74,5 +92,12 @@ class CORS
   public static function renderContentType(string $type): void
   {
     header("Content-Type: {$type}");
+  }
+
+  private static function requestOrigin(): string
+  {
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+    return is_string($origin) ? $origin : '';
   }
 }

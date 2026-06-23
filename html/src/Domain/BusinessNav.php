@@ -28,6 +28,7 @@ final class BusinessNav
       ['page' => 'PAGE_BUSINESS_DASHBOARD', 'href' => '/business/', 'label_key' => 'BUSINESS_NAV_DASHBOARD'],
       ['page' => 'PAGE_BUSINESS_DETAILS', 'href' => '/business/details/', 'label_key' => 'BUSINESS_NAV_DETAILS'],
       ['page' => 'PAGE_BUSINESS_MEMBERS', 'href' => '/business/members/', 'label_key' => 'BUSINESS_NAV_MEMBERS'],
+      ['page' => 'PAGE_BUSINESS_GROUPS', 'href' => '/business/groups/', 'label_key' => 'BUSINESS_NAV_GROUPS'],
       ['page' => 'PAGE_BUSINESS_SITES', 'href' => '/business/sites/', 'label_key' => 'BUSINESS_NAV_SITES'],
       ['page' => 'PAGE_BUSINESS_PAYROLL', 'href' => '/business/payroll/', 'label_key' => 'BUSINESS_NAV_PAYROLL'],
       ['page' => 'PAGE_BUSINESS_REPORTS', 'href' => '/business/reports/', 'label_key' => 'BUSINESS_NAV_REPORTS'],
@@ -47,7 +48,7 @@ final class BusinessNav
   }
 
   /**
-   * TODO: Document pageTitleKeyFor.
+   * Page title key for.
    */
   public static function pageTitleKeyFor(string $currentPage): string
   {
@@ -55,6 +56,7 @@ final class BusinessNav
       'PAGE_BUSINESS_DASHBOARD', 'PAGE_BUSINESSES' => 'BUSINESS_NAV_DASHBOARD',
       'PAGE_BUSINESS_DETAILS' => 'BUSINESS_NAV_DETAILS',
       'PAGE_BUSINESS_MEMBERS' => 'BUSINESS_NAV_MEMBERS',
+      'PAGE_BUSINESS_GROUPS' => 'BUSINESS_NAV_GROUPS',
       'PAGE_BUSINESS_SITES' => 'BUSINESS_NAV_SITES',
       'PAGE_BUSINESS_PAYROLL' => 'BUSINESS_NAV_PAYROLL',
       'PAGE_BUSINESS_AUDIT' => 'BUSINESS_NAV_AUDIT',
@@ -95,9 +97,9 @@ final class BusinessNav
 
     foreach ($businesses as $business) {
       $type = strtolower(self::stringField($business, 'business_type', 'shared'));
-      $relationshipStatus = strtolower(self::stringField($business, 'relationship_status', self::stringField($business, 'status', 'active')));
+      $connectionStatus = strtolower(self::stringField($business, 'connection_status', self::stringField($business, 'status', 'active')));
 
-      if ($type === 'shared' && ($relationshipStatus === 'active' || $relationshipStatus === 'pending')) {
+      if ($type === 'shared' && ($connectionStatus === 'active' || $connectionStatus === 'pending')) {
         return $business;
       }
     }
@@ -159,7 +161,7 @@ final class BusinessNav
   }
 
   /**
-   * TODO: Document roleDisplayLabel.
+   * Role display label.
    */
   public static function roleDisplayLabel(string $role): string
   {
@@ -178,7 +180,7 @@ final class BusinessNav
   }
 
   /**
-   * Redirect free-tier visitors away from /business/* (admins retain access).
+   * Redirect non-Business-tier visitors away from /business/* (admins retain access).
    */
   public static function requirePremiumAccess(): void
   {
@@ -187,12 +189,12 @@ final class BusinessNav
     }
 
     $userUUID = User::currentUUID();
-    $hasPremium = $userUUID !== '' && SubscriptionGate::hasActivePremium($userUUID);
-    if ($hasPremium) {
+    $hasBusiness = $userUUID !== '' && SubscriptionGate::hasActiveBusiness($userUUID);
+    if ($hasBusiness) {
       return;
     }
 
-    header('Location: /premium/', true, 302);
+    header('Location: /pricing/', true, 302);
     exit;
   }
 

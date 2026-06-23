@@ -10,7 +10,7 @@ use PayCal\Infrastructure\Audit\TheLedger;
  * SystemAuditRepository
  *
  * Write and retrieve system-level audit events that are not scoped to a single
- * organization (e.g. auth_level changes, account deletions, superadmin promotions).
+ * structure (e.g. auth_level changes, account deletions, superadmin promotions).
  *
  * Key layout:
  *   system:audit:event:{id}  – hash of event fields

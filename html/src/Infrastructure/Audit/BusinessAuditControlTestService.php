@@ -62,7 +62,7 @@ final class BusinessAuditControlTestService
   private \Closure $alertArtifactUploader;
 
   /**
-   * TODO: Document __construct.
+   * Construct.
    */
   public function __construct(
     ?BusinessDiscoveryService $businessService = null,
@@ -145,8 +145,8 @@ final class BusinessAuditControlTestService
     $timestamp = date('c');
     $testId = 'OACT' . substr(hash('sha256', $orgId . '|' . $actorUUID . '|' . bin2hex(random_bytes(16))), 0, 20);
     $orgName = (string) ($business['name'] ?? $orgId);
-    $actorRelationship = $this->businessService->getRelationshipSummary($orgId, $actorUUID);
-    $actorRole = (string) ($actorRelationship['role'] ?? ((string) ($business['owner_uuid'] ?? '') === $actorUUID ? 'owner' : ''));
+    $actorConnection = $this->businessService->getConnectionSummary($orgId, $actorUUID);
+    $actorRole = (string) ($actorConnection['role'] ?? ((string) ($business['owner_uuid'] ?? '') === $actorUUID ? 'owner' : ''));
 
     $systemAuditEventId = SystemAuditRepository::append(
       'business.audit_control_test.error_generated',

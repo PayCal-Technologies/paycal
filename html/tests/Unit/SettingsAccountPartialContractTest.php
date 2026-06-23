@@ -14,9 +14,23 @@ final class SettingsAccountPartialContractTest extends TestCase
     $profile = (string) file_get_contents($projectRoot . '/html/settings/_partials/panel_account.php');
     $locale = (string) file_get_contents($projectRoot . '/html/settings/_partials/panel_account_locale.php');
 
-    foreach (['panel-account', 'label_full_name', 'label_phone', 'label_province', 'call_edit_details_modal'] as $id) {
+    foreach ([
+      'panel-account',
+      'edit_details_form',
+      'edit_details_full_name',
+      'edit_details_phone',
+      'edit_details_province',
+      'edit_details_employment_type',
+      'edit_details_indigenous_tax_exemption_eligible',
+    ] as $id) {
       $this->assertStringContainsString($id, $profile, $id . ' must exist on account profile partial');
     }
+
+    $this->assertStringNotContainsString('call_edit_details_modal', $profile);
+    $this->assertStringNotContainsString('edit_details_submit', $profile);
+    $this->assertStringContainsString('Details', $profile);
+    $this->assertStringContainsString('Employment', $profile);
+    $this->assertStringContainsString('Tax Exemptions', $profile);
 
     foreach (['businesses_personal_language', 'businesses_personal_locale', 'businesses_personal_currency_search', 'businesses_personal_timezone_search'] as $id) {
       $this->assertStringContainsString('id="' . $id . '"', $locale, $id . ' must exist on account locale partial');

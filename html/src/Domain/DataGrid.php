@@ -145,7 +145,7 @@ class DataGrid
   }
 
   /**
-   * Render the table for the grid (stub for test).
+   * Render the grid using the configured layout.
    *
    * @param null|mixed $pager
    */
@@ -220,6 +220,7 @@ class DataGrid
     $layout = self::toString($this->meta['layout'] ?? 'auto', 'auto');
     $layoutClass = 'datagrid_layout_'.$layout;
     $chromeClass = !empty($this->meta['noChrome']) ? ' datagrid_no_chrome' : '';
+    $customClass = $this->sanitizeClassList(self::toString($this->meta['class'] ?? '', ''));
     $descriptionId = trim(self::toString($this->meta['descriptionId'] ?? ''));
     $rowActionsHeaderLabel = self::toString($this->meta['rowActionsHeaderLabel'] ?? 'Actions', 'Actions');
     $toolbarLayout = self::toString($this->meta['toolbarLayout'] ?? '', '');
@@ -247,7 +248,7 @@ class DataGrid
     ob_start();
     ?>
     <?php $columnVisibilityEnabled = !empty($this->meta['columnVisibilityEnabled']); ?>
-    <div id="<?php echo $this->escape($this->id); ?>" class="datagrid <?php echo $this->escape($columnClass); ?> <?php echo $this->escape($layoutClass.$chromeClass); ?>" data-grid="<?php echo $this->escape($this->id); ?>" data-page="<?php echo $page; ?>" data-total-pages="<?php echo $totalPages; ?>" data-year="<?php echo $this->escape(self::toString($this->meta['year'] ?? date('Y'))); ?>" data-month="<?php echo $this->escape(self::toString($this->meta['month'] ?? date('m'))); ?>" data-autofocus="<?php echo $this->escape(self::toString($this->meta['autofocus'] ?? 'current')); ?>" data-date-label-position="<?php echo $this->escape(self::toString($this->meta['dateLabelPosition'] ?? 'left')); ?>" data-work-entry-position="<?php echo $this->escape(self::toString($this->meta['workEntryPosition'] ?? 'left')); ?>"<?php echo $columnVisibilityEnabled ? ' data-column-visibility="1"' : ''; ?> role="region" aria-label="<?php echo $this->escape(self::toString($this->meta['title'] ?? $this->id, $i18n['DATAGRID_DATA_GRID'])); ?>"<?php echo '' !== $descriptionId ? ' aria-describedby="' . $this->escape($descriptionId) . '"' : ''; ?>>
+    <div id="<?php echo $this->escape($this->id); ?>" class="datagrid <?php echo $this->escape($columnClass); ?> <?php echo $this->escape($layoutClass.$chromeClass.$customClass); ?>" data-grid="<?php echo $this->escape($this->id); ?>" data-page="<?php echo $page; ?>" data-total-pages="<?php echo $totalPages; ?>" data-year="<?php echo $this->escape(self::toString($this->meta['year'] ?? date('Y'))); ?>" data-month="<?php echo $this->escape(self::toString($this->meta['month'] ?? date('m'))); ?>" data-autofocus="<?php echo $this->escape(self::toString($this->meta['autofocus'] ?? 'current')); ?>" data-date-label-position="<?php echo $this->escape(self::toString($this->meta['dateLabelPosition'] ?? 'left')); ?>" data-work-entry-position="<?php echo $this->escape(self::toString($this->meta['workEntryPosition'] ?? 'left')); ?>"<?php echo $columnVisibilityEnabled ? ' data-column-visibility="1"' : ''; ?> role="region" aria-label="<?php echo $this->escape(self::toString($this->meta['title'] ?? $this->id, $i18n['DATAGRID_DATA_GRID'])); ?>"<?php echo '' !== $descriptionId ? ' aria-describedby="' . $this->escape($descriptionId) . '"' : ''; ?>>
       <?php if (!empty($controls) || (!empty($this->meta['searchEnabled']) && !$mergedSearchPaginationToolbar)) { ?>
       <div class="datagrid_controls" role="navigation" aria-label="<?php echo $this->escape($i18n['DATAGRID_CALENDAR_MONTH_NAVIGATION']); ?>">
         <?php foreach ($controls as $control) {
@@ -369,6 +370,7 @@ class DataGrid
               $columnLabel = self::toString($column['label'] ?? '');
               $columnHeaderId = $this->id.'_col_'.($columnIndex + 1);
               $columnAlign = self::toString($column['align'] ?? '');
+              $columnWidth = self::toString($column['width'] ?? '');
               $headingClass = 'datagrid_heading';
               if ('' !== $columnKey) {
                 $headingClass .= ' datagrid_col_' . preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey));
@@ -377,7 +379,7 @@ class DataGrid
                 $headingClass .= ' datagrid_align_' . $columnAlign;
               }
             ?>
-              <div class="<?php echo $this->escape($headingClass); ?>" role="columnheader" id="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>">
+              <div class="<?php echo $this->escape($headingClass); ?>" role="columnheader" id="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>"<?php echo '' !== $columnWidth ? ' data-col-width="' . $this->escape($columnWidth) . '"' : ''; ?>>
                 <?php if ($isSortable) { ?>
                   <button type="button" class="datagrid_sort" data-column="<?php echo $this->escape($columnKey); ?>">
                     <?php echo $this->escape($columnLabel); ?>
@@ -388,7 +390,7 @@ class DataGrid
               </div>
             <?php } ?>
             <?php if (!empty($rowActions)) { ?>
-              <div class="datagrid_heading datagrid_heading_actions datagrid_col_actions" role="columnheader" id="<?php echo $this->escape($this->id.'_col_actions'); ?>"><?php echo $this->escape($rowActionsHeaderLabel); ?></div>
+              <div class="datagrid_heading datagrid_heading_actions datagrid_col_actions" role="columnheader" id="<?php echo $this->escape($this->id.'_col_actions'); ?>" data-col-width="minmax(5.5rem, max-content)"><?php echo $this->escape($rowActionsHeaderLabel); ?></div>
             <?php } ?>
           </div>
         </div>
@@ -419,6 +421,7 @@ class DataGrid
                   $value = ('' !== $columnKey) ? ($row[$columnKey] ?? '') : '';
                   $columnHeaderId = $this->id.'_col_'.($columnIndex + 1);
                   $columnAlign = self::toString($column['align'] ?? '');
+                  $columnWidth = self::toString($column['width'] ?? '');
                   $itemClass = 'datagrid_item';
                   if ('' !== $columnKey) {
                     $itemClass .= ' datagrid_col_' . preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey));
@@ -433,7 +436,7 @@ class DataGrid
                     $value = $compute($row, $column);
                   }
                 ?>
-                  <div class="<?php echo $this->escape($itemClass); ?>" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>" data-col-label="<?php echo $this->escape($columnLabel); ?>">
+                  <div class="<?php echo $this->escape($itemClass); ?>" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>" data-col-label="<?php echo $this->escape($columnLabel); ?>"<?php echo '' !== $columnWidth ? ' data-col-width="' . $this->escape($columnWidth) . '"' : ''; ?>>
                     <?php if (!empty($column['rawHtml'])) { ?>
                       <?php echo self::toString($value); ?>
                     <?php } else { ?>
@@ -443,10 +446,13 @@ class DataGrid
                 <?php } ?>
 
                 <?php if (!empty($rowActions)) { ?>
-                  <div class="datagrid_item datagrid_item_actions" role="gridcell" aria-labelledby="<?php echo $this->escape($this->id.'_col_actions'); ?>">
+                  <div class="datagrid_item datagrid_item_actions" role="gridcell" aria-labelledby="<?php echo $this->escape($this->id.'_col_actions'); ?>" data-col-width="minmax(5.5rem, max-content)">
                     <div class="datagrid_actions">
                       <?php foreach ($rowActions as $action) {
                         $actionName = self::toString($action['action'] ?? 'action', 'action');
+                        $actionLabel = self::toString($action['label'] ?? '');
+                        $actionAriaLabel = self::toString($action['ariaLabel'] ?? $actionName, $actionName);
+                        $actionTitle = self::toString($action['title'] ?? $actionAriaLabel, $actionAriaLabel);
                         $actionClass = 'datagrid_action';
                         if ('delete' === $actionName) {
                           $actionClass .= ' datagrid_action_danger';
@@ -457,9 +463,10 @@ class DataGrid
                           class="<?php echo $this->escape($actionClass); ?>"
                           data-action="<?php echo $this->escape($actionName); ?>"
                           data-id="<?php echo $this->escape(self::toString($row['id'] ?? '')); ?>"
-                          aria-label="<?php echo $this->escape($actionName); ?>"
+                          aria-label="<?php echo $this->escape($actionAriaLabel); ?>"
+                          title="<?php echo $this->escape($actionTitle); ?>"
                         >
-                          <?php echo $this->escape(self::toString($action['label'] ?? '')); ?>
+                          <?php echo $this->escape($actionLabel); ?>
                         </button>
                       <?php } ?>
                     </div>
@@ -513,7 +520,9 @@ class DataGrid
   private function renderMergedSearchPaginationToolbar(?PagerInterface $pager): string
   {
     $i18nSearch = Strings::i18n('SEARCH');
-    $pagination = $this->paginationContext($pager);
+    $pagination = $pager instanceof PagerInterface && $pager->hasPagination()
+      ? $this->paginationContext($pager)
+      : null;
     $arrowsOnly = !empty($this->meta['paginationArrowsOnly']);
 
     ob_start();
@@ -522,7 +531,7 @@ class DataGrid
       class="datagrid_toolbar datagrid_toolbar_search_pagination"
       role="navigation"
       aria-label="<?php echo $this->escape(Strings::i18n('DATAGRID_DATA_GRID')); ?>"
-      <?php if (null !== $pagination && $pager instanceof PagerInterface) { ?>
+      <?php if (null !== $pagination) { ?>
       data-pagination-start="<?php echo $pagination['start']; ?>"
       data-pagination-end="<?php echo $pagination['end']; ?>"
       data-pagination-total="<?php echo $pagination['total']; ?>"
@@ -536,7 +545,8 @@ class DataGrid
           value="<?php echo $this->escape(self::toString($this->meta['search'] ?? '')); ?>"
         >
       </div>
-      <?php if (null !== $pagination && $pager instanceof PagerInterface) { ?>
+      <?php echo self::toString($this->meta['toolbarAfterStartHtml'] ?? '', ''); ?>
+      <?php if (null !== $pagination) { ?>
       <div class="datagrid_toolbar_center">
         <span class="datagrid_page datagrid_page_info" role="status"><?php echo $this->escape($pagination['rangeLabel']); ?></span>
       </div>
@@ -1087,10 +1097,17 @@ class DataGrid
   /**
    * Add a row action to the grid.
    */
-  public function addRowAction(string $action, string $label): void
+  public function addRowAction(string $action, string $label, ?string $ariaLabel = null, ?string $title = null): void
   {
     $rowActions = self::listAssoc($this->meta['rowActions'] ?? []);
-    $rowActions[] = ['action' => $action, 'label' => $label];
+    $rowAction = ['action' => $action, 'label' => $label];
+    if ($ariaLabel !== null) {
+      $rowAction['ariaLabel'] = $ariaLabel;
+    }
+    if ($title !== null) {
+      $rowAction['title'] = $title;
+    }
+    $rowActions[] = $rowAction;
     $this->meta['rowActions'] = $rowActions;
   }
 
@@ -1151,12 +1168,28 @@ class DataGrid
   }
 
   /**
+   * Add server-rendered layout classes to the datagrid root.
+   */
+  public function setClass(string $class): void
+  {
+    $this->meta['class'] = $class;
+  }
+
+  /**
    * Merge search and top pagination into one toolbar row.
    * Layout: search (left) | range info (center) | prev/next (right).
    */
   public function setToolbarLayout(string $layout): void
   {
     $this->meta['toolbarLayout'] = $layout;
+  }
+
+  /**
+   * Add trusted server-rendered markup immediately after the toolbar search slot.
+   */
+  public function setToolbarAfterStartHtml(string $html): void
+  {
+    $this->meta['toolbarAfterStartHtml'] = $html;
   }
 
   /**
@@ -1205,5 +1238,22 @@ class DataGrid
   private function escape(string $value): string
   {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+  }
+
+  private function sanitizeClassList(string $classList): string
+  {
+    $classes = preg_split('/\s+/', trim($classList));
+    if (!is_array($classes)) {
+      return '';
+    }
+
+    $safe = [];
+    foreach ($classes as $class) {
+      if ($class !== '' && preg_match('/^[a-zA-Z0-9_-]+$/', $class)) {
+        $safe[] = $class;
+      }
+    }
+
+    return $safe === [] ? '' : ' ' . implode(' ', array_values(array_unique($safe)));
   }
 }

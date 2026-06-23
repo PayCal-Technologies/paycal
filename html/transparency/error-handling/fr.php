@@ -117,16 +117,15 @@ try {
       <h2>Portée d'implémentation</h2>
       <p>
         À partir d'avril 2026, ce modèle standardisé de gestion des erreurs a été appliqué à
-        <strong>11 modules frontend</strong> avec <strong>~40+ blocs catch normalisés</strong> :
+        <strong>10 modules frontend</strong> avec <strong>39+ blocs catch normalisés</strong> :
       </p>
       <div class="doc-two-column">
         <div>
-          <h3>Authentification et paramètres (7 modules)</h3>
+          <h3>Authentification et paramètres (6 modules)</h3>
           <ul class="doc-list">
             <li><code>html/js/auth-recovery/index.php</code> (4 catches)</li>
             <li><code>html/js/signin/index.php</code> (2 catches)</li>
             <li><code>html/js/signin/verification-reminder.js</code> (2 catches)</li>
-            <li><code>html/js/signin/verification-status-banner.js</code> (1 catch)</li>
             <li><code>html/js/settings/index.php</code> (8+ catches)</li>
           </ul>
         </div>

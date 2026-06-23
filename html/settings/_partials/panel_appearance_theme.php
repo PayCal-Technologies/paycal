@@ -14,75 +14,146 @@ if ($textSliderValue <= -2 && $spacingSliderValue <= -3) {
 } elseif ($textSliderValue >= 2 && $spacingSliderValue >= 3) {
   $densityPreset = 'spacious';
 }
+$currentTheme = (string) ($user->theme ?? 'paycal_blue');
+if ($currentTheme === 'paycal') {
+  $currentTheme = 'paycal_black';
+}
+$currentVariant = (string) ($user->variant ?? 'dark');
+$themeCatalog = [
+  'Core' => [
+    ['value' => 'paycal_blue', 'label' => 'PayCal Blue', 'icon' => 'shield'],
+    ['value' => 'paycal_black', 'label' => 'PayCal Black', 'icon' => 'shield'],
+    ['value' => 'paycal_red', 'label' => 'PayCal Red', 'icon' => 'shield'],
+    ['value' => 'paycal_green', 'label' => 'PayCal Green', 'icon' => 'shield'],
+    ['value' => 'paycal_white', 'label' => 'PayCal White', 'icon' => 'shield'],
+  ],
+  'BeOS Lineage' => [
+    ['value' => 'beos', 'label' => 'BeOS', 'icon' => 'window'],
+    ['value' => 'haiku', 'label' => 'Haiku', 'icon' => 'spark'],
+    ['value' => 'zeta', 'label' => 'Zeta', 'icon' => 'spark'],
+  ],
+  'Linux Family' => [
+    ['value' => 'debian', 'label' => 'Debian', 'icon' => 'swirl'],
+    ['value' => 'fedora', 'label' => 'Fedora', 'icon' => 'circle'],
+    ['value' => 'mint', 'label' => 'Mint', 'icon' => 'leaf'],
+    ['value' => 'linux', 'label' => 'Ubuntu', 'icon' => 'circle'],
+  ],
+  'Mac OS Family' => [
+    ['value' => 'system7', 'label' => 'Mac OS 7', 'icon' => 'monitor'],
+    ['value' => 'system8', 'label' => 'Mac OS 8', 'icon' => 'monitor'],
+    ['value' => 'macos9', 'label' => 'Mac OS 9', 'icon' => 'monitor'],
+    ['value' => 'macos', 'label' => 'Mac OS X', 'icon' => 'monitor'],
+  ],
+  'Other' => [
+    ['value' => 'bluejeans', 'label' => 'Bluejeans', 'icon' => 'waves'],
+    ['value' => 'garden', 'label' => 'Garden', 'icon' => 'leaf'],
+    ['value' => 'retro', 'label' => 'Retro', 'icon' => 'bolt'],
+    ['value' => 'arcade', 'label' => 'Arcade', 'icon' => 'game'],
+    ['value' => 'amiga', 'label' => 'Amiga', 'icon' => 'spark'],
+    ['value' => 'workbench', 'label' => 'Workbench', 'icon' => 'window'],
+    ['value' => 'nextstep', 'label' => 'NeXTSTEP', 'icon' => 'cube'],
+    ['value' => 'openstep', 'label' => 'OpenStep', 'icon' => 'cube'],
+    ['value' => 'solaris', 'label' => 'Solaris', 'icon' => 'sun'],
+    ['value' => 'terminal', 'label' => 'Terminal', 'icon' => 'terminal'],
+    ['value' => 'c64', 'label' => 'C64', 'icon' => 'terminal'],
+    ['value' => 'irix', 'label' => 'IRIX', 'icon' => 'cube'],
+    ['value' => 'os2_warp', 'label' => 'OS/2 Warp', 'icon' => 'orbit'],
+    ['value' => 'palm_os', 'label' => 'Palm OS', 'icon' => 'grid'],
+    ['value' => 'cyberdeck', 'label' => 'Cyberdeck', 'icon' => 'terminal'],
+    ['value' => 'solarpunk', 'label' => 'Solarpunk', 'icon' => 'leaf'],
+  ],
+  'Sci-Fi' => [
+    ['value' => 'space_odyssey', 'label' => '2001', 'icon' => 'orbit'],
+    ['value' => 'akira', 'label' => 'Akira', 'icon' => 'bolt'],
+    ['value' => 'alien', 'label' => 'Alien', 'icon' => 'orbit'],
+    ['value' => 'blade_runner', 'label' => 'Blade Runner', 'icon' => 'city'],
+    ['value' => 'dune', 'label' => 'Dune', 'icon' => 'waves'],
+    ['value' => 'star_trek', 'label' => 'Star Trek', 'icon' => 'star'],
+    ['value' => 'star_wars', 'label' => 'Star Wars', 'icon' => 'star'],
+    ['value' => 'fifth_element', 'label' => 'Fifth Element', 'icon' => 'spark'],
+    ['value' => 'matrix', 'label' => 'The Matrix', 'icon' => 'terminal'],
+    ['value' => 'tron', 'label' => 'TRON', 'icon' => 'grid'],
+    ['value' => 'vaporwave', 'label' => 'Vaporwave', 'icon' => 'sun'],
+  ],
+  'Windows' => [
+    ['value' => 'win10', 'label' => 'Windows 10', 'icon' => 'window'],
+    ['value' => 'win11', 'label' => 'Windows 11', 'icon' => 'window'],
+    ['value' => 'win95', 'label' => 'Windows 95', 'icon' => 'window'],
+    ['value' => 'win98', 'label' => 'Windows 98', 'icon' => 'window'],
+    ['value' => 'winxp', 'label' => 'Windows XP', 'icon' => 'window'],
+  ],
+];
+$currentThemeLabel = 'PayCal Blue';
+foreach ($themeCatalog as $themes) {
+  foreach ($themes as $theme) {
+    if ($currentTheme === $theme['value']) {
+      $currentThemeLabel = (string) $theme['label'];
+      break 2;
+    }
+  }
+}
+$themeIcon = static function (string $icon): string {
+  $attrs = 'viewBox="0 0 24 24" aria-hidden="true" focusable="false"';
+  $common = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+  return match ($icon) {
+    'bolt' => '<svg ' . $attrs . ' ' . $common . '><path d="M13 2 4 14h7l-1 8 10-13h-7l1-7Z"/></svg>',
+    'circle' => '<svg ' . $attrs . ' ' . $common . '><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8"/></svg>',
+    'city' => '<svg ' . $attrs . ' ' . $common . '><path d="M4 20V9l5-3v14M9 20V4h6v16M15 20V8l5 3v9"/><path d="M7 11h.01M12 8h.01M17 13h.01"/></svg>',
+    'cube' => '<svg ' . $attrs . ' ' . $common . '><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg>',
+    'game' => '<svg ' . $attrs . ' ' . $common . '><rect x="4" y="8" width="16" height="10" rx="3"/><path d="M8 13h4M10 11v4M16 12h.01M18 15h.01"/></svg>',
+    'grid' => '<svg ' . $attrs . ' ' . $common . '><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg>',
+    'leaf' => '<svg ' . $attrs . ' ' . $common . '><path d="M5 19c9 0 14-5 14-14C10 5 5 10 5 19Z"/><path d="M5 19 15 9"/></svg>',
+    'monitor' => '<svg ' . $attrs . ' ' . $common . '><rect x="4" y="5" width="16" height="12" rx="2"/><path d="M9 21h6M12 17v4"/></svg>',
+    'orbit' => '<svg ' . $attrs . ' ' . $common . '><circle cx="12" cy="12" r="3"/><path d="M3 12c3-6 15-6 18 0M3 12c3 6 15 6 18 0"/></svg>',
+    'shield' => '<svg ' . $attrs . ' ' . $common . '><path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z"/><path d="M9 12l2 2 4-5"/></svg>',
+    'spark' => '<svg ' . $attrs . ' ' . $common . '><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg>',
+    'sun' => '<svg ' . $attrs . ' ' . $common . '><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    'swirl' => '<svg ' . $attrs . ' ' . $common . '><path d="M18 7c-2-3-7-4-10-1-4 4-1 11 5 11 4 0 6-3 5-6-.8-3-5-4-7-2-2 2-.8 5 2 5"/></svg>',
+    'terminal' => '<svg ' . $attrs . ' ' . $common . '><rect x="4" y="5" width="16" height="14" rx="2"/><path d="m8 10 3 2-3 2M13 15h4"/></svg>',
+    'waves' => '<svg ' . $attrs . ' ' . $common . '><path d="M3 8c2 0 2 2 4 2s2-2 4-2 2 2 4 2 2-2 4-2 2 2 4 2"/><path d="M3 14c2 0 2 2 4 2s2-2 4-2 2 2 4 2 2-2 4-2 2 2 4 2"/></svg>',
+    default => '<svg ' . $attrs . ' ' . $common . '><rect x="5" y="5" width="14" height="14" rx="3"/></svg>',
+  };
+};
 
 ?>
 <section class="panel settings_card_group" id="panel-style">
   <form id="account_style_form" method="POST" action="<?php echo Environment::appURL('api/v1/settings/style/update/'); ?>" aria-label="<?php echo settings_index_i18n('STYLE_PREFS'); ?>">
     <input class="visually_hidden" type="text" name="username" value="NOTUSED" autocomplete="username" hidden tabindex="-1" aria-hidden="true">
     <input type="hidden" name="csrf_token" value="<?php echo $csrfNonce; ?>">
-    <h2 class="heading-accent settings_card_title"><?php echo settings_index_i18n('SETTINGS_APPEARANCE_THEME_TITLE'); ?></h2>
-
-    <div class="flex f_baseline w100 settings_theme_mode_row">
-      <div class="settings_theme_mode_field settings_theme_mode_field--theme">
-        <label for="theme_picker" class="settings_theme_mode_label"><?php echo settings_index_i18n('THEME'); ?></label>
-        <select id="theme_picker" name="theme" aria-label="<?php echo settings_index_i18n('THEME_PICKER'); ?>" data-hover-help="Theme controls color palette and overall visual mood.">
-        <option value="choose" disabled selected><?php echo settings_index_i18n('CHOOSE_A_THEME'); ?></option>
-        <option value="" disabled>------ Core ------</option>
-        <option value="paycal_blue"<?php if (in_array(($user->theme ?? 'paycal_blue'), ['paycal_blue'], true)) echo ' selected'; ?>>PayCal Blue</option>
-        <option value="paycal_black"<?php if (in_array(($user->theme ?? 'paycal_blue'), ['paycal_black', 'paycal'], true)) echo ' selected'; ?>>PayCal Black</option>
-        <option value="paycal_red"<?php if (in_array(($user->theme ?? 'paycal_blue'), ['paycal_red'], true)) echo ' selected'; ?>>PayCal Red</option>
-        <option value="paycal_green"<?php if (in_array(($user->theme ?? 'paycal_blue'), ['paycal_green'], true)) echo ' selected'; ?>>PayCal Green</option>
-        <option value="paycal_white"<?php if (in_array(($user->theme ?? 'paycal_blue'), ['paycal_white'], true)) echo ' selected'; ?>>PayCal White</option>
-
-        <option value="" disabled>-- BeOS Lineage --</option>
-        <option value="beos"<?php if (($user->theme ?? 'paycal') === 'beos') echo ' selected'; ?>>BeOS</option>
-        <option value="haiku"<?php if (($user->theme ?? 'paycal') === 'haiku') echo ' selected'; ?>>Haiku</option>
-        <option value="zeta"<?php if (($user->theme ?? 'paycal') === 'zeta') echo ' selected'; ?>>Zeta</option>
-
-        <option value="" disabled>--- Linux Family ---</option>
-        <option value="debian"<?php if (($user->theme ?? 'paycal') === 'debian') echo ' selected'; ?>>Debian</option>
-        <option value="fedora"<?php if (($user->theme ?? 'paycal') === 'fedora') echo ' selected'; ?>>Fedora</option>
-        <option value="mint"<?php if (($user->theme ?? 'paycal') === 'mint') echo ' selected'; ?>>Mint</option>
-        <option value="linux"<?php if (($user->theme ?? 'paycal') === 'linux') echo ' selected'; ?>>Ubuntu</option>
-
-        <option value="" disabled>---- Mac OS Family ----</option>
-        <option value="system7"<?php if (($user->theme ?? 'paycal') === 'system7') echo ' selected'; ?>>Mac OS 7</option>
-        <option value="system8"<?php if (($user->theme ?? 'paycal') === 'system8') echo ' selected'; ?>>Mac OS 8</option>
-        <option value="macos9"<?php if (($user->theme ?? 'paycal') === 'macos9') echo ' selected'; ?>>Mac OS 9</option>
-        <option value="macos"<?php if (($user->theme ?? 'paycal') === 'macos') echo ' selected'; ?>>Mac OS X</option>
-
-        <option value="" disabled>------ Other ------</option>
-        <option value="bluejeans"<?php if (in_array(($user->theme ?? 'paycal'), ['bluejeans', 'denim_dream'], true)) echo ' selected'; ?>>Bluejeans</option>
-        <option value="garden"<?php if (in_array(($user->theme ?? 'paycal'), ['garden', 'sweater_weather'], true)) echo ' selected'; ?>>Garden</option>
-        <option value="retro"<?php if (($user->theme ?? 'paycal') === 'retro') echo ' selected'; ?>>Retro</option>
-        <option value="arcade"<?php if (($user->theme ?? 'paycal') === 'arcade') echo ' selected'; ?>>Arcade</option>
-
-        <option value="" disabled>------ Sci-Fi -----</option>
-        <option value="space_odyssey"<?php if (($user->theme ?? 'paycal') === 'space_odyssey') echo ' selected'; ?>>2001: A Space Odyssey</option>
-        <option value="akira"<?php if (($user->theme ?? 'paycal') === 'akira') echo ' selected'; ?>>Akira</option>
-        <option value="alien"<?php if (($user->theme ?? 'paycal') === 'alien') echo ' selected'; ?>>Alien</option>
-        <option value="blade_runner"<?php if (($user->theme ?? 'paycal') === 'blade_runner') echo ' selected'; ?>>Blade Runner</option>
-        <option value="dune"<?php if (($user->theme ?? 'paycal') === 'dune') echo ' selected'; ?>>Dune</option>
-        <option value="star_trek"<?php if (($user->theme ?? 'paycal') === 'star_trek') echo ' selected'; ?>>Star Trek</option>
-        <option value="star_wars"<?php if (($user->theme ?? 'paycal') === 'star_wars') echo ' selected'; ?>>Star Wars</option>
-        <option value="fifth_element"<?php if (($user->theme ?? 'paycal') === 'fifth_element') echo ' selected'; ?>>The Fifth Element</option>
-        <option value="matrix"<?php if (($user->theme ?? 'paycal') === 'matrix') echo ' selected'; ?>>The Matrix</option>
-        <option value="tron"<?php if (($user->theme ?? 'paycal') === 'tron') echo ' selected'; ?>>TRON</option>
-
-        <option value="" disabled>----- Windows -----</option>
-        <option value="win10"<?php if (($user->theme ?? 'paycal') === 'win10') echo ' selected'; ?>>Windows 10</option>
-        <option value="win95"<?php if (($user->theme ?? 'paycal') === 'win95') echo ' selected'; ?>>Windows 95</option>
-        <option value="win98"<?php if (($user->theme ?? 'paycal') === 'win98') echo ' selected'; ?>>Windows 98</option>
-        <option value="winxp"<?php if (($user->theme ?? 'paycal') === 'winxp') echo ' selected'; ?>>Windows XP</option>
-        </select>
+    <div class="settings_theme_header">
+      <h2 class="heading-accent settings_card_title"><?php echo settings_index_i18n('SETTINGS_APPEARANCE_THEME_TITLE'); ?></h2>
+      <div class="settings_mode_toggle" role="group" aria-label="<?php echo settings_index_i18n('VARIANT_PICKER'); ?>">
+        <button type="button" class="settings_mode_option<?php if ($currentVariant === 'light') echo ' is-selected'; ?>" data-variant-value="light" aria-pressed="<?php echo $currentVariant === 'light' ? 'true' : 'false'; ?>">
+          <?php echo $themeIcon('sun'); ?>
+          <span><?php echo settings_index_i18n('LIGHT'); ?></span>
+        </button>
+        <button type="button" class="settings_mode_option<?php if ($currentVariant === 'dark') echo ' is-selected'; ?>" data-variant-value="dark" aria-pressed="<?php echo $currentVariant === 'dark' ? 'true' : 'false'; ?>">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A7.8 7.8 0 0 1 9.5 4 8.2 8.2 0 1 0 20 14.5Z"/></svg>
+          <span><?php echo settings_index_i18n('DARK'); ?></span>
+        </button>
       </div>
-      <div class="settings_theme_mode_field settings_theme_mode_field--mode">
-        <label for="variant_picker" class="settings_theme_mode_label"><?php echo settings_index_i18n('VARIANT'); ?></label>
-        <select id="variant_picker" name="variant" aria-label="<?php echo settings_index_i18n('VARIANT_PICKER'); ?>" data-hover-help="Mode switches between light and dark treatment.">
-          <option value="light"<?php if (($user->variant ?? 'dark') === 'light') echo ' selected'; ?>><?php echo settings_index_i18n('LIGHT'); ?></option>
-          <option value="dark"<?php if (($user->variant ?? 'dark') === 'dark') echo ' selected'; ?>><?php echo settings_index_i18n('DARK'); ?></option>
-        </select>
-      </div>
+    </div>
+    <input id="theme_picker" type="hidden" name="theme" value="<?php echo htmlspecialchars($currentTheme, ENT_QUOTES, 'UTF-8'); ?>">
+    <input id="variant_picker" type="hidden" name="variant" value="<?php echo htmlspecialchars($currentVariant, ENT_QUOTES, 'UTF-8'); ?>">
+
+    <div class="settings_theme_grid" role="group" aria-label="<?php echo settings_index_i18n('THEME_PICKER'); ?>">
+      <?php foreach ($themeCatalog as $themes) { foreach ($themes as $theme) { ?>
+        <button
+          type="button"
+          class="settings_theme_card<?php if ($currentTheme === $theme['value']) echo ' is-selected'; ?>"
+          data-theme-value="<?php echo htmlspecialchars($theme['value'], ENT_QUOTES, 'UTF-8'); ?>"
+          data-label="<?php echo htmlspecialchars($theme['label'], ENT_QUOTES, 'UTF-8'); ?>"
+          aria-label="<?php echo htmlspecialchars($theme['label'], ENT_QUOTES, 'UTF-8'); ?>"
+          aria-pressed="<?php echo $currentTheme === $theme['value'] ? 'true' : 'false'; ?>"
+          title="<?php echo htmlspecialchars($theme['label'], ENT_QUOTES, 'UTF-8'); ?>"
+        >
+          <span class="settings_theme_card_icon"><?php echo $themeIcon((string) $theme['icon']); ?></span>
+          <span class="settings_theme_card_name"><?php echo htmlspecialchars($theme['label'], ENT_QUOTES, 'UTF-8'); ?></span>
+        </button>
+      <?php } } ?>
+    </div>
+    <div class="settings_theme_selected_label" id="selected_theme_label" aria-live="polite">
+      Selected: <span><?php echo htmlspecialchars($currentThemeLabel, ENT_QUOTES, 'UTF-8'); ?></span>
     </div>
 
     <div class="flex f_baseline w100">
@@ -113,13 +184,18 @@ if ($textSliderValue <= -2 && $spacingSliderValue <= -3) {
                 <div class="settings_accent_preview_day">19</div>
                 <div class="settings_accent_preview_shift">8h</div>
               </div>
+              <div class="settings_accent_preview_example" aria-hidden="true">
+                <span>abc</span>
+                <span>123</span>
+                <span>xyz</span>
+              </div>
               <div class="settings_accent_preview_report" aria-hidden="true">
                 <div class="settings_accent_preview_report_title">Earnings</div>
                 <div class="settings_accent_preview_report_value">$1,842.50</div>
                 <div class="settings_accent_preview_bar"><span></span></div>
               </div>
               <div class="settings_accent_preview_controls" aria-hidden="true">
-                <button type="button" class="settings_accent_preview_button">Save</button>
+                <button type="button" class="settings_accent_preview_button">Example</button>
                 <span class="settings_accent_preview_pill">Selected</span>
               </div>
             </div>
@@ -135,6 +211,18 @@ if ($textSliderValue <= -2 && $spacingSliderValue <= -3) {
           <?php foreach (['compact', 'comfortable', 'spacious'] as $preset) { ?>
             <input type="radio" class="radio" id="density_preset_<?php echo $preset; ?>" name="density_preset_ui" value="<?php echo $preset; ?>"<?php if ($densityPreset === $preset) { echo ' checked'; } ?>>
             <label for="density_preset_<?php echo $preset; ?>"><?php echo settings_index_i18n('SETTINGS_DENSITY_PRESET_' . strtoupper($preset)); ?></label>
+          <?php } ?>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex f_baseline w100">
+      <label class="w25"><?php echo settings_index_i18n('SETTINGS_DEPTH_PRESET_LABEL'); ?></label>
+      <div class="w75">
+        <div class="radio_group pill_group settings_depth_group" role="radiogroup" aria-label="<?php echo settings_index_i18n('SETTINGS_DEPTH_PRESET_LABEL'); ?>">
+          <?php foreach (['flat', 'low', 'standard', 'high'] as $preset) { ?>
+            <input type="radio" class="radio" id="depth_preset_<?php echo $preset; ?>" name="depth" value="<?php echo $preset; ?>"<?php if ($depthPreset === $preset) { echo ' checked'; } ?>>
+            <label for="depth_preset_<?php echo $preset; ?>"><?php echo settings_index_i18n('SETTINGS_DEPTH_PRESET_' . strtoupper($preset)); ?></label>
           <?php } ?>
         </div>
       </div>

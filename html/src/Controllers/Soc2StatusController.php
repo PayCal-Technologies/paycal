@@ -20,7 +20,7 @@ use PayCal\Domain\User;
 final class Soc2StatusController
 {
   /**
-   * TODO: Document getSoc2Status.
+   * Get SOC 2 status.
    */
   #[Route('internal/soc2/status', ['GET'])]
   public function getSoc2Status(): void
@@ -77,7 +77,7 @@ final class Soc2StatusController
   }
 
   /**
-   * TODO: Document stringValue.
+   * String value.
    */
   private function stringValue(mixed $value, string $fallback = ''): string
   {
@@ -85,7 +85,7 @@ final class Soc2StatusController
   }
 
   /**
-   * TODO: Document intValue.
+   * Int value.
    */
   private function intValue(mixed $value, int $fallback = 0): int
   {

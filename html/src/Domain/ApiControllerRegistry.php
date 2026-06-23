@@ -13,6 +13,8 @@ use PayCal\Controllers\EmailVerificationController;
 use PayCal\Controllers\EarningsController;
 use PayCal\Controllers\EncryptionController;
 use PayCal\Controllers\ExtensionDiagnosticsController;
+use PayCal\Controllers\FederatedAuthController;
+use PayCal\Controllers\FeedbackController;
 use PayCal\Controllers\HealthController;
 use PayCal\Controllers\KekController;
 use PayCal\Controllers\LoginController;
@@ -63,6 +65,8 @@ final class ApiControllerRegistry
       EmailVerificationController::class,
       EarningsController::class,
       EncryptionController::class,
+      FederatedAuthController::class,
+      FeedbackController::class,
       HealthController::class,
       KekController::class,
       LoginController::class,

@@ -40,7 +40,7 @@ use PayCal\Domain\Database;
 final class EarningsCacheService
 {
   private const DEFAULT_TTL_SECONDS = 90;
-  private const CACHE_SCHEMA = 'v3';
+  private const CACHE_SCHEMA = 'v4';
 
   /**
    * @param array<string, mixed> $payload

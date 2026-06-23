@@ -89,7 +89,7 @@ final class BusinessMembersFinancialSummary
 
     $businessOwnerUuid = OrgLockedPeriodSnapshot::resolveBusinessOwnerUuid($businessId);
     $orgSiteIndex = BusinessWorkVisibilityPolicy::buildOrgSiteIndex($businessId);
-    $relationshipsByMember = self::loadRelationships($businessId, array_keys($memberSet));
+    $connectionsByMember = self::loadConnections($businessId, array_keys($memberSet));
 
     $summaries = [];
     $cachedMemberWork = BusinessWorkspaceCache::getMemberWork($businessId);
@@ -106,7 +106,7 @@ final class BusinessMembersFinancialSummary
         )
         : self::resolveBatchWorkEntries($batch, $cachedMemberWork);
       foreach ($batch as $memberUuid) {
-        $relationship = $relationshipsByMember[$memberUuid] ?? [];
+        $connection = $connectionsByMember[$memberUuid] ?? [];
         $memberWork = $workEntriesByMember[$memberUuid] ?? [];
 
         if (
@@ -114,7 +114,7 @@ final class BusinessMembersFinancialSummary
           && BusinessWorkVisibilityPolicy::canAggregateForOrg(
             $businessId,
             $memberUuid,
-            $relationship,
+            $connection,
             $orgSiteIndex,
           )
         ) {
@@ -124,7 +124,7 @@ final class BusinessMembersFinancialSummary
             $memberUuid,
             $year,
             $memberWork,
-            $relationship,
+            $connection,
             $orgSiteIndex,
           );
         }
@@ -134,7 +134,7 @@ final class BusinessMembersFinancialSummary
           $businessOwnerUuid,
           $memberUuid,
           $memberWork,
-          $relationship,
+          $connection,
           $orgSiteIndex,
         );
         $liveSummary = $this->buildSummaryFromSnapshot($workSnapshot, $year);
@@ -142,7 +142,7 @@ final class BusinessMembersFinancialSummary
         $lockedSummary = BusinessWorkVisibilityPolicy::canAggregateForOrg(
           $businessId,
           $memberUuid,
-          $relationship,
+          $connection,
           $orgSiteIndex,
         ) ? OrgLockedPeriodMetrics::get($businessId, $memberUuid, $year) : null;
 
@@ -272,7 +272,7 @@ final class BusinessMembersFinancialSummary
    * Aggregate org-visible work entries for a member (org-owned org-only sites only).
    *
    * @param array<string, array<string, string>> $workEntries Work key => entry hash
-   * @param array<string, string> $relationship
+   * @param array<string, string> $connection
    * @param array<string, array{
    *   site_owner_uuid: string,
    *   site_id: string,
@@ -288,13 +288,13 @@ final class BusinessMembersFinancialSummary
     string $businessOwnerUuid,
     string $memberUuid,
     array $workEntries,
-    array $relationship,
+    array $connection,
     array $orgSiteIndex,
   ): array {
     if (!BusinessWorkVisibilityPolicy::canAggregateForOrg(
       $businessId,
       $memberUuid,
-      $relationship,
+      $connection,
       $orgSiteIndex,
     )) {
       return [
@@ -330,7 +330,7 @@ final class BusinessMembersFinancialSummary
         $memberUuid,
         (string) $workKey,
         $entry,
-        $relationship,
+        $connection,
         $orgSiteIndex,
       );
       if (!$decision['allowed']) {
@@ -376,7 +376,7 @@ final class BusinessMembersFinancialSummary
   }
 
   /**
-   * TODO: Document formatCurrency.
+   * Format currency.
    */
   public function formatCurrency(float $amount): string
   {
@@ -384,7 +384,7 @@ final class BusinessMembersFinancialSummary
   }
 
   /**
-   * TODO: Document formatHours.
+   * Format hours.
    */
   public function formatHours(float $hours): string
   {
@@ -433,7 +433,7 @@ final class BusinessMembersFinancialSummary
    * @param list<string> $memberUuids
    * @return array<string, array<string, string>>
    */
-  private static function loadRelationships(string $businessId, array $memberUuids): array
+  private static function loadConnections(string $businessId, array $memberUuids): array
   {
     $keys = [];
     foreach ($memberUuids as $memberUuid) {
@@ -441,7 +441,7 @@ final class BusinessMembersFinancialSummary
       if ($memberUuid === '') {
         continue;
       }
-      $keys[$memberUuid] = Keys::BUSINESS_RELATIONSHIP . ':' . $businessId . ':' . $memberUuid;
+      $keys[$memberUuid] = Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $memberUuid;
     }
 
     if ($keys === []) {
@@ -449,12 +449,12 @@ final class BusinessMembersFinancialSummary
     }
 
     $hashes = Database::pipelineHgetall(array_values($keys));
-    $relationships = [];
+    $connections = [];
     foreach ($keys as $memberUuid => $key) {
       $hash = $hashes[$key] ?? [];
-      $relationships[$memberUuid] = $hash;
+      $connections[$memberUuid] = $hash;
     }
 
-    return $relationships;
+    return $connections;
   }
 }

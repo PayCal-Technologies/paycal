@@ -93,17 +93,17 @@ final class CalendarControllerIntegrationTest extends TestCase
         return [$periodKey, $metaKey, $indexKey];
     }
 
-    private function orgWriteDeniedCounterKey(string $reason): string
+    private function businessWriteDeniedCounterKey(string $reason): string
     {
         $schema = SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
 
-        return "telemetry:encryption:{$schema}:org:work_write_denied:{$reason}";
+        return "telemetry:encryption:{$schema}:business:work_write_denied:{$reason}";
     }
 
-    private function clearOrgWriteDeniedTelemetryCounters(): void
+    private function clearBusinessWriteDeniedTelemetryCounters(): void
     {
         $schema = SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
-        foreach (Database::scanKeys("telemetry:encryption:{$schema}:org:work_write_denied:*") as $key) {
+        foreach (Database::scanKeys("telemetry:encryption:{$schema}:business:work_write_denied:*") as $key) {
             Database::unlink((string) $key);
         }
     }
@@ -120,9 +120,9 @@ final class CalendarControllerIntegrationTest extends TestCase
         $this->testUserUUID = 'test-user-' . bin2hex(random_bytes(8));
         $testEmail = 'test-' . bin2hex(random_bytes(4)) . '@example.com';
 
-        $this->originalOrgSharedEncryptionEnabled = (bool) SystemConfig::get('org_shared_encryption_enabled');
-        $this->originalOrgSharedEncryptionWriteEnabled = (bool) SystemConfig::get('org_shared_encryption_enable_write');
-        $this->clearOrgWriteDeniedTelemetryCounters();
+        $this->originalOrgSharedEncryptionEnabled = (bool) SystemConfig::get('business_shared_encryption_enabled');
+        $this->originalOrgSharedEncryptionWriteEnabled = (bool) SystemConfig::get('business_shared_encryption_enable_write');
+        $this->clearBusinessWriteDeniedTelemetryCounters();
 
         Database::hset(Keys::USER . ':' . $this->testUserUUID, [
             'user_uuid' => $this->testUserUUID,
@@ -157,9 +157,9 @@ final class CalendarControllerIntegrationTest extends TestCase
         $_POST = $this->originalPost;
         $_GET = $this->originalGet;
 
-        SystemConfig::set('org_shared_encryption_enabled', $this->originalOrgSharedEncryptionEnabled);
-        SystemConfig::set('org_shared_encryption_enable_write', $this->originalOrgSharedEncryptionWriteEnabled);
-        $this->clearOrgWriteDeniedTelemetryCounters();
+        SystemConfig::set('business_shared_encryption_enabled', $this->originalOrgSharedEncryptionEnabled);
+        SystemConfig::set('business_shared_encryption_enable_write', $this->originalOrgSharedEncryptionWriteEnabled);
+        $this->clearBusinessWriteDeniedTelemetryCounters();
 
         parent::tearDown();
     }
@@ -311,10 +311,10 @@ final class CalendarControllerIntegrationTest extends TestCase
         $this->assertContains('site_metadata:financial_payload', $deniedPairs);
     }
 
-    public function testUpdateCalendarOrganizationModeRequiresOrganizationId(): void
+    public function testUpdateCalendarBusinessModeRequiresBusinessId(): void
     {
-        SystemConfig::set('org_shared_encryption_enabled', true);
-        SystemConfig::set('org_shared_encryption_enable_write', true);
+        SystemConfig::set('business_shared_encryption_enabled', true);
+        SystemConfig::set('business_shared_encryption_enable_write', true);
 
         $controller = new CalendarController();
         $nonce = $this->issueCalendarNonce($controller);
@@ -324,7 +324,7 @@ final class CalendarControllerIntegrationTest extends TestCase
         $_POST = [
             'csrf_token' => $nonce,
             'd' => date('Y-m-d'),
-            'mode' => 'organization',
+            'mode' => 'business',
             'entries' => '[]',
         ];
 
@@ -335,15 +335,15 @@ final class CalendarControllerIntegrationTest extends TestCase
 
         $this->assertSame('error', $response['status'] ?? null);
         $this->assertStringContainsString('business_id is required', (string) ($response['message'] ?? ''));
-        $counter = Database::get($this->orgWriteDeniedCounterKey('missing_org_id'));
+        $counter = Database::get($this->businessWriteDeniedCounterKey('missing_business_id'));
         $this->assertNotNull($counter);
         $this->assertSame('1', (string) $counter);
     }
 
-    public function testUpdateCalendarOrganizationModeWritesDisabledEmitsTelemetry(): void
+    public function testUpdateCalendarBusinessModeWritesDisabledEmitsTelemetry(): void
     {
-        SystemConfig::set('org_shared_encryption_enabled', false);
-        SystemConfig::set('org_shared_encryption_enable_write', false);
+        SystemConfig::set('business_shared_encryption_enabled', false);
+        SystemConfig::set('business_shared_encryption_enable_write', false);
 
         $controller = new CalendarController();
         $nonce = $this->issueCalendarNonce($controller);
@@ -353,8 +353,8 @@ final class CalendarControllerIntegrationTest extends TestCase
         $_POST = [
             'csrf_token' => $nonce,
             'd' => date('Y-m-d'),
-            'mode' => 'organization',
-            'organization_id' => 'org-disabled-' . bin2hex(random_bytes(4)),
+            'mode' => 'business',
+            'business_id' => 'business-disabled-' . bin2hex(random_bytes(4)),
             'target_user_uuid' => $this->testUserUUID,
             'entries' => '[]',
         ];
@@ -366,15 +366,15 @@ final class CalendarControllerIntegrationTest extends TestCase
 
         $this->assertSame('error', $response['status'] ?? null);
         $this->assertStringContainsString('Business mode writes are disabled', (string) ($response['message'] ?? ''));
-        $counter = Database::get($this->orgWriteDeniedCounterKey('writes_disabled'));
+        $counter = Database::get($this->businessWriteDeniedCounterKey('writes_disabled'));
         $this->assertNotNull($counter);
         $this->assertSame('1', (string) $counter);
     }
 
-    public function testUpdateCalendarOrganizationModeRejectsDelegatedWriteWithoutScope(): void
+    public function testUpdateCalendarBusinessModeRejectsDelegatedWriteWithoutScope(): void
     {
-        SystemConfig::set('org_shared_encryption_enabled', true);
-        SystemConfig::set('org_shared_encryption_enable_write', true);
+        SystemConfig::set('business_shared_encryption_enabled', true);
+        SystemConfig::set('business_shared_encryption_enable_write', true);
 
         $controller = new CalendarController();
         $nonce = $this->issueCalendarNonce($controller);
@@ -384,8 +384,8 @@ final class CalendarControllerIntegrationTest extends TestCase
         $_POST = [
             'csrf_token' => $nonce,
             'd' => date('Y-m-d'),
-            'mode' => 'organization',
-            'organization_id' => 'org-test-no-scope',
+            'mode' => 'business',
+            'business_id' => 'business-test-no-scope',
             'target_user_uuid' => 'other-user-' . bin2hex(random_bytes(4)),
             'entries' => '[]',
         ];
@@ -397,17 +397,17 @@ final class CalendarControllerIntegrationTest extends TestCase
 
         $this->assertSame('error', $response['status'] ?? null);
         $this->assertStringContainsString('Insufficient business scope for delegated work mutation', (string) ($response['message'] ?? ''));
-        $counter = Database::get($this->orgWriteDeniedCounterKey('insufficient_scope'));
+        $counter = Database::get($this->businessWriteDeniedCounterKey('insufficient_scope'));
         $this->assertNotNull($counter);
         $this->assertSame('1', (string) $counter);
     }
 
-    public function testUpdateCalendarOrganizationModeDelegatedWriteSucceeds(): void
+    public function testUpdateCalendarBusinessModeDelegatedWriteSucceeds(): void
     {
-        SystemConfig::set('org_shared_encryption_enabled', true);
-        SystemConfig::set('org_shared_encryption_enable_write', true);
+        SystemConfig::set('business_shared_encryption_enabled', true);
+        SystemConfig::set('business_shared_encryption_enable_write', true);
 
-        $orgId = 'org-write-' . bin2hex(random_bytes(4));
+        $businessId = 'business-write-' . bin2hex(random_bytes(4));
         $targetUserUUID = 'target-user-' . bin2hex(random_bytes(6));
         $targetSiteId = 'S' . strtoupper(substr(bin2hex(random_bytes(5)), 0, 9));
         // Use the target user's timezone (America/Edmonton) to compute today's date so that
@@ -428,15 +428,15 @@ final class CalendarControllerIntegrationTest extends TestCase
             'pay_frequency' => 'biweekly',
         ]);
 
-        Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID, [
-            'organization_id' => $orgId,
+        Database::hset(Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $this->testUserUUID, [
+            'business_id' => $businessId,
             'user_uuid' => $this->testUserUUID,
             'role' => 'member',
             'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
-            'scopes' => 'work.write,work.read',
+            'scopes' => 'work.write,work.read,work.scope.business',
         ]);
-        Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $targetUserUUID, [
-            'organization_id' => $orgId,
+        Database::hset(Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $targetUserUUID, [
+            'business_id' => $businessId,
             'user_uuid' => $targetUserUUID,
             'role' => 'member',
             'status' => BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE,
@@ -461,9 +461,9 @@ final class CalendarControllerIntegrationTest extends TestCase
             'nonce' => base64_encode(str_repeat('n', 12)),
             'aad' => 'site-aad',
             'meta' => [
-                'encryption_mode' => 'organization',
-                'org_id' => $orgId,
-                'segment' => BusinessDiscoveryService::ORG_DEK_SEGMENT_CURRENT_PERIOD,
+                'encryption_mode' => 'business',
+                'business_id' => $businessId,
+                'segment' => BusinessDiscoveryService::BUSINESS_DEK_SEGMENT_CURRENT_PERIOD,
                 'key_version' => 'v1',
             ],
         ];
@@ -477,8 +477,8 @@ final class CalendarControllerIntegrationTest extends TestCase
             $_POST = [
                 'csrf_token' => $nonce,
                 'd' => $day,
-                'mode' => 'organization',
-                'organization_id' => $orgId,
+                'mode' => 'business',
+                'business_id' => $businessId,
                 'target_user_uuid' => $targetUserUUID,
                 'entries' => (string) json_encode([
                     [
@@ -501,8 +501,8 @@ final class CalendarControllerIntegrationTest extends TestCase
             $this->assertSame(base64_encode((string) json_encode($envelope)), (string) ($stored['encrypted_blob'] ?? ''));
         } finally {
             Database::unlink(Keys::USER . ':' . $targetUserUUID);
-            Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $this->testUserUUID);
-            Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $orgId . ':' . $targetUserUUID);
+            Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $this->testUserUUID);
+            Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $businessId . ':' . $targetUserUUID);
             Database::unlink(Keys::SITE . ':' . $targetUserUUID . ':' . $targetSiteId);
             Database::unlink(Keys::WORK . ':' . $targetUserUUID . ':' . $day . ':' . $targetSiteId);
             foreach ($payPeriodKeys as $key) {

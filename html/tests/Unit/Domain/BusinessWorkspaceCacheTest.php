@@ -26,14 +26,14 @@ final class BusinessWorkspaceCacheTest extends TestCase
   {
     BusinessWorkspaceCache::releaseWarmLock($this->businessId);
     BusinessWorkspaceCache::invalidate($this->businessId);
-    Database::unlink(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->actorUUID);
+    Database::unlink(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->actorUUID);
     Database::unlink(Keys::BUSINESS_USER . ':' . $this->actorUUID);
   }
 
   private function seedActorSitesReadAccess(): void
   {
     Database::sadd(Keys::BUSINESS_USER . ':' . $this->actorUUID, $this->businessId);
-    Database::hset(Keys::BUSINESS_RELATIONSHIP . ':' . $this->businessId . ':' . $this->actorUUID, [
+    Database::hset(Keys::BUSINESS_CONNECTION . ':' . $this->businessId . ':' . $this->actorUUID, [
       'user_uuid' => $this->actorUUID,
       'role' => 'member',
       'status' => 'active',
@@ -265,16 +265,16 @@ final class BusinessWorkspaceCacheTest extends TestCase
   }
 
   #[Test]
-  public function membershipMutationsInvalidateThroughSetRelationship(): void
+  public function membershipMutationsInvalidateThroughSetConnection(): void
   {
     $source = (string) file_get_contents(
       dirname(__DIR__, 3) . '/src/Domain/BusinessDiscoveryService.php',
     );
 
-    $setRelationshipPos = strpos($source, 'private function setRelationship');
-    $this->assertNotFalse($setRelationshipPos);
+    $setConnectionPos = strpos($source, 'private function setConnection');
+    $this->assertNotFalse($setConnectionPos);
 
-    $body = substr($source, $setRelationshipPos, 3000);
+    $body = substr($source, $setConnectionPos, 3000);
     $this->assertStringContainsString('BusinessWorkspaceCache::invalidate', $body);
   }
 }

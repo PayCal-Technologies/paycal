@@ -104,7 +104,7 @@ final class AccountRecoveryKeySettingsIntegrationTest extends TestCase
 
     public function testCreateRecoveryKeyRejectsUnauthenticated(): void
     {
-        $recoveryKey = 'ABCD-EFGH-JKMN-PQRS-TVWX-YZ01-2345-6789-ABCD-EFGH-JKMN-PQRS-TVWX';
+        $recoveryKey = 'K3HWR7-QTMAPG-C9';
 
         $response = $this->runAccountCall('createRecoveryKey', [
             'wrappedDekRecovery' => base64_encode(json_encode([
@@ -134,7 +134,8 @@ final class AccountRecoveryKeySettingsIntegrationTest extends TestCase
         ]));
         $accountRecoverySalt = base64_encode(random_bytes(32));
         $recoveryProofKey = base64_encode(random_bytes(32));
-        $recoveryKey = 'ABCD-EFGH-JKMN-PQRS-TVWX-YZ01-2345-6789-ABCD-EFGH-JKMN-PQRS-TVWX';
+        $recoveryKey = 'K3HWR7-QTMAPG-C9';
+        $this->assertMatchesRegularExpression('/^[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}-[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}-[ABCDEFGHJKLMNPQRTUWXYZ346789]{2}$/', $recoveryKey);
 
         $response = $this->runAccountCall('createRecoveryKey', [
             'wrappedDekRecovery' => $wrappedDekRecovery,

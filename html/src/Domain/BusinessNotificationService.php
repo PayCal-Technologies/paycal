@@ -7,17 +7,17 @@ use PayCal\Domain\Constants\Keys;
 /**
  * BusinessNotificationService.php
  *
- * Purpose: Organization notification service for unread counters, role-aware
- * event fanout, and transactional messaging around organization activity.
+ * Purpose: Business notification service for unread counters, role-aware
+ * event fanout, and transactional messaging around business activity.
  *
  * Developer notes:
- * - Notification fanout rules are part of the user-facing organization event
+ * - Notification fanout rules are part of the user-facing business event
  *   contract and should remain centralized here.
  * - Keep unread counters and email delivery side effects coordinated so event
  *   state remains predictable for recipients.
  *
  * Architectural role:
- * - Reusable domain service for organization event notification persistence,
+ * - Reusable domain service for business event notification persistence,
  *   recipient fanout, and delivery helpers.
  * - Encapsulates notification policy outside the HTTP layer.
  *
@@ -34,9 +34,9 @@ use PayCal\Domain\Constants\Keys;
  * BusinessNotificationService
  *
  * Purpose:
- * - Maintain unread organization notification counters per user.
+ * - Maintain unread business notification counters per user.
  * - Fan out event notifications using a role/recipient matrix.
- * - Send transactional notification emails for significant organization events.
+ * - Send transactional notification emails for significant business events.
  */
 final class BusinessNotificationService
 {
@@ -48,8 +48,8 @@ final class BusinessNotificationService
     'access.request.approved' => 'Access request approved',
     'access.request.rejected' => 'Access request rejected',
     'invite.accepted' => 'Invite accepted',
-    'relationship.role_updated' => 'Role updated',
-    'relationship.revoked' => 'Access revoked',
+    'connection.role_updated' => 'Role updated',
+    'connection.revoked' => 'Access revoked',
     'ownership.transferred' => 'Ownership transferred',
   ];
 
@@ -98,7 +98,7 @@ final class BusinessNotificationService
   }
 
   /**
-   * Mark all unread notifications as read for one user+organization.
+   * Mark all unread notifications as read for one user+business.
    *
    * @return array{total_unread: int, by_org: array<string, int>}
    */
@@ -118,7 +118,7 @@ final class BusinessNotificationService
   }
 
   /**
-   * Create notifications and send emails for significant organization events.
+   * Create notifications and send emails for significant business events.
    *
    * @param array<string, string> $details
    */
@@ -128,10 +128,10 @@ final class BusinessNotificationService
       return;
     }
 
-    $org = Database::hgetall(Keys::BUSINESS . ':' . $orgId);
-    $organizationName = trim((string) ($org['name'] ?? 'Organization'));
-    if ($organizationName === '') {
-      $organizationName = 'Organization';
+    $business = Database::hgetall(Keys::BUSINESS . ':' . $orgId);
+    $businessName = trim((string) ($business['name'] ?? 'Business'));
+    if ($businessName === '') {
+      $businessName = 'Business';
     }
 
     $roleIndex = $this->activeRoleIndexForOrganization($orgId);
@@ -175,7 +175,7 @@ final class BusinessNotificationService
         EmailGarum::sendBusinessEventNotification(
           emailTo: $email,
           recipientName: $recipient->full_name,
-          organizationName: $organizationName,
+          businessName: $businessName,
           eventLabel: $label,
           eventDetail: $eventDetail,
           eventTimeUTC: $createdAt
@@ -252,8 +252,8 @@ final class BusinessNotificationService
         }
         break;
 
-      case 'relationship.role_updated':
-      case 'relationship.revoked':
+      case 'connection.role_updated':
+      case 'connection.revoked':
         $target = trim((string) ($details['target_user_uuid'] ?? ''));
         if ($target !== '' && $target !== $actorUUID) {
           $recipients[] = $target;
@@ -301,7 +301,7 @@ final class BusinessNotificationService
     ), fn(string $role): bool => $role !== '')));
 
     $payload = [
-      'schema' => 'organization.notification.event.v1',
+      'schema' => 'business.notification.event.v1',
       'business_id' => $orgId,
       'event_type' => $eventType,
       'event_label' => $eventLabel,
@@ -319,9 +319,9 @@ final class BusinessNotificationService
       return;
     }
 
-    Database::publish(Keys::businessNotificationChannelOrg($orgId), $encoded);
+    Database::publish(Keys::businessNotificationChannelBusiness($orgId), $encoded);
 
-    // Role channels let all role groups hook into org activity without forcing unread/email delivery.
+    // Role channels let all role groups hook into business activity without forcing unread/email delivery.
     foreach ($orgRoles as $role) {
       Database::publish(Keys::businessNotificationChannelRole($orgId, $role), $encoded);
     }
@@ -330,7 +330,7 @@ final class BusinessNotificationService
       Database::publish(Keys::businessNotificationChannelUser($recipientUUID), $encoded);
     }
 
-    $eventsKey = Keys::businessNotificationEventsByOrg($orgId);
+    $eventsKey = Keys::businessNotificationEventsByBusiness($orgId);
     Database::lpush($eventsKey, $encoded);
     Database::ltrim($eventsKey, 0, self::RECENT_EVENT_BUFFER_LIMIT - 1);
     Database::expire($eventsKey, 7 * 24 * 3600);
@@ -354,7 +354,7 @@ final class BusinessNotificationService
    */
   private function buildEventDetail(string $eventType, array $details): string
   {
-    if ($eventType === 'relationship.role_updated') {
+    if ($eventType === 'connection.role_updated') {
       $role = trim((string) ($details['role'] ?? ''));
       if ($role !== '') {
         return 'New role: ' . $role;

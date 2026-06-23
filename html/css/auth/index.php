@@ -165,11 +165,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.38);
     opacity: 0;
     pointer-events: none;
-    transition: transform 180ms ease, opacity 180ms ease;
+    transform: translateX(-50%);
+    transition: opacity 180ms ease;
   }
 
   .auth-feedback-banner.show {
-    transform: translate(-50%, 0);
     opacity: 1;
     pointer-events: auto;
   }
@@ -253,10 +253,16 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     align-items: center;
     justify-content: center;
     margin-bottom: 1.1rem;
+    width: 100%;
+    min-width: 0;
   }
 
   .auth-tabs {
-    display: inline-flex;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     background: rgba(27, 27, 27, 0.76);
     border: 1px solid var(--line);
     border-radius: 999px;
@@ -269,7 +275,15 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     border: 0;
     border-radius: 999px;
     padding: 0.25rem 1rem;
+    min-width: 0;
+    min-height: 2.25rem;
     font-weight: 700;
+    font-size: clamp(0.82rem, 2.7vw, 1rem) !important;
+    line-height: 1.12 !important;
+    letter-spacing: 0 !important;
+    text-align: center;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
     cursor: pointer;
     background: transparent;
     color: var(--text-1);
@@ -290,7 +304,6 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     display: flex;
     width: 200%;
     transform: translateX(0);
-    transition: transform 300ms cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
   .auth-shell.is-register .auth-track {
@@ -305,16 +318,17 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
   .auth-panel .btn {
     width: 100%;
+    min-width: 0;
+    letter-spacing: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    text-align: center;
   }
 
   .auth-panel .status {
     margin-top: 0.5rem;
     font-size: var(--text, 1.125rem);
     color: var(--text-1);
-  }
-
-  .auth-panel .status.status-drop-in {
-    animation: statusDropIn 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
   .auth-verification-panel {
@@ -346,17 +360,6 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     margin: 0.16rem 0;
   }
 
-  @keyframes statusDropIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
   .auth-panel section {
     margin-bottom: 1.35rem;
   }
@@ -379,6 +382,69 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
   .auth-panel .divider-or {
     text-align: center;
+  }
+
+  .federated-signin[hidden] {
+    display: none;
+  }
+
+  .federated-signin {
+    margin-top: 0.75rem;
+  }
+
+  .federated-signin-providers {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .federated-signin-button {
+    width: 100%;
+    min-height: 2.85rem;
+    display: grid;
+    grid-template-columns: 1.8rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.65rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #1f1f1f;
+    padding: 0.58rem 0.82rem;
+    font: inherit;
+    font-weight: 800;
+    line-height: 1.15 !important;
+    letter-spacing: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .federated-signin-button:hover {
+    background: #ffffff;
+  }
+
+  .federated-signin-button:focus-visible {
+    outline: 2px solid var(--color-focus-ring, #0096d6);
+    outline-offset: 2px;
+  }
+
+  .federated-signin-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #f2f2f2;
+    color: #1f1f1f;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .federated-signin-text {
+    min-width: 0;
+    letter-spacing: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
   }
 
   .auth-panel .auth-recover-link {
@@ -451,6 +517,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     background: linear-gradient(180deg, #1a8fe8 0%, var(--brand) 100%);
     color: var(--brand-ink);
     font-weight: 800;
+    line-height: 1.18 !important;
+    letter-spacing: 0 !important;
     border-radius: 14px;
     padding: 0.72rem 0.9rem;
     cursor: pointer;
@@ -528,10 +596,14 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     padding: 0;
     margin: 0;
     font: inherit;
+    line-height: 1.25 !important;
+    letter-spacing: 0 !important;
     color: #60cdff;
     cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 2px;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -565,7 +637,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     }
 
     .auth-tab {
-      padding: 0.48rem 0.82rem;
+      padding: 0.48rem 0.72rem;
     }
   }
 
@@ -606,9 +678,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     }
 
     .auth-tab {
-      padding: 0.4rem 0.9rem !important;
-      min-height: 2rem;
-      line-height: 1.1;
+      padding: 0.42rem 0.56rem !important;
+      min-height: 2.35rem;
+      line-height: 1.08;
     }
 
     .auth-panel .btn.btn_primary {

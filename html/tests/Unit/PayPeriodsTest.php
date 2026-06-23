@@ -531,6 +531,19 @@ class PayPeriodsTest extends TestCase
     $this->assertEquals(14, $next->lengthDays());
   }
 
+  #[Test]
+  public function testBiweeklyNavigationAdvancesAcrossSpringDstBoundary(): void
+  {
+    $epoch = new DateTimeImmutable('2024-01-01', $this->tz);
+    $period = PayPeriods::fromDate('2024-02-26', PayFrequency::BIWEEKLY, 'Monday', $epoch, 'America/Edmonton');
+    $next = $period->next();
+    $afterNext = $next->next();
+
+    $this->assertEquals('2024-02-26', $period->start()->format('Y-m-d'));
+    $this->assertEquals('2024-03-11', $next->start()->format('Y-m-d'));
+    $this->assertEquals('2024-03-25', $afterNext->start()->format('Y-m-d'));
+  }
+
   // ========== Label Generation ==========
 
   #[Test]

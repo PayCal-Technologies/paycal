@@ -16,10 +16,18 @@ This master changelog provides a high-level overview of major version milestones
 ## Version 1.x
 
 ### [Unreleased] - 2026-06-22
-**CI/CD tooling transparency**
+**CI/CD tooling transparency and portability**
 - Published the CI/CD Tooling and Release Governance Transparency Hub article at `/transparency/ci-cd-tooling-2026-06/`.
-- Documented PayCal's local-authoritative CI/CD model, hook gates, policy-meta checks, remote workflow posture, dependency/version controls, public promotion boundaries, and portability commitments.
+- Documented PayCal's local-authoritative CI/CD model, hook gates, policy-meta checks, remote workflow posture, dependency/version controls, and portability commitments.
+- Hardened tooling portability by replacing GNU-only affected-test invocation, quoting staged PHP paths in pre-commit PHPStan calls, and stabilizing randomized PHPUnit inventory labels.
 - Updated related Transparency Hub articles (`dependency-ci`, `testing`, `verification-governance`, and `php-packages`) with previous-version archive links and cross-links to the new CI/CD tooling article.
+
+### [Unreleased] - 2026-06-21
+**GoldMaster canonical examples**
+- Added the `golden_masters` directory structure with static metadata for PHP, JavaScript, CSS, UI, and test references.
+- Added the first active golden master: the Calendar-style modal/dialog pattern used by Calendar, Groups, Business Sites, and personal Sites.
+- Added an admin-only GoldMaster catalog at `/admin/goldmaster/` with category browsing, status chips, copy-path, and read-only file preview actions.
+- Published the GoldMaster Transparency Hub article at `/transparency/goldmaster/` and updated the Superheroes System Map with a previous-version archive link.
 
 ### [1.059.000] - 2026-06-19
 **June 2026 remediation transparency release**

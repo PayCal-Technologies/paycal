@@ -60,20 +60,19 @@ final class G5DomainRenderersA11yContractTest extends TestCase
     $this->assertStringContainsString('role="tabpanel" aria-labelledby="{$forecastTabBtnId}"', $memberReports);
   }
 
-  #[Group('private-moat')]
   #[Test]
   public function contactCardMenuToggleUsesMenuHaspopupNotTrue(): void
   {
     $projectRoot = dirname(__DIR__, 4);
-    $workspaceJs = (string) file_get_contents($projectRoot . '/html/js/business/workspace.js.php');
+    $contactCardsJs = (string) file_get_contents($projectRoot . '/html/js/business/core/contact-cards.js.php');
 
     $this->assertStringContainsString(
       'businesses_contact_card_menu_toggle" aria-haspopup="menu"',
-      $workspaceJs,
+      $contactCardsJs,
     );
     $this->assertStringNotContainsString(
       'businesses_contact_card_menu_toggle" aria-haspopup="true"',
-      $workspaceJs,
+      $contactCardsJs,
     );
   }
 }

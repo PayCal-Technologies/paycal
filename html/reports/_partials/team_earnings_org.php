@@ -5,7 +5,7 @@ namespace PayCal\Domain;
 use PayCal\Domain\Constants\Keys;
 
 /**
- * Resolve active org memberships with team financial access and selected org.
+ * Resolve active org memberships with group financial access and selected org.
  *
  * Expects optional $preferredOrgId (workspace business id). Sets:
  * $activeOrgs, $hasOrgMembership, $selectedOrgId, $allMemberships

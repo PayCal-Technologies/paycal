@@ -38,6 +38,19 @@ use PayCal\Infrastructure\Business\BusinessEncryptionService;
  */
 class Earnings
 {
+  /**
+   * @var array<string, array{
+   *   range: array{start:string,end:string},
+   *   days:int,
+   *   hours:array{regular:float,overtime:float,travel:float,total:float},
+   *   amounts:array{loa:string,wage:string,other:string},
+   *   payRate:array{deviates:bool,expected:?string,min:?string,avg:?string,max:?string},
+   *   sites:list<string>,
+   *   totals:array{gross:string,tax:string,net:string,grossCents:int,taxCents:int,netCents:int},
+   *   deductions:array{tax:string}
+   * }>
+   */
+  private static array $totalsForRangeCache = [];
 
   /**
    * Handles batchI18n operation.
@@ -75,6 +88,10 @@ class Earnings
    */
   private static function lensDebug(string $label, array $payload): void
   {
+    if (InputSanitizer::getString('debug') !== '1') {
+      return;
+    }
+
     \PayCal\Observability\Lens::add($label, $payload, 'data');
     Log::debug('[EarningsLens] ' . $label . ' ' . json_encode($payload, JSON_UNESCAPED_SLASHES));
   }
@@ -319,25 +336,25 @@ class Earnings
   }
 
   /**
-   * Resolve the correct DEK wrapper for either personal or organization envelopes.
+   * Resolve the correct DEK wrapper for either personal or business envelopes.
    */
   private static function resolveDekForEnvelope(string $blob, string $ownerUUID, string $credentialId, string $saltB64): ?string
   {
-    $orgMeta = self::parseOrganizationEnvelopeMetadata($blob);
-    if (is_array($orgMeta)) {
+    $businessMeta = self::parseBusinessEnvelopeMetadata($blob);
+    if (is_array($businessMeta)) {
       $actorUUID = User::currentUUID();
       if ($actorUUID === '' || $credentialId === '') {
         return null;
       }
 
       $wrap = (new BusinessEncryptionService())->resolveActiveWrapForUnwrap(
-        $orgMeta['org_id'],
-        $orgMeta['segment'],
-        $orgMeta['key_version'],
+        $businessMeta['business_id'],
+        $businessMeta['segment'],
+        $businessMeta['key_version'],
         $actorUUID,
         $credentialId,
         '',
-        $orgMeta['dek_id']
+        $businessMeta['dek_id']
       );
       if (!$wrap['success']) {
         return null;
@@ -345,10 +362,19 @@ class Earnings
 
       $wrappedDek = self::scalarString($wrap['data']['wrapped_dek'] ?? '');
       if ($wrappedDek === '') {
+        CryptoCompatibilityTelemetry::wrapperMissing(CryptoCompatibilityTelemetry::SOURCE_BUSINESS_CURRENT);
         return null;
       }
 
-      return self::unwrapDekFromPasskeyWrapper($wrappedDek, $credentialId, $actorUUID, $saltB64);
+      CryptoCompatibilityTelemetry::wrapperPresent(CryptoCompatibilityTelemetry::SOURCE_BUSINESS_CURRENT);
+
+      return self::unwrapDekFromPasskeyWrapper(
+        $wrappedDek,
+        $credentialId,
+        $actorUUID,
+        $saltB64,
+        CryptoCompatibilityTelemetry::SOURCE_BUSINESS_CURRENT
+      );
     }
 
     $wrappedPasskeyMapKey = Keys::USER . ':' . $ownerUUID . ':passkey_wrapped_deks';
@@ -358,17 +384,32 @@ class Earnings
     }
 
     if ($credentialId === '') {
+      CryptoCompatibilityTelemetry::wrapperMissing(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT);
       return null;
     }
     if ($wrappedDekPasskey === '') {
+      CryptoCompatibilityTelemetry::wrapperMissing(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT);
+      $legacyWrappedDek = self::scalarString(Database::hget(Keys::USER . ':' . $ownerUUID, 'wrapped_dek_passkey'));
+      if ($legacyWrappedDek !== '') {
+        CryptoCompatibilityTelemetry::wrapperPresent(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_LEGACY);
+        CryptoCompatibilityTelemetry::legacyWrapperBlocked();
+      }
       return null;
     }
 
-    return self::unwrapDekFromPasskeyWrapper($wrappedDekPasskey, $credentialId, $ownerUUID, $saltB64);
+    CryptoCompatibilityTelemetry::wrapperPresent(CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT);
+
+    return self::unwrapDekFromPasskeyWrapper(
+      $wrappedDekPasskey,
+      $credentialId,
+      $ownerUUID,
+      $saltB64,
+      CryptoCompatibilityTelemetry::SOURCE_PERSONAL_CURRENT
+    );
   }
 
-  /** @return array{org_id: string, segment: string, key_version: string, dek_id: string}|null */
-  private static function parseOrganizationEnvelopeMetadata(string $blob): ?array
+  /** @return array{business_id: string, segment: string, key_version: string, dek_id: string}|null */
+  private static function parseBusinessEnvelopeMetadata(string $blob): ?array
   {
     $decodedEnvelope = base64_decode($blob, true);
     if ($decodedEnvelope === false) {
@@ -388,22 +429,22 @@ class Earnings
       return null;
     }
 
-    $orgIdRaw = $meta['org_id'] ?? ($envelope['org_id'] ?? '');
+    $businessIdRaw = $meta['business_id'] ?? ($envelope['business_id'] ?? '');
     $segmentRaw = $meta['segment'] ?? ($envelope['segment'] ?? '');
     $keyVersionRaw = $meta['key_version'] ?? ($envelope['key_version'] ?? '');
     $dekIdRaw = $meta['dek_id'] ?? ($envelope['dek_id'] ?? '');
 
-    $orgId = is_scalar($orgIdRaw) ? trim((string) $orgIdRaw) : '';
+    $businessId = is_scalar($businessIdRaw) ? trim((string) $businessIdRaw) : '';
     $segment = is_scalar($segmentRaw) ? trim((string) $segmentRaw) : '';
     $keyVersion = is_scalar($keyVersionRaw) ? trim((string) $keyVersionRaw) : '';
     $dekId = is_scalar($dekIdRaw) ? trim((string) $dekIdRaw) : '';
 
-    if ($orgId === '' || $segment === '' || $keyVersion === '' || $dekId === '') {
+    if ($businessId === '' || $segment === '' || $keyVersion === '' || $dekId === '') {
       return null;
     }
 
     return [
-      'org_id' => $orgId,
+      'business_id' => $businessId,
       'segment' => $segment,
       'key_version' => $keyVersion,
       'dek_id' => $dekId,
@@ -426,27 +467,39 @@ class Earnings
   /**
    * Handles unwrapDekFromPasskeyWrapper operation.
    */
-  private static function unwrapDekFromPasskeyWrapper(string $wrappedDekPasskey, string $credentialId, string $userUUID, string $saltB64): ?string
+  private static function unwrapDekFromPasskeyWrapper(
+    string $wrappedDekPasskey,
+    string $credentialId,
+    string $userUUID,
+    string $saltB64,
+    string $telemetrySource
+  ): ?string
   {
+    CryptoCompatibilityTelemetry::unwrapAttempt($telemetrySource);
+
     $decodedEnvelope = base64_decode($wrappedDekPasskey, true);
     if ($decodedEnvelope === false) {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
     $envelope = json_decode($decodedEnvelope, true);
     if (!is_array($envelope)) {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
     $nonceB64 = self::scalarString($envelope['nonce'] ?? $envelope['iv'] ?? '');
     $ctB64 = self::scalarString($envelope['ciphertext'] ?? $envelope['ct'] ?? '');
     if ($nonceB64 === '' || $ctB64 === '') {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
     $nonce = base64_decode($nonceB64, true);
     $ciphertextWithTag = base64_decode($ctB64, true);
     if ($nonce === false || $ciphertextWithTag === false || strlen($ciphertextWithTag) < 17) {
+      CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
       return null;
     }
 
@@ -457,9 +510,12 @@ class Earnings
     if (is_string($kekCanonical) && $kekCanonical !== '') {
       $dek = openssl_decrypt($ciphertext, 'aes-256-gcm', $kekCanonical, OPENSSL_RAW_DATA, $nonce, $tag);
       if (is_string($dek) && $dek !== '') {
+        CryptoCompatibilityTelemetry::unwrapSuccess($telemetrySource);
         return $dek;
       }
     }
+
+    CryptoCompatibilityTelemetry::unwrapFailure($telemetrySource);
 
     return null;
   }
@@ -846,25 +902,33 @@ class Earnings
     $overtimeHours = 0.0;
 
     $rows = Work::getInstance()->getWorkInRange($start, $end->modify('+1 day'));
-    self::lensDebug('getWorkTotalsForRange:start', [
-      'start' => $start->format('Y-m-d'),
-      'end' => $end->format('Y-m-d'),
-    ]);
+    $debugRequested = InputSanitizer::getString('debug') === '1';
+    if ($debugRequested) {
+      self::lensDebug('getWorkTotalsForRange:start', [
+        'start' => $start->format('Y-m-d'),
+        'end' => $end->format('Y-m-d'),
+      ]);
+    }
 
     foreach ($rows as $row) {
-      $lensDebug = [
-        'date' => self::scalarString($row['date'] ?? ''),
-        'site_id' => self::scalarString($row['site_id'] ?? ''),
-        'has_encrypted_blob' => isset($row['encrypted_blob']) && is_string($row['encrypted_blob']) && $row['encrypted_blob'] !== '',
-      ];
+      $lensDebug = $debugRequested
+        ? [
+          'date' => self::scalarString($row['date'] ?? ''),
+          'site_id' => self::scalarString($row['site_id'] ?? ''),
+          'has_encrypted_blob' => isset($row['encrypted_blob']) && is_string($row['encrypted_blob']) && $row['encrypted_blob'] !== '',
+        ]
+        : [];
       $workData = self::resolveWorkRow($row, User::currentUUID());
       if (!is_array($workData)) {
         // Decryption unavailable — fall through to plaintext snapshot fields
         // (gross, regular_hours, overtime_hours are stored alongside the blob).
         // This is consistent with getTotalsForRange() behaviour.
-        self::lensDebug('getWorkTotalsForRange:fallthrough', $lensDebug + [
-          'reason' => 'resolve_failed_using_plaintext',
-        ]);
+        if ($debugRequested) {
+          self::lensDebug('getWorkTotalsForRange:fallthrough', $lensDebug + [
+            'reason' => 'resolve_failed_using_plaintext',
+          ]);
+        }
+        CryptoCompatibilityTelemetry::plaintextFallback('work_totals_range');
         $workData = $row;
       }
       if (
@@ -872,11 +936,13 @@ class Earnings
         || !is_numeric($workData['regular_hours'])
         || !is_numeric($workData['overtime_hours'])
       ) {
-        self::lensDebug('getWorkTotalsForRange:skip', $lensDebug + [
-          'reason' => 'missing_or_invalid_hour_fields',
-          'has_regular' => isset($workData['regular_hours']),
-          'has_overtime' => isset($workData['overtime_hours']),
-        ]);
+        if ($debugRequested) {
+          self::lensDebug('getWorkTotalsForRange:skip', $lensDebug + [
+            'reason' => 'missing_or_invalid_hour_fields',
+            'has_regular' => isset($workData['regular_hours']),
+            'has_overtime' => isset($workData['overtime_hours']),
+          ]);
+        }
         continue; // skip invalid or undecrypted rows
       }
 
@@ -906,21 +972,25 @@ class Earnings
       // Hours can remain float (time, not money)
       $regularHours += self::numericFloat($workData['regular_hours']);
       $overtimeHours += self::numericFloat($workData['overtime_hours']);
-      self::lensDebug('getWorkTotalsForRange:aggregate', $lensDebug + [
-        'gross' => $grossDollars,
-        'regular_hours' => self::numericFloat($workData['regular_hours']),
-        'overtime_hours' => self::numericFloat($workData['overtime_hours']),
+      if ($debugRequested) {
+        self::lensDebug('getWorkTotalsForRange:aggregate', $lensDebug + [
+          'gross' => $grossDollars,
+          'regular_hours' => self::numericFloat($workData['regular_hours']),
+          'overtime_hours' => self::numericFloat($workData['overtime_hours']),
+          'grossIncomeCents' => $grossIncomeCents,
+          'regularHours' => $regularHours,
+          'overtimeHours' => $overtimeHours,
+        ]);
+      }
+    }
+
+    if ($debugRequested) {
+      self::lensDebug('getWorkTotalsForRange:done', [
         'grossIncomeCents' => $grossIncomeCents,
         'regularHours' => $regularHours,
         'overtimeHours' => $overtimeHours,
       ]);
     }
-
-    self::lensDebug('getWorkTotalsForRange:done', [
-      'grossIncomeCents' => $grossIncomeCents,
-      'regularHours' => $regularHours,
-      'overtimeHours' => $overtimeHours,
-    ]);
 
     return [
       'grossIncome'      => (float) Money::centsToDollars($grossIncomeCents),
@@ -967,6 +1037,8 @@ class Earnings
       $resolved = self::resolveWorkRow($row, User::currentUUID());
       if (is_array($resolved)) {
         $row = $resolved;
+      } else {
+        CryptoCompatibilityTelemetry::plaintextFallback('export_csv');
       }
 
       // Minimal validation; earnings payload guarantees g/r/o numeric
@@ -1167,52 +1239,47 @@ class Earnings
   }
 
   /**
-   * Render a 12-month horizontal strip of earnings data for a given year.
-   * Each month is rendered via earnings-month and assembled into
-   * earnings-monthly-viewstrip.
+   * Render a 12-month earnings summary grid for a given year.
    *
    * @param int $year The year to render (e.g., 2025).
    *
-   * @return string rendered HTML of the monthly earnings strip≈
+   * @return string rendered HTML of the monthly earnings grid
    */
   public function renderMonthlyViewStrip(int $year): string
   {
-    $monthLabel = htmlspecialchars(self::batchI18n('EARNINGS_MONTH'), ENT_QUOTES, 'UTF-8');
-    $grossLabel = htmlspecialchars(self::batchI18n('GROSS'), ENT_QUOTES, 'UTF-8');
-    $deductionsLabel = htmlspecialchars(self::batchI18n('EARNINGS_TOTAL_DEDUCTIONS'), ENT_QUOTES, 'UTF-8');
-    $netLabel = htmlspecialchars(self::batchI18n('NET'), ENT_QUOTES, 'UTF-8');
     $ariaLabel = self::formatI18nPlain('EARNINGS_MONTHLY_GRID_ARIA_FOR', ['year' => (string) $year]);
 
-    $rowsHtml = '';
+    $rows = [];
     for ($month = 1; $month <= 12; ++$month) {
       $startDate = new \DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month));
       $endDate = (clone $startDate)->modify('last day of this month');
       $totals = self::getTotalsForRange($startDate, $endDate, User::currentUUID());
 
-      $monthName = htmlspecialchars(Strings::formatLocalizedShortMonth($year, $month), ENT_QUOTES, 'UTF-8');
-      $gross = htmlspecialchars(self::formatNumberLocalized($totals['totals']['grossCents'] / 100, 2), ENT_QUOTES, 'UTF-8');
-      $deductions = htmlspecialchars(self::formatNumberLocalized($totals['totals']['taxCents'] / 100, 2), ENT_QUOTES, 'UTF-8');
-      $net = htmlspecialchars(self::formatNumberLocalized($totals['totals']['netCents'] / 100, 2), ENT_QUOTES, 'UTF-8');
-
-      $rowsHtml .= '<div class="datagrid_row" role="row"><div class="datagrid_row_content" role="presentation">'
-        . '<div class="datagrid_item" role="gridcell">' . $monthName . '</div>'
-        . '<div class="datagrid_item" role="gridcell">$' . $gross . '</div>'
-        . '<div class="datagrid_item" role="gridcell">$' . $deductions . '</div>'
-        . '<div class="datagrid_item" role="gridcell">$' . $net . '</div>'
-        . '</div></div>';
+      $rows[] = [
+        'id' => sprintf('%04d-%02d', $year, $month),
+        'month' => Strings::formatLocalizedShortMonth($year, $month),
+        'gross' => self::formatCurrencyCentsLocalized((int) $totals['totals']['grossCents']),
+        'deductions' => self::formatCurrencyCentsLocalized((int) $totals['totals']['taxCents']),
+        'net' => self::formatCurrencyCentsLocalized((int) $totals['totals']['netCents']),
+      ];
     }
 
-    $coreHtml = '<div class="datagrid datagrid_cols_4 datagrid_layout_auto earnings_monthly_datagrid" data-grid="earnings-monthly-' . $year . '" data-page="1" role="region" aria-label="' . $ariaLabel . '">'
-      . '<div class="datagrid_table" role="grid" aria-colcount="4" aria-rowcount="12">'
-      . '<div class="datagrid_header_row" role="rowgroup"><div class="datagrid_header_content" role="row">'
-      . '<div class="datagrid_heading" role="columnheader">' . $monthLabel . '</div>'
-      . '<div class="datagrid_heading" role="columnheader">' . $grossLabel . '</div>'
-      . '<div class="datagrid_heading" role="columnheader">' . $deductionsLabel . '</div>'
-      . '<div class="datagrid_heading" role="columnheader">' . $netLabel . '</div>'
-      . '</div></div>'
-      . '<div class="datagrid_body" role="rowgroup">' . $rowsHtml . '</div>'
-      . '</div>'
-      . '</div>';
+    $coreHtml = (new DataGrid([
+      'id' => 'earnings-monthly-' . $year,
+      'columns' => [
+        ['key' => 'month', 'label' => self::batchI18n('EARNINGS_MONTH')],
+        ['key' => 'gross', 'label' => self::batchI18n('GROSS'), 'align' => 'right'],
+        ['key' => 'deductions', 'label' => self::batchI18n('EARNINGS_TOTAL_DEDUCTIONS'), 'align' => 'right'],
+        ['key' => 'net', 'label' => self::batchI18n('NET'), 'align' => 'right'],
+      ],
+      'rows' => $rows,
+      'meta' => [
+        'layout' => 'auto',
+        'page' => 1,
+        'totalPages' => 1,
+        'title' => $ariaLabel,
+      ],
+    ]))->table();
 
     $privateRendered = EarningsMonthlyExtensionBridge::render($year, $coreHtml);
     if (is_string($privateRendered) && trim($privateRendered) !== '') {
@@ -1250,6 +1317,8 @@ class Earnings
       $resolved = self::resolveWorkRow($earnings, User::currentUUID());
       if (is_array($resolved)) {
         $earnings = $resolved;
+      } else {
+        CryptoCompatibilityTelemetry::plaintextFallback('render_earnings_year');
       }
       $date                     = self::scalarString($earnings['date'] ?? '');
       $label                    = date('l, F jS, Y', (int) strtotime($date));
@@ -1403,6 +1472,8 @@ class Earnings
       $resolved = self::resolveWorkRow($row, User::currentUUID());
       if (is_array($resolved)) {
         $row = $resolved;
+      } else {
+        CryptoCompatibilityTelemetry::plaintextFallback('health_insights_months');
       }
       $date = self::scalarString($row['date'] ?? '');
       if ($date === '' || strlen($date) < 7) {
@@ -1449,13 +1520,16 @@ class Earnings
    */
   public function renderSections(string $renderMode = 'lazy'): string
   {
-    $lazyMode = strtolower($renderMode) !== 'eager';
+    $normalizedRenderMode = strtolower($renderMode);
+    $lazyMode = $normalizedRenderMode !== 'eager';
+    $shellMode = in_array($normalizedRenderMode, ['shell', 'deferred'], true);
     $compareRequested = User::isAdmin() && InputSanitizer::getString('ext_compare') === 'earnings-ytd';
     $requestedModeRaw = InputSanitizer::getString('ext_mode') ?? 'auto';
     $requestedMode = self::normalizeYtdRenderMode($requestedModeRaw);
     $years = iterator_to_array(Work::getInstance()->getAvailableYears(User::currentUUID()));
     // Reverse year order: older years on left, newer on right
     $years = array_reverse($years);
+    $hasPremiumReporting = SubscriptionRepository::isPremiumActive(User::currentUUID());
 
     $yearTabsAria = htmlspecialchars(self::batchI18n('EARNINGS_YEAR_SELECTOR'), ENT_QUOTES, 'UTF-8');
     $tabs = "<ul class='tabs' role='tablist' aria-label='{$yearTabsAria}'>\n";
@@ -1473,10 +1547,6 @@ class Earnings
 
       $yearToDate    = self::batchI18n('YEAR_TO_DATE');
       $payPeriods = self::batchI18n('PAY_PERIODS');
-      $cSV           = self::batchI18n('CSV');
-      $tXT           = self::batchI18n('TXT');
-      $pDF           = self::batchI18n('PDF');
-      $xLSX          = 'XLSX';
       $monthly       = self::batchI18n('MONTHLY');
       $daily         = self::batchI18n('DAILY');
       $earningsAriaLabel = self::batchI18n('EARNINGS_LABEL') . ' ' . $year;
@@ -1492,6 +1562,9 @@ class Earnings
       $loadingYtdSummary = self::batchI18n('EARNINGS_LOADING_YEAR_TO_DATE_SUMMARY');
       $loadingPayPeriods = self::batchI18n('EARNINGS_LOADING_PAY_PERIODS');
       $loadingMonthlySummary = self::batchI18n('EARNINGS_LOADING_MONTHLY_SUMMARY');
+      $yearToDateExportButtons = self::renderPersonalExportButtons('yearly', ['data-export-year' => (string) $year], $hasPremiumReporting);
+      $monthlyExportButtons = self::renderPersonalExportButtons('monthly', ['data-export-year' => (string) $year], $hasPremiumReporting);
+      $dailyExportButtons = self::renderPersonalExportButtons('daily', ['data-export-year' => (string) $year], $hasPremiumReporting);
       $trendHelp = htmlspecialchars($earningsTrend . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
       $historicalHelp = htmlspecialchars(self::formatI18nPlain('EARNINGS_HI_SECTION_HELP', ['year' => (string) $year]) . '.', ENT_QUOTES, 'UTF-8');
       $yearToDateHelp = htmlspecialchars($yearToDate . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
@@ -1500,10 +1573,12 @@ class Earnings
       $dailyHelp = htmlspecialchars($daily . ' ' . self::batchI18n('FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
 
       $activeClass = $active ? ' active' : '';
-      $eagerYtdHtml = $compareRequested
-        ? $this->renderYearToDateSummaryCompare((int) $year)
-        : $this->renderYearToDateSummary((int) $year, $requestedMode);
-      $renderYearInline = !$lazyMode || $isActive;
+      $renderYearInline = !$lazyMode || ($isActive && !$shellMode);
+      $eagerYtdHtml = $renderYearInline
+        ? ($compareRequested
+          ? $this->renderYearToDateSummaryCompare((int) $year)
+          : $this->renderYearToDateSummary((int) $year, $requestedMode))
+        : '';
 
       $yearToDateHtml = $renderYearInline
         ? '<div id="earnings_ytd_' . $year . '" class="earnings_async_slot" data-earnings-slot="ytd" data-earnings-year="' . $year . '">' . $eagerYtdHtml . '</div>'
@@ -1543,10 +1618,7 @@ class Earnings
   <section class="panel w100 earnings_panel" data-hover-help="{$yearToDateHelp}">
     <h2 class="earnings_panel_title">{$yearToDate}</h2>
     <div class="earnings_export_actions" role="group" aria-label="{$yearToDateExportAria}">
-      <button type="button" class="paycal_export_btn" data-export-scope="yearly" data-export-format="csv" data-export-year="{$year}">{$cSV}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-export-scope="yearly" data-export-format="xlsx" data-export-year="{$year}">{$xLSX}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-export-scope="yearly" data-export-format="txt" data-export-year="{$year}">{$tXT}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-export-scope="yearly" data-export-format="pdf" data-export-year="{$year}">{$pDF}</button>
+      {$yearToDateExportButtons}
     </div>
     {$yearToDateHtml}
   </section>
@@ -1559,10 +1631,7 @@ class Earnings
   <section class="panel w100 earnings_panel" data-hover-help="{$monthlyHelp}">
     <h2 class="earnings_panel_title">{$monthly}</h2>
     <div class="earnings_export_actions" role="group" aria-label="{$monthlyExportAria}">
-      <button type="button" class="paycal_export_btn" data-export-scope="monthly" data-export-format="csv" data-export-year="{$year}">{$cSV}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-export-scope="monthly" data-export-format="xlsx" data-export-year="{$year}">{$xLSX}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-export-scope="monthly" data-export-format="txt" data-export-year="{$year}">{$tXT}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-export-scope="monthly" data-export-format="pdf" data-export-year="{$year}">{$pDF}</button>
+      {$monthlyExportButtons}
     </div>
     {$monthlyHtml}
   </section>
@@ -1570,10 +1639,7 @@ class Earnings
   <section class="panel w100 earnings_panel" data-hover-help="{$dailyHelp}">
     <h2 class="earnings_panel_title">{$daily}</h2>
     <div class="earnings_export_actions" role="group" aria-label="{$dailyExportAria}">
-      <button type="button" class="paycal_export_btn" data-export-scope="daily" data-export-format="csv" data-export-year="{$year}">{$cSV}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-export-scope="daily" data-export-format="xlsx" data-export-year="{$year}">{$xLSX}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-export-scope="daily" data-export-format="txt" data-export-year="{$year}">{$tXT}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-export-scope="daily" data-export-format="pdf" data-export-year="{$year}">{$pDF}</button>
+      {$dailyExportButtons}
     </div>
     <div class="visually_hidden">
       <p id="daily_earnings_{$year}_sr_instructions">{$dailyGridInstructions}</p>
@@ -1586,16 +1652,17 @@ class Earnings
 HTML;
     }
 
-    // Forecast tab — always visible regardless of whether year data exists.
-    $forecastLabel = htmlspecialchars(self::batchI18n('EARNINGS_FORECAST'), ENT_QUOTES, 'UTF-8');
-    $forecastAria = htmlspecialchars(self::batchI18n('EARNINGS_FORECAST_WORKSPACE_ARIA'), ENT_QUOTES, 'UTF-8');
-    $forecastContent = $this->renderForecastSection(User::current());
-    $tabs .= "<li id='tab-btn-forecast' data-tab-target='tab-forecast' class='tab' role='tab' aria-selected='false' tabindex='-1' aria-controls='tab-forecast'>{$forecastLabel}</li>\n";
-    $contents .= '<div id="tab-forecast" data-tab-content="tab-forecast" class="f_column" role="tabpanel" aria-labelledby="tab-btn-forecast" aria-label="' . $forecastAria . '">'
-      . '<section class="panel w100 earnings_panel forecast-panel-shell">'
-      . $forecastContent
-      . '</section>'
-      . '</div>';
+    if ($hasPremiumReporting) {
+      $forecastLabel = htmlspecialchars(self::batchI18n('EARNINGS_FORECAST'), ENT_QUOTES, 'UTF-8');
+      $forecastAria = htmlspecialchars(self::batchI18n('EARNINGS_FORECAST_WORKSPACE_ARIA'), ENT_QUOTES, 'UTF-8');
+      $forecastContent = $this->renderForecastSection(User::current());
+      $tabs .= "<li id='tab-btn-forecast' data-tab-target='tab-forecast' class='tab' role='tab' aria-selected='false' tabindex='-1' aria-controls='tab-forecast'>{$forecastLabel}</li>\n";
+      $contents .= '<div id="tab-forecast" data-tab-content="tab-forecast" class="f_column" role="tabpanel" aria-labelledby="tab-btn-forecast" aria-label="' . $forecastAria . '">'
+        . '<section class="panel w100 earnings_panel forecast-panel-shell">'
+        . $forecastContent
+        . '</section>'
+        . '</div>';
+    }
 
     $tabs .= "</ul>\n";
     $contents .= "</section>\n";
@@ -1603,6 +1670,37 @@ HTML;
     $mode = $lazyMode ? 'lazy' : 'eager';
 
     return "<section class=\"w100\" data-earnings-mode=\"{$mode}\">{$tabs}</section>{$contents}";
+  }
+
+  /**
+   * @param array<string, string> $attributes
+   */
+  private static function renderPersonalExportButtons(string $scope, array $attributes, bool $hasPremiumReporting): string
+  {
+    $labels = [
+      'csv' => self::batchI18n('CSV'),
+      'txt' => self::batchI18n('TXT'),
+      'xlsx' => 'XLSX',
+      'pdf' => self::batchI18n('PDF'),
+    ];
+    $formats = $hasPremiumReporting ? ['csv', 'txt', 'xlsx', 'pdf'] : ['pdf'];
+    $scopeAttr = htmlspecialchars($scope, ENT_QUOTES, 'UTF-8');
+    $extraAttributes = '';
+    foreach ($attributes as $name => $value) {
+      if (!preg_match('/\Adata-[a-z0-9\-]+\z/', $name)) {
+        continue;
+      }
+      $extraAttributes .= ' ' . $name . '="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"';
+    }
+
+    $buttons = [];
+    foreach ($formats as $format) {
+      $formatAttr = htmlspecialchars($format, ENT_QUOTES, 'UTF-8');
+      $label = htmlspecialchars($labels[$format], ENT_QUOTES, 'UTF-8');
+      $buttons[] = '<button type="button" class="paycal_export_btn" data-export-scope="' . $scopeAttr . '" data-export-format="' . $formatAttr . '"' . $extraAttributes . '>' . $label . '</button>';
+    }
+
+    return implode(' &sdot; ', $buttons);
   }
 
   /**
@@ -1670,6 +1768,15 @@ HTML;
     $s = (new \DateTimeImmutable($start->format('Y-m-d'), $tz))->setTime(0, 0, 0);
     $eInc = (new \DateTimeImmutable($endInclusive->format('Y-m-d'), $tz))->setTime(0, 0, 0);
     $eExc = $eInc->modify('+1 day');
+    $cacheKey = implode('|', [
+      $userUUID,
+      $s->format('Y-m-d'),
+      $eInc->format('Y-m-d'),
+      $tzName,
+    ]);
+    if (isset(self::$totalsForRangeCache[$cacheKey])) {
+      return self::$totalsForRangeCache[$cacheKey];
+    }
 
     // Pull work entries for [s, eExc)
     // Expected entry shape (best-effort): r=regular hrs, o=overtime hrs, h=total hrs,
@@ -1702,6 +1809,8 @@ HTML;
       $resolved = self::resolveWorkRow($row, $userUUID);
       if (is_array($resolved)) {
         $row = $resolved;
+      } else {
+        CryptoCompatibilityTelemetry::plaintextFallback('annual_summary');
       }
 
       // Hours (float is acceptable for time)
@@ -1795,7 +1904,7 @@ HTML;
 
     $days = (int) max(0, (int) (($eExc->getTimestamp() - $s->getTimestamp()) / 86400));
 
-    return [
+    $result = [
       'range' => [
         'start' => $s->format('Y-m-d'),
         'end' => $eInc->format('Y-m-d'),
@@ -1832,6 +1941,9 @@ HTML;
         'tax' => Money::centsToDollars($taxesCents),
       ],
     ];
+    self::$totalsForRangeCache[$cacheKey] = $result;
+
+    return $result;
   }
 
   /**
@@ -1930,8 +2042,14 @@ HTML;
   {
     $startDate = Strings::formatLocalizedMediumDate($pp->start());
     $endDate = Strings::formatLocalizedMediumDate($pp->endInclusive());
-    $startDateIso = htmlspecialchars((string) $totals['range']['start'], ENT_QUOTES, 'UTF-8');
-    $endDateIso = htmlspecialchars((string) $totals['range']['end'], ENT_QUOTES, 'UTF-8');
+    $payPeriodExportButtons = self::renderPersonalExportButtons(
+      'payperiod',
+      [
+        'data-export-start' => (string) $totals['range']['start'],
+        'data-export-end' => (string) $totals['range']['end'],
+      ],
+      SubscriptionRepository::isPremiumActive(User::currentUUID()),
+    );
 
     $regularHours = self::formatNumberLocalized((float) $totals['hours']['regular'], 2);
     $overtimeHours = self::formatNumberLocalized((float) $totals['hours']['overtime'], 2);
@@ -1969,10 +2087,7 @@ HTML;
 <article class="pay-period-card" aria-label="Pay period {$startDate} to {$endDate}">
   <h3 class="pay-period-card_title">{$startDate} - {$endDate}</h3>
   <div class="pay-period-card_exports" role="group" aria-label="Pay period export formats for {$startDate} to {$endDate}">
-    <button type="button" class="paycal_export_btn" data-export-scope="payperiod" data-export-format="csv" data-export-start="{$startDateIso}" data-export-end="{$endDateIso}">CSV</button> &sdot;
-    <button type="button" class="paycal_export_btn" data-export-scope="payperiod" data-export-format="xlsx" data-export-start="{$startDateIso}" data-export-end="{$endDateIso}">XLSX</button> &sdot;
-    <button type="button" class="paycal_export_btn" data-export-scope="payperiod" data-export-format="txt" data-export-start="{$startDateIso}" data-export-end="{$endDateIso}">TXT</button> &sdot;
-    <button type="button" class="paycal_export_btn" data-export-scope="payperiod" data-export-format="pdf" data-export-start="{$startDateIso}" data-export-end="{$endDateIso}">PDF</button>
+    {$payPeriodExportButtons}
   </div>
   <div class="pay-period-card_hours">
     <div class="pay-period-card_row"><span class="pay-period-card_label">Regular</span><span class="pay-period-card_value">{$regularHours}h</span></div>
@@ -2084,5 +2199,3 @@ HTML;
     return "{$heading}\n\n{$output}";
   }
 }
-
-

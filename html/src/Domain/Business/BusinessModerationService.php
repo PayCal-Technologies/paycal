@@ -289,7 +289,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document approveListing.
+   * Approve listing.
    */
   public static function approveListing(string $businessId, string $adminUUID): bool
   {
@@ -319,7 +319,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document rejectName.
+   * Reject name.
    */
   public static function rejectName(string $businessId, string $adminUUID, string $reason = 'manual_admin_decision'): bool
   {
@@ -349,7 +349,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document hideListing.
+   * Hide listing.
    */
   public static function hideListing(string $businessId, string $adminUUID): bool
   {
@@ -362,7 +362,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document suspendBusiness.
+   * Suspend business.
    */
   public static function suspendBusiness(string $businessId, string $adminUUID, string $reason): bool
   {
@@ -375,7 +375,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document restoreBusiness.
+   * Restore business.
    */
   public static function restoreBusiness(string $businessId, string $adminUUID): bool
   {
@@ -390,7 +390,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document markOwnerTrusted.
+   * Mark owner trusted.
    */
   public static function markOwnerTrusted(string $businessId, string $adminUUID): bool
   {
@@ -429,7 +429,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document enqueue.
+   * Enqueue.
    */
   public static function enqueue(string $businessId): void
   {
@@ -439,7 +439,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document dequeue.
+   * Dequeue.
    */
   public static function dequeue(string $businessId): void
   {
@@ -690,7 +690,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document formatDuration.
+   * Format duration.
    */
   private static function formatDuration(int $seconds): string
   {
@@ -733,7 +733,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document trustConfigInt.
+   * Trust config int.
    */
   private static function trustConfigInt(string $key, int $default): int
   {
@@ -744,7 +744,7 @@ final class BusinessModerationService
   }
 
   /**
-   * TODO: Document rejectPublicMaxScore.
+   * Reject public max score.
    */
   private static function rejectPublicMaxScore(): int
   {

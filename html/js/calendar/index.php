@@ -1108,6 +1108,45 @@ const updateCalendarWeek = async (week) => {
  * @param event e                        The HTML element representing the selected calendar day.
  * @returns void
  */
+const parseCalendarMoney = (value) => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value !== 'string') {
+    return 0;
+  }
+  const normalized = value.replace(/[^0-9.-]/g, '').trim();
+  if (normalized === '') {
+    return 0;
+  }
+  const parsed = parseFloat(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const roundCalendarMoney = (value) => Number((Number(value) || 0).toFixed(2));
+
+const buildWorkEntryEarningsSnapshot = (entry) => {
+  const regular = parseFloat(entry?.regular_hours ?? 0) || 0;
+  const overtime = parseFloat(entry?.overtime_hours ?? 0) || 0;
+  const travel = parseFloat(entry?.travel_hours ?? 0) || 0;
+  const livingOut = parseCalendarMoney(entry?.living_out_allowance ?? 0);
+  const wage = parseCalendarMoney(entry?.wage ?? 0);
+  const regularAmount = roundCalendarMoney(regular * wage);
+  const overtimeAmount = roundCalendarMoney(overtime * wage * 1.5);
+  const travelAmount = roundCalendarMoney(travel * wage);
+  const livingOutAmount = roundCalendarMoney(livingOut);
+
+  return {
+    wage: roundCalendarMoney(wage),
+    regular_amount: regularAmount,
+    overtime_amount: overtimeAmount,
+    travel_amount: travelAmount,
+    living_out_amount: livingOutAmount,
+    gross: roundCalendarMoney(regularAmount + overtimeAmount + travelAmount + livingOutAmount),
+    earnings_snapshot_version: 1,
+  };
+};
+
 const save_work = async (e) => {
   e.preventDefault();
   e.stopPropagation();
@@ -1135,6 +1174,7 @@ const save_work = async (e) => {
     const selected_option       = site_select.options[site_select.selectedIndex];
     const site_id               = selected_option.value;
     const site_name             = selected_option.textContent;
+    const site_wage             = selected_option?.dataset?.wage ?? sites?.[site_id]?.wage ?? 0;
 
     const hours                 = parseFloat(row.querySelector('[name="hours"]').value);
     const living_out_allowance_raw  = parseFloat(row.querySelector('[name="living_out_allowance"]').value);
@@ -1161,8 +1201,10 @@ const save_work = async (e) => {
       regular_hours: regular_hours,
       overtime_hours: overtime_hours,
       living_out_allowance: living_out_allowance,
-      travel_hours: travel_hours
+      travel_hours: travel_hours,
+      wage: parseCalendarMoney(site_wage)
     };
+    Object.assign(entry, buildWorkEntryEarningsSnapshot(entry));
     try {
       const nonce = window.crypto.getRandomValues(new Uint8Array(12));
       const aad = entry.site_id;
@@ -1389,6 +1431,9 @@ const buildCalendarSiteOption = (site) => {
   }
   if (site?.business_abbrev) {
     option.dataset.businessAbbrev = String(site.business_abbrev);
+  }
+  if (site?.wage !== undefined) {
+    option.dataset.wage = String(site.wage);
   }
   return option;
 };

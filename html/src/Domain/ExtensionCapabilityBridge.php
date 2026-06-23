@@ -19,7 +19,7 @@ final class ExtensionCapabilityBridge
   private const RUNTIME_CLASS = 'PayCal\\Domain\\Extensions\\ExtensionRuntime';
 
   /**
-   * TODO: Document runtimeAvailable.
+   * Runtime available.
    */
   public static function runtimeAvailable(): bool
   {
@@ -27,7 +27,7 @@ final class ExtensionCapabilityBridge
   }
 
   /**
-   * TODO: Document enabled.
+   * Enabled.
    */
   #[ExtensionCapability('dynamic')]
   public static function enabled(string $capability, bool $default = false): bool
@@ -45,7 +45,7 @@ final class ExtensionCapabilityBridge
   }
 
   /**
-   * TODO: Document value.
+   * Value.
    */
   #[ExtensionCapability('dynamic')]
   public static function value(string $capability, mixed $default = null): mixed

@@ -12,6 +12,11 @@ $dotenv->safeLoad(['PC_EMAIL_PASSWORD']);
 
 Environment::bootstrap($_ENV);
 
+if (PHP_SAPI !== 'cli') {
+	\PayCal\Observability\ArgusRequestContext::bootstrap();
+	\PayCal\Observability\Argus::setCorrelationId(\PayCal\Observability\ArgusRequestContext::traceId());
+}
+
 // Initialize extension runtime for public/basic + private override packages.
 ExtensionBootstrapBridge::initialize();
 

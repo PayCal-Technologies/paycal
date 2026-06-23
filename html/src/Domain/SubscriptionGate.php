@@ -10,7 +10,7 @@ namespace PayCal\Domain;
 final class SubscriptionGate
 {
   /**
-   * TODO: Document canCreateSharedBusinesses.
+   * Can create shared businesses.
    */
   public static function canCreateSharedBusinesses(string $userUUID): bool
   {

@@ -486,6 +486,38 @@ let currentLang = '<?php echo \PayCal\Domain\Language::DEFAULT; ?>';
       return `${protocol}//${window.location.host}/ws`;
     }
 
+    function humanizeAuditToken(value) {
+      return String(value || '')
+        .trim()
+        .replace(/^org\./, '')
+        .replace(/[\._-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .toLowerCase()
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
+    }
+
+    function auditEventLabel(value) {
+      const normalized = String(value || '').trim().toLowerCase().replace(/^org\./, '');
+      const labels = {
+        'access.request.approved': 'Access request approved',
+        'access.request.rejected': 'Access request rejected',
+        'invite.accepted': 'Invitation accepted',
+        'invite.bulk_import_committed': 'Bulk invite import completed',
+        'invite.revoked': 'Invitation revoked',
+        'business.consent.granted_from_settings': 'Data sharing approved',
+        'business.consent.revoked_from_settings': 'Data sharing revoked',
+        'business.dek.wrap.bootstrap': 'Secure access prepared',
+        'business.dek.wrap.bootstrap.bulk': 'Secure access prepared for members',
+        'ownership.transferred': 'Ownership transferred',
+        'connection.revoked': 'Business access revoked',
+        'connection.role_updated': 'Business role updated',
+        'connection.withdrawn': 'Member left business',
+        'settings.updated': 'Business settings updated'
+      };
+
+      return labels[normalized] || humanizeAuditToken(value) || 'Unknown activity';
+    }
+
     function renderAuditEvent(data) {
       eventCount++;
       if (countEl) countEl.textContent = `(${eventCount})`;
@@ -493,7 +525,7 @@ let currentLang = '<?php echo \PayCal\Domain\Language::DEFAULT; ?>';
       const ts = data.created_at ? new Date(data.created_at).toLocaleTimeString() : '';
       const seq = data.ledger_sequence ? `#${data.ledger_sequence}` : '';
       const actor = String(data.actor_uuid || '').slice(0, 8);
-      const type = String(data.event_type || 'unknown');
+      const type = auditEventLabel(data.event_type || 'unknown');
 
       const li = document.createElement('li');
       li.className = 'audit-event-item';

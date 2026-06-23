@@ -99,7 +99,7 @@ final class BusinessMemberReportsService
 
     return [
       'success' => true,
-      'message' => '[OrgC] Member earnings breakdown loaded.',
+      'message' => '[Business] Member earnings breakdown loaded.',
       'data' => [
         'name' => $data['member_name'],
         'role' => $data['member_role'],
@@ -133,11 +133,18 @@ final class BusinessMemberReportsService
     $workSnapshot = $data['work_snapshot'];
     $years = $workSnapshot['years'];
     $activeYear = $data['year'];
-    $html = $this->renderMemberEarningsViewHtml($years, $activeYear, $workSnapshot, $businessId, $memberUUID);
+    $html = $this->renderMemberEarningsViewHtml(
+      $years,
+      $activeYear,
+      $workSnapshot,
+      $businessId,
+      $memberUUID,
+      SubscriptionRepository::isPremiumActive($actorUUID),
+    );
 
     return [
       'success' => true,
-      'message' => '[OrgC] Member earnings reports view loaded.',
+      'message' => '[Business] Member earnings reports view loaded.',
       'data' => [
         'member' => [
           'uuid' => $memberUUID,
@@ -183,7 +190,7 @@ final class BusinessMemberReportsService
 
     return [
       'success' => true,
-      'message' => '[OrgC] Member reports section loaded.',
+      'message' => '[Business] Member reports section loaded.',
       'data' => ['html' => $html],
     ];
   }
@@ -209,7 +216,7 @@ final class BusinessMemberReportsService
 
     return [
       'success' => true,
-      'message' => '[OrgC] Member gross trend loaded.',
+      'message' => '[Business] Member gross trend loaded.',
       'data' => [
         'gross_by_date' => $workSnapshot['by_year'][$activeYear]['gross_by_date'] ?? [],
       ],
@@ -238,7 +245,7 @@ final class BusinessMemberReportsService
 
     return [
       'success' => true,
-      'message' => '[OrgC] Member daily earnings loaded.',
+      'message' => '[Business] Member daily earnings loaded.',
       'data' => $this->buildMemberDailyPayload($activeYear, $workSnapshot, $memberUser),
     ];
   }
@@ -256,6 +263,14 @@ final class BusinessMemberReportsService
       return $context;
     }
 
+    if (!SubscriptionRepository::isPremiumActive($actorUUID)) {
+      return [
+        'success' => false,
+        'message' => 'Premium subscription required for Forecast.',
+        'data' => [],
+      ];
+    }
+
     /** @var array<string, mixed> $data */
     $data = $context['data'];
     $memberUser = $data['member_user'] ?? null;
@@ -269,7 +284,7 @@ final class BusinessMemberReportsService
 
     return [
       'success' => true,
-      'message' => '[OrgC] Member forecast access granted.',
+      'message' => '[Business] Member forecast access granted.',
       'data' => ['member_user' => $memberUser],
     ];
   }
@@ -282,7 +297,7 @@ final class BusinessMemberReportsService
     string $businessId,
     string $memberUUID,
   ): array {
-    $context = $this->resolveAccessContext($actorUUID, $businessId, $memberUUID, (int) date('Y'));
+    $context = $this->resolveMemberForecastAccess($actorUUID, $businessId, $memberUUID);
     if (!$context['success']) {
       return $context;
     }
@@ -303,7 +318,7 @@ final class BusinessMemberReportsService
 
     return [
       'success' => true,
-      'message' => '[OrgC] Member forecast loaded.',
+      'message' => '[Business] Member forecast loaded.',
       'data' => ['html' => $html, 'state' => $state],
     ];
   }
@@ -334,7 +349,7 @@ final class BusinessMemberReportsService
     }
 
     $discovery = new BusinessDiscoveryService();
-    $access = $discovery->listRelationships($actorUUID, $businessId);
+    $access = $discovery->listConnections($actorUUID, $businessId);
     if (!$access['success']) {
       return [
         'success' => false,
@@ -385,7 +400,7 @@ final class BusinessMemberReportsService
 
     return [
       'success' => true,
-      'message' => '[OrgC] Member reports access granted.',
+      'message' => '[Business] Member reports access granted.',
       'data' => [
         'member_name' => $memberContext['name'],
         'member_role' => $memberContext['role'],
@@ -637,6 +652,7 @@ final class BusinessMemberReportsService
     array $workSnapshot,
     string $businessId,
     string $memberUUID,
+    bool $hasPremiumReporting,
   ): string {
     if ($years === []) {
       $years = [$activeYear];
@@ -648,6 +664,7 @@ final class BusinessMemberReportsService
     $myEarningsLabel = htmlspecialchars(Strings::i18n('EARNINGS_MY_EARNINGS'), ENT_QUOTES, 'UTF-8');
     $businessIdAttr = htmlspecialchars($businessId, ENT_QUOTES, 'UTF-8');
     $memberUuidAttr = htmlspecialchars($memberUUID, ENT_QUOTES, 'UTF-8');
+    $premiumAttr = $hasPremiumReporting ? '1' : '0';
 
     $yearTabsAria = htmlspecialchars(Strings::i18n('MEMBER_REPORTS_YEAR_TABS_ARIA'), ENT_QUOTES, 'UTF-8');
     $tabs = "<ul class='tabs member_reports_year_tabs' role='tablist' aria-label='{$yearTabsAria}'>\n";
@@ -667,11 +684,9 @@ final class BusinessMemberReportsService
       $monthly = htmlspecialchars(Strings::i18n('MONTHLY'), ENT_QUOTES, 'UTF-8');
       $daily = htmlspecialchars(Strings::i18n('DAILY'), ENT_QUOTES, 'UTF-8');
       $earningsTrend = htmlspecialchars(Strings::i18n('EARNINGS_TREND'), ENT_QUOTES, 'UTF-8');
-      $cSV = htmlspecialchars(Strings::i18n('CSV'), ENT_QUOTES, 'UTF-8');
-      $tXT = htmlspecialchars(Strings::i18n('TXT'), ENT_QUOTES, 'UTF-8');
-      $pDF = htmlspecialchars(Strings::i18n('PDF'), ENT_QUOTES, 'UTF-8');
-      $xLSX = 'XLSX';
-      $browserConvenienceExports = htmlspecialchars('CSV/TXT are browser convenience exports.', ENT_QUOTES, 'UTF-8');
+      $browserConvenienceExportsNote = $hasPremiumReporting
+        ? '<p class="earnings_export_note">' . htmlspecialchars('CSV/TXT are browser convenience exports.', ENT_QUOTES, 'UTF-8') . '</p>'
+        : '';
       $lineGraphTitle = htmlspecialchars(Strings::i18n('EARNINGS_TREND_CHART_FOR') . ' ' . $year, ENT_QUOTES, 'UTF-8');
       $lineGraphDesc = htmlspecialchars(Strings::i18n('EARNINGS_TREND_CHART_DESC') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
       $lineGraphStatus = htmlspecialchars(Strings::i18n('EARNINGS_TREND_CHART_LOADING_FOR') . ' ' . $year . '.', ENT_QUOTES, 'UTF-8');
@@ -684,6 +699,9 @@ final class BusinessMemberReportsService
       $graphId = self::GRAPH_ID_PREFIX . $year;
       $historicalIntelligenceHtml = $this->renderHistoricalIntelligence($year, $workSnapshot);
       $pieGraphsHtml = $this->renderMemberPieGraphsPanel($year);
+      $ytdExportButtons = $this->renderMemberExportButtons('yearly', $year, $hasPremiumReporting);
+      $monthlyExportButtons = $this->renderMemberExportButtons('monthly', $year, $hasPremiumReporting);
+      $dailyExportButtons = $this->renderMemberExportButtons('daily', $year, $hasPremiumReporting);
 
       $contents .= <<<HTML
 <div id="{$tabTarget}" data-tab-content="{$tabTarget}" class="f_column{$activeClass}" role="tabpanel" aria-labelledby="{$tabBtnId}" aria-label="{$memberEarningsForYear}">
@@ -708,12 +726,9 @@ final class BusinessMemberReportsService
   <section class="panel w100 earnings_panel">
     <h2 class="earnings_panel_title">{$yearToDate}</h2>
     <div class="earnings_export_actions" role="group" aria-label="{$ytdExportAria}">
-      <button type="button" class="paycal_export_btn" data-member-export-scope="yearly" data-member-export-format="csv" data-member-export-year="{$year}">{$cSV}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-member-export-scope="yearly" data-member-export-format="xlsx" data-member-export-year="{$year}">{$xLSX}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-member-export-scope="yearly" data-member-export-format="txt" data-member-export-year="{$year}">{$tXT}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-member-export-scope="yearly" data-member-export-format="pdf" data-member-export-year="{$year}">{$pDF}</button>
+      {$ytdExportButtons}
     </div>
-    <p class="earnings_export_note">{$browserConvenienceExports}</p>
+    {$browserConvenienceExportsNote}
     <div id="member_reports_ytd_{$year}" class="earnings_async_slot" data-earnings-slot="ytd" data-earnings-year="{$year}">{$this->buildAsyncSkeletonGrid(3, 5)}</div>
   </section>
 
@@ -725,24 +740,18 @@ final class BusinessMemberReportsService
   <section class="panel w100 earnings_panel">
     <h2 class="earnings_panel_title">{$monthly}</h2>
     <div class="earnings_export_actions" role="group" aria-label="{$monthlyExportAria}">
-      <button type="button" class="paycal_export_btn" data-member-export-scope="monthly" data-member-export-format="csv" data-member-export-year="{$year}">{$cSV}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-member-export-scope="monthly" data-member-export-format="xlsx" data-member-export-year="{$year}">{$xLSX}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-member-export-scope="monthly" data-member-export-format="txt" data-member-export-year="{$year}">{$tXT}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-member-export-scope="monthly" data-member-export-format="pdf" data-member-export-year="{$year}">{$pDF}</button>
+      {$monthlyExportButtons}
     </div>
-    <p class="earnings_export_note">{$browserConvenienceExports}</p>
+    {$browserConvenienceExportsNote}
     <div id="member_reports_monthly_{$year}" class="earnings_async_slot" data-earnings-slot="monthly" data-earnings-year="{$year}">{$this->buildAsyncSkeletonGrid(11, 6)}</div>
   </section>
 
   <section class="panel w100 earnings_panel">
     <h2 class="earnings_panel_title">{$daily}</h2>
     <div class="earnings_export_actions" role="group" aria-label="{$dailyExportAria}">
-      <button type="button" class="paycal_export_btn" data-member-export-scope="daily" data-member-export-format="csv" data-member-export-year="{$year}">{$cSV}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-member-export-scope="daily" data-member-export-format="xlsx" data-member-export-year="{$year}">{$xLSX}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-member-export-scope="daily" data-member-export-format="txt" data-member-export-year="{$year}">{$tXT}</button> &sdot;
-      <button type="button" class="paycal_export_btn" data-member-export-scope="daily" data-member-export-format="pdf" data-member-export-year="{$year}">{$pDF}</button>
+      {$dailyExportButtons}
     </div>
-    <p class="earnings_export_note">{$browserConvenienceExports}</p>
+    {$browserConvenienceExportsNote}
     <div class="visually_hidden">
       <p id="member_reports_daily_{$year}_sr_instructions">{$dailyGridInstructions}</p>
       <p id="member_reports_daily_{$year}_sr_context">{$dailyGridContext}</p>
@@ -754,24 +763,26 @@ final class BusinessMemberReportsService
 HTML;
     }
 
-    $forecastTarget = self::TAB_ID_PREFIX . 'forecast';
-    $forecastTabBtnId = self::TAB_ID_PREFIX . 'btn-forecast';
-    $forecastLabel = htmlspecialchars(Strings::i18n('EARNINGS_FORECAST'), ENT_QUOTES, 'UTF-8');
-    $forecastAria = htmlspecialchars(Strings::i18n('EARNINGS_MEMBER_EARNINGS_FORECAST_ARIA'), ENT_QUOTES, 'UTF-8');
-    $tabs .= "<li id='{$forecastTabBtnId}' data-tab-target='{$forecastTarget}' class='tab' role='tab' aria-selected='false' tabindex='-1' aria-controls='{$forecastTarget}'>{$forecastLabel}</li>\n";
-    $contents .= <<<HTML
+    if ($hasPremiumReporting) {
+      $forecastTarget = self::TAB_ID_PREFIX . 'forecast';
+      $forecastTabBtnId = self::TAB_ID_PREFIX . 'btn-forecast';
+      $forecastLabel = htmlspecialchars(Strings::i18n('EARNINGS_FORECAST'), ENT_QUOTES, 'UTF-8');
+      $forecastAria = htmlspecialchars(Strings::i18n('EARNINGS_MEMBER_EARNINGS_FORECAST_ARIA'), ENT_QUOTES, 'UTF-8');
+      $tabs .= "<li id='{$forecastTabBtnId}' data-tab-target='{$forecastTarget}' class='tab' role='tab' aria-selected='false' tabindex='-1' aria-controls='{$forecastTarget}'>{$forecastLabel}</li>\n";
+      $contents .= <<<HTML
 <div id="{$forecastTarget}" data-tab-content="{$forecastTarget}" class="f_column" role="tabpanel" aria-labelledby="{$forecastTabBtnId}" aria-label="{$forecastAria}">
   <section class="panel w100 earnings_panel forecast-panel-shell">
     <div id="member_reports_forecast_content" class="earnings_async_slot" data-forecast-async="1">{$this->buildAsyncSkeletonGrid(4, 3)}</div>
   </section>
 </div>
 HTML;
+    }
 
     $tabs .= "</ul>\n";
     $contents .= "</section>\n";
 
     return <<<HTML
-<div class="earnings_member_reports_view" data-member-reports-root="1" data-member-reports-business-id="{$businessIdAttr}" data-member-reports-member-uuid="{$memberUuidAttr}">
+<div class="earnings_member_reports_view" data-member-reports-root="1" data-member-reports-premium="{$premiumAttr}" data-member-reports-business-id="{$businessIdAttr}" data-member-reports-member-uuid="{$memberUuidAttr}">
   <nav class="earnings_view_tabs" aria-label="{$myEarningsLabel}">
     <div class="earnings_view_tabs_links">
       <span class="earnings_view_tab active" aria-current="page">{$myEarningsLabel}</span>
@@ -783,6 +794,28 @@ HTML;
   </section>
 </div>
 HTML;
+  }
+
+  private function renderMemberExportButtons(string $scope, int $year, bool $hasPremiumReporting): string
+  {
+    $labels = [
+      'csv' => Strings::i18n('CSV'),
+      'txt' => Strings::i18n('TXT'),
+      'xlsx' => 'XLSX',
+      'pdf' => Strings::i18n('PDF'),
+    ];
+    $formats = $hasPremiumReporting ? ['csv', 'txt', 'xlsx', 'pdf'] : ['pdf'];
+    $scopeAttr = htmlspecialchars($scope, ENT_QUOTES, 'UTF-8');
+    $yearAttr = htmlspecialchars((string) $year, ENT_QUOTES, 'UTF-8');
+
+    $buttons = [];
+    foreach ($formats as $format) {
+      $formatAttr = htmlspecialchars($format, ENT_QUOTES, 'UTF-8');
+      $label = htmlspecialchars($labels[$format], ENT_QUOTES, 'UTF-8');
+      $buttons[] = '<button type="button" class="paycal_export_btn" data-member-export-scope="' . $scopeAttr . '" data-member-export-format="' . $formatAttr . '" data-member-export-year="' . $yearAttr . '">' . $label . '</button>';
+    }
+
+    return implode(' &sdot; ', $buttons);
   }
 
   private function renderMemberPieGraphsPanel(int $year): string
@@ -898,7 +931,7 @@ HTML;
     $prevCanadaPensionPlan = 0;
     $prevOldAgeSecurity = 0;
 
-    $monthsHtml = [];
+    $rows = [];
     for ($month = 1; $month <= 12; ++$month) {
       $monthKey = sprintf('%04d-%02d', $year, $month);
 
@@ -926,21 +959,20 @@ HTML;
 
       $hours = $hoursByMonth[$monthKey] ?? ['reg' => 0.0, 'ot' => 0.0];
 
-      $monthsHtml[] = Render::template('earnings-month', [
-        '__MONTH_ID__' => $monthKey,
-        '__MONTH_NAME__' => Strings::formatLocalizedShortMonth($year, $month),
-        '__REGULAR_HOURS__' => $this->formatNumberLocalized($hours['reg'], 2),
-        '__OVERTIME_HOURS__' => $this->formatNumberLocalized($hours['ot'], 2),
-        '__GROSS__' => $this->formatNumberLocalized($monthGrossCents / 100, 2),
-        '__FEDERAL_TAX__' => $this->formatNumberLocalized(max(0, $monthFederalCents) / 100, 2),
-        '__PROVINCIAL_TAX__' => $this->formatNumberLocalized(max(0, $monthProvincialCents) / 100, 2),
-        '__TOTAL_TAX__' => $this->formatNumberLocalized(max(0, $monthFederalCents + $monthProvincialCents) / 100, 2),
-        '__EI__' => $this->formatNumberLocalized(max(0, $monthEiCents) / 100, 2),
-        '__CPP__' => $this->formatNumberLocalized(max(0, $monthCppCents) / 100, 2),
-        '__OAS__' => $this->formatNumberLocalized(max(0, $monthOasCents) / 100, 2),
-        '__TOTAL_DEDUCTIONS__' => $this->formatNumberLocalized(max(0, $monthTotalTaxCents) / 100, 2),
-        '__NET__' => $this->formatNumberLocalized($monthNetCents / 100, 2),
-      ]);
+      $rows[] = [
+        'id' => $monthKey,
+        'month' => Strings::formatLocalizedShortMonth($year, $month),
+        'regular_hours' => $this->formatNumberLocalized($hours['reg'], 2),
+        'overtime_hours' => $this->formatNumberLocalized($hours['ot'], 2),
+        'gross' => '$' . $this->formatNumberLocalized($monthGrossCents / 100, 2),
+        'federal_tax' => '$' . $this->formatNumberLocalized(max(0, $monthFederalCents) / 100, 2),
+        'provincial_tax' => '$' . $this->formatNumberLocalized(max(0, $monthProvincialCents) / 100, 2),
+        'ei' => '$' . $this->formatNumberLocalized(max(0, $monthEiCents) / 100, 2),
+        'cpp' => '$' . $this->formatNumberLocalized(max(0, $monthCppCents) / 100, 2),
+        'oas' => '$' . $this->formatNumberLocalized(max(0, $monthOasCents) / 100, 2),
+        'total_deductions' => '$' . $this->formatNumberLocalized(max(0, $monthTotalTaxCents) / 100, 2),
+        'net' => '$' . $this->formatNumberLocalized($monthNetCents / 100, 2),
+      ];
 
       $prevGrossCents = $ytdGrossCents;
       $prevFederalTax = (int) $taxes['federal'];
@@ -950,23 +982,37 @@ HTML;
       $prevOldAgeSecurity = (int) $taxes['old_age_security'];
     }
 
-    return Render::template('earnings-monthly-viewstrip', [
-      '__YEAR__' => (string) $year,
-      '__DATA_GRID__' => 'member-reports-monthly-' . $year,
-      '__EARNINGS_MONTHLY_ARIA__' => $this->formatI18nPlain('EARNINGS_MONTHLY_GRID_ARIA_FOR', ['year' => (string) $year]),
-      '__EARNINGS_MONTH__' => Strings::i18n('EARNINGS_MONTH'),
-      '__REGULAR_LABEL__' => Strings::i18n('REGULAR'),
-      '__OT_LABEL__' => Strings::i18n('OVERTIME'),
-      '__GROSS_LABEL__' => Strings::i18n('GROSS'),
-      '__FEDERAL_TAX_LABEL__' => Strings::i18n('FEDERAL_TAX'),
-      '__PROVINCIAL_TAX_LABEL__' => Strings::i18n('PROVINCIAL_TAX'),
-      '__EARNINGS_EI__' => Strings::i18n('EARNINGS_EI'),
-      '__EARNINGS_CPP__' => Strings::i18n('EARNINGS_CPP'),
-      '__EARNINGS_OAS__' => Strings::i18n('EARNINGS_OAS'),
-      '__EARNINGS_TOTAL_DEDUCTIONS__' => Strings::i18n('EARNINGS_TOTAL_DEDUCTIONS'),
-      '__NET_LABEL__' => Strings::i18n('NET'),
-      '__MONTHS__' => implode('', $monthsHtml),
-    ]);
+    return (new DataGrid([
+      'id' => 'member-reports-monthly-' . $year,
+      'columns' => self::memberMonthlyColumns(),
+      'rows' => $rows,
+      'meta' => [
+        'layout' => 'auto',
+        'page' => 1,
+        'totalPages' => 1,
+        'title' => $this->formatI18nPlain('EARNINGS_MONTHLY_GRID_ARIA_FOR', ['year' => (string) $year]),
+      ],
+    ]))->table();
+  }
+
+  /**
+   * @return list<array<string, scalar>>
+   */
+  private static function memberMonthlyColumns(): array
+  {
+    return [
+      ['key' => 'month', 'label' => Strings::i18n('EARNINGS_MONTH')],
+      ['key' => 'regular_hours', 'label' => Strings::i18n('REGULAR'), 'align' => 'right'],
+      ['key' => 'overtime_hours', 'label' => Strings::i18n('OVERTIME'), 'align' => 'right'],
+      ['key' => 'gross', 'label' => Strings::i18n('GROSS'), 'align' => 'right'],
+      ['key' => 'federal_tax', 'label' => Strings::i18n('FEDERAL_TAX'), 'align' => 'right'],
+      ['key' => 'provincial_tax', 'label' => Strings::i18n('PROVINCIAL_TAX'), 'align' => 'right'],
+      ['key' => 'ei', 'label' => Strings::i18n('EARNINGS_EI'), 'align' => 'right'],
+      ['key' => 'cpp', 'label' => Strings::i18n('EARNINGS_CPP'), 'align' => 'right'],
+      ['key' => 'oas', 'label' => Strings::i18n('EARNINGS_OAS'), 'align' => 'right'],
+      ['key' => 'total_deductions', 'label' => Strings::i18n('EARNINGS_TOTAL_DEDUCTIONS'), 'align' => 'right'],
+      ['key' => 'net', 'label' => Strings::i18n('NET'), 'align' => 'right'],
+    ];
   }
 
   /**

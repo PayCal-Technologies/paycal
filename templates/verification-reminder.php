@@ -1,4 +1,4 @@
-<section id="email-verification-reminder" class="verification-reminder" role="alert" aria-live="polite">
+<section id="email-verification-reminder" class="verification-reminder" role="alert" aria-live="polite" data-cooldown-fmt="__AUTH_VERIFICATION_REMINDER_COOLDOWN_FMT__" data-resend-sending="__AUTH_VERIFICATION_REMINDER_SENDING__" data-signout-failed="__AUTH_VERIFICATION_REMINDER_SIGNOUT_FAILED__">
 	<div class="verification-reminder__content">
 				<strong>__AUTH_VERIFICATION_REMINDER_TITLE__</strong>
 				<span>__AUTH_VERIFICATION_REMINDER_BODY__</span>

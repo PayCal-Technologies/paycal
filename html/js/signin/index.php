@@ -37,6 +37,8 @@ foreach ($authI18nKeys as $authI18nKey) {
 
 ?>
 import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '/js/core/binary-codec.js';
+import { isWebAuthnCapableBrowser } from '/js/core/capabilities.js';
+import { setActionBusy as setButtonBusy } from '/js/core/actions.js';
 
 // Passkey-only auth helpers for /auth
 
@@ -44,13 +46,6 @@ const AUTH_T = <?php echo json_encode($authI18n, JSON_UNESCAPED_UNICODE | JSON_H
 
 const WEB_AUTHN_UNSUPPORTED_MESSAGE = AUTH_T.AUTH_JS_WEBAUTHN_UNSUPPORTED;
 const WEB_AUTHN_HELP_URL = '/help/webauthn-security.php';
-const isWebAuthnCapableBrowser = () => {
-  const hasPublicKeyCredential = typeof window.PublicKeyCredential !== 'undefined';
-  const hasCredentialsApi = typeof navigator.credentials !== 'undefined' && navigator.credentials !== null;
-  const hasGet = hasCredentialsApi && typeof navigator.credentials.get === 'function';
-  const hasCreate = hasCredentialsApi && typeof navigator.credentials.create === 'function';
-  return window.isSecureContext && hasPublicKeyCredential && hasCredentialsApi && hasGet && hasCreate;
-};
 
 const passkeyStatusEl = document.getElementById('signin-passkey-status');
 const DEFAULT_SIGNIN_STATUS = AUTH_T.AUTH_SIGNIN_PASSKEY_STATUS;
@@ -304,10 +299,85 @@ const fetchJsonWithTimeout = async (url, options, timeoutMs = 15000) => {
 let signinInFlight = false;
 let registerInFlight = false;
 
-const setButtonBusy = (button, busy) => {
-  if (!button) return;
-  button.disabled = busy;
-  button.setAttribute('aria-busy', busy ? 'true' : 'false');
+const federatedSigninEl = document.getElementById('federated-signin');
+const federatedProvidersEl = document.getElementById('federated-signin-providers');
+const providerIconText = (providerId) => {
+  switch (providerId) {
+    case 'google':
+      return 'G';
+    case 'apple':
+      return 'A';
+    case 'microsoft':
+      return 'M';
+    default:
+      return '?';
+  }
+};
+
+const renderFederatedProviders = (providers) => {
+  if (!federatedSigninEl || !federatedProvidersEl) return;
+  federatedProvidersEl.replaceChildren();
+
+  const visibleProviders = Array.isArray(providers) ? providers : [];
+  if (visibleProviders.length === 0) {
+    federatedSigninEl.hidden = true;
+    return;
+  }
+
+  visibleProviders.forEach((provider) => {
+    const providerId = String(provider?.id || '').trim();
+    const buttonLabel = String(provider?.button_label || provider?.label || '').trim();
+    if (providerId === '' || buttonLabel === '') {
+      return;
+    }
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `federated-signin-button federated-signin-button_${providerId}`;
+    button.dataset.provider = providerId;
+    button.setAttribute('aria-label', buttonLabel);
+
+    const icon = document.createElement('span');
+    icon.className = 'federated-signin-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = providerIconText(providerId);
+
+    const label = document.createElement('span');
+    label.className = 'federated-signin-text';
+    label.textContent = buttonLabel;
+
+    button.appendChild(icon);
+    button.appendChild(label);
+    button.addEventListener('click', () => {
+      window.location.href = `/api/v1/auth/federated/start/${encodeURIComponent(providerId)}?mode=signin`;
+    });
+
+    federatedProvidersEl.appendChild(button);
+  });
+
+  federatedSigninEl.hidden = federatedProvidersEl.children.length === 0;
+};
+
+const loadFederatedProviders = async () => {
+  if (!federatedSigninEl || !federatedProvidersEl) return;
+
+  try {
+    const { response, payload } = await fetchJsonWithTimeout('/api/v1/auth/providers', {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' },
+    }, 8000);
+
+    const providerPayload = payload && typeof payload === 'object' ? payload : {};
+    if (!response.ok || providerPayload.status !== 'success') {
+      renderFederatedProviders([]);
+      return;
+    }
+
+    renderFederatedProviders(providerPayload.providers);
+  } catch (_error) {
+    renderFederatedProviders([]);
+  }
 };
 
 const runPasskeySignin = async (preferPhoneFlow = false) => {
@@ -538,6 +608,7 @@ const isSigninPanelActive = () => {
 
 // Keep passkey sign-in user-initiated to avoid background 401s from silent
 // conditional mediation probes that create confusing console noise.
+loadFederatedProviders();
 
 const passkeyButton = document.getElementById('signin-passkey');
 if (passkeyButton) {

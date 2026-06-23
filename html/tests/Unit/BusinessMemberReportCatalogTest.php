@@ -18,6 +18,11 @@ final class BusinessMemberReportCatalogTest extends TestCase
     $this->assertSame(['ytd', 'monthly', 'daily'], array_column($reports, 'key'));
     $this->assertSame(['yearly', 'monthly', 'daily'], array_column($reports, 'scope'));
     $this->assertSame(['Yearly work summary', 'Monthly work summary', 'Daily work summary'], array_column($reports, 'label'));
+    $this->assertSame([
+      'Includes hours, sites, gross totals, allowances, and yearly totals.',
+      'Groups member work by month with hours, sites, gross totals, and allowances.',
+      'Lists daily work entries with sites, hours, allowances, and daily totals.',
+    ], array_column($reports, 'description'));
   }
 
   #[Test]
@@ -26,6 +31,6 @@ final class BusinessMemberReportCatalogTest extends TestCase
     $formats = BusinessMemberReportCatalog::formats();
 
     $this->assertSame(['csv', 'txt', 'xlsx', 'pdf'], array_column($formats, 'key'));
-    $this->assertSame(['CSV (browser convenience)', 'TXT (browser convenience)', 'XLSX', 'PDF'], array_column($formats, 'label'));
+    $this->assertSame(['CSV', 'TXT', 'XLSX', 'PDF'], array_column($formats, 'label'));
   }
 }

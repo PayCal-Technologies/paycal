@@ -149,16 +149,16 @@ final class BusinessMembersCacheTest extends TestCase
   }
 
   #[Test]
-  public function membershipMutationsInvalidateThroughSetRelationship(): void
+  public function membershipMutationsInvalidateThroughSetConnection(): void
   {
     $source = (string) file_get_contents(
       dirname(__DIR__, 3) . '/src/Domain/BusinessDiscoveryService.php',
     );
 
-    $setRelationshipPos = strpos($source, 'private function setRelationship');
-    $this->assertNotFalse($setRelationshipPos);
+    $setConnectionPos = strpos($source, 'private function setConnection');
+    $this->assertNotFalse($setConnectionPos);
 
-    $body = substr($source, $setRelationshipPos, 5000);
+    $body = substr($source, $setConnectionPos, 5000);
     $this->assertStringContainsString('BusinessWorkspaceCache::invalidate', $body);
   }
 }

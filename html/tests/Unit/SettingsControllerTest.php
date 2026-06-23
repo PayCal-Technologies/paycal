@@ -82,6 +82,17 @@ final class SettingsControllerTest extends TestCase
   }
 
   #[Test]
+  public function accountProfileSettingsRoutesUseAccountScopedEndpoints(): void
+  {
+    $source = (string) file_get_contents(dirname(__DIR__, 2) . '/src/Controllers/SettingsController.php');
+
+    $this->assertStringContainsString("Route('account/profile/settings'", $source);
+    $this->assertStringContainsString("Route('account/profile/settings/update'", $source);
+    $this->assertStringNotContainsString("Route('profile/settings'", $source);
+    $this->assertStringNotContainsString("Route('profile/settings/update'", $source);
+  }
+
+  #[Test]
   public function normalizeCalendarWeekStartAcceptsSundayAndMonday(): void
   {
     $this->assertSame('0', $this->normalizeCalendar(['calendar_week_start' => '0'])['calendar_week_start']);
@@ -96,6 +107,16 @@ final class SettingsControllerTest extends TestCase
     $this->assertSame('week', $this->normalizeCalendar(['calendar_default_view' => 'WEEK'])['calendar_default_view']);
     $this->assertSame('pay_period', $this->normalizeCalendar(['calendar_default_view' => 'pay_period'])['calendar_default_view']);
     $this->assertArrayNotHasKey('calendar_default_view', $this->normalizeCalendar(['calendar_default_view' => 'year']));
+  }
+
+  #[Test]
+  public function normalizeStyleDepthAcceptsKnownPresets(): void
+  {
+    $this->assertSame('flat', $this->normalizeStyle(['depth' => 'flat'])['depth']);
+    $this->assertSame('low', $this->normalizeStyle(['depth' => 'LOW'])['depth']);
+    $this->assertSame('standard', $this->normalizeStyle(['depth' => 'standard'])['depth']);
+    $this->assertSame('high', $this->normalizeStyle(['depth' => 'high'])['depth']);
+    $this->assertSame('standard', $this->normalizeStyle(['depth' => 'floating'])['depth']);
   }
 
   #[Test]
