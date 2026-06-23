@@ -76,6 +76,8 @@ $registerInviteValue = htmlspecialchars($registerInviteInput, ENT_QUOTES, 'UTF-8
 $cssVersion = (string) time();
 $isRegisterTab = $authTab === 'register';
 $accountRecoveryEnabled = filter_var(\PayCal\Domain\Config\SystemConfig::get('account_recovery_enabled'), FILTER_VALIDATE_BOOLEAN);
+$immediateUiAllowed = EarlyAccessImmediateUi::signedOutAllowed();
+$immediateUiRuntimeEnabled = EarlyAccessImmediateUi::runtimeEnabled();
 $siteName = Strings::headerI18n('SITE_NAME');
 
 $i18nKeys = [
@@ -226,6 +228,12 @@ require_once __DIR__ . '/../header.php';
   </div>
   </div>
 
-  <script type="module" src="<?php echo Environment::appURL('js/signin/'); ?>?v=<?php echo $cssVersion; ?>" nonce="<?php echo User::nonce(); ?>"></script>
+  <script
+    type="module"
+    src="<?php echo Environment::appURL('js/signin/'); ?>?v=<?php echo $cssVersion; ?>"
+    nonce="<?php echo User::nonce(); ?>"
+    data-immediate-ui-allowed="<?php echo $immediateUiAllowed ? '1' : '0'; ?>"
+    data-immediate-ui-runtime-enabled="<?php echo $immediateUiRuntimeEnabled ? '1' : '0'; ?>"
+  ></script>
 
 <?php require_once __DIR__ . '/../footer.php'; ?>

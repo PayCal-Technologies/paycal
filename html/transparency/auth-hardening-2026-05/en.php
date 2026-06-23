@@ -22,7 +22,7 @@ foreach ($i18nKeys as $key) {
 }
 
 $currentPage = 'PAGE_TRANSPARENCY';
-$pageTitle = $i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'] . ' - [PayCal]'; Redis Hardening — May 2026 - [PayCal]';
+$pageTitle = $i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'] . ' - [PayCal]';
 $pageLabel = $i18n['TRANSPARENCY_AUTH_HARDENING_2026_05_PAGE_TITLE'];
 require_once HTML.'/header.php';
 ?>

@@ -114,7 +114,7 @@ const SignalPanel = (() => {
 
   const bindOpeners = () => {
     document.querySelectorAll('[data-signal-open]').forEach((button) => {
-      button.addEventListener('click', () => open('feedback'));
+      button.addEventListener('click', () => open('feedback', button instanceof HTMLElement ? button : null));
     });
     state.panel.querySelectorAll('[data-signal-close]').forEach((button) => {
       button.addEventListener('click', close);
@@ -177,17 +177,36 @@ const SignalPanel = (() => {
 
   const isOpen = () => state.panel && !state.panel.hidden;
 
-  const open = (tab = 'feedback') => {
+  const open = (tab = 'feedback', opener = null) => {
     if (!state.panel) return;
     state.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     refreshContext();
     state.panel.hidden = false;
     activateTab(tab);
+    if (tab === 'feedback' && opener instanceof HTMLElement) {
+      applyFeedbackPrefill(opener);
+    }
     startHeartbeatIfNeeded();
     requestAnimationFrame(() => {
       const first = state.panel.querySelector('#signal_feedback_topic, [data-signal-tab], button, input, textarea');
       first?.focus();
     });
+  };
+
+  const applyFeedbackPrefill = (opener) => {
+    const topic = state.panel.querySelector('#signal_feedback_topic');
+    const notes = state.panel.querySelector('#signal_feedback_notes');
+    const tags = state.panel.querySelector('#signal_feedback_tags');
+
+    if (topic instanceof HTMLInputElement && opener.dataset.signalTopic && topic.value.trim() === '') {
+      topic.value = opener.dataset.signalTopic;
+    }
+    if (notes instanceof HTMLTextAreaElement && opener.dataset.signalNotes && notes.value.trim() === '') {
+      notes.value = opener.dataset.signalNotes;
+    }
+    if (tags instanceof HTMLInputElement && opener.dataset.signalTags && tags.value.trim() === '') {
+      tags.value = opener.dataset.signalTags;
+    }
   };
 
   const close = () => {

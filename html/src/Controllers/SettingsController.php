@@ -12,6 +12,7 @@ use PayCal\Observability\Lens;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Constants\Keys;
+use PayCal\Domain\EarlyAccessImmediateUi;
 use PayCal\Domain\Log;
 use PayCal\Domain\Language;
 use PayCal\Domain\BusinessDiscoveryService;
@@ -93,6 +94,96 @@ class SettingsController
     'es-ES',
     'pt-BR',
   ];
+
+  #[Route('settings/early-access/immediate-ui/enable', ['POST'])]
+  public function enableImmediateUiEarlyAccess(): void
+  {
+    $user = UserRepository::getByUUID(User::currentUUID());
+    if (!$user instanceof User) {
+      Response::error('Unknown user.', [], HttpStatus::HTTP_UNAUTHORIZED);
+      return;
+    }
+
+    $csrfToken = InputSanitizer::postString('csrf_token');
+    if (!$user->verifyFormNonce('settings', $csrfToken)) {
+      Response::error('Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    $state = EarlyAccessImmediateUi::settingsState($user);
+    if (!$state['runtime_enabled']) {
+      EarlyAccessImmediateUi::clearActivationCookie();
+      Response::error('Faster passkey sign-in is temporarily unavailable.', ['reason' => 'runtime_disabled'], HttpStatus::HTTP_SERVICE_UNAVAILABLE);
+      return;
+    }
+
+    if (!$state['can_enable']) {
+      Response::error('Faster passkey sign-in is not available for this account.', ['reason' => $state['reason']], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    EarlyAccessImmediateUi::issueActivationCookie();
+    $this->recordEarlyAccessEvent($user->user_uuid, 'enabled', $state);
+
+    Response::success('Faster passkey sign-in is enabled on this browser.', [
+      'enabled' => true,
+      'version' => $state['version'],
+    ]);
+  }
+
+  #[Route('settings/early-access/immediate-ui/disable', ['POST'])]
+  public function disableImmediateUiEarlyAccess(): void
+  {
+    $user = UserRepository::getByUUID(User::currentUUID());
+    if (!$user instanceof User) {
+      Response::error('Unknown user.', [], HttpStatus::HTTP_UNAUTHORIZED);
+      return;
+    }
+
+    $csrfToken = InputSanitizer::postString('csrf_token');
+    if (!$user->verifyFormNonce('settings', $csrfToken)) {
+      Response::error('Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    $state = EarlyAccessImmediateUi::settingsState($user);
+    EarlyAccessImmediateUi::clearActivationCookie();
+    $this->recordEarlyAccessEvent($user->user_uuid, 'disabled', $state);
+
+    Response::success('Faster passkey sign-in is disabled on this browser.', [
+      'enabled' => false,
+      'version' => $state['version'],
+    ]);
+  }
+
+  /**
+   * @param array<string, mixed> $state
+   */
+  private function recordEarlyAccessEvent(string $userUUID, string $action, array $state): void
+  {
+    $stateVersion = $state['version'] ?? EarlyAccessImmediateUi::activationVersion();
+    if (!is_int($stateVersion) && !is_string($stateVersion)) {
+      $stateVersion = EarlyAccessImmediateUi::activationVersion();
+    }
+
+    $rolloutMode = SystemConfig::get('auth.immediate_ui.rollout_mode');
+    if (!is_string($rolloutMode)) {
+      $rolloutMode = 'staff';
+    }
+
+    $payload = json_encode([
+      'user_id' => $userUUID,
+      'feature_key' => EarlyAccessImmediateUi::FEATURE_KEY,
+      'action' => $action,
+      'occurred_at' => gmdate('c'),
+      'release_version' => (string) $stateVersion,
+      'rollout_cohort' => $rolloutMode,
+    ], JSON_UNESCAPED_SLASHES);
+
+    if (is_string($payload)) {
+      Database::lpush('early_access:events', $payload);
+    }
+  }
 
   /**
    * GET account/profile/settings

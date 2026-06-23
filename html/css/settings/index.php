@@ -232,6 +232,157 @@ header('Expires: 0');
   margin-bottom: 0;
 }
 
+.settings_early_access_panel {
+  gap: var(--gap-md);
+}
+
+.settings_early_access_card {
+  display: grid;
+  grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
+  gap: var(--gap-md);
+  padding: var(--settings-card-padding-block) var(--settings-card-padding-inline);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel-bg) 94%, var(--panel-border));
+}
+
+.settings_early_access_card_header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-md);
+}
+
+.settings_early_access_card_title {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.settings_early_access_switch_column {
+  display: flex;
+  align-items: flex-start;
+  padding-inline-end: var(--gap-md);
+  border-inline-end: 1px solid var(--panel-border);
+}
+
+.settings_early_access_body {
+  display: grid;
+  gap: var(--gap-sm);
+  min-width: 0;
+}
+
+.settings_early_access_sentence,
+.settings_early_access_metadata {
+  margin: 0;
+}
+
+.settings_early_access_metadata {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.settings_early_access_actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--gap-sm) var(--gap-md);
+}
+
+.settings_early_access_details summary,
+.settings_early_access_feedback_link {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.settings_early_access_details p {
+  margin: var(--gap-sm) 0 0;
+}
+
+.settings_switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  min-height: var(--settings-control-height);
+  cursor: pointer;
+}
+
+.settings_switch input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+}
+
+.settings_switch_track {
+  position: relative;
+  inline-size: 3rem;
+  block-size: 1.65rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-bg) 78%, var(--text-muted));
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.settings_switch_track::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 0.2rem;
+  inset-inline-start: 0.2rem;
+  inline-size: 1.15rem;
+  block-size: 1.15rem;
+  border-radius: 50%;
+  background: var(--panel-bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+  transition: inset-inline-start 160ms ease;
+}
+
+.settings_switch input:checked + .settings_switch_track {
+  border-color: var(--accent, #3b82f6);
+  background: var(--accent, #3b82f6);
+}
+
+.settings_switch input:checked + .settings_switch_track::after {
+  inset-inline-start: calc(100% - 1.35rem);
+}
+
+.settings_switch input:focus-visible + .settings_switch_track {
+  outline: 2px solid var(--focus-ring, var(--accent, #3b82f6));
+  outline-offset: 3px;
+}
+
+.settings_switch input:disabled + .settings_switch_track,
+.settings_switch input:disabled ~ .settings_switch_label {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.settings_early_access_status {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .settings_early_access_card {
+    grid-template-columns: 1fr;
+  }
+
+  .settings_early_access_switch_column {
+    padding-inline-end: 0;
+    padding-block-end: var(--gap-md);
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--panel-border);
+  }
+}
+
 .settings_dashboard_grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3540,7 +3691,7 @@ header('Expires: 0');
 }
 
 .currency_finder_code {
-  font-family: monospace;
+  font-family: var(--monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--color-primary, #4d8ef0);
@@ -3567,7 +3718,7 @@ header('Expires: 0');
 
 .timezone_finder_offset {
   flex-shrink: 0;
-  font-family: monospace;
+  font-family: var(--monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
   font-size: 0.78rem;
   color: var(--color-primary, #4d8ef0);
 }

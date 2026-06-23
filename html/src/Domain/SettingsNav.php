@@ -13,6 +13,7 @@ final class SettingsNav
   public const PAGE_APPEARANCE = 'PAGE_SETTINGS_APPEARANCE';
   public const PAGE_ACCESSIBILITY = 'PAGE_SETTINGS_ACCESSIBILITY';
   public const PAGE_SECURITY = 'PAGE_SETTINGS_SECURITY';
+  public const PAGE_EARLY_ACCESS = 'PAGE_SETTINGS_EARLY_ACCESS';
   public const PAGE_DATA = 'PAGE_SETTINGS_DATA';
   public const PAGE_DIAGNOSTICS = 'PAGE_SETTINGS_DIAGNOSTICS';
 
@@ -21,7 +22,7 @@ final class SettingsNav
    */
   public static function subNavTabs(): array
   {
-    return [
+    $tabs = [
       [
         'page' => self::PAGE_ACCESSIBILITY,
         'slug' => 'accessibility',
@@ -78,15 +79,29 @@ final class SettingsNav
         'title_key' => 'SETTINGS_PAGE_SECURITY_TITLE',
         'desc_key' => 'SETTINGS_PAGE_SECURITY_DESC',
       ],
-      [
+    ];
+
+    if (self::canViewEarlyAccess()) {
+      $tabs[] = [
+        'page' => self::PAGE_EARLY_ACCESS,
+        'slug' => 'early-access',
+        'href' => '/settings/early-access/',
+        'label_key' => 'SETTINGS_NAV_EARLY_ACCESS',
+        'title_key' => 'SETTINGS_PAGE_EARLY_ACCESS_TITLE',
+        'desc_key' => 'SETTINGS_PAGE_EARLY_ACCESS_DESC',
+      ];
+    }
+
+    $tabs[] = [
         'page' => self::PAGE_DIAGNOSTICS,
         'slug' => 'diagnostics',
         'href' => '/settings/diagnostics/',
         'label_key' => 'SETTINGS_NAV_DIAGNOSTICS',
         'title_key' => 'SETTINGS_PAGE_DIAGNOSTICS_TITLE',
         'desc_key' => 'SETTINGS_PAGE_DIAGNOSTICS_DESC',
-      ],
-    ];
+      ];
+
+    return $tabs;
   }
 
   /**
@@ -128,5 +143,11 @@ final class SettingsNav
   public static function canViewAdvancedDiagnostics(): bool
   {
     return User::isAdmin() || User::isManager();
+  }
+
+  public static function canViewEarlyAccess(): bool
+  {
+    $user = User::current();
+    return EarlyAccessImmediateUi::settingsState($user)['visible'];
   }
 }

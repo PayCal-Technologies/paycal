@@ -13,10 +13,13 @@ final class SettingsNavTest extends TestCase
   {
     $slugs = array_map(static fn (array $tab): string => $tab['slug'], SettingsNav::subNavTabs());
 
-    $this->assertSame(
-      ['accessibility', 'account', 'subscription', 'data', 'appearance', 'calendar', 'security', 'diagnostics'],
-      $slugs
-    );
+    $expected = ['accessibility', 'account', 'subscription', 'data', 'appearance', 'calendar', 'security'];
+    if (SettingsNav::canViewEarlyAccess()) {
+      $expected[] = 'early-access';
+    }
+    $expected[] = 'diagnostics';
+
+    $this->assertSame($expected, $slugs);
   }
 
   #[Test]

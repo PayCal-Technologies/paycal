@@ -671,7 +671,10 @@ final class PasskeyController
       return;
     }
 
-    if ('' === $expectedUserUUID && $userHandle !== null && '' !== $userHandle) {
+    $isDiscoverableLogin = $this->scalarString($challengeData['discoverable'] ?? '') === '1';
+    if ($expectedUserUUID === '' && $isDiscoverableLogin) {
+      $expectedUserUUID = $credentialUserUUID;
+    } elseif ('' === $expectedUserUUID && $userHandle !== null && '' !== $userHandle) {
       $expectedUserUUID = $userHandle;
     }
 
@@ -715,7 +718,12 @@ final class PasskeyController
       );
 
       $newSignCount = (int) ($webauthn->getSignatureCounter() ?? 0);
-    } catch (WebAuthnException) {
+    } catch (WebAuthnException $exception) {
+      \PayCal\Observability\Lens::add('[PASSKEY] WebAuthn login verification failed', [
+        'credential_id_prefix' => substr($credentialId, 0, 12),
+        'discoverable' => $isDiscoverableLogin ? '1' : '0',
+        'reason' => $exception->getMessage(),
+      ]);
       Response::error('Authentication failed.', ['error' => 'passkey_invalid'], HttpStatus::HTTP_UNAUTHORIZED);
       return;
     }

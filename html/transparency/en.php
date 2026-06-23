@@ -151,6 +151,21 @@ require_once HTML.'/header.php';
 
       <div class="doc-panel-grid doc-panel-grid--responsive-3" aria-label="<?php echo $i18n['TRANSPARENCY_HUB_PANELS_ARIA']; ?>">
         <section class="doc-section">
+          <h2>Faster Passkey Sign-In Early Access</h2>
+          <p class="doc-article-meta">Published: <time datetime="2026-06-23">2026-06-23</time></p>
+          <p>
+            PayCal's Early Access passkey shortcut lets an opted-in browser show available
+            PayCal passkeys when you select Sign in, without requiring an email address first.
+          </p>
+          <ul class="doc-fact-list">
+            <li>Browser-scoped opt-in with a signed activation cookie</li>
+            <li>Uses Chrome Immediate UI when available, then falls back normally</li>
+            <li>Same server-side WebAuthn verification before any session is created</li>
+          </ul>
+          <p><a class="doc-read-more" href="<?php echo transparency_href('/transparency/faster-passkey-sign-in-2026-06/'); ?>"><?php echo $readMoreLabel; ?></a></p>
+        </section>
+
+        <section class="doc-section">
           <h2><?php echo $i18n['TRANSPARENCY_HUB_SECURITY_AUDIT_TITLE']; ?></h2>
           <p class="doc-article-meta">Published: <time datetime="2026-03-23">2026-03-23</time></p>
           <p><?php echo $i18n['TRANSPARENCY_HUB_SECURITY_AUDIT_TEXT_1']; ?></p>

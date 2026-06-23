@@ -25,6 +25,10 @@ $authI18nKeys = [
   'AUTH_JS_ENTER_FULL_NAME',
   'AUTH_JS_ENTER_VALID_EMAIL',
   'AUTH_JS_EMAIL_REQUIRED',
+  'AUTH_JS_EMAIL_OPTIONAL_IMMEDIATE_UI',
+  'AUTH_JS_IMMEDIATE_UI_ENABLED',
+  'AUTH_JS_IMMEDIATE_UI_NOT_ACTIVE',
+  'AUTH_JS_IMMEDIATE_UI_UNSUPPORTED',
   'AUTH_JS_NO_ACCOUNT',
   'AUTH_JS_SIGNIN_FAILED',
   'AUTH_JS_REQUEST_TIMEOUT',
@@ -43,6 +47,13 @@ import { setActionBusy as setButtonBusy } from '/js/core/actions.js';
 // Passkey-only auth helpers for /auth
 
 const AUTH_T = <?php echo json_encode($authI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+const authScriptEl = document.querySelector('script[src*="/js/signin/"]');
+const AUTH_CONFIG = window.PayCalAuthConfig && typeof window.PayCalAuthConfig === 'object'
+  ? window.PayCalAuthConfig
+  : {
+    immediateUiAllowed: authScriptEl instanceof HTMLScriptElement && authScriptEl.dataset.immediateUiAllowed === '1',
+    immediateUiRuntimeEnabled: authScriptEl instanceof HTMLScriptElement && authScriptEl.dataset.immediateUiRuntimeEnabled === '1',
+  };
 
 const WEB_AUTHN_UNSUPPORTED_MESSAGE = AUTH_T.AUTH_JS_WEBAUTHN_UNSUPPORTED;
 const WEB_AUTHN_HELP_URL = '/help/webauthn-security.php';
@@ -70,6 +81,23 @@ const setRegisterStatus = (msg) => {
   if (registerStatusEl) {
     registerStatusEl.textContent = msg;
     animateStatusEl(registerStatusEl);
+  }
+};
+
+const syncImmediateUiSigninCopy = async () => {
+  if (AUTH_CONFIG.immediateUiAllowed !== true) {
+    return;
+  }
+
+  const emailLabel = document.querySelector('label[for="email"]');
+  if (emailLabel instanceof HTMLElement) {
+    emailLabel.textContent = AUTH_T.AUTH_JS_EMAIL_OPTIONAL_IMMEDIATE_UI || 'Email (optional for faster passkey sign-in)';
+  }
+
+  if (await browserSupportsImmediateUi()) {
+    setPasskeyStatus(AUTH_T.AUTH_JS_IMMEDIATE_UI_ENABLED || DEFAULT_SIGNIN_STATUS);
+  } else {
+    setPasskeyStatus(AUTH_T.AUTH_JS_IMMEDIATE_UI_UNSUPPORTED || DEFAULT_SIGNIN_STATUS);
   }
 };
 
@@ -177,6 +205,19 @@ const showRecoveryCodeComposer = (prefillEmail = '') => {
   authBannerEl.appendChild(actions);
 
   input.focus();
+};
+
+const browserSupportsImmediateUi = async () => {
+  if (!window.PublicKeyCredential || typeof PublicKeyCredential.getClientCapabilities !== 'function') {
+    return false;
+  }
+
+  try {
+    const capabilities = await PublicKeyCredential.getClientCapabilities();
+    return capabilities?.immediateGet === true;
+  } catch (_error) {
+    return false;
+  }
 };
 
 const showAuthError = (msg, context = 'signin') => {
@@ -400,9 +441,14 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
 
     const emailInput = document.getElementById('email');
     const email = emailInput?.value?.trim() || '';
+    const tryImmediateUi = !preferPhoneFlow
+      && AUTH_CONFIG.immediateUiAllowed === true
+      && await browserSupportsImmediateUi();
 
-    if (!preferPhoneFlow && !email) {
-      const msg = 'Email is required.';
+    if (!tryImmediateUi && !preferPhoneFlow && !email) {
+      const msg = AUTH_CONFIG.immediateUiRuntimeEnabled === true
+        ? (AUTH_T.AUTH_JS_IMMEDIATE_UI_NOT_ACTIVE || AUTH_T.AUTH_JS_EMAIL_REQUIRED)
+        : AUTH_T.AUTH_JS_EMAIL_REQUIRED;
       showAuthError(msg, 'signin');
       return;
     }
@@ -413,7 +459,7 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(
-        preferPhoneFlow
+        tryImmediateUi || preferPhoneFlow
           ? { discoverable: true }
           : { email }
       ),
@@ -432,9 +478,13 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
         id: b64urlToBuffer(c.id),
       }))
       : [];
+    if (tryImmediateUi) {
+      options.allowCredentials = [];
+      delete options.hints;
+    }
 
     // Keep login discoverable for cross-device passkey (browser-provided QR flow).
-    if (!Array.isArray(options.hints)) {
+    if (!tryImmediateUi && !Array.isArray(options.hints)) {
       options.hints = ['client-device', 'hybrid', 'security-key'];
     }
     if (options.authenticatorSelection && options.authenticatorSelection.authenticatorAttachment === 'platform') {
@@ -446,7 +496,31 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
         ? AUTH_T.AUTH_JS_CONFIRM_DEVICE
         : AUTH_T.AUTH_JS_CONFIRM_DEVICE
     );
-    const assertion = await navigator.credentials.get({ publicKey: options, mediation: 'optional' });
+    let assertion = null;
+    try {
+      const credentialRequest = {
+        publicKey: options,
+      };
+      if (tryImmediateUi) {
+        credentialRequest.uiMode = 'immediate';
+      } else {
+        credentialRequest.mediation = 'optional';
+      }
+      assertion = await navigator.credentials.get(credentialRequest);
+    } catch (error) {
+      if (tryImmediateUi && error instanceof DOMException && error.name === 'NotAllowedError') {
+        setPasskeyStatus(DEFAULT_SIGNIN_STATUS);
+        if (!email) {
+          return;
+        }
+        signinInFlight = false;
+        setButtonBusy(passkeyButton, false);
+        setButtonBusy(passkeyPhoneButton, false);
+        await runPasskeySignin(false);
+        return;
+      }
+      throw error;
+    }
     if (!assertion) {
       throw new Error('Sign-in cancelled. Try again.');
     }
@@ -609,6 +683,7 @@ const isSigninPanelActive = () => {
 // Keep passkey sign-in user-initiated to avoid background 401s from silent
 // conditional mediation probes that create confusing console noise.
 loadFederatedProviders();
+syncImmediateUiSigninCopy();
 
 const passkeyButton = document.getElementById('signin-passkey');
 if (passkeyButton) {

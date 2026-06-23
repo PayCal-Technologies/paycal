@@ -257,9 +257,13 @@ AUTH_BETA_NOTICE PayCal is in private beta.
 AUTH_DIVIDER_OR or
 AUTH_JS_CONFIRM_DEVICE Confirm on your device…
 AUTH_JS_EMAIL_ALREADY_REGISTERED This email is already registered. Sign in instead.
+AUTH_JS_EMAIL_OPTIONAL_IMMEDIATE_UI Email (optional for faster passkey sign-in)
 AUTH_JS_EMAIL_REQUIRED Email is required.
 AUTH_JS_ENTER_FULL_NAME Please enter your full name.
 AUTH_JS_ENTER_VALID_EMAIL Please enter a valid email address.
+AUTH_JS_IMMEDIATE_UI_ENABLED Faster passkey sign-in is enabled on this browser.
+AUTH_JS_IMMEDIATE_UI_NOT_ACTIVE Faster passkey sign-in is not enabled on this browser. Enter your email or enable it from Settings > Early Access.
+AUTH_JS_IMMEDIATE_UI_UNSUPPORTED Faster passkey sign-in is not supported in this browser. Enter your email to continue.
 AUTH_JS_INVALID_INVITE_CODE Invite code is invalid. Please check it and try again.
 AUTH_JS_NETWORK_ERROR Network issue. Please try again.
 AUTH_JS_NO_ACCOUNT No account found. Create an account instead.
@@ -2320,7 +2324,7 @@ HELP_LEGAL_ACCESSIBILITY_TITLE Accessibility
 HELP_LEGAL_DECK View policy and legal information relevant to using PayCal.
 HELP_LEGAL_PRIVACY_1 We collect account info, work records you enter, and technical data needed to keep the service secure.
 HELP_LEGAL_PRIVACY_2 We do not sell your personal information.
-HELP_LEGAL_PRIVACY_3 Session data is protected with authentication controls and TTL-based expiry.
+HELP_LEGAL_PRIVACY_3 Session and browser preference cookies are protected with authentication controls, signatures where needed, and TTL-based expiry.
 HELP_LEGAL_PRIVACY_4 You may have rights to access, correct, or request deletion of your information.
 HELP_LEGAL_PRIVACY_LINK Read the full Privacy Policy
 HELP_LEGAL_PRIVACY_TEXT Our Privacy Policy explains what information is collected when you use PayCal, how it is used, how it is protected, and how long it is kept.
@@ -2986,8 +2990,8 @@ REDIS Redis
 REFRESH Refresh
 REFRESH_METRICS Refresh Metrics
 REGISTER Register
-REGISTER_COOKIE_DISCLAIMER If you are not comfortable with cookies, you may not register. Sorry bout that. (
-REGISTER_COOKIE_HEADSUP Hey, headsup! We use a cookie to store user authentication.
+REGISTER_COOKIE_DISCLAIMER If you are not comfortable with cookies required for authentication and browser preferences, you may not register. Sorry bout that. (
+REGISTER_COOKIE_HEADSUP Hey, headsup! We use cookies to store user authentication and, when you opt in, browser-specific preferences such as Early Access faster passkey sign-in.
 REGISTER_FEATURE1_TEXT Say goodbye to paycheck mysteries! Visualize your expected earnings each pay period. Plan your finances with confidence.
 REGISTER_FEATURE1_TITLE Earnings Transparency
 REGISTER_FEATURE2_TEXT No more complicated multi-step data entry!
@@ -3059,6 +3063,7 @@ SETTINGS_NAV_ARIA Settings sections
 SETTINGS_NAV_CALENDAR Calendar
 SETTINGS_NAV_DATA Data/Consent
 SETTINGS_NAV_DIAGNOSTICS Diagnostics
+SETTINGS_NAV_EARLY_ACCESS Early Access
 SETTINGS_NAV_SECURITY Security
 SETTINGS_NAV_SUBSCRIPTION Subscription
 SETTINGS_DASHBOARD_TITLE Settings Dashboard
@@ -3084,6 +3089,8 @@ SETTINGS_PAGE_DATA_DESC Control which businesses can use your approved work entr
 SETTINGS_PAGE_DATA_TITLE Business Access
 SETTINGS_PAGE_DIAGNOSTICS_DESC Troubleshooting tools and optional developer diagnostics.
 SETTINGS_PAGE_DIAGNOSTICS_TITLE Diagnostics
+SETTINGS_PAGE_EARLY_ACCESS_DESC Try selected PayCal features before they are widely released.
+SETTINGS_PAGE_EARLY_ACCESS_TITLE Early Access
 SETTINGS_PAGE_SECURITY_DESC Passkeys, session timing, sensitive actions, and emergency sign-out.
 SETTINGS_PAGE_SECURITY_TITLE Security
 SETTINGS_PAGE_SUBSCRIPTION_DESC Plan and billing.
@@ -3092,6 +3099,28 @@ SETTINGS_REDIRECT_LOADING Opening settings…
 SETTINGS_ACCOUNT_DETAILS_DESC Update your profile, recovery email, and employment details. Use Save to apply changes.
 SETTINGS_ACCOUNT_DETAILS_TITLE Account Details
 SETTINGS_ADD_DEVICE Add Device
+SETTINGS_EARLY_ACCESS_BADGE Early access
+SETTINGS_EARLY_ACCESS_CREATE_PASSKEY_LINK Create a passkey
+SETTINGS_EARLY_ACCESS_DETAILS Details
+SETTINGS_EARLY_ACCESS_FEEDBACK Send feedback
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_CREATE_PASSKEY Create a passkey before enabling faster passkey sign-in.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_DESC Show an available PayCal passkey when you select Sign in. Otherwise, use the standard sign-in options.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_DETAILS Applies only to this browser and does not change your passkeys. Shared devices may show other available PayCal passkeys.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_DISABLED Faster passkey sign-in is disabled on this browser.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_ENABLED Faster passkey sign-in is enabled on this browser.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_ENROLLMENT_CLOSED Enrollment is closed for new browser activations.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_METADATA Requires an existing passkey · Biometrics stay on your device · Unavailable in private browsing
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_NOT_SUPPORTED Not supported in this browser.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_PRIVACY Your device handles passkey verification. Biometric information is not shared with PayCal.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_REQUIREMENTS Requires a PayCal passkey and a supported browser. It does not operate in private browsing.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_SHARED_BROWSER On a shared browser, the browser may offer any PayCal passkeys available on that device.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_SUPPORT This preference applies only to this browser. It does not create, remove, or change your passkeys.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_SWITCH Faster Passkey Sign-In
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_TEMP_UNAVAILABLE Temporarily unavailable.
+SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_TITLE Faster passkey sign-in
+SETTINGS_EARLY_ACCESS_LEARN_CHROME How Chrome passkey prompts work
+SETTINGS_EARLY_ACCESS_INTRO Try selected PayCal features before they are widely released. Early Access features may change or be removed. You can leave at any time.
+SETTINGS_EARLY_ACCESS_TITLE Early Access
 SETTINGS_ARIA_CALENDAR_PREFERENCES_FORM Calendar Preferences Form
 SETTINGS_ARIA_DELETE_SITE_ROW Delete site row
 SETTINGS_ARIA_EDIT_ACCOUNT_DETAILS Edit Account Details
