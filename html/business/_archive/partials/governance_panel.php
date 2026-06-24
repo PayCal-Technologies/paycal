@@ -5,10 +5,10 @@ namespace PayCal\Domain;
 ?>
   <details class="panel businesses_governance_panel businesses_definitions_panel" aria-labelledby="businesses_hierarchy_guide_title">
     <summary class="businesses_governance_summary">
-      <h2 id="businesses_hierarchy_guide_title"><?php echo businesses_index_i18n('BUSINESSES_HIERARCHY_TITLE'); ?></h2>
+      <h2 id="businesses_hierarchy_guide_title"><?php echo businesses_index_i18n_html('BUSINESSES_HIERARCHY_TITLE'); ?></h2>
     </summary>
-    <p class="help_text businesses_hierarchy_intro"><?php echo businesses_index_i18n('BUSINESSES_HIERARCHY_INTRO'); ?></p>
-    <p class="help_text businesses_hierarchy_ownership_note" role="note"><?php echo businesses_index_i18n('BUSINESSES_HIERARCHY_OWNERSHIP_NOTE'); ?></p>
+    <p class="help_text businesses_hierarchy_intro"><?php echo businesses_index_i18n_html('BUSINESSES_HIERARCHY_INTRO'); ?></p>
+    <p class="help_text businesses_hierarchy_ownership_note" role="note"><?php echo businesses_index_i18n_html('BUSINESSES_HIERARCHY_OWNERSHIP_NOTE'); ?></p>
     <div class="businesses_permission_matrix">
       <div class="businesses_hierarchy_table_wrap businesses_permission_table_desktop">
         <table class="businesses_hierarchy_table">
@@ -32,7 +32,7 @@ namespace PayCal\Domain;
           </tbody>
         </table>
       </div>
-      <div class="businesses_permission_cards businesses_permission_table_mobile" aria-label="<?php echo businesses_index_i18n('BUSINESSES_HIERARCHY_TITLE'); ?>">
+      <div class="businesses_permission_cards businesses_permission_table_mobile" aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_HIERARCHY_TITLE'); ?>">
         <?php foreach ($businessPermissionMatrix as $permissionRow) { ?>
           <article class="businesses_permission_card">
             <h3 class="businesses_permission_card_title"><?php echo htmlspecialchars((string) $permissionRow['feature'], ENT_QUOTES, 'UTF-8'); ?></h3>

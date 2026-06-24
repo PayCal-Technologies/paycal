@@ -148,7 +148,7 @@ require_once Environment::appHome().'html/header.php';
             <p id="sites_grid_active_sr_status" role="status" aria-live="polite" aria-atomic="true"></p>
           </div>
           <div id="sites-grid-active" class="datagrid_container" role="region" aria-label="<?php echo sites_index_i18n('SITES_ACTIVE_RESULTS_ARIA'); ?>" aria-describedby="sites_grid_active_sr_instructions sites_grid_active_sr_context sites_grid_active_sr_status">
-            <div class="datagrid_body"></div>
+            <div class="datagrid_body"><?php echo DataGrid::loadingSkeleton(7, 4); ?></div>
           </div>
         </div>
         <div id='archived_sites' data-tab-content='archived_sites' role="tabpanel" aria-labelledby="tab-archived_sites">
@@ -158,7 +158,7 @@ require_once Environment::appHome().'html/header.php';
             <p id="sites_grid_archived_sr_status" role="status" aria-live="polite" aria-atomic="true"></p>
           </div>
           <div id="sites-grid-archived" class="datagrid_container" role="region" aria-label="<?php echo sites_index_i18n('SITES_ARCHIVED_RESULTS_ARIA'); ?>" aria-describedby="sites_grid_archived_sr_instructions sites_grid_archived_sr_context sites_grid_archived_sr_status">
-            <div class="datagrid_body"></div>
+            <div class="datagrid_body"><?php echo DataGrid::loadingSkeleton(7, 4); ?></div>
           </div>
         </div>
       </section>
@@ -173,7 +173,7 @@ require_once Environment::appHome().'html/header.php';
         <p class='tab-disclaimer'><?php echo sites_index_i18n('SITES_EARNINGS_HISTORY_DISCLAIMER'); ?></p>
 
         <div id='site_earnings_container'>
-          <div id='site_earnings_loading' class='earnings_loading_container skeleton' aria-label="<?php echo sites_index_i18n('SITES_LOADING_EARNINGS_DATA'); ?>" aria-live="polite">
+          <div id='site_earnings_loading' class='earnings_loading_container skeleton site_earnings_state is-active' aria-label="<?php echo sites_index_i18n('SITES_LOADING_EARNINGS_DATA'); ?>" aria-live="polite">
             <!-- Skeleton bar chart -->
             <div class="sites_earnings_skeleton_wrap">
               <div class="sites_earnings_skeleton_head">
@@ -197,15 +197,15 @@ require_once Environment::appHome().'html/header.php';
             </div>
           </div>
 
-          <div id='site_earnings_list' class='hidden'>
+          <div id='site_earnings_list' class='site_earnings_state' aria-hidden="true">
             <!-- Site earnings rows populated via JavaScript -->
           </div>
 
-          <div id='site_earnings_totals' class='hidden earnings_totals_container'>
+          <div id='site_earnings_totals' class='site_earnings_state earnings_totals_container' aria-hidden="true">
             <!-- Totals summary populated via JavaScript -->
           </div>
 
-          <div id='site_earnings_empty' class='hidden f_center earnings_empty_container'>
+          <div id='site_earnings_empty' class='site_earnings_state f_center earnings_empty_container' aria-hidden="true">
             <span><?php echo sites_index_i18n('SITES_NO_EARNINGS_FOR_YEAR'); ?></span>
           </div>
         </div>

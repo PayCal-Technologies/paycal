@@ -9,7 +9,7 @@ namespace PayCal\Domain;
  * surface for account-creation behavior.
  *
  * Developer notes:
- * - Registration policy has intentionally shifted away from password signup.
+ * - Registration policy is passkey-only.
  * - Keep this class as the single place that explains and enforces current
  *   registration availability/state.
  *
@@ -38,7 +38,7 @@ final class Registration
   {
     return [
       'success' => false,
-      'message' => 'Password registration is disabled. Use passkey signup at /auth/.',
+      'message' => 'Use passkey signup at /auth/.',
       'userUUID' => null,
     ];
   }

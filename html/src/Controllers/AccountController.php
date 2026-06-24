@@ -10,7 +10,6 @@ use PayCal\Domain\Database;
 use PayCal\Domain\Encryption\EnvelopeFormat;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\Constants\Keys;
-use PayCal\Domain\ProtectedMode;
 use PayCal\Domain\RecoveryKey;
 use PayCal\Infrastructure\Resilience\RedisReliabilityService;
 use PayCal\Domain\Response;
@@ -27,7 +26,7 @@ use PayCal\Domain\UserFields;
  * Developer notes:
  * - This controller coordinates sensitive account flows; keep encryption and
  *   recovery rules centralized in domain helpers where possible.
- * - Protected-mode gates, reliability checks, and security logging are part of
+ * - Reliability checks, CSRF checks, and security logging are part of
  *   the behavior contract for these endpoints.
  *
  * Architectural role:
@@ -111,14 +110,10 @@ class AccountController
             \PayCal\Observability\Lens::add('[Bootstrap] Salt already exists', ['user_uuid' => $user->user_uuid]);
         }
 
-        // Fetch wrapped DEK and version if present
-        $wrappedDek = $user->wrapped_dek;
         $wrappedDekPasskey = '';
         $dekVersion = $user->dek_version;
         $cryptoVersion = $user->crypto_version > 0 ? $user->crypto_version : 1;
-        $passwordOnlyWarning = ProtectedMode::isCurrentSessionPasswordOnly();
-        $authStrength = ProtectedMode::getCurrentAuthStrength();
-        $passkeyEnabled = ProtectedMode::isPasskeyEnabled($user->user_uuid);
+        $authStrength = 'standard';
         
         // Fetch session credential_id (if logged in via passkey)
         $sessionCredentialId = '';
@@ -126,6 +121,10 @@ class AccountController
         if ($sessionHash) {
             $sessionKey = \PayCal\Domain\Constants\Keys::SESSION . ':' . $sessionHash;
             $sessionCredentialId = (string) \PayCal\Domain\Database::hget($sessionKey, 'credential_id');
+            $storedAuthStrength = (string) \PayCal\Domain\Database::hget($sessionKey, 'auth_strength');
+            if ($storedAuthStrength !== '') {
+                $authStrength = $storedAuthStrength;
+            }
         }
         
         $credentialId = '';
@@ -136,6 +135,8 @@ class AccountController
             static fn ($value): string => (string) $value,
             $credentialIds
         ), static fn (string $value): bool => $value !== ''));
+        $webauthnEnabled = strtolower((string) Database::hget(Keys::USER . ':' . $user->user_uuid, 'webauthn_enabled'));
+        $passkeyEnabled = count($credentialIds) > 0 || in_array($webauthnEnabled, ['1', 'true', 'yes'], true);
         if ($sessionCredentialId !== '') {
             $credentialId = $sessionCredentialId;
             $credentialSource = 'session_credential';
@@ -175,11 +176,9 @@ class AccountController
 
         \PayCal\Observability\Lens::add('[Bootstrap] Encryption state', [
             'user_uuid' => $user->user_uuid,
-            'hasWrappedDek' => !empty($wrappedDek),
             'hasWrappedDekPasskey' => !empty($wrappedDekPasskey),
             'dekVersion' => $dekVersion,
             'cryptoVersion' => $cryptoVersion,
-            'passwordOnlyWarning' => $passwordOnlyWarning,
             'authStrength' => $authStrength,
             'passkeyEnabled' => $passkeyEnabled,
             'hasCredentialId' => !empty($credentialId),
@@ -195,7 +194,6 @@ class AccountController
         $authDiagnostics = [
             'userUuid' => $user->user_uuid,
             'emailVerified' => (bool) $user->email_verified,
-            'passwordOnlyWarning' => $passwordOnlyWarning,
             'authStrength' => $authStrength,
             'passkeyEnabled' => $passkeyEnabled,
             'sessionCredentialIdPresent' => $sessionCredentialId !== '',
@@ -204,7 +202,6 @@ class AccountController
             'selectedCredentialSource' => $credentialSource,
             'credentialSetCount' => count($credentialIds),
             'wrappedCredentialCount' => $wrappedCredentialCount,
-            'hasWrappedDekPassword' => !empty($wrappedDek),
             'hasWrappedDekPasskey' => !empty($wrappedDekPasskey),
             'wrappedDekPasskeyMeta' => $wrappedDekPasskeyMeta,
         ];
@@ -221,17 +218,13 @@ class AccountController
             'credentialSetCount' => count($credentialIds),
             'wrappedCredentialCount' => $wrappedCredentialCount,
             'encryptionSalt' => $salt,
-            'wrappedDek' => $wrappedDek,
-            'wrappedDekPassword' => $wrappedDek,
             'wrappedDekPasskey' => $wrappedDekPasskey,
             'wrappedDekPasskeyForCredential' => $wrappedDekPasskey,
             'dekVersion' => $dekVersion,
             'cryptoVersion' => $cryptoVersion,
-            'passwordOnlyWarning' => $passwordOnlyWarning,
             'authStrength' => $authStrength,
             'passkeyEnabled' => $passkeyEnabled,
             'mutationAllowed' => true,
-            'stepUpRequiredForSensitiveActions' => $passwordOnlyWarning,
             'authDiagnostics' => $authDiagnostics,
         ]);
     }
@@ -240,7 +233,7 @@ class AccountController
      * POST user/account/recovery-key
      *
      * Stores the recovery-wrapped DEK and related proof material for the
-     * current authenticated user, enabling future account recovery without a password.
+     * current authenticated user, enabling future account recovery.
      */
     #[Route('user/account/recovery-key', ['POST'])]
     /**

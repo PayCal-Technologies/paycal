@@ -27,7 +27,6 @@ final class WorkWeeklyRecalcE2ETest extends TestCase
 
     UserRepository::setUser(
       $this->userUUID,
-      password_hash('test-password', PASSWORD_DEFAULT),
       'work-weekly-e2e-' . substr($this->userUUID, 1) . '@example.test',
       AuthLevel::USER,
       'Work Weekly E2E User',

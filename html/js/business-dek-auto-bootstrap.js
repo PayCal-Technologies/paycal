@@ -11,10 +11,15 @@
     return;
   }
 
-  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  const csrfToken = document.getElementById('businesses_csrf_token')?.value || '';
+  if (csrfToken === '') {
+    return;
+  }
+
   const run = () => {
     const body = new URLSearchParams();
     body.set('trigger', 'page_visit');
+    body.set('csrf_token', csrfToken);
 
     fetch('/api/v1/businesses/encryption/auto-bootstrap', {
       method: 'POST',

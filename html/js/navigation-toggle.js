@@ -396,9 +396,9 @@ export default (() => {
         collapse(true);
       });
 
-      // Restore saved preference (default: pinned)
+      // Restore the server-rendered preference first so hydration matches first paint.
       const serverState = document.body.getAttribute('data-nav-initial-state');
-      const saved = localStorage.getItem(STORAGE_KEY) ?? (serverState === 'pinned' ? '1' : '0');
+      const saved = serverState === 'pinned' ? '1' : '0';
       if (saved === '0') {
         applyBodyClass('collapsed');
         setCollapsedInteractivity(true);

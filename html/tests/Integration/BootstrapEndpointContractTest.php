@@ -298,7 +298,6 @@ final class BootstrapEndpointContractTest extends TestCase
   {
     UserRepository::setUser(
       $this->userUUID,
-      password_hash('dummy', PASSWORD_DEFAULT),
       $this->email,
       AuthLevel::USER,
       'Bootstrap Test User',

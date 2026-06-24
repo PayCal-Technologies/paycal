@@ -326,41 +326,13 @@ final class SettingsPageTest extends TestCase
   public function changeEmailFormFields(): void
   {
     $requiredFields = [
-      'current_password',
       'new_email',
       'confirm_new_email',
     ];
     
-    $this->assertCount(3, $requiredFields);
-    $this->assertContains('current_password', $requiredFields);
+    $this->assertCount(2, $requiredFields);
     $this->assertContains('new_email', $requiredFields);
     $this->assertContains('confirm_new_email', $requiredFields);
-  }
-
-  /**
-   * Change Password Modal Fields
-   */
-  #[Test]
-  public function changePasswordFormHasCorrectAction(): void
-  {
-    $expectedAction = '/api/settings/password/update/';
-    
-    $this->assertSame('/api/settings/password/update/', $expectedAction);
-  }
-
-  #[Test]
-  public function changePasswordFormFields(): void
-  {
-    $requiredFields = [
-      'current_password',
-      'new_password',
-      'confirm_password',
-    ];
-    
-    $this->assertCount(3, $requiredFields);
-    $this->assertContains('current_password', $requiredFields);
-    $this->assertContains('new_password', $requiredFields);
-    $this->assertContains('confirm_password', $requiredFields);
   }
 
   /**

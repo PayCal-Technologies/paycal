@@ -370,7 +370,7 @@ final class SystemConfig
         'category' => 'features',
         'default' => true,
         'label' => 'Immediate UI Passkeys Only',
-        'help' => 'Keep Immediate UI requests scoped to passkeys and omit managed-password requests',
+        'help' => 'Keep Immediate UI requests scoped to passkeys and omit alternate credential requests',
       ],
       'account_recovery_enabled' => [
         'type' => 'bool',

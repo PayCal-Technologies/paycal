@@ -208,7 +208,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('$fixedContactKeys = [\'ceo\', \'coo\', \'cto\', \'payroll\', \'hr\'];', $businessPanel);
     $this->assertSame(1, substr_count($businessPanel, 'class="businesses_contact_card"'));
     $this->assertStringContainsString('businesses_contact_card_avatar_button', $businessPanel);
-    $this->assertStringContainsString("businesses_index_i18n('BUSINESSES_CONTACT_CLEAR')", $businessPanel);
+    $this->assertStringContainsString("businesses_index_i18n_html('BUSINESSES_CONTACT_CLEAR')", $businessPanel);
     $this->assertStringNotContainsString("businesses_index_i18n('DELETE')", $businessPanel);
     $this->assertMatchesRegularExpression(
       '/businesses_contact_card_avatar_button[\s\S]*?_role[\s\S]*?_name/s',
@@ -299,7 +299,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
         $this->assertStringContainsString('aria-describedby=', $dialogTag, $dialogFile);
       }
 
-      $this->assertStringContainsString("businesses_index_i18n('CLOSE')", $markup, $dialogFile);
+      $this->assertStringContainsString("businesses_index_i18n_html('CLOSE')", $markup, $dialogFile);
     }
   }
 
@@ -350,7 +350,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('id="businesses-hub"', $hubPanel);
     $this->assertStringContainsString('request_access_panel.php', $hubPanel);
     $this->assertStringContainsString('id="businesses_request_email"', $requestAccessPanel);
-    $this->assertStringContainsString('aria-label="<?php echo businesses_index_i18n(\'BUSINESSES_REQUEST_EMAIL_PLACEHOLDER\'); ?>"', $requestAccessPanel);
+    $this->assertStringContainsString('aria-label="<?php echo businesses_index_i18n_html(\'BUSINESSES_REQUEST_EMAIL_PLACEHOLDER\'); ?>"', $requestAccessPanel);
     $this->assertStringContainsString('id="businesses_request_access_readonly"', $requestAccessPanel);
     $this->assertStringContainsString('aria-pressed="true"', $requestAccessPanel);
     $this->assertStringContainsString('id="businesses_request_access_full"', $requestAccessPanel);
@@ -362,7 +362,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('businesses_governance_panel', $governancePanel);
     $this->assertStringContainsString('businesses_permission_cards', $governancePanel);
     $this->assertStringContainsString('id="businesses_definitions_help_button"', $peopleAccessPanel);
-    $this->assertStringContainsString('aria-label="<?php echo businesses_index_i18n(\'BUSINESSES_OPEN_DEFINITIONS_BTN\'); ?>"', $peopleAccessPanel);
+    $this->assertStringContainsString('aria-label="<?php echo businesses_index_i18n_html(\'BUSINESSES_OPEN_DEFINITIONS_BTN\'); ?>"', $peopleAccessPanel);
     $this->assertStringContainsString('aria-expanded="false"', $peopleAccessPanel);
     $this->assertStringContainsString('class="panel businesses_inline_editor_panel businesses_settings_panel"', $peopleAccessPanel);
 
@@ -519,7 +519,6 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $projectRoot = dirname(__DIR__, 4);
     $sitesPage = (string) file_get_contents($projectRoot . '/html/business/sites/index.php');
     $businessCss = (string) file_get_contents($projectRoot . '/html/css/business/index.php');
-    $businessesCss = (string) file_get_contents($projectRoot . '/html/css/businesses/index.php');
     $sitesCss = (string) file_get_contents($projectRoot . '/html/css/sites/index.php');
     $siteEditorDialogs = (string) file_get_contents($projectRoot . '/html/sites/_partials/site_editor_dialogs.php');
     $discoveryPanel = (string) file_get_contents($projectRoot . '/html/business/_partials/editor_sites_discovery_panel.php');
@@ -567,8 +566,6 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('#main:has(#business-workspace.business_sites)', $businessCss);
     $this->assertStringContainsString('--businesses-content-width: 100%', $businessCss);
     $this->assertStringContainsString('[data-grid="business-sites-active"]', $businessCss);
-    $this->assertStringContainsString('#main:has(#business-workspace.business_sites)', $businessesCss);
-    $this->assertStringContainsString('[data-grid="business-sites-active"]', $sitesCss);
     $this->assertStringContainsString("siteEditorContext = 'business'", $sitesPage);
     $this->assertStringContainsString('site_editor_dialogs.php', $sitesPage);
     $this->assertStringContainsString('modal_create_site', $siteEditorDialogs);
@@ -663,7 +660,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('id="businesses_editor_pay_period_length"', $payPeriodPanel);
     $this->assertStringContainsString('business_payroll_pay_period', $payPeriodPanel);
     $this->assertStringContainsString('id="businesses_editor_preview"', $payPeriodPanel);
-    $this->assertStringContainsString('businesses_index_i18n(', $payPeriodPanel);
+    $this->assertStringContainsString('businesses_index_i18n_html(', $payPeriodPanel);
 
     $this->assertStringNotContainsString('id="businesses_editor_pay_frequency"', $membersPage);
     $this->assertStringNotContainsString('businesses_panel_pay_period', $membersPage);
@@ -1360,6 +1357,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const postForm = async', $apiCoreJs);
     $this->assertStringContainsString('const postJsonRaw = async', $apiCoreJs);
     $this->assertStringContainsString("document.getElementById('businesses_csrf_token')", $apiCoreJs);
+    $this->assertStringContainsString("'X-CSRF-Token': csrfToken", $apiCoreJs);
     $this->assertStringContainsString("require __DIR__ . '/core/api.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/api.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const apiRequest = async', $workspaceJs);

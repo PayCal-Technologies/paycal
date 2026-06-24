@@ -3,6 +3,7 @@
 namespace Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
+use PayCal\Domain\BusinessGroupService;
 use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Database;
@@ -714,18 +715,19 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       'failed' => '3',
       'duration_ms' => '12345',
       'generated_at' => '2026-06-18T12:00:00+00:00',
-      'event_phase' => 'completed',
-      'result' => 'completed',
+      'event_phase' => 'requested',
+      'result' => 'requested',
       'reason' => '',
       'generation_path' => 'mixed_server_authorized_and_browser_convenience',
       'trust_level' => 'mixed_package_server_authorized_pdf_and_browser_convenience_csv',
       'member_uuids' => $memberUuids,
+      'csrf_token' => 'test-csrf',
     ]);
 
     $this->assertSame('success', $payload['status'] ?? null, json_encode($payload));
     $this->assertSame(200, $payload['__http_code'] ?? null, json_encode($payload));
 
-    $event = $this->latestBusinessAuditEventOfType('business.member.report.export.completed');
+    $event = $this->latestBusinessAuditEventOfType('business.member.report.export.requested');
     $this->assertSame($this->ownerUUID, (string) ($event['actor_uuid'] ?? ''));
 
     $details = json_decode((string) ($event['details'] ?? '{}'), true);
@@ -735,16 +737,30 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertSame('2026', (string) ($details['year'] ?? ''));
     $this->assertSame('zip', (string) ($details['format'] ?? ''));
     $this->assertSame('100', (string) ($details['member_count'] ?? ''));
-    $this->assertSame('97', (string) ($details['succeeded'] ?? ''));
-    $this->assertSame('3', (string) ($details['failed'] ?? ''));
-    $this->assertSame('completed', (string) ($details['result'] ?? ''));
-    $this->assertSame('mixed_server_authorized_and_browser_convenience', (string) ($details['generation_path'] ?? ''));
-    $this->assertSame('mixed_package_server_authorized_pdf_and_browser_convenience_csv', (string) ($details['trust_level'] ?? ''));
+    $this->assertSame('', (string) ($details['succeeded'] ?? ''));
+    $this->assertSame('', (string) ($details['failed'] ?? ''));
+    $this->assertSame('requested', (string) ($details['result'] ?? ''));
+    $this->assertSame('', (string) ($details['generation_path'] ?? ''));
+    $this->assertSame('', (string) ($details['trust_level'] ?? ''));
 
     $recordedMembers = array_values(array_filter(explode(',', (string) ($details['member_uuids'] ?? ''))));
     $this->assertCount(100, $recordedMembers);
     $this->assertSame($memberUuids[0], $recordedMembers[0]);
     $this->assertSame($memberUuids[99], $recordedMembers[99]);
+  }
+
+  public function testRecordMemberReportsAuditRejectsClientCompletedEvent(): void
+  {
+    $payload = $this->invokeControllerRoute('recordMemberReportsAudit', $this->businessId, 'POST', [
+      'report_key' => 'bulk_member_reports',
+      'event_phase' => 'completed',
+      'member_uuids' => ['client-forged-complete'],
+      'csrf_token' => 'test-csrf',
+    ]);
+
+    $this->assertSame('error', $payload['status'] ?? null, json_encode($payload));
+    $this->assertSame(403, $payload['__http_code'] ?? null, json_encode($payload));
+    $this->assertStringContainsString('server export workflow', (string) ($payload['message'] ?? ''));
   }
 
   public function testUpdateConnectionRoleRouteUpdatesRoleAndScopes(): void
@@ -1175,6 +1191,135 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertSame('withdrawn', (string) ($connection['status'] ?? ''));
   }
 
+  public function testBusinessPathMutationsRequireCsrfToken(): void
+  {
+    foreach (['markNotificationsRead', 'leaveBusiness'] as $route) {
+      $payload = $this->invokeControllerRoute($route, $this->businessId, 'POST');
+
+      $this->assertSame('error', $payload['status'] ?? null, $route);
+      $this->assertSame(403, (int) ($payload['__http_code'] ?? 0), $route);
+      $this->assertStringContainsString('CSRF', (string) ($payload['message'] ?? ''), $route);
+    }
+  }
+
+  public function testPersonConnectionApproveRequiresCsrfToken(): void
+  {
+    $connectionId = 'missing-person-connection-' . bin2hex(random_bytes(4));
+    $missingToken = $this->invokeControllerRoute('approvePersonConnection', $connectionId, 'POST');
+
+    $this->assertSame('error', $missingToken['status'] ?? null, json_encode($missingToken));
+    $this->assertSame(403, (int) ($missingToken['__http_code'] ?? 0));
+    $this->assertStringContainsString('CSRF', (string) ($missingToken['message'] ?? ''));
+
+    $validToken = $this->invokeControllerRoute('approvePersonConnection', $connectionId, 'POST', [
+      'csrf_token' => 'test-csrf',
+    ]);
+    $this->assertSame('error', $validToken['status'] ?? null, json_encode($validToken));
+    $this->assertStringNotContainsString('CSRF', (string) ($validToken['message'] ?? ''));
+  }
+
+  public function testNotificationsReadAllowsValidCsrfToken(): void
+  {
+    $payload = $this->invokeControllerRoute('markNotificationsRead', $this->businessId, 'POST', [
+      'csrf_token' => 'test-csrf',
+    ]);
+
+    $this->assertSame('success', $payload['status'] ?? null, json_encode($payload));
+  }
+
+  public function testBusinessGroupPathMutationsRequireCsrfToken(): void
+  {
+    $groupId = 'csrf-group-' . bin2hex(random_bytes(4));
+    $routes = [
+      'archiveBusinessGroup',
+      'restoreBusinessGroup',
+      'deleteBusinessGroup',
+    ];
+
+    foreach ($routes as $route) {
+      $payload = $this->invokeControllerGroupRoute($route, $this->businessId, $groupId, 'POST');
+
+      $this->assertSame('error', $payload['status'] ?? null, $route);
+      $this->assertSame(403, (int) ($payload['__http_code'] ?? 0), $route);
+      $this->assertStringContainsString('CSRF', (string) ($payload['message'] ?? ''), $route);
+    }
+  }
+
+  public function testBusinessGroupArchiveAllowsValidCsrfToken(): void
+  {
+    $saved = (new BusinessGroupService())->saveGroup($this->ownerUUID, $this->businessId, [
+      'name' => 'Controller CSRF Group',
+      'description' => 'Regression fixture',
+    ]);
+    $this->assertTrue($saved['success'], (string) ($saved['message'] ?? ''));
+    $group = is_array($saved['data']['group'] ?? null) ? $saved['data']['group'] : [];
+    $groupId = (string) ($group['group_id'] ?? '');
+    $this->assertNotSame('', $groupId);
+
+    $payload = $this->invokeControllerGroupRoute('archiveBusinessGroup', $this->businessId, $groupId, 'POST', [
+      'csrf_token' => 'test-csrf',
+    ]);
+
+    $this->assertSame('success', $payload['status'] ?? null, json_encode($payload));
+    $stored = Database::hgetall(Keys::businessGroup($this->businessId, $groupId));
+    $this->assertSame('archived', (string) ($stored['status'] ?? ''));
+  }
+
+  public function testMemberReportJsonPostRoutesRequireCsrfToken(): void
+  {
+    $export = $this->invokeControllerMemberExportRoute(
+      'exportMemberReport',
+      $this->businessId,
+      $this->requesterUUID,
+      'pdf',
+      'POST',
+    );
+    $this->assertSame('error', $export['status'] ?? null, json_encode($export));
+    $this->assertSame(403, (int) ($export['__http_code'] ?? 0));
+    $this->assertStringContainsString('CSRF', (string) ($export['message'] ?? ''));
+
+    $forecast = $this->invokeControllerMemberForecastRoute(
+      'postMemberReportsForecastPreview',
+      $this->businessId,
+      $this->requesterUUID,
+      'POST',
+    );
+    $this->assertSame('error', $forecast['status'] ?? null, json_encode($forecast));
+    $this->assertSame(403, (int) ($forecast['__http_code'] ?? 0));
+    $this->assertStringContainsString('CSRF', (string) ($forecast['message'] ?? ''));
+  }
+
+  public function testAutoBootstrapBusinessEncryptionRequiresCsrfToken(): void
+  {
+    $payload = $this->invokeControllerMethodWithoutBusiness('autoBootstrapBusinessEncryption', 'POST');
+
+    $this->assertSame('error', $payload['status'] ?? null, json_encode($payload));
+    $this->assertSame(403, (int) ($payload['__http_code'] ?? 0));
+    $this->assertStringContainsString('CSRF', (string) ($payload['message'] ?? ''));
+  }
+
+  public function testAutoBootstrapBusinessEncryptionAllowsValidCsrfHeader(): void
+  {
+    $throttleKey = Keys::TELEMETRY . ':business:dek:auto_bootstrap:user:' . $this->ownerUUID;
+    Database::unlink($throttleKey);
+
+    try {
+      $payload = $this->invokeControllerMethodWithoutBusiness(
+        'autoBootstrapBusinessEncryption',
+        'POST',
+        [],
+        [],
+        null,
+        ['HTTP_X_CSRF_TOKEN' => 'test-csrf'],
+      );
+
+      $this->assertSame('success', $payload['status'] ?? null, json_encode($payload));
+      $this->assertSame(200, (int) ($payload['__http_code'] ?? 0), json_encode($payload));
+    } finally {
+      Database::unlink($throttleKey);
+    }
+  }
+
   public function testNonPremiumPersonalOwnerCanMutateOwnSitesAndWork(): void
   {
     Database::unlink(Keys::USER_SUBSCRIPTION . ':' . $this->ownerUUID);
@@ -1212,6 +1357,57 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
 
     $this->seedConnection($this->requesterUUID, 'coordinator', 'business.settings.write,work.write');
     $this->assertTrue($this->service->canMutateWorkForOwner($this->requesterUUID, $targetUUID, $this->businessId));
+  }
+
+  public function testBusinessSitePathMutationsRequireCsrfToken(): void
+  {
+    $siteId = 'S' . substr(bin2hex(random_bytes(8)), 0, 9);
+    $routes = [
+      'unlinkBusinessSite',
+      'restoreBusinessSite',
+      'archiveBusinessSite',
+      'permanentDeleteBusinessSite',
+    ];
+
+    foreach ($routes as $route) {
+      $payload = $this->invokeControllerSiteRoute($route, $this->businessId, $this->ownerUUID, $siteId, 'POST');
+
+      $this->assertSame('error', $payload['status'] ?? null, $route);
+      $this->assertSame(403, (int) ($payload['__http_code'] ?? 0), $route);
+      $this->assertStringContainsString('CSRF', (string) ($payload['message'] ?? ''), $route);
+    }
+  }
+
+  public function testBusinessSitePathUnlinkAllowsValidCsrfToken(): void
+  {
+    $create = $this->service->createBusinessSite($this->ownerUUID, $this->businessId, [
+      'site_name' => 'Controller CSRF Site',
+      'wage' => '45',
+      'living_out_allowance' => '0',
+      'travel_hours' => '0',
+      'province' => 'AB',
+    ]);
+    $this->assertTrue($create['success'], (string) ($create['message'] ?? ''));
+    $siteId = (string) ($create['data']['site_id'] ?? '');
+    $this->assertNotSame('', $siteId);
+    $siteRef = $this->ownerUUID . ':' . $siteId;
+
+    try {
+      $payload = $this->invokeControllerSiteRoute(
+        'unlinkBusinessSite',
+        $this->businessId,
+        $this->ownerUUID,
+        $siteId,
+        'POST',
+        ['csrf_token' => 'test-csrf'],
+      );
+
+      $this->assertSame('success', $payload['status'] ?? null, json_encode($payload));
+      $this->assertSame(0, Database::sismember(Keys::BUSINESS_SITE . ':' . $this->businessId, $siteRef));
+    } finally {
+      Database::unlink(Keys::SITE . ':' . $this->ownerUUID . ':' . $siteId);
+      Database::unlink(Keys::BUSINESS_SITE_SETTINGS . ':' . $this->businessId . ':' . $siteRef);
+    }
   }
 
   /**
@@ -1252,7 +1448,12 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
   ): array
   {
     $bootstrap = var_export(__DIR__ . '/../../bootstrap/Classes.php', true);
-    $cookie = var_export($sessionOverride ?? $this->ownerSession, true);
+    $sessionHash = $sessionOverride ?? $this->ownerSession;
+    if (strtoupper($requestMethod) === 'POST' && ($post['csrf_token'] ?? null) === 'test-csrf') {
+      $post['csrf_token'] = $this->businessCsrfTokenForSession($sessionHash);
+    }
+
+    $cookie = var_export($sessionHash, true);
     $requestMethodLiteral = var_export($requestMethod, true);
     $businessIdLiteral = var_export($businessId, true);
     $postLiteral = var_export($post, true);
@@ -1284,11 +1485,14 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
   }
 
   /**
-   * @param array<string, string> $post
+   * @param array<string, mixed> $post
    * @return array<string, mixed>
    */
-  private function invokeControllerMethodWithoutBusiness(
+  private function invokeControllerSiteRoute(
     string $method,
+    string $businessId,
+    string $siteOwnerUUID,
+    string $siteID,
     string $requestMethod,
     array $post = [],
     array $get = [],
@@ -1296,8 +1500,16 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
   ): array
   {
     $bootstrap = var_export(__DIR__ . '/../../bootstrap/Classes.php', true);
-    $cookie = var_export($sessionOverride ?? $this->ownerSession, true);
+    $sessionHash = $sessionOverride ?? $this->ownerSession;
+    if (strtoupper($requestMethod) === 'POST' && ($post['csrf_token'] ?? null) === 'test-csrf') {
+      $post['csrf_token'] = $this->businessCsrfTokenForSession($sessionHash);
+    }
+
+    $cookie = var_export($sessionHash, true);
     $requestMethodLiteral = var_export($requestMethod, true);
+    $businessIdLiteral = var_export($businessId, true);
+    $siteOwnerLiteral = var_export($siteOwnerUUID, true);
+    $siteIDLiteral = var_export($siteID, true);
     $postLiteral = var_export($post, true);
     $getLiteral = var_export($get, true);
 
@@ -1306,6 +1518,225 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       . '$_COOKIE["PAYCAL_AUTH"] = ' . $cookie . '; '
       . '$_SERVER["REQUEST_METHOD"] = ' . $requestMethodLiteral . '; '
       . '$_SERVER["REMOTE_ADDR"] = "127.0.0.1"; '
+      . '$_POST = ' . $postLiteral . '; '
+      . '$_GET = ' . $getLiteral . '; '
+      . '$_REQUEST = array_merge($_GET, $_POST); '
+      . '$c = new \\PayCal\\Controllers\\BusinessDiscoveryController(); '
+      . 'ob_start(); '
+      . '$c->' . $method . '(' . $businessIdLiteral . ', ' . $siteOwnerLiteral . ', ' . $siteIDLiteral . '); '
+      . '$out = ob_get_clean(); '
+      . '$decoded = json_decode($out, true); '
+      . 'if (is_array($decoded)) { $decoded["__http_code"] = (int) http_response_code(); echo json_encode($decoded); } else { echo $out; }';
+
+    $cmd = escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg($script);
+    $output = shell_exec($cmd);
+
+    $this->assertNotFalse($output, 'Controller subprocess call failed.');
+    $payload = json_decode((string) $output, true);
+    $this->assertIsArray($payload, 'Controller response was not valid JSON.');
+
+    return $payload;
+  }
+
+  /**
+   * @param array<string, mixed> $post
+   * @return array<string, mixed>
+   */
+  private function invokeControllerGroupRoute(
+    string $method,
+    string $businessId,
+    string $groupId,
+    string $requestMethod,
+    array $post = [],
+    array $get = [],
+    ?string $sessionOverride = null
+  ): array
+  {
+    $bootstrap = var_export(__DIR__ . '/../../bootstrap/Classes.php', true);
+    $sessionHash = $sessionOverride ?? $this->ownerSession;
+    if (strtoupper($requestMethod) === 'POST' && ($post['csrf_token'] ?? null) === 'test-csrf') {
+      $post['csrf_token'] = $this->businessCsrfTokenForSession($sessionHash);
+    }
+
+    $cookie = var_export($sessionHash, true);
+    $requestMethodLiteral = var_export($requestMethod, true);
+    $businessIdLiteral = var_export($businessId, true);
+    $groupIdLiteral = var_export($groupId, true);
+    $postLiteral = var_export($post, true);
+    $getLiteral = var_export($get, true);
+
+    $script = 'if (!defined("PHPUNIT_COMPOSER_INSTALL")) { define("PHPUNIT_COMPOSER_INSTALL", "1"); } '
+      . 'require ' . $bootstrap . '; '
+      . '$_COOKIE["PAYCAL_AUTH"] = ' . $cookie . '; '
+      . '$_SERVER["REQUEST_METHOD"] = ' . $requestMethodLiteral . '; '
+      . '$_SERVER["REMOTE_ADDR"] = "127.0.0.1"; '
+      . '$_POST = ' . $postLiteral . '; '
+      . '$_GET = ' . $getLiteral . '; '
+      . '$_REQUEST = array_merge($_GET, $_POST); '
+      . '$c = new \\PayCal\\Controllers\\BusinessDiscoveryController(); '
+      . 'ob_start(); '
+      . '$c->' . $method . '(' . $businessIdLiteral . ', ' . $groupIdLiteral . '); '
+      . '$out = ob_get_clean(); '
+      . '$decoded = json_decode($out, true); '
+      . 'if (is_array($decoded)) { $decoded["__http_code"] = (int) http_response_code(); echo json_encode($decoded); } else { echo $out; }';
+
+    $cmd = escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg($script);
+    $output = shell_exec($cmd);
+
+    $this->assertNotFalse($output, 'Controller subprocess call failed.');
+    $payload = json_decode((string) $output, true);
+    $this->assertIsArray($payload, 'Controller response was not valid JSON.');
+
+    return $payload;
+  }
+
+  /**
+   * @param array<string, mixed> $post
+   * @return array<string, mixed>
+   */
+  private function invokeControllerMemberExportRoute(
+    string $method,
+    string $businessId,
+    string $memberUUID,
+    string $format,
+    string $requestMethod,
+    array $post = [],
+    array $get = [],
+    ?string $sessionOverride = null
+  ): array
+  {
+    $bootstrap = var_export(__DIR__ . '/../../bootstrap/Classes.php', true);
+    $sessionHash = $sessionOverride ?? $this->ownerSession;
+    if (strtoupper($requestMethod) === 'POST' && ($post['csrf_token'] ?? null) === 'test-csrf') {
+      $post['csrf_token'] = $this->businessCsrfTokenForSession($sessionHash);
+    }
+
+    $cookie = var_export($sessionHash, true);
+    $requestMethodLiteral = var_export($requestMethod, true);
+    $businessIdLiteral = var_export($businessId, true);
+    $memberUUIDLiteral = var_export($memberUUID, true);
+    $formatLiteral = var_export($format, true);
+    $postLiteral = var_export($post, true);
+    $getLiteral = var_export($get, true);
+
+    $script = 'if (!defined("PHPUNIT_COMPOSER_INSTALL")) { define("PHPUNIT_COMPOSER_INSTALL", "1"); } '
+      . 'require ' . $bootstrap . '; '
+      . '$_COOKIE["PAYCAL_AUTH"] = ' . $cookie . '; '
+      . '$_SERVER["REQUEST_METHOD"] = ' . $requestMethodLiteral . '; '
+      . '$_SERVER["REMOTE_ADDR"] = "127.0.0.1"; '
+      . '$_POST = ' . $postLiteral . '; '
+      . '$_GET = ' . $getLiteral . '; '
+      . '$_REQUEST = array_merge($_GET, $_POST); '
+      . '$c = new \\PayCal\\Controllers\\BusinessDiscoveryController(); '
+      . 'ob_start(); '
+      . '$c->' . $method . '(' . $businessIdLiteral . ', ' . $memberUUIDLiteral . ', ' . $formatLiteral . '); '
+      . '$out = ob_get_clean(); '
+      . '$decoded = json_decode($out, true); '
+      . 'if (is_array($decoded)) { $decoded["__http_code"] = (int) http_response_code(); echo json_encode($decoded); } else { echo $out; }';
+
+    $cmd = escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg($script);
+    $output = shell_exec($cmd);
+
+    $this->assertNotFalse($output, 'Controller subprocess call failed.');
+    $payload = json_decode((string) $output, true);
+    $this->assertIsArray($payload, 'Controller response was not valid JSON.');
+
+    return $payload;
+  }
+
+  /**
+   * @param array<string, mixed> $post
+   * @return array<string, mixed>
+   */
+  private function invokeControllerMemberForecastRoute(
+    string $method,
+    string $businessId,
+    string $memberUUID,
+    string $requestMethod,
+    array $post = [],
+    array $get = [],
+    ?string $sessionOverride = null
+  ): array
+  {
+    $bootstrap = var_export(__DIR__ . '/../../bootstrap/Classes.php', true);
+    $sessionHash = $sessionOverride ?? $this->ownerSession;
+    if (strtoupper($requestMethod) === 'POST' && ($post['csrf_token'] ?? null) === 'test-csrf') {
+      $post['csrf_token'] = $this->businessCsrfTokenForSession($sessionHash);
+    }
+
+    $cookie = var_export($sessionHash, true);
+    $requestMethodLiteral = var_export($requestMethod, true);
+    $businessIdLiteral = var_export($businessId, true);
+    $memberUUIDLiteral = var_export($memberUUID, true);
+    $postLiteral = var_export($post, true);
+    $getLiteral = var_export($get, true);
+
+    $script = 'if (!defined("PHPUNIT_COMPOSER_INSTALL")) { define("PHPUNIT_COMPOSER_INSTALL", "1"); } '
+      . 'require ' . $bootstrap . '; '
+      . '$_COOKIE["PAYCAL_AUTH"] = ' . $cookie . '; '
+      . '$_SERVER["REQUEST_METHOD"] = ' . $requestMethodLiteral . '; '
+      . '$_SERVER["REMOTE_ADDR"] = "127.0.0.1"; '
+      . '$_POST = ' . $postLiteral . '; '
+      . '$_GET = ' . $getLiteral . '; '
+      . '$_REQUEST = array_merge($_GET, $_POST); '
+      . '$c = new \\PayCal\\Controllers\\BusinessDiscoveryController(); '
+      . 'ob_start(); '
+      . '$c->' . $method . '(' . $businessIdLiteral . ', ' . $memberUUIDLiteral . '); '
+      . '$out = ob_get_clean(); '
+      . '$decoded = json_decode($out, true); '
+      . 'if (is_array($decoded)) { $decoded["__http_code"] = (int) http_response_code(); echo json_encode($decoded); } else { echo $out; }';
+
+    $cmd = escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg($script);
+    $output = shell_exec($cmd);
+
+    $this->assertNotFalse($output, 'Controller subprocess call failed.');
+    $payload = json_decode((string) $output, true);
+    $this->assertIsArray($payload, 'Controller response was not valid JSON.');
+
+    return $payload;
+  }
+
+  /**
+   * @param array<string, string> $post
+   * @param array<string, string> $server
+   * @return array<string, mixed>
+   */
+  private function invokeControllerMethodWithoutBusiness(
+    string $method,
+    string $requestMethod,
+    array $post = [],
+    array $get = [],
+    ?string $sessionOverride = null,
+    array $server = []
+  ): array
+  {
+    $bootstrap = var_export(__DIR__ . '/../../bootstrap/Classes.php', true);
+    $sessionHash = $sessionOverride ?? $this->ownerSession;
+    if (strtoupper($requestMethod) === 'POST') {
+      $csrfNonce = null;
+      if (($post['csrf_token'] ?? null) === 'test-csrf' || ($server['HTTP_X_CSRF_TOKEN'] ?? null) === 'test-csrf') {
+        $csrfNonce = $this->businessCsrfTokenForSession($sessionHash);
+      }
+      if (($post['csrf_token'] ?? null) === 'test-csrf') {
+        $post['csrf_token'] = (string) $csrfNonce;
+      }
+      if (($server['HTTP_X_CSRF_TOKEN'] ?? null) === 'test-csrf') {
+        $server['HTTP_X_CSRF_TOKEN'] = (string) $csrfNonce;
+      }
+    }
+
+    $cookie = var_export($sessionHash, true);
+    $requestMethodLiteral = var_export($requestMethod, true);
+    $postLiteral = var_export($post, true);
+    $getLiteral = var_export($get, true);
+    $serverLiteral = var_export($server, true);
+
+    $script = 'if (!defined("PHPUNIT_COMPOSER_INSTALL")) { define("PHPUNIT_COMPOSER_INSTALL", "1"); } '
+      . 'require ' . $bootstrap . '; '
+      . '$_COOKIE["PAYCAL_AUTH"] = ' . $cookie . '; '
+      . '$_SERVER["REQUEST_METHOD"] = ' . $requestMethodLiteral . '; '
+      . '$_SERVER["REMOTE_ADDR"] = "127.0.0.1"; '
+      . '$_SERVER = array_merge($_SERVER, ' . $serverLiteral . '); '
       . '$_POST = ' . $postLiteral . '; '
       . '$_GET = ' . $getLiteral . '; '
       . '$_REQUEST = array_merge($_GET, $_POST); '
@@ -1324,6 +1755,17 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertIsArray($payload, 'Controller response was not valid JSON.');
 
     return $payload;
+  }
+
+  private function businessCsrfTokenForSession(string $sessionHash): string
+  {
+    $userUUID = (string) Database::hget(Keys::SESSION . ':' . $sessionHash, 'user_uuid');
+    $this->assertNotSame('', $userUUID, 'Expected session user for CSRF fixture.');
+
+    $nonce = bin2hex(random_bytes(32));
+    Database::set('user:' . $userUUID . ':csrf:businesses:' . $nonce, (string) time(), 3600);
+
+    return $nonce;
   }
 
   private function seedUser(string $userUUID, string $email): void
@@ -1379,6 +1821,20 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     Database::unlink(Keys::BUSINESS_INVITE_BUSINESS . ':' . $orgId);
     Database::unlink(Keys::BUSINESS_SITE . ':' . $orgId);
     Database::unlink(Keys::BUSINESS_SETTINGS . ':' . $orgId);
+    $groupSetKey = Keys::businessGroups($orgId);
+    foreach (Database::smembers($groupSetKey) as $groupIdRaw) {
+      $groupId = trim((string) $groupIdRaw);
+      if ($groupId === '') {
+        continue;
+      }
+      foreach (Database::smembers(Keys::businessGroupMembers($orgId, $groupId)) as $memberUUID) {
+        Database::srem(Keys::businessMemberGroups($orgId, (string) $memberUUID), $groupId);
+      }
+      Database::unlink(Keys::businessGroup($orgId, $groupId));
+      Database::unlink(Keys::businessGroupMembers($orgId, $groupId));
+      Database::unlink(Keys::businessGroupMetricsCache($orgId, $groupId));
+    }
+    Database::unlink($groupSetKey);
     Database::unlink(Keys::BUSINESS . ':' . $orgId);
   }
 

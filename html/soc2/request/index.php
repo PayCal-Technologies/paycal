@@ -64,7 +64,7 @@ function soc2NdaSendAdminNotification(array $data): bool
   $eStamp   = htmlspecialchars($data['submitted_at_utc'], ENT_QUOTES, 'UTF-8');
 
   $html = <<<HTML
-  <html><body style="font-family:Arial,sans-serif;color:#1f2933;padding:24px;">
+  <html><body style="font-family:system-ui,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Arial,sans-serif;color:#1f2933;padding:24px;">
   <h2 style="margin:0 0 16px">New SOC 2 NDA Request</h2>
   <table style="border-collapse:collapse;width:100%;max-width:600px;">
     <tr><td style="padding:6px 12px 6px 0;font-weight:700;width:120px;">Name</td><td style="padding:6px 0">{$eName}</td></tr>
@@ -123,7 +123,7 @@ function soc2NdaSendRequesterCopy(array $data): bool
   $ndaText  = soc2NdaText($data['name'], gmdate('F j, Y'));
 
   $intro = <<<HTML
-  <html><body style="font-family:Arial,sans-serif;color:#1f2933;padding:24px;max-width:680px;">
+  <html><body style="font-family:system-ui,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Arial,sans-serif;color:#1f2933;padding:24px;max-width:680px;">
   <p>Hi {$eName},</p>
   <p>Thank you for requesting access to PayCal Technologies Inc.'s SOC 2 materials.</p>
   <p>Please review the Non-Disclosure Agreement below, <strong>print or copy it</strong>,
@@ -165,7 +165,7 @@ function soc2NdaHtml(string $recipientName = '[Full Legal Name]', string $effect
   $d = htmlspecialchars($effectiveDate, ENT_QUOTES, 'UTF-8');
 
   return <<<HTML
-  <div style="font-family:Georgia,serif;color:#1f2933;line-height:1.7;max-width:680px;">
+  <div style="font-family:Georgia,&quot;Times New Roman&quot;,Times,serif;color:#1f2933;line-height:1.7;max-width:680px;">
     <h2 style="text-align:center;letter-spacing:0.04em;">NON-DISCLOSURE AGREEMENT<br><span style="font-size:0.85em;font-weight:400;">(SOC 2 Materials Access)</span></h2>
     <p><strong>Effective Date:</strong> {$d}</p>
     <p>This Non-Disclosure Agreement ("Agreement") is entered into by and between:<br>

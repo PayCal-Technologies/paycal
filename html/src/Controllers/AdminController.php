@@ -188,7 +188,7 @@ class AdminController
 
     // Update using User method
     $previousAuthLevel = $user->auth_level->value;
-    UserRepository::setUser($userUUID, $user->password_hash, $email, $authLevel, $fullName, $lastSessionHash, $phone);
+    UserRepository::setUser($userUUID, $email, $authLevel, $fullName, $lastSessionHash, $phone);
 
     if ($previousAuthLevel !== $authLevel->value) {
       \PayCal\Infrastructure\Audit\SystemAuditRepository::append('user.auth_level.changed', $actor->user_uuid, [
@@ -1248,7 +1248,6 @@ class AdminController
     }
     Database::unlink($credentialSetKey);
     Database::unlink(Keys::USER . ':' . $userUUID . ':passkey_wrapped_deks');
-    Database::unlink(Keys::userKekV1($userUUID));
 
     // User nonces/csrf and user hash
     Database::unlink(Keys::USER . ':' . $userUUID . ':nonce');

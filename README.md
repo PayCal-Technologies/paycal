@@ -6,7 +6,7 @@ PayCal helps workers understand pay, taxes, sites, pay periods, and business-sha
 
 Latest documented release: **v1.059.009**
 
-[![Test Suite](https://img.shields.io/badge/tests-2279%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2306%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -277,11 +277,11 @@ Localization source files live in `strings/`. Backup files such as `*.bak` are n
 
 ## Test And Quality Gates
 
-Suite inventory (as of 2026-06-23):
+Suite inventory (as of 2026-06-24):
 
-- **2,279 listed tests**
-- **263 repository test files**
-- **Active public suite file split:** **130 Unit**, **63 Integration**, **40 Contract**, **1 Timezone**, **12 Accessibility**
+- **2,306 listed tests**
+- **264 repository test files**
+- **Active public suite file split:** **133 Unit**, **61 Integration**, **40 Contract**, **1 Timezone**, **12 Accessibility**
 - **2 Manual verification files**
 
 Latest validation snapshot (2026-06-22):
@@ -297,13 +297,13 @@ Latest validation snapshot (2026-06-22):
 
 | Configured public suite | Files | Purpose |
 |------|------:|---------|
-| PayCal Unit | 130 | Domain, service, renderer, policy, and invariant behavior |
-| PayCal Integration | 63 | Controller/API flows, auth, encryption, account lifecycle, and cross-service behavior |
+| PayCal Unit | 133 | Domain, service, renderer, policy, and invariant behavior |
+| PayCal Integration | 61 | Controller/API flows, auth, encryption, account lifecycle, and cross-service behavior |
 | PayCal Contract | 40 | Stable API, route, manifest, persistence, and architecture boundaries |
 | PayCal Timezone | 1 | Timezone-sensitive pay-period behavior |
 | PayCal Accessibility | 12 | ARIA, WCAG, keyboard, and accessibility contracts |
 
-Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-06-23 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes public-excluded SOC2/Exploit/private-moat files and the two manual verification files.
+Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-06-24 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes public-excluded SOC2/Exploit/private-moat files and the two manual verification files.
 
 ## Developer Commands
 

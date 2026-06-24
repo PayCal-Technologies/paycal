@@ -6,7 +6,6 @@ use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
 #[Group('contract')]
-#[Group('private-moat')]
 final class AppLayoutWidthContractTest extends TestCase
 {
   #[Test]
@@ -15,7 +14,7 @@ final class AppLayoutWidthContractTest extends TestCase
     $projectRoot = dirname(__DIR__, 4);
     $commonCss = (string) file_get_contents($projectRoot . '/html/css/common/index.php');
     $settingsCss = (string) file_get_contents($projectRoot . '/html/css/settings/index.php');
-    $businessesCss = (string) file_get_contents($projectRoot . '/html/css/businesses/index.php');
+    $businessesCss = (string) file_get_contents($projectRoot . '/html/css/business/index.php');
     $sitesCss = (string) file_get_contents($projectRoot . '/html/css/sites/index.php');
     $profileCss = (string) file_get_contents($projectRoot . '/html/css/profile/index.php');
     $reportsCss = (string) file_get_contents($projectRoot . '/html/css/reports/index.php');
@@ -24,7 +23,7 @@ final class AppLayoutWidthContractTest extends TestCase
     $this->assertStringContainsString('max-width: var(--app-content-width, 100%);', $settingsCss);
     $this->assertStringContainsString('width: var(--app-content-width, 100%);', $settingsCss);
     $this->assertStringContainsString('max-width: var(--app-content-width, 100%);', $settingsCss);
-    $this->assertStringContainsString('--businesses-content-width: var(--app-content-width, 100%);', $businessesCss);
+    $this->assertStringContainsString('--businesses-content-width: 100%;', $businessesCss);
     $this->assertStringContainsString('width: var(--app-content-width, 100%);', $sitesCss);
     $this->assertStringContainsString('width: var(--app-content-width, 100%);', $profileCss);
     $this->assertStringContainsString('max-width: var(--app-content-width, 100%);', $reportsCss);
@@ -36,6 +35,7 @@ final class AppLayoutWidthContractTest extends TestCase
     }
   }
 
+  #[Group('private-moat')]
   #[Test]
   public function appSubpagePanelHeadingsUseCompactOperationalScale(): void
   {
@@ -79,6 +79,63 @@ final class AppLayoutWidthContractTest extends TestCase
     $this->assertStringContainsString('html[data-print-mode="grayscale"] .ytd_line--gross', $commonCss);
     $this->assertStringContainsString('html[data-print-mode="color"] {', $commonCss);
     $this->assertStringContainsString('-webkit-print-color-adjust: exact;', $commonCss);
+  }
+
+  #[Test]
+  public function commonStylesheetEnablesDocumentTransitionsButHonorsReducedMotion(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $commonCss = (string) file_get_contents($projectRoot . '/html/css/common/index.php');
+
+    $this->assertStringContainsString('@view-transition {', $commonCss);
+    $this->assertStringContainsString('navigation: auto;', $commonCss);
+    $this->assertStringContainsString('::view-transition-old(root),', $commonCss);
+    $this->assertStringContainsString('::view-transition-new(root)', $commonCss);
+    $this->assertStringContainsString('html[data-a11y-reduced-motion="on"]::view-transition-old(root),', $commonCss);
+    $this->assertStringContainsString('html[data-a11y-reduced-motion="on"]::view-transition-new(root)', $commonCss);
+    $this->assertStringContainsString('html[data-a11y-reduced-motion="system"]::view-transition-old(root),', $commonCss);
+    $this->assertStringContainsString('html[data-a11y-reduced-motion="system"]::view-transition-new(root)', $commonCss);
+  }
+
+  #[Test]
+  public function firstPartyJavascriptAvoidsBeforeUnloadForBfcacheEligibility(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $scriptFiles = [
+      $projectRoot . '/html/js/core/index.php',
+      $projectRoot . '/html/js/calendar/calendar.js',
+      $projectRoot . '/html/js/earnings/index.php',
+      $projectRoot . '/html/js/phantomwing/index.php',
+    ];
+
+    foreach ($scriptFiles as $scriptFile) {
+      $script = (string) file_get_contents($scriptFile);
+
+      $this->assertStringNotContainsString("addEventListener('beforeunload'", $script, $scriptFile);
+      $this->assertStringNotContainsString('addEventListener("beforeunload"', $script, $scriptFile);
+    }
+
+    $core = (string) file_get_contents($projectRoot . '/html/js/core/index.php');
+    $this->assertStringContainsString("window.addEventListener('pageshow'", $core);
+    $this->assertStringContainsString('paycal:bfcache-restore', $core);
+  }
+
+  #[Test]
+  public function coreJavascriptNormalizesThrownMessagesForUserFacingAsyncFailures(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $core = (string) file_get_contents($projectRoot . '/html/js/core/index.php');
+    $earnings = (string) file_get_contents($projectRoot . '/html/js/earnings/index.php');
+    $memberReports = (string) file_get_contents($projectRoot . '/html/js/earnings/member-reports-view.js');
+    $siteEditor = (string) file_get_contents($projectRoot . '/html/js/sites/site-editor-core.php');
+
+    $this->assertStringContainsString('function resolveThrownMessage(error, fallbackMessage', $core);
+    $this->assertStringContainsString('ECONNREFUSED', $core);
+    $this->assertStringContainsString('Failed to fetch', $core);
+    $this->assertStringContainsString('resolveThrownMessage,', $core);
+    $this->assertStringContainsString('PC.resolveThrownMessage(error', $earnings);
+    $this->assertStringContainsString('options.resolveThrownMessage', $memberReports);
+    $this->assertStringContainsString('PC.resolveThrownMessage(error', $siteEditor);
   }
 
   #[Test]

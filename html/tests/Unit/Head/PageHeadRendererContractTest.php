@@ -48,4 +48,32 @@ final class PageHeadRendererContractTest extends TestCase
     $this->assertStringNotContainsString('page-subject', $html);
     $this->assertSame(1, substr_count($html, 'name="application-name"'));
   }
+
+  #[Test]
+  public function speculationRulesPrefetchDocumentsWithoutPrerendering(): void
+  {
+    $html = PageHeadRenderer::renderSpeculationRules('test-nonce');
+
+    $this->assertStringContainsString('<script type="speculationrules" nonce="test-nonce">', $html);
+    $this->assertStringContainsString('"prefetch"', $html);
+    $this->assertStringContainsString('"source":"document"', $html);
+    $this->assertStringContainsString('"eagerness":"moderate"', $html);
+    $this->assertStringContainsString('"tag":"paycal-document-prefetch"', $html);
+    $this->assertStringContainsString('"href_matches":"/api/*"', $html);
+    $this->assertStringContainsString('"href_matches":"/signout*"', $html);
+    $this->assertStringContainsString('"selector_matches":"[download], [target], [rel~=nofollow], [data-no-speculation]"', $html);
+    $this->assertStringNotContainsString('"prerender"', $html);
+  }
+
+  #[Test]
+  public function shellAllowsSpeculationRulesWithoutUnsafeInlineScripts(): void
+  {
+    $projectRoot = dirname(__DIR__, 3);
+    $header = (string) file_get_contents($projectRoot . '/header.php');
+    $layout = (string) file_get_contents($projectRoot . '/src/Domain/Layout.php');
+
+    $this->assertStringContainsString("'inline-speculation-rules'", $header);
+    $this->assertStringContainsString("'inline-speculation-rules'", $layout);
+    $this->assertStringContainsString('data-no-speculation', $header);
+  }
 }

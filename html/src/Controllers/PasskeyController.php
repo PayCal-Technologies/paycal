@@ -258,11 +258,9 @@ final class PasskeyController
     }
 
     $userUUID = User::generateUserUUID();
-    $placeholderPasswordHash = password_hash(bin2hex(random_bytes(self::SECRET_BYTES)), PASSWORD_DEFAULT);
 
     UserRepository::setUser(
       $userUUID,
-      $placeholderPasswordHash,
       $email,
       AuthLevel::USER,
       $fullName,
@@ -363,6 +361,15 @@ final class PasskeyController
       return;
     }
 
+    if ($this->userHasPasskeyCredentials($user->user_uuid) && !$this->hasRecentPasskeyStepUp()) {
+      Response::error(
+        '[PASSKEY] Passkey confirmation required before adding another passkey.',
+        ['step_up_required' => true, 'recommended_method' => 'passkey'],
+        HttpStatus::HTTP_FORBIDDEN
+      );
+      return;
+    }
+
     $body = $this->jsonBody();
     $deviceName = $this->scalarString($body['deviceName'] ?? '');
     if ('' === $deviceName) {
@@ -439,6 +446,15 @@ final class PasskeyController
       || $expectedUserUUID !== $sessionUser->user_uuid
     ) {
       Response::error('Registration failed.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    if ($this->userHasPasskeyCredentials($sessionUser->user_uuid) && !$this->hasRecentPasskeyStepUp()) {
+      Response::error(
+        '[PASSKEY] Passkey confirmation required before adding another passkey.',
+        ['step_up_required' => true, 'recommended_method' => 'passkey'],
+        HttpStatus::HTTP_FORBIDDEN
+      );
       return;
     }
 
@@ -777,7 +793,6 @@ final class PasskeyController
 
     Database::hset(Keys::USER . ':' . $expectedUserUUID, [
       'webauthn_enabled' => '1',
-      'password_only_risk' => '0',
       'last_auth_method' => 'passkey',
     ]);
 
@@ -797,7 +812,6 @@ final class PasskeyController
     if ($loginUser) {
       \PayCal\Observability\Lens::add('[PASSKEY] Post-login encryption state', [
         'user_uuid' => $expectedUserUUID,
-        'hasWrappedDek' => !empty($loginUser->wrapped_dek),
         'hasEncryptionSalt' => !empty($loginUser->encryption_salt),
         'dekVersion' => $loginUser->dek_version
       ]);
@@ -806,7 +820,6 @@ final class PasskeyController
     Response::success('[PASSKEY] Login successful.', [
       'user_uuid' => $expectedUserUUID,
       'auth_strength' => 'strong',
-      'password_only_warning' => false,
       'mutation_allowed' => true,
       'credential_id' => $credentialId,
       'suspected_clone' => $suspectedClone,
@@ -957,6 +970,15 @@ final class PasskeyController
     }
     if ($ownerUUID !== $userUUID) {
       Response::error('Delete failed.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
+    if (!$this->hasRecentPasskeyStepUp()) {
+      Response::error(
+        '[PASSKEY] Passkey confirmation required before deleting a passkey.',
+        ['step_up_required' => true, 'recommended_method' => 'passkey'],
+        HttpStatus::HTTP_FORBIDDEN
+      );
       return;
     }
 
@@ -1171,6 +1193,47 @@ final class PasskeyController
   }
 
   /**
+   * Return true when the user already has stored passkey credentials.
+   */
+  private function userHasPasskeyCredentials(string $userUUID): bool
+  {
+    if (!$this->isValidUserUUID($userUUID)) {
+      return false;
+    }
+
+    return (int) (Database::scard($this->userCredentialsKey($userUUID)) ?? 0) > 0;
+  }
+
+  /**
+   * Require a strong passkey-backed session or recent passkey step-up.
+   */
+  private function hasRecentPasskeyStepUp(): bool
+  {
+    $sessionHash = Authentication::getSessionHashFromCookie();
+    if ($sessionHash === null || $sessionHash === '') {
+      return false;
+    }
+
+    $sessionKey = Keys::SESSION . ':' . $sessionHash;
+    $strength = strtolower((string) Database::hget($sessionKey, 'auth_strength'));
+    if ($strength === 'strong') {
+      return true;
+    }
+
+    $stepUpTimestamp = (int) Database::hget($sessionKey, 'passkey_stepup_at');
+    if ($stepUpTimestamp <= 0) {
+      return false;
+    }
+
+    $maxAge = (int) SystemConfig::get('email_change_stepup_max_age_seconds');
+    if ($maxAge <= 0) {
+      $maxAge = 900;
+    }
+
+    return (time() - $stepUpTimestamp) <= $maxAge;
+  }
+
+  /**
    * Encode binary data as URL-safe base64.
    *
    * @param string $binary Raw binary payload
@@ -1281,7 +1344,6 @@ final class PasskeyController
 
     Database::hset(Keys::USER . ':' . $userUUID, [
       'webauthn_enabled' => '1',
-      'password_only_risk' => '0',
       'last_auth_method' => 'passkey',
     ]);
 

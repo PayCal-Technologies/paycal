@@ -483,7 +483,6 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   }
 
   .auth-panel input[type="email"],
-  .auth-panel input[type="password"],
   .auth-panel input[type="text"] {
     width: 100%;
     box-sizing: border-box;

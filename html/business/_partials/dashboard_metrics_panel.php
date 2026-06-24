@@ -94,7 +94,7 @@ $formatMetricDisplay = static function (array $card): string {
 ?>
 
 <section class="panel business_dashboard_metrics" aria-labelledby="business_dashboard_metrics_heading">
-  <h2 id="business_dashboard_metrics_heading" class="visually_hidden"><?php echo businesses_index_i18n('BUSINESS_DASHBOARD_METRICS_ARIA'); ?></h2>
+  <h2 id="business_dashboard_metrics_heading" class="visually_hidden"><?php echo businesses_index_i18n_html('BUSINESS_DASHBOARD_METRICS_ARIA'); ?></h2>
   <div class="business_dashboard_metrics_grid">
 <?php foreach ($metricCards as $card) {
   $displayValue = $formatMetricDisplay($card);

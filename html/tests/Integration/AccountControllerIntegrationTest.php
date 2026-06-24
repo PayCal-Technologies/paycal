@@ -59,7 +59,6 @@ final class AccountControllerIntegrationTest extends TestCase
             'full_name' => 'Test User',
             'email_verified' => '1',
             'auth_level' => (string) AuthLevel::USER->value,
-            'password_hash' => password_hash('testpass123', PASSWORD_DEFAULT),
         ]);
 
         // Create test session

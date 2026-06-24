@@ -12,16 +12,16 @@ namespace PayCal\Domain;
   >
     <form id="businesses_member_revoke_form" method="dialog">
       <section class="modal_header">
-        <h2 id="businesses_member_revoke_dialog_title" class="modal_title"><?php echo businesses_index_i18n('BUSINESSES_MEMBER_REVOKE_DIALOG_TITLE'); ?></h2>
-        <button type="button" id="businesses_member_revoke_close" class="btn_close" data-dialog-close="businesses_member_revoke_dialog" aria-label="<?php echo businesses_index_i18n('CLOSE'); ?>">&times;</button>
+        <h2 id="businesses_member_revoke_dialog_title" class="modal_title"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBER_REVOKE_DIALOG_TITLE'); ?></h2>
+        <button type="button" id="businesses_member_revoke_close" class="btn_close" data-dialog-close="businesses_member_revoke_dialog" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
       </section>
       <section class="modal_content f_column businesses_member_revoke_dialog_content">
         <p id="businesses_member_revoke_dialog_message" class="businesses_member_revoke_dialog_message"></p>
       </section>
       <section class="modal_footer">
         <div class="flex f_center f_space_around">
-          <button type="submit" id="businesses_member_revoke_confirm" class="btn btn_delete"><?php echo businesses_index_i18n('BUSINESSES_REVOKE'); ?></button>
-          <button type="button" id="businesses_member_revoke_cancel" class="btn btn_secondary"><?php echo businesses_index_i18n('CANCEL'); ?></button>
+          <button type="submit" id="businesses_member_revoke_confirm" class="btn btn_delete"><?php echo businesses_index_i18n_html('BUSINESSES_REVOKE'); ?></button>
+          <button type="button" id="businesses_member_revoke_cancel" class="btn btn_secondary"><?php echo businesses_index_i18n_html('CANCEL'); ?></button>
         </div>
       </section>
     </form>
@@ -36,13 +36,13 @@ namespace PayCal\Domain;
     data-dialog-close-on-backdrop="true"
   >
     <section class="modal_header">
-      <h2 id="businesses_member_reports_dialog_title" class="modal_title"><?php echo businesses_index_i18n('BUSINESSES_MEMBER_REPORTS_DIALOG_TITLE'); ?></h2>
-      <button type="button" id="businesses_member_reports_close" class="btn_close" data-dialog-close="businesses_member_reports_dialog" aria-label="<?php echo businesses_index_i18n('CLOSE'); ?>">&times;</button>
+      <h2 id="businesses_member_reports_dialog_title" class="modal_title"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBER_REPORTS_DIALOG_TITLE'); ?></h2>
+      <button type="button" id="businesses_member_reports_close" class="btn_close" data-dialog-close="businesses_member_reports_dialog" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
     </section>
     <section class="modal_content businesses_member_reports_dialog_content">
       <div id="businesses_member_reports_dialog_body" class="businesses_member_reports_dialog_body earnings_member_reports_mount" role="region" aria-live="polite" aria-busy="false"></div>
     </section>
     <section class="modal_footer">
-      <button type="button" class="btn btn_secondary" data-dialog-close="businesses_member_reports_dialog"><?php echo businesses_index_i18n('CLOSE'); ?></button>
+      <button type="button" class="btn btn_secondary" data-dialog-close="businesses_member_reports_dialog"><?php echo businesses_index_i18n_html('CLOSE'); ?></button>
     </section>
   </dialog>

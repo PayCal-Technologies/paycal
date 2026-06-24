@@ -21,6 +21,8 @@ use PayCal\Domain\UserRepository;
  */
 final class FederatedAuthController
 {
+  private const SETTINGS_CSRF_FORM_TYPE = 'settings';
+
   /**
    * Return available federated sign-in providers.
    */
@@ -200,8 +202,7 @@ final class FederatedAuthController
     }
 
     $userUUID = User::generateUserUUID();
-    $placeholderPasswordHash = password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT);
-    UserRepository::setUser($userUUID, $placeholderPasswordHash, $email, AuthLevel::USER, $fullName, '', '');
+    UserRepository::setUser($userUUID, $email, AuthLevel::USER, $fullName, '', '');
     Database::hset(Keys::USER . ':' . $userUUID, [
       'email_verified' => '1',
       'email_verified_at' => (string) time(),
@@ -248,6 +249,10 @@ final class FederatedAuthController
     }
 
     $body = $this->jsonBody();
+    if (!$this->requireSettingsCsrfToken($body)) {
+      return;
+    }
+
     $providerId = strtolower(trim($this->scalarString($body['provider'] ?? '')));
     if ($providerId !== 'google') {
       Response::error('[Auth] Federated provider unavailable.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -258,6 +263,22 @@ final class FederatedAuthController
     Response::success('[Auth] Federated provider unlinked.', [
       'providers' => FederatedAuth::linkedProvidersForUser($userUUID),
     ]);
+  }
+
+  /** @param array<string, mixed> $body */
+  private function requireSettingsCsrfToken(array $body): bool
+  {
+    $csrfToken = $this->scalarString($body['csrf_token'] ?? '');
+    if ($csrfToken === '') {
+      $csrfToken = $this->scalarString($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+    }
+
+    if ($csrfToken === '' || !User::current()->verifyFormNonce(self::SETTINGS_CSRF_FORM_TYPE, $csrfToken)) {
+      Response::error('[Auth] CSRF token invalid or missing.', [], HttpStatus::HTTP_FORBIDDEN);
+      return false;
+    }
+
+    return true;
   }
 
   /** @return array<string, mixed> */

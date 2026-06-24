@@ -272,7 +272,6 @@ final class EncryptionTamperDetectionTest extends TestCase
   {
     UserRepository::setUser(
       $this->userUUID,
-      password_hash('dummy', PASSWORD_DEFAULT),
       $this->email,
       \PayCal\Domain\AuthLevel::USER,
       'Tamper Test User',

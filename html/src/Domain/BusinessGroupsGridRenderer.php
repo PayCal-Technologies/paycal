@@ -168,8 +168,8 @@ final class BusinessGroupsGridRenderer
     $grid->enableSorting();
     $grid->enableColumnVisibility();
     $grid->addColumn('name', Strings::i18n('BUSINESS_GROUPS_COL_GROUP'), true, 'minmax(14rem, 3fr)', null, true, false, true);
-    $grid->addColumn('member_count', Strings::i18n('BUSINESS_GROUPS_COL_MEMBERS'), true, 'minmax(5rem, 0.7fr)', 'right');
-    $grid->addColumn('site_count', Strings::i18n('BUSINESS_GROUPS_COL_SITES'), true, 'minmax(5rem, 0.7fr)', 'right');
+    $grid->addColumn('member_count', Strings::i18n('BUSINESS_GROUPS_COL_MEMBERS'), true, 'minmax(5rem, 0.7fr)', 'right', false);
+    $grid->addColumn('site_count', Strings::i18n('BUSINESS_GROUPS_COL_SITES'), true, 'minmax(5rem, 0.7fr)', 'right', false);
     $grid->addColumn('hours', Strings::i18n('BUSINESS_GROUPS_COL_HOURS'), true, 'minmax(5rem, 0.8fr)', 'right');
     $grid->addColumn('work_gross', Strings::i18n('BUSINESS_GROUPS_COL_WORK_GROSS'), true, 'minmax(6rem, 1fr)', 'right');
     $grid->addColumn('updated_at', Strings::i18n('BUSINESS_GROUPS_COL_UPDATED'), true, 'minmax(10rem, 1fr)');
@@ -217,10 +217,7 @@ final class BusinessGroupsGridRenderer
    */
   public function loadingSkeleton(): string
   {
-    $cell = '<span class="sk-line businesses_datagrid_skeleton_cell"></span>';
-    $row = '<div class="skeleton businesses_datagrid_skeleton_row">' . str_repeat($cell, 6) . '</div>';
-
-    return str_repeat($row, 4);
+    return DataGrid::loadingSkeleton(6, 4);
   }
 
   /**

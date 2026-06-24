@@ -92,24 +92,4 @@ final class SecurityLog
     ]);
   }
 
-  /**
-   * Log protected mode activated.
-   */
-  public static function logProtectedModeActivated(string $userUUID, string $authMethod): void
-  {
-    self::log('protected_mode_activated', [
-      'auth_method' => $authMethod,
-    ]);
-  }
-
-  /**
-   * Log protected mode mutation blocked.
-   */
-  public static function logProtectedModeMutationBlocked(string $userUUID, string $method, string $route): void
-  {
-    self::log('protected_mode_mutation_blocked', [
-      'method' => strtoupper($method),
-      'route' => $route,
-    ]);
-  }
 }

@@ -2,6 +2,8 @@
 
 namespace Tests\Integration;
 
+require_once __DIR__ . '/Support/EncryptedWorkTestUser.php';
+
 use PayCal\Controllers\SettingsController;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Database;
@@ -68,7 +70,6 @@ final class SettingsControllerIntegrationTest extends TestCase
 
     UserRepository::setUser(
       $userUUID,
-      password_hash('secret', PASSWORD_DEFAULT),
       $email,
       AuthLevel::USER,
       'Settings Test User',

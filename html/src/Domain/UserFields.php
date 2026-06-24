@@ -32,13 +32,11 @@ enum UserFields: string
   case FULL_NAME = 'full_name';
   case EMAIL = 'email';
   case PHONE = 'phone';
-  case PASSWORD_HASH = 'password_hash';
 
   // E2E encryption salt
   case ENCRYPTION_SALT = 'encryption_salt';
 
   // DEK wrapping
-  case WRAPPED_DEK = 'wrapped_dek';
   case WRAPPED_DEK_PASSKEY = 'wrapped_dek_passkey';
   case DEK_VERSION = 'dek_version';
   case CRYPTO_VERSION = 'crypto_version';

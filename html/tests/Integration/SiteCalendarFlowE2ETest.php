@@ -29,7 +29,6 @@ final class SiteCalendarFlowE2ETest extends TestCase
 
     UserRepository::setUser(
       $this->userUUID,
-      password_hash('test-password', PASSWORD_DEFAULT),
       'site-calendar-e2e-' . substr($this->userUUID, 1) . '@example.test',
       AuthLevel::USER,
       'Site Calendar E2E User',

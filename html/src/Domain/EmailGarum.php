@@ -345,56 +345,12 @@ class EmailGarum
   /**
    * Resolve the verification link base URL.
    *
-   * Prefer the current request host to keep verification links environment-local
-   * (for example: dev.paycal.app stays on dev). Fall back to configured app base URL
-   * for CLI contexts where HTTP server variables are not available.
+   * Verification and code emails carry account secrets, so their links must not
+   * inherit request-controlled Host or forwarded-host headers.
    */
   private static function resolveVerificationBaseUrl(): string
   {
-    // Only trust X-Forwarded-Host when the request originates from a known
-    // infrastructure proxy. Accepting it unconditionally allows any attacker
-    // to inject an arbitrary hostname and redirect verification links to a
-    // phishing domain. Apply the same trusted-proxy gate used by Security and
-    // BillingController for all forwarded-header handling.
-    $remoteAddr = isset($_SERVER['REMOTE_ADDR']) && is_string($_SERVER['REMOTE_ADDR'])
-      ? $_SERVER['REMOTE_ADDR'] : '';
-    $forwardedHost = '';
-    if ($remoteAddr !== '' && Security::isTrustedProxy($remoteAddr)) {
-      $forwardedHost = isset($_SERVER['HTTP_X_FORWARDED_HOST']) && is_string($_SERVER['HTTP_X_FORWARDED_HOST'])
-        ? trim($_SERVER['HTTP_X_FORWARDED_HOST'])
-        : '';
-    }
-    $httpHost = isset($_SERVER['HTTP_HOST']) && is_string($_SERVER['HTTP_HOST'])
-      ? trim($_SERVER['HTTP_HOST'])
-      : '';
-    $rawHost = $forwardedHost !== '' ? $forwardedHost : $httpHost;
-
-    if ($rawHost === '') {
-      return Environment::appBaseURL();
-    }
-
-    // If multiple hosts are provided by a proxy, use the first entry.
-    $host = trim(explode(',', $rawHost)[0]);
-
-    if (preg_match('/^[a-zA-Z0-9.:-]+$/', $host) !== 1) {
-      return Environment::appBaseURL();
-    }
-
-    $forwardedProto = isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && is_string($_SERVER['HTTP_X_FORWARDED_PROTO'])
-      ? trim($_SERVER['HTTP_X_FORWARDED_PROTO'])
-      : '';
-    $https = isset($_SERVER['HTTPS']) && is_string($_SERVER['HTTPS'])
-      ? strtolower($_SERVER['HTTPS'])
-      : '';
-    $scheme = $forwardedProto !== ''
-      ? strtolower(explode(',', $forwardedProto)[0])
-      : (($https !== '' && $https !== 'off') ? 'https' : 'http');
-
-    if ($scheme !== 'http' && $scheme !== 'https') {
-      $scheme = 'https';
-    }
-
-    return rtrim($scheme.'://'.$host, '/');
+    return Environment::appBaseURL();
   }
 
   /**
@@ -746,7 +702,7 @@ class EmailGarum
     $detailLineHtml = $detailSafe !== '' ? '<p style="margin:0 0 14px;">' . $detailSafe . '</p>' : '';
     $detailLineText = $eventDetail !== '' ? "\n{$eventDetail}\n" : "\n";
 
-    $htmlBody = '<!doctype html><html><body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.45;color:#1f2937;">'
+    $htmlBody = '<!doctype html><html><body style="font-family:system-ui,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Arial,sans-serif;line-height:1.45;color:#1f2937;">'
       . '<h2 style="margin:0 0 12px;">Business Notification</h2>'
       . '<p style="margin:0 0 14px;">Hello ' . $nameSafe . ',</p>'
       . '<p style="margin:0 0 14px;"><strong>' . $eventSafe . '</strong> in <strong>' . $businessSafe . '</strong>.</p>'

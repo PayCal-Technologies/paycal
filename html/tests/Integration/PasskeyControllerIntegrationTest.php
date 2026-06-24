@@ -65,6 +65,69 @@ final class PasskeyControllerIntegrationTest extends TestCase
     return $decoded;
   }
 
+  /**
+   * @return array<string, mixed>
+   */
+  private function runAuthenticatedPasskeyCall(string $method, array $payload = [], array $sessionFields = [], bool $seedCredential = false): array
+  {
+    $bootstrap = var_export(__DIR__ . '/../../bootstrap/Classes.php', true);
+    $method = var_export($method, true);
+    $jsonPayload = var_export(json_encode($payload), true);
+    $sessionFieldsExport = var_export($sessionFields, true);
+    $seedCredentialLiteral = $seedCredential ? 'true' : 'false';
+    $script = 'require ' . $bootstrap . '; '
+      . '$userUUID = "passkey-it-" . bin2hex(random_bytes(6)); '
+      . '$sessionHash = bin2hex(random_bytes(16)); '
+      . '$credentialId = "passkey-credential-" . bin2hex(random_bytes(8)); '
+      . '\\PayCal\\Domain\\Database::hset(\\PayCal\\Domain\\Constants\\Keys::USER . ":" . $userUUID, ['
+      . '"user_uuid" => $userUUID, '
+      . '"email" => "passkey-" . bin2hex(random_bytes(4)) . "@example.com", '
+      . '"full_name" => "Passkey Integration", '
+      . '"email_verified" => "1", '
+      . '"webauthn_enabled" => "1"'
+      . ']); '
+      . '$sessionFields = array_merge(["user_uuid" => $userUUID, "created_at" => (string) time(), "last_activity" => (string) time()], ' . $sessionFieldsExport . '); '
+      . '\\PayCal\\Domain\\Database::hset(\\PayCal\\Domain\\Constants\\Keys::SESSION . ":" . $sessionHash, $sessionFields); '
+      . '\\PayCal\\Domain\\Database::expire(\\PayCal\\Domain\\Constants\\Keys::SESSION . ":" . $sessionHash, 3600); '
+      . 'if (' . $seedCredentialLiteral . ') { '
+      . '\\PayCal\\Domain\\Database::sadd(\\PayCal\\Domain\\Constants\\Keys::webauthnUserCredentials($userUUID), $credentialId); '
+      . '\\PayCal\\Domain\\Database::hset(\\PayCal\\Domain\\Constants\\Keys::webauthnCredential($credentialId), ["credential_id" => $credentialId, "user_uuid" => $userUUID, "public_key_pem" => "test", "revoked_at" => ""]); '
+      . '} '
+      . '$_COOKIE["PAYCAL_AUTH"] = $sessionHash; '
+      . '$_SERVER["REQUEST_METHOD"] = "POST"; '
+      . '$_SERVER["REMOTE_ADDR"] = "127.0.0.1"; '
+      . '$_SERVER["CONTENT_TYPE"] = "application/json"; '
+      . '$GLOBALS["mock_php_input_passkey"] = ' . $jsonPayload . '; '
+      . 'class MockPhpInputStreamPasskeyAuth {'
+      . '  public $context;'
+      . '  public int $position = 0;'
+      . '  public function stream_open(string $path, string $mode, int $options, ?string &$opened_path): bool { $this->position = 0; return true; }'
+      . '  public function stream_read(int $count): string { $data = (string)($GLOBALS["mock_php_input_passkey"] ?? ""); $chunk = substr($data, $this->position, $count); $this->position += strlen($chunk); return $chunk; }'
+      . '  public function stream_eof(): bool { $data = (string)($GLOBALS["mock_php_input_passkey"] ?? ""); return $this->position >= strlen($data); }'
+      . '  public function stream_stat(): array { return []; }'
+      . '}'
+      . 'stream_wrapper_unregister("php"); '
+      . 'stream_wrapper_register("php", "MockPhpInputStreamPasskeyAuth"); '
+      . 'ob_start(); '
+      . '$c = new \\PayCal\\Controllers\\PasskeyController(); '
+      . '$m = ' . $method . '; '
+      . '$c->{$m}(); '
+      . 'stream_wrapper_restore("php"); '
+      . '$out = ob_get_clean(); '
+      . 'if (' . $seedCredentialLiteral . ') { '
+      . '\\PayCal\\Domain\\Database::srem(\\PayCal\\Domain\\Constants\\Keys::webauthnUserCredentials($userUUID), $credentialId); '
+      . '\\PayCal\\Domain\\Database::unlink(\\PayCal\\Domain\\Constants\\Keys::webauthnCredential($credentialId)); '
+      . '} '
+      . '\\PayCal\\Domain\\Database::unlink(\\PayCal\\Domain\\Constants\\Keys::SESSION . ":" . $sessionHash); '
+      . '\\PayCal\\Domain\\Database::unlink(\\PayCal\\Domain\\Constants\\Keys::USER . ":" . $userUUID); '
+      . 'echo $out;';
+
+    $output = shell_exec(escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg($script));
+    $this->assertNotFalse($output);
+
+    return $this->decodeJsonPayload((string) $output);
+  }
+
   public function testSignupStartRejectsMissingFullName(): void
   {
     $decoded = $this->runPasskeyCall('signupStart', []);
@@ -100,5 +163,18 @@ final class PasskeyControllerIntegrationTest extends TestCase
 
     $this->assertSame('error', $decoded['status'] ?? null);
     $this->assertStringContainsString('unauthorized', strtolower((string) ($decoded['message'] ?? '')));
+  }
+
+  public function testRegisterStartRequiresStepUpWhenAccountAlreadyHasPasskey(): void
+  {
+    $decoded = $this->runAuthenticatedPasskeyCall('registerStart', [
+      'deviceName' => 'Attacker Device',
+    ], [
+      'auth_strength' => 'standard',
+    ], true);
+
+    $this->assertSame('error', $decoded['status'] ?? null);
+    $this->assertTrue((bool) ($decoded['step_up_required'] ?? false));
+    $this->assertStringContainsString('passkey confirmation required', strtolower((string) ($decoded['message'] ?? '')));
   }
 }

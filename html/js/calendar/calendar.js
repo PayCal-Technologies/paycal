@@ -429,15 +429,6 @@
       });
     });
 
-    window.addEventListener('beforeunload', () => {
-      void zeroizeCryptoState('beforeunload', { strict: true }).catch((err) => {
-        cryptoLog('[CRYPTO] Strict beforeunload zeroize failed', {
-          reason: 'beforeunload',
-          error: err?.message || String(err),
-        });
-      });
-    });
-
     const activityEvents = ['pointerdown', 'keydown', 'touchstart', 'focus'];
     activityEvents.forEach((eventName) => {
       document.addEventListener(eventName, () => {
@@ -762,15 +753,6 @@
         }
       };
 
-      // eslint-disable-next-line no-unused-vars -- intentional stub: password fallback is reserved for future re-enablement
-      const unlockWithPasswordFallback = async () => {
-        if (!interactive) {
-          return false;
-        }
-        cryptoLog('[CRYPTO] Password fallback disabled; passkey unlock required');
-        return false;
-      };
-
       const tryPasskeyUnwrapFromEnvelope = async (wrappedEnvelopeBase64, sourceLabel) => {
       if (!wrappedEnvelopeBase64 || !PayCalCryptoState.credentialId) {
         return false;
@@ -922,19 +904,6 @@
       }
     }
 
-    if (PayCalCryptoState.credentialId && !bootstrapData.wrappedDekPasskey && bootstrapData.wrappedDek) {
-      cryptoLog('[CRYPTO] No passkey wrapper found for active credential; password fallback is disabled');
-
-      // Compatibility path: some historical accounts may have passkey envelope data
-      // stored in wrappedDek (or migrated incompletely). Try passkey unwrap before prompt.
-      const recoveredFromLegacyEnvelope = await tryPasskeyUnwrapFromEnvelope(bootstrapData.wrappedDek, 'wrappedDek_compat');
-      if (recoveredFromLegacyEnvelope) {
-        return true;
-      }
-
-      return false;
-    }
-
     if (PayCalCryptoState.credentialId && !bootstrapData.wrappedDekPasskey && bootstrapData.wrappedCredentialCount > 0) {
       cryptoLog('[CRYPTO] Existing passkey wrappers belong to other credentials; refusing DEK regeneration', {
         credentialFp: safeFingerprint(PayCalCryptoState.credentialId || ''),
@@ -943,7 +912,7 @@
       return false;
     }
 
-    if (PayCalCryptoState.credentialId && !bootstrapData.wrappedDekPasskey && !bootstrapData.wrappedDek) {
+    if (PayCalCryptoState.credentialId && !bootstrapData.wrappedDekPasskey) {
       cryptoLog('[CRYPTO] No existing DEK wrappers found; generating new passkey-backed DEK');
       // Continue to first-time DEK generation path below.
     }
@@ -954,14 +923,13 @@
     }
 
     // Hard safety guard: do not regenerate DEK when any wrapper already exists.
-    if (bootstrapData.wrappedDek || bootstrapData.wrappedDekPasskey || bootstrapData.wrappedCredentialCount > 0) {
+    if (bootstrapData.wrappedDekPasskey || bootstrapData.wrappedCredentialCount > 0) {
       throw new Error('[CRYPTO] DEK regeneration forbidden while wrapped DEK exists');
     }
 
     // Generate new DEK and wrap with active session credential
     // This runs only for first-time setup with no existing wrappers.
     cryptoLog('[CRYPTO] Generating new DEK', {
-      hasExistingWrappedDekPassword: !!bootstrapData.wrappedDek,
       hasExistingWrappedDek: !!bootstrapData.wrappedDekPasskey,
       credentialFp: safeFingerprint(PayCalCryptoState.credentialId || ''),
     });

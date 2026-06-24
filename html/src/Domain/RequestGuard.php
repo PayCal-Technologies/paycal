@@ -110,6 +110,7 @@ final class RequestGuard
   * @param array<int,string> $droppedKeys Optional output list of ignored POST keys
   * @param array<int,string> $base64ImageStrings Optional allowlist keys that must be treated as base64 image payloads
   * @param array<int,string> $rawStrings Optional allowlist keys that should use postRaw() only
+  * @param string $csrfFormType Optional form namespace requiring csrf_token validation
    *
    * @return array<string, null|array<mixed>|bool|float|int|string>|false
    */
@@ -118,7 +119,8 @@ final class RequestGuard
     array $allowedArrays = [],
     array &$droppedKeys = [],
     array $base64ImageStrings = [],
-    array $rawStrings = []
+    array $rawStrings = [],
+    string $csrfFormType = ''
   ): array|false
   {
     $droppedKeys = [];
@@ -140,6 +142,12 @@ final class RequestGuard
         ],
         HttpStatus::HTTP_SERVICE_UNAVAILABLE
       );
+
+      return false;
+    }
+
+    if ($csrfFormType !== '' && !self::verifyCsrfToken($csrfFormType)) {
+      \PayCal\Domain\Response::error('[PF] CSRF token invalid or missing.', [], HttpStatus::HTTP_FORBIDDEN);
 
       return false;
     }
@@ -230,6 +238,19 @@ final class RequestGuard
   }
 
   /**
+   * Validate a session-bound form nonce for browser-authenticated mutations.
+   */
+  private static function verifyCsrfToken(string $formType): bool
+  {
+    $csrfToken = InputSanitizer::postString('csrf_token');
+    if ($csrfToken === '') {
+      return false;
+    }
+
+    return User::current()->verifyFormNonce($formType, $csrfToken);
+  }
+
+  /**
    * Minimal ID validation for DELETE.
    */
   public static function deleteCheck(?string $param): false|string
@@ -289,4 +310,3 @@ final class RequestGuard
     return InputSanitizer::SanitizeString($param);
   }
 }
-

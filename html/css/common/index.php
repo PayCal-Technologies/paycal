@@ -144,16 +144,24 @@ $fontXl = $resolveCssLength( strtolower(trim((string) \PayCal\Domain\Config\Syst
 $fontWeight = $resolveFontWeight(\PayCal\Domain\Config\SystemConfig::get('font_weight_base'), '500');
 $sansSerif = $sanitizeFontFamily(
   \PayCal\Domain\Config\SystemConfig::get('font_family_sans'),
-  'Roboto, "Open Sans", Lato, Nunito, Verdana, Helvetica, Arial, sans-serif'
+  'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif'
 );
 $serif = $sanitizeFontFamily(
   \PayCal\Domain\Config\SystemConfig::get('font_family_serif'),
-  'Merriweather, Garamond, "Times New Roman", serif'
+  'Georgia, "Times New Roman", Times, serif'
 );
 $monospace = $sanitizeFontFamily(
   \PayCal\Domain\Config\SystemConfig::get('font_family_monospace'),
-  '"Courier New", Courier, monospace'
+  'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace'
 );
+$legacyFontStackMap = [
+  'Roboto, "Open Sans", Lato, Nunito, Verdana, Helvetica, Arial, sans-serif' => 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+  'Merriweather, Garamond, "Times New Roman", serif' => 'Georgia, "Times New Roman", Times, serif',
+  '"Courier New", Courier, monospace' => 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+];
+$sansSerif = $legacyFontStackMap[$sansSerif] ?? $sansSerif;
+$serif = $legacyFontStackMap[$serif] ?? $serif;
+$monospace = $legacyFontStackMap[$monospace] ?? $monospace;
 
 $navBarStickiness = "static";
 
@@ -250,7 +258,7 @@ $navBarStickiness = "static";
   font-family: 'Atkinson Hyperlegible';
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  font-display: optional;
   src: url('/fonts/atkinson-hyperlegible-400.ttf') format('truetype');
 }
 
@@ -258,7 +266,7 @@ $navBarStickiness = "static";
   font-family: 'Atkinson Hyperlegible';
   font-style: normal;
   font-weight: 700;
-  font-display: swap;
+  font-display: optional;
   src: url('/fonts/atkinson-hyperlegible-700.ttf') format('truetype');
 }
 
@@ -266,7 +274,7 @@ $navBarStickiness = "static";
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  font-display: optional;
   src: url('/fonts/lexend-400.ttf') format('truetype');
 }
 
@@ -274,7 +282,7 @@ $navBarStickiness = "static";
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 700;
-  font-display: swap;
+  font-display: optional;
   src: url('/fonts/lexend-700.ttf') format('truetype');
 }
 
@@ -282,7 +290,7 @@ $navBarStickiness = "static";
   font-family: 'OpenDyslexic';
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  font-display: optional;
   src: url('/fonts/open-dyslexic-400.woff2') format('woff2');
 }
 
@@ -290,7 +298,7 @@ $navBarStickiness = "static";
   font-family: 'OpenDyslexic';
   font-style: normal;
   font-weight: 700;
-  font-display: swap;
+  font-display: optional;
   src: url('/fonts/open-dyslexic-700.woff2') format('woff2');
 }
 
@@ -298,7 +306,7 @@ $navBarStickiness = "static";
   font-family: 'Atkinson Hyperlegible Mono';
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  font-display: optional;
   src: url('/fonts/atkinson-hyperlegible-mono-400.ttf') format('truetype');
 }
 
@@ -306,13 +314,13 @@ $navBarStickiness = "static";
   font-family: 'Atkinson Hyperlegible Mono';
   font-style: normal;
   font-weight: 700;
-  font-display: swap;
+  font-display: optional;
   src: url('/fonts/atkinson-hyperlegible-mono-700.ttf') format('truetype');
 }
 
 html[data-a11y-dyslexia-typography="on"] {
   --sans-serif: "Atkinson Hyperlegible", "Lexend", "OpenDyslexic", "Segoe UI", Verdana, Arial, sans-serif;
-  --monospace: "Atkinson Hyperlegible Mono", Menlo, Monaco, "Courier New", Courier, monospace;
+  --monospace: "Atkinson Hyperlegible Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
 
 html[data-a11y-dyslexia-typography="on"] body,
@@ -358,6 +366,28 @@ html[data-a11y-reduced-motion="on"] *::after {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 120ms;
+  animation-timing-function: ease-out;
+}
+
+html[data-a11y-reduced-motion="on"]::view-transition-old(root),
+html[data-a11y-reduced-motion="on"]::view-transition-new(root) {
+  animation-duration: 1ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-a11y-reduced-motion="system"]::view-transition-old(root),
+  html[data-a11y-reduced-motion="system"]::view-transition-new(root) {
+    animation-duration: 1ms;
   }
 }
 
@@ -1397,7 +1427,7 @@ input, select, textarea {
   color: var(--button-primary-text-active, var(--button-primary-text));
 }
 
-input[type=text], input[type=password],input[type=email], input[type=tel], input[type=date] {
+input[type=text], input[type=email], input[type=tel], input[type=date] {
   width: 100%;
   background-color: var(--button-bg);
   cursor: text;
@@ -2959,7 +2989,6 @@ input[type="reset"]:focus-visible,
 
 /* Form inputs */
 input[type="text"]:focus-visible,
-input[type="password"]:focus-visible,
 input[type="email"]:focus-visible,
 input[type="tel"]:focus-visible,
 input[type="date"]:focus-visible,

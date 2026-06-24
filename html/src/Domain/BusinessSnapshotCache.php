@@ -57,12 +57,11 @@ final class BusinessSnapshotCache
       return;
     }
 
-    Database::hset(Keys::businessSnapshot($businessId), [
+    Database::hsetex(Keys::businessSnapshot($businessId), [
       'snapshot_version' => $snapshot->snapshot_version,
       'payload' => $encoded,
       'generated_at' => $snapshot->generated_at !== '' ? $snapshot->generated_at : date('c'),
-    ]);
-    Database::expire(Keys::businessSnapshot($businessId), self::TTL_SECONDS);
+    ], self::TTL_SECONDS);
   }
 
   /**

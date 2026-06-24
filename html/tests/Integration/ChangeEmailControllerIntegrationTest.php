@@ -35,7 +35,6 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
             'full_name' => 'Test User',
             'email_verified' => '1',
             'auth_level' => (string) AuthLevel::USER->value,
-            'password_hash' => password_hash('password123', PASSWORD_DEFAULT),
             'recovery_email' => $this->recoveryEmail,
             'recovery_email_verified' => '1',
             'recovery_email_verified_at' => date('c'),
@@ -70,8 +69,18 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
         
         // Clean up rate limit keys
         Database::unlink('email_change:start_count:daily:' . $this->testUserUUID);
+        Database::unlink('change_email:starts:' . $this->testUserUUID);
         Database::unlink('email_change:resend_cooldown:' . $this->testUserUUID);
         Database::unlink('email_change:resend_count:hourly:' . $this->testUserUUID);
+        foreach (Database::scanKeys('user:' . $this->testUserUUID . ':csrf:settings:*') as $key) {
+            Database::unlink((string) $key);
+        }
+        foreach (Database::scanKeys('email_change:txn:*') as $key) {
+            $userUuid = (string) Database::hget((string) $key, 'user_uuid');
+            if ($userUuid === $this->testUserUUID) {
+                Database::unlink((string) $key);
+            }
+        }
         
         unset($_COOKIE['PAYCAL_AUTH']);
         unset($_SERVER['REQUEST_METHOD']);
@@ -79,6 +88,124 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
         unset($_POST);
 
         parent::tearDown();
+    }
+
+    private function createSettingsCsrfToken(): string
+    {
+        $nonce = bin2hex(random_bytes(32));
+        Database::set('user:' . $this->testUserUUID . ':csrf:settings:' . $nonce, (string) time(), 3600);
+
+        return $nonce;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    private function withSettingsCsrfToken(array $payload): array
+    {
+        $payload['csrf_token'] = $this->createSettingsCsrfToken();
+
+        return $payload;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    private function normalizePostPayload(array $payload): array
+    {
+        return json_decode(json_encode($payload, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function callChangeEmailEndpoint(string $method): array
+    {
+        $controller = new ChangeEmailController();
+        ob_start();
+        $controller->{$method}();
+        $output = ob_get_clean();
+
+        $response = json_decode((string) $output, true);
+        $this->assertIsArray($response);
+
+        return $response;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, string> $server
+     * @return array<string, mixed>
+     */
+    private function invokeChangeEmailJson(string $method, array $payload, array $server = []): array
+    {
+        $bootstrap = var_export(__DIR__ . '/../../bootstrap/Classes.php', true);
+        $methodLiteral = var_export($method, true);
+        $sessionHash = var_export($this->testSessionHash, true);
+        $json = var_export((string) json_encode($payload), true);
+        $serverLiteral = var_export($server, true);
+
+        $script = <<<'PHP'
+if (!class_exists('ChangeEmailControllerInputStream')) {
+  final class ChangeEmailControllerInputStream
+  {
+    public mixed $context;
+    private int $position = 0;
+
+    public function stream_open(string $path, string $mode, int $options, ?string &$openedPath): bool
+    {
+      $this->position = 0;
+      return true;
+    }
+
+    public function stream_read(int $count): string
+    {
+      $data = (string) ($GLOBALS['change_email_controller_input'] ?? '');
+      $chunk = substr($data, $this->position, $count);
+      $this->position += strlen($chunk);
+      return $chunk;
+    }
+
+    public function stream_eof(): bool
+    {
+      $data = (string) ($GLOBALS['change_email_controller_input'] ?? '');
+      return $this->position >= strlen($data);
+    }
+
+    public function stream_stat(): array
+    {
+      return [];
+    }
+  }
+}
+PHP;
+
+        $script .= ' if (!defined("PHPUNIT_COMPOSER_INSTALL")) { define("PHPUNIT_COMPOSER_INSTALL", "1"); }'
+            . ' require ' . $bootstrap . ';'
+            . ' $GLOBALS["change_email_controller_input"] = ' . $json . ';'
+            . ' $_COOKIE["PAYCAL_AUTH"] = ' . $sessionHash . ';'
+            . ' $_SERVER["REQUEST_METHOD"] = "POST";'
+            . ' $_SERVER["REMOTE_ADDR"] = "127.0.0.1";'
+            . ' $_SERVER["CONTENT_TYPE"] = "application/json";'
+            . ' $_SERVER = array_merge($_SERVER, ' . $serverLiteral . ');'
+            . ' stream_wrapper_unregister("php");'
+            . ' stream_wrapper_register("php", ChangeEmailControllerInputStream::class);'
+            . ' $method = ' . $methodLiteral . ';'
+            . ' ob_start();'
+            . ' try { $controller = new \PayCal\Controllers\ChangeEmailController(); $controller->{$method}(); $out = ob_get_clean(); }'
+            . ' finally { stream_wrapper_restore("php"); unset($GLOBALS["change_email_controller_input"]); }'
+            . ' $decoded = json_decode($out, true);'
+            . ' if (is_array($decoded)) { $decoded["__http_code"] = (int) http_response_code(); echo json_encode($decoded); } else { echo $out; }';
+
+        $output = shell_exec(escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg($script));
+        $this->assertNotFalse($output, 'Controller subprocess failed.');
+
+        $decoded = json_decode((string) $output, true);
+        $this->assertIsArray($decoded, 'Expected controller JSON output: ' . (string) $output);
+
+        return $decoded;
     }
 
     /**
@@ -107,9 +234,9 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
      */
     public function testStartAcceptsValidNewEmail(): void
     {
-        $_POST = json_decode(json_encode([
+        $_POST = $this->normalizePostPayload($this->withSettingsCsrfToken([
             'new_email' => $this->newEmail,
-        ], JSON_THROW_ON_ERROR), true);
+        ]));
 
         $controller = new ChangeEmailController();
         ob_start();
@@ -123,13 +250,58 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
     }
 
     /**
+     * Test change email start accepts a production-shaped JSON body CSRF token.
+     */
+    public function testStartAcceptsJsonBodySettingsCsrfToken(): void
+    {
+        $response = $this->invokeChangeEmailJson('start', [
+            'new_email' => $this->newEmail,
+            'csrf_token' => $this->createSettingsCsrfToken(),
+        ]);
+
+        $this->assertSame('success', $response['status'] ?? null, json_encode($response));
+        $this->assertSame(200, (int) ($response['__http_code'] ?? 0));
+        $this->assertArrayHasKey('txn_id', $response);
+    }
+
+    /**
+     * Test change email start accepts a valid settings CSRF header.
+     */
+    public function testStartAcceptsJsonRequestWithSettingsCsrfHeader(): void
+    {
+        $response = $this->invokeChangeEmailJson(
+            'start',
+            ['new_email' => $this->newEmail],
+            ['HTTP_X_CSRF_TOKEN' => $this->createSettingsCsrfToken()],
+        );
+
+        $this->assertSame('success', $response['status'] ?? null, json_encode($response));
+        $this->assertSame(200, (int) ($response['__http_code'] ?? 0));
+        $this->assertArrayHasKey('txn_id', $response);
+    }
+
+    /**
+     * Test change email start rejects production-shaped JSON without CSRF.
+     */
+    public function testStartRejectsJsonRequestWithoutSettingsCsrfToken(): void
+    {
+        $response = $this->invokeChangeEmailJson('start', [
+            'new_email' => $this->newEmail,
+        ]);
+
+        $this->assertSame('error', $response['status'] ?? null, json_encode($response));
+        $this->assertSame(403, (int) ($response['__http_code'] ?? 0));
+        $this->assertStringContainsString('csrf', strtolower((string) ($response['message'] ?? '')));
+    }
+
+    /**
      * Test change email start rejects invalid email
      */
     public function testStartRejectsInvalidEmail(): void
     {
-        $_POST = json_decode(json_encode([
+        $_POST = $this->normalizePostPayload($this->withSettingsCsrfToken([
             'new_email' => 'not-an-email',
-        ], JSON_THROW_ON_ERROR), true);
+        ]));
 
         $controller = new ChangeEmailController();
         ob_start();
@@ -158,9 +330,9 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
             'user_uuid' => $otherUserUUID,
         ]);
 
-        $_POST = json_decode(json_encode([
+        $_POST = $this->normalizePostPayload($this->withSettingsCsrfToken([
             'new_email' => $this->newEmail,
-        ], JSON_THROW_ON_ERROR), true);
+        ]));
 
         $controller = new ChangeEmailController();
         ob_start();
@@ -187,9 +359,9 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
         Database::set($dailyCountKey, (string)$maxStarts);
         Database::expire($dailyCountKey, 86400);
 
-        $_POST = json_decode(json_encode([
+        $_POST = $this->normalizePostPayload($this->withSettingsCsrfToken([
             'new_email' => $this->newEmail,
-        ], JSON_THROW_ON_ERROR), true);
+        ]));
 
         $controller = new ChangeEmailController();
         ob_start();
@@ -207,11 +379,11 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
      */
     public function testVerifyRejectsInvalidCodes(): void
     {
-        $_POST = json_decode(json_encode([
-            'transaction_id' => 'nonexistent-txn',
+        $_POST = $this->normalizePostPayload($this->withSettingsCsrfToken([
+            'txn_id' => 'nonexistent-txn',
             'old_code' => 'invalid',
             'new_code' => 'invalid',
-        ], JSON_THROW_ON_ERROR), true);
+        ]));
 
         $controller = new ChangeEmailController();
         ob_start();
@@ -229,9 +401,9 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
     public function testCancelMarksTransactionCancelled(): void
     {
         // First create a transaction via start endpoint
-        $_POST = json_decode(json_encode([
+        $_POST = $this->normalizePostPayload($this->withSettingsCsrfToken([
             'new_email' => $this->newEmail,
-        ], JSON_THROW_ON_ERROR), true);
+        ]));
 
         $startController = new ChangeEmailController();
         ob_start();
@@ -244,9 +416,9 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
         $this->assertNotNull($txnId);
 
         // Now cancel it
-        $_POST = json_decode(json_encode([
+        $_POST = $this->normalizePostPayload($this->withSettingsCsrfToken([
             'txn_id' => $txnId,
-        ], JSON_THROW_ON_ERROR), true);
+        ]));
 
         $cancelController = new ChangeEmailController();
         ob_start();
@@ -264,9 +436,9 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
     public function testResendEnforcesCooldown(): void
     {
         // Create a pending transaction via start first.
-        $_POST = json_decode(json_encode([
+        $_POST = $this->normalizePostPayload($this->withSettingsCsrfToken([
             'new_email' => $this->newEmail,
-        ], JSON_THROW_ON_ERROR), true);
+        ]));
 
         $startController = new ChangeEmailController();
         ob_start();
@@ -279,9 +451,9 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
         $txnId = (string) ($startResponse['txn_id'] ?? '');
         $this->assertNotSame('', $txnId);
 
-        $_POST = json_decode(json_encode([
+        $_POST = $this->normalizePostPayload($this->withSettingsCsrfToken([
             'txn_id' => $txnId,
-        ], JSON_THROW_ON_ERROR), true);
+        ]));
 
         $controller = new ChangeEmailController();
         ob_start();
@@ -292,5 +464,37 @@ final class ChangeEmailControllerIntegrationTest extends TestCase
         $this->assertIsArray($response);
         $this->assertFalse($response['success'] ?? false);
         $this->assertStringContainsString('retry in', strtolower($response['message'] ?? ''));
+    }
+
+    /**
+     * Test change email mutations reject browser-forged requests without settings CSRF.
+     */
+    public function testMutationsRejectMissingSettingsCsrfToken(): void
+    {
+        $cases = [
+            'start' => [
+                'new_email' => $this->newEmail,
+            ],
+            'verify' => [
+                'txn_id' => 'nonexistent-txn',
+                'old_code' => 'invalid',
+                'new_code' => 'invalid',
+            ],
+            'resend' => [
+                'txn_id' => 'nonexistent-txn',
+            ],
+            'cancel' => [
+                'txn_id' => 'nonexistent-txn',
+            ],
+        ];
+
+        foreach ($cases as $method => $payload) {
+            $_POST = $this->normalizePostPayload($payload);
+
+            $response = $this->callChangeEmailEndpoint($method);
+
+            $this->assertFalse($response['success'] ?? false, $method . ' should reject missing CSRF token.');
+            $this->assertStringContainsString('csrf', strtolower((string) ($response['message'] ?? '')));
+        }
     }
 }

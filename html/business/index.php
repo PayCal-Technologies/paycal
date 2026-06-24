@@ -63,7 +63,7 @@ if ($workspaceBusinessId !== '' && $currentPage === 'PAGE_BUSINESS_DASHBOARD') {
 
 <div id="business-workspace" class="business_workspace business_dashboard" data-business-subpage="dashboard"<?php echo $workspaceBusinessIdAttr; ?>>
 
-  <h1 class="visually_hidden"><?php echo businesses_index_i18n('BUSINESS_NAV_DASHBOARD'); ?></h1>
+  <h1 class="visually_hidden"><?php echo businesses_index_i18n_html('BUSINESS_NAV_DASHBOARD'); ?></h1>
 
 <?php if ($workspaceBusinessId !== '') {
   require __DIR__ . '/_partials/dashboard_metrics_panel.php';

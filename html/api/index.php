@@ -168,8 +168,6 @@ foreach ($routes as $route) {
   $comparison['params'] = $params;
   $debug['matched_route'] = $comparison;
 
-  ProtectedMode::enforceStepUpForSensitiveRoute($requestMethod, $routePath);
-
   $controllerClass = $route['controller'];
   $action = $route['action'];
 

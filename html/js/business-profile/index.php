@@ -56,7 +56,7 @@ require __DIR__ . '/../business/core/context-header.js.php';
 
   initialize().catch((error) => {
     PW.error(error);
-    const message = error instanceof Error && error.message ? error.message : T.unavailable;
+    const message = PC.resolveThrownMessage(error, T.unavailable);
     PC.showToast(message, 'error', 7000, true);
   });
 })();

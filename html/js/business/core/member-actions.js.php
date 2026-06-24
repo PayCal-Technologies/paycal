@@ -240,12 +240,13 @@
         showToast: (message, type = 'error') => {
           PC.showToast(message, type, 7000, true);
         },
+        resolveThrownMessage: PC.resolveThrownMessage,
       });
 
       announceMembersGridStatus(formatPhpTemplate(T.memberReportsLoadedFor, [resolvedName]));
     } catch (error) {
       debugLog('Error loading member reports:', error);
-      const detailMessage = String(error?.message || '').trim();
+      const detailMessage = PC.resolveThrownMessage(error, '');
       const failureMessage = detailMessage !== '' && !detailMessage.startsWith('Failed to load member reports:')
         ? detailMessage
         : formatMemberNamedMessage(T.memberReportsLoadFailed, resolvedName);

@@ -110,20 +110,20 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
   <h1 class="visually_hidden"><?php echo Strings::i18n('BUSINESS_NAV_MEMBERS'); ?></h1>
 
   <section class="business_members_grid_shell" aria-labelledby="business_members_grid_heading">
-    <h3 id="business_members_grid_heading" class="visually_hidden"><?php echo businesses_index_i18n('BUSINESSES_MEMBERS_H3'); ?></h3>
-    <div class="business_members_metrics_bar" role="status" aria-live="polite" aria-label="<?php echo businesses_index_i18n('BUSINESSES_MEMBERS_METRICS_ARIA'); ?>">
+    <h3 id="business_members_grid_heading" class="visually_hidden"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_H3'); ?></h3>
+    <div class="business_members_metrics_bar" role="status" aria-live="polite" aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_METRICS_ARIA'); ?>">
       <span class="business_members_metric_chip">
-        <span class="business_members_metric_label"><?php echo businesses_index_i18n('BUSINESSES_MEMBERS_METRIC_MEMBERS'); ?></span>
+        <span class="business_members_metric_label"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_METRIC_MEMBERS'); ?></span>
         <span class="business_members_metric_value" id="business_members_metric_members"><?php echo htmlspecialchars((string) ($membersPageMetrics['members'] ?? 0), ENT_QUOTES, 'UTF-8'); ?></span>
       </span>
       <span class="business_members_metric_divider" aria-hidden="true">|</span>
       <span class="business_members_metric_chip">
-        <span class="business_members_metric_label"><?php echo businesses_index_i18n('BUSINESSES_MEMBERS_METRIC_MANAGERS'); ?></span>
+        <span class="business_members_metric_label"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_METRIC_MANAGERS'); ?></span>
         <span class="business_members_metric_value" id="business_members_metric_managers"><?php echo htmlspecialchars((string) ($membersPageMetrics['managers'] ?? 0), ENT_QUOTES, 'UTF-8'); ?></span>
       </span>
       <span class="business_members_metric_divider" aria-hidden="true">|</span>
       <span class="business_members_metric_chip">
-        <span class="business_members_metric_label"><?php echo businesses_index_i18n('BUSINESSES_MEMBERS_METRIC_SITES'); ?></span>
+        <span class="business_members_metric_label"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_METRIC_SITES'); ?></span>
         <span class="business_members_metric_value" id="business_members_metric_sites"><?php echo htmlspecialchars((string) ($membersPageMetrics['sites'] ?? 0), ENT_QUOTES, 'UTF-8'); ?></span>
       </span>
       <span class="business_members_metric_divider" aria-hidden="true">|</span>
@@ -138,16 +138,17 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
     <div id="business_members_bulk_toolbar_mount" class="business_members_bulk_toolbar_mount">
     <div
       id="business_members_bulk_toolbar"
-      class="business_members_bulk_toolbar business_members_bulk_toolbar_compact hidden"
-      aria-label="<?php echo businesses_index_i18n('BUSINESSES_MEMBERS_BULK_TOOLBAR_ARIA'); ?>"
+      class="business_members_bulk_toolbar business_members_bulk_toolbar_compact"
+      aria-hidden="true"
+      aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_BULK_TOOLBAR_ARIA'); ?>"
     >
       <span id="business_members_selection_count" class="business_members_selection_badge" role="status" aria-live="polite">
         <span class="business_members_selection_badge_icon" aria-hidden="true">&#10003;</span>
         <span class="business_members_selection_badge_count" id="business_members_selection_badge_count">0</span>
-        <span class="business_members_selection_badge_label"><?php echo businesses_index_i18n('BUSINESSES_MEMBERS_SELECTION_BADGE_LABEL'); ?></span>
+        <span class="business_members_selection_badge_label"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_SELECTION_BADGE_LABEL'); ?></span>
       </span>
       <button type="button" class="btn btn_secondary btn_compact" id="business_members_clear_selection">
-        <?php echo businesses_index_i18n('BUSINESSES_MEMBERS_CLEAR_SELECTION'); ?>
+        <?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_CLEAR_SELECTION'); ?>
       </button>
       <div class="business_members_bulk_group_control" id="business_members_bulk_group_control">
         <button
@@ -186,7 +187,7 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
         >
           <div class="business_members_report_dialog_header">
             <h4><?php echo htmlspecialchars($memberReportI18n['BUSINESS_MEMBERS_REPORT_DIALOG_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h4>
-            <button type="button" class="btn_close business_members_report_close" id="business_members_report_close" aria-label="<?php echo businesses_index_i18n('CLOSE'); ?>">&times;</button>
+            <button type="button" class="btn_close business_members_report_close" id="business_members_report_close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
           </div>
           <div class="business_members_report_selected">
             <h5 class="business_members_report_section_title">
@@ -274,8 +275,8 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
     ?>
     <details
       id="business_members_pending_details"
-      class="business_members_pending_details"
-      <?php if ($membersPendingCount <= 0) { ?>hidden<?php } ?>
+      class="business_members_pending_details<?php echo $membersPendingCount <= 0 ? ' is-empty' : ''; ?>"
+      <?php if ($membersPendingCount <= 0) { ?>aria-hidden="true"<?php } ?>
     >
       <summary class="business_members_pending_summary">
         <span id="business_members_pending_summary_label"><?php echo htmlspecialchars($membersPendingSummary, ENT_QUOTES, 'UTF-8'); ?></span>
@@ -284,21 +285,21 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
         id="business_members_pending_list"
         class="business_members_pending_list"
         role="list"
-        aria-label="<?php echo businesses_index_i18n('BUSINESSES_MEMBERS_PENDING_ARIA'); ?>"
+        aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_PENDING_ARIA'); ?>"
         aria-describedby="business_members_pending_sr_status"
       ></div>
       <p id="business_members_pending_sr_status" class="visually_hidden" role="status" aria-live="polite" aria-atomic="true"></p>
     </details>
     <div class="visually_hidden">
-      <p id="businesses_members_grid_sr_instructions"><?php echo businesses_index_i18n('BUSINESSES_MEMBERS_GRID_SR'); ?></p>
-      <p id="businesses_members_grid_sr_context"><?php echo businesses_index_i18n('BUSINESSES_MEMBERS_GRID_CONTEXT'); ?></p>
+      <p id="businesses_members_grid_sr_instructions"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_GRID_SR'); ?></p>
+      <p id="businesses_members_grid_sr_context"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_GRID_CONTEXT'); ?></p>
       <p id="businesses_members_grid_sr_status" role="status" aria-live="polite" aria-atomic="true"><?php echo htmlspecialchars($membersGridStatusMessage, ENT_QUOTES, 'UTF-8'); ?></p>
     </div>
     <div
       id="businesses-members-grid"
       class="datagrid_container business_members_datagrid"
       role="region"
-      aria-label="<?php echo businesses_index_i18n('BUSINESSES_MEMBERS_GRID_ARIA'); ?>"
+      aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_GRID_ARIA'); ?>"
       aria-describedby="businesses_members_grid_sr_instructions businesses_members_grid_sr_context businesses_members_grid_sr_status"
       <?php if ($membersGridRenderSuccess) { ?>data-ssr-members-grid="1"<?php } ?>
     >
@@ -316,7 +317,7 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
   >
     <section class="modal_header">
       <h2 id="business_members_info_dialog_title" class="modal_title">Members Guide</h2>
-      <button type="button" class="btn_close" data-dialog-close="business_members_info_dialog" aria-label="<?php echo businesses_index_i18n('CLOSE'); ?>">&times;</button>
+      <button type="button" class="btn_close" data-dialog-close="business_members_info_dialog" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
     </section>
     <section id="business_members_info_dialog_body" class="modal_content business_members_info_dialog_content">
       <div class="business_members_info_dialog_grid">
@@ -430,7 +431,7 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
       </div>
     </section>
     <section class="modal_footer">
-      <button type="button" class="btn btn_secondary" data-dialog-close="business_members_info_dialog"><?php echo businesses_index_i18n('CLOSE'); ?></button>
+      <button type="button" class="btn btn_secondary" data-dialog-close="business_members_info_dialog"><?php echo businesses_index_i18n_html('CLOSE'); ?></button>
     </section>
   </dialog>
 

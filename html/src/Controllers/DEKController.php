@@ -84,8 +84,8 @@ class DEKController
 
         $bodyCredentialId = $body['credentialId'] ?? '';
         if (is_string($bodyCredentialId) && $bodyCredentialId !== '') {
-            // If session carries a credential, caller must bind wrapper to that same credential.
-            if ($sessionCredentialId !== '' && !hash_equals($sessionCredentialId, $bodyCredentialId)) {
+            // Wrapper writes must be bound to the active passkey credential, not a body-selected ID.
+            if ($sessionCredentialId === '' || !hash_equals($sessionCredentialId, $bodyCredentialId)) {
                 return '';
             }
 
@@ -142,7 +142,6 @@ class DEKController
 
         Response::success('[DEK] Wrapped DEK.', [
             'credentialId' => $sessionCredentialId,
-            'wrappedDekPassword' => $user->wrapped_dek,
             'wrappedDekPasskey' => $wrappedDekPasskey,
             'dekVersion' => $user->dek_version,
             'cryptoVersion' => $user->crypto_version > 0 ? $user->crypto_version : 1,
@@ -310,5 +309,3 @@ class DEKController
         Response::success('[DEK] Wrapped DEK stored.', ['credentialId' => $credentialId]);
     }
 }
-
-

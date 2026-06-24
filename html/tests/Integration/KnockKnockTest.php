@@ -478,7 +478,7 @@ final class KnockKnockTest extends TestCase
     $isUnauthorized = in_array($status, [401, 403], true);
     $isNotFound = $status === 404;
     $looksLikeSigninPage = $status === 200
-      && (str_contains($sampleLower, '/signin') || str_contains($sampleLower, 'name="password"'));
+      && str_contains($sampleLower, '/signin');
 
     $publicPagePrefixes = [
       '/', '/about/', '/auth/', '/blog/', '/contact/', '/faq/', '/help/', '/language-coverage/', '/media/', '/policies/', '/pricing/', '/security/', '/soc2/', '/status/', '/transparency/', '/verify/'
@@ -494,7 +494,6 @@ final class KnockKnockTest extends TestCase
       '/api/v1/auth/passkey/send-recovery-email',  // intentionally public: serves unauthenticated passkey recovery flow
       '/api/v1/health',
       '/api/v1/security/csp/report',
-      '/api/v1/system/kek/salt',
       '/api/v1/telemetry/record',
     ];
 

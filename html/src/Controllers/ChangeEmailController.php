@@ -55,6 +55,8 @@ use PayCal\Domain\UserRepository;
  */
 final class ChangeEmailController
 {
+  private const SETTINGS_CSRF_FORM_TYPE = 'settings';
+
   /**
    * Start email change transaction.
    * Requires: Recovery email verified, fresh passkey step-up
@@ -95,6 +97,10 @@ final class ChangeEmailController
       }
 
       $input = $this->requestInput();
+      if (!$this->requireSettingsCsrfToken($input)) {
+        return;
+      }
+
       if (!is_array($input) || !isset($input['new_email']) || !is_string($input['new_email'])) {
         Response::error('Missing new_email.', [], HttpStatus::HTTP_BAD_REQUEST);
         return;
@@ -220,6 +226,10 @@ final class ChangeEmailController
       }
 
       $input = $this->requestInput();
+      if (!$this->requireSettingsCsrfToken($input)) {
+        return;
+      }
+
       if (!is_array($input) || !isset($input['txn_id'], $input['old_code'], $input['new_code'])) {
         Response::error('Missing txn_id, old_code, or new_code.', [], HttpStatus::HTTP_BAD_REQUEST);
         return;
@@ -353,6 +363,10 @@ final class ChangeEmailController
       }
 
       $input = $this->requestInput();
+      if (!$this->requireSettingsCsrfToken($input)) {
+        return;
+      }
+
       if (!is_array($input) || !isset($input['txn_id'])) {
         Response::error('Missing txn_id.', [], HttpStatus::HTTP_BAD_REQUEST);
         return;
@@ -450,6 +464,10 @@ final class ChangeEmailController
       }
 
       $input = $this->requestInput();
+      if (!$this->requireSettingsCsrfToken($input)) {
+        return;
+      }
+
       if (!is_array($input) || !isset($input['txn_id'])) {
         Response::error('Missing txn_id.', [], HttpStatus::HTTP_BAD_REQUEST);
         return;
@@ -506,6 +524,27 @@ final class ChangeEmailController
     $maxAge = (int) SystemConfig::get('email_change_stepup_max_age_seconds');
 
     return $stepUpTimestamp > 0 && ($now - $stepUpTimestamp) < $maxAge;
+  }
+
+  /**
+   * @param array<mixed>|null $input
+   */
+  private function requireSettingsCsrfToken(?array $input): bool
+  {
+    $csrfToken = '';
+    if (is_array($input) && isset($input['csrf_token']) && is_scalar($input['csrf_token'])) {
+      $csrfToken = InputSanitizer::sanitizeString((string) $input['csrf_token']);
+    }
+    if ($csrfToken === '' && isset($_SERVER['HTTP_X_CSRF_TOKEN']) && is_scalar($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+      $csrfToken = InputSanitizer::sanitizeString((string) $_SERVER['HTTP_X_CSRF_TOKEN']);
+    }
+
+    if ($csrfToken === '' || !User::current()->verifyFormNonce(self::SETTINGS_CSRF_FORM_TYPE, $csrfToken)) {
+      Response::error('CSRF token invalid or missing.', [], HttpStatus::HTTP_FORBIDDEN);
+      return false;
+    }
+
+    return true;
   }
 
   /**

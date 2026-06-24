@@ -858,12 +858,25 @@ document.addEventListener("DOMContentLoaded", async () =>
     const listEl = PC.getElement('site_earnings_list');
     const totalsEl = PC.getElement('site_earnings_totals');
     const emptyEl = PC.getElement('site_earnings_empty');
+    const setEarningsState = (state) => {
+      const states = [
+        { key: 'loading', el: loadingEl },
+        { key: 'list', el: listEl },
+        { key: 'totals', el: totalsEl },
+        { key: 'empty', el: emptyEl },
+      ];
 
-    // Show loading state
-    loadingEl?.classList.remove('hidden');
-    listEl?.classList.add('hidden');
-    totalsEl?.classList.add('hidden');
-    emptyEl?.classList.add('hidden');
+      states.forEach(({ key, el }) => {
+        if (!(el instanceof HTMLElement)) {
+          return;
+        }
+        const active = key === state || (state === 'data' && (key === 'list' || key === 'totals'));
+        el.classList.toggle('is-active', active);
+        el.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+    };
+
+    setEarningsState('loading');
 
     try {
       debugLog('Fetching site earnings', year);
@@ -897,25 +910,21 @@ document.addEventListener("DOMContentLoaded", async () =>
         debugLog('Site earnings loaded', responseData);
         const { sites, totals } = responseData;
 
-        loadingEl?.classList.add('hidden');
-
         if (sites.length === 0) {
-          emptyEl?.classList.remove('hidden');
+          setEarningsState('empty');
         } else {
           renderEarningsList(sites, totals.earnings);
           renderEarningsTotals(totals);
-          listEl?.classList.remove('hidden');
-          totalsEl?.classList.remove('hidden');
+          setEarningsState('data');
         }
       } else {
         throw new Error(responseData.message || 'Failed to load earnings');
       }
     } catch (error) {
       PW.error(`Error loading site earnings: ${getErrorMessage(error)}`);
-      loadingEl?.classList.add('hidden');
       if (listEl) {
         PC.setHTML(listEl, `<div class="f_center earnings_error">${SITES_T.SITES_EARNINGS_FAILED_LOAD}</div>`);
-        listEl.classList.remove('hidden');
+        setEarningsState('list');
       }
     }
   }

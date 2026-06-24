@@ -72,12 +72,12 @@ async function testPbkdf2() {
   if (!detectWebCrypto()) return false;
 
   try {
-    const password = new TextEncoder().encode("test");
+    const keyMaterial = new TextEncoder().encode("test");
     const salt = window.crypto.getRandomValues(new Uint8Array(16));
 
     const baseKey = await window.crypto.subtle.importKey(
         "raw",
-        password,
+        keyMaterial,
         "PBKDF2",
         false,
         ["deriveKey"]

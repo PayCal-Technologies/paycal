@@ -95,18 +95,25 @@ $actionLabels = [
 $requestMethod = isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD'])
   ? strtoupper($_SERVER['REQUEST_METHOD'])
   : 'GET';
+$currentUser = \PayCal\Domain\User::current();
 
 if ($requestMethod === 'POST') {
+  $csrfTokenRaw = $_POST['csrf_token'] ?? '';
+  $csrfToken = is_scalar($csrfTokenRaw) ? trim((string) $csrfTokenRaw) : '';
   $action = InputSanitizer::postString('action');
   $businessId = InputSanitizer::postString('business_id');
-  $adminUUID = \PayCal\Domain\User::currentUUID();
+  $adminUUID = $currentUser->user_uuid;
   $businessName = $businessId !== ''
     ? trim((string) (Database::hget(Keys::BUSINESS . ':' . $businessId, 'name') ?: ''))
     : '';
   $actionLabel = $actionLabels[$action] ?? 'Updated business';
   $displayName = $businessName !== '' ? $businessName : 'Unknown business';
 
-  if ($businessId === '') {
+  if ($csrfToken === '' || !$currentUser->verifyFormNonce('general', $csrfToken)) {
+    $flashError = 'Action blocked: invalid CSRF token.';
+    $flashTitle = 'Action blocked';
+    $flashDetail = 'Refresh the page and try the moderation action again.';
+  } elseif ($businessId === '') {
     $flashError = 'Missing business ID.';
   } else {
     $ok = match ($action) {
@@ -143,6 +150,7 @@ if ($requestMethod === 'POST') {
   }
 }
 
+$actionNonce = $currentUser->generateFormNonce('general');
 $queue = BusinessModerationService::listQueue(200);
 $queueCount = count($queue);
 
@@ -212,6 +220,7 @@ $feedbackIcon = $flashType === 'error' ? '!' : '✓';
     <h2>Search Index</h2>
     <p class="business-moderation-queue__meta">Rebuild the public Business Browser index from approved, listed businesses.</p>
     <form method="POST" action="/admin/business-moderation/" class="business-moderation-actions">
+      <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($actionNonce, ENT_QUOTES, 'UTF-8'); ?>">
       <input type="hidden" name="business_id" value="system">
       <button type="submit" name="action" value="rebuild_search_index" class="btn btn_secondary btn_sm">Rebuild search index</button>
     </form>
@@ -258,6 +267,7 @@ $feedbackIcon = $flashType === 'error' ? '!' : '✓';
             <td class="business-moderation-table__mono"><?php echo htmlspecialchars(businessModerationFormatTimestamp((string) ($row['created_at'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
             <td>
               <form method="POST" action="/admin/business-moderation/" class="business-moderation-actions">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($actionNonce, ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="business_id" value="<?php echo htmlspecialchars((string) ($row['business_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                 <button type="submit" name="action" value="approve_listing" class="btn btn_primary btn_sm">Approve</button>
                 <button type="submit" name="action" value="reject_name" class="btn btn_sm">Reject</button>

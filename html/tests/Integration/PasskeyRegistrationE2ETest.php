@@ -14,7 +14,7 @@ require_once __DIR__ . '/../../tests/bootstrap.php';
  * PasskeyRegistrationE2ETest
  * 
  * Comprehensive end-to-end test simulating a complete passkey lifecycle:
- * 1. User signup (no password, only passkey)
+ * 1. User signup
  * 2. Passkey login
  * 3. DEK unwrap via passkey
  * 4. Calendar entry creation (encrypted)
@@ -23,7 +23,7 @@ require_once __DIR__ . '/../../tests/bootstrap.php';
  * 7. User deletion cleanup
  * 
  * This test validates the core requirements:
- * - Passkey-only authentication without passwords
+ * - Passkey-only authentication
  * - Deterministic HKDF-SHA256 KEK derivation
  * - DEK persistence across sessions via server-backed bootstrap
  * - Encryption-at-rest for calendar entries
@@ -65,7 +65,7 @@ final class PasskeyRegistrationE2ETest extends TestCase
    * Test: Complete passkey registration and authentication lifecycle
    * 
    * Scenario:
-   * 1. Register user with ONLY passkey (no password)
+   * 1. Register user with a passkey
    * 2. Simulate passkey login
    * 3. Create encrypted calendar entry
    * 4. Reload session (simulating page refresh)
@@ -81,7 +81,7 @@ final class PasskeyRegistrationE2ETest extends TestCase
     $this->assertEncryptionSaltExists('Encryption salt should be generated');
     
     // ========== PHASE 2: Passkey Login ==========
-    // Simulate: User authenticates with passkey (no password challenge)
+    // Simulate: User authenticates with passkey.
     
     $loginSession = $this->simulatePasskeyLogin();
     $this->assertSame($this->userUUID, $loginSession, 'Login should return user UUID');
@@ -253,7 +253,6 @@ final class PasskeyRegistrationE2ETest extends TestCase
     // Create user record
     UserRepository::setUser(
       $this->userUUID,
-      password_hash('dummy-not-used', PASSWORD_DEFAULT),  // Password not used in passkey-only
       $this->email,
       AuthLevel::USER,
       'Passkey E2E Test User',

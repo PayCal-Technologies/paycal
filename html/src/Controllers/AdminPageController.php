@@ -268,6 +268,18 @@ class AdminPageController
   }
 
   /**
+   * Return a short non-replayable session fingerprint for admin diagnostics.
+   */
+  private static function sessionFingerprint(string $sessionHash): string
+  {
+    if ($sessionHash === '') {
+      return '';
+    }
+
+    return substr(hash('sha256', 'paycal-admin-session-fingerprint:' . $sessionHash), 0, 16);
+  }
+
+  /**
    * Renders the admin dashboard page.
    * Handles authentication, data fetching, and template rendering.
    */
@@ -319,7 +331,7 @@ class AdminPageController
         $lastLoginAt = self::asString($userData['last_signin'] ?? $sessionSnapshot['last_login_at']);
         $lastLoginIp = self::asString($userData['last_signin_ip'] ?? $sessionSnapshot['last_login_ip']);
         $lastSessionAt = $sessionSnapshot['last_session_at'];
-        $lastSessionHash = self::asString($userData['last_session_hash'] ?? $sessionSnapshot['last_session_hash']);
+        $lastSessionHash = self::sessionFingerprint(self::asString($userData['last_session_hash'] ?? $sessionSnapshot['last_session_hash']));
 
         $lastAuthMethod = self::asString($userData['last_auth_method'] ?? 'unknown');
         $credentialCount = '0';

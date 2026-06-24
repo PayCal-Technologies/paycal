@@ -1278,7 +1278,10 @@ require_once __DIR__ . '/_bootstrap.php';
       const visible = minRole === 'coordinator'
         ? canViewCoordinatorBusinessTabs(business)
         : true;
-      tabNode.classList.toggle('hidden', !visible);
+      tabNode.classList.toggle('is-hidden-reserved', !visible);
+      tabNode.classList.remove('hidden');
+      tabNode.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      tabNode.tabIndex = visible ? 0 : -1;
     });
   };
 

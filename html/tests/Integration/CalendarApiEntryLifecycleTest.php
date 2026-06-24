@@ -45,7 +45,6 @@ final class CalendarApiEntryLifecycleTest extends TestCase
 
     UserRepository::setUser(
       $this->userUUID,
-      password_hash('test-password', PASSWORD_DEFAULT),
       'calendar-api-' . substr($this->userUUID, 1) . '@example.test',
       AuthLevel::USER,
       'Calendar API Test User',

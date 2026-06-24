@@ -1006,8 +1006,8 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-window.addEventListener('beforeunload', () => {
-  void _pw_flush_telemetry_queue('unload');
+window.addEventListener('pagehide', () => {
+  void _pw_flush_telemetry_queue('pagehide');
 });
 
 // ============================================================================

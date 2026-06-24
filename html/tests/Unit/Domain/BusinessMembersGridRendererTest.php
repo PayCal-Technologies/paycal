@@ -479,7 +479,19 @@ final class BusinessMembersGridRendererTest extends TestCase
     $renderer = new BusinessMembersGridRenderer();
     $html = $renderer->loadingSkeleton();
 
-    $this->assertStringContainsString('businesses_datagrid_skeleton_row', $html);
+    $this->assertStringContainsString('datagrid_loading', $html);
+    $this->assertStringContainsString('datagrid_skeleton_row', $html);
     $this->assertStringContainsString('sk-line', $html);
+  }
+
+  #[Test]
+  public function memberConsentStatusUsesBatchedHashReads(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $renderer = (string) file_get_contents($projectRoot . '/html/src/Domain/BusinessMembersGridRenderer.php');
+
+    $this->assertStringContainsString('activeBusinessConsentByMember', $renderer);
+    $this->assertStringContainsString('Database::pipelineHgetall(array_values($consentKeysById))', $renderer);
+    $this->assertStringNotContainsString('hasActiveBusinessConsent', $renderer);
   }
 }

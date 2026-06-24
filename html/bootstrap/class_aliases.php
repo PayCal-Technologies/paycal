@@ -82,8 +82,6 @@ $aliasClass('PayCal\\Domain\\Enums\\SessionTimeout', 'SessionTimeout');
 $aliasClass('PayCal\\Domain\\Crypto\\ChainVerifier', 'PayCal\\Crypto\\ChainVerifier');
 $aliasClass('PayCal\\Domain\\Encryption\\EnvelopeFormat', 'PayCal\\Encryption\\EnvelopeFormat');
 $aliasClass('PayCal\\Domain\\Encryption\\EnvelopeFormat', 'EnvelopeFormat');
-$aliasClass('PayCal\\Controllers\\KekController', 'PayCal\\KekController');
-$aliasClass('PayCal\\Controllers\\KekController', 'KekController');
 $aliasClass('PayCal\\Infrastructure\\Audit\\BusinessAuditRepository', 'PayCal\\Infrastructure\\Audit\\OrgAuditRepository');
 
 // Register global runtime fault handling as early as autoload bootstrap.

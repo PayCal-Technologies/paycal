@@ -33,6 +33,19 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .datagrid_cols_9 { --datagrid_cols: 9; }
 .datagrid_cols_10 { --datagrid_cols: 10; }
 .datagrid_cols_11 { --datagrid_cols: 11; }
+.datagrid_cols_12 { --datagrid_cols: 12; }
+
+.datagrid_container {
+  min-height: 12rem;
+}
+
+.datagrid_container > .datagrid_body {
+  min-height: inherit;
+}
+
+.datagrid_container_loading {
+  min-height: 15rem;
+}
 
 .datagrid_controls {
   display: flex;
@@ -188,6 +201,40 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .datagrid_col_hidden {
   display: none !important;
+}
+
+.datagrid_loading {
+  pointer-events: none;
+}
+
+.datagrid_skeleton_toolbar {
+  display: grid;
+  grid-template-columns: minmax(10rem, 18rem) minmax(6rem, 1fr) 2.4rem 2.4rem;
+  gap: 12px;
+  align-items: center;
+  min-height: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.datagrid_skeleton_search,
+.datagrid_skeleton_page,
+.datagrid_skeleton_button,
+.datagrid_skeleton_heading,
+.datagrid_skeleton_cell {
+  min-height: 0.85rem;
+}
+
+.datagrid_skeleton_button {
+  min-height: 2rem;
+}
+
+.datagrid_skeleton_heading,
+.datagrid_skeleton_cell {
+  margin: 6px 8px;
+}
+
+.datagrid_skeleton_row .datagrid_row_content {
+  min-height: 30px;
 }
 
 /* Table container */

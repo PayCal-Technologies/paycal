@@ -48,12 +48,9 @@ final class RedisContractTest extends TestCase
       $offending['telemetry'][] = $k;
     }
 
-    // 2) user:kek:* keys that do NOT include user:kek:v1:
+    // 2) user:kek:* keys are obsolete and should not be produced.
     $kekKeys = Database::scanKeys($prefix.'user:kek:*');
     foreach ($kekKeys as $k) {
-      if (str_contains($k, 'user:kek:v1:')) {
-        continue;
-      }
       $offending['kek'][] = $k;
     }
 

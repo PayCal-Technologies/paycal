@@ -1009,7 +1009,7 @@ if (headers_sent() === false) {
   border-radius: var(--border-radius);
   background-color: var(--panel-bg);
   color: var(--panel-text);
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-family: var(--monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
   font-size: 0.875rem;
   line-height: 1.5;
   resize: vertical;
@@ -1108,7 +1108,7 @@ if (headers_sent() === false) {
   border-radius: var(--border-radius);
   padding: var(--pad-md);
   color: var(--danger);
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-family: var(--monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
   font-size: 0.875rem;
   line-height: 1.5;
   overflow-x: auto;
@@ -1236,7 +1236,7 @@ if (headers_sent() === false) {
 
 .admin-palette-swatch-hex {
   font-size: 0.65rem;
-  font-family: monospace;
+  font-family: var(--monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
   color: rgba(255,255,255,0.7);
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }

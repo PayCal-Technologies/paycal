@@ -288,7 +288,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 .ast_node_info {
   border-top: 1px solid var(--color-border);
   min-height: 3rem;
-  font-family: monospace;
+  font-family: var(--monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
   font-size: .85rem;
 }
 

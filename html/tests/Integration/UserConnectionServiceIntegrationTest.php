@@ -133,7 +133,6 @@ final class UserConnectionServiceIntegrationTest extends TestCase
   {
     UserRepository::setUser(
       $userUUID,
-      password_hash('test-password', PASSWORD_DEFAULT),
       $email,
       AuthLevel::USER,
       $fullName,

@@ -27,7 +27,7 @@ final class BusinessesCspStyleContractTest extends TestCase
     $projectRoot = dirname(__DIR__, 4);
     $businessesJs = (string) file_get_contents($projectRoot . '/html/js/business/core/display-utils.js.php');
 
-    $this->assertStringContainsString('businesses_datagrid_skeleton_row', $businessesJs);
+    $this->assertStringContainsString('datagrid_skeleton_row', $businessesJs);
     $this->assertStringNotContainsString('style="', $businessesJs);
     $this->assertStringNotContainsString("style='", $businessesJs);
   }
@@ -185,16 +185,19 @@ final class BusinessesCspStyleContractTest extends TestCase
     $grid->enableColumnVisibility();
     $grid->addColumn('name', 'Name', true);
     $grid->addColumn('amount', 'Amount', true, null, 'right');
+    $grid->addColumn('internal_count', 'Internal Count', true, null, 'right', false);
     $grid->addRowAction('revoke', 'Revoke');
 
     $pager = ArrayPager::fromArray([
-      ['id' => 'row-1', 'name' => 'Alpha', 'amount' => '1.00'],
-      ['id' => 'row-2', 'name' => 'Zulu', 'amount' => '2.00'],
+      ['id' => 'row-1', 'name' => 'Alpha', 'amount' => '1.00', 'internal_count' => '4'],
+      ['id' => 'row-2', 'name' => 'Zulu', 'amount' => '2.00', 'internal_count' => '8'],
     ], ['pageSize' => 25]);
 
     $html = $grid->table($pager);
 
     $this->assertStringContainsString('data-grid="csp-contract-grid"', $html);
+    $this->assertStringContainsString('datagrid_col_internal_count datagrid_align_right datagrid_col_hidden', $html);
+    $this->assertStringContainsString('data-col-key="internal_count" aria-hidden="true"', $html);
     $this->assertNoInlineStyles($html, 'DataGrid::table output');
   }
 

@@ -249,6 +249,7 @@ $csp = [
   'script-src' => array_merge([
     "'nonce-{$cspNonce}'",
     "'strict-dynamic'",
+    "'inline-speculation-rules'",
     "'self'",
     $origin,
     'www.googletagmanager.com',
@@ -386,6 +387,8 @@ $languageNavHtml = Render::languageNav($activeLanguageForNav);
 $publicLanguageBarHtml = Render::publicLanguageBar($activeLanguageForNav);
 $bodyClassNames = array_values(array_filter([
   ($currentPage ?? '') === 'PAGE_INDEX' ? 'page-calendar' : '',
+  ($isAuthenticated && $isSidePrimaryNav) ? 'nav-' . $navInitialState : '',
+  ($isAuthenticated && $isSidePrimaryNav && $userForNav->isNavOverlayMode()) ? 'nav-overlay-mode' : '',
 ]));
 $toastPosition = htmlspecialchars($userForNav->getToastPosition(), ENT_QUOTES, 'UTF-8');
 $toastFontSize = (string) $userForNav->getToastFontSize();
@@ -838,7 +841,7 @@ echo Render::template('keyboard-shortcuts', $renders);
           <li class="pages"><a href="/help/" data-help-trigger="true" data-nav-shortcut="h" aria-keyshortcuts="h" accesskey="h"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['shortcuts']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('KEYBOARD'); ?></span></a></li>
 <?php } // end $isAuthenticated nav ?>
 <?php if ($isAuthenticated) { ?>
-      <li class="pages nav_signout"><a href="/signout/" id="call_signout_modal"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['signout']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('SIGN_OUT'); ?></span></a></li>
+      <li class="pages nav_signout"><a href="/signout/" id="call_signout_modal" data-no-speculation><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['signout']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('SIGN_OUT'); ?></span></a></li>
 <?php } ?>
     </ul>
   </nav>

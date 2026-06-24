@@ -97,6 +97,13 @@ final class EmailVerificationController
     $requestUri = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI'])
       ? $_SERVER['REQUEST_URI']
       : '';
+    $requestPath = parse_url($requestUri, PHP_URL_PATH);
+    $requestPath = is_string($requestPath) && $requestPath !== ''
+      ? InputSanitizer::sanitizeString($requestPath)
+      : '/auth/verify-email';
+    $lookupFingerprint = $lookupValue !== ''
+      ? substr(hash('sha256', 'email-verification-lookup:' . $lookupValue), 0, 16)
+      : '';
     $host = isset($_SERVER['HTTP_HOST']) && is_string($_SERVER['HTTP_HOST'])
       ? $_SERVER['HTTP_HOST']
       : '';
@@ -104,9 +111,11 @@ final class EmailVerificationController
     SecurityLog::log('email_verification_attempt', [
         'mode' => $verificationMode,
         'request_method' => $requestMethod,
-        'request_uri' => $requestUri,
+        'request_path' => $requestPath,
         'host' => $host,
         'ip' => $remoteIp,
+        'lookup_present' => $lookupValue !== '' ? '1' : '0',
+        'lookup_fingerprint' => $lookupFingerprint,
         'token_length' => strlen($token),
         'code_length' => strlen($code),
     ]);
@@ -116,7 +125,7 @@ final class EmailVerificationController
           'reason' => 'missing_lookup_value',
           'mode' => $verificationMode,
           'request_method' => $requestMethod,
-          'request_uri' => $requestUri,
+          'request_path' => $requestPath,
           'ip' => $remoteIp,
       ]);
 
@@ -145,7 +154,8 @@ final class EmailVerificationController
           'reason' => $verificationMode === 'code' ? 'invalid_code' : 'invalid_token',
           'mode' => $verificationMode,
           'request_method' => $requestMethod,
-          'request_uri' => $requestUri,
+          'request_path' => $requestPath,
+          'lookup_fingerprint' => $lookupFingerprint,
           'ip' => $remoteIp,
       ]);
 

@@ -597,7 +597,6 @@ final class AccountRecoveryController
       UserFields::CRYPTO_VERSION->value => (string) $this->scalarInt($body['cryptoVersion'] ?? 1, 1),
       UserFields::WRAPPED_DEK_PASSKEY->value => '',
       'last_auth_method' => 'passkey',
-      'password_only_risk' => '0',
     ]);
 
     Authentication::clearUserRecoveryPending($transaction->userUuid(), $transaction->id());
@@ -751,8 +750,7 @@ final class AccountRecoveryController
   private function hasExistingCryptoMaterial(User $user): bool
   {
     if (
-      $this->scalarString($user->wrapped_dek) !== ''
-      || $this->scalarString($user->wrapped_dek_passkey) !== ''
+      $this->scalarString($user->wrapped_dek_passkey) !== ''
       || $this->scalarString($user->wrapped_dek_recovery) !== ''
     ) {
       return true;

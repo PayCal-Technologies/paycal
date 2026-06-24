@@ -1292,12 +1292,27 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
 #site_earnings_container {
   display: grid;
   gap: 0.85rem;
+  min-height: 16rem;
 }
 
+#site_earnings_loading,
 #site_earnings_list,
 #site_earnings_totals,
 #site_earnings_empty {
+  grid-area: 1 / 1;
   margin-top: 0.35rem;
+}
+
+.site_earnings_state {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.site_earnings_state.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .sites_earnings_skeleton_wrap {

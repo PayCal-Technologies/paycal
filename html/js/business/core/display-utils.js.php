@@ -95,12 +95,28 @@
   };
 
   const buildSkeletonRows = (colCount = 4, rowCount = 4) => {
-    const cell = '<span class="sk-line businesses_datagrid_skeleton_cell"></span>';
-    const rowClass = colCount === 4
-      ? 'businesses_datagrid_skeleton_row'
-      : `businesses_datagrid_skeleton_row businesses_datagrid_skeleton_row--${colCount}`;
-    const row = `<div class="skeleton ${rowClass}">${cell.repeat(colCount)}</div>`;
-    return row.repeat(rowCount);
+    const count = Math.max(1, Math.min(12, Number.parseInt(colCount, 10) || 4));
+    const rows = Math.max(1, Math.min(12, Number.parseInt(rowCount, 10) || 4));
+    const cells = '<span class="sk-line datagrid_skeleton_cell"></span>'.repeat(count);
+    const row = `<div class="datagrid_row datagrid_skeleton_row" role="presentation"><div class="datagrid_row_content skeleton" role="presentation">${cells}</div></div>`;
+    const headings = '<span class="sk-line datagrid_skeleton_heading"></span>'.repeat(count);
+
+    return `
+      <div class="datagrid datagrid_loading datagrid_cols_${count}" aria-hidden="true">
+        <div class="datagrid_toolbar datagrid_toolbar_search_pagination datagrid_skeleton_toolbar skeleton">
+          <span class="sk-line datagrid_skeleton_search"></span>
+          <span class="sk-line datagrid_skeleton_page"></span>
+          <span class="sk-line datagrid_skeleton_button"></span>
+          <span class="sk-line datagrid_skeleton_button"></span>
+        </div>
+        <div class="datagrid_table" role="presentation">
+          <div class="datagrid_header_row" role="presentation">
+            <div class="datagrid_header_content skeleton" role="presentation">${headings}</div>
+          </div>
+          <div class="datagrid_body" role="presentation">${row.repeat(rows)}</div>
+        </div>
+      </div>
+    `;
   };
 
   const setDatagridMessage = (container, message, isLoading = false) => {
@@ -114,8 +130,10 @@
     }
 
     if (isLoading) {
+      container.classList.add('datagrid_container_loading');
       Guardian.setHTML(body, buildSkeletonRows(4, 4));
     } else {
+      container.classList.remove('datagrid_container_loading');
       Guardian.setHTML(body, `<div class="datagrid_empty">${String(message || '')}</div>`);
     }
   };

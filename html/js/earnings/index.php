@@ -309,7 +309,6 @@ function clearEarningsTransientGlobals() {
 }
 
 window.addEventListener('pagehide', clearEarningsTransientGlobals);
-window.addEventListener('beforeunload', clearEarningsTransientGlobals);
 
 document.addEventListener("DOMContentLoaded", () => {
   Object.assign(PC.config, <?php echo json_encode($earningsI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
@@ -1511,8 +1510,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const refCode = await initializeExport(scope, format, year || new Date().getFullYear());
         await runScopedExport(scope, format, year, startDate, endDate, refCode);
       } catch (error) {
+        const message = PC.resolveThrownMessage(error, getI18nLabel('EARNINGS_UNKNOWN_ERROR', 'Unknown error.'));
         PW.error(`[EXPORT] ${scope.toUpperCase()} ${format.toUpperCase()} ${year} failed: ${error.message}`);
-        PC.showToast(`${getI18nLabel('EARNINGS_EXPORT_FAILED_PREFIX', 'Export failed:')} ${error.message}`);
+        PC.showToast(`${getI18nLabel('EARNINGS_EXPORT_FAILED_PREFIX', 'Export failed:')} ${message}`);
       } finally {
         button.disabled = false;
         button.textContent = originalText;
@@ -1545,7 +1545,8 @@ async function render_daily_year(year) {
       return;
     }
   } catch (error) {
-    PC.showToast(`${getI18nLabel('EARNINGS_DAILY_LOAD_FAILED_PREFIX', 'Error: Could not load daily earnings data.')} ${error.message}`);
+    const message = PC.resolveThrownMessage(error, getI18nLabel('EARNINGS_UNKNOWN_ERROR', 'Unknown error.'));
+    PC.showToast(`${getI18nLabel('EARNINGS_DAILY_LOAD_FAILED_PREFIX', 'Error: Could not load daily earnings data.')} ${message}`);
     return;
   }
 
@@ -1700,9 +1701,10 @@ async function render_daily_year(year) {
       );
       loadedSections.add(key);
     } catch (error) {
+      const message = PC.resolveThrownMessage(error, getI18nLabel('EARNINGS_UNKNOWN_ERROR', 'unknown error'));
       window.Guardian.setHTML(
         target,
-        `<p class="earnings_async_status">${escapeHtml(formatI18n('EARNINGS_ASYNC_SECTION_LOAD_FAILED', 'Unable to load section: {message}.', { message: error.message || getI18nLabel('EARNINGS_UNKNOWN_ERROR', 'unknown error') }))}</p>`
+        `<p class="earnings_async_status">${escapeHtml(formatI18n('EARNINGS_ASYNC_SECTION_LOAD_FAILED', 'Unable to load section: {message}.', { message }))}</p>`
       );
       PW.error(`[EARNINGS] ${section} year ${year} failed: ${error.message}`);
     }
@@ -1733,10 +1735,11 @@ async function render_daily_year(year) {
         verifyCanonicalHashesForYear(year);
       })
       .catch(error => {
+        const message = PC.resolveThrownMessage(error, getI18nLabel('EARNINGS_UNABLE_TO_RETRIEVE_TREND', 'Unable to retrieve earnings trend data.'));
         PW.error(`[INIT] Error drawing earnings graph for ${year}: ${error.message}`);
         announceEarningsGraphError(
           year,
-          error.message || getI18nLabel('EARNINGS_UNABLE_TO_RETRIEVE_TREND', 'Unable to retrieve earnings trend data.')
+          message
         );
       });
   }

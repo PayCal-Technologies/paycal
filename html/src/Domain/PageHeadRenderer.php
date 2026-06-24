@@ -50,6 +50,8 @@ final class PageHeadRenderer
     'PAGE_PRICING' => 'pricing',
     'PAGE_PAYPERIODS' => 'payperiods',
     'PAGE_AUTH' => 'auth',
+    'PAGE_SIGNIN' => 'auth',
+    'PAGE_REGISTER' => 'auth',
   ];
 
   /**
@@ -310,6 +312,8 @@ HTML;
       '__JSON_LD__' => $jsonLd,
     ]);
 
+    $html .= self::renderSpeculationRules((string) $context['cspNonce']);
+
     $html .= <<<HTML
   <script src="{$guardian}" nonce="{$cspNonce}"></script>
 
@@ -330,6 +334,45 @@ HTML;
     }
 
     return $html;
+  }
+
+  public static function renderSpeculationRules(string $cspNonce): string
+  {
+    $rules = [
+      'prefetch' => [[
+        'source' => 'document',
+        'where' => [
+          'and' => [
+            ['href_matches' => '/*'],
+            ['not' => ['href_matches' => '/api/*']],
+            ['not' => ['href_matches' => '/ws/*']],
+            ['not' => ['href_matches' => '/cli/*']],
+            ['not' => ['href_matches' => '/internal/*']],
+            ['not' => ['href_matches' => '/admin/*']],
+            ['not' => ['href_matches' => '/signout*']],
+            ['not' => ['href_matches' => '/signout-esc*']],
+            ['not' => ['href_matches' => '/auth/recover*']],
+            ['not' => ['href_matches' => '/verify*']],
+            ['not' => ['selector_matches' => '[download], [target], [rel~=nofollow], [data-no-speculation]']],
+          ],
+        ],
+        'eagerness' => 'moderate',
+        'tag' => 'paycal-document-prefetch',
+      ]],
+    ];
+    $json = json_encode($rules, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    if ($json === false) {
+      return '';
+    }
+
+    $nonce = self::attr($cspNonce);
+
+    return <<<HTML
+  <script type="speculationrules" nonce="{$nonce}">
+{$json}
+  </script>
+
+HTML;
   }
 
   private static function attr(string $value): string

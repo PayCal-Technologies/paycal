@@ -1129,6 +1129,7 @@ export function createDataGrid(config)
     try {
       syncSearchFromInput();
       syncDataset();
+      grid.classList.add('datagrid_container_loading');
 
       // Use GET for endpoints that are data fetch (like sites/grid)
       let url = config.endpoint;
@@ -1228,6 +1229,7 @@ export function createDataGrid(config)
         }));
 
         PC.setHTML(body, result.html);
+        grid.classList.remove('datagrid_container_loading');
         initColumnVisibility(grid);
         initColumnVisibilityMenu(resolveColumnVisibilityGrid(grid) || grid);
         syncStateFromDom();
@@ -1264,6 +1266,7 @@ export function createDataGrid(config)
         return;
       }
 
+      grid.classList.remove('datagrid_container_loading');
       throw error;
     }
   }

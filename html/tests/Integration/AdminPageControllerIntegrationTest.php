@@ -105,9 +105,11 @@ final class AdminPageControllerIntegrationTest extends TestCase
   public function testDashboardIncludesAdminEnrichmentWhenContextAllowed(): void
   {
     $output = $this->runDashboardSubprocess(['correlation_context' => 'security-incident']);
+    $expectedFingerprint = substr(hash('sha256', 'paycal-admin-session-fingerprint:' . $this->targetSessionHash), 0, 16);
 
     $this->assertStringContainsString('Target User', $output);
-    $this->assertStringContainsString($this->targetSessionHash, $output);
+    $this->assertStringNotContainsString($this->targetSessionHash, $output);
+    $this->assertStringContainsString("data-last-session-hash='" . $expectedFingerprint . "'", $output);
     $this->assertStringContainsString("data-credential-count='1'", $output);
     $this->assertMatchesRegularExpression("/data-last-session-at='\\d+'/", $output);
     $this->assertMatchesRegularExpression("/data-registered-at='\\d+'/", $output);

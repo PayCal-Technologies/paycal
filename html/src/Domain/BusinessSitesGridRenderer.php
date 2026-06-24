@@ -346,10 +346,7 @@ final class BusinessSitesGridRenderer
    */
   public function loadingSkeleton(): string
   {
-    $cell = '<span class="sk-line businesses_datagrid_skeleton_cell"></span>';
-    $row = '<div class="skeleton businesses_datagrid_skeleton_row">' . str_repeat($cell, 4) . '</div>';
-
-    return str_repeat($row, 4);
+    return DataGrid::loadingSkeleton(8, 4);
   }
 
   /**

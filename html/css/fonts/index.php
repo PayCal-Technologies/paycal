@@ -4,7 +4,7 @@ if (headers_sent() === false) {
 } ?>
 /* roboto-100 - latin */
 @font-face {
-  font-display: swap; 
+  font-display: optional;
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 100;
@@ -17,7 +17,7 @@ if (headers_sent() === false) {
 }
 /* roboto-regular - latin */
 @font-face {
-  font-display: swap; 
+  font-display: optional;
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
@@ -30,7 +30,7 @@ if (headers_sent() === false) {
 }
 /* roboto-700 - latin */
 @font-face {
-  font-display: swap; 
+  font-display: optional;
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 700;
@@ -45,7 +45,7 @@ if (headers_sent() === false) {
 
 /* open-sans-300 - latin */
 @font-face {
-  font-display: swap; 
+  font-display: optional;
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 300;
@@ -58,7 +58,7 @@ if (headers_sent() === false) {
 }
 /* open-sans-regular - latin */
 @font-face {
-  font-display: swap; 
+  font-display: optional;
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 400;
@@ -71,7 +71,7 @@ if (headers_sent() === false) {
 }
 /* open-sans-700 - latin */
 @font-face {
-  font-display: swap; 
+  font-display: optional;
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 700;
@@ -85,7 +85,7 @@ if (headers_sent() === false) {
 
 /* lato-100 - latin */
 @font-face {
-  font-display: swap; 
+  font-display: optional;
   font-family: 'Lato';
   font-style: normal;
   font-weight: 100;
@@ -98,7 +98,7 @@ if (headers_sent() === false) {
 }
 /* lato-regular - latin */
 @font-face {
-  font-display: swap; 
+  font-display: optional;
   font-family: 'Lato';
   font-style: normal;
   font-weight: 400;
@@ -111,7 +111,7 @@ if (headers_sent() === false) {
 }
 /* lato-700 - latin */
 @font-face {
-  font-display: swap; 
+  font-display: optional;
   font-family: 'Lato';
   font-style: normal;
   font-weight: 700;
@@ -126,7 +126,7 @@ if (headers_sent() === false) {
 
 /* merriweather-300 - latin */
 @font-face {
-  font-display: swap;/
+  font-display: optional;
   font-family: 'Merriweather';
   font-style: normal;
   font-weight: 300;
@@ -139,7 +139,7 @@ if (headers_sent() === false) {
 }
 /* merriweather-regular - latin */
 @font-face {
-  font-display: swap;/
+  font-display: optional;
   font-family: 'Merriweather';
   font-style: normal;
   font-weight: 400;
@@ -152,7 +152,7 @@ if (headers_sent() === false) {
 }
 /* merriweather-700 - latin */
 @font-face {
-  font-display: swap;/
+  font-display: optional;
   font-family: 'Merriweather';
   font-style: normal;
   font-weight: 700;
@@ -167,7 +167,7 @@ if (headers_sent() === false) {
 
 /* nunito-200 - latin */
 @font-face {
-  font-display: swap;/
+  font-display: optional;
   font-family: 'Nunito';
   font-style: normal;
   font-weight: 200;
@@ -180,7 +180,7 @@ if (headers_sent() === false) {
 }
 /* nunito-regular - latin */
 @font-face {
-  font-display: swap;/
+  font-display: optional;
   font-family: 'Nunito';
   font-style: normal;
   font-weight: 400;
@@ -193,7 +193,7 @@ if (headers_sent() === false) {
 }
 /* nunito-700 - latin */
 @font-face {
-  font-display: swap;/
+  font-display: optional;
   font-family: 'Nunito';
   font-style: normal;
   font-weight: 700;

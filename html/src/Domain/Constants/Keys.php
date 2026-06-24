@@ -64,13 +64,6 @@ final class Keys
     public const CACHE              = "cache";
   
   /**
-   * UNUSED: Reserved for password reset token storage and management.
-   * Roadmap: Will store temporary password reset tokens with TTL,
-   * allowing secure email-based password recovery flows.
-   */
-  public const PASSWORD_RESET     = "password_reset";
-  
-  /**
    * UNUSED: Reserved for email verification and change verification flows.
    * Roadmap: Will store email verification tokens for new email addresses
    * during email change operations and initial account verification.
@@ -191,17 +184,6 @@ final class Keys
   public const WEBAUTHN           = "webauthn";
   public const CREDENTIAL         = "credential";
   public const CHALLENGE          = "challenge";
-  public const KEK                = "kek";
-  public const KEK_V1             = "v1";
-
-  /**
-   * Handles userKekV1 operation.
-   */
-  public static function userKekV1(string $userId): string
-  {
-    return self::USER . self::SEPARATOR . self::KEK . self::SEPARATOR . self::KEK_V1 . self::SEPARATOR . $userId;
-  }
-
   /**
    * Handles webauthnUserCredentials operation.
    */

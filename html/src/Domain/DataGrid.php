@@ -371,6 +371,7 @@ class DataGrid
               $columnHeaderId = $this->id.'_col_'.($columnIndex + 1);
               $columnAlign = self::toString($column['align'] ?? '');
               $columnWidth = self::toString($column['width'] ?? '');
+              $defaultVisible = !array_key_exists('defaultVisible', $column) || !empty($column['defaultVisible']);
               $headingClass = 'datagrid_heading';
               if ('' !== $columnKey) {
                 $headingClass .= ' datagrid_col_' . preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey));
@@ -378,8 +379,11 @@ class DataGrid
               if ('' !== $columnAlign) {
                 $headingClass .= ' datagrid_align_' . $columnAlign;
               }
+              if (!$defaultVisible) {
+                $headingClass .= ' datagrid_col_hidden';
+              }
             ?>
-              <div class="<?php echo $this->escape($headingClass); ?>" role="columnheader" id="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>"<?php echo '' !== $columnWidth ? ' data-col-width="' . $this->escape($columnWidth) . '"' : ''; ?>>
+              <div class="<?php echo $this->escape($headingClass); ?>" role="columnheader" id="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>"<?php echo '' !== $columnWidth ? ' data-col-width="' . $this->escape($columnWidth) . '"' : ''; ?><?php echo $defaultVisible ? '' : ' aria-hidden="true"'; ?>>
                 <?php if ($isSortable) { ?>
                   <button type="button" class="datagrid_sort" data-column="<?php echo $this->escape($columnKey); ?>">
                     <?php echo $this->escape($columnLabel); ?>
@@ -422,12 +426,16 @@ class DataGrid
                   $columnHeaderId = $this->id.'_col_'.($columnIndex + 1);
                   $columnAlign = self::toString($column['align'] ?? '');
                   $columnWidth = self::toString($column['width'] ?? '');
+                  $defaultVisible = !array_key_exists('defaultVisible', $column) || !empty($column['defaultVisible']);
                   $itemClass = 'datagrid_item';
                   if ('' !== $columnKey) {
                     $itemClass .= ' datagrid_col_' . preg_replace('/[^a-z0-9]+/', '_', strtolower($columnKey));
                   }
                   if ('' !== $columnAlign) {
                     $itemClass .= ' datagrid_align_' . $columnAlign;
+                  }
+                  if (!$defaultVisible) {
+                    $itemClass .= ' datagrid_col_hidden';
                   }
 
                   // Apply compute function if provided
@@ -436,7 +444,7 @@ class DataGrid
                     $value = $compute($row, $column);
                   }
                 ?>
-                  <div class="<?php echo $this->escape($itemClass); ?>" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>" data-col-label="<?php echo $this->escape($columnLabel); ?>"<?php echo '' !== $columnWidth ? ' data-col-width="' . $this->escape($columnWidth) . '"' : ''; ?>>
+                  <div class="<?php echo $this->escape($itemClass); ?>" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>" data-col-label="<?php echo $this->escape($columnLabel); ?>"<?php echo '' !== $columnWidth ? ' data-col-width="' . $this->escape($columnWidth) . '"' : ''; ?><?php echo $defaultVisible ? '' : ' aria-hidden="true"'; ?>>
                     <?php if (!empty($column['rawHtml'])) { ?>
                       <?php echo self::toString($value); ?>
                     <?php } else { ?>
@@ -481,6 +489,52 @@ class DataGrid
       <?php if (!$mergedSearchPaginationToolbar) {
         echo $this->renderPagination($pagerInstance, 'bottom');
       } ?>
+    </div>
+    <?php
+
+    return (string) ob_get_clean();
+  }
+
+  /**
+   * Render a stable table-shaped loading skeleton for async grid containers.
+   */
+  public static function loadingSkeleton(int $columnCount = 4, int $rowCount = 4, bool $withToolbar = true): string
+  {
+    $columnCount = max(1, min(self::MAX_COLUMN_CLASS_COUNT, $columnCount));
+    $rowCount = max(1, min(12, $rowCount));
+    $columnClass = 'datagrid_cols_' . $columnCount;
+
+    ob_start();
+    ?>
+    <div class="datagrid datagrid_loading <?php echo $columnClass; ?>" aria-hidden="true">
+      <?php if ($withToolbar) { ?>
+      <div class="datagrid_toolbar datagrid_toolbar_search_pagination datagrid_skeleton_toolbar skeleton">
+        <span class="sk-line datagrid_skeleton_search"></span>
+        <span class="sk-line datagrid_skeleton_page"></span>
+        <span class="sk-line datagrid_skeleton_button"></span>
+        <span class="sk-line datagrid_skeleton_button"></span>
+      </div>
+      <?php } ?>
+      <div class="datagrid_table" role="presentation">
+        <div class="datagrid_header_row" role="presentation">
+          <div class="datagrid_header_content skeleton" role="presentation">
+            <?php for ($columnIndex = 0; $columnIndex < $columnCount; $columnIndex++) { ?>
+              <span class="sk-line datagrid_skeleton_heading"></span>
+            <?php } ?>
+          </div>
+        </div>
+        <div class="datagrid_body" role="presentation">
+          <?php for ($rowIndex = 0; $rowIndex < $rowCount; $rowIndex++) { ?>
+            <div class="datagrid_row datagrid_skeleton_row" role="presentation">
+              <div class="datagrid_row_content skeleton" role="presentation">
+                <?php for ($columnIndex = 0; $columnIndex < $columnCount; $columnIndex++) { ?>
+                  <span class="sk-line datagrid_skeleton_cell"></span>
+                <?php } ?>
+              </div>
+            </div>
+          <?php } ?>
+        </div>
+      </div>
     </div>
     <?php
 

@@ -67,7 +67,6 @@ final class UserRepositorySuperAdminTest extends TestCase
   {
     UserRepository::setUser(
       $this->uuidA,
-      password_hash('pw-a', PASSWORD_DEFAULT),
       $this->emailA,
       AuthLevel::SUPERADMIN,
       'Super A',
@@ -77,7 +76,6 @@ final class UserRepositorySuperAdminTest extends TestCase
 
     UserRepository::setUser(
       $this->uuidB,
-      password_hash('pw-b', PASSWORD_DEFAULT),
       $this->emailB,
       AuthLevel::SUPERADMIN,
       'Super B',

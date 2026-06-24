@@ -82,6 +82,10 @@ $i18nKeys = [
   'SETTINGS_JS_DIAGNOSTICS_BUNDLE_COPIED',
   'SETTINGS_JS_DIAGNOSTICS_BUNDLE_FAILED',
   'SETTINGS_JS_PASSKEY_ONBOARDING_TOAST',
+  'SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_DISABLED',
+  'SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_ENABLED',
+  'SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_NOT_SUPPORTED',
+  'SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_TEMP_UNAVAILABLE',
   'SETTINGS_JS_SUPPORT_INFO_COPIED',
   'SETTINGS_JS_SUPPORT_INFO_COPY_FAILED',
   'SETTINGS_JS_SUPPORT_INFO_LABEL',
@@ -210,6 +214,21 @@ const appendSettingsCsrfToken = (formData) => {
   if (csrfValue !== '') {
     formData.append('csrf_token', csrfValue);
   }
+};
+
+const settingsJsonRequest = (payload = {}) => {
+  const csrfValue = getSettingsCsrfToken();
+  const body = { ...payload };
+  const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+  if (csrfValue !== '') {
+    body.csrf_token = csrfValue;
+    headers['X-CSRF-Token'] = csrfValue;
+  }
+
+  return {
+    headers,
+    body: JSON.stringify(body),
+  };
 };
 
 const isDebugEnabled = () => window.PAYCAL_DEBUG === true;
@@ -403,6 +422,90 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (passkeysPanel instanceof HTMLElement) {
       passkeysPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  const immediateUiSwitch = document.getElementById('early_access_immediate_ui_switch');
+  const immediateUiStatus = document.getElementById('early_access_immediate_ui_status');
+  const setImmediateUiStatus = (message, toastType = '') => {
+    if (immediateUiStatus instanceof HTMLElement) {
+      immediateUiStatus.textContent = message;
+    }
+    if (toastType !== '') {
+      PC.showToast(message, toastType, 3500, true);
+    }
+  };
+  const browserSupportsImmediateUi = async () => {
+    if (!window.PublicKeyCredential || typeof PublicKeyCredential.getClientCapabilities !== 'function') {
+      return false;
+    }
+
+    try {
+      const capabilities = await PublicKeyCredential.getClientCapabilities();
+      return capabilities?.immediateGet === true;
+    } catch (error) {
+      debugLog('[Early Access] immediateGet capability detection failed', error);
+      return false;
+    }
+  };
+
+  if (immediateUiSwitch instanceof HTMLInputElement) {
+    const earlyAccessCard = immediateUiSwitch.closest('[data-early-access-feature="auth.immediate_ui"]');
+    const runtimeEnabled = earlyAccessCard instanceof HTMLElement && earlyAccessCard.dataset.immediateUiRuntime === '1';
+    const canEnable = earlyAccessCard instanceof HTMLElement && earlyAccessCard.dataset.immediateUiCanEnable === '1';
+    const immediateUiSupported = await browserSupportsImmediateUi();
+    const updateEndpoint = (enabled) => enabled
+      ? '/api/v1/settings/early-access/immediate-ui/enable'
+      : '/api/v1/settings/early-access/immediate-ui/disable';
+
+    if (!runtimeEnabled) {
+      immediateUiSwitch.disabled = true;
+      setImmediateUiStatus(SETTINGS_T.SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_TEMP_UNAVAILABLE);
+    } else if (!immediateUiSupported) {
+      immediateUiSwitch.disabled = true;
+      immediateUiSwitch.checked = false;
+      setImmediateUiStatus(SETTINGS_T.SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_NOT_SUPPORTED);
+    } else if (!canEnable && !immediateUiSwitch.checked) {
+      immediateUiSwitch.disabled = true;
+    }
+
+    immediateUiSwitch.addEventListener('change', async () => {
+      const desiredState = immediateUiSwitch.checked;
+      const previousState = !desiredState;
+      immediateUiSwitch.disabled = true;
+
+      const formData = new FormData();
+      appendSettingsCsrfToken(formData);
+
+      try {
+        const response = await fetch(updateEndpoint(desiredState), {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin',
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload?.success !== true) {
+          throw new Error(String(payload?.message || 'Unable to update Early Access preference.'));
+        }
+
+        const message = String(
+          payload.message
+          || (desiredState
+            ? SETTINGS_T.SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_ENABLED
+            : SETTINGS_T.SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_DISABLED)
+        );
+        immediateUiSwitch.checked = desiredState;
+        setImmediateUiStatus(message, 'save');
+      } catch (error) {
+        immediateUiSwitch.checked = previousState;
+        const fallback = previousState
+          ? SETTINGS_T.SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_ENABLED
+          : SETTINGS_T.SETTINGS_EARLY_ACCESS_IMMEDIATE_UI_DISABLED;
+        setImmediateUiStatus(error instanceof Error ? error.message : fallback, 'error');
+        PW.error(error);
+      } finally {
+        immediateUiSwitch.disabled = false;
+      }
+    });
   }
 
   (() => {
@@ -1087,7 +1190,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const accountHasExistingDek = Number(bootstrapBeforeRegistration.wrappedCredentialCount || 0) > 0
-      || !!bootstrapBeforeRegistration.wrappedDek
       || !!bootstrapBeforeRegistration.wrappedDekPasskey;
 
     if (!passkeyWrapCrypto.hasDek) {
@@ -1541,11 +1643,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (provider.linked) {
           try {
             setFederatedProviderStatus('Disconnecting Google...');
+            const csrfToken = getSettingsCsrfToken();
+            if (csrfToken === '') {
+              throw new Error('Unable to verify this request. Refresh the page and try again.');
+            }
             const response = await fetch('/api/v1/auth/federated/unlink', {
               method: 'POST',
               credentials: 'include',
-              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              body: JSON.stringify({ provider: 'google' }),
+              ...settingsJsonRequest({ provider: 'google' }),
             });
             const payload = await response.json();
             if (!response.ok || payload.status !== 'success') {
@@ -1814,8 +1919,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch('/api/v1/account/change-email/start', {
         method: 'POST',
         credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ new_email: newEmail }),
+        ...settingsJsonRequest({ new_email: newEmail }),
       });
       const { data, raw } = await parseApiResponse(response);
 
@@ -1875,8 +1979,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch('/api/v1/account/change-email/verify', {
         method: 'POST',
         credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ txn_id: txnId, old_code: oldCode, new_code: newCode }),
+        ...settingsJsonRequest({ txn_id: txnId, old_code: oldCode, new_code: newCode }),
       });
       const { data, raw } = await parseApiResponse(response);
 
@@ -1916,8 +2019,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch('/api/v1/account/change-email/resend', {
         method: 'POST',
         credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ txn_id: txnId }),
+        ...settingsJsonRequest({ txn_id: txnId }),
       });
       const { data, raw } = await parseApiResponse(response);
       if (response.ok && data && data.status === 'success') {

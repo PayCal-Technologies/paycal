@@ -596,7 +596,7 @@ namespace PayCal\Domain;
           }
         } catch (error) {
           PW.error(error);
-          PC.showToast(error instanceof Error ? error.message : SITES_T.SITES_ERROR_LOADING, 'error', 7000, true);
+          PC.showToast(PC.resolveThrownMessage(error, SITES_T.SITES_ERROR_LOADING), 'error', 7000, true);
         }
         return;
       }
@@ -735,7 +735,7 @@ namespace PayCal\Domain;
         await reloadGrids();
       } catch (error) {
         PW.error(error);
-        siteEditorSetFormStatus('create_site_form_status', error instanceof Error ? error.message : SITES_T.SITES_ERROR_CREATE_RETRY);
+        siteEditorSetFormStatus('create_site_form_status', PC.resolveThrownMessage(error, SITES_T.SITES_ERROR_CREATE_RETRY));
         PC.showToast(SITES_T.SITES_ERROR_CREATING, 'error', 7000, true);
       }
     }
@@ -811,7 +811,7 @@ namespace PayCal\Domain;
         await reloadGrids();
       } catch (error) {
         PW.error(error);
-        siteEditorSetFormStatus('edit_site_form_status', error instanceof Error ? error.message : SITES_T.SITES_ERROR_UPDATE_RETRY);
+        siteEditorSetFormStatus('edit_site_form_status', PC.resolveThrownMessage(error, SITES_T.SITES_ERROR_UPDATE_RETRY));
         PC.showToast(SITES_T.SITES_ERROR_UPDATING, 'error', 7000, true);
       }
     }

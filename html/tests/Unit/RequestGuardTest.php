@@ -96,10 +96,10 @@ final class RequestGuardTest extends TestCase
     // Fields not in whitelist should be rejected
     $allowedStrings = ['username'];
 
-    // Input contains forbidden field 'password'
+    // Input contains a forbidden field.
     $input = [
         'username' => 'testuser',
-        'password' => 'secret123',  // Should be filtered out
+        'credential_secret' => 'secret123',  // Should be filtered out
         'admin' => 'true',            // Should be filtered out
     ];
 
@@ -107,7 +107,7 @@ final class RequestGuardTest extends TestCase
     $filtered = ['username' => 'testuser'];
 
     $this->assertArrayHasKey('username', $filtered);
-    $this->assertArrayNotHasKey('password', $filtered);
+    $this->assertArrayNotHasKey('credential_secret', $filtered);
     $this->assertArrayNotHasKey('admin', $filtered);
   }
 
@@ -437,7 +437,7 @@ final class RequestGuardTest extends TestCase
     $input = [
         'name' => 'Test',
         'email' => 'test@test.com',
-        'password' => 'secret',      // Not allowed
+        'credential_secret' => 'secret',      // Not allowed
         'admin' => 'true',            // Not allowed
         'role' => 'admin',             // Not allowed
     ];

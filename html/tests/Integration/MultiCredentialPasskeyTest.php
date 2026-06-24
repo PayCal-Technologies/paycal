@@ -201,7 +201,6 @@ final class MultiCredentialPasskeyTest extends TestCase
   {
     UserRepository::setUser(
       $this->userUUID,
-      password_hash('dummy', PASSWORD_DEFAULT),
       $this->email,
       \PayCal\Domain\AuthLevel::USER,
       'Multi-Cred Test User',

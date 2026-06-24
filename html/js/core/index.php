@@ -14,7 +14,6 @@ Javascript::renderDocBlock();
 $user = User::current();
 
 $i18nKeys = [
-  'CAPSLOCK_ACTIVE',
   'CLOSED_DIALOG',
   'KEYBOARD_SHORTCUTS',
   'OPENED_DIALOG',
@@ -67,7 +66,7 @@ foreach ($i18nKeys as $i18nKey) {
  *   pc_UUID_set:              string   - Character set for site UUIDs
  *   pc_verification_set:      string   - Character set for verification codes
  *   languages:                object   - Map of language codes to names
- *   [strings]:                string   - i18n strings (CAPSLOCK_ACTIVE, etc)
+ *   [strings]:                string   - shared i18n strings
  * }
  * 
  * state: {
@@ -111,8 +110,6 @@ foreach ($i18nKeys as $i18nKey) {
  *   formatPhoneNumberValue(value)   - Convert raw phone text to (XXX) XXX-XXXX format
  *   formatVerificationCode(input)   - Filter to valid charset, uppercase
  *   generateSiteUUID()              - Create secure random S + 9 chars
- *   togglePasswordVisibility(id)    - Switch input type password <-> text
- * 
  * PUBLIC API - Date, Text, Language:
  * ===================================
  *   formatReadableDate(yyyymmdd)    - Format YYYY-MM-DD to "Long Format" in locale
@@ -123,8 +120,6 @@ foreach ($i18nKeys as $i18nKey) {
  * =============================
  *   showToast(text, type, skipTTS) - Canonical cross-page toast API (auto-dismiss from help_popup_timeout_seconds)
  *   textToSpeech(text)          - Speak text using Web Speech API
- *   activateCapslockWarning()   - Show CAPS LOCK warning
- *   deactivateCapslockWarning() - Hide CAPS LOCK warning
  *   addAudioFocusListener(el)   - Read field value on focus (if audio_feedback='all')
  * 
  * PUBLIC API - Utilities:
@@ -155,7 +150,6 @@ foreach ($i18nKeys as $i18nKey) {
  * ===============
  * - Audio feedback announcements via textToSpeech
  * - ARIA modal attributes (aria-hidden)
- * - Capslock warning with visual + audio notification
  * - Focus management with lastFocused restoration
  * - Keyboard shortcuts (Escape, Enter, etc)
  * 
@@ -191,11 +185,34 @@ const PayCalCore = (() => {
     dialog.showModal();
   }
 
+  function resolveThrownMessage(error, fallbackMessage = 'The request could not be completed. Try again.') {
+    const fallback = fallbackMessage === undefined
+      ? 'The request could not be completed. Try again.'
+      : String(fallbackMessage);
+    const raw = error instanceof Error && error.message
+      ? error.message
+      : (typeof error === 'string' ? error : '');
+    const message = raw.trim();
+
+    if (message === '') {
+      return fallback;
+    }
+
+    if (/^(NetworkError|TypeError:\s*Failed to fetch|Failed to fetch|Load failed|ECONNREFUSED|ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|AbortError)/i.test(message)) {
+      return fallback;
+    }
+
+    if (/\b(ECONNREFUSED|ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN)\b/i.test(message)) {
+      return fallback;
+    }
+
+    return message;
+  }
+
   /** INIT */
   const config = {
     pc_api               : '<?php echo \PayCal\Domain\Environment::appURL('api/v1'); ?>',
     USER_LOCALE          : '<?php echo htmlspecialchars(Language::resolveDateLocale(trim((string) ($user->locale ?? '')), (string) ($user->language ?? Language::DEFAULT)), ENT_QUOTES, 'UTF-8'); ?>',
-    CAPSLOCK_ACTIVE      : '<?php echo htmlspecialchars($i18n['CAPSLOCK_ACTIVE'], ENT_QUOTES, 'UTF-8'); ?>',
     KEYBOARD_SHORTCUTS   : '<?php echo htmlspecialchars($i18n['KEYBOARD_SHORTCUTS'], ENT_QUOTES, 'UTF-8'); ?>',
     OPENED_DIALOG        : '<?php echo htmlspecialchars($i18n['OPENED_DIALOG'], ENT_QUOTES, 'UTF-8'); ?>',
     CLOSED_DIALOG        : '<?php echo htmlspecialchars($i18n['CLOSED_DIALOG'], ENT_QUOTES, 'UTF-8'); ?>',
@@ -428,23 +445,6 @@ const PayCalCore = (() => {
 
   function addAudioFocusListener(el, prefix = "", suffix = "") {
     a11y.addAudioFocusListener(el, prefix, suffix);
-  }
-
-  function activateCapslockWarning() {
-    queryAll("center.status_message").forEach(el => {
-      if (el) trustLayer.setHTML(el, config.CAPSLOCK_ACTIVE);
-    });
-    showToast(config.CAPSLOCK_ACTIVE);
-    const icon = document.getElementById("capslock_icon");
-    if (icon) icon.classList.add('visibility-visible');
-  }
-
-  function deactivateCapslockWarning() {
-    queryAll("center.status_message").forEach(el => {
-      if (el) trustLayer.setHTML(el, "&nbsp;");
-    });
-    const icon = document.getElementById("capslock_icon");
-    if (icon) icon.classList.remove('visibility-visible');
   }
 
   function warnNotificationsPollingError(error) {
@@ -836,12 +836,6 @@ const PayCalCore = (() => {
       .join(" ");
   }
 
-  function togglePasswordVisibility(id) {
-    const el = getElement(id);
-    if (!el || !el.type) return;
-    el.type = el.type === "password" ? "text" : "password";
-  }
-
   async function updateResource(ep, form_or_id, options = {}) {
     if (!ep) {
       const msg = 'Invalid endpoint';
@@ -1065,6 +1059,17 @@ const PayCalCore = (() => {
     });
   };
 
+  const normalizeBfcacheRestore = () => {
+    document.body.classList.add('nav-ready');
+    document.querySelectorAll('.datagrid_container_loading').forEach((node) => {
+      node.classList.remove('datagrid_container_loading');
+    });
+    document.querySelectorAll('[data-bfcache-clear-busy][aria-busy="true"]').forEach((node) => {
+      node.setAttribute('aria-busy', 'false');
+    });
+    window.dispatchEvent(new CustomEvent('paycal:bfcache-restore'));
+  };
+
   function init() {
     if (hasInitialized) {
       return cleanupHandler || (() => {});
@@ -1110,7 +1115,7 @@ const PayCalCore = (() => {
       };
       
       const style = 'color: #0066cc; font-weight: bold; font-size: 13px; background: #f0f0f0; padding: 8px; border-radius: 4px; display: block; margin: 8px 0;';
-      const infoStyle = 'color: #333; font-family: monospace; font-size: 12px; background: #fafafa; padding: 6px; margin: 4px 0; border-left: 3px solid #0066cc;';
+      const infoStyle = 'color: #333; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: 12px; background: #fafafa; padding: 6px; margin: 4px 0; border-left: 3px solid #0066cc;';
       
       PW.log('📊 PAYCAL DIAGNOSTICS');
       PW.log('Page: ' + diagnostics.page);
@@ -1141,6 +1146,12 @@ const PayCalCore = (() => {
     } else {
       outputDiagnostics();
     }
+
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        normalizeBfcacheRestore();
+      }
+    });
 
     // ====================================================================
     // LENS DASHBOARD CLIENT METRICS (NO FLOATING PANEL)
@@ -1494,7 +1505,6 @@ const PayCalCore = (() => {
           'email',
           'url',
           'tel',
-          'password',
           'number',
           'date',
           'datetime-local',
@@ -1575,8 +1585,6 @@ const PayCalCore = (() => {
     // General Keyboard Events
     const handleGlobalKeys = (e) => {
       const key = typeof e.key === 'string' ? e.key : '';
-      const caps = e.getModifierState?.("CapsLock");
-      caps ? activateCapslockWarning() : deactivateCapslockWarning();
       if (key === "Escape") {
         queryAll("dialog").forEach(modal => closeModal(modal.id));
         if (state.context_menu_is_active) {
@@ -1680,14 +1688,6 @@ const PayCalCore = (() => {
           const dialog_id = e.currentTarget.closest("dialog")?.id;
           if (dialog_id) delay(200).then(() => closeModal(dialog_id));
         }
-      });
-    });
-
-    // Capslock on password inputs
-    queryAll("input[type=password]").forEach(input => {
-      input.addEventListener("keyup", (e) => {
-        const caps = e.getModifierState?.("CapsLock");
-        caps ? activateCapslockWarning() : deactivateCapslockWarning();
       });
     });
 
@@ -2385,14 +2385,13 @@ const PayCalCore = (() => {
 
   return {
     showTrustLayerWarning,
+    resolveThrownMessage,
     config,
     state,
     getElement,
     query,
     queryAll,
     addAudioFocusListener,
-    activateCapslockWarning,
-    deactivateCapslockWarning,
     closeModal,
     deleteResource,
     copyAttribute,
@@ -2422,7 +2421,6 @@ const PayCalCore = (() => {
     updateStatusMessage,
     textToSpeech,
     toTitleCase,
-    togglePasswordVisibility,
     updateResource,
     getBrowserVendor,
     init,

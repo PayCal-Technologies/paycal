@@ -64,8 +64,10 @@ require __DIR__ . '/subpages.css.php';
   font-weight: 600;
 }
 
+.business_subnav_tab.is-hidden-reserved,
 .business_subnav_tab.hidden {
-  display: none;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .business_context_actions {
@@ -1196,6 +1198,12 @@ button.business_members_metric_chip_pending:disabled {
   border: 1px solid var(--panel-border, #2a2a2a);
   border-radius: 8px;
   background: var(--panel-bg, #151515);
+  min-height: 2.7rem;
+}
+
+.business_members_pending_details.is-empty {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .business_members_pending_details > summary {
@@ -1748,6 +1756,14 @@ button.business_members_metric_chip_pending:disabled {
   min-width: 0;
   max-width: none;
   padding: 2px;
+  min-height: 2rem;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.business_members_bulk_toolbar_compact.is-active {
+  visibility: visible;
+  pointer-events: auto;
 }
 
 [data-grid="business-members"] .datagrid_toolbar_start .datagrid_search {
@@ -1772,6 +1788,11 @@ button.business_members_metric_chip_pending:disabled {
 
 [data-grid="business-members"] .business_members_toolbar_filters[hidden] {
   display: none;
+}
+
+[data-grid="business-members"] .business_members_toolbar_filters.is-inactive {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 [data-grid="business-members"] .datagrid_column_menu {
@@ -1801,11 +1822,6 @@ button.business_members_metric_chip_pending:disabled {
   gap: 0.45rem 0.55rem;
   min-height: 2rem;
   min-width: 0;
-}
-
-[data-grid="business-members"] .business_members_toolbar_bulk:empty,
-[data-grid="business-members"] .business_members_toolbar_bulk:has(.business_members_bulk_toolbar.hidden) {
-  display: none;
 }
 
 .business_members_report_control {

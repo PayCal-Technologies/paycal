@@ -63,7 +63,7 @@ class RegistrationController
 
     $result = Registration::register($input);
     if (!$result['success']) {
-      AuthTrace::signupRejected('legacy_form', 'password_registration_disabled', [
+      AuthTrace::signupRejected('legacy_form', 'legacy_registration_disabled', [
         'email_token' => AuthTrace::emailToken($input['email'] ?? ''),
       ]);
     }
@@ -94,8 +94,6 @@ class RegistrationController
       $email = InputSanitizer::postString('register_email');
     }
 
-    // Note: password/confirm_password fields are intentionally not collected;
-    // password registration is disabled and the passkey flow handles all signup.
     return [
         'full_name' => $fullName,
         'email' => $email,
@@ -150,4 +148,3 @@ class RegistrationController
     exit;
   }
 }
-

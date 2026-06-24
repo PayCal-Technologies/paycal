@@ -100,7 +100,6 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
     $userUuid = 'U' . bin2hex(random_bytes(4));
     UserRepository::setUser(
       $userUuid,
-      password_hash(bin2hex(random_bytes(12)), PASSWORD_DEFAULT),
       $email,
       AuthLevel::USER,
       'Recovery Test User',
@@ -141,7 +140,6 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
     $userUuid = 'U' . bin2hex(random_bytes(4));
     UserRepository::setUser(
       $userUuid,
-      password_hash(bin2hex(random_bytes(12)), PASSWORD_DEFAULT),
       $email,
       AuthLevel::USER,
       'First Key Test User',

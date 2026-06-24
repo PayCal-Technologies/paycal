@@ -205,8 +205,11 @@ final class BusinessMembersGridRenderer
       : [];
 
     $lastActiveByMember = $this->lastActiveTimestampsForMembers($memberUuids);
+    $activeConsentByMember = $businessId !== ''
+      ? $this->activeBusinessConsentByMember($businessId, $memberUuids)
+      : [];
 
-    $rows = array_map(function (mixed $member) use ($financialByMember, $lastActiveByMember, $businessId): array {
+    $rows = array_map(function (mixed $member) use ($financialByMember, $lastActiveByMember, $activeConsentByMember): array {
       if (!is_array($member)) {
         return [
           'id' => '',
@@ -246,7 +249,7 @@ final class BusinessMembersGridRenderer
         : (isset($member['uuid']) && is_scalar($member['uuid']) ? (string) $member['uuid'] : '');
       $financial = is_array($financialByMember[$memberUuid] ?? null) ? $financialByMember[$memberUuid] : [];
       $connectionStatus = isset($member['status']) && is_scalar($member['status']) ? strtolower(trim((string) $member['status'])) : '';
-      $hasActiveConsent = $businessId !== '' && $memberUuid !== '' && $this->hasActiveBusinessConsent($businessId, $memberUuid);
+      $hasActiveConsent = $memberUuid !== '' && ($activeConsentByMember[$memberUuid] ?? false);
       $dataAccess = $this->businessDataAccessStatus($connectionStatus, $hasActiveConsent);
       $lastActiveAt = $lastActiveByMember[$memberUuid] ?? 0;
 
@@ -379,10 +382,7 @@ final class BusinessMembersGridRenderer
    */
   public function loadingSkeleton(): string
   {
-    $cell = '<span class="sk-line businesses_datagrid_skeleton_cell"></span>';
-    $row = '<div class="skeleton businesses_datagrid_skeleton_row">' . str_repeat($cell, 4) . '</div>';
-
-    return str_repeat($row, 4);
+    return DataGrid::loadingSkeleton(7, 4);
   }
 
   /**
@@ -680,34 +680,62 @@ final class BusinessMembersGridRenderer
   }
 
   /**
-   * Has active business consent.
+   * @param list<string> $memberUUIDs
+   * @return array<string, bool>
    */
-  private function hasActiveBusinessConsent(string $businessId, string $memberUUID): bool
+  private function activeBusinessConsentByMember(string $businessId, array $memberUUIDs): array
   {
     $businessId = trim($businessId);
-    $memberUUID = trim($memberUUID);
-    if ($businessId === '' || $memberUUID === '') {
-      return false;
+    if ($businessId === '' || $memberUUIDs === []) {
+      return [];
     }
 
-    foreach (Database::smembers(Keys::businessConsentsByUser($memberUUID)) as $consentIdRaw) {
-      $consentId = trim((string) $consentIdRaw);
-      if ($consentId === '') {
+    $consentIdsByMember = [];
+    $consentKeysById = [];
+    foreach (array_values(array_unique($memberUUIDs)) as $memberUUID) {
+      $memberUUID = trim($memberUUID);
+      if ($memberUUID === '') {
         continue;
       }
 
-      $consent = Database::hgetall(Keys::businessConsent($consentId));
-      if (
-        $consent !== []
-        && (string) ($consent['business_id'] ?? '') === $businessId
-        && (string) ($consent['user_uuid'] ?? '') === $memberUUID
-        && (string) ($consent['status'] ?? '') === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE
-      ) {
-        return true;
+      foreach (Database::smembers(Keys::businessConsentsByUser($memberUUID)) as $consentIdRaw) {
+        $consentId = trim((string) $consentIdRaw);
+        if ($consentId === '') {
+          continue;
+        }
+
+        $consentIdsByMember[$memberUUID][] = $consentId;
+        $consentKeysById[$consentId] = Keys::businessConsent($consentId);
       }
     }
 
-    return false;
+    if ($consentKeysById === []) {
+      return [];
+    }
+
+    $consentsByKey = Database::pipelineHgetall(array_values($consentKeysById));
+    $consentsById = [];
+    foreach ($consentKeysById as $consentId => $consentKey) {
+      $consentsById[$consentId] = $consentsByKey[$consentKey] ?? [];
+    }
+
+    $activeByMember = [];
+    foreach ($consentIdsByMember as $memberUUID => $consentIds) {
+      foreach ($consentIds as $consentId) {
+        $consent = $consentsById[$consentId] ?? [];
+        if (
+          $consent !== []
+          && (string) ($consent['business_id'] ?? '') === $businessId
+          && (string) ($consent['user_uuid'] ?? '') === $memberUUID
+          && (string) ($consent['status'] ?? '') === BusinessDiscoveryService::MEMBERSHIP_STATE_ACTIVE
+        ) {
+          $activeByMember[$memberUUID] = true;
+          break;
+        }
+      }
+    }
+
+    return $activeByMember;
   }
 
   /** @return array{label: string, class: string, title: string} */

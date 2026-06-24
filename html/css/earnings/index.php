@@ -3193,7 +3193,7 @@ svg[data-compact-chart="true"] .earnings-crosshair {
   body {
     background: #fff;
     color: #111;
-    font-family: Georgia, serif;
+    font-family: var(--serif, Georgia, "Times New Roman", Times, serif);
     font-size: 10pt;
   }
 

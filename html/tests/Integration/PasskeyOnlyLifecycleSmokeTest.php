@@ -73,7 +73,6 @@ final class PasskeyOnlyLifecycleSmokeTest extends TestCase
   {
     UserRepository::setUser(
       $this->userUUID,
-      password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT),
       $this->email,
       AuthLevel::USER,
       'Passkey Smoke User',

@@ -52,7 +52,6 @@ final class AdminControllerIntegrationTest extends TestCase
             'full_name' => 'Test Admin',
             'email_verified' => '1',
             'auth_level' => (string) AuthLevel::ADMIN->value,
-            'password_hash' => password_hash('admin123', PASSWORD_DEFAULT),
         ]);
 
         // Create regular user for testing
@@ -63,7 +62,6 @@ final class AdminControllerIntegrationTest extends TestCase
             'full_name' => 'Regular User',
             'email_verified' => '1',
             'auth_level' => (string) AuthLevel::USER->value,
-            'password_hash' => password_hash('user123', PASSWORD_DEFAULT),
         ]);
 
         // Create admin session
@@ -124,17 +122,9 @@ final class AdminControllerIntegrationTest extends TestCase
         }
     }
 
-    /**
-     * Test admin update ignores deprecated password field.
-     */
-    public function testAdminUpdateIgnoresPasswordField(): void
+    public function testAdminUpdateDoesNotCreateCredentialSecretField(): void
     {
-        $existingUser = User::getByUUID($this->testUserUUID);
-        $this->assertNotNull($existingUser);
-        $originalHash = $existingUser->password_hash;
-
         $_POST['user_uuid'] = $this->testUserUUID;
-        $_POST['password'] = 'newpassword123';
         $_POST['full_name'] = 'Regular User';
         $_POST['email'] = $this->userEmail;
         $_POST['auth_level'] = (string) AuthLevel::USER->value;
@@ -152,7 +142,7 @@ final class AdminControllerIntegrationTest extends TestCase
 
         $updatedUser = User::getByUUID($this->testUserUUID);
         $this->assertNotNull($updatedUser);
-        $this->assertSame($originalHash, $updatedUser->password_hash);
+        $this->assertSame('', (string) Database::hget(Keys::USER . ':' . $this->testUserUUID, 'credential_secret'));
     }
 
     /**

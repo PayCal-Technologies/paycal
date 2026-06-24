@@ -72,7 +72,6 @@ final class PasskeySessionPromotionTest extends TestCase
 
     UserRepository::setUser(
       $this->userUUID,
-      password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT),
       $this->email,
       AuthLevel::USER,
       'Passkey Session Promotion',
@@ -84,7 +83,6 @@ final class PasskeySessionPromotionTest extends TestCase
       'webauthn_enabled' => '1',
       'encryption_salt' => base64_encode(random_bytes(32)),
       'crypto_version' => '1',
-      'password_only_risk' => '1',
       'last_auth_method' => 'federated',
     ]);
 
@@ -133,7 +131,6 @@ final class PasskeySessionPromotionTest extends TestCase
     $this->assertSame($this->credentialId, Database::hget($sessionKey, 'credential_id'));
     $this->assertSame('1782012345', Database::hget($sessionKey, 'passkey_stepup_at'));
     $this->assertSame('0', Database::hget($sessionKey, 'recovery_pending'));
-    $this->assertSame('0', Database::hget(Keys::USER . ':' . $this->userUUID, 'password_only_risk'));
     $this->assertSame('passkey', Database::hget(Keys::USER . ':' . $this->userUUID, 'last_auth_method'));
   }
 

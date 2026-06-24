@@ -181,7 +181,7 @@ class Layout
       'media-src' => ["'self'", $origin],
       'manifest-src' => ["'self'", $origin],
       'object-src' => ["'none'"],
-      'script-src' => ["'nonce-{$cspNonce}'", "'strict-dynamic'", "'self'", $origin],
+      'script-src' => ["'nonce-{$cspNonce}'", "'strict-dynamic'", "'inline-speculation-rules'", "'self'", $origin],
       'style-src' => ["'self'", $origin],
       'style-src-elem' => ["'self'", $origin],
       'frame-ancestors' => ["'none'"],

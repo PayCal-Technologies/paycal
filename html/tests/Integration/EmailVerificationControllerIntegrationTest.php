@@ -34,4 +34,15 @@ final class EmailVerificationControllerIntegrationTest extends TestCase
     $this->assertSame('error', $decoded['status'] ?? null);
     $this->assertStringContainsString('unauthorized', strtolower((string) ($decoded['message'] ?? '')));
   }
+
+  public function testVerificationLogsDoNotIncludeRawRequestUri(): void
+  {
+    $source = file_get_contents(__DIR__ . '/../../src/Controllers/EmailVerificationController.php');
+    $this->assertIsString($source);
+
+    $this->assertStringNotContainsString("'request_uri' => \$requestUri", $source);
+    $this->assertStringNotContainsString('"request_uri" => $requestUri', $source);
+    $this->assertStringContainsString("'request_path' => \$requestPath", $source);
+    $this->assertStringContainsString("'lookup_fingerprint' => \$lookupFingerprint", $source);
+  }
 }

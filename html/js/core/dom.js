@@ -59,12 +59,6 @@ const DOMModule = (() => {
     }
   }
 
-  function togglePasswordVisibility(id) {
-    const el = getElement(id);
-    if (!el || !el.type) return;
-    el.type = el.type === "password" ? "text" : "password";
-  }
-
   function addClickAndEnterListener(id, func) {
     const el = getElement(id);
     if (!el) return null;
@@ -84,7 +78,6 @@ const DOMModule = (() => {
     getDataAttribute,
     escapeCssId,
     setSelectOption,
-    togglePasswordVisibility,
     addClickAndEnterListener,
   };
 })();

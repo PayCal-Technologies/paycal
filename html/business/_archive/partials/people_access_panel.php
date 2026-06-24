@@ -5,7 +5,7 @@ namespace PayCal\Domain;
 ?>
   <section class="panel businesses_people_access_panel" aria-labelledby="businesses_people_access_title">
     <div class="businesses_section_header">
-      <h2 id="businesses_people_access_title"><?php echo businesses_index_i18n('BUSINESSES_EDITOR_INLINE_TITLE'); ?></h2>
+      <h2 id="businesses_people_access_title"><?php echo businesses_index_i18n_html('BUSINESSES_EDITOR_INLINE_TITLE'); ?></h2>
       <div class="businesses_header_actions">
         <button
           id="businesses_definitions_help_button"
@@ -14,8 +14,8 @@ namespace PayCal\Domain;
           aria-haspopup="dialog"
           aria-controls="businesses_definitions_dialog"
           aria-expanded="false"
-          aria-label="<?php echo businesses_index_i18n('BUSINESSES_OPEN_DEFINITIONS_BTN'); ?>"
-          title="<?php echo businesses_index_i18n('BUSINESSES_DEFINITIONS_TITLE'); ?>"
+          aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_OPEN_DEFINITIONS_BTN'); ?>"
+          title="<?php echo businesses_index_i18n_html('BUSINESSES_DEFINITIONS_TITLE'); ?>"
         >
           <span aria-hidden="true">?</span>
         </button>

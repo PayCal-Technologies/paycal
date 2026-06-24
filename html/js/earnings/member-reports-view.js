@@ -214,6 +214,7 @@ function renderPieGraphsForYear(year, dailyPayload, getElement, pieHelpers) {
  * @param {object} [options.config] PC.config-like i18n map
  * @param {function} [options.buildHeaders] auth header builder
  * @param {function} [options.showToast]
+ * @param {function} [options.resolveThrownMessage]
  */
 export function initMemberReportsEarningsView(container, options = {}) {
   if (!(container instanceof HTMLElement)) {
@@ -234,6 +235,12 @@ export function initMemberReportsEarningsView(container, options = {}) {
   const config = options.config || {};
   const buildHeaders = typeof options.buildHeaders === 'function' ? options.buildHeaders : () => ({ Accept: 'application/json' });
   const showToast = typeof options.showToast === 'function' ? options.showToast : () => {};
+  const resolveThrownMessage = typeof options.resolveThrownMessage === 'function'
+    ? options.resolveThrownMessage
+    : (error, fallbackMessage = 'Unable to complete the request.') => {
+        const message = error instanceof Error && error.message ? error.message.trim() : '';
+        return message || fallbackMessage;
+      };
   const userLocale = String(config.USER_LOCALE || resolveUserLocale()).trim() || resolveUserLocale();
   const apiBase = `/api/v1/businesses/${encodeURIComponent(businessId)}/members/${encodeURIComponent(memberUuid)}/reports`;
   const hasPremiumReporting = root.dataset.memberReportsPremium === '1';
@@ -310,9 +317,10 @@ export function initMemberReportsEarningsView(container, options = {}) {
       );
       loadedSections.add(key);
     } catch (error) {
+      const message = resolveThrownMessage(error, 'Unable to load section.');
       window.Guardian.setHTML(
         target,
-        `<p class="earnings_async_status">${escapeHtml(error.message || 'Unable to load section.')}</p>`,
+        `<p class="earnings_async_status">${escapeHtml(message)}</p>`,
       );
     }
   };
@@ -351,7 +359,8 @@ export function initMemberReportsEarningsView(container, options = {}) {
     try {
       dailyData = await fetchDailyYearData(year);
     } catch (error) {
-      showToast(formatI18n(config, 'EARNINGS_DAILY_LOAD_FAILED_FMT', 'Could not load daily earnings: {message}', { message: error.message }));
+      const message = resolveThrownMessage(error, 'Unable to load daily earnings.');
+      showToast(formatI18n(config, 'EARNINGS_DAILY_LOAD_FAILED_FMT', 'Could not load daily earnings: {message}', { message }));
       return;
     }
     if (!dailyData || typeof dailyData !== 'object') {
@@ -598,7 +607,8 @@ export function initMemberReportsEarningsView(container, options = {}) {
         EarningsExport.downloadTextFile(txt, `paycal-member-${scope}-${browserConvenienceSuffix}.txt`, 'text/plain;charset=utf-8');
       }
     } catch (error) {
-      showToast(formatI18n(config, 'EARNINGS_EXPORT_FAILED_FMT', 'Export failed: {message}', { message: error.message }));
+      const message = resolveThrownMessage(error, 'Unable to export report.');
+      showToast(formatI18n(config, 'EARNINGS_EXPORT_FAILED_FMT', 'Export failed: {message}', { message }));
     } finally {
       button.disabled = false;
       button.textContent = originalText;

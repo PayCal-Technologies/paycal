@@ -15,6 +15,18 @@
     ...extra,
   });
 
+  const withCsrfHeader = (headers = {}) => {
+    const csrfToken = getCsrfToken();
+    if (csrfToken === '') {
+      return headers;
+    }
+
+    return {
+      'X-CSRF-Token': csrfToken,
+      ...headers,
+    };
+  };
+
   const extractPayloadData = (payload) => {
     if (payload && typeof payload === 'object') {
       const { status, message, _lens, ...data } = payload;
@@ -151,7 +163,7 @@
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...headers,
+        ...withCsrfHeader(headers),
       },
       body: JSON.stringify(values ?? {}),
     });
@@ -168,7 +180,7 @@
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...headers,
+        ...withCsrfHeader(headers),
       },
       body: JSON.stringify(values ?? {}),
     });

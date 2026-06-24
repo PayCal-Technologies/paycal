@@ -73,6 +73,61 @@ use PayCal\Domain\UserRepository;
  */
 final class BusinessDiscoveryController
 {
+  private const CSRF_FORM_TYPE = 'businesses';
+
+  /**
+   * Validate and filter browser-authenticated business mutations.
+   *
+   * @param array<int,string> $allowedStrings
+   * @param array<int,string> $allowedArrays
+   * @param array<int,string> $droppedKeys
+   * @param array<int,string> $base64ImageStrings
+   * @param array<int,string> $rawStrings
+   *
+   * @return array<string, null|array<mixed>|bool|float|int|string>|false
+   */
+  private static function filterBusinessPost(
+    array $allowedStrings = [],
+    array $allowedArrays = [],
+    array &$droppedKeys = [],
+    array $base64ImageStrings = [],
+    array $rawStrings = []
+  ): array|false
+  {
+    return RequestGuard::filterPost(
+      $allowedStrings,
+      $allowedArrays,
+      $droppedKeys,
+      $base64ImageStrings,
+      $rawStrings,
+      self::CSRF_FORM_TYPE,
+    );
+  }
+
+  /**
+   * Validate browser-authenticated business mutations that carry all identity in
+   * the route path and only need a business CSRF token in the POST body/header.
+   */
+  private static function requireBusinessCsrfPost(): bool
+  {
+    self::promoteBusinessCsrfHeader();
+    $droppedKeys = [];
+
+    return self::filterBusinessPost(['csrf_token'], [], $droppedKeys) !== false;
+  }
+
+  private static function promoteBusinessCsrfHeader(): void
+  {
+    if (isset($_POST['csrf_token']) && is_scalar($_POST['csrf_token']) && trim((string) $_POST['csrf_token']) !== '') {
+      return;
+    }
+
+    $header = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    if (is_scalar($header) && trim((string) $header) !== '') {
+      $_POST['csrf_token'] = (string) $header;
+    }
+  }
+
   /**
    * Map domain/service failures to the appropriate HTTP status.
     *
@@ -156,7 +211,7 @@ final class BusinessDiscoveryController
   public function create(): void
   {
     $allowedStrings = ['name', 'business_type', 'organization_type'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -224,7 +279,7 @@ final class BusinessDiscoveryController
   #[Route('connections/people/request', ['POST'])]
   public function requestPersonConnection(): void
   {
-    $filtered = RequestGuard::filterPost(['target_email'], []);
+    $filtered = self::filterBusinessPost(['target_email'], []);
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
@@ -251,6 +306,10 @@ final class BusinessDiscoveryController
   #[Route('connections/people/{connectionId}/approve', ['POST'])]
   public function approvePersonConnection(string $connectionId): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $service = new UserConnectionService();
     $result = $service->approvePersonConnection(User::currentUUID(), InputSanitizer::sanitizeString($connectionId));
 
@@ -269,7 +328,7 @@ final class BusinessDiscoveryController
   #[Route('connections/people/{connectionId}/revoke', ['POST'])]
   public function revokePersonConnection(string $connectionId): void
   {
-    $filtered = RequestGuard::filterPost(['status'], []);
+    $filtered = self::filterBusinessPost(['status'], []);
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
@@ -300,7 +359,7 @@ final class BusinessDiscoveryController
   #[Route('connections/people/{connectionId}/grants', ['POST'])]
   public function updatePersonConnectionGrant(string $connectionId): void
   {
-    $filtered = RequestGuard::filterPost(['capability', 'enabled'], []);
+    $filtered = self::filterBusinessPost(['capability', 'enabled'], []);
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
 
@@ -335,6 +394,10 @@ final class BusinessDiscoveryController
    */
   public function markNotificationsRead(string $businessId): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $service = new BusinessDiscoveryService();
     $businessId = InputSanitizer::sanitizeString($businessId);
     $result = $service->markBusinessNotificationsRead(User::currentUUID(), $businessId);
@@ -580,7 +643,7 @@ final class BusinessDiscoveryController
   {
     $allowedStrings = ['site_id', 'site_owner_uuid', 'apply_scope', 'select_all'];
     $allowedArrays = ['member_uuids'];
-    $filtered = RequestGuard::filterPost($allowedStrings, $allowedArrays);
+    $filtered = self::filterBusinessPost($allowedStrings, $allowedArrays);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -704,7 +767,7 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/groups', ['POST'])]
   public function saveBusinessGroup(string $businessId): void
   {
-    $filtered = RequestGuard::filterPost(['group_id', 'name', 'description'], []);
+    $filtered = self::filterBusinessPost(['group_id', 'name', 'description'], []);
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
@@ -725,7 +788,7 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/groups/{groupId}/members', ['POST'])]
   public function addBusinessGroupMembers(string $businessId, string $groupId): void
   {
-    $filtered = RequestGuard::filterPost([], ['member_uuids']);
+    $filtered = self::filterBusinessPost([], ['member_uuids']);
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
@@ -764,6 +827,10 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/groups/{groupId}/archive', ['POST'])]
   public function archiveBusinessGroup(string $businessId, string $groupId): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $result = (new BusinessGroupService())->archiveGroup(
       User::currentUUID(),
       InputSanitizer::sanitizeString($businessId),
@@ -783,6 +850,10 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/groups/{groupId}/restore', ['POST'])]
   public function restoreBusinessGroup(string $businessId, string $groupId): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $result = (new BusinessGroupService())->restoreGroup(
       User::currentUUID(),
       InputSanitizer::sanitizeString($businessId),
@@ -802,6 +873,10 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/groups/{groupId}/delete', ['POST'])]
   public function deleteBusinessGroup(string $businessId, string $groupId): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $result = (new BusinessGroupService())->deleteGroup(
       User::currentUUID(),
       InputSanitizer::sanitizeString($businessId),
@@ -968,7 +1043,7 @@ final class BusinessDiscoveryController
       'generation_path',
       'trust_level',
     ];
-    $filtered = RequestGuard::filterPost($allowedStrings, ['member_uuids']);
+    $filtered = self::filterBusinessPost($allowedStrings, ['member_uuids']);
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
@@ -995,15 +1070,16 @@ final class BusinessDiscoveryController
       }
     }
 
-    $eventPhase = strtolower($scalar($filtered['event_phase'] ?? 'completed'));
-    $eventType = match ($eventPhase) {
-      'requested', 'request' => 'business.member.report.export.requested',
-      'started', 'start' => 'business.member.report.export.started',
-      'denied', 'deny' => 'business.member.report.export.denied',
-      'failed', 'failure' => 'business.member.report.export.failed',
-      'completed', 'complete' => 'business.member.report.export.completed',
-      default => 'business.member.report.export.completed',
-    };
+    $eventPhase = strtolower($scalar($filtered['event_phase'] ?? 'requested'));
+    if ($eventPhase !== 'requested' && $eventPhase !== 'request') {
+      Response::error(
+        '[Business] Export completion audit events must be emitted by the server export workflow.',
+        ['allowed_event_phase' => 'requested'],
+        HttpStatus::HTTP_FORBIDDEN
+      );
+      return;
+    }
+    $eventType = 'business.member.report.export.requested';
 
     (new BusinessDiscoveryService())->appendBusinessAuditEvent(
       $businessId,
@@ -1016,15 +1092,9 @@ final class BusinessDiscoveryController
         'format' => $scalar($filtered['format'] ?? ''),
         'delivery' => $scalar($filtered['delivery'] ?? ''),
         'member_count' => $scalar($filtered['member_count'] ?? ''),
-        'succeeded' => $scalar($filtered['succeeded'] ?? ''),
-        'failed' => $scalar($filtered['failed'] ?? ''),
-        'duration_ms' => $scalar($filtered['duration_ms'] ?? ''),
-        'generated_at' => $scalar($filtered['generated_at'] ?? ''),
         'member_uuids' => $memberUuids,
-        'result' => $scalar($filtered['result'] ?? $eventPhase),
+        'result' => 'requested',
         'reason' => $scalar($filtered['reason'] ?? ''),
-        'generation_path' => $scalar($filtered['generation_path'] ?? ''),
-        'trust_level' => $scalar($filtered['trust_level'] ?? ''),
       ],
     );
 
@@ -1040,6 +1110,9 @@ final class BusinessDiscoveryController
   public function exportMemberReport(string $businessId, string $memberUUID, string $format): void
   {
     Authentication::abortIfUnauthenticated();
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
 
     $businessId = InputSanitizer::sanitizeString($businessId);
     $memberUUID = InputSanitizer::sanitizeString($memberUUID);
@@ -1141,6 +1214,10 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/members/{memberUUID}/reports/forecast/preview', ['POST'])]
   public function postMemberReportsForecastPreview(string $businessId, string $memberUUID): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $businessId = InputSanitizer::sanitizeString($businessId);
     $memberUUID = InputSanitizer::sanitizeString($memberUUID);
 
@@ -1232,7 +1309,7 @@ final class BusinessDiscoveryController
   {
     $allowedStrings = ['email'];
     $allowedArrays = ['scopes'];
-    $filtered = RequestGuard::filterPost($allowedStrings, $allowedArrays);
+    $filtered = self::filterBusinessPost($allowedStrings, $allowedArrays);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1279,7 +1356,7 @@ final class BusinessDiscoveryController
   {
     $allowedStrings = ['emails'];
     $allowedArrays = ['scopes', 'emails_chunks'];
-    $filtered = RequestGuard::filterPost($allowedStrings, $allowedArrays);
+    $filtered = self::filterBusinessPost($allowedStrings, $allowedArrays);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1451,7 +1528,7 @@ final class BusinessDiscoveryController
   public function startInviteImportChallenge(string $businessId): void
   {
     $allowedStrings = ['import_id'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1485,7 +1562,7 @@ final class BusinessDiscoveryController
   public function verifyInviteImportChallenge(string $businessId): void
   {
     $allowedStrings = ['import_id', 'challenge_id', 'code'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1524,7 +1601,7 @@ final class BusinessDiscoveryController
   public function commitInviteImport(string $businessId): void
   {
     $allowedStrings = ['import_id', 'challenge_id'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1624,7 +1701,7 @@ final class BusinessDiscoveryController
   public function approveAccessRequest(string $businessId): void
   {
     $allowedStrings = ['request_id', 'consent_id', 'consent_version', 'consent_acknowledged', 'disclaimer_text'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1666,7 +1743,7 @@ final class BusinessDiscoveryController
   public function rejectAccessRequest(string $businessId): void
   {
     $allowedStrings = ['request_id'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1699,7 +1776,7 @@ final class BusinessDiscoveryController
   public function revokeInvite(string $businessId): void
   {
     $allowedStrings = ['invite_id'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1733,7 +1810,7 @@ final class BusinessDiscoveryController
   public function acceptInvite(): void
   {
     $allowedStrings = ['invite_token', 'consent_id', 'consent_version', 'consent_acknowledged', 'disclaimer_text'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1783,7 +1860,7 @@ final class BusinessDiscoveryController
       'consent_acknowledged',
       'disclaimer_text',
     ];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1828,7 +1905,7 @@ final class BusinessDiscoveryController
       'consent_acknowledged',
       'disclaimer_text',
     ];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1864,7 +1941,7 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/consent/revoke', ['POST'])]
   public function revokeBusinessDataConsent(string $businessId): void
   {
-    $filtered = RequestGuard::filterPost(['consent_action'], []);
+    $filtered = self::filterBusinessPost(['consent_action'], []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1894,7 +1971,7 @@ final class BusinessDiscoveryController
   public function revokeConnection(string $businessId): void
   {
     $allowedStrings = ['target_user_uuid'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('We could not read that request. Please try again.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1928,7 +2005,7 @@ final class BusinessDiscoveryController
   public function updateConnectionRole(string $businessId): void
   {
     $allowedStrings = ['target_user_uuid', 'role'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -1963,6 +2040,10 @@ final class BusinessDiscoveryController
    */
   public function leaveBusiness(string $businessId): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $service = new BusinessDiscoveryService();
     $result = $service->leaveBusiness(User::currentUUID(), InputSanitizer::sanitizeString($businessId));
 
@@ -2091,7 +2172,7 @@ final class BusinessDiscoveryController
   public function unlinkSite(string $businessId): void
   {
     $allowedStrings = ['site_id', 'site_owner_uuid'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -2132,7 +2213,7 @@ final class BusinessDiscoveryController
   public function linkSite(string $businessId): void
   {
     $allowedStrings = ['site_id', 'site_owner_uuid'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -2164,7 +2245,7 @@ final class BusinessDiscoveryController
   public function createBusinessSite(string $businessId): void
   {
     $allowedStrings = ['site_name', 'wage', 'living_out_allowance', 'travel_hours', 'province'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -2194,6 +2275,10 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/sites/{siteOwnerUUID}/{siteID}/unlink', ['POST'])]
   public function unlinkBusinessSite(string $businessId, string $siteOwnerUUID, string $siteID): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $service = new BusinessDiscoveryService();
     $result = $service->unlinkBusinessSite(
       User::currentUUID(),
@@ -2334,7 +2419,7 @@ final class BusinessDiscoveryController
       'contact_custom_json',
     ];
     $droppedKeys = [];
-    $filtered = RequestGuard::filterPost($allowedStrings, [], $droppedKeys, $base64ImageFields, $rawStringFields);
+    $filtered = self::filterBusinessPost($allowedStrings, [], $droppedKeys, $base64ImageFields, $rawStringFields);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -2407,6 +2492,10 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/sites/{siteOwnerUUID}/{siteID}/restore', ['POST'])]
   public function restoreBusinessSite(string $businessId, string $siteOwnerUUID, string $siteID): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $service = new BusinessDiscoveryService();
     $result  = $service->restoreBusinessSite(
       User::currentUUID(),
@@ -2430,6 +2519,10 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/sites/{siteOwnerUUID}/{siteID}/archive', ['POST'])]
   public function archiveBusinessSite(string $businessId, string $siteOwnerUUID, string $siteID): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $service = new BusinessDiscoveryService();
     $result  = $service->archiveBusinessSite(
       User::currentUUID(),
@@ -2453,6 +2546,10 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/sites/{siteOwnerUUID}/{siteID}/permanent-delete', ['POST'])]
   public function permanentDeleteBusinessSite(string $businessId, string $siteOwnerUUID, string $siteID): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $service = new BusinessDiscoveryService();
     $result  = $service->permanentDeleteBusinessSite(
       User::currentUUID(),
@@ -2485,7 +2582,7 @@ final class BusinessDiscoveryController
       'tags', 'client_name', 'cost_code', 'start_date', 'end_date',
     ];
     $droppedKeys = [];
-    $filtered    = RequestGuard::filterPost($allowedStrings, [], $droppedKeys);
+    $filtered    = self::filterBusinessPost($allowedStrings, [], $droppedKeys);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -2522,7 +2619,7 @@ final class BusinessDiscoveryController
   public function requestAccess(): void
   {
     $allowedStrings = ['owner_email'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -2618,7 +2715,7 @@ final class BusinessDiscoveryController
   public function transferOwnership(string $businessId): void
   {
     $allowedStrings = ['target_user_uuid'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -2651,7 +2748,7 @@ final class BusinessDiscoveryController
   public function bootstrapBusinessEncryption(string $businessId): void
   {
     $allowedStrings = ['segment', 'version'];
-    $filtered = RequestGuard::filterPost($allowedStrings, []);
+    $filtered = self::filterBusinessPost($allowedStrings, []);
 
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
@@ -2702,6 +2799,10 @@ final class BusinessDiscoveryController
    */
   public function autoBootstrapBusinessEncryption(): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $actorUUID = User::currentUUID();
     $actorThrottleKey = Keys::TELEMETRY . ':business:dek:auto_bootstrap:user:' . $actorUUID;
     // setnx is atomic (SET NX EX); eliminates the exists()→set() TOCTOU race
@@ -2772,7 +2873,7 @@ final class BusinessDiscoveryController
   #[Route('businesses/{businessId}/audit/control-test', ['POST'])]
   public function generateAuditControlTest(string $businessId): void
   {
-    $filtered = RequestGuard::filterPost(['summary'], []);
+    $filtered = self::filterBusinessPost(['summary'], []);
     if (false === $filtered) {
       Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
 

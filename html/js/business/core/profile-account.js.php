@@ -31,6 +31,18 @@
     });
   };
 
+  const withSettingsCsrfToken = (payload = {}) => {
+    const csrfToken = String((document.getElementById('settings_csrf_token')?.value || '')).trim();
+    if (csrfToken === '') {
+      return payload;
+    }
+
+    return {
+      ...payload,
+      csrf_token: csrfToken,
+    };
+  };
+
   const bindProfileEditDetails = () => {
     const editDetailsForm = document.getElementById('edit_details_form');
     const editDetailsPhone = document.getElementById('edit_details_phone');
@@ -378,9 +390,9 @@
 
       try {
         if (statusEl) statusEl.textContent = CHANGE_EMAIL_I18N.working;
-        const { response, data, raw } = await postJsonRaw('/api/v1/account/change-email/start', {
+        const { response, data, raw } = await postJsonRaw('/api/v1/account/change-email/start', withSettingsCsrfToken({
           new_email: newEmail,
-        });
+        }));
 
         if (response.ok && data && data.status === 'success') {
           setFieldErrorState(newEmailInput, 'change_email_new_email_error', '');
@@ -437,11 +449,11 @@
 
       try {
         if (statusEl) statusEl.textContent = CHANGE_EMAIL_I18N.working;
-        const { response, data, raw } = await postJsonRaw('/api/v1/account/change-email/verify', {
+        const { response, data, raw } = await postJsonRaw('/api/v1/account/change-email/verify', withSettingsCsrfToken({
           txn_id: txnId,
           old_code: oldCode,
           new_code: newCode,
-        });
+        }));
 
         if (response.ok && data && data.status === 'success') {
           setFieldErrorState(oldCodeInput, 'change_email_old_code_error', '');
@@ -476,9 +488,9 @@
 
       try {
         if (statusEl) statusEl.textContent = CHANGE_EMAIL_I18N.working;
-        const { response, data, raw } = await postJsonRaw('/api/v1/account/change-email/resend', {
+        const { response, data, raw } = await postJsonRaw('/api/v1/account/change-email/resend', withSettingsCsrfToken({
           txn_id: txnId,
-        });
+        }));
         if (response.ok && data && data.status === 'success') {
           if (statusEl) statusEl.textContent = CHANGE_EMAIL_I18N.codesSent;
         } else if (statusEl) {

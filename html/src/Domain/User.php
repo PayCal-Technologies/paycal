@@ -49,7 +49,6 @@ final class User
 
   public ?string $pay_frequency       = 'biweekly';
   public ?string $encryption_salt     = null;  // Encryption salt for PBKDF2 and HKDF
-  public ?string $wrapped_dek         = null;  // Legacy password-wrapped DEK
   public ?string $wrapped_dek_passkey = null;  // DEK wrapped with passkey-derived KEK (HKDF)
   public int $dek_version             = 1;     // DEK version (for rotation)
   public int $crypto_version          = 1;     // Crypto version (for algorithm migration)
@@ -87,9 +86,6 @@ final class User
   #[\PayCal\Domain\Attributes\Required]
   #[\PayCal\Domain\Attributes\Email]
   public string $email = '';
-
-  #[\PayCal\Domain\Attributes\Required]
-  public string $password_hash = '';
 
   #[\PayCal\Domain\Attributes\Enum(AuthLevel::class)]
   public AuthLevel $auth_level                       = AuthLevel::USER;

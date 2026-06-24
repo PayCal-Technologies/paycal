@@ -140,7 +140,6 @@ final class UserRepository
   /**
    * Sets user preferences.
    * @param string    $userUUID        User UUID
-   * @param string    $passwordHash    Password Hash
    * @param string    $email           Email Address
    * @param AuthLevel $authLevel       User Authorization level (unverified, user, admin, etc...)
    * @param string    $fullName        Full name (John Smith)
@@ -149,7 +148,6 @@ final class UserRepository
    */
   public static function setUser(
     string $userUUID,
-    string $passwordHash,
     string $email,
     AuthLevel $authLevel,
     string $fullName,
@@ -165,7 +163,6 @@ final class UserRepository
 
     $fields = [
       'user_uuid' => $userUUID,
-      'password_hash' => $passwordHash,
       'email' => InputSanitizer::sanitizeString($email),
       'auth_level' => $authLevel->value,
       'full_name' => InputSanitizer::sanitizeString($fullName),
@@ -528,14 +525,8 @@ final class UserRepository
       case 'phone':
         $user->phone = $value;
         return;
-      case 'password_hash':
-        $user->password_hash = $value;
-        return;
       case 'encryption_salt':
         $user->encryption_salt = $value;
-        return;
-      case 'wrapped_dek':
-        $user->wrapped_dek = $value;
         return;
       case 'wrapped_dek_passkey':
         $user->wrapped_dek_passkey = $value;
