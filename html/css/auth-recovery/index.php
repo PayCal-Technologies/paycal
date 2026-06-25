@@ -75,6 +75,16 @@ body {
   font-weight: 700;
   padding: 0;
 }
+.recovery-disclosure {
+  margin: 0.75rem 0 1rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 196, 120, 0.35);
+  background: rgba(120, 72, 18, 0.22);
+  color: #ffe2b8;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
 .recovery-status-action {
   display: inline-flex;
   align-items: center;

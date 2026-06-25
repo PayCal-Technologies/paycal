@@ -13,26 +13,36 @@ $authI18nKeys = [
   'AUTH_JS_WEBAUTHN_UNSUPPORTED',
   'AUTH_JS_REGISTER_UNSUPPORTED',
   'AUTH_JS_REGISTER_UNSUPPORTED_HELP',
-  'AUTH_JS_SIGNIN_RECOVERY_CODE',
   'AUTH_JS_CONFIRM_DEVICE',
   'AUTH_JS_SUCCESS_REDIRECTING',
-  'AUTH_JS_RECOVERY_START_FAILED',
-  'AUTH_JS_RECOVERY_SEND_FAILED',
   'AUTH_JS_REGISTER_CHECK_EMAIL',
   'AUTH_JS_REGISTER_FAILED',
   'AUTH_JS_EMAIL_ALREADY_REGISTERED',
   'AUTH_JS_INVALID_INVITE_CODE',
   'AUTH_JS_ENTER_FULL_NAME',
   'AUTH_JS_ENTER_VALID_EMAIL',
-  'AUTH_JS_EMAIL_REQUIRED',
-  'AUTH_JS_EMAIL_OPTIONAL_IMMEDIATE_UI',
-  'AUTH_JS_IMMEDIATE_UI_ENABLED',
-  'AUTH_JS_IMMEDIATE_UI_NOT_ACTIVE',
-  'AUTH_JS_IMMEDIATE_UI_UNSUPPORTED',
+  'AUTH_JS_IMMEDIATE_UI_MISS',
+  'AUTH_JS_IMMEDIATE_UI_MISS',
   'AUTH_JS_NO_ACCOUNT',
   'AUTH_JS_SIGNIN_FAILED',
   'AUTH_JS_REQUEST_TIMEOUT',
   'AUTH_JS_NETWORK_ERROR',
+  'AUTH_JS_PASSKEY_CANCEL',
+  'AUTH_JS_PASSKEY_PHONE_CANCEL',
+  'AUTH_JS_PASSKEY_CREDENTIAL_REJECTED',
+  'AUTH_JS_PASSKEY_COMPROMISED',
+  'AUTH_JS_PASSKEY_MISMATCH_DETAIL',
+  'AUTH_JS_PASSKEY_NOT_RECOGNIZED',
+  'AUTH_JS_CONNECT_FAILED',
+  'AUTH_JS_RATE_LIMIT_FMT',
+  'AUTH_JS_TRY_AGAIN',
+  'AUTH_JS_TRY_ANOTHER_PASSKEY',
+  'AUTH_JS_TRY_PHONE_AGAIN',
+  'AUTH_JS_TRY_PHONE_OR_TABLET_AGAIN',
+  'AUTH_JS_USE_PASSKEY_THIS_DEVICE',
+  'AUTH_JS_USE_ANOTHER_PASSKEY',
+  'AUTH_JS_EDIT_EMAIL',
+  'AUTH_RECOVER_ACCOUNT',
 ];
 $authI18n = [];
 foreach ($authI18nKeys as $authI18nKey) {
@@ -43,6 +53,7 @@ foreach ($authI18nKeys as $authI18nKey) {
 import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '/js/core/binary-codec.js';
 import { isWebAuthnCapableBrowser } from '/js/core/capabilities.js';
 import { setActionBusy as setButtonBusy } from '/js/core/actions.js';
+import { formatTemplate as formatAuthMessage } from '/js/core/template.js';
 
 // Passkey-only auth helpers for /auth
 
@@ -84,27 +95,103 @@ const setRegisterStatus = (msg) => {
   }
 };
 
-const syncImmediateUiSigninCopy = async () => {
-  if (AUTH_CONFIG.immediateUiAllowed !== true) {
-    return;
-  }
+const signinNoticeEl = document.getElementById('signin-notice');
+const signinErrorActionsEl = document.getElementById('signin-error-actions');
+const emailInputEl = document.getElementById('email');
 
-  const emailLabel = document.querySelector('label[for="email"]');
-  if (emailLabel instanceof HTMLElement) {
-    emailLabel.textContent = AUTH_T.AUTH_JS_EMAIL_OPTIONAL_IMMEDIATE_UI || 'Email (optional for faster passkey sign-in)';
+const hideSigninNotice = () => {
+  if (signinNoticeEl) {
+    signinNoticeEl.hidden = true;
+    signinNoticeEl.classList.remove('is-security');
+    signinNoticeEl.replaceChildren();
   }
-
-  if (await browserSupportsImmediateUi()) {
-    setPasskeyStatus(AUTH_T.AUTH_JS_IMMEDIATE_UI_ENABLED || DEFAULT_SIGNIN_STATUS);
-  } else {
-    setPasskeyStatus(AUTH_T.AUTH_JS_IMMEDIATE_UI_UNSUPPORTED || DEFAULT_SIGNIN_STATUS);
+  if (signinErrorActionsEl) {
+    signinErrorActionsEl.hidden = true;
+    signinErrorActionsEl.replaceChildren();
   }
 };
 
+const showSigninNotice = (title, detail = '', { security = false } = {}) => {
+  if (!signinNoticeEl) return;
+  signinNoticeEl.replaceChildren();
+  if (title) {
+    const titleEl = document.createElement('strong');
+    titleEl.className = 'auth-signin-notice-title';
+    titleEl.textContent = title;
+    signinNoticeEl.appendChild(titleEl);
+  }
+  if (detail) {
+    const detailEl = document.createElement('span');
+    detailEl.textContent = detail;
+    signinNoticeEl.appendChild(detailEl);
+  }
+  signinNoticeEl.classList.toggle('is-security', security === true);
+  signinNoticeEl.hidden = false;
+};
+
+const showSigninErrorActions = (actions = []) => {
+  if (!signinErrorActionsEl) return;
+  signinErrorActionsEl.replaceChildren();
+  actions.filter((action) => action && !action.link).forEach((action) => {
+    if (typeof action.onClick !== 'function') return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = action.primary ? 'btn btn_primary' : 'btn btn_secondary';
+    button.textContent = String(action.label || '');
+    button.addEventListener('click', action.onClick);
+    signinErrorActionsEl.appendChild(button);
+  });
+
+  const links = actions.filter((action) => action && action.link);
+  if (links.length > 0) {
+    const linksWrap = document.createElement('div');
+    linksWrap.className = 'auth-signin-error-links';
+    links.forEach((action) => {
+      const link = document.createElement('button');
+      link.type = 'button';
+      link.className = 'btn-link';
+      link.textContent = String(action.label || '');
+      link.addEventListener('click', action.onClick);
+      linksWrap.appendChild(link);
+    });
+    signinErrorActionsEl.appendChild(linksWrap);
+  }
+
+  signinErrorActionsEl.hidden = signinErrorActionsEl.children.length === 0;
+};
+
+const focusEmailInput = () => {
+  if (emailInputEl instanceof HTMLInputElement) {
+    emailInputEl.focus();
+    emailInputEl.select();
+  }
+};
+
+const recoveryUrlWithLanguage = () => {
+  const current = new URL(window.location.href);
+  const language = String(current.searchParams.get('l') || '').trim();
+  const target = new URL('/auth/recover/', window.location.origin);
+  if (language !== '') {
+    target.searchParams.set('l', language);
+  }
+  return target.toString();
+};
+
+const buildLoginStartBody = (email) => {
+  if (email) {
+    return { email };
+  }
+  return { discoverable: true };
+};
+
+const transportHintsForFlow = (preferPhoneFlow) => (
+  preferPhoneFlow
+    ? ['hybrid', 'client-device', 'security-key']
+    : ['client-device', 'hybrid', 'security-key']
+);
+
 const authBannerEl = document.getElementById('auth-feedback-banner');
 let authBannerTimer = null;
-let recoveryStartInFlight = false;
-const RECOVERY_PREFILL_SESSION_KEY = 'paycal.recovery.prefill';
 const registerUnsupportedWarning = AUTH_T.AUTH_JS_REGISTER_UNSUPPORTED;
 const registerUnsupportedHelpLabel = AUTH_T.AUTH_JS_REGISTER_UNSUPPORTED_HELP;
 
@@ -155,56 +242,6 @@ const showAuthBanner = (msg, type = 'error', options = {}) => {
       authBannerEl.classList.remove('show');
     }, autoHideMs);
   }
-};
-
-const recoveryUrlWithLanguage = () => {
-  const current = new URL(window.location.href);
-  const language = String(current.searchParams.get('l') || '').trim();
-  const target = new URL('/auth/recover/', window.location.origin);
-  if (language !== '') {
-    target.searchParams.set('l', language);
-  }
-  return target.toString();
-};
-
-const showRecoveryCodeComposer = (prefillEmail = '') => {
-  if (!authBannerEl) return;
-
-  showAuthBanner('Passkey sign-in failed. Enter your account email to send a recovery code.', 'error', {
-    autoHideMs: 0,
-  });
-
-  const actions = document.createElement('div');
-  actions.className = 'auth-feedback-banner-actions';
-
-  const input = document.createElement('input');
-  input.type = 'email';
-  input.className = 'auth-feedback-banner-input';
-  input.placeholder = 'you@example.com';
-  input.value = String(prefillEmail || '').trim();
-  input.autocomplete = 'email';
-  input.setAttribute('aria-label', 'Email for recovery code');
-
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'auth-feedback-banner-btn';
-  button.textContent = AUTH_T.AUTH_JS_SIGNIN_RECOVERY_CODE;
-
-  button.addEventListener('click', async () => {
-    const email = String(input.value || '').trim();
-    if (!email || !email.includes('@')) {
-      showAuthBanner('Enter a valid email address to send a recovery code.', 'error', { autoHideMs: 0 });
-      showRecoveryCodeComposer(email);
-      return;
-    }
-    await requestRecoveryCodeAndRedirect(email, { source: 'manual' });
-  });
-
-  actions.appendChild(input);
-  actions.appendChild(button);
-  authBannerEl.appendChild(actions);
-
-  input.focus();
 };
 
 const browserSupportsImmediateUi = async () => {
@@ -296,16 +333,176 @@ const suggestedDeviceNameFromEmail = (emailRaw) => {
 
 const signinFriendlyMessage = (apiMessage, statusCode) => {
   const message = String(apiMessage || '').trim();
-  if (/email is required/i.test(message)) {
-    return AUTH_T.AUTH_JS_EMAIL_REQUIRED;
-  }
   if (statusCode === 401 || /authentication failed/i.test(message)) {
     return AUTH_T.AUTH_JS_NO_ACCOUNT;
+  }
+  if (statusCode === 429 || /too many attempts/i.test(message)) {
+    return message || AUTH_T.AUTH_JS_SIGNIN_FAILED;
   }
   if (message !== '') {
     return message;
   }
   return AUTH_T.AUTH_JS_SIGNIN_FAILED;
+};
+
+const classifySigninFailure = (error, context = {}) => {
+  const preferPhoneFlow = context.preferPhoneFlow === true;
+  const email = String(context.email || '').trim();
+  const statusCode = Number(context.statusCode || 0);
+  const finishErrorCode = String(context.finishErrorCode || '').trim();
+  const message = String(error?.message || '').trim();
+
+  if (statusCode === 429 || /too many attempts/i.test(message)) {
+    return { kind: 'rate_limit', retrySeconds: 60 };
+  }
+  if (message === AUTH_T.AUTH_JS_REQUEST_TIMEOUT || message === AUTH_T.AUTH_JS_NETWORK_ERROR || message === AUTH_T.AUTH_JS_CONNECT_FAILED) {
+    return { kind: message === AUTH_T.AUTH_JS_NETWORK_ERROR || message === AUTH_T.AUTH_JS_CONNECT_FAILED ? 'network' : 'network' };
+  }
+  if (error instanceof DOMException) {
+    if (error.name === 'NotAllowedError' || error.name === 'AbortError' || error.name === 'TimeoutError') {
+      return { kind: preferPhoneFlow ? 'phone_cancel' : 'cancel' };
+    }
+  }
+  if (finishErrorCode === 'passkey_compromised') {
+    return { kind: 'revoked' };
+  }
+  if (statusCode === 403 && email) {
+    return { kind: 'credential_mismatch', email, preferPhoneFlow };
+  }
+  if (finishErrorCode === 'passkey_invalid' || statusCode === 401 || statusCode === 403) {
+    return { kind: 'credential_rejected' };
+  }
+  return { kind: 'generic', message: message || AUTH_T.AUTH_JS_SIGNIN_FAILED };
+};
+
+let rateLimitTimer = null;
+
+const renderSigninFailure = (failure, retryHandler) => {
+  hideAuthBanner();
+  hideSigninNotice();
+  showSigninErrorActions([]);
+  setPasskeyStatus(DEFAULT_SIGNIN_STATUS);
+
+  const recoverAction = {
+    label: AUTH_T.AUTH_RECOVER_ACCOUNT,
+    link: true,
+    onClick: () => {
+      window.location.href = recoveryUrlWithLanguage();
+    },
+  };
+
+  switch (failure.kind) {
+    case 'cancel':
+      showSigninNotice(AUTH_T.AUTH_JS_PASSKEY_CANCEL);
+      showSigninErrorActions([{
+        label: AUTH_T.AUTH_JS_TRY_AGAIN,
+        primary: true,
+        onClick: retryHandler,
+      }]);
+      return;
+    case 'phone_cancel':
+      showSigninNotice(AUTH_T.AUTH_JS_PASSKEY_PHONE_CANCEL);
+      showSigninErrorActions([{
+        label: AUTH_T.AUTH_JS_TRY_PHONE_AGAIN,
+        primary: true,
+        onClick: retryHandler,
+      }]);
+      return;
+    case 'credential_mismatch':
+      showSigninNotice(
+        AUTH_T.AUTH_JS_PASSKEY_CREDENTIAL_REJECTED,
+        AUTH_T.AUTH_JS_PASSKEY_MISMATCH_DETAIL,
+        { security: true },
+      );
+      showSigninErrorActions([
+        {
+          label: AUTH_T.AUTH_JS_TRY_PHONE_OR_TABLET_AGAIN,
+          primary: true,
+          onClick: () => runPasskeySignin(true),
+        },
+        {
+          label: AUTH_T.AUTH_JS_USE_PASSKEY_THIS_DEVICE,
+          primary: false,
+          onClick: () => runPasskeySignin(false),
+        },
+        {
+          label: AUTH_T.AUTH_JS_EDIT_EMAIL,
+          link: true,
+          onClick: focusEmailInput,
+        },
+        recoverAction,
+      ]);
+      return;
+    case 'credential_rejected':
+      showSigninNotice(AUTH_T.AUTH_JS_PASSKEY_NOT_RECOGNIZED, '', { security: true });
+      showSigninErrorActions([
+        {
+          label: AUTH_T.AUTH_JS_USE_ANOTHER_PASSKEY,
+          primary: true,
+          onClick: retryHandler,
+        },
+        recoverAction,
+      ]);
+      return;
+    case 'revoked':
+      showSigninNotice(AUTH_T.AUTH_JS_PASSKEY_COMPROMISED, '', { security: true });
+      showSigninErrorActions([
+        {
+          label: AUTH_T.AUTH_JS_USE_ANOTHER_PASSKEY,
+          primary: true,
+          onClick: retryHandler,
+        },
+        recoverAction,
+      ]);
+      return;
+    case 'network':
+      showSigninNotice(AUTH_T.AUTH_JS_CONNECT_FAILED);
+      showSigninErrorActions([{
+        label: AUTH_T.AUTH_JS_TRY_AGAIN,
+        primary: true,
+        onClick: retryHandler,
+      }]);
+      return;
+    case 'rate_limit': {
+      let remaining = Math.max(1, Number(failure.retrySeconds) || 60);
+      const renderCountdown = () => {
+        showSigninNotice(formatAuthMessage(AUTH_T.AUTH_JS_RATE_LIMIT_FMT, { seconds: remaining }));
+      };
+      renderCountdown();
+      if (rateLimitTimer) {
+        window.clearInterval(rateLimitTimer);
+      }
+      showSigninErrorActions([{
+        label: AUTH_T.AUTH_JS_TRY_AGAIN,
+        primary: true,
+        onClick: retryHandler,
+      }]);
+      const tryAgainButton = signinErrorActionsEl?.querySelector('.btn_primary');
+      if (tryAgainButton instanceof HTMLButtonElement) {
+        tryAgainButton.disabled = true;
+        rateLimitTimer = window.setInterval(() => {
+          remaining -= 1;
+          if (remaining <= 0) {
+            window.clearInterval(rateLimitTimer);
+            rateLimitTimer = null;
+            tryAgainButton.disabled = false;
+            hideSigninNotice();
+            showSigninErrorActions([]);
+            return;
+          }
+          renderCountdown();
+        }, 1000);
+      }
+      return;
+    }
+    default:
+      showSigninNotice(failure.message || AUTH_T.AUTH_JS_SIGNIN_FAILED);
+      showSigninErrorActions([{
+        label: AUTH_T.AUTH_JS_TRY_AGAIN,
+        primary: true,
+        onClick: retryHandler,
+      }]);
+  }
 };
 
 const parseJsonOrNull = async (response) => {
@@ -421,6 +618,109 @@ const loadFederatedProviders = async () => {
   }
 };
 
+const completePasskeySignin = async ({
+  preferPhoneFlow = false,
+  useImmediateUi = false,
+  silentFailure = false,
+} = {}) => {
+  const email = emailInputEl instanceof HTMLInputElement ? emailInputEl.value.trim() : '';
+
+  setPasskeyStatus('Working…');
+  const { response: startResponse, payload: startPayloadRaw } = await fetchJsonWithTimeout('/api/v1/auth/passkey/login/start', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(buildLoginStartBody(email)),
+  });
+  const startPayload = startPayloadRaw && typeof startPayloadRaw === 'object' ? startPayloadRaw : {};
+  if (!startResponse.ok || startPayload.status !== 'success') {
+    if (silentFailure) {
+      throw new Error(signinFriendlyMessage(startPayload.message, startResponse.status));
+    }
+    const failure = classifySigninFailure(new Error(signinFriendlyMessage(startPayload.message, startResponse.status)), {
+      preferPhoneFlow,
+      email,
+      statusCode: startResponse.status,
+    });
+    renderSigninFailure(failure, () => runPasskeySignin(preferPhoneFlow));
+    return;
+  }
+
+  const challengeId = startPayload.challengeId;
+  const options = startPayload.publicKey || {};
+  options.challenge = b64urlToBuffer(options.challenge || '');
+  options.allowCredentials = Array.isArray(options.allowCredentials)
+    ? options.allowCredentials.map((c) => ({
+      ...c,
+      id: b64urlToBuffer(c.id),
+    }))
+    : [];
+
+  if (useImmediateUi) {
+    options.allowCredentials = [];
+    delete options.hints;
+  } else {
+    options.hints = transportHintsForFlow(preferPhoneFlow);
+  }
+
+  if (options.authenticatorSelection && options.authenticatorSelection.authenticatorAttachment === 'platform') {
+    delete options.authenticatorSelection.authenticatorAttachment;
+  }
+
+  setPasskeyStatus(AUTH_T.AUTH_JS_CONFIRM_DEVICE);
+  const credentialRequest = { publicKey: options };
+  if (useImmediateUi) {
+    credentialRequest.uiMode = 'immediate';
+  } else {
+    credentialRequest.mediation = 'optional';
+  }
+
+  const assertion = await navigator.credentials.get(credentialRequest);
+  if (!assertion) {
+    throw Object.assign(new Error(AUTH_T.AUTH_JS_PASSKEY_CANCEL), { name: 'NotAllowedError' });
+  }
+
+  const credentialPayload = {
+    id: assertion.id,
+    type: assertion.type,
+    rawId: bufferToB64url(assertion.rawId),
+    response: {
+      clientDataJSON: bufferToB64url(assertion.response.clientDataJSON),
+      authenticatorData: bufferToB64url(assertion.response.authenticatorData),
+      signature: bufferToB64url(assertion.response.signature),
+      userHandle: assertion.response.userHandle ? bufferToB64url(assertion.response.userHandle) : null,
+    },
+  };
+
+  const { response: finishResponse, payload: finishPayloadRaw } = await fetchJsonWithTimeout('/api/v1/auth/passkey/login/finish', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ challengeId, assertion: credentialPayload }),
+  });
+
+  const finishPayload = finishPayloadRaw && typeof finishPayloadRaw === 'object' ? finishPayloadRaw : {};
+  if (!finishResponse.ok || finishPayload.status !== 'success') {
+    const finishErrorCode = String(finishPayload.error || '').trim();
+    if (silentFailure) {
+      throw new Error(finishPayload.message || AUTH_T.AUTH_JS_SIGNIN_FAILED);
+    }
+    const failure = classifySigninFailure(new Error(finishPayload.message || AUTH_T.AUTH_JS_SIGNIN_FAILED), {
+      preferPhoneFlow,
+      email,
+      statusCode: finishResponse.status,
+      finishErrorCode,
+    });
+    renderSigninFailure(failure, () => runPasskeySignin(preferPhoneFlow));
+    return;
+  }
+
+  setPasskeyStatus(AUTH_T.AUTH_JS_SUCCESS_REDIRECTING);
+  hideAuthBanner();
+  hideSigninNotice();
+  window.location.href = preferPhoneFlow ? '/?passkey_device_hint=1' : '/';
+};
+
 const runPasskeySignin = async (preferPhoneFlow = false) => {
   if (signinInFlight) {
     return;
@@ -432,172 +732,19 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
 
   try {
     hideAuthBanner();
+    hideSigninNotice();
+    showSigninErrorActions([]);
 
     if (!isWebAuthnCapableBrowser()) {
-      const msg = WEB_AUTHN_UNSUPPORTED_MESSAGE;
-      showAuthError(msg, 'signin');
+      showAuthError(WEB_AUTHN_UNSUPPORTED_MESSAGE, 'signin');
       return;
     }
 
-    const emailInput = document.getElementById('email');
-    const email = emailInput?.value?.trim() || '';
-    const tryImmediateUi = !preferPhoneFlow
-      && AUTH_CONFIG.immediateUiAllowed === true
-      && await browserSupportsImmediateUi();
-
-    if (!tryImmediateUi && !preferPhoneFlow && !email) {
-      const msg = AUTH_CONFIG.immediateUiRuntimeEnabled === true
-        ? (AUTH_T.AUTH_JS_IMMEDIATE_UI_NOT_ACTIVE || AUTH_T.AUTH_JS_EMAIL_REQUIRED)
-        : AUTH_T.AUTH_JS_EMAIL_REQUIRED;
-      showAuthError(msg, 'signin');
-      return;
-    }
-
-    setPasskeyStatus('Working…');
-    const { response: startResponse, payload: startPayloadRaw } = await fetchJsonWithTimeout('/api/v1/auth/passkey/login/start', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(
-        tryImmediateUi || preferPhoneFlow
-          ? { discoverable: true }
-          : { email }
-      ),
-    });
-    const startPayload = startPayloadRaw && typeof startPayloadRaw === 'object' ? startPayloadRaw : {};
-    if (!startResponse.ok || startPayload.status !== 'success') {
-      throw new Error(signinFriendlyMessage(startPayload.message, startResponse.status));
-    }
-
-    const challengeId = startPayload.challengeId;
-    const options = startPayload.publicKey || {};
-    options.challenge = b64urlToBuffer(options.challenge || '');
-    options.allowCredentials = Array.isArray(options.allowCredentials)
-      ? options.allowCredentials.map((c) => ({
-        ...c,
-        id: b64urlToBuffer(c.id),
-      }))
-      : [];
-    if (tryImmediateUi) {
-      options.allowCredentials = [];
-      delete options.hints;
-    }
-
-    // Keep login discoverable for cross-device passkey (browser-provided QR flow).
-    if (!tryImmediateUi && !Array.isArray(options.hints)) {
-      options.hints = ['client-device', 'hybrid', 'security-key'];
-    }
-    if (options.authenticatorSelection && options.authenticatorSelection.authenticatorAttachment === 'platform') {
-      delete options.authenticatorSelection.authenticatorAttachment;
-    }
-
-    setPasskeyStatus(
-      preferPhoneFlow
-        ? AUTH_T.AUTH_JS_CONFIRM_DEVICE
-        : AUTH_T.AUTH_JS_CONFIRM_DEVICE
-    );
-    let assertion = null;
-    try {
-      const credentialRequest = {
-        publicKey: options,
-      };
-      if (tryImmediateUi) {
-        credentialRequest.uiMode = 'immediate';
-      } else {
-        credentialRequest.mediation = 'optional';
-      }
-      assertion = await navigator.credentials.get(credentialRequest);
-    } catch (error) {
-      if (tryImmediateUi && error instanceof DOMException && error.name === 'NotAllowedError') {
-        setPasskeyStatus(DEFAULT_SIGNIN_STATUS);
-        if (!email) {
-          return;
-        }
-        signinInFlight = false;
-        setButtonBusy(passkeyButton, false);
-        setButtonBusy(passkeyPhoneButton, false);
-        await runPasskeySignin(false);
-        return;
-      }
-      throw error;
-    }
-    if (!assertion) {
-      throw new Error('Sign-in cancelled. Try again.');
-    }
-
-    const credentialPayload = {
-      id: assertion.id,
-      type: assertion.type,
-      rawId: bufferToB64url(assertion.rawId),
-      response: {
-        clientDataJSON: bufferToB64url(assertion.response.clientDataJSON),
-        authenticatorData: bufferToB64url(assertion.response.authenticatorData),
-        signature: bufferToB64url(assertion.response.signature),
-        userHandle: assertion.response.userHandle ? bufferToB64url(assertion.response.userHandle) : null,
-      },
-    };
-
-    const { response: finishResponse, payload: finishPayloadRaw } = await fetchJsonWithTimeout('/api/v1/auth/passkey/login/finish', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ challengeId, assertion: credentialPayload }),
-    });
-
-    const finishPayload = finishPayloadRaw && typeof finishPayloadRaw === 'object' ? finishPayloadRaw : {};
-    if (!finishResponse.ok || finishPayload.status !== 'success') {
-      const finishErrorCode = String(finishPayload.error || '').trim();
-      // 403 means credential mismatch (passkey not registered for this email)
-      if (finishResponse.status === 403 && email) {
-        const error = new Error('This passkey isn\'t registered for this account.');
-        error.isPasskeyMismatch = true;
-        error.isPasskeyRecoverable = true;
-        error.email = email;
-        throw error;
-      }
-      if (finishErrorCode === 'passkey_compromised' && email) {
-        const error = new Error('This passkey can no longer be used. Use a recovery link to continue.');
-        error.isPasskeyRecoverable = true;
-        error.email = email;
-        throw error;
-      }
-      if (finishErrorCode === 'passkey_invalid' && email) {
-        const error = new Error('This passkey is no longer valid for this account.');
-        error.isPasskeyRecoverable = true;
-        error.email = email;
-        throw error;
-      }
-      // 401 means the passkey credential was not found or authentication failed
-      if (finishResponse.status === 401) {
-        const error = new Error('Passkey not recognized.');
-        error.isPasskeyRecoverable = true;
-        error.email = email;
-        error.requiresEmailForRecovery = !email;
-        throw error;
-      }
-      throw new Error(finishPayload.message || 'Passkey login failed.');
-    }
-
-    setPasskeyStatus(AUTH_T.AUTH_JS_SUCCESS_REDIRECTING);
-    hideAuthBanner();
-    window.location.href = preferPhoneFlow
-      ? '/settings/security/?passkey_onboarding=1'
-      : '/';
+    await completePasskeySignin({ preferPhoneFlow, useImmediateUi: false });
   } catch (error) {
-    const msg = error?.message || AUTH_T.AUTH_JS_SIGNIN_FAILED;
-    
-    // Send recovery code and redirect to recovery page when passkey cannot be used.
-    if (error?.isPasskeyRecoverable) {
-      const recoveryEmail = String(error?.email || '').trim();
-      if (recoveryEmail !== '') {
-        await requestRecoveryCodeAndRedirect(recoveryEmail, { source: 'auto' });
-      } else {
-        showRecoveryCodeComposer('');
-        setPasskeyStatus('Enter your email to send a recovery code.');
-      }
-    } else {
-      showAuthError(msg, 'signin');
-    }
+    const email = emailInputEl instanceof HTMLInputElement ? emailInputEl.value.trim() : '';
+    const failure = classifySigninFailure(error, { preferPhoneFlow, email });
+    renderSigninFailure(failure, () => runPasskeySignin(preferPhoneFlow));
   } finally {
     signinInFlight = false;
     setButtonBusy(passkeyButton, false);
@@ -605,64 +752,35 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
   }
 };
 
-const requestRecoveryCodeAndRedirect = async (email, options = {}) => {
-  if (recoveryStartInFlight) {
+let passiveImmediateUiAttempted = false;
+
+const tryPassiveImmediateUiSignin = async () => {
+  if (passiveImmediateUiAttempted || signinInFlight || !isSigninPanelActive()) {
+    return;
+  }
+  if (AUTH_CONFIG.immediateUiAllowed !== true || AUTH_CONFIG.immediateUiRuntimeEnabled !== true) {
+    return;
+  }
+  if (emailInputEl instanceof HTMLInputElement && emailInputEl.value.trim() !== '') {
+    return;
+  }
+  if (!isWebAuthnCapableBrowser() || !(await browserSupportsImmediateUi())) {
     return;
   }
 
-  recoveryStartInFlight = true;
-  const source = String(options.source || 'manual');
+  passiveImmediateUiAttempted = true;
+  signinInFlight = true;
 
   try {
-    setPasskeyStatus('Sending recovery code...');
-    const { response, payload } = await fetchJsonWithTimeout('/api/v1/auth/recovery/start', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-
-    const startPayload = payload && typeof payload === 'object' ? payload : {};
-    const txnId = String(startPayload.txnId || startPayload?.data?.txnId || '').trim();
-    const txnSecret = String(startPayload.txnSecret || startPayload?.data?.txnSecret || '').trim();
-
-    if (response.ok && startPayload.status === 'success' && txnId !== '' && txnSecret !== '') {
-      const normalizedEmail = String(email || '').trim();
-      try {
-        window.sessionStorage.setItem(RECOVERY_PREFILL_SESSION_KEY, JSON.stringify({
-          txnId,
-          txnSecret,
-          email: normalizedEmail,
-          createdAt: Date.now(),
-        }));
-      } catch (_) {
-        // If sessionStorage is blocked, continue with plain redirect.
-      }
-
-      showAuthBanner(
-        'Recovery code sent to ' + normalizedEmail + '. Redirecting to recovery...',
-        'success',
-        {
-          linkHref: recoveryUrlWithLanguage(),
-          linkLabel: 'Go to recovery page',
-          autoHideMs: source === 'auto' ? 2200 : 1800,
-        }
-      );
-
-      setPasskeyStatus('Recovery code sent. Redirecting...');
-      window.setTimeout(() => {
-        window.location.href = recoveryUrlWithLanguage();
-      }, source === 'auto' ? 300 : 500);
-    } else {
-      throw new Error(AUTH_T.AUTH_JS_RECOVERY_START_FAILED);
-    }
+    await completePasskeySignin({ preferPhoneFlow: false, useImmediateUi: true, silentFailure: true });
   } catch (error) {
-    const msg = error?.message || AUTH_T.AUTH_JS_RECOVERY_SEND_FAILED;
-    showAuthBanner(msg, 'error', { autoHideMs: 0 });
-    showRecoveryCodeComposer(String(email || '').trim());
-    setPasskeyStatus('Recovery code could not be sent. Try again.');
+    if (error instanceof DOMException && error.name === 'NotAllowedError') {
+      setPasskeyStatus(AUTH_T.AUTH_JS_IMMEDIATE_UI_MISS || DEFAULT_SIGNIN_STATUS);
+      return;
+    }
+    // Passive enhancement: ignore other failures silently.
   } finally {
-    recoveryStartInFlight = false;
+    signinInFlight = false;
   }
 };
 
@@ -683,7 +801,7 @@ const isSigninPanelActive = () => {
 // Keep passkey sign-in user-initiated to avoid background 401s from silent
 // conditional mediation probes that create confusing console noise.
 loadFederatedProviders();
-syncImmediateUiSigninCopy();
+tryPassiveImmediateUiSignin();
 
 const passkeyButton = document.getElementById('signin-passkey');
 if (passkeyButton) {

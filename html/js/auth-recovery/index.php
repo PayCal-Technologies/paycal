@@ -9,6 +9,7 @@ CORS::renderContentType('application/javascript; charset=utf-8');
 
 $recoveryI18nKeys = [
   'AUTH_RECOVER_SEND_CODE',
+  'AUTH_RECOVER_EMAIL_SENT',
   'AUTH_JS_WEBAUTHN_UNSUPPORTED',
   'AUTH_JS_RECOVER_SEND_CODE_FMT',
   'AUTH_JS_RECOVER_CANCEL_FAILED',
@@ -65,6 +66,42 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
   const workerVersion = document.body?.dataset?.workerVersion || String(Date.now());
   const RECOVERY_T = <?php echo json_encode($recoveryI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
   const WEB_AUTHN_UNSUPPORTED_MESSAGE = RECOVERY_T.AUTH_JS_WEBAUTHN_UNSUPPORTED;
+  const LEGACY_RECOVERY_LENGTH = 52;
+  const CROCKFORD_ALPHABET = '0123456789ABCDEFGHJKMNPQRTVWXYZ';
+
+  function recoveryKeyBlockVisible() {
+    return Boolean(recoveryKeyBlock && !recoveryKeyBlock.classList.contains('is-hidden'));
+  }
+
+  function formatRecoveryKeyInput(value) {
+    const normalized = normalizePayCalCode(value);
+    if (normalized.length <= PAYCAL_RECOVERY_SECRET_LENGTH + 2) {
+      return formatRecoveryCode(value);
+    }
+    const trimmed = normalized.slice(0, LEGACY_RECOVERY_LENGTH);
+    return trimmed.match(/.{1,4}/g)?.join('-') || trimmed;
+  }
+
+  function getRecoveryKeyValidationState(value) {
+    const normalized = normalizePayCalCode(value);
+    const paycalState = getPayCalCodeValidationState(value, PAYCAL_RECOVERY_SECRET_LENGTH);
+    if (paycalState === 'valid') {
+      return 'valid';
+    }
+    if (normalized.length === 0) {
+      return 'empty';
+    }
+    if (normalized.length <= PAYCAL_RECOVERY_SECRET_LENGTH + 2) {
+      return paycalState;
+    }
+    if (normalized.length < LEGACY_RECOVERY_LENGTH) {
+      return 'incomplete';
+    }
+    if (normalized.length === LEGACY_RECOVERY_LENGTH) {
+      return [...normalized].every((char) => CROCKFORD_ALPHABET.includes(char)) ? 'valid' : 'invalid-char';
+    }
+    return 'incomplete';
+  }
   const CHECKSUM_ERROR = 'Check the last two characters.';
   const INVALID_CHAR_ERROR = 'Use only PayCal code characters: ABCDEFGHJKLMNPQRTUWXYZ346789.';
   const AUTOSUBMIT_DEBOUNCE_MS = 500;
@@ -130,8 +167,9 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
 
   function validateVisibleRecoveryFields(showErrors = false) {
     const codeRequired = !state.emailCodeVerified && !state.magicLinkVerified;
+    const keyRequired = recoveryKeyBlockVisible();
     const codeState = getPayCalCodeValidationState(codeInput?.value || '', PAYCAL_EMAIL_SECRET_LENGTH);
-    const keyState = getPayCalCodeValidationState(recoveryKeyInput?.value || '', PAYCAL_RECOVERY_SECRET_LENGTH);
+    const keyState = keyRequired ? getRecoveryKeyValidationState(recoveryKeyInput?.value || '') : 'valid';
     const messageFor = (state, validMessage) => {
       if (state === 'valid') {
         return { message: validMessage, tone: 'good' };
@@ -148,12 +186,12 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
     const keyMessage = messageFor(keyState, 'Recovery code looks good.');
 
     const shouldShowCodeMessage = codeRequired && (showErrors || codeState === 'valid' || codeState === 'invalid-char' || codeState === 'checksum');
-    const shouldShowKeyMessage = showErrors || keyState === 'valid' || keyState === 'invalid-char' || keyState === 'checksum';
+    const shouldShowKeyMessage = keyRequired && (showErrors || keyState === 'valid' || keyState === 'invalid-char' || keyState === 'checksum');
 
     setFieldMessage(codeInput, codeErrorEl, shouldShowCodeMessage ? codeMessage.message : '', codeMessage.tone);
     setFieldMessage(recoveryKeyInput, recoveryKeyErrorEl, shouldShowKeyMessage ? keyMessage.message : '', keyMessage.tone);
 
-    return (!codeRequired || codeState === 'valid') && keyState === 'valid';
+    return (!codeRequired || codeState === 'valid') && (!keyRequired || keyState === 'valid');
   }
 
   function updateVerifyButtonState() {
@@ -213,7 +251,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
     startForm?.classList.remove('is-hidden');
     verifyForm?.classList.remove('is-hidden');
     resetRecoveryCodeInput();
-    showRecoveryKeyInput();
+    hideRecoveryKeyInput();
     setStep(1);
 
     if (!emailInput?.value?.trim()) {
@@ -391,7 +429,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
     if (recoveryKeyInput) {
       recoveryKeyInput.required = true;
       recoveryKeyInput.disabled = false;
-      recoveryKeyInput.value = formatRecoveryCode(recoveryKeyInput.value);
+      recoveryKeyInput.value = formatRecoveryKeyInput(recoveryKeyInput.value);
     }
     setFieldMessage(recoveryKeyInput, recoveryKeyErrorEl, '');
     updateVerifyButtonState();
@@ -500,10 +538,10 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
       state.bootstrap = null;
       verifyForm?.classList.remove('is-hidden');
       resetRecoveryCodeInput();
-      showRecoveryKeyInput();
+      hideRecoveryKeyInput();
       updateVerifyButtonState();
-      setStatus('Code sent. Check your email.', 'sent');
-      startSendCooldown(60);
+      setStatus(RECOVERY_T.AUTH_RECOVER_EMAIL_SENT, 'sent');
+      startSendCooldown(Number(payload?.cooldownSeconds) || 60);
       codeInput?.focus();
       scheduleAutoSubmit();
     } catch (error) {
@@ -561,9 +599,10 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
           return;
         }
 
-        if (!recoveryKeyInput?.value?.trim()) {
+        if (verifyPayload?.recoveryKeyRequired === true) {
           showRecoveryKeyInput();
           setStatus('Email verified. Enter your recovery code to continue.', 'sent');
+          recoveryKeyInput?.focus();
           return;
         }
       }
@@ -734,8 +773,8 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
 
     verifyForm?.classList.remove('is-hidden');
     resetRecoveryCodeInput();
-    showRecoveryKeyInput();
-    setStatus('Code sent. Check your email.', 'sent');
+    hideRecoveryKeyInput();
+    setStatus(RECOVERY_T.AUTH_RECOVER_EMAIL_SENT, 'sent');
     updateVerifyButtonState();
     codeInput?.focus();
 
@@ -763,7 +802,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
       const startRequestBody = {
         txnId: state.txnId,
         txnSecret: state.txnSecret,
-        deviceName: deviceNameInput?.value?.trim() || 'Recovered Passkey',
+        deviceName: deviceNameInput?.value?.trim() || '',
       };
 
       let startPayload;
@@ -918,7 +957,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
     scheduleAutoSubmit();
   });
   recoveryKeyInput?.addEventListener('input', () => {
-    recoveryKeyInput.value = formatRecoveryCode(recoveryKeyInput.value);
+    recoveryKeyInput.value = formatRecoveryKeyInput(recoveryKeyInput.value);
     updateVerifyButtonState();
     scheduleAutoSubmit();
   });
@@ -932,7 +971,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
   });
   recoveryKeyInput?.addEventListener('paste', () => {
     window.setTimeout(() => {
-      recoveryKeyInput.value = formatRecoveryCode(recoveryKeyInput.value);
+      recoveryKeyInput.value = formatRecoveryKeyInput(recoveryKeyInput.value);
       validateVisibleRecoveryFields(true);
       updateVerifyButtonState();
       scheduleAutoSubmit();
@@ -940,6 +979,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
   });
 
   updateVerifyButtonState();
+  hideRecoveryKeyInput();
 
   consumeMagicLinkIfPresent()
     .then((consumed) => {

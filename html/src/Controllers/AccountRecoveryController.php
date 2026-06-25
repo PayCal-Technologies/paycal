@@ -451,7 +451,7 @@ final class AccountRecoveryController
       $this->fail('Recovery bootstrap unavailable.', HttpStatus::HTTP_BAD_REQUEST);
     }
 
-    $deviceName = InputSanitizer::sanitizeString($this->scalarString($body['deviceName'] ?? 'Recovered Passkey'));
+    $deviceName = InputSanitizer::sanitizeString($this->scalarString($body['deviceName'] ?? ''));
     $webauthn = $this->createWebAuthn();
     // Recovery can intentionally register on an authenticator that may already hold this RP's credential.
     // Excluding existing IDs here can trigger browser InvalidStateError and stall recovery UX.
@@ -463,7 +463,7 @@ final class AccountRecoveryController
       'challenge' => $challenge,
       'txn_id' => $transaction->id(),
       'user_uuid' => $user->user_uuid,
-      'device_name' => $deviceName !== '' ? $deviceName : 'Recovered Passkey',
+      'device_name' => $deviceName,
     ], self::CHALLENGE_TTL_SECONDS);
 
     Response::success('Recovery passkey challenge created.', [
@@ -532,7 +532,8 @@ final class AccountRecoveryController
       'public_key_pem' => $publicKeyPem,
       'sign_count' => (string) $signCount,
       'transports' => $transportsJson,
-      'device_name' => $this->scalarString($challengeData['device_name'] ?? 'Recovered Passkey'),
+      'device_name' => $this->scalarString($challengeData['device_name'] ?? ''),
+      'origin' => 'recovery',
       'created_at' => (string) time(),
       'last_used_at' => '',
     ]);

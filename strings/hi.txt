@@ -47,6 +47,33 @@ ADMIN_AST_PAGE_TITLE AST Graph
 ADMIN_AST_SEARCH_PLACEHOLDER class or method
 ADMIN_AST_SELECT_NODE Select a node.
 ADMIN_BUSINESS_MODERATION_TITLE Business Moderation
+AUTH_JS_CONNECT_FAILED PayCal से कनेक्ट नहीं हो सका।
+AUTH_JS_EDIT_EMAIL ईमेल संपादित करें
+AUTH_JS_EMAIL_OPTIONAL_IMMEDIATE_UI ईमेल (वैकल्पिक)
+AUTH_JS_IMMEDIATE_UI_ENABLED इस ब्राउज़र में तेज़ passkey साइन-इन सक्षम है।
+AUTH_JS_IMMEDIATE_UI_MISS कोई passkey नहीं चुनी गई। इस डिवाइस या फ़ोन का उपयोग करें, या किसी खाते के लिए ईमेल दर्ज करें।
+AUTH_JS_IMMEDIATE_UI_NOT_ACTIVE इस ब्राउज़र में तेज़ passkey साइन-इन सक्षम नहीं है। अपना ईमेल दर्ज करें या सेटिंग्स > Early Access से सक्षम करें।
+AUTH_JS_IMMEDIATE_UI_UNSUPPORTED इस ब्राउज़र में तेज़ passkey साइन-इन समर्थित नहीं है। जारी रखने के लिए अपना ईमेल दर्ज करें।
+AUTH_JS_PASSKEY_CANCEL Passkey साइन-इन पूरा नहीं हुआ।
+AUTH_JS_PASSKEY_COMPROMISED आपकी सुरक्षा के लिए यह passkey अक्षम कर दी गई है।
+AUTH_JS_PASSKEY_CREDENTIAL_REJECTED वह passkey इस खाते के लिए उपयोग नहीं की जा सकी।
+AUTH_JS_PASSKEY_DEVICE_HINT अगली बार तेज़ साइन-इन के लिए इस कंप्यूटर पर passkey जोड़ें।
+AUTH_JS_PASSKEY_MISMATCH_DETAIL दूसरी passkey आज़माएँ, ईमेल पता जाँचें, या कोई अन्य साइन-इन विधि उपयोग करें।
+AUTH_JS_PASSKEY_NOT_RECOGNIZED वह passkey इस खाते के लिए उपयोग नहीं की जा सकी।
+AUTH_JS_PASSKEY_PHONE_CANCEL आपके फ़ोन से साइन-इन पूरा नहीं हुआ।
+AUTH_JS_RATE_LIMIT_FMT बहुत अधिक प्रयास। {seconds} सेकंड में फिर से प्रयास करें।
+AUTH_JS_TRY_AGAIN फिर से प्रयास करें
+AUTH_JS_TRY_ANOTHER_PASSKEY दूसरी passkey आज़माएँ
+AUTH_JS_TRY_PHONE_AGAIN फ़ोन से फिर से प्रयास करें
+AUTH_JS_TRY_PHONE_OR_TABLET_AGAIN फ़ोन या टैबलेट से फिर से प्रयास करें
+AUTH_JS_USE_ANOTHER_PASSKEY दूसरी passkey उपयोग करें
+AUTH_JS_USE_PASSKEY_THIS_DEVICE इस डिवाइस पर passkey उपयोग करें
+AUTH_RECOVER_DISCLOSURE पुनर्प्राप्ति पूरी करने पर आपके अन्य सत्र समाप्त हो जाएँगे और मौजूदा passkeys अक्षम हो जाएँगी।
+AUTH_RECOVER_EMAIL_SENT यदि खाता मौजूद है, तो अपना ईमेल जाँचें
+AUTH_RECOVER_PROMPT क्या आप अपनी किसी passkey का उपयोग नहीं कर सकते?
+AUTH_RECOVER_SUBHEADING अपना खाता सत्यापित करें और नई passkey बनाएँ।
+AUTH_SIGNIN_EMAIL_HINT किसी विशिष्ट PayCal खाते में साइन-इन करने के लिए इसे दर्ज करें।
+AUTH_SIGNIN_OTHER_WAYS साइन-इन के अन्य तरीके
 BUSINESS_MODERATION Business Moderation
 ADMIN_CONTACT_PIPELINE_HEALTH Contact Pipeline Health
 ADMIN_DASHBOARD_ENGLISH_LANGUAGE_EDITOR English Language Editor
@@ -274,30 +301,30 @@ AUTH_PAGE_HEADING प्रमाणीकरण
 AUTH_PRIVACY_LINK गोपनीयता नीति
 AUTH_RECOVER_ACCOUNT खाता पुनर्प्राप्त करें
 AUTH_RECOVER_ACCOUNT_EMAIL खाता ईमेल
-AUTH_RECOVER_ALREADY_HAVE_PASSKEY Already have a passkey?
-AUTH_RECOVER_BACK_TO_SIGNIN Back to sign in
-AUTH_RECOVER_BACK_TO_SIGNIN_BUTTON Back to signin
-AUTH_RECOVER_CODE_LABEL Recovery code
-AUTH_RECOVER_COMPLETE_HEADING Recovery complete
-AUTH_RECOVER_COMPLETE_MESSAGE Your data remains encrypted and unchanged.
-AUTH_RECOVER_CONTINUE_TO_PAYCAL Continue to PayCal
-AUTH_RECOVER_DEFAULT_DEVICE_NAME Recovered Passkey
-AUTH_RECOVER_HEADING Recover your account
-AUTH_RECOVER_INTRO_LINE_1 We'll help you regain access in three steps.
-AUTH_RECOVER_INTRO_LINE_2 Enter the code from your email. If this account already has protected data, you will also need your Recovery Code.
-AUTH_RECOVER_KEY_LABEL Recovery Code
-AUTH_RECOVER_META_TITLE Recover Account - PayCal
-AUTH_RECOVER_NEW_PASSKEY_NAME New passkey name
-AUTH_RECOVER_REGISTER_NEW_PASSKEY Register new passkey
-AUTH_RECOVER_SEND_CODE Send code
-AUTH_RECOVER_SIGN_IN_INSTEAD Sign in instead
-AUTH_RECOVER_STATUS_MAGIC_LINK Verifying recovery link...
-AUTH_RECOVER_STATUS_START Enter your account email to begin.
-AUTH_RECOVER_STEPS_ARIA_LABEL Recovery steps
+AUTH_RECOVER_ALREADY_HAVE_PASSKEY पहले से passkey है?
+AUTH_RECOVER_BACK_TO_SIGNIN साइन-इन पर वापस जाएँ
+AUTH_RECOVER_BACK_TO_SIGNIN_BUTTON साइन-इन पर वापस जाएँ
+AUTH_RECOVER_CODE_LABEL रिकवरी कोड
+AUTH_RECOVER_COMPLETE_HEADING पुनर्प्राप्ति पूर्ण
+AUTH_RECOVER_COMPLETE_MESSAGE आपका डेटा एन्क्रिप्टेड और अपरिवर्तित रहता है।
+AUTH_RECOVER_CONTINUE_TO_PAYCAL PayCal पर जारी रखें
+AUTH_RECOVER_DEFAULT_DEVICE_NAME 
+AUTH_RECOVER_HEADING अपना खाता पुनर्प्राप्त करें
+AUTH_RECOVER_INTRO_LINE_1 हम तीन चरणों में आपकी पहुँच बहाल करने में मदद करेंगे।
+AUTH_RECOVER_INTRO_LINE_2 अपने ईमेल से कोड दर्ज करें। यदि इस खाते में पहले से सुरक्षित डेटा है, तो आपको अपना रिकवरी कोड भी चाहिए होगा।
+AUTH_RECOVER_KEY_LABEL रिकवरी कोड
+AUTH_RECOVER_META_TITLE खाता पुनर्प्राप्त करें - PayCal
+AUTH_RECOVER_NEW_PASSKEY_NAME नई passkey का नाम
+AUTH_RECOVER_REGISTER_NEW_PASSKEY नई passkey पंजीकृत करें
+AUTH_RECOVER_SEND_CODE कोड भेजें
+AUTH_RECOVER_SIGN_IN_INSTEAD इसके बजाय साइन-इन करें
+AUTH_RECOVER_STATUS_MAGIC_LINK पुनर्प्राप्ति लिंक सत्यापित हो रहा है...
+AUTH_RECOVER_STATUS_START शुरू करने के लिए अपना खाता ईमेल दर्ज करें।
+AUTH_RECOVER_STEPS_ARIA_LABEL पुनर्प्राप्ति चरण
 AUTH_RECOVER_STEP_PASSKEY Passkey
-AUTH_RECOVER_STEP_SUCCESS Success
-AUTH_RECOVER_STEP_VERIFY Verify
-AUTH_RECOVER_VERIFIED_REGISTER_PASSKEY Verified. Now register a new passkey for this account.
+AUTH_RECOVER_STEP_SUCCESS सफल
+AUTH_RECOVER_STEP_VERIFY सत्यापित करें
+AUTH_RECOVER_VERIFIED_REGISTER_PASSKEY सत्यापित। अब इस खाते के लिए नई passkey पंजीकृत करें।
 AUTH_REGISTER_CREATE_BUTTON खाता बनाएं
 AUTH_REGISTER_DEVICE_LABEL Passkey डिवाइस का नाम
 AUTH_REGISTER_DEVICE_PLACEHOLDER naam-AAAAMMDD
@@ -307,12 +334,12 @@ AUTH_REGISTER_INVITE_LABEL आमंत्रण कोड
 AUTH_REGISTER_PANEL_ARIA खाता बनाने का पैनल
 AUTH_REGISTER_PASSKEY_STATUS आप अपने खाते को सुरक्षित करने के लिए एक passkey बनाएंगे।
 AUTH_REGISTER_PASSWORDS_NO_MATCH पासवर्ड मेल नहीं खाते। पुनः दर्ज करें।
-AUTH_SIGNIN_EMAIL_ARIA ईमेल आवश्यक
-AUTH_SIGNIN_EMAIL_LABEL ईमेल (आवश्यक)
-AUTH_SIGNIN_OTHER_DEVICE दूसरा डिवाइस उपयोग करें
+AUTH_SIGNIN_EMAIL_ARIA ईमेल (वैकल्पिक)
+AUTH_SIGNIN_EMAIL_LABEL ईमेल (वैकल्पिक)
+AUTH_SIGNIN_OTHER_DEVICE फ़ोन या टैबलेट उपयोग करें
 AUTH_SIGNIN_PANEL_ARIA साइन-इन पैनल
 AUTH_SIGNIN_PASSKEY_BUTTON Passkey के साथ जारी रखें
-AUTH_SIGNIN_PASSKEY_STATUS इस डिवाइस पर passkey का उपयोग करें, या किसी अन्य डिवाइस से साइन इन करें।
+AUTH_SIGNIN_PASSKEY_STATUS इस डिवाइस पर passkey का उपयोग करें, या अपने फ़ोन या टैबलेट से साइन-इन करें।
 AUTH_TABS_ARIA प्रमाणीकरण विकल्प
 AUTH_TAB_REGISTER खाता बनाएं
 AUTH_TAB_SIGNIN साइन इन करें
@@ -2501,7 +2528,7 @@ SETTINGS_JS_PASSKEYS_CHECKING पासकी सूची लोड हुई�
 SETTINGS_JS_PASSKEYS_LOADED_COUNT पासकी सूची लोड हुई। {count} पासकी उपलब्ध।
 SETTINGS_JS_PASSKEYS_LOADED_NONE पासकी सूची लोड हुई। अभी तक कोई पासकी पंजीकृत नहीं।
 SETTINGS_JS_PASSKEYS_LOAD_FAILED पासकी लोड नहीं हो सकीं। पुनः प्रयास करें।
-SETTINGS_JS_PASSKEYS_NONE अभी तक कोई पासकी पंजीकृत नहीं है।
+SETTINGS_JS_PASSKEYS_NONE No passkeys yet.
 SETTINGS_JS_PASSKEYS_REMOVED पासकी हटाई गई।
 SETTINGS_JS_PASSKEYS_REMOVING पासकी हटाई जा रही है...
 SETTINGS_JS_PASSKEYS_UPDATE_FAILED पासकी अपडेट नहीं हो सकीं। पुनः प्रयास करें।
@@ -2523,7 +2550,41 @@ SETTINGS_JS_WORK_ENTRY_FIELDS_UPDATED कार्य प्रविष्ट�
 SETTINGS_OVERLAY_COLLAPSE_HOVER पॉइंटर गतिविधि के बिना विस्तारित ओवरले साइडबार पतले मोड में संकुचित होने से पहले कितनी देर खुला रहेगा। 0 = कभी नहीं।
 SETTINGS_OVERLAY_COLLAPSE_LABEL संकुचन
 SETTINGS_PASSKEYS_SECURITY_NOTE Add more passkeys to improve account security.
-SETTINGS_PASSKEYS_SR_INSTRUCTIONS Passkeys list. Edit a passkey name inline and press Enter to save. Use Remove to delete a passkey when multiple devices are registered.
+SETTINGS_PASSKEYS_COUNT_RECOMMENDATION You have {count} passkeys. Recommended: at least 2 passkeys on different devices.
+SETTINGS_PASSKEYS_EMPTY_TITLE No passkeys yet
+SETTINGS_PASSKEYS_EMPTY_DESC Add a passkey to sign in securely without a password.
+SETTINGS_PASSKEYS_ADD_FIRST Add first passkey
+SETTINGS_PASSKEYS_ADD_TITLE Add passkey
+SETTINGS_PASSKEYS_ADD_DESC Add another device for easier sign-in and better account recovery.
+SETTINGS_PASSKEYS_ADD_BUTTON Add passkey
+SETTINGS_PASSKEYS_ADDED_LABEL Added
+SETTINGS_PASSKEYS_ADDED_DATE {date}
+SETTINGS_PASSKEYS_LAST_USED_LABEL Last used
+SETTINGS_PASSKEYS_LAST_USED {date}
+SETTINGS_PASSKEYS_LAST_USED_NEVER Never
+SETTINGS_PASSKEYS_UNNAMED Unnamed passkey
+SETTINGS_PASSKEYS_RECOVERED_META Added during account recovery
+SETTINGS_PASSKEY_BADGE_THIS_DEVICE This device
+SETTINGS_PASSKEY_BADGE_RECOVERED Recovered
+SETTINGS_PASSKEY_BADGE_NEVER_USED Never used
+SETTINGS_PASSKEY_BADGE_RECENTLY_USED Recently used
+SETTINGS_PASSKEY_BADGE_SECURITY_KEY Security key
+SETTINGS_PASSKEY_BADGE_SYNCED Synced
+SETTINGS_PASSKEY_RENAME Rename
+SETTINGS_PASSKEY_REMOVE Remove
+SETTINGS_PASSKEY_MENU_ARIA Passkey actions
+SETTINGS_PASSKEYS_SETTING_UP Setting up passkey...
+SETTINGS_PASSKEY_HINT_SYNCED Synced to your password manager
+SETTINGS_PASSKEY_HINT_SECURITY_KEY External security key
+SETTINGS_PASSKEY_HINT_PLATFORM Device passkey
+SETTINGS_PASSKEY_STATUS_THIS_DEVICE Ready for fast sign-in on this device
+SETTINGS_PASSKEY_STATUS_RECENTLY_USED Used recently for sign-in
+SETTINGS_PASSKEY_STATUS_NEVER_USED Not used for sign-in yet
+SETTINGS_PASSKEY_STATUS_RECOVERY Ready to sign in after recovery
+SETTINGS_PASSKEY_STATUS_SECURITY_KEY Hardware security key for sign-in
+SETTINGS_PASSKEY_STATUS_SYNCED Synced for sign-in anywhere
+SETTINGS_PASSKEY_STATUS_DEFAULT Available for passwordless sign-in
+SETTINGS_PASSKEYS_SR_INSTRUCTIONS Passkey cards. Edit a passkey name inline or choose Rename from the menu. Remove is available when multiple passkeys are registered.
 SETTINGS_POSITION_LEFT Left
 SETTINGS_POSITION_MIDDLE Middle
 SETTINGS_POSITION_RIGHT Right
@@ -3512,7 +3573,7 @@ SETTINGS_JS_SUPPORT_INFO_COPIED Support info copied to clipboard.
 SETTINGS_JS_SUPPORT_INFO_COPY_FAILED Could not copy automatically. Select and copy the text from your browser console instead.
 SETTINGS_JS_SUPPORT_INFO_LABEL PayCal support info
 SETTINGS_JS_VOICE_VOLUME_UPDATED Voice volume updated
-SETTINGS_JS_PASSKEY_ONBOARDING_TOAST Signed in on this phone. Tap Add another device to add a local passkey for this device.
+SETTINGS_JS_PASSKEY_ONBOARDING_TOAST Signed in on this phone. Tap Add passkey to add a local passkey for this device.
 SETTINGS_JS_DEBUG_CONSOLE_TOAST_FMT Console messages: {label}
 SETTINGS_JS_DEBUG_FINE_GRAINED_TOAST_FMT Detailed diagnostics: {label}
 SETTINGS_JS_DEBUG_NETWORK_TOAST_FMT Network insights: {label}

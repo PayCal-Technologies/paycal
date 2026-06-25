@@ -94,9 +94,12 @@ $i18nKeys = [
   'AUTH_REGISTER_INVITE_LABEL',
   'AUTH_REGISTER_PANEL_ARIA',
   'AUTH_REGISTER_PASSKEY_STATUS',
+  'AUTH_RECOVER_PROMPT',
   'AUTH_SIGNIN_EMAIL_ARIA',
+  'AUTH_SIGNIN_EMAIL_HINT',
   'AUTH_SIGNIN_EMAIL_LABEL',
   'AUTH_SIGNIN_OTHER_DEVICE',
+  'AUTH_SIGNIN_OTHER_WAYS',
   'AUTH_SIGNIN_PANEL_ARIA',
   'AUTH_SIGNIN_PASSKEY_BUTTON',
   'AUTH_SIGNIN_PASSKEY_STATUS',
@@ -170,23 +173,26 @@ require_once __DIR__ . '/../header.php';
             <form id="signin-form" method="POST" action="/auth/<?php echo $authLanguageQuery; ?>">
               <section>
                 <label for="email"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-                <input type="email" id="email" name="email" value="<?php echo $emailValue; ?>" autocomplete="username webauthn" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                <input type="email" id="email" name="email" value="<?php echo $emailValue; ?>" autocomplete="username webauthn" aria-describedby="signin-email-hint" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
+                <p class="auth-signin-email-hint" id="signin-email-hint"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_HINT'], ENT_QUOTES, 'UTF-8'); ?></p>
               </section>
 
-              <section>
+              <section class="auth-signin-primary">
                 <button id="signin-passkey" type="button" class="btn btn_primary" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_BUTTON'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_BUTTON'], ENT_QUOTES, 'UTF-8'); ?></button>
-                <p class="divider-or"><?php echo htmlspecialchars($i18n['AUTH_DIVIDER_OR'], ENT_QUOTES, 'UTF-8'); ?></p>
-                <p class="centered">
-                  <button id="signin-passkey-phone" type="button" class="btn-link" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_DEVICE'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_DEVICE'], ENT_QUOTES, 'UTF-8'); ?></button>
-                </p>
-                <p class="status" id="signin-passkey-status" role="status" aria-live="polite" aria-atomic="true"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_STATUS'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <button id="signin-passkey-phone" type="button" class="btn btn_secondary" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_DEVICE'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_DEVICE'], ENT_QUOTES, 'UTF-8'); ?></button>
+              </section>
+
+              <p class="status" id="signin-passkey-status" role="status" aria-live="polite" aria-atomic="true"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_PASSKEY_STATUS'], ENT_QUOTES, 'UTF-8'); ?></p>
+              <div id="signin-notice" class="auth-signin-notice" role="status" aria-live="polite" hidden></div>
+              <div id="signin-error-actions" class="auth-signin-error-actions" hidden></div>
+
+              <section class="auth-signin-alternate">
+                <h2 class="auth-signin-alt-heading" id="federated-signin-label"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_WAYS'], ENT_QUOTES, 'UTF-8'); ?></h2>
                 <div id="federated-signin" class="federated-signin" hidden>
-                  <p class="divider-or" id="federated-signin-label"><?php echo htmlspecialchars($i18n['AUTH_DIVIDER_OR'], ENT_QUOTES, 'UTF-8'); ?></p>
                   <div id="federated-signin-providers" class="federated-signin-providers" aria-labelledby="federated-signin-label"></div>
                 </div>
                 <?php if ($accountRecoveryEnabled) { ?>
-                  <hr class="auth-recover-divider" aria-hidden="true">
-                  <p class="auth-recover-link"><a href="/auth/recover/<?php echo $authLanguageQuery; ?>"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_ACCOUNT'], ENT_QUOTES, 'UTF-8'); ?></a></p>
+                  <p class="auth-recover-link"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_PROMPT'], ENT_QUOTES, 'UTF-8'); ?> <a href="/auth/recover/<?php echo $authLanguageQuery; ?>"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_ACCOUNT'], ENT_QUOTES, 'UTF-8'); ?></a></p>
                 <?php } ?>
               </section>
 

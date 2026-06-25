@@ -846,6 +846,14 @@ final class PasskeyController
       return;
     }
 
+    $sessionCredentialId = '';
+    $sessionHash = Authentication::getSessionHashFromCookie();
+    if ('' !== $sessionHash) {
+      $sessionCredentialId = $this->scalarString(
+        Database::hget(Keys::SESSION . ':' . $sessionHash, 'credential_id')
+      );
+    }
+
     $records = [];
     foreach (Database::smembers($this->userCredentialsKey($userUUID)) as $credentialIdRaw) {
       $credentialId = $this->scalarString($credentialIdRaw);
@@ -863,6 +871,9 @@ final class PasskeyController
         'deviceName' => $this->scalarString($data['device_name'] ?? 'Passkey'),
         'createdAt' => (int) $this->scalarString($data['created_at'] ?? '0'),
         'lastUsedAt' => (int) $this->scalarString($data['last_used_at'] ?? '0'),
+        'transports' => $this->decodeTransports($data['transports'] ?? '[]'),
+        'isCurrentDevice' => '' !== $sessionCredentialId && $credentialId === $sessionCredentialId,
+        'isRecoveryPasskey' => 'recovery' === $this->scalarString($data['origin'] ?? ''),
       ];
     }
 
@@ -1387,6 +1398,35 @@ final class PasskeyController
     }
 
     return (string) json_encode($normalized);
+  }
+
+  /**
+   * Decode stored WebAuthn transport hints.
+   *
+   * @return list<string>
+   */
+  private function decodeTransports(mixed $value): array
+  {
+    if (!is_string($value) || '' === $value) {
+      return [];
+    }
+
+    $decoded = json_decode($value, true);
+    if (!is_array($decoded)) {
+      return [];
+    }
+
+    $transports = [];
+    foreach ($decoded as $item) {
+      if (is_scalar($item)) {
+        $transport = strtolower(trim((string) $item));
+        if ('' !== $transport) {
+          $transports[] = $transport;
+        }
+      }
+    }
+
+    return $transports;
   }
 
   /**

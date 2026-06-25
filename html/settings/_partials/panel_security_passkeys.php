@@ -18,15 +18,17 @@ if ($recoveryKeyUpdatedRaw !== '') {
     <h2 class="heading-accent settings_card_title"><?php echo settings_index_i18n('SETTINGS_SECTION_PASSKEYS'); ?></h2>
 
     <div id="security_passkeys_widget" class="security_status_widget" aria-live="polite">
-      <div class="security_status_note"><?php echo settings_index_i18n('SETTINGS_PASSKEYS_SECURITY_NOTE'); ?></div>
+      <div id="passkey_security_summary" class="passkey_security_summary security_status_note" hidden></div>
       <div class="visually_hidden">
         <p id="passkey_credentials_sr_instructions"><?php echo settings_index_i18n('SETTINGS_PASSKEYS_SR_INSTRUCTIONS'); ?></p>
         <p id="passkey_credentials_sr_status" role="status" aria-live="polite" aria-atomic="true"></p>
       </div>
-      <div id="passkey_credentials_list" class="passkey_credentials_list" data-hover-help="Passkeys are trusted devices. Remove lost ones and rename for clarity."></div>
-      <div class="security_passkey_actions">
-        <button id="add_passkey_button" type="button" class="btn btn_primary" data-hover-help="Add another passkey before replacing devices to avoid lockout."><?php echo settings_index_i18n('SETTINGS_ADD_DEVICE'); ?></button>
+      <div id="passkey_empty_state" class="passkey_empty_state" hidden>
+        <p class="passkey_empty_state_title"><?php echo settings_index_i18n('SETTINGS_PASSKEYS_EMPTY_TITLE'); ?></p>
+        <p class="passkey_empty_state_text"><?php echo settings_index_i18n('SETTINGS_PASSKEYS_EMPTY_DESC'); ?></p>
+        <button id="add_passkey_first_button" type="button" class="btn btn_primary"><?php echo settings_index_i18n('SETTINGS_PASSKEYS_ADD_FIRST'); ?></button>
       </div>
+      <div id="passkey_credentials_list" class="passkey_card_grid" data-hover-help="Passkeys are trusted devices. Remove lost ones and rename for clarity."></div>
       <div id="add_passkey_status" class="status_message status_message_callout passkey_action_status" role="status" aria-live="polite" aria-atomic="true"></div>
     </div>
 

@@ -33,6 +33,7 @@ $i18nKeys = [
   'CALENDAR_DAY_SINGULAR',
   'CALENDAR_DAYS',
   'CALENDAR_ENCRYPTION_REQUIRED',
+  'AUTH_JS_PASSKEY_DEVICE_HINT',
   'I_WORK_DETAILS',
   'LAST_UPDATED',
   'SITE',
@@ -85,6 +86,7 @@ const MSG_CAL_LOCKED_CANNOT_EDIT_GRACE = <?php echo json_encode($i18n['CALENDAR_
 const MSG_CAL_DAY_SINGULAR = <?php echo json_encode($i18n['CALENDAR_DAY_SINGULAR']); ?>;
 const MSG_CAL_DAYS_PLURAL = <?php echo json_encode($i18n['CALENDAR_DAYS']); ?>;
 const MSG_CAL_ENCRYPTION_REQUIRED = <?php echo json_encode($i18n['CALENDAR_ENCRYPTION_REQUIRED']); ?>;
+const MSG_PASSKEY_DEVICE_HINT = <?php echo json_encode($i18n['AUTH_JS_PASSKEY_DEVICE_HINT']); ?>;
 const CAL_TOTAL_HOURS_MAX = 24;
 const LABEL_LAST_UPDATED = <?php echo json_encode($i18n['LAST_UPDATED']); ?>;
 const CAL_WORK_ENTRY_FIELDS = {
@@ -738,6 +740,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Parse initial year/month from URL
   const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('passkey_device_hint') === '1') {
+    PC.showToast(MSG_PASSKEY_DEVICE_HINT, 'info', 10000, true);
+    urlParams.delete('passkey_device_hint');
+    const query = urlParams.toString();
+    const cleanUrl = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
+    window.history.replaceState({}, '', cleanUrl);
+  }
+
   const urlPath = window.location.search.substring(1); // Remove leading ?
   let initialYear, initialMonth;
   

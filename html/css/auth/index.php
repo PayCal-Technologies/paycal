@@ -389,7 +389,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   }
 
   .federated-signin {
-    margin-top: 0.75rem;
+    margin-top: 0;
   }
 
   .federated-signin-providers {
@@ -521,6 +521,101 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     border-radius: 14px;
     padding: 0.72rem 0.9rem;
     cursor: pointer;
+  }
+
+  .auth-panel .btn.btn_secondary {
+    border: 1px solid var(--line-strong);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-0);
+    font-weight: 700;
+    line-height: 1.18 !important;
+    letter-spacing: 0 !important;
+    border-radius: 14px;
+    padding: 0.72rem 0.9rem;
+    cursor: pointer;
+    margin-top: 0.55rem;
+  }
+
+  .auth-panel .btn.btn_secondary:hover,
+  .auth-panel .btn.btn_secondary:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .auth-signin-email-hint {
+    margin: 0.35rem 0 0;
+    color: var(--text-2);
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .auth-signin-primary {
+    display: grid;
+    gap: 0;
+  }
+
+  .auth-signin-alt-heading {
+    margin: 1.1rem 0 0.65rem;
+    color: var(--text-1);
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .auth-signin-notice {
+    margin-top: 0.55rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: rgba(45, 45, 45, 0.55);
+    color: var(--text-1);
+    font-size: 0.98rem;
+    line-height: 1.4;
+  }
+
+  .auth-signin-notice.is-security {
+    border-color: #93455a;
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+
+  .auth-signin-notice[hidden],
+  .auth-signin-error-actions[hidden] {
+    display: none;
+  }
+
+  .auth-signin-notice-title {
+    display: block;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+  }
+
+  .auth-signin-error-actions {
+    margin-top: 0.55rem;
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .auth-signin-error-actions .btn {
+    width: 100%;
+  }
+
+  .auth-signin-error-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    justify-content: center;
+    margin-top: 0.15rem;
+  }
+
+  .auth-signin-error-links .btn-link {
+    font-size: 0.95rem;
+  }
+
+  .auth-feedback-banner.notice {
+    border-color: var(--line-strong);
+    background: rgba(45, 45, 45, 0.95);
+    color: var(--text-0);
   }
 
   .auth-panel .btn.btn_primary:hover {

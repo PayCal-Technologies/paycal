@@ -2062,12 +2062,6 @@ header('Expires: 0');
   opacity: 1;
 }
 
-.security_passkey_actions {
-  margin-top: 0.6rem;
-  display: flex;
-  justify-content: center;
-}
-
 .settings_recovery_key_card {
   margin-top: 1rem;
   padding: 1rem;
@@ -2184,39 +2178,6 @@ header('Expires: 0');
   font-weight: 600;
 }
 
-.security_passkey_actions #add_passkey_button.is-working {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.security_passkey_actions #add_passkey_button.is-working::after {
-  content: '';
-  width: 0.95rem;
-  height: 0.95rem;
-  border: 2px solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  animation: settingsBusySpin 700ms linear infinite;
-}
-
-.security_passkey_actions #add_passkey_button.is-success {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.security_passkey_actions #add_passkey_button.is-success::after {
-  content: '';
-  width: 0.9rem;
-  height: 0.5rem;
-  border: 2px solid currentColor;
-  border-top: 0;
-  border-right: 0;
-  transform: rotate(-45deg);
-  animation: settingsPasskeyCheckMorph 420ms ease-out both;
-}
-
 .passkey_action_status {
   margin-top: 0.65rem;
   min-height: 1.25rem;
@@ -2278,11 +2239,735 @@ header('Expires: 0');
   }
 }
 
-.passkey_credentials_list {
+.passkey_security_summary {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.passkey_empty_state {
+  margin-top: 0.75rem;
+  padding: 1.25rem 1rem;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: var(--radius-sm, 0.25rem);
+  background: color-mix(in srgb, var(--surface-color, #20252b) 86%, #000 14%);
+  box-shadow: var(--depth-surface-shadow, none);
+  text-align: center;
+}
+
+.passkey_empty_state_title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.passkey_empty_state_text {
+  margin: 0 0 0.9rem;
+  opacity: 0.9;
+  line-height: 1.45;
+}
+
+.passkey_card_grid {
   margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(13.2rem, 100%), 1fr));
+  gap: 0.75rem;
+}
+
+/* Passkey cards use the shared depth harness (--depth-surface-shadow / --depth-control-shadow-hover).
+   Gamification glow, emblem, and lift layers gate on html[data-depth] (flat/low = minimal). */
+.passkey_card {
+  --passkey-card-accent: var(--accent-color, #4d8ef0);
+  position: relative;
   display: flex;
   flex-direction: column;
+  gap: 0.55rem;
+  min-height: 100%;
+  padding: 2.3rem 0.95rem 0.95rem;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: var(--radius-sm, 0.25rem);
+  background: color-mix(in srgb, var(--surface-color, #20252b) 86%, #000 14%);
+  box-shadow: var(--depth-surface-shadow, none);
+  transition: var(--depth-interaction-transition, border-color 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease, transform 0.12s ease);
+  overflow: visible;
+}
+
+.passkey_card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.passkey_card::before,
+.passkey_card::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.passkey_card::before {
+  inset: -1px;
+  z-index: 0;
+  opacity: 0;
+  border: 1px solid color-mix(in srgb, var(--passkey-card-accent) 20%, transparent);
+}
+
+.passkey_card::after {
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 0.55rem 0.55rem, color-mix(in srgb, var(--passkey-card-accent) 52%, transparent) 0 0.18rem, transparent 0.19rem),
+    radial-gradient(circle at calc(100% - 0.55rem) 0.55rem, color-mix(in srgb, var(--passkey-card-accent) 52%, transparent) 0 0.18rem, transparent 0.19rem),
+    radial-gradient(circle at 0.55rem calc(100% - 0.55rem), color-mix(in srgb, var(--passkey-card-accent) 38%, transparent) 0 0.16rem, transparent 0.17rem),
+    radial-gradient(circle at calc(100% - 0.55rem) calc(100% - 0.55rem), color-mix(in srgb, var(--passkey-card-accent) 38%, transparent) 0 0.16rem, transparent 0.17rem),
+    radial-gradient(circle at 50% 0, color-mix(in srgb, var(--passkey-card-accent) 62%, transparent) 0 0.22rem, transparent 0.23rem),
+    radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--passkey-card-accent) 48%, transparent) 0 0.18rem, transparent 0.19rem);
+}
+
+.passkey_card--current {
+  --passkey-card-accent: var(--color-primary, var(--accent-color, #4d8ef0));
+}
+
+.passkey_card--security-key,
+.passkey_card--recovery {
+  --passkey-card-accent: var(--accent-color, var(--color-primary, #4d8ef0));
+}
+
+html[data-depth="standard"] .passkey_card,
+html[data-depth="high"] .passkey_card {
+  border-color: color-mix(in srgb, var(--border-color, rgba(255, 255, 255, 0.12)) 72%, var(--passkey-card-accent) 28%);
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, color-mix(in srgb, var(--passkey-card-accent) 16%, transparent) 0%, transparent 58%),
+    color-mix(in srgb, var(--surface-color, #20252b) 86%, #000 14%);
+  box-shadow:
+    var(--depth-surface-shadow, none),
+    0 0 0 1px color-mix(in srgb, var(--passkey-card-accent) 14%, var(--border-color, rgba(255, 255, 255, 0.12)) 86%),
+    inset 0 1px 0 color-mix(in srgb, var(--panel-text, #fff) 8%, transparent);
+}
+
+html[data-depth="standard"] .passkey_card::before,
+html[data-depth="high"] .passkey_card::before {
+  opacity: 1;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--border-color, rgba(255, 255, 255, 0.12)) 55%, transparent),
+    0 0 16px color-mix(in srgb, var(--passkey-card-accent) 14%, transparent);
+}
+
+html[data-depth="standard"] .passkey_card::after,
+html[data-depth="high"] .passkey_card::after {
+  opacity: 0.9;
+}
+
+html[data-depth="high"] .passkey_card {
+  box-shadow:
+    var(--depth-surface-shadow, none),
+    0 0 0 1px color-mix(in srgb, var(--passkey-card-accent) 18%, var(--border-color, rgba(255, 255, 255, 0.12)) 82%),
+    0 0 22px color-mix(in srgb, var(--passkey-card-accent) 18%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--panel-text, #fff) 10%, transparent);
+}
+
+html[data-depth="high"] .passkey_card::before {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--border-color, rgba(255, 255, 255, 0.12)) 55%, transparent),
+    0 0 24px color-mix(in srgb, var(--passkey-card-accent) 22%, transparent);
+}
+
+html[data-depth="high"] .passkey_card--current {
+  box-shadow:
+    var(--depth-surface-shadow, none),
+    0 0 0 1px color-mix(in srgb, var(--passkey-card-accent) 22%, var(--border-color, rgba(255, 255, 255, 0.12)) 78%),
+    0 0 28px color-mix(in srgb, var(--passkey-card-accent) 26%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--panel-text, #fff) 10%, transparent);
+}
+
+.passkey_card_emblem {
+  position: absolute;
+  top: -0.72rem;
+  left: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.45rem;
+  height: 2.45rem;
+  border: 1px solid color-mix(in srgb, var(--passkey-card-accent) 48%, var(--border-color, rgba(255, 255, 255, 0.12)));
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--passkey-card-accent) 32%, #fff 8%), transparent 58%),
+    radial-gradient(circle at 50% 62%, color-mix(in srgb, #000 18%, transparent) 0%, transparent 68%),
+    color-mix(in srgb, var(--passkey-card-accent) 16%, var(--surface-color, #20252b));
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--surface-color, #20252b) 92%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--passkey-card-accent) 16%, transparent),
+    inset 0 1px 3px color-mix(in srgb, #000 22%, transparent);
+  color: var(--passkey-card-accent);
+  transform: translateX(-50%);
+}
+
+html[data-depth="standard"] .passkey_card_emblem,
+html[data-depth="high"] .passkey_card_emblem {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--surface-color, #20252b) 92%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--passkey-card-accent) 20%, transparent),
+    0 0 14px color-mix(in srgb, var(--passkey-card-accent) 28%, transparent),
+    inset 0 1px 3px color-mix(in srgb, #000 22%, transparent);
+}
+
+html[data-depth="high"] .passkey_card_emblem {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--surface-color, #20252b) 92%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--passkey-card-accent) 24%, transparent),
+    0 0 20px color-mix(in srgb, var(--passkey-card-accent) 34%, transparent),
+    inset 0 1px 3px color-mix(in srgb, #000 22%, transparent);
+}
+
+.passkey_card_emblem svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.passkey_card:hover,
+.passkey_card:focus-within {
+  box-shadow: var(--depth-control-shadow-hover, var(--depth-surface-shadow, none));
+}
+
+html[data-depth="standard"] .passkey_card:hover,
+html[data-depth="standard"] .passkey_card:focus-within,
+html[data-depth="high"] .passkey_card:hover,
+html[data-depth="high"] .passkey_card:focus-within {
+  border-color: color-mix(in srgb, var(--passkey-card-accent) 42%, var(--border-color, rgba(255, 255, 255, 0.12)) 58%);
+}
+
+.passkey_card_header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.passkey_card_title {
+  margin: 0;
+  min-width: 0;
+  color: var(--heading-color, inherit);
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.passkey_card_title.is-editable {
+  cursor: text;
+  padding: 0.1rem 0.25rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  transition: background-color 0.15s ease;
+}
+
+.passkey_card_title.is-editable:hover {
+  background-color: var(--back-light, rgba(255, 255, 255, 0.04));
+}
+
+.passkey_card_title.is-editable:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #0096d6);
+  outline-offset: 1px;
+  background-color: var(--back-light, rgba(255, 255, 255, 0.06));
+}
+
+.passkey_card_menu_wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.passkey_card_menu_trigger {
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.14));
+  border-radius: var(--radius-sm, 0.25rem);
+  background: transparent;
+  color: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--depth-control-shadow, none);
+  transition: var(--depth-interaction-transition, border-color 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease);
+}
+
+.passkey_card_menu_trigger:hover,
+.passkey_card_menu_trigger:focus-visible {
+  border-color: var(--button-border-active, rgba(255, 255, 255, 0.28));
+  background: color-mix(in srgb, var(--surface-color, #20252b) 70%, #fff 8%);
+  box-shadow: var(--depth-control-shadow-hover, var(--depth-control-shadow, none));
+}
+
+.passkey_card_menu_trigger:focus-visible {
+  outline: none;
+  box-shadow: var(--depth-focus-shadow, var(--depth-control-shadow-hover, var(--depth-control-shadow, none)));
+}
+
+.passkey_card_menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  z-index: 4;
+  min-width: 8.5rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.14));
+  border-radius: var(--radius-sm, 0.25rem);
+  background: var(--surface-color, #20252b);
+  box-shadow: var(--depth-dialog-shadow, var(--depth-panel-shadow, none));
+}
+
+.passkey_card_menu[hidden] {
+  display: none;
+}
+
+.passkey_card_menu_item {
+  display: block;
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border: 0;
+  border-radius: calc(var(--radius-sm, 0.25rem) - 0.05rem);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.passkey_card_menu_item:hover,
+.passkey_card_menu_item:focus-visible {
+  background: color-mix(in srgb, var(--accent-color, #4d8ef0) 16%, transparent);
+}
+
+.passkey_card_menu_item.is-destructive {
+  color: color-mix(in srgb, var(--danger-color, #e06c6c) 88%, #fff 12%);
+}
+
+.passkey_card_subtitle {
+  margin: 0;
+  font-size: 0.84rem;
+  opacity: 0.82;
+  line-height: 1.35;
+}
+
+.passkey_card_status {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: center;
+  color: color-mix(in srgb, var(--heading-color, #fff) 76%, transparent);
+}
+
+.passkey_card_status::before {
+  content: '';
+  flex: 0 0 0.88rem;
+  width: 0.88rem;
+  height: 0.88rem;
+  margin-top: 0.08rem;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 82%, var(--heading-color, #fff) 18%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 28%, transparent);
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>') center / 68% no-repeat;
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>') center / 68% no-repeat;
+}
+
+html[data-depth="standard"] .passkey_card_status::before,
+html[data-depth="high"] .passkey_card_status::before {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 32%, transparent),
+    0 0 8px color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 28%, transparent);
+}
+
+.passkey_card_badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.passkey_card_badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border-color, rgba(255, 255, 255, 0.14)) 80%, var(--accent-color, #4d8ef0) 20%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-color, #4d8ef0) 16%, transparent),
+    color-mix(in srgb, var(--accent-color, #4d8ef0) 8%, transparent)
+  );
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--panel-text, #fff) 10%, transparent);
+}
+
+.passkey_card_badge.is-accent {
+  border-color: color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 58%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 28%, transparent),
+    color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 12%, transparent)
+  );
+  color: color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 90%, #fff 10%);
+}
+
+.passkey_card_badge.is-recovery {
+  border-color: color-mix(in srgb, var(--accent-color, var(--color-primary, #4d8ef0)) 48%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-color, var(--color-primary, #4d8ef0)) 22%, transparent),
+    color-mix(in srgb, var(--accent-color, var(--color-primary, #4d8ef0)) 10%, transparent)
+  );
+}
+
+.passkey_card_badge.is-warn {
+  border-color: color-mix(in srgb, var(--heading-color, #fff) 28%, var(--border-color, rgba(255, 255, 255, 0.14)) 72%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--heading-color, #fff) 12%, transparent),
+    color-mix(in srgb, var(--heading-color, #fff) 5%, transparent)
+  );
+}
+
+.passkey_card_badge.is-recent {
+  border-color: color-mix(in srgb, var(--color-primary, var(--accent-color, #4d8ef0)) 48%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-primary, var(--accent-color, #4d8ef0)) 22%, transparent),
+    color-mix(in srgb, var(--color-primary, var(--accent-color, #4d8ef0)) 10%, transparent)
+  );
+  color: color-mix(in srgb, var(--color-primary, var(--accent-color, #4d8ef0)) 88%, #fff 12%);
+}
+
+.passkey_card_badge.is-security {
+  border-color: color-mix(in srgb, var(--accent-color, var(--color-primary, #4d8ef0)) 48%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-color, var(--color-primary, #4d8ef0)) 20%, transparent),
+    color-mix(in srgb, var(--accent-color, var(--color-primary, #4d8ef0)) 9%, transparent)
+  );
+  color: color-mix(in srgb, var(--accent-color, var(--color-primary, #4d8ef0)) 86%, #fff 14%);
+}
+
+.passkey_card_badge.is-muted {
+  opacity: 0.88;
+}
+
+.passkey_card_meta {
+  display: grid;
+  gap: 0;
+  margin: 0.15rem 0 0;
+  padding: 0.55rem 0.65rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--border-color, rgba(255, 255, 255, 0.12)) 72%, #000 28%);
+  border-radius: calc(var(--radius-sm, 0.25rem) - 0.05rem);
+  background: color-mix(in srgb, #000 34%, var(--surface-color, #20252b) 66%);
+  box-shadow:
+    inset 0 1px 5px color-mix(in srgb, #000 42%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--panel-text, #fff) 4%, transparent);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.passkey_card_meta::before {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: -0.55rem -0.65rem 0.45rem;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 28%, var(--border-color, rgba(255, 255, 255, 0.12)) 72%) 18%,
+      color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 42%, transparent) 50%,
+      color-mix(in srgb, var(--passkey-card-accent, var(--accent-color, #4d8ef0)) 28%, var(--border-color, rgba(255, 255, 255, 0.12)) 72%) 82%,
+      transparent
+    );
+}
+
+.passkey_card_meta > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  align-items: flex-start;
+  padding-block: 0.35rem;
+}
+
+.passkey_card_meta > div + div {
+  border-top: 1px solid color-mix(in srgb, var(--border-color, rgba(255, 255, 255, 0.12)) 78%, transparent);
+}
+
+.passkey_card_meta dt {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--heading-color, #fff) 62%, transparent);
+}
+.passkey_card_meta_row--added dt::before,
+.passkey_card_meta_row--last-used dt::before {
+  content: '';
+  flex: 0 0 0.82rem;
+  width: 0.82rem;
+  height: 0.82rem;
+  background-color: currentColor;
+  opacity: 0.68;
+}
+
+.passkey_card_meta_row--added dt::before {
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>') center / contain no-repeat;
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>') center / contain no-repeat;
+}
+
+.passkey_card_meta_row--last-used dt::before {
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>') center / contain no-repeat;
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>') center / contain no-repeat;
+}
+
+.passkey_card_meta dd {
+  margin: 0;
+  color: color-mix(in srgb, var(--heading-color, #fff) 84%, transparent);
+}
+
+.passkey_card_add {
+  --passkey-card-accent: var(--accent-color, var(--color-primary, #4d8ef0));
+  position: relative;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  padding-top: 2.65rem;
+  border-style: dashed;
+  background: color-mix(in srgb, var(--surface-color, #20252b) 92%, #fff 8%);
+  cursor: pointer;
+}
+
+.passkey_card_add:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #0096d6);
+  outline-offset: 2px;
+}
+
+.passkey_card_add[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+html[data-depth="standard"] .passkey_card_add,
+html[data-depth="high"] .passkey_card_add {
+  border-color: color-mix(in srgb, var(--passkey-card-accent) 42%, var(--border-color, rgba(255, 255, 255, 0.12)) 58%);
+  background:
+    radial-gradient(ellipse 110% 75% at 50% -5%, color-mix(in srgb, var(--passkey-card-accent) 16%, transparent) 0%, transparent 58%),
+    color-mix(in srgb, var(--surface-color, #20252b) 92%, #fff 8%);
+  box-shadow:
+    var(--depth-surface-shadow, none),
+    0 0 0 1px color-mix(in srgb, var(--passkey-card-accent) 12%, var(--border-color, rgba(255, 255, 255, 0.12)) 88%),
+    inset 0 1px 0 color-mix(in srgb, var(--panel-text, #fff) 6%, transparent);
+}
+
+html[data-depth="standard"] .passkey_card_add::before,
+html[data-depth="high"] .passkey_card_add::before {
+  opacity: 1;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--passkey-card-accent) 28%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--border-color, rgba(255, 255, 255, 0.12)) 50%, transparent),
+    0 0 18px color-mix(in srgb, var(--passkey-card-accent) 16%, transparent);
+}
+
+html[data-depth="high"] .passkey_card_add::before {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--border-color, rgba(255, 255, 255, 0.12)) 50%, transparent),
+    0 0 26px color-mix(in srgb, var(--passkey-card-accent) 24%, transparent);
+}
+
+html[data-depth="standard"] .passkey_card_add::after,
+html[data-depth="high"] .passkey_card_add::after {
+  opacity: 0.85;
+  background:
+    radial-gradient(circle at 50% 0, color-mix(in srgb, var(--passkey-card-accent) 68%, transparent) 0 0.24rem, transparent 0.25rem),
+    radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--passkey-card-accent) 52%, transparent) 0 0.2rem, transparent 0.21rem),
+    radial-gradient(circle at 0.55rem 0.55rem, color-mix(in srgb, var(--passkey-card-accent) 42%, transparent) 0 0.16rem, transparent 0.17rem),
+    radial-gradient(circle at calc(100% - 0.55rem) 0.55rem, color-mix(in srgb, var(--passkey-card-accent) 42%, transparent) 0 0.16rem, transparent 0.17rem);
+}
+
+.passkey_card_add:hover,
+.passkey_card_add:focus-within {
+  box-shadow: var(--depth-control-shadow-hover, var(--depth-surface-shadow, none));
+}
+
+html[data-depth="flat"] .passkey_card:hover,
+html[data-depth="flat"] .passkey_card:focus-within,
+html[data-depth="flat"] .passkey_card_add:hover,
+html[data-depth="flat"] .passkey_card_add:focus-within {
+  box-shadow: none;
+  transform: none;
+}
+
+html[data-depth="low"] .passkey_card:hover,
+html[data-depth="low"] .passkey_card:focus-within,
+html[data-depth="low"] .passkey_card_add:hover,
+html[data-depth="low"] .passkey_card_add:focus-within {
+  transform: none;
+}
+
+.passkey_card_add_icon {
+  position: absolute;
+  top: -0.82rem;
+  left: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  border: 1px dashed color-mix(in srgb, var(--passkey-card-accent) 58%, var(--border-color, rgba(255, 255, 255, 0.14)));
+  border-radius: 50%;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--passkey-card-accent) 62%, transparent), color-mix(in srgb, var(--passkey-card-accent) 62%, transparent)) center -0.22rem / 1px 0.3rem no-repeat,
+    linear-gradient(180deg, color-mix(in srgb, var(--passkey-card-accent) 62%, transparent), color-mix(in srgb, var(--passkey-card-accent) 62%, transparent)) center calc(100% + 0.22rem) / 1px 0.3rem no-repeat,
+    linear-gradient(90deg, color-mix(in srgb, var(--passkey-card-accent) 62%, transparent), color-mix(in srgb, var(--passkey-card-accent) 62%, transparent)) -0.22rem center / 0.3rem 1px no-repeat,
+    linear-gradient(90deg, color-mix(in srgb, var(--passkey-card-accent) 62%, transparent), color-mix(in srgb, var(--passkey-card-accent) 62%, transparent)) calc(100% + 0.22rem) center / 0.3rem 1px no-repeat,
+    radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--passkey-card-accent) 34%, #fff 8%), transparent 58%),
+    radial-gradient(circle at 50% 68%, color-mix(in srgb, #000 16%, transparent) 0%, transparent 66%),
+    color-mix(in srgb, var(--surface-color, #20252b) 74%, var(--passkey-card-accent) 26%);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--surface-color, #20252b) 92%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--passkey-card-accent) 14%, transparent);
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--passkey-card-accent);
+  transform: translateX(-50%);
+}
+
+html[data-depth="standard"] .passkey_card_add_icon,
+html[data-depth="high"] .passkey_card_add_icon {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--surface-color, #20252b) 92%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--passkey-card-accent) 18%, transparent),
+    0 0 16px color-mix(in srgb, var(--passkey-card-accent) 28%, transparent);
+}
+
+html[data-depth="high"] .passkey_card_add_icon {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--surface-color, #20252b) 92%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--passkey-card-accent) 22%, transparent),
+    0 0 22px color-mix(in srgb, var(--passkey-card-accent) 34%, transparent);
+}
+
+html[data-depth="standard"] .passkey_card_add:hover,
+html[data-depth="high"] .passkey_card_add:hover,
+html[data-depth="standard"] .passkey_card_add:focus-within,
+html[data-depth="high"] .passkey_card_add:focus-within {
+}
+
+.passkey_card_add_title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--heading-color, inherit);
+}
+
+.passkey_card_add_text {
+  margin: 0;
+  max-width: 16rem;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--heading-color, #fff) 72%, transparent);
+}
+
+.passkey_card_add .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-inline: 1rem;
+  pointer-events: none;
+}
+
+.passkey_card_add_btn_icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 1.35rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 1px solid color-mix(in srgb, currentColor 38%, transparent);
+  border-radius: 50%;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.passkey_card_add_btn_label {
+  line-height: 1.2;
+}
+
+.passkey_card_add.is-working .btn {
+  display: inline-flex;
+  align-items: center;
   gap: 0.45rem;
+}
+
+.passkey_card_add.is-working .btn::after {
+  content: '';
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: settingsBusySpin 700ms linear infinite;
+}
+
+.passkey_card_add.is-success .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.passkey_card_add.is-success .btn::after {
+  content: '';
+  width: 0.9rem;
+  height: 0.5rem;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  animation: settingsPasskeyCheckMorph 420ms ease-out both;
+}
+
+@media (max-width: 980px) {
+  .passkey_card_grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .passkey_card_grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .passkey_card,
+  .passkey_card_add {
+    transition: border-color 0.01ms ease, box-shadow 0.01ms ease, background-color 0.01ms ease;
+  }
+
+  html[data-depth="standard"] .passkey_card:hover,
+  html[data-depth="standard"] .passkey_card:focus-within,
+  html[data-depth="high"] .passkey_card:hover,
+  html[data-depth="high"] .passkey_card:focus-within,
+  html[data-depth="standard"] .passkey_card_add:hover,
+  html[data-depth="high"] .passkey_card_add:hover,
+  html[data-depth="standard"] .passkey_card_add:focus-within,
+  html[data-depth="high"] .passkey_card_add:focus-within {
+    transform: none;
+  }
+}
+
+.passkey_credential_detail {
+  font-size: 0.88em;
+  opacity: 0.85;
 }
 
 .federated_provider_list {
@@ -2308,81 +2993,6 @@ header('Expires: 0');
   .federated_provider_row {
     grid-template-columns: 1fr;
   }
-}
-
-.passkey_datagrid {
-  width: 100%;
-  border: 1px solid var(--fore-dark, #2b2b2b);
-  border-radius: 8px;
-  overflow: hidden;
-  background: transparent;
-}
-
-.passkey_datagrid.datagrid_no_chrome {
-  border: 0;
-  border-radius: 0;
-  overflow: visible;
-}
-
-.passkey_datagrid_row {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 0.5rem;
-  align-items: center;
-  padding: 0.5rem 0.6rem;
-  border-top: 1px solid var(--fore-dark, #2b2b2b);
-  background: transparent;
-}
-
-.passkey_datagrid_row:hover {
-  border-color: var(--button-border-active);
-}
-
-.passkey_datagrid_3col .passkey_datagrid_row {
-  grid-template-columns: 1.3fr 1fr auto;
-}
-
-.passkey_datagrid_row:first-child {
-  border-top: 0;
-}
-
-.passkey_datagrid.datagrid_no_chrome .passkey_datagrid_row {
-  border-top: 0;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.passkey_datagrid.datagrid_no_chrome .passkey_datagrid_header {
-  margin-bottom: 0.2rem;
-  opacity: 0.85;
-}
-
-.passkey_datagrid_header {
-  font-weight: 700;
-  background: transparent;
-}
-
-.passkey_credential_name {
-  font-weight: 600;
-  cursor: text;
-  padding: 0.15rem 0.3rem;
-  border-radius: 4px;
-  transition: background-color 0.15s ease;
-}
-
-.passkey_credential_name:hover {
-  background-color: var(--back-light, rgba(255, 255, 255, 0.04));
-}
-
-.passkey_credential_name:focus-visible {
-  outline: 2px solid var(--color-focus-ring, #0096d6);
-  outline-offset: 1px;
-  background-color: var(--back-light, rgba(255, 255, 255, 0.06));
-}
-
-.passkey_credential_detail {
-  font-size: 0.88em;
-  opacity: 0.85;
 }
 
 .section_separator {

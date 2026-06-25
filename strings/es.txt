@@ -47,6 +47,33 @@ ADMIN_AST_PAGE_TITLE AST Graph
 ADMIN_AST_SEARCH_PLACEHOLDER class or method
 ADMIN_AST_SELECT_NODE Select a node.
 ADMIN_BUSINESS_MODERATION_TITLE Business Moderation
+AUTH_JS_CONNECT_FAILED No pudimos conectar con PayCal.
+AUTH_JS_EDIT_EMAIL Editar correo
+AUTH_JS_EMAIL_OPTIONAL_IMMEDIATE_UI Correo (opcional)
+AUTH_JS_IMMEDIATE_UI_ENABLED El inicio de sesión rápido con passkey está activado en este navegador.
+AUTH_JS_IMMEDIATE_UI_MISS No se seleccionó ninguna passkey. Use este dispositivo, su teléfono o introduzca un correo para una cuenta específica.
+AUTH_JS_IMMEDIATE_UI_NOT_ACTIVE El inicio de sesión rápido con passkey no está activado en este navegador. Introduzca su correo o actívelo en Configuración > Early Access.
+AUTH_JS_IMMEDIATE_UI_UNSUPPORTED El inicio de sesión rápido con passkey no es compatible con este navegador. Introduzca su correo para continuar.
+AUTH_JS_PASSKEY_CANCEL El inicio de sesión con passkey no se completó.
+AUTH_JS_PASSKEY_COMPROMISED Esta passkey se ha desactivado por su seguridad.
+AUTH_JS_PASSKEY_CREDENTIAL_REJECTED Esa passkey no se pudo usar para esta cuenta.
+AUTH_JS_PASSKEY_DEVICE_HINT Añada una passkey a este ordenador para un inicio de sesión más rápido la próxima vez.
+AUTH_JS_PASSKEY_MISMATCH_DETAIL Pruebe otra passkey, compruebe la dirección de correo o use otro método de inicio de sesión.
+AUTH_JS_PASSKEY_NOT_RECOGNIZED Esa passkey no se pudo usar para esta cuenta.
+AUTH_JS_PASSKEY_PHONE_CANCEL El inicio de sesión con su teléfono no se completó.
+AUTH_JS_RATE_LIMIT_FMT Demasiados intentos. Inténtelo de nuevo en {seconds} segundos.
+AUTH_JS_TRY_AGAIN Intentar de nuevo
+AUTH_JS_TRY_ANOTHER_PASSKEY Probar otra passkey
+AUTH_JS_TRY_PHONE_AGAIN Intentar de nuevo con el teléfono
+AUTH_JS_TRY_PHONE_OR_TABLET_AGAIN Intentar de nuevo con teléfono o tableta
+AUTH_JS_USE_ANOTHER_PASSKEY Usar otra passkey
+AUTH_JS_USE_PASSKEY_THIS_DEVICE Usar una passkey en este dispositivo
+AUTH_RECOVER_DISCLOSURE Al completar la recuperación se cerrarán sus otras sesiones y se desactivarán sus passkeys existentes.
+AUTH_RECOVER_EMAIL_SENT Si la cuenta existe, revise su correo
+AUTH_RECOVER_PROMPT ¿No puede usar ninguna de sus passkeys?
+AUTH_RECOVER_SUBHEADING Verifique su cuenta y cree una nueva passkey.
+AUTH_SIGNIN_EMAIL_HINT Introdúzcalo para iniciar sesión en una cuenta PayCal específica.
+AUTH_SIGNIN_OTHER_WAYS Otras formas de iniciar sesión
 BUSINESS_MODERATION Business Moderation
 ADMIN_CONTACT_PIPELINE_HEALTH Contact Pipeline Health
 ADMIN_DASHBOARD_ENGLISH_LANGUAGE_EDITOR English Language Editor
@@ -274,30 +301,30 @@ AUTH_PAGE_HEADING Autenticación
 AUTH_PRIVACY_LINK Política de privacidad
 AUTH_RECOVER_ACCOUNT Recuperar cuenta
 AUTH_RECOVER_ACCOUNT_EMAIL Correo de la cuenta
-AUTH_RECOVER_ALREADY_HAVE_PASSKEY Already have a passkey?
-AUTH_RECOVER_BACK_TO_SIGNIN Back to sign in
-AUTH_RECOVER_BACK_TO_SIGNIN_BUTTON Back to signin
-AUTH_RECOVER_CODE_LABEL Recovery code
-AUTH_RECOVER_COMPLETE_HEADING Recovery complete
-AUTH_RECOVER_COMPLETE_MESSAGE Your data remains encrypted and unchanged.
-AUTH_RECOVER_CONTINUE_TO_PAYCAL Continue to PayCal
-AUTH_RECOVER_DEFAULT_DEVICE_NAME Recovered Passkey
-AUTH_RECOVER_HEADING Recover your account
-AUTH_RECOVER_INTRO_LINE_1 We'll help you regain access in three steps.
-AUTH_RECOVER_INTRO_LINE_2 Enter the code from your email. If this account already has protected data, you will also need your Recovery Code.
-AUTH_RECOVER_KEY_LABEL Recovery Code
-AUTH_RECOVER_META_TITLE Recover Account - PayCal
-AUTH_RECOVER_NEW_PASSKEY_NAME New passkey name
-AUTH_RECOVER_REGISTER_NEW_PASSKEY Register new passkey
-AUTH_RECOVER_SEND_CODE Send code
-AUTH_RECOVER_SIGN_IN_INSTEAD Sign in instead
-AUTH_RECOVER_STATUS_MAGIC_LINK Verifying recovery link...
-AUTH_RECOVER_STATUS_START Enter your account email to begin.
-AUTH_RECOVER_STEPS_ARIA_LABEL Recovery steps
+AUTH_RECOVER_ALREADY_HAVE_PASSKEY ¿Ya tiene una passkey?
+AUTH_RECOVER_BACK_TO_SIGNIN Volver a iniciar sesión
+AUTH_RECOVER_BACK_TO_SIGNIN_BUTTON Volver a iniciar sesión
+AUTH_RECOVER_CODE_LABEL Código de recuperación
+AUTH_RECOVER_COMPLETE_HEADING Recuperación completada
+AUTH_RECOVER_COMPLETE_MESSAGE Sus datos permanecen cifrados y sin cambios.
+AUTH_RECOVER_CONTINUE_TO_PAYCAL Continuar a PayCal
+AUTH_RECOVER_DEFAULT_DEVICE_NAME 
+AUTH_RECOVER_HEADING Recupere su cuenta
+AUTH_RECOVER_INTRO_LINE_1 Le ayudaremos a recuperar el acceso en tres pasos.
+AUTH_RECOVER_INTRO_LINE_2 Introduzca el código de su correo. Si esta cuenta ya tiene datos protegidos, también necesitará su código de recuperación.
+AUTH_RECOVER_KEY_LABEL Código de recuperación
+AUTH_RECOVER_META_TITLE Recuperar cuenta - PayCal
+AUTH_RECOVER_NEW_PASSKEY_NAME Nombre de la nueva passkey
+AUTH_RECOVER_REGISTER_NEW_PASSKEY Registrar nueva passkey
+AUTH_RECOVER_SEND_CODE Enviar código
+AUTH_RECOVER_SIGN_IN_INSTEAD Iniciar sesión en su lugar
+AUTH_RECOVER_STATUS_MAGIC_LINK Verificando enlace de recuperación...
+AUTH_RECOVER_STATUS_START Introduzca el correo de su cuenta para comenzar.
+AUTH_RECOVER_STEPS_ARIA_LABEL Pasos de recuperación
 AUTH_RECOVER_STEP_PASSKEY Passkey
-AUTH_RECOVER_STEP_SUCCESS Success
-AUTH_RECOVER_STEP_VERIFY Verify
-AUTH_RECOVER_VERIFIED_REGISTER_PASSKEY Verified. Now register a new passkey for this account.
+AUTH_RECOVER_STEP_SUCCESS Éxito
+AUTH_RECOVER_STEP_VERIFY Verificar
+AUTH_RECOVER_VERIFIED_REGISTER_PASSKEY Verificado. Ahora registre una nueva passkey para esta cuenta.
 AUTH_REGISTER_CREATE_BUTTON Crear cuenta
 AUTH_REGISTER_DEVICE_LABEL Nombre del dispositivo con passkey
 AUTH_REGISTER_DEVICE_PLACEHOLDER nombre-AAAAMMDD
@@ -307,12 +334,12 @@ AUTH_REGISTER_INVITE_LABEL Código de invitación
 AUTH_REGISTER_PANEL_ARIA Panel de creación de cuenta
 AUTH_REGISTER_PASSKEY_STATUS Crearás una passkey para proteger tu cuenta.
 AUTH_REGISTER_PASSWORDS_NO_MATCH Las contraseñas no coinciden. Vuelva a introducirlas.
-AUTH_SIGNIN_EMAIL_ARIA Correo electrónico obligatorio
-AUTH_SIGNIN_EMAIL_LABEL Correo electrónico (obligatorio)
-AUTH_SIGNIN_OTHER_DEVICE Usar otro dispositivo
+AUTH_SIGNIN_EMAIL_ARIA Correo (opcional)
+AUTH_SIGNIN_EMAIL_LABEL Correo (opcional)
+AUTH_SIGNIN_OTHER_DEVICE Usar un teléfono o tableta
 AUTH_SIGNIN_PANEL_ARIA Panel de inicio de sesión
 AUTH_SIGNIN_PASSKEY_BUTTON Continuar con passkey
-AUTH_SIGNIN_PASSKEY_STATUS Usa una passkey en este dispositivo o inicia sesión desde otro dispositivo.
+AUTH_SIGNIN_PASSKEY_STATUS Use una passkey en este dispositivo o inicie sesión desde su teléfono o tableta.
 AUTH_TABS_ARIA Opciones de autenticación
 AUTH_TAB_REGISTER Crear cuenta
 AUTH_TAB_SIGNIN Iniciar sesión
@@ -2501,7 +2528,7 @@ SETTINGS_JS_PASSKEYS_CHECKING Lista cargada. Comprobando passkeys...
 SETTINGS_JS_PASSKEYS_LOADED_COUNT Lista de passkeys cargada. {count} passkey(s) disponible(s).
 SETTINGS_JS_PASSKEYS_LOADED_NONE Lista de passkeys cargada. Aún no hay passkeys registradas.
 SETTINGS_JS_PASSKEYS_LOAD_FAILED No se pudieron cargar las passkeys. Inténtelo de nuevo.
-SETTINGS_JS_PASSKEYS_NONE Aún no hay passkeys registradas.
+SETTINGS_JS_PASSKEYS_NONE No passkeys yet.
 SETTINGS_JS_PASSKEYS_REMOVED Passkey eliminada.
 SETTINGS_JS_PASSKEYS_REMOVING Eliminando passkey...
 SETTINGS_JS_PASSKEYS_UPDATE_FAILED No se pudieron actualizar las passkeys. Inténtelo de nuevo.
@@ -2523,7 +2550,41 @@ SETTINGS_JS_WORK_ENTRY_FIELDS_UPDATED Campos de entrada de trabajo actualizados
 SETTINGS_OVERLAY_COLLAPSE_HOVER Cuánto tiempo permanece abierta la barra lateral expandida en superposición sin actividad del puntero antes de contraerse al modo estrecho. 0 = nunca.
 SETTINGS_OVERLAY_COLLAPSE_LABEL Contraer
 SETTINGS_PASSKEYS_SECURITY_NOTE Add more passkeys to improve account security.
-SETTINGS_PASSKEYS_SR_INSTRUCTIONS Passkeys list. Edit a passkey name inline and press Enter to save. Use Remove to delete a passkey when multiple devices are registered.
+SETTINGS_PASSKEYS_COUNT_RECOMMENDATION You have {count} passkeys. Recommended: at least 2 passkeys on different devices.
+SETTINGS_PASSKEYS_EMPTY_TITLE No passkeys yet
+SETTINGS_PASSKEYS_EMPTY_DESC Add a passkey to sign in securely without a password.
+SETTINGS_PASSKEYS_ADD_FIRST Add first passkey
+SETTINGS_PASSKEYS_ADD_TITLE Add passkey
+SETTINGS_PASSKEYS_ADD_DESC Add another device for easier sign-in and better account recovery.
+SETTINGS_PASSKEYS_ADD_BUTTON Add passkey
+SETTINGS_PASSKEYS_ADDED_LABEL Added
+SETTINGS_PASSKEYS_ADDED_DATE {date}
+SETTINGS_PASSKEYS_LAST_USED_LABEL Last used
+SETTINGS_PASSKEYS_LAST_USED {date}
+SETTINGS_PASSKEYS_LAST_USED_NEVER Never
+SETTINGS_PASSKEYS_UNNAMED Unnamed passkey
+SETTINGS_PASSKEYS_RECOVERED_META Added during account recovery
+SETTINGS_PASSKEY_BADGE_THIS_DEVICE This device
+SETTINGS_PASSKEY_BADGE_RECOVERED Recovered
+SETTINGS_PASSKEY_BADGE_NEVER_USED Never used
+SETTINGS_PASSKEY_BADGE_RECENTLY_USED Recently used
+SETTINGS_PASSKEY_BADGE_SECURITY_KEY Security key
+SETTINGS_PASSKEY_BADGE_SYNCED Synced
+SETTINGS_PASSKEY_RENAME Rename
+SETTINGS_PASSKEY_REMOVE Remove
+SETTINGS_PASSKEY_MENU_ARIA Passkey actions
+SETTINGS_PASSKEYS_SETTING_UP Setting up passkey...
+SETTINGS_PASSKEY_HINT_SYNCED Synced to your password manager
+SETTINGS_PASSKEY_HINT_SECURITY_KEY External security key
+SETTINGS_PASSKEY_HINT_PLATFORM Device passkey
+SETTINGS_PASSKEY_STATUS_THIS_DEVICE Ready for fast sign-in on this device
+SETTINGS_PASSKEY_STATUS_RECENTLY_USED Used recently for sign-in
+SETTINGS_PASSKEY_STATUS_NEVER_USED Not used for sign-in yet
+SETTINGS_PASSKEY_STATUS_RECOVERY Ready to sign in after recovery
+SETTINGS_PASSKEY_STATUS_SECURITY_KEY Hardware security key for sign-in
+SETTINGS_PASSKEY_STATUS_SYNCED Synced for sign-in anywhere
+SETTINGS_PASSKEY_STATUS_DEFAULT Available for passwordless sign-in
+SETTINGS_PASSKEYS_SR_INSTRUCTIONS Passkey cards. Edit a passkey name inline or choose Rename from the menu. Remove is available when multiple passkeys are registered.
 SETTINGS_POSITION_LEFT Left
 SETTINGS_POSITION_MIDDLE Middle
 SETTINGS_POSITION_RIGHT Right
@@ -3512,7 +3573,7 @@ SETTINGS_JS_SUPPORT_INFO_COPIED Support info copied to clipboard.
 SETTINGS_JS_SUPPORT_INFO_COPY_FAILED Could not copy automatically. Select and copy the text from your browser console instead.
 SETTINGS_JS_SUPPORT_INFO_LABEL PayCal support info
 SETTINGS_JS_VOICE_VOLUME_UPDATED Voice volume updated
-SETTINGS_JS_PASSKEY_ONBOARDING_TOAST Signed in on this phone. Tap Add another device to add a local passkey for this device.
+SETTINGS_JS_PASSKEY_ONBOARDING_TOAST Signed in on this phone. Tap Add passkey to add a local passkey for this device.
 SETTINGS_JS_DEBUG_CONSOLE_TOAST_FMT Console messages: {label}
 SETTINGS_JS_DEBUG_FINE_GRAINED_TOAST_FMT Detailed diagnostics: {label}
 SETTINGS_JS_DEBUG_NETWORK_TOAST_FMT Network insights: {label}

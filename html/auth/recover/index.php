@@ -23,6 +23,9 @@ $i18nKeys = [
   'AUTH_RECOVER_COMPLETE_HEADING',
   'AUTH_RECOVER_COMPLETE_MESSAGE',
   'AUTH_RECOVER_CONTINUE_TO_PAYCAL',
+  'AUTH_RECOVER_DISCLOSURE',
+  'AUTH_RECOVER_EMAIL_SENT',
+  'AUTH_RECOVER_SUBHEADING',
   'AUTH_RECOVER_DEFAULT_DEVICE_NAME',
   'AUTH_RECOVER_HEADING',
   'AUTH_RECOVER_INTRO_LINE_1',
@@ -64,8 +67,8 @@ foreach ($i18nKeys as $i18nKey) {
   <main class="recovery-shell">
     <header class="recovery-header">
       <a class="recovery-back" href="/auth/<?php echo $authLanguageQuery; ?>">&lt; Back to sign in</a>
-      <h1>Recover your account</h1>
-      <p>Use your codes to create a passkey.</p>
+      <h1><?php echo htmlspecialchars($i18n['AUTH_RECOVER_HEADING'], ENT_QUOTES, 'UTF-8'); ?></h1>
+      <p><?php echo htmlspecialchars($i18n['AUTH_RECOVER_SUBHEADING'], ENT_QUOTES, 'UTF-8'); ?></p>
     </header>
     <section class="recovery-card">
       <section class="recovery-panel" data-step="1">
@@ -86,9 +89,9 @@ foreach ($i18nKeys as $i18nKey) {
             <p class="recovery-hint">Sent to your email.</p>
             <p class="recovery-field-error" id="recovery-code-error" aria-live="polite"></p>
           </div>
-          <div id="recovery-key-block" class="recovery-field">
+          <div id="recovery-key-block" class="recovery-field is-hidden">
             <label for="recovery-key">Recovery code</label>
-            <input id="recovery-key" name="recoveryKey" type="text" autocomplete="off" spellcheck="false" maxlength="16" required aria-describedby="recovery-key-error">
+            <input id="recovery-key" name="recoveryKey" type="text" autocomplete="off" spellcheck="false" maxlength="60" aria-describedby="recovery-key-error">
             <p class="recovery-hint">Saved when you secured your account.</p>
             <p class="recovery-field-error" id="recovery-key-error" aria-live="polite"></p>
           </div>
@@ -99,6 +102,7 @@ foreach ($i18nKeys as $i18nKey) {
       </section>
       <section class="recovery-panel is-hidden" data-step="2">
         <p><?php echo htmlspecialchars($i18n['AUTH_RECOVER_VERIFIED_REGISTER_PASSKEY'], ENT_QUOTES, 'UTF-8'); ?></p>
+        <p class="recovery-disclosure"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_DISCLOSURE'], ENT_QUOTES, 'UTF-8'); ?></p>
         <label for="recovery-device-name"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_NEW_PASSKEY_NAME'], ENT_QUOTES, 'UTF-8'); ?></label>
         <input id="recovery-device-name" name="deviceName" type="text" autocomplete="off" value="<?php echo htmlspecialchars($i18n['AUTH_RECOVER_DEFAULT_DEVICE_NAME'], ENT_QUOTES, 'UTF-8'); ?>">
         <div class="recovery-actions">

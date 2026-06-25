@@ -143,8 +143,8 @@ final class NetworkTrafficContractTest extends TestCase
     $this->assertStringContainsString('id="recovery-start-form" class="recovery-email-form"', $recoveryPage);
     $this->assertStringContainsString('id="recovery-verify-form" class="recovery-code-form"', $recoveryPage);
     $this->assertSame(1, substr_count($recoveryPage, '&lt; Back to sign in'));
-    $this->assertStringContainsString('<h1>Recover your account</h1>', $recoveryPage);
-    $this->assertStringContainsString('Use your codes to create a passkey.', $recoveryPage);
+    $this->assertStringContainsString('<h1><?php echo htmlspecialchars($i18n[\'AUTH_RECOVER_HEADING\']', $recoveryPage);
+    $this->assertStringContainsString('AUTH_RECOVER_SUBHEADING', $recoveryPage);
     $this->assertStringContainsString('<label for="recovery-email">Email address</label>', $recoveryPage);
     $this->assertStringContainsString('<label for="recovery-code">Verification code</label>', $recoveryPage);
     $this->assertStringContainsString('<label for="recovery-key">Recovery code</label>', $recoveryPage);
@@ -152,8 +152,9 @@ final class NetworkTrafficContractTest extends TestCase
     $this->assertStringContainsString('Sent to your email.', $recoveryPage);
     $this->assertStringContainsString('Saved when you secured your account.', $recoveryPage);
     $this->assertStringContainsString('Verify and continue', $recoveryPage);
-    $this->assertStringContainsString('<div id="recovery-key-block" class="recovery-field">', $recoveryPage);
-    $this->assertStringContainsString('id="recovery-key" name="recoveryKey" type="text" autocomplete="off" spellcheck="false" maxlength="16" required', $recoveryPage);
+    $this->assertStringContainsString('recovery-disclosure', $recoveryPage);
+    $this->assertStringContainsString('<div id="recovery-key-block" class="recovery-field is-hidden">', $recoveryPage);
+    $this->assertStringContainsString('id="recovery-key" name="recoveryKey" type="text" autocomplete="off" spellcheck="false" maxlength="60"', $recoveryPage);
     $this->assertStringContainsString('id="recovery-code" name="code" type="text" autocomplete="one-time-code" maxlength="6" required', $recoveryPage);
     $this->assertStringContainsString('id="recovery-register-passkey" class="btn btn_primary" disabled aria-disabled="true"', $recoveryPage);
     $this->assertStringContainsString('class="recovery-hint is-prominent" id="recovery-existing-passkey-hint"', $recoveryPage);
@@ -162,8 +163,9 @@ final class NetworkTrafficContractTest extends TestCase
     $this->assertStringContainsString('verifyPayload?.passkeyReady === true && verifyPayload?.recoveryKeyRequired === false', $recoveryFrontend);
     $this->assertStringContainsString('verifyPayload?.recoveryUnavailable === true', $recoveryFrontend);
     $this->assertStringContainsString('Sign in with your passkey, then create one from Settings', $recoveryFrontend);
-    $this->assertStringContainsString('showRecoveryKeyInput();', $recoveryFrontend);
-    $this->assertStringContainsString("setStatus('Code sent. Check your email.', 'sent');", $recoveryFrontend);
+    $this->assertStringContainsString('hideRecoveryKeyInput();', $recoveryFrontend);
+    $this->assertStringContainsString('verifyPayload?.recoveryKeyRequired === true', $recoveryFrontend);
+    $this->assertStringContainsString('RECOVERY_T.AUTH_RECOVER_EMAIL_SENT', $recoveryFrontend);
     $this->assertStringContainsString("setStatus('Checking...');", $recoveryFrontend);
     $this->assertStringContainsString("const CHECKSUM_ERROR = 'Check the last two characters.';", $recoveryFrontend);
     $this->assertStringContainsString('Verification code looks good.', $recoveryFrontend);

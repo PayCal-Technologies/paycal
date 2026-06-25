@@ -38,6 +38,34 @@ $i18nKeys = [
   'SETTINGS_JS_PASSKEYS_REMOVING',
   'SETTINGS_JS_PASSKEYS_REMOVED',
   'SETTINGS_JS_PASSKEYS_UPDATE_FAILED',
+  'SETTINGS_PASSKEYS_COUNT_RECOMMENDATION',
+  'SETTINGS_PASSKEYS_EMPTY_TITLE',
+  'SETTINGS_PASSKEYS_EMPTY_DESC',
+  'SETTINGS_PASSKEYS_ADD_FIRST',
+  'SETTINGS_PASSKEYS_ADD_TITLE',
+  'SETTINGS_PASSKEYS_ADD_DESC',
+  'SETTINGS_PASSKEYS_ADD_BUTTON',
+  'SETTINGS_PASSKEYS_ADDED_LABEL',
+  'SETTINGS_PASSKEYS_LAST_USED_LABEL',
+  'SETTINGS_PASSKEYS_LAST_USED_NEVER',
+  'SETTINGS_PASSKEYS_UNNAMED',
+  'SETTINGS_PASSKEYS_RECOVERED_META',
+  'SETTINGS_PASSKEY_BADGE_THIS_DEVICE',
+  'SETTINGS_PASSKEY_BADGE_RECOVERED',
+  'SETTINGS_PASSKEY_BADGE_NEVER_USED',
+  'SETTINGS_PASSKEY_BADGE_RECENTLY_USED',
+  'SETTINGS_PASSKEY_BADGE_SECURITY_KEY',
+  'SETTINGS_PASSKEY_RENAME',
+  'SETTINGS_PASSKEY_REMOVE',
+  'SETTINGS_PASSKEY_MENU_ARIA',
+  'SETTINGS_PASSKEYS_SETTING_UP',
+  'SETTINGS_PASSKEY_STATUS_THIS_DEVICE',
+  'SETTINGS_PASSKEY_STATUS_RECENTLY_USED',
+  'SETTINGS_PASSKEY_STATUS_NEVER_USED',
+  'SETTINGS_PASSKEY_STATUS_RECOVERY',
+  'SETTINGS_PASSKEY_STATUS_SECURITY_KEY',
+  'SETTINGS_PASSKEY_STATUS_DEFAULT',
+  'REMOVE',
   'SETTINGS_JS_WORK_ENTRY_FIELDS_UPDATED',
   'SETTINGS_JS_CALENDAR_DISPLAY_UPDATED',
   'SETTINGS_JS_DENSITY_UPDATED_FMT',
@@ -539,10 +567,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  const addPasskeyButtonEl = document.getElementById('add_passkey_button');
   const addPasskeyStatusEl = document.getElementById('add_passkey_status');
   const passkeyCredentialsListEl = document.getElementById('passkey_credentials_list');
+  const passkeyEmptyStateEl = document.getElementById('passkey_empty_state');
+  const passkeySecuritySummaryEl = document.getElementById('passkey_security_summary');
+  const addPasskeyFirstButtonEl = document.getElementById('add_passkey_first_button');
   let passkeyCredentialsStatusEl = document.getElementById('passkey_credentials_sr_status');
+  let addPasskeyButtonEl = null;
+  let addPasskeyCardEl = null;
+  let passkeyMenuDocumentListenerBound = false;
   const createRecoveryKeyButtonEl = document.getElementById('create_recovery_key_btn');
   const createRecoveryKeyStatusEl = document.getElementById('create_recovery_key_status');
 
@@ -854,28 +887,66 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const setAddPasskeyBusyState = (busy) => {
-    if (!addPasskeyButtonEl || passkeyActionHardDisabled) {
+    const buttons = [addPasskeyButtonEl, addPasskeyFirstButtonEl].filter((button) => button instanceof HTMLElement);
+    if ((buttons.length === 0 && !(addPasskeyCardEl instanceof HTMLElement)) || passkeyActionHardDisabled) {
       return;
     }
 
-    setActionBusy(addPasskeyButtonEl, busy, {
-      ariaDisabled: true,
-      busyClass: 'is-working',
+    buttons.forEach((button) => {
+      const label = button.querySelector('.passkey_card_add_btn_label');
+      if (label instanceof HTMLElement) {
+        label.textContent = busy
+          ? SETTINGS_T.SETTINGS_PASSKEYS_SETTING_UP
+          : SETTINGS_T.SETTINGS_PASSKEYS_ADD_BUTTON;
+      } else if (button.id === 'add_passkey_button') {
+        button.textContent = busy
+          ? SETTINGS_T.SETTINGS_PASSKEYS_SETTING_UP
+          : SETTINGS_T.SETTINGS_PASSKEYS_ADD_BUTTON;
+      }
+
+      if (button !== addPasskeyButtonEl) {
+        setActionBusy(button, busy, {
+          ariaDisabled: true,
+          busyClass: 'is-working',
+        });
+        if (busy) {
+          button.classList.remove('is-success');
+        }
+      }
     });
-    if (busy) {
-      addPasskeyButtonEl.classList.remove('is-success');
+
+    if (addPasskeyCardEl instanceof HTMLElement) {
+      addPasskeyCardEl.classList.toggle('is-working', busy);
+      if (busy) {
+        addPasskeyCardEl.classList.remove('is-success');
+        addPasskeyCardEl.setAttribute('aria-disabled', 'true');
+        addPasskeyCardEl.setAttribute('aria-busy', 'true');
+      } else if (!passkeyActionHardDisabled) {
+        addPasskeyCardEl.removeAttribute('aria-disabled');
+        addPasskeyCardEl.setAttribute('aria-busy', 'false');
+      }
     }
-    addPasskeyButtonEl.textContent = busy ? 'Setting up passkey...' : 'Add Device';
   };
 
   const markAddPasskeySuccess = () => {
-    if (!(addPasskeyButtonEl instanceof HTMLElement)) {
+    const buttons = [addPasskeyButtonEl, addPasskeyFirstButtonEl].filter((button) => button instanceof HTMLElement && button !== addPasskeyButtonEl);
+    if (buttons.length === 0 && !(addPasskeyCardEl instanceof HTMLElement)) {
       return;
     }
-    addPasskeyButtonEl.classList.add('is-success');
-    window.setTimeout(() => {
-      addPasskeyButtonEl.classList.remove('is-success');
-    }, 1300);
+
+    buttons.forEach((button) => {
+      button.classList.add('is-success');
+      window.setTimeout(() => {
+        button.classList.remove('is-success');
+      }, 1300);
+    });
+
+    if (addPasskeyCardEl instanceof HTMLElement) {
+      addPasskeyCardEl.classList.add('is-success');
+      window.setTimeout(() => {
+        addPasskeyCardEl.classList.remove('is-success');
+      }, 1300);
+    }
   };
 
   const setPasskeyGridStatus = (message) => {
@@ -968,13 +1039,394 @@ document.addEventListener("DOMContentLoaded", async () => {
     downloadDisplayedRecoveryCode();
   });
 
-  const formatPasskeyTimestamp = (ts) => {
+  const formatPasskeyDate = (ts) => {
     const value = Number(ts || 0);
     if (!value || Number.isNaN(value)) {
-      return 'never';
+      return '';
     }
-    const date = new Date(value * 1000);
-    return date.toLocaleString();
+
+    return new Date(value * 1000).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const isRecoveredPasskeyName = (deviceName) => /^recovered passkey$/iu.test(String(deviceName || '').trim());
+
+  const isRecoveryPasskey = (credential) => credential?.isRecoveryPasskey === true || isRecoveredPasskeyName(credential?.deviceName);
+
+  const getPasskeyDisplayTitle = (credential) => {
+    const rawName = String(credential?.deviceName || '').trim();
+    if (isRecoveredPasskeyName(rawName)) {
+      return SETTINGS_T.SETTINGS_PASSKEYS_UNNAMED;
+    }
+
+    if (rawName === '' || /^passkey$/iu.test(rawName)) {
+      return SETTINGS_T.SETTINGS_PASSKEYS_UNNAMED;
+    }
+
+    return rawName;
+  };
+
+  const getPasskeyBadges = (credential) => {
+    const badges = [];
+    if (credential?.isCurrentDevice === true) {
+      badges.push({ className: 'is-accent', label: SETTINGS_T.SETTINGS_PASSKEY_BADGE_THIS_DEVICE });
+    }
+    if (isRecoveryPasskey(credential)) {
+      badges.push({ className: 'is-recovery', label: SETTINGS_T.SETTINGS_PASSKEY_BADGE_RECOVERED });
+    }
+
+    const lastUsedAt = Number(credential?.lastUsedAt || 0);
+    if (lastUsedAt <= 0) {
+      badges.push({ className: 'is-warn', label: SETTINGS_T.SETTINGS_PASSKEY_BADGE_NEVER_USED });
+    } else if ((Date.now() / 1000) - lastUsedAt < (7 * 86400)) {
+      badges.push({ className: 'is-recent', label: SETTINGS_T.SETTINGS_PASSKEY_BADGE_RECENTLY_USED });
+    }
+
+    const transports = Array.isArray(credential?.transports) ? credential.transports : [];
+    if (transports.some((transport) => ['usb', 'nfc', 'ble'].includes(transport)) && !transports.includes('internal')) {
+      badges.push({ className: 'is-security', label: SETTINGS_T.SETTINGS_PASSKEY_BADGE_SECURITY_KEY });
+    }
+
+    return badges;
+  };
+
+  const getPasskeyCardClassName = (credential) => {
+    const classes = ['passkey_card'];
+    if (credential?.isCurrentDevice === true) {
+      classes.push('passkey_card--current');
+    }
+    if (isRecoveryPasskey(credential)) {
+      classes.push('passkey_card--recovery');
+    }
+
+    const transports = Array.isArray(credential?.transports) ? credential.transports : [];
+    if (transports.some((transport) => ['usb', 'nfc', 'ble'].includes(transport)) && !transports.includes('internal')) {
+      classes.push('passkey_card--security-key');
+    }
+
+    return classes.join(' ');
+  };
+
+  const getPasskeyStatusLine = (credential) => {
+    if (credential?.isCurrentDevice === true) {
+      return SETTINGS_T.SETTINGS_PASSKEY_STATUS_THIS_DEVICE;
+    }
+    if (isRecoveryPasskey(credential)) {
+      return SETTINGS_T.SETTINGS_PASSKEY_STATUS_RECOVERY;
+    }
+
+    const transports = Array.isArray(credential?.transports) ? credential.transports : [];
+    if (transports.some((transport) => ['usb', 'nfc', 'ble'].includes(transport)) && !transports.includes('internal')) {
+      return SETTINGS_T.SETTINGS_PASSKEY_STATUS_SECURITY_KEY;
+    }
+
+    const lastUsedAt = Number(credential?.lastUsedAt || 0);
+    if (lastUsedAt <= 0) {
+      return SETTINGS_T.SETTINGS_PASSKEY_STATUS_NEVER_USED;
+    }
+    if ((Date.now() / 1000) - lastUsedAt < (7 * 86400)) {
+      return SETTINGS_T.SETTINGS_PASSKEY_STATUS_RECENTLY_USED;
+    }
+
+    return SETTINGS_T.SETTINGS_PASSKEY_STATUS_DEFAULT;
+  };
+
+  const createPasskeyKeyEmblem = () => {
+    const emblem = document.createElement('div');
+    emblem.className = 'passkey_card_emblem';
+    emblem.setAttribute('aria-hidden', 'true');
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '18');
+    svg.setAttribute('height', '18');
+    svg.setAttribute('fill', 'currentColor');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M7 14a5 5 0 1 1 8.7-3.5L21 15.8V21h-2v-2h-2v-2h-1.6l-1.1-1.1A4.98 4.98 0 0 1 7 14zm2 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0z');
+    svg.appendChild(path);
+    emblem.appendChild(svg);
+    return emblem;
+  };
+
+  const closePasskeyCardMenus = (exceptMenu = null) => {
+    if (!(passkeyCredentialsListEl instanceof HTMLElement)) {
+      return;
+    }
+
+    passkeyCredentialsListEl.querySelectorAll('.passkey_card_menu').forEach((menu) => {
+      if (!(menu instanceof HTMLElement) || menu === exceptMenu) {
+        return;
+      }
+
+      menu.hidden = true;
+      const trigger = menu.parentElement?.querySelector('.passkey_card_menu_trigger');
+      if (trigger instanceof HTMLElement) {
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  };
+
+  const bindPasskeyMenuDocumentListener = () => {
+    if (passkeyMenuDocumentListenerBound) {
+      return;
+    }
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) {
+        closePasskeyCardMenus();
+        return;
+      }
+
+      if (target.closest('.passkey_card_menu_wrap')) {
+        return;
+      }
+
+      closePasskeyCardMenus();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closePasskeyCardMenus();
+      }
+    });
+
+    passkeyMenuDocumentListenerBound = true;
+  };
+
+  const createPasskeyCardMenu = ({ credentialId, canRemove, onRename }) => {
+    const menuWrap = document.createElement('div');
+    menuWrap.className = 'passkey_card_menu_wrap';
+
+    const menuId = `passkey_menu_${String(credentialId || '').replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'passkey_card_menu_trigger';
+    trigger.setAttribute('aria-label', SETTINGS_T.SETTINGS_PASSKEY_MENU_ARIA);
+    trigger.setAttribute('aria-haspopup', 'menu');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('aria-controls', menuId);
+    trigger.textContent = '•••';
+
+    const menu = document.createElement('div');
+    menu.id = menuId;
+    menu.className = 'passkey_card_menu';
+    menu.setAttribute('role', 'menu');
+    menu.hidden = true;
+
+    const renameButton = document.createElement('button');
+    renameButton.type = 'button';
+    renameButton.className = 'passkey_card_menu_item';
+    renameButton.setAttribute('role', 'menuitem');
+    renameButton.textContent = SETTINGS_T.SETTINGS_PASSKEY_RENAME;
+    renameButton.addEventListener('click', () => {
+      closePasskeyCardMenus();
+      onRename();
+    });
+    menu.appendChild(renameButton);
+
+    if (canRemove) {
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'passkey_card_menu_item is-destructive';
+      removeButton.setAttribute('role', 'menuitem');
+      removeButton.textContent = SETTINGS_T.SETTINGS_PASSKEY_REMOVE;
+      removeButton.addEventListener('click', () => {
+        closePasskeyCardMenus();
+        removePasskeyCredential(String(credentialId || ''));
+      });
+      menu.appendChild(removeButton);
+    }
+
+    trigger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const willOpen = menu.hidden;
+      closePasskeyCardMenus(willOpen ? menu : null);
+      menu.hidden = !willOpen;
+      trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+
+    menuWrap.appendChild(trigger);
+    menuWrap.appendChild(menu);
+    return menuWrap;
+  };
+
+  const createPasskeyCredentialCard = (credential, canRemove) => {
+    const card = document.createElement('article');
+    card.className = getPasskeyCardClassName(credential);
+    card.setAttribute('data-credential-id', String(credential.credentialId || ''));
+
+    card.appendChild(createPasskeyKeyEmblem());
+
+    const header = document.createElement('div');
+    header.className = 'passkey_card_header';
+
+    const title = document.createElement('h3');
+    title.className = 'passkey_card_title is-editable';
+    title.contentEditable = 'true';
+    title.setAttribute('spellcheck', 'false');
+    title.textContent = getPasskeyDisplayTitle(credential);
+    title.setAttribute('data-credential-id', String(credential.credentialId || ''));
+    title.addEventListener('blur', async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      const newName = target.textContent?.trim() || SETTINGS_T.SETTINGS_PASSKEYS_UNNAMED;
+      const credId = target.getAttribute('data-credential-id') || '';
+      if (credId) {
+        await updatePasskeyName(credId, newName);
+      }
+    });
+    title.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const target = event.target;
+        if (target instanceof HTMLElement) {
+          target.blur();
+        }
+      }
+    });
+
+    header.appendChild(title);
+    header.appendChild(createPasskeyCardMenu({
+      credentialId: credential.credentialId,
+      canRemove,
+      onRename: () => {
+        title.focus();
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(title);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      },
+    }));
+    card.appendChild(header);
+
+    const badges = getPasskeyBadges(credential);
+    if (badges.length > 0) {
+      const badgeRow = document.createElement('div');
+      badgeRow.className = 'passkey_card_badges';
+      badges.forEach((badge) => {
+        const badgeEl = document.createElement('span');
+        badgeEl.className = `passkey_card_badge${badge.className ? ` ${badge.className}` : ''}`;
+        badgeEl.textContent = badge.label;
+        badgeRow.appendChild(badgeEl);
+      });
+      card.appendChild(badgeRow);
+    }
+
+    const statusLine = getPasskeyStatusLine(credential);
+    if (statusLine !== '') {
+      const status = document.createElement('p');
+      status.className = 'passkey_card_status';
+      status.textContent = statusLine;
+      card.appendChild(status);
+    }
+
+    const meta = document.createElement('dl');
+    meta.className = 'passkey_card_meta';
+
+    const addedRow = document.createElement('div');
+    addedRow.className = 'passkey_card_meta_row passkey_card_meta_row--added';
+    const addedLabel = document.createElement('dt');
+    addedLabel.textContent = SETTINGS_T.SETTINGS_PASSKEYS_ADDED_LABEL;
+    const addedValue = document.createElement('dd');
+    const addedDate = formatPasskeyDate(credential.createdAt);
+    addedValue.textContent = addedDate !== '' ? addedDate : '—';
+    addedRow.appendChild(addedLabel);
+    addedRow.appendChild(addedValue);
+    meta.appendChild(addedRow);
+
+    const lastUsedRow = document.createElement('div');
+    lastUsedRow.className = 'passkey_card_meta_row passkey_card_meta_row--last-used';
+    const lastUsedLabel = document.createElement('dt');
+    lastUsedLabel.textContent = SETTINGS_T.SETTINGS_PASSKEYS_LAST_USED_LABEL;
+    const lastUsedValue = document.createElement('dd');
+    const lastUsedDate = formatPasskeyDate(credential.lastUsedAt);
+    lastUsedValue.textContent = lastUsedDate !== ''
+      ? lastUsedDate
+      : SETTINGS_T.SETTINGS_PASSKEYS_LAST_USED_NEVER;
+    lastUsedRow.appendChild(lastUsedLabel);
+    lastUsedRow.appendChild(lastUsedValue);
+    meta.appendChild(lastUsedRow);
+    card.appendChild(meta);
+
+    return card;
+  };
+
+  const createAddPasskeyCard = () => {
+    const card = document.createElement('article');
+    card.className = 'passkey_card passkey_card_add';
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute(
+      'aria-label',
+      `${SETTINGS_T.SETTINGS_PASSKEYS_ADD_TITLE}. ${SETTINGS_T.SETTINGS_PASSKEYS_ADD_DESC}`
+    );
+
+    const icon = document.createElement('div');
+    icon.className = 'passkey_card_add_icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '+';
+    card.appendChild(icon);
+
+    const title = document.createElement('h3');
+    title.className = 'passkey_card_add_title';
+    title.textContent = SETTINGS_T.SETTINGS_PASSKEYS_ADD_TITLE;
+    title.setAttribute('aria-hidden', 'true');
+    card.appendChild(title);
+
+    const text = document.createElement('p');
+    text.className = 'passkey_card_add_text';
+    text.textContent = SETTINGS_T.SETTINGS_PASSKEYS_ADD_DESC;
+    text.setAttribute('aria-hidden', 'true');
+    card.appendChild(text);
+
+    const button = document.createElement('span');
+    button.id = 'add_passkey_button';
+    button.className = 'btn btn_primary';
+    button.setAttribute('aria-hidden', 'true');
+    const buttonIcon = document.createElement('span');
+    buttonIcon.className = 'passkey_card_add_btn_icon';
+    buttonIcon.setAttribute('aria-hidden', 'true');
+    buttonIcon.textContent = '+';
+    const buttonLabel = document.createElement('span');
+    buttonLabel.className = 'passkey_card_add_btn_label';
+    buttonLabel.textContent = SETTINGS_T.SETTINGS_PASSKEYS_ADD_BUTTON;
+    button.appendChild(buttonIcon);
+    button.appendChild(buttonLabel);
+    if (passkeyActionHardDisabled) {
+      card.setAttribute('aria-disabled', 'true');
+    }
+    card.appendChild(button);
+
+    addPasskeyButtonEl = button;
+    addPasskeyCardEl = card;
+    return card;
+  };
+
+  const updatePasskeySecuritySummary = (count) => {
+    if (!(passkeySecuritySummaryEl instanceof HTMLElement)) {
+      return;
+    }
+
+    if (count <= 0) {
+      passkeySecuritySummaryEl.hidden = true;
+      passkeySecuritySummaryEl.textContent = '';
+      return;
+    }
+
+    passkeySecuritySummaryEl.hidden = false;
+    passkeySecuritySummaryEl.textContent = formatSettingsMessage(
+      SETTINGS_T.SETTINGS_PASSKEYS_COUNT_RECOMMENDATION,
+      { count }
+    );
   };
 
   const renderPasskeyCredentials = (credentials = []) => {
@@ -982,100 +1434,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
+    bindPasskeyMenuDocumentListener();
     passkeyCredentialsListEl.textContent = '';
+    addPasskeyButtonEl = null;
+    addPasskeyCardEl = null;
 
-    if (!Array.isArray(credentials) || credentials.length === 0) {
-      const empty = document.createElement('div');
-      empty.className = 'passkey_credential_detail';
-      empty.textContent = SETTINGS_T.SETTINGS_JS_PASSKEYS_NONE;
-      passkeyCredentialsListEl.appendChild(empty);
-      setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_LOADED_NONE);
+    const hasCredentials = Array.isArray(credentials) && credentials.length > 0;
+    if (passkeyEmptyStateEl instanceof HTMLElement) {
+      passkeyEmptyStateEl.hidden = hasCredentials;
+    }
+    passkeyCredentialsListEl.hidden = !hasCredentials;
+    updatePasskeySecuritySummary(hasCredentials ? credentials.length : 0);
+
+    if (!hasCredentials) {
+      setPasskeyGridStatus(SETTINGS_T.SETTINGS_JS_PASSKEYS_NONE);
       return;
     }
 
+    passkeyCredentialsListEl.setAttribute(
+      'aria-describedby',
+      'passkey_credentials_sr_instructions passkey_credentials_sr_status'
+    );
+
     const canRemove = credentials.length > 1;
-    const table = document.createElement('div');
-    table.className = 'passkey_datagrid datagrid_no_chrome';
-    table.setAttribute('role', 'grid');
-    table.setAttribute('aria-colcount', canRemove ? '3' : '2');
-    table.setAttribute('aria-rowcount', String(credentials.length + 1));
-    table.setAttribute('aria-describedby', 'passkey_credentials_sr_instructions passkey_credentials_sr_status');
-    
-    // Set grid to 2 or 3 columns based on credential count
-    if (canRemove) {
-      table.classList.add('passkey_datagrid_3col');
-    }
-
-    const header = document.createElement('div');
-    header.className = 'passkey_datagrid_row passkey_datagrid_header';
-    header.setAttribute('role', 'row');
-    if (canRemove) {
-      PC.setHTML(header, '<div role="columnheader" id="passkey_col_name">Passkey</div><div role="columnheader" id="passkey_col_date">Date</div><div role="columnheader" id="passkey_col_actions">Actions</div>');
-    } else {
-      PC.setHTML(header, '<div role="columnheader" id="passkey_col_name">Passkey</div><div role="columnheader" id="passkey_col_date">Date</div>');
-    }
-    table.appendChild(header);
-
     credentials.forEach((credential) => {
-      const row = document.createElement('div');
-      row.className = 'passkey_datagrid_row';
-      row.setAttribute('role', 'row');
-
-      const nameCell = document.createElement('div');
-      nameCell.className = 'passkey_credential_name';
-      nameCell.setAttribute('role', 'gridcell');
-      nameCell.setAttribute('aria-labelledby', 'passkey_col_name');
-      nameCell.contentEditable = 'true';
-      nameCell.textContent = credential.deviceName || 'Passkey';
-      nameCell.setAttribute('data-credential-id', String(credential.credentialId || ''));
-      nameCell.setAttribute('spellcheck', 'false');
-      nameCell.addEventListener('blur', async (e) => {
-        const target = e.target;
-        if (!(target instanceof HTMLElement)) return;
-        const newName = target.textContent?.trim() || 'Passkey';
-        const credId = target.getAttribute('data-credential-id') || '';
-        if (newName && credId) {
-          await updatePasskeyName(credId, newName);
-        }
-      });
-      nameCell.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const target = e.target;
-          if (target instanceof HTMLElement) {
-            target.blur();
-          }
-        }
-      });
-
-      const dateCell = document.createElement('div');
-      dateCell.className = 'passkey_credential_detail';
-      dateCell.setAttribute('role', 'gridcell');
-      dateCell.setAttribute('aria-labelledby', 'passkey_col_date');
-      dateCell.textContent = formatPasskeyTimestamp(credential.lastUsedAt);
-
-      row.appendChild(nameCell);
-      row.appendChild(dateCell);
-
-      if (canRemove) {
-        const actionCell = document.createElement('div');
-        actionCell.setAttribute('role', 'gridcell');
-        actionCell.setAttribute('aria-labelledby', 'passkey_col_actions');
-        const removeButton = document.createElement('button');
-        removeButton.type = 'button';
-        removeButton.className = 'btn btn_delete';
-        removeButton.textContent = <?php echo json_encode(Strings::i18n('REMOVE'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>;
-        removeButton.addEventListener('click', () => {
-          removePasskeyCredential(String(credential.credentialId || ''));
-        });
-        actionCell.appendChild(removeButton);
-        row.appendChild(actionCell);
-      }
-
-      table.appendChild(row);
+      passkeyCredentialsListEl.appendChild(createPasskeyCredentialCard(credential, canRemove));
     });
+    passkeyCredentialsListEl.appendChild(createAddPasskeyCard());
+    wireAddPasskeyButtons();
 
-    passkeyCredentialsListEl.appendChild(table);
     setPasskeyGridStatus(formatSettingsMessage(SETTINGS_T.SETTINGS_JS_PASSKEYS_LOADED_COUNT, { count: credentials.length }));
   };
 
@@ -1093,11 +1480,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (!listResponse.ok || listPayload.status !== 'success') {
         throw new Error(listPayload.message || 'Unable to load passkeys.');
-      }
-
-      // Keep Add Passkey visible to support per-device enrollment.
-      if (addPasskeyButtonEl) {
-        addPasskeyButtonEl.hidden = false;
       }
 
       renderPasskeyCredentials(listPayload.credentials || []);
@@ -1542,30 +1924,59 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
-  if (addPasskeyButtonEl) {
-    if (!isWebAuthnCapableBrowser()) {
-      passkeyActionHardDisabled = true;
-      addPasskeyButtonEl.disabled = true;
-      addPasskeyButtonEl.setAttribute('aria-disabled', 'true');
-      setPasskeyStatus(WEB_AUTHN_UNSUPPORTED_MESSAGE, 'warning');
-      setPasskeyGridStatus(WEB_AUTHN_UNSUPPORTED_MESSAGE);
+  const runAddPasskeyFlow = async () => {
+    setAddPasskeyBusyState(true);
+    try {
+      await addPasskeyAction();
+      markAddPasskeySuccess();
+    } catch (error) {
+      const errorMessage = simplifyPasskeyStatusMessage(error);
+      setPasskeyStatus(errorMessage, 'error');
+      setPasskeyGridStatus(`Passkey add failed: ${errorMessage}`);
+      PW.error(`[PASSKEY] Add device failed: ${errorMessage}`);
+    } finally {
+      setAddPasskeyBusyState(false);
+    }
+  };
+
+  const wireAddPasskeyButtons = () => {
+    if (addPasskeyCardEl instanceof HTMLElement && !addPasskeyCardEl.dataset.passkeyBound) {
+      addPasskeyCardEl.dataset.passkeyBound = '1';
+      const triggerAddPasskey = () => {
+        if (passkeyActionHardDisabled || addPasskeyCardEl?.getAttribute('aria-disabled') === 'true') {
+          return;
+        }
+        runAddPasskeyFlow();
+      };
+      addPasskeyCardEl.addEventListener('click', triggerAddPasskey);
+      addPasskeyCardEl.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') {
+          return;
+        }
+        event.preventDefault();
+        triggerAddPasskey();
+      });
     }
 
-    addPasskeyButtonEl.addEventListener('click', async () => {
-      setAddPasskeyBusyState(true);
-      try {
-        await addPasskeyAction();
-        markAddPasskeySuccess();
-      } catch (error) {
-        const errorMessage = simplifyPasskeyStatusMessage(error);
-        setPasskeyStatus(errorMessage, 'error');
-        setPasskeyGridStatus(`Passkey add failed: ${errorMessage}`);
-        PW.error(`[PASSKEY] Add device failed: ${errorMessage}`);
-      } finally {
-        setAddPasskeyBusyState(false);
-      }
-    });
+    if (addPasskeyFirstButtonEl instanceof HTMLElement && !addPasskeyFirstButtonEl.dataset.passkeyBound) {
+      addPasskeyFirstButtonEl.dataset.passkeyBound = '1';
+      addPasskeyFirstButtonEl.addEventListener('click', () => {
+        runAddPasskeyFlow();
+      });
+    }
+  };
+
+  if (!isWebAuthnCapableBrowser()) {
+    passkeyActionHardDisabled = true;
+    if (addPasskeyFirstButtonEl instanceof HTMLElement) {
+      addPasskeyFirstButtonEl.disabled = true;
+      addPasskeyFirstButtonEl.setAttribute('aria-disabled', 'true');
+    }
+    setPasskeyStatus(WEB_AUTHN_UNSUPPORTED_MESSAGE, 'warning');
+    setPasskeyGridStatus(WEB_AUTHN_UNSUPPORTED_MESSAGE);
   }
+
+  wireAddPasskeyButtons();
 
   if (createRecoveryKeyButtonEl) {
     createRecoveryKeyButtonEl.addEventListener('click', () => {
