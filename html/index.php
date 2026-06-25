@@ -1226,21 +1226,21 @@ echo '    <script type="module" src="' . Environment::appURL('js/core/set-utils.
 $calendarI18nSriAttribute = Environment::appEnv() === 'prod'
 	? Render::sriAttribute('js/calendar/i18n.js')
 	: '';
-echo '    <script src="' . Environment::appURL('js/calendar/i18n.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarI18nSriAttribute . '></script>' . PHP_EOL;
+echo '    <script src="' . Environment::appURL('js/calendar/i18n.js') . '?v=' . htmlspecialchars(Render::assetCacheVersion('js/calendar/i18n.js', $cacheVersion), ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarI18nSriAttribute . '></script>' . PHP_EOL;
 
 $calendarAriaEchoSriAttribute = Environment::appEnv() === 'prod'
 	? Render::sriAttribute('js/calendar/aria-echo.js')
 	: '';
-echo '    <script src="' . Environment::appURL('js/calendar/aria-echo.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarAriaEchoSriAttribute . '></script>' . PHP_EOL;
+echo '    <script src="' . Environment::appURL('js/calendar/aria-echo.js') . '?v=' . htmlspecialchars(Render::assetCacheVersion('js/calendar/aria-echo.js', $cacheVersion), ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarAriaEchoSriAttribute . '></script>' . PHP_EOL;
 
 $calendarPlatformSriAttribute = Environment::appEnv() === 'prod'
 	? Render::sriAttribute('js/calendar/platform.js')
 	: '';
-echo '    <script src="' . Environment::appURL('js/calendar/platform.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarPlatformSriAttribute . '></script>' . PHP_EOL;
+echo '    <script src="' . Environment::appURL('js/calendar/platform.js') . '?v=' . htmlspecialchars(Render::assetCacheVersion('js/calendar/platform.js', $cacheVersion), ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarPlatformSriAttribute . '></script>' . PHP_EOL;
 
 $calendarSriAttribute = Environment::appEnv() === 'prod'
 	? Render::sriAttribute('js/calendar/calendar.js')
 	: '';
-echo '    <script src="' . Environment::appURL('js/calendar/calendar.js') . '?v=' . htmlspecialchars($cacheVersion, ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarSriAttribute . '></script>' . PHP_EOL;
+echo '    <script src="' . Environment::appURL('js/calendar/calendar.js') . '?v=' . htmlspecialchars(Render::assetCacheVersion('js/calendar/calendar.js', $cacheVersion), ENT_QUOTES, 'UTF-8') . '" nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES, 'UTF-8') . '"' . $calendarSriAttribute . '></script>' . PHP_EOL;
 
 require_once Environment::appHome().'html/footer.php';

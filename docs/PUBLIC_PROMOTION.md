@@ -47,6 +47,17 @@ Only paths matching `scripts/public-promotion-allowlist.txt` may appear in a pro
 - SOC2 evidence trees, `Soc2Surface`, or private-only JS partials
 - Because GitHub Actions are queued or red (local gates already decided)
 
+## Production static assets (SRI)
+
+`paycal.app` serves from **`/var/www/paycal`** (not `paycal-private`). Promotion must update the public tree; `git pull` on private alone does not change prod.
+
+PHP-FPM runs as `www-data` and cannot read `.git`, so cache-buster `?v=` uses the repo **`VERSION`** file, while SRI `integrity` is computed from the live file on disk. Nginx caches `.js` for 24h. If allowlisted JS changes without bumping **`VERSION`**, browsers can keep an old `calendar.js` and SRI will block it.
+
+After any promotion that changes SRI-covered JS/CSS:
+
+1. Bump **`VERSION`** (and README via hooks) when the release version changes.
+2. Rely on `Render::assetCacheVersion()` (app version + file mtime in prod) on SRI script tags so intra-release file updates still bust cache.
+
 ## Optional GitHub evidence
 
 ```bash

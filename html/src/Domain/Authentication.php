@@ -554,7 +554,7 @@ class Authentication
     $renders = [
       '__SITE_REGISTER_VERIFY_URL__' => Environment::appURL('verify/'),
       '__SITE_API_RESEND_VERIFY_URL__' => Environment::appURL('api/v1/account/resend-verification'),
-      '__VERIFICATION_REMINDER_JS_URL__' => Environment::appURL('js/signin/verification-reminder.js') . '?v=' . Environment::appVersion(),
+      '__VERIFICATION_REMINDER_JS_URL__' => Environment::appURL('js/signin/verification-reminder.js') . '?v=' . Render::assetCacheVersion('js/signin/verification-reminder.js'),
       '__VERIFICATION_REMINDER_JS_INTEGRITY_ATTR__' => Render::sriAttribute('js/signin/verification-reminder.js'),
       '__AUTH_VERIFICATION_REMINDER_TITLE__' => $i18n['AUTH_VERIFICATION_REMINDER_TITLE'],
       '__AUTH_VERIFICATION_REMINDER_BODY__' => $i18n['AUTH_VERIFICATION_REMINDER_BODY'],

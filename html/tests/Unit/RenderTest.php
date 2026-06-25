@@ -164,6 +164,25 @@ final class RenderTest extends TestCase
     $this->assertStringContainsString(' crossorigin="anonymous"', $attr);
   }
 
+
+  #[Test]
+  public function assetCacheVersionAppendsMtimeInProd(): void
+  {
+    $assetDir = $this->tempRoot.'/html/js/calendar';
+    mkdir($assetDir, 0755, true);
+    $assetPath = $assetDir.'/calendar.js';
+    file_put_contents($assetPath, "console.log('calendar');\n");
+    clearstatcache(true, $assetPath);
+    $mtime = (string) filemtime($assetPath);
+
+    Environment::bootstrap($this->envDefaults([
+      'APP_ENV' => 'prod',
+      'APP_HOME' => $this->tempRoot.'/',
+    ]));
+
+    $this->assertSame('1.2.3.'.$mtime, Render::assetCacheVersion('js/calendar/calendar.js', '1.2.3'));
+  }
+
   #[Test]
   public function sriAttributeThrowsWhenAssetMissing(): void
   {

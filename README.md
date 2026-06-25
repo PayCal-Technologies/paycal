@@ -6,7 +6,7 @@ PayCal helps workers understand pay, taxes, sites, pay periods, and business-sha
 
 Latest documented release: **v1.059.009**
 
-[![Test Suite](https://img.shields.io/badge/tests-2350%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2351%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -279,7 +279,7 @@ Localization source files live in `strings/`. Backup files such as `*.bak` are n
 
 Suite inventory (as of 2026-06-24):
 
-- **2,350 listed tests**
+- **2,351 listed tests**
 - **270 repository test files**
 - **Active public suite file split:** **138 Unit**, **61 Integration**, **41 Contract**, **1 Timezone**, **12 Accessibility**
 - **2 Manual verification files**

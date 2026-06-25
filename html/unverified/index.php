@@ -113,6 +113,6 @@ $pageLanguage = defined('USER_LANGUAGE') ? (string) USER_LANGUAGE : 'en';
   </footer>
 
   <?php $verificationReminderSriAttribute = Render::sriAttribute('js/signin/verification-reminder.js'); ?>
-  <script src="<?php echo Environment::appURL('js/signin/verification-reminder.js'); ?>?v=<?php echo $cssVersion; ?>"<?php echo $verificationReminderSriAttribute; ?>></script>
+  <script src="<?php echo Environment::appURL('js/signin/verification-reminder.js'); ?>?v=<?php echo Render::assetCacheVersion('js/signin/verification-reminder.js', $cssVersion); ?>"<?php echo $verificationReminderSriAttribute; ?>></script>
 </body>
 </html>

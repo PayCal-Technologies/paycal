@@ -1121,7 +1121,7 @@ class Render
       return '';
     }
 
-    $fullPath = rtrim(\PayCal\Domain\Config\Environment::appHome(), '/') . '/html/' . $normalizedPath;
+    $fullPath = self::staticAssetFullPath($relativePath);
     if (!is_file($fullPath)) {
       return '';
     }
@@ -1146,4 +1146,33 @@ class Render
 
     return ' integrity="' . htmlspecialchars($hash, ENT_QUOTES, 'UTF-8') . '" crossorigin="anonymous"';
   }
+
+  private static function staticAssetFullPath(string $relativePath): string
+  {
+    $normalizedPath = ltrim(trim($relativePath), '/');
+    return rtrim(\PayCal\Domain\Config\Environment::appHome(), '/') . '/html/' . $normalizedPath;
+  }
+
+  /**
+   * Query-string cache version for a static asset under html/.
+   *
+   * Production PHP resolves appVersion from VERSION while SRI hashes read the live
+   * file. Append file mtime in prod so cached static assets cannot outlive content.
+   */
+  public static function assetCacheVersion(string $relativePath, ?string $appVersion = null): string
+  {
+    $base = $appVersion ?? \PayCal\Domain\Config\Environment::appVersion();
+    $fullPath = self::staticAssetFullPath($relativePath);
+
+    if ($base === '' || $base === 'unknown') {
+      return is_file($fullPath) ? 'dev-' . (string) filemtime($fullPath) : 'dev-' . (string) time();
+    }
+
+    if (\PayCal\Domain\Config\Environment::appEnv() !== 'prod' || !is_file($fullPath)) {
+      return $base;
+    }
+
+    return $base . '.' . (string) filemtime($fullPath);
+  }
+
 }
