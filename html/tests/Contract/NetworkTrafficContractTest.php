@@ -105,19 +105,21 @@ final class NetworkTrafficContractTest extends TestCase
     $authPage = $this->readProjectFile('auth/index.php');
     $authCss = $this->readProjectFile('css/auth/index.php');
 
-    $this->assertStringContainsString("\$i18n['AUTH_TERMS_ACK_PREFIX']", $authPage);
-    $this->assertStringContainsString("\$i18n['AUTH_TERMS_ACK_SUFFIX']", $authPage);
+    $this->assertStringContainsString('class="auth-signin-divider"', $authPage);
+    $this->assertStringContainsString('role="separator"', $authPage);
+    $this->assertStringContainsString('aria-hidden="true"', $authPage);
+    $this->assertStringNotContainsString("\$i18n['AUTH_TERMS_ACK_PREFIX']", $authPage);
     $this->assertStringNotContainsString('By signing in you agree to our', $authPage);
 
     $this->assertStringContainsString('grid-template-columns: repeat(2, minmax(0, 1fr));', $authCss);
     $this->assertStringContainsString('letter-spacing: 0 !important;', $authCss);
     $this->assertStringContainsString('white-space: normal !important;', $authCss);
     $this->assertStringContainsString('overflow-wrap: anywhere !important;', $authCss);
+    $this->assertStringContainsString('.auth-signin-divider {', $authCss);
 
     foreach (['fr', 'de', 'es', 'hi', 'it', 'nl', 'pt', 'tl', 'tr'] as $languageCode) {
       $strings = $this->readRootFile('strings/' . $languageCode . '.txt');
 
-      $this->assertStringContainsString('AUTH_TERMS_ACK_SUFFIX ', $strings);
       $this->assertStringNotContainsString('FOOTER_TRADEMARK PayCal™ is a trademark of PayCal Technologies Inc. (registration pending).', $strings);
     }
   }

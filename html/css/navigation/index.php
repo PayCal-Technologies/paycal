@@ -385,6 +385,7 @@ span.active svg { fill: var(--color-text); }
   color: var(--color-text, #f5f5f5);
   opacity: 1;
   box-shadow: var(--depth-dialog-shadow, 0 10px 24px color-mix(in srgb, var(--panel-head-text) 24%, black));
+  pointer-events: none;
 }
 
 .nav_admin_popover.is-portal {
@@ -392,16 +393,19 @@ span.active svg { fill: var(--color-text); }
   top: var(--nav-admin-popover-top, 8px);
   left: var(--nav-admin-popover-left, 8px);
   margin: 0;
+  z-index: 10050;
 }
 
 .nav_admin_popover[hidden] {
   display: none !important;
+  pointer-events: none !important;
 }
 
 .nav_admin_popover:popover-open,
 .nav_admin_popover.is-open {
   display: grid;
   gap: 0.15rem;
+  pointer-events: auto;
 }
 
 .nav_admin_group:hover > .nav_admin_popover,
@@ -438,7 +442,7 @@ span.active svg { fill: var(--color-text); }
   outline: none;
 }
 
-body[data-nav-primary-position='top'] .nav_admin_popover {
+body[data-nav-primary-position='top'] .nav_admin_popover:not(.is-portal) {
   left: 0;
   top: calc(100% + 0.25rem);
 }
@@ -457,6 +461,14 @@ body[data-nav-primary-position='top'] #page_header.nav_component--header .nav_me
 body[data-nav-primary-position='left'] #page_header.nav_component--header .nav_menu--primary li.nav_admin_group,
 body[data-nav-primary-position='right'] #page_header.nav_component--header .nav_menu--primary li.nav_admin_group {
   z-index: auto;
+}
+
+body[data-nav-primary-position='left'] #page_header.nav_component--header .nav_menu--primary li.nav_admin_group:has(.nav_admin_popover.is-open),
+body[data-nav-primary-position='right'] #page_header.nav_component--header .nav_menu--primary li.nav_admin_group:has(.nav_admin_popover.is-open),
+body.admin-nav-popover-open[data-nav-primary-position='left'] #page_header.nav_component--header .nav_menu--primary li.nav_admin_group,
+body.admin-nav-popover-open[data-nav-primary-position='right'] #page_header.nav_component--header .nav_menu--primary li.nav_admin_group {
+  z-index: 10060;
+  overflow: visible;
 }
 
 #page_header.nav_component--header > .nav_menu--primary > ul > li:not(.active) {
@@ -1153,12 +1165,12 @@ body[data-nav-primary-position='right'] #page_header.nav_component--header .nav_
   outline-offset: -2px;
 }
 
-body[data-nav-primary-position='left'] .nav_admin_popover {
+body[data-nav-primary-position='left'] .nav_admin_popover:not(.is-portal) {
   top: 0;
   left: calc(100% + 0.25rem);
 }
 
-body[data-nav-primary-position='right'] .nav_admin_popover {
+body[data-nav-primary-position='right'] .nav_admin_popover:not(.is-portal) {
   top: 0;
   right: calc(100% + 0.25rem);
   left: auto;
@@ -1515,6 +1527,10 @@ body.nav-collapsed #page_header.nav_component--header .nav_menu--primary li {
 }
 
 body.nav-collapsed #page_header.nav_component--header .nav_menu--primary li.nav_cta {
+  pointer-events: auto;
+}
+
+body.nav-collapsed #page_header.nav_component--header .nav_menu--primary li.nav_admin_group {
   pointer-events: auto;
 }
 

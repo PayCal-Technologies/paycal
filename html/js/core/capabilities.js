@@ -49,6 +49,11 @@ export function detectRegExpEscape() {
   return typeof RegExp.escape === 'function';
 }
 
+export function detectInvokerCommands() {
+  return typeof HTMLButtonElement !== 'undefined'
+    && Object.prototype.hasOwnProperty.call(HTMLButtonElement.prototype, 'commandForElement');
+}
+
 export function isWebAuthnCapableBrowser({ requireSecureContext = true } = {}) {
   const hasPublicKeyCredential = typeof window !== 'undefined'
     && typeof window.PublicKeyCredential !== 'undefined';
@@ -66,6 +71,7 @@ export const capabilities = Object.freeze({
   uint8arrayBase64: detectUint8ArrayBase64(),
   setMethods: detectSetMethods(),
   regexpEscape: detectRegExpEscape(),
+  invokerCommands: detectInvokerCommands(),
   webAuthn: isWebAuthnCapableBrowser(),
 });
 

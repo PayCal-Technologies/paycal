@@ -84,7 +84,6 @@ $i18nKeys = [
   'AUTH_BETA_NOTICE',
   'AUTH_DIVIDER_OR',
   'AUTH_PAGE_HEADING',
-  'AUTH_PRIVACY_LINK',
   'AUTH_RECOVER_ACCOUNT',
   'AUTH_REGISTER_CREATE_BUTTON',
   'AUTH_REGISTER_DEVICE_LABEL',
@@ -94,22 +93,16 @@ $i18nKeys = [
   'AUTH_REGISTER_INVITE_LABEL',
   'AUTH_REGISTER_PANEL_ARIA',
   'AUTH_REGISTER_PASSKEY_STATUS',
-  'AUTH_RECOVER_PROMPT',
   'AUTH_SIGNIN_EMAIL_ARIA',
-  'AUTH_SIGNIN_EMAIL_HINT',
   'AUTH_SIGNIN_EMAIL_LABEL',
+  'AUTH_SIGNIN_EMAIL_PLACEHOLDER',
   'AUTH_SIGNIN_OTHER_DEVICE',
-  'AUTH_SIGNIN_OTHER_WAYS',
   'AUTH_SIGNIN_PANEL_ARIA',
   'AUTH_SIGNIN_PASSKEY_BUTTON',
   'AUTH_SIGNIN_PASSKEY_STATUS',
   'AUTH_TAB_REGISTER',
   'AUTH_TAB_SIGNIN',
   'AUTH_TABS_ARIA',
-  'AUTH_TERMS_ACK_AND',
-  'AUTH_TERMS_ACK_PREFIX',
-  'AUTH_TERMS_ACK_SUFFIX',
-  'AUTH_TERMS_LINK',
   'AUTH_VERIFICATION_MESSAGE',
   'AUTH_VERIFICATION_STEP_1',
   'AUTH_VERIFICATION_STEP_2',
@@ -173,8 +166,7 @@ require_once __DIR__ . '/../header.php';
             <form id="signin-form" method="POST" action="/auth/<?php echo $authLanguageQuery; ?>">
               <section>
                 <label for="email"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-                <input type="email" id="email" name="email" value="<?php echo $emailValue; ?>" autocomplete="username webauthn" aria-describedby="signin-email-hint" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
-                <p class="auth-signin-email-hint" id="signin-email-hint"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_HINT'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <input type="email" id="email" name="email" value="<?php echo $emailValue; ?>" autocomplete="username webauthn" placeholder="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>"<?php echo ($isRegisterTab || $verificationSuccess) ? '' : ' autofocus'; ?>>
               </section>
 
               <section class="auth-signin-primary">
@@ -187,16 +179,15 @@ require_once __DIR__ . '/../header.php';
               <div id="signin-error-actions" class="auth-signin-error-actions" hidden></div>
 
               <section class="auth-signin-alternate">
-                <h2 class="auth-signin-alt-heading" id="federated-signin-label"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_OTHER_WAYS'], ENT_QUOTES, 'UTF-8'); ?></h2>
+                <hr class="auth-signin-divider" role="separator" aria-hidden="true">
                 <div id="federated-signin" class="federated-signin" hidden>
-                  <div id="federated-signin-providers" class="federated-signin-providers" aria-labelledby="federated-signin-label"></div>
+                  <div id="federated-signin-providers" class="federated-signin-providers"></div>
                 </div>
                 <?php if ($accountRecoveryEnabled) { ?>
-                  <p class="auth-recover-link"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_PROMPT'], ENT_QUOTES, 'UTF-8'); ?> <a href="/auth/recover/<?php echo $authLanguageQuery; ?>"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_ACCOUNT'], ENT_QUOTES, 'UTF-8'); ?></a></p>
+                  <hr class="auth-signin-divider" role="separator" aria-hidden="true">
+                  <p class="auth-recover-link"><a href="/auth/recover/<?php echo $authLanguageQuery; ?>"><?php echo htmlspecialchars($i18n['AUTH_RECOVER_ACCOUNT'], ENT_QUOTES, 'UTF-8'); ?></a></p>
                 <?php } ?>
               </section>
-
-              <p><?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_PREFIX'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#terms"><?php echo htmlspecialchars($i18n['AUTH_TERMS_LINK'], ENT_QUOTES, 'UTF-8'); ?></a> <?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_AND'], ENT_QUOTES, 'UTF-8'); ?> <a href="/policies/#privacy"><?php echo htmlspecialchars($i18n['AUTH_PRIVACY_LINK'], ENT_QUOTES, 'UTF-8'); ?></a><?php echo htmlspecialchars($i18n['AUTH_TERMS_ACK_SUFFIX'], ENT_QUOTES, 'UTF-8'); ?></p>
             </form>
           </section>
 

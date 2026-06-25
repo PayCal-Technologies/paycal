@@ -22,6 +22,7 @@ use PayCal\Domain\Security;
 use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Domain\User;
 use PayCal\Domain\UserRepository;
+use PayCal\Domain\WebAuthnRpId;
 use PayCal\Domain\RecoveryKey;
 use PayCal\Observability\AuthTrace;
 use PayCal\Observability\Lens;
@@ -1120,27 +1121,7 @@ final class PasskeyController
    */
   private function createWebAuthn(): WebAuthn
   {
-    return new WebAuthn('PayCal', $this->rpId(), ['none'], true);
-  }
-
-  /**
-   * Resolve the relying-party identifier for WebAuthn ceremonies.
-   *
-   * @return string Relying-party identifier
-   */
-  private function rpId(): string
-  {
-    $host = parse_url(Environment::appPublicURL(), PHP_URL_HOST);
-    if (!is_string($host) || $host === '') {
-      return 'localhost';
-    }
-
-    $trimmed = trim(strtolower($host));
-    if (str_ends_with($trimmed, 'paycal.app')) {
-      return 'paycal.app';
-    }
-
-    return $trimmed;
+    return new WebAuthn('PayCal', WebAuthnRpId::resolve(), ['none'], true);
   }
 
   /**

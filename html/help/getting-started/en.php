@@ -69,6 +69,8 @@ require_once HTML . '/header.php';
           type="button"
           class="help-image-button"
           data-help-popover-open="pay-period-example-popover"
+          commandfor="pay-period-example-popover"
+          command="toggle-popover"
           aria-haspopup="dialog"
           aria-controls="pay-period-example-popover"
           aria-expanded="false"
@@ -98,6 +100,8 @@ require_once HTML . '/header.php';
               type="button"
               class="btn btn_secondary help-image-popover-close"
               data-help-popover-close="pay-period-example-popover"
+              commandfor="pay-period-example-popover"
+              command="hide-popover"
               aria-label="<?php echo htmlspecialchars(help_gs_i18n('HELP_PAY_PERIODS_POPOVER_CLOSE_ARIA'), ENT_QUOTES, 'UTF-8'); ?>"
             ><?php echo htmlspecialchars(help_gs_i18n('CLOSE'), ENT_QUOTES, 'UTF-8'); ?></button>
           </div>

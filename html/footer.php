@@ -132,7 +132,7 @@ if ($isAuthenticated) {
     <p class="footer_copyright"><?php echo $i18n['FOOTER_TRADEMARK']; ?></p>
   </footer>
 
-  <dialog id="modal_session_timeout" aria-modal="true" aria-labelledby="modal_session_timeout_title" aria-describedby="modal_session_timeout_aria modal_session_timeout_meta">
+  <dialog id="modal_session_timeout" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo htmlspecialchars($i18n['SESSION_TIMEOUT_TITLE'], ENT_QUOTES, 'UTF-8'); ?>" aria-modal="true" aria-labelledby="modal_session_timeout_title" aria-describedby="modal_session_timeout_aria modal_session_timeout_meta">
     <div class="modal_aria visually_hidden">
       <span id="modal_session_timeout_aria"><?php echo $i18n['SESSION_TIMEOUT_MODAL_ARIA']; ?></span>
     </div>
@@ -140,7 +140,7 @@ if ($isAuthenticated) {
       <span id="modal_session_timeout_meta"><?php echo $i18n['SESSION_TIMEOUT_MODAL_META']; ?></span>
     </div>
     <section class="modal_header centered">
-      <button type="button" class="btn btn_close" data-dialog-close="modal_session_timeout" aria-label="<?php echo $i18n['CLOSE']; ?>">&times;</button>
+      <button type="button" class="btn btn_close" data-dialog-close="modal_session_timeout" commandfor="modal_session_timeout" command="close" aria-label="<?php echo $i18n['CLOSE']; ?>">&times;</button>
       <h1 id="modal_session_timeout_title" class="modal_title"><?php echo $i18n['SESSION_TIMEOUT_TITLE']; ?></h1>
     </section>
     <section class="modal_content centered">

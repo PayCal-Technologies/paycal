@@ -117,6 +117,43 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
   }
 
   /**
+   * Post-close a11y side effects shared by closeModal() and the Invoker bridge.
+   * Guarded so cancel+close or delegated+native paths cannot double-announce.
+   */
+  function applyModalCloseEffects(el, text = "") {
+    if (!(el instanceof HTMLElement)) return;
+    if (el.dataset.paycalCloseEffectsApplied === '1') return;
+    el.dataset.paycalCloseEffectsApplied = '1';
+    queueMicrotask(() => {
+      delete el.dataset.paycalCloseEffectsApplied;
+    });
+
+    const active = document.activeElement;
+    const focusWasInside = active instanceof HTMLElement && el.contains(active);
+    if (focusWasInside) {
+      active.blur();
+    }
+
+    if (!(document.activeElement instanceof HTMLElement) || !el.contains(document.activeElement)) {
+      el.setAttribute('aria-hidden', 'true');
+    }
+    state.modal_is_active = !!queryFn('dialog[open]');
+
+    if (!state.modal_is_active && state.lastFocused && typeof state.lastFocused.focus === 'function') {
+      state.lastFocused.focus();
+    }
+    if (!state.modal_is_active) {
+      state.lastFocused = null;
+    }
+
+    if (state.audio_feedback === "all") {
+      try {
+        textToSpeechFn(configObj.CLOSED_DIALOG + ` ${text}`);
+      } catch {}
+    }
+  }
+
+  /**
    * Close modal dialog with accessibility features.
    * - Restores last focused element
    * - Announces closing via text-to-speech
@@ -126,36 +163,68 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
     const el = getElementFn(id);
     if (!el) return;
 
+    if (el instanceof HTMLDialogElement) {
+      if (!el.open) return;
+
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && el.contains(active)) {
+        active.blur();
+      }
+
+      el.dataset.paycalCloseViaModal = '1';
+      el.close();
+      delete el.dataset.paycalCloseViaModal;
+      applyModalCloseEffects(el, text);
+      return;
+    }
+
     const active = document.activeElement;
     const focusWasInside = active instanceof HTMLElement && el.contains(active);
     if (focusWasInside) {
       active.blur();
     }
-    
-    if (el instanceof HTMLDialogElement) {
-      if (el.open) el.close();
-    } else {
-      el.classList.add('hidden');
-      el.classList.remove('display-flex');
-    }
-    
-    if (!(document.activeElement instanceof HTMLElement) || !el.contains(document.activeElement)) {
-      el.setAttribute('aria-hidden', 'true');
-    }
-    state.modal_is_active = !!queryFn('dialog[open]');
-    
-    if (!state.modal_is_active && state.lastFocused && typeof state.lastFocused.focus === 'function') {
-      state.lastFocused.focus();
-    }
-    if (!state.modal_is_active) {
-      state.lastFocused = null;
-    }
-    
-    if (state.audio_feedback === "all") {
-      try {
-        textToSpeechFn(configObj.CLOSED_DIALOG + ` ${text}`);
-      } catch {}
-    }
+
+    el.classList.add('hidden');
+    el.classList.remove('display-flex');
+    applyModalCloseEffects(el, text);
+  }
+
+  /**
+   * Golden Invoker Commands + PayCal a11y bridge
+   * -------------------------------------------
+   * Mark a <dialog> with data-dialog-invoker-bridge and optional data-dialog-close-tts.
+   * Close controls keep data-dialog-close for fallback/contract tests and add:
+   *   commandfor="{dialogId}" command="close"
+   *
+   * Invoker-capable browsers: command="close" (or Escape → cancel/close) closes natively;
+   * this bridge listens for close/cancel and runs applyModalCloseEffects (TTS, focus,
+   * aria-hidden, modal_is_active). Delegated [data-dialog-close] clicks are skipped when
+   * invoker close is active so closeModal() does not double-fire.
+   *
+   * Legacy browsers: [data-dialog-close] delegation calls closeModal() as before.
+   * Open paths that need prep (forms, fetched content) still use openModal(); only use
+   * command="show-modal" when no JS prep is required before showModal().
+   */
+  function bindDialogInvokerBridge(dialog) {
+    if (!(dialog instanceof HTMLDialogElement)) return;
+    if (dialog.dataset.invokerBridgeBound === '1') return;
+    dialog.dataset.invokerBridgeBound = '1';
+
+    const getCloseLabel = () => dialog.getAttribute('data-dialog-close-tts') || '';
+
+    const handleNativeClose = () => {
+      if (dialog.dataset.paycalCloseViaModal === '1') return;
+      applyModalCloseEffects(dialog, getCloseLabel());
+    };
+
+    dialog.addEventListener('close', handleNativeClose);
+    dialog.addEventListener('cancel', handleNativeClose);
+  }
+
+  function bindAllDialogInvokerBridges() {
+    queryAllFn('dialog[data-dialog-invoker-bridge]').forEach((dialog) => {
+      bindDialogInvokerBridge(dialog);
+    });
   }
 
   /**
@@ -185,6 +254,10 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
         closeButton.type = 'button';
         closeButton.className = 'btn btn_close';
         closeButton.setAttribute('data-dialog-close', el.id);
+        if (el.hasAttribute('data-dialog-invoker-bridge')) {
+          closeButton.setAttribute('commandfor', el.id);
+          closeButton.setAttribute('command', 'close');
+        }
         closeButton.setAttribute('aria-label', 'Close');
         closeButton.textContent = '×';
         header.prepend(closeButton);
@@ -214,6 +287,9 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
     addAudioFocusListener,
     openModal,
     closeModal,
+    applyModalCloseEffects,
+    bindDialogInvokerBridge,
+    bindAllDialogInvokerBridges,
     ensureDialogChrome,
     ensureAllDialogsChrome,
   };

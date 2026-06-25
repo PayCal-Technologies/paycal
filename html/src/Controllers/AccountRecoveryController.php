@@ -24,6 +24,7 @@ use PayCal\Domain\Security;
 use PayCal\Domain\User;
 use PayCal\Domain\UserFields;
 use PayCal\Domain\UserRepository;
+use PayCal\Domain\WebAuthnRpId;
 
 /**
  * AccountRecoveryController.php
@@ -979,19 +980,7 @@ final class AccountRecoveryController
    */
   private function createWebAuthn(): WebAuthn
   {
-    return new WebAuthn('PayCal', $this->rpId(), ['none'], true);
-  }
-
-  /**
-   * Handles rpId operation.
-   */
-  private function rpId(): string
-  {
-    $host = parse_url(Environment::appPublicURL(), PHP_URL_HOST);
-    if (!is_string($host) || $host === '') {
-      return 'localhost';
-    }
-    return str_ends_with(strtolower($host), 'paycal.app') ? 'paycal.app' : strtolower($host);
+    return new WebAuthn('PayCal', WebAuthnRpId::resolve(), ['none'], true);
   }
 
   /**

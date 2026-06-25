@@ -83,6 +83,28 @@ $i18nKeys = [
   'SETTINGS_JS_SESSIONS_NONE',
   'SETTINGS_JS_SESSIONS_REVOKED_FMT',
   'SETTINGS_JS_SESSIONS_REVOKE_FAILED',
+  'SETTINGS_FEDERATED_SECTION_TITLE',
+  'SETTINGS_FEDERATED_SECTION_NOTE',
+  'SETTINGS_FEDERATED_NOT_CONFIGURED',
+  'SETTINGS_FEDERATED_CHECKING',
+  'SETTINGS_FEDERATED_LOAD_FAILED',
+  'SETTINGS_FEDERATED_CSRF_FAILED',
+  'SETTINGS_FEDERATED_PROVIDER_FALLBACK',
+  'SETTINGS_FEDERATED_CONNECTED_FMT',
+  'SETTINGS_FEDERATED_CONNECTED_EMAIL_FMT',
+  'SETTINGS_FEDERATED_NOT_CONNECTED_FMT',
+  'SETTINGS_FEDERATED_CONNECT_FMT',
+  'SETTINGS_FEDERATED_DISCONNECT_FMT',
+  'SETTINGS_FEDERATED_DISCONNECTING_FMT',
+  'SETTINGS_FEDERATED_DISCONNECTED_FMT',
+  'SETTINGS_FEDERATED_DISCONNECT_FAILED_FMT',
+  'SETTINGS_FEDERATED_RESULT_LINKED',
+  'SETTINGS_FEDERATED_RESULT_ALREADY_LINKED',
+  'SETTINGS_FEDERATED_RESULT_PROVIDER_NOT_LINKED',
+  'SETTINGS_FEDERATED_RESULT_INVALID_TOKEN',
+  'SETTINGS_FEDERATED_RESULT_INVALID_STATE',
+  'SETTINGS_FEDERATED_RESULT_LINK_FAILED',
+  'SETTINGS_FEDERATED_RESULT_UNAVAILABLE',
   'SETTINGS_JS_EXPORT_HISTORY_LOAD_FAILED',
   'SETTINGS_JS_EXPORT_HISTORY_NONE',
   'SETTINGS_JS_EXPORT_ENCRYPT_PROMPT',
@@ -1996,20 +2018,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   const federatedResultMessage = (() => {
     switch (federatedResultStatus) {
       case 'linked':
-        return 'Google connected.';
+        return SETTINGS_T.SETTINGS_FEDERATED_RESULT_LINKED;
       case 'already_linked':
-        return 'This Google account is already connected.';
+        return SETTINGS_T.SETTINGS_FEDERATED_RESULT_ALREADY_LINKED;
       case 'provider_not_linked':
-        return 'Google is not connected to this PayCal account yet. Try Connect Google from this Security page.';
+        return SETTINGS_T.SETTINGS_FEDERATED_RESULT_PROVIDER_NOT_LINKED;
       case 'invalid_provider_token':
-        return 'Google returned a token PayCal could not verify. Try connecting again.';
+        return SETTINGS_T.SETTINGS_FEDERATED_RESULT_INVALID_TOKEN;
       case 'invalid_state':
       case 'missing_callback_params':
-        return 'The Google connection expired or was incomplete. Start again from Connect Google.';
+        return SETTINGS_T.SETTINGS_FEDERATED_RESULT_INVALID_STATE;
       case 'link_failed':
-        return 'PayCal could not find the account that started this Google connection. Sign in with your passkey and try again.';
+        return SETTINGS_T.SETTINGS_FEDERATED_RESULT_LINK_FAILED;
       case 'provider_unavailable':
-        return 'Google sign-in is not available right now.';
+        return SETTINGS_T.SETTINGS_FEDERATED_RESULT_UNAVAILABLE;
       default:
         return '';
     }
@@ -2021,6 +2043,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  const federatedProviderIds = ['google', 'apple'];
+  const federatedProviderName = (provider) => {
+    const label = String(provider?.label || provider?.id || '').trim();
+    return label || SETTINGS_T.SETTINGS_FEDERATED_PROVIDER_FALLBACK;
+  };
   const renderFederatedProviders = (providers) => {
     if (!(federatedProviderListEl instanceof HTMLElement)) {
       return;
@@ -2028,55 +2055,62 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     federatedProviderListEl.textContent = '';
     const visibleProviders = Array.isArray(providers)
-      ? providers.filter((provider) => provider && provider.id === 'google' && provider.enabled === true)
+      ? providers.filter((provider) => provider && federatedProviderIds.includes(String(provider.id || '')) && provider.enabled === true)
       : [];
 
     if (visibleProviders.length === 0) {
-      setFederatedProviderStatus('Google sign-in is not configured for this local host.');
+      setFederatedProviderStatus(SETTINGS_T.SETTINGS_FEDERATED_NOT_CONFIGURED);
       return;
     }
 
     visibleProviders.forEach((provider) => {
+      const providerId = String(provider.id || '').trim();
+      const providerName = federatedProviderName(provider);
+      const providerEmail = String(provider?.email || '').trim();
       const row = document.createElement('div');
       row.className = 'federated_provider_row';
 
       const label = document.createElement('div');
       label.className = 'federated_provider_label';
       label.textContent = provider.linked
-        ? `Google connected${provider.email ? `: ${provider.email}` : ''}`
-        : 'Google is not connected';
+        ? (providerEmail !== ''
+          ? formatSettingsMessage(SETTINGS_T.SETTINGS_FEDERATED_CONNECTED_EMAIL_FMT, { provider: providerName, email: providerEmail })
+          : formatSettingsMessage(SETTINGS_T.SETTINGS_FEDERATED_CONNECTED_FMT, { provider: providerName }))
+        : formatSettingsMessage(SETTINGS_T.SETTINGS_FEDERATED_NOT_CONNECTED_FMT, { provider: providerName });
 
       const button = document.createElement('button');
       button.type = 'button';
       button.className = provider.linked ? 'btn btn_delete' : 'btn btn_primary';
-      button.textContent = provider.linked ? 'Disconnect Google' : 'Connect Google';
+      button.textContent = provider.linked
+        ? formatSettingsMessage(SETTINGS_T.SETTINGS_FEDERATED_DISCONNECT_FMT, { provider: providerName })
+        : formatSettingsMessage(SETTINGS_T.SETTINGS_FEDERATED_CONNECT_FMT, { provider: providerName });
       button.addEventListener('click', async () => {
         if (provider.linked) {
           try {
-            setFederatedProviderStatus('Disconnecting Google...');
+            setFederatedProviderStatus(formatSettingsMessage(SETTINGS_T.SETTINGS_FEDERATED_DISCONNECTING_FMT, { provider: providerName }));
             const csrfToken = getSettingsCsrfToken();
             if (csrfToken === '') {
-              throw new Error('Unable to verify this request. Refresh the page and try again.');
+              throw new Error(SETTINGS_T.SETTINGS_FEDERATED_CSRF_FAILED);
             }
             const response = await fetch('/api/v1/auth/federated/unlink', {
               method: 'POST',
               credentials: 'include',
-              ...settingsJsonRequest({ provider: 'google' }),
+              ...settingsJsonRequest({ provider: providerId }),
             });
             const payload = await response.json();
             if (!response.ok || payload.status !== 'success') {
-              throw new Error(payload.message || 'Unable to disconnect Google.');
+              throw new Error(payload.message || formatSettingsMessage(SETTINGS_T.SETTINGS_FEDERATED_DISCONNECT_FAILED_FMT, { provider: providerName }));
             }
             renderFederatedProviders(payload.providers || []);
-            setFederatedProviderStatus('Google disconnected.');
+            setFederatedProviderStatus(formatSettingsMessage(SETTINGS_T.SETTINGS_FEDERATED_DISCONNECTED_FMT, { provider: providerName }));
           } catch (error) {
-            setFederatedProviderStatus(error?.message || 'Unable to disconnect Google.');
+            setFederatedProviderStatus(error?.message || formatSettingsMessage(SETTINGS_T.SETTINGS_FEDERATED_DISCONNECT_FAILED_FMT, { provider: providerName }));
             PW.error(error);
           }
           return;
         }
 
-        window.location.href = '/api/v1/auth/federated/start/google?mode=link';
+        window.location.href = `/api/v1/auth/federated/start/${encodeURIComponent(providerId)}?mode=link`;
       });
 
       row.appendChild(label);
@@ -2091,7 +2125,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      setFederatedProviderStatus('Checking connected sign-in providers...');
+      setFederatedProviderStatus(SETTINGS_T.SETTINGS_FEDERATED_CHECKING);
       const response = await fetch('/api/v1/auth/federated/linked', {
         method: 'GET',
         credentials: 'include',
@@ -2099,12 +2133,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
       const payload = await response.json();
       if (!response.ok || payload.status !== 'success') {
-        throw new Error(payload.message || 'Unable to load connected sign-in providers.');
+        throw new Error(payload.message || SETTINGS_T.SETTINGS_FEDERATED_LOAD_FAILED);
       }
       renderFederatedProviders(payload.providers || []);
       setFederatedProviderStatus(federatedResultMessage);
     } catch (error) {
-      setFederatedProviderStatus(error?.message || 'Unable to load connected sign-in providers.');
+      setFederatedProviderStatus(error?.message || SETTINGS_T.SETTINGS_FEDERATED_LOAD_FAILED);
       PW.error(error);
     }
   };

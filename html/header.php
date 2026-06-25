@@ -236,7 +236,8 @@ $_SERVER['CSP_NONCE'] = $cspNonce;
 $cspReportUrl = Environment::appURL('api/' . Environment::apiVersion() . '/security/csp/report');
 
 $csp = [
-  'default-src' => ["'none'"],
+  // Same-origin required: default-src governs speculation-rule navigational prefetches.
+  'default-src' => ["'self'", $origin],
   'base-uri' => ["'self'", $origin],
   'connect-src' => ["'self'", $origin, '*.google-analytics.com', '*.analytics.google.com', '*.googletagmanager.com'],
   'frame-src' => ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
@@ -250,6 +251,7 @@ $csp = [
     "'nonce-{$cspNonce}'",
     "'strict-dynamic'",
     "'inline-speculation-rules'",
+    PageHeadRenderer::SPECULATION_RULES_INLINE_HASH,
     "'self'",
     $origin,
     'www.googletagmanager.com',
@@ -670,7 +672,7 @@ echo Render::template('keyboard-shortcuts', $renders);
   <div id="signal_panel_resize" class="signal_panel_resize" role="separator" aria-label="<?php echo Strings::headerI18n('DASHBOARD_RESIZE_GRIP_ARIA'); ?>"></div>
 </section>
 
-<dialog id="modal_signout" aria-modal="true" aria-labelledby="modal_signout_title" aria-describedby="modal_signout_aria modal_signout_meta">
+<dialog id="modal_signout" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo htmlspecialchars(Strings::headerI18n('SIGN_OUT'), ENT_QUOTES, 'UTF-8'); ?>" aria-modal="true" aria-labelledby="modal_signout_title" aria-describedby="modal_signout_aria modal_signout_meta">
   <div class="modal_aria visually_hidden">
     <span id="modal_signout_aria"><?php echo Strings::headerI18n('SIGN_OUT_DIALOG_DESCRIPTION'); ?></span>
   </div>
@@ -680,7 +682,7 @@ echo Render::template('keyboard-shortcuts', $renders);
   <form id="signout_form" name="signout_form" method="POST" action="<?php echo Environment::appURL('signout/'); ?>" aria-label="<?php echo Strings::headerI18n('SIGN_OUT'); ?>">
     <input class="visually_hidden" type="text" name="username" value="NOTUSED" autocomplete="username" hidden tabindex="-1" aria-hidden="true">
     <section class="modal_header">
-      <button type="button" class="btn btn_close" data-dialog-close="modal_signout" aria-label="<?php echo Strings::headerI18n('CLOSE'); ?>">&times;</button>
+      <button type="button" class="btn btn_close" data-dialog-close="modal_signout" commandfor="modal_signout" command="close" aria-label="<?php echo Strings::headerI18n('CLOSE'); ?>">&times;</button>
       <h1 id="modal_signout_title" class="modal_title centered"><?php echo Strings::headerI18n('SIGN_OUT'); ?></h1>
     </section>
     <section class="modal_content f_column">
@@ -689,7 +691,7 @@ echo Render::template('keyboard-shortcuts', $renders);
     <section class="modal_footer">
       <div class="modal_controls flex centered">
         <button id="signout_submit" class="btn btn_primary f_just_center mar_sm"><?php echo Strings::headerI18n('SIGN_OUT'); ?></button>
-        <button id="signout_cancel_btn" class="btn btn_cancel f_just_center mar_sm"><?php echo Strings::headerI18n('CANCEL'); ?></button>
+        <button id="signout_cancel_btn" type="button" class="btn btn_cancel f_just_center mar_sm" data-dialog-close="modal_signout" commandfor="modal_signout" command="close"><?php echo Strings::headerI18n('CANCEL'); ?></button>
       </div>
     </section>
   </form>

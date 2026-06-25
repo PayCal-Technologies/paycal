@@ -1,7 +1,7 @@
 <!-- MODAL KEYBOARD SHORTCUTS -->
 <!-- Contract marker: Shortcut Safeguards -->
 <!-- Contract marker: Single-key page shortcuts are suppressed while typing in inputs and while dialogs are open. -->
-<dialog id='modal_help' data-dialog-close-on-backdrop='true' aria-modal='true' aria-labelledby='modal_help_title' aria-describedby='modal_help_aria modal_help_meta'>
+<dialog id='modal_help' data-dialog-invoker-bridge data-dialog-close-tts='__KEYBOARD_SHORTCUTS__' data-dialog-close-on-backdrop='true' aria-modal='true' aria-labelledby='modal_help_title' aria-describedby='modal_help_aria modal_help_meta'>
   <div class='modal_aria visually_hidden'>
     <span id='modal_help_aria'>__KEYBOARD_SHORTCUTS_MODAL_ARIA__</span>
   </div>
@@ -9,7 +9,7 @@
     <span id='modal_help_meta'>__KEYBOARD_SHORTCUTS_MODAL_META__</span>
   </div>
   <section class='modal_header'>
-    <button type='button' class='btn btn_close' data-dialog-close='modal_help' aria-label='__CLOSE__'>&times;</button>
+    <button type='button' class='btn btn_close' data-dialog-close='modal_help' commandfor='modal_help' command='close' aria-label='__CLOSE__'>&times;</button>
     <h2 id='modal_help_title' class='modal_title centered'>__KEYBOARD_SHORTCUTS__</h2>
   </section>
   <section id='modal_help_content' class='modal_content keyboard_shortcuts_layout'>
@@ -53,7 +53,7 @@
   <section class="modal_footer">
     <div class="modal_controls f_column centered w100 pad_md">
       <form method="dialog" class="centered">
-        <button class="modal_close btn_close pad_md" data-dialog-close="modal_help" aria-label="__CLOSE__" autofocus>__CLOSE__</button>
+        <button type="button" class="modal_close btn_close pad_md" data-dialog-close="modal_help" commandfor="modal_help" command="close" aria-label="__CLOSE__" autofocus>__CLOSE__</button>
       </form>
       <p class="centered">__HELP_PAGE_TEASER__</p>
     </div>

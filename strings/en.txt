@@ -298,7 +298,6 @@ AUTH_JS_SIGNIN_RECOVERY_CODE Send recovery code
 AUTH_JS_SUCCESS_REDIRECTING Success. Redirecting…
 AUTH_JS_WEBAUTHN_UNSUPPORTED This browser cannot use passkeys. Use a WebAuthn-capable browser on a secure connection (HTTPS).
 AUTH_PAGE_HEADING Authentication
-AUTH_PRIVACY_LINK Privacy Policy
 AUTH_RECOVER_ACCOUNT Recover account
 AUTH_RECOVER_ACCOUNT_EMAIL Account email
 AUTH_RECOVER_ALREADY_HAVE_PASSKEY Already have a passkey?
@@ -312,7 +311,6 @@ AUTH_RECOVER_DEFAULT_DEVICE_NAME
 AUTH_RECOVER_DISCLOSURE Completing recovery will sign out your other sessions and disable your existing passkeys.
 AUTH_RECOVER_EMAIL_SENT If the account exists, check your email
 AUTH_RECOVER_HEADING Recover your account
-AUTH_RECOVER_PROMPT Can't use any of your passkeys?
 AUTH_RECOVER_SUBHEADING Verify your account and create a new passkey.
 AUTH_RECOVER_INTRO_LINE_1 We'll help you regain access in three steps.
 AUTH_RECOVER_INTRO_LINE_2 Enter the code from your email. If this account already has protected data, you will also need your Recovery Code.
@@ -339,20 +337,18 @@ AUTH_REGISTER_PANEL_ARIA Create account panel
 AUTH_REGISTER_PASSKEY_STATUS You'll create a passkey to secure your account.
 AUTH_REGISTER_PASSWORDS_NO_MATCH Passwords do not match. Please re-enter and try again.
 AUTH_SIGNIN_EMAIL_ARIA Email (optional)
-AUTH_SIGNIN_EMAIL_HINT Enter it to sign in to a specific PayCal account.
 AUTH_SIGNIN_EMAIL_LABEL Email (optional)
+AUTH_SIGNIN_EMAIL_PLACEHOLDER Email for a specific account...
 AUTH_SIGNIN_OTHER_DEVICE Use a phone or tablet
-AUTH_SIGNIN_OTHER_WAYS Other ways to sign in
 AUTH_SIGNIN_PANEL_ARIA Sign in panel
 AUTH_SIGNIN_PASSKEY_BUTTON Continue with a passkey
 AUTH_SIGNIN_PASSKEY_STATUS Use a passkey on this device, or sign in from your phone or tablet.
+AUTH_FEDERATED_CONTINUE_GOOGLE Continue with Google
+AUTH_FEDERATED_CONTINUE_APPLE Continue with Apple
+AUTH_FEDERATED_CONTINUE_MICROSOFT Continue with Microsoft
 AUTH_TABS_ARIA Authentication options
 AUTH_TAB_REGISTER Create Account
 AUTH_TAB_SIGNIN Sign In
-AUTH_TERMS_ACK_AND and
-AUTH_TERMS_ACK_PREFIX By signing in you agree to the
-AUTH_TERMS_ACK_SUFFIX .
-AUTH_TERMS_LINK Terms
 AUTH_VERIFICATION_BANNER_ALERT_FAILED Failed to resend verification email. Please try again later.
 AUTH_VERIFICATION_BANNER_BODY Please verify your email address to start using PayCal. Check your inbox for the verification link.
 AUTH_VERIFICATION_BANNER_RESEND_BUTTON Resend Email
@@ -3564,6 +3560,28 @@ SETTINGS_SECTION_DATA_PORTABILITY_ACTION_LOG Action Log
 SETTINGS_SECTION_DATA_PORTABILITY_EXPORT_IMPORT Account data export and import
 SETTINGS_SECTION_DEBUGGING_OPTIONAL Debugging (Optional)
 SETTINGS_SECTION_PASSKEYS Passkeys
+SETTINGS_FEDERATED_SECTION_TITLE Connected sign-in providers
+SETTINGS_FEDERATED_SECTION_NOTE Connect Google or Apple to sign in after your PayCal account is already protected by passkeys.
+SETTINGS_FEDERATED_NOT_CONFIGURED Federated sign-in is not configured for this local host.
+SETTINGS_FEDERATED_CHECKING Checking connected sign-in providers...
+SETTINGS_FEDERATED_LOAD_FAILED Unable to load connected sign-in providers.
+SETTINGS_FEDERATED_CSRF_FAILED Unable to verify this request. Refresh the page and try again.
+SETTINGS_FEDERATED_PROVIDER_FALLBACK Provider
+SETTINGS_FEDERATED_CONNECTED_FMT {provider} connected
+SETTINGS_FEDERATED_CONNECTED_EMAIL_FMT {provider} connected: {email}
+SETTINGS_FEDERATED_NOT_CONNECTED_FMT {provider} is not connected
+SETTINGS_FEDERATED_CONNECT_FMT Connect {provider}
+SETTINGS_FEDERATED_DISCONNECT_FMT Disconnect {provider}
+SETTINGS_FEDERATED_DISCONNECTING_FMT Disconnecting {provider}...
+SETTINGS_FEDERATED_DISCONNECTED_FMT {provider} disconnected.
+SETTINGS_FEDERATED_DISCONNECT_FAILED_FMT Unable to disconnect {provider}.
+SETTINGS_FEDERATED_RESULT_LINKED Sign-in provider connected.
+SETTINGS_FEDERATED_RESULT_ALREADY_LINKED This sign-in provider is already connected to another PayCal account.
+SETTINGS_FEDERATED_RESULT_PROVIDER_NOT_LINKED This sign-in provider is not connected to your PayCal account yet. Connect it from this Security page.
+SETTINGS_FEDERATED_RESULT_INVALID_TOKEN The sign-in provider returned a token PayCal could not verify. Try connecting again.
+SETTINGS_FEDERATED_RESULT_INVALID_STATE The connection expired or was incomplete. Start again from this Security page.
+SETTINGS_FEDERATED_RESULT_LINK_FAILED PayCal could not find the account that started this connection. Sign in with your passkey and try again.
+SETTINGS_FEDERATED_RESULT_UNAVAILABLE Federated sign-in is not available right now.
 SETTINGS_SECTION_SECURITY Security
 SETTINGS_SECURITY_BALANCED Balanced
 SETTINGS_SECURITY_DERIVED_TIMEOUTS_ARIA Derived timeout values

@@ -91,20 +91,13 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL
   </div>
 </section>
 
-<dialog
-  id="goldmaster_dialog"
-  class="dialog goldmaster-dialog"
-  aria-modal="true"
-  aria-labelledby="goldmaster_dialog_title"
-  aria-describedby="goldmaster_dialog_desc"
-  <?= $openDialogOnLoad ? 'data-open-on-load="1"' : '' ?>
->
+<dialog id="goldmaster_dialog" data-dialog-invoker-bridge class="dialog goldmaster-dialog" data-dialog-close-tts="GoldMaster" aria-modal="true" aria-labelledby="goldmaster_dialog_title" aria-describedby="goldmaster_dialog_desc" <?= $openDialogOnLoad ? 'data-open-on-load="1"' : '' ?>>
   <section class="modal_header">
     <div>
       <h2 id="goldmaster_dialog_title" class="modal_title">GoldMaster</h2>
       <p id="goldmaster_dialog_desc" class="goldmaster-subtitle">Canonical examples for humans and AI agents</p>
     </div>
-    <button type="button" class="btn btn_close" data-goldmaster-close aria-label="Close GoldMaster">&times;</button>
+    <button type="button" class="btn btn_close" data-dialog-close="goldmaster_dialog" commandfor="goldmaster_dialog" command="close" aria-label="Close GoldMaster">&times;</button>
   </section>
 
   <section class="modal_content goldmaster-modal-content">
@@ -238,7 +231,7 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL
       ><?= $showFile ? 'Hide file' : 'View file' ?></button>
       <button type="button" class="btn btn_primary" data-goldmaster-copy>Copy path</button>
     <?php } ?>
-    <button type="button" class="btn btn_secondary" data-goldmaster-close>Close</button>
+    <button type="button" class="btn btn_secondary" data-dialog-close="goldmaster_dialog" commandfor="goldmaster_dialog" command="close">Close</button>
     <span class="goldmaster-copy-status" data-goldmaster-copy-status aria-live="polite"></span>
   </section>
 </dialog>

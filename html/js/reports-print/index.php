@@ -123,7 +123,7 @@ const ensurePrintDialog = () => {
     <form method="dialog" class="reports_print_form">
       <section class="modal_header reports_print_header">
         <h2 id="reports_print_dialog_title" class="modal_title">Print report</h2>
-        <button type="button" class="btn_close" data-reports-print-close aria-label="Close">&times;</button>
+        <button type="button" class="btn_close" commandfor="reports_print_dialog" command="close" data-reports-print-close aria-label="Close">&times;</button>
       </section>
       <section class="modal_content reports_print_content">
         <p id="reports_print_dialog_desc" class="reports_print_desc">Choose how this reports page should be prepared for Chrome print or Save as PDF.</p>
@@ -141,7 +141,7 @@ const ensurePrintDialog = () => {
         </fieldset>
       </section>
       <section class="modal_footer reports_print_footer">
-        <button type="button" class="btn btn_secondary" data-reports-print-close>Cancel</button>
+        <button type="button" class="btn btn_secondary" commandfor="reports_print_dialog" command="close" data-reports-print-close>Cancel</button>
         <button type="submit" class="btn btn_primary" value="print">Print</button>
       </section>
     </form>
@@ -155,11 +155,16 @@ const ensurePrintDialog = () => {
     }
   });
 
-  dialog.querySelectorAll('[data-reports-print-close]').forEach((button) => {
-    button.addEventListener('click', () => {
-      dialog.close('cancel');
+  const supportsInvokerCommands = typeof HTMLButtonElement !== 'undefined'
+    && Object.prototype.hasOwnProperty.call(HTMLButtonElement.prototype, 'commandForElement');
+
+  if (!supportsInvokerCommands) {
+    dialog.querySelectorAll('[data-reports-print-close]').forEach((button) => {
+      button.addEventListener('click', () => {
+        dialog.close('cancel');
+      });
     });
-  });
+  }
 
   dialog.addEventListener('close', () => {
     document.documentElement.classList.remove('reports_print_dialog_open');

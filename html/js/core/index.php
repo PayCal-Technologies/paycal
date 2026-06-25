@@ -465,6 +465,17 @@ const PayCalCore = (() => {
 
   function ensureAllDialogsChrome() { a11y.ensureAllDialogsChrome(); }
 
+  function bindAllDialogInvokerBridges() { a11y.bindAllDialogInvokerBridges(); }
+
+  const supportsInvokerCommands = BrowserCapabilities.invokerCommands;
+
+  const isInvokerCloseControl = (control) => {
+    if (!(control instanceof Element)) return false;
+    if (!supportsInvokerCommands) return false;
+    if (!control.hasAttribute('commandfor')) return false;
+    return control.getAttribute('command') === 'close';
+  };
+
   function closeModal(id, text = "") {
     a11y.closeModal(id, text);
   }
@@ -1640,6 +1651,7 @@ const PayCalCore = (() => {
     });
 
     ensureAllDialogsChrome();
+    bindAllDialogInvokerBridges();
     initKeyboardShortcutComboAccessibility();
 
     document.addEventListener('click', (event) => {
@@ -1649,11 +1661,17 @@ const PayCalCore = (() => {
       const closeControl = target.closest('[data-dialog-close]');
       if (!(closeControl instanceof Element)) return;
 
+      if (isInvokerCloseControl(closeControl)) return;
+
       const dialogId = closeControl.getAttribute('data-dialog-close') || closeControl.closest('dialog')?.id;
       if (!dialogId) return;
 
       event.preventDefault();
-      closeModal(dialogId);
+      const dialogEl = getElement(dialogId);
+      const closeLabel = dialogEl instanceof HTMLElement
+        ? (dialogEl.getAttribute('data-dialog-close-tts') || '')
+        : '';
+      closeModal(dialogId, closeLabel);
     });
 
     // Opt-in outside-click close behavior for dialogs that should close on backdrop click.
@@ -1671,17 +1689,21 @@ const PayCalCore = (() => {
           return;
         }
 
-        const dialogLabel = dialog.getAttribute('aria-label') || undefined;
+        const dialogLabel = dialog.getAttribute('data-dialog-close-tts')
+          || dialog.getAttribute('aria-label')
+          || undefined;
         closeModal(dialog.id, dialogLabel);
       });
     });
 
-    // Modal Close
+    // Modal Close (legacy; invoker-migrated dialogs use bridge + data-dialog-close delegation)
     queryAll(".modal_close").forEach(button => {
       button.addEventListener("click", () => {
+        if (isInvokerCloseControl(button)) return;
         queryAll("dialog").forEach(modal => closeModal(modal.id));
       });
       button.addEventListener("keydown", (e) => {
+        if (isInvokerCloseControl(e.currentTarget)) return;
         if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
           e.stopPropagation();
           e.preventDefault();
@@ -1704,6 +1726,44 @@ const PayCalCore = (() => {
     // Use controlled popover behavior for nav menus to avoid global backdrop side effects.
     const supportsPopoverApi = false;
     let adminPopoverPortalMounted = false;
+    let adminOutsideCloseListener = null;
+
+    const adminNavLog = (...args) => {
+      console.log('[admin-nav]', ...args);
+    };
+
+    const adminNavDebug = (...args) => {
+      if (window.PAYCAL_DEBUG_ADMIN_NAV === true) {
+        adminNavLog(...args);
+      }
+    };
+
+    const logAdminPopoverLayout = (reason) => {
+      if (!(adminPopover instanceof HTMLElement)) return;
+
+      const rect = adminPopover.getBoundingClientRect();
+      const styles = window.getComputedStyle(adminPopover);
+      adminNavDebug(reason, {
+        open: isAdminPopoverOpen(),
+        hidden: adminPopover.hasAttribute('hidden'),
+        isOpenClass: adminPopover.classList.contains('is-open'),
+        isPortal: adminPopover.classList.contains('is-portal'),
+        parent: adminPopover.parentElement?.id || adminPopover.parentElement?.tagName || null,
+        rect: {
+          top: Math.round(rect.top),
+          left: Math.round(rect.left),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+        },
+        display: styles.display,
+        visibility: styles.visibility,
+        opacity: styles.opacity,
+        zIndex: styles.zIndex,
+        pointerEvents: styles.pointerEvents,
+        cssTop: styles.top,
+        cssLeft: styles.left,
+      });
+    };
 
     const ensureAdminPopoverPortal = () => {
       if (!(adminPopover instanceof HTMLElement)) return;
@@ -1712,6 +1772,7 @@ const PayCalCore = (() => {
       document.body.appendChild(adminPopover);
       adminPopover.classList.add('is-portal');
       adminPopoverPortalMounted = true;
+      adminNavDebug('portal-mounted', { parent: 'body' });
     };
 
     const positionAdminPopover = () => {
@@ -1742,10 +1803,55 @@ const PayCalCore = (() => {
 
       adminPopover.style.setProperty('--nav-admin-popover-left', `${Math.round(left)}px`);
       adminPopover.style.setProperty('--nav-admin-popover-top', `${Math.round(top)}px`);
+      adminNavDebug('positioned', {
+        navPosition,
+        triggerRect: {
+          top: Math.round(triggerRect.top),
+          left: Math.round(triggerRect.left),
+          right: Math.round(triggerRect.right),
+          bottom: Math.round(triggerRect.bottom),
+        },
+        left: Math.round(left),
+        top: Math.round(top),
+      });
+    };
+
+    const detachAdminOutsideClose = () => {
+      if (adminOutsideCloseListener) {
+        document.removeEventListener('click', adminOutsideCloseListener, true);
+        adminOutsideCloseListener = null;
+      }
+    };
+
+    const attachAdminOutsideClose = () => {
+      detachAdminOutsideClose();
+      adminOutsideCloseListener = (event) => {
+        if (!isAdminPopoverOpen()) {
+          detachAdminOutsideClose();
+          return;
+        }
+
+        const target = event.target;
+        if (!(target instanceof Node)) return;
+        if (adminPopover.contains(target) || adminPopoverToggle.contains(target)) return;
+
+        adminNavDebug('outside-click-close', {
+          target: target instanceof Element ? target.tagName + (target.id ? `#${target.id}` : '') : String(target),
+        });
+        closeAdminPopover();
+      };
+
+      // Defer so the opening click does not immediately close the menu.
+      setTimeout(() => {
+        if (!isAdminPopoverOpen()) return;
+        document.addEventListener('click', adminOutsideCloseListener, true);
+        adminNavDebug('outside-click-listener-attached');
+      }, 0);
     };
 
     const isAdminPopoverOpen = () => {
       if (!adminPopover) return false;
+      if (adminPopover.hasAttribute('hidden')) return false;
       if (supportsPopoverApi) {
         return adminPopover.matches(':popover-open');
       }
@@ -1755,10 +1861,12 @@ const PayCalCore = (() => {
     const syncAdminPopoverState = () => {
       if (!(adminPopoverToggle instanceof HTMLElement)) return;
       adminPopoverToggle.setAttribute('aria-expanded', isAdminPopoverOpen() ? 'true' : 'false');
+      document.body.classList.toggle('admin-nav-popover-open', isAdminPopoverOpen());
     };
 
     const closeAdminPopover = () => {
       if (!adminPopover) return;
+      adminNavDebug('close');
       if (supportsPopoverApi) {
         if (adminPopover.matches(':popover-open')) {
           adminPopover.hidePopover();
@@ -1769,6 +1877,7 @@ const PayCalCore = (() => {
       adminPopover.setAttribute('hidden', 'hidden');
       window.removeEventListener('resize', positionAdminPopover);
       window.removeEventListener('scroll', positionAdminPopover, true);
+      detachAdminOutsideClose();
       syncAdminPopoverState();
     };
 
@@ -1807,6 +1916,7 @@ const PayCalCore = (() => {
 
     const openAdminPopover = () => {
       if (!adminPopover) return;
+      adminNavDebug('open');
       ensureAdminPopoverPortal();
       adminPopover.removeAttribute('hidden');
       if (supportsPopoverApi) {
@@ -1819,16 +1929,31 @@ const PayCalCore = (() => {
       positionAdminPopover();
       window.addEventListener('resize', positionAdminPopover);
       window.addEventListener('scroll', positionAdminPopover, true);
+      attachAdminOutsideClose();
       syncAdminPopoverState();
+      requestAnimationFrame(() => logAdminPopoverLayout('after-open'));
     };
 
     if (adminPopoverToggle instanceof HTMLElement && adminPopover instanceof HTMLElement) {
+      adminNavLog('bind', {
+        toggle: adminPopoverToggle.tagName,
+        popoverId: adminPopover.id,
+        navCollapsed: document.body.classList.contains('nav-collapsed'),
+        navPosition: document.body.getAttribute('data-nav-primary-position'),
+      });
+
       // Portal-mount the popover immediately so the admin li contains only its <a>
       // child at page load, matching the single-child structure of all other nav li items.
       ensureAdminPopoverPortal();
 
+      adminPopoverToggle.addEventListener('mousedown', () => {
+        adminNavDebug('toggle-mousedown', { open: isAdminPopoverOpen() });
+      });
+
       adminPopoverToggle.addEventListener('click', (event) => {
+        adminNavDebug('toggle-click', { open: isAdminPopoverOpen() });
         event.preventDefault();
+        event.stopPropagation();
         if (isAdminPopoverOpen()) {
           closeAdminPopover();
           return;
@@ -1836,15 +1961,7 @@ const PayCalCore = (() => {
         openAdminPopover();
       });
 
-      if (!supportsPopoverApi) {
-        document.addEventListener('click', (event) => {
-          if (!isAdminPopoverOpen()) return;
-          const target = event.target;
-          if (!(target instanceof Node)) return;
-          if (adminPopover.contains(target) || adminPopoverToggle.contains(target)) return;
-          closeAdminPopover();
-        });
-      } else {
+      if (supportsPopoverApi) {
         adminPopover.addEventListener('toggle', syncAdminPopoverState);
       }
 
@@ -1945,6 +2062,12 @@ const PayCalCore = (() => {
 
       closeAdminPopover();
       syncAdminPopoverState();
+    } else {
+      adminNavLog('bind-skipped', {
+        hasToggle: adminPopoverToggle instanceof HTMLElement,
+        hasPopover: adminPopover instanceof HTMLElement,
+        navPosition: document.body.getAttribute('data-nav-primary-position'),
+      });
     }
 
     // Page Tabs
@@ -2247,9 +2370,8 @@ const PayCalCore = (() => {
       });
     }
 
-    // Sign Out Listeners (example of delegation)
+    // Sign Out: open via JS (nav link has href); close via Invoker bridge + data-dialog-close fallback
     addClickAndEnterListener("call_signout_modal", (e) => { e.preventDefault(); openModal("modal_signout", config.SIGN_OUT); });
-    addClickAndEnterListener("signout_cancel_btn", (e) => { e.preventDefault(); closeModal("modal_signout", config.SIGN_OUT); });
 
     // Log initialization complete
     const initColor = 'color: #00aa00; font-weight: bold; font-size: 12px; background: #f0fff0; padding: 6px; border-radius: 4px;';
@@ -2436,8 +2558,9 @@ export default PayCalCore;
 if (typeof window !== 'undefined') {
   window.PayCalCore = PayCalCore;
   window.NavToggle = NavigationToggle;
-  if (!window.__PAYCAL_CORE_AUTO_INIT__) {
-    window.__PAYCAL_CORE_AUTO_INIT__ = true;
+  const coreInitVersion = '<?php echo htmlspecialchars(\PayCal\Domain\Config\Environment::appVersion(), ENT_QUOTES, 'UTF-8'); ?>';
+  if (window.__PAYCAL_CORE_AUTO_INIT_VERSION__ !== coreInitVersion) {
+    window.__PAYCAL_CORE_AUTO_INIT_VERSION__ = coreInitVersion;
 
     const bootPayCalCore = () => {
       try {

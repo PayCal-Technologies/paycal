@@ -89,7 +89,11 @@ final class Environment
   private static string $authGoogleClientId = '';
   private static string $authGoogleClientSecret = '';
   private static string $authAppleClientId = '';
+  private static string $authAppleTeamId = '';
+  private static string $authAppleKeyId = '';
+  private static string $authApplePrivateKey = '';
   private static string $authMicrosoftClientId = '';
+  private static string $webauthnRpId = '';
   /**
    * @param array<string, string> $env
    */
@@ -131,7 +135,11 @@ final class Environment
     self::$authGoogleClientId           = trim((string) ($env["PAYCAL_AUTH_GOOGLE_CLIENT_ID"] ?? ''));
     self::$authGoogleClientSecret       = trim((string) ($env["PAYCAL_AUTH_GOOGLE_CLIENT_SECRET"] ?? ''));
     self::$authAppleClientId            = trim((string) ($env["PAYCAL_AUTH_APPLE_CLIENT_ID"] ?? ''));
+    self::$authAppleTeamId              = trim((string) ($env["PAYCAL_AUTH_APPLE_TEAM_ID"] ?? ''));
+    self::$authAppleKeyId               = trim((string) ($env["PAYCAL_AUTH_APPLE_KEY_ID"] ?? ''));
+    self::$authApplePrivateKey          = self::normalizeMultilineSecret((string) ($env["PAYCAL_AUTH_APPLE_PRIVATE_KEY"] ?? ''));
     self::$authMicrosoftClientId        = trim((string) ($env["PAYCAL_AUTH_MICROSOFT_CLIENT_ID"] ?? ''));
+    self::$webauthnRpId                 = trim((string) ($env["WEBAUTHN_RP_ID"] ?? ''));
     // Guard: DEV_* overrides are only honored in non-production environments
     $knownDevEnvs = ['mac', 'dev', 'local', 'test'];
     if (!in_array(self::$appEnv, $knownDevEnvs, true)) {
@@ -366,15 +374,48 @@ final class Environment
    */
   public static function authAppleClientId(): string { return self::$authAppleClientId; }
   /**
+   * Apple Developer Team ID used for Sign in with Apple client-secret JWTs.
+   */
+  public static function authAppleTeamId(): string { return self::$authAppleTeamId; }
+  /**
+   * Apple Sign in with Apple key ID for client-secret JWTs.
+   */
+  public static function authAppleKeyId(): string { return self::$authAppleKeyId; }
+  /**
+   * Apple Sign in with Apple private key (.p8 PEM contents).
+   */
+  public static function authApplePrivateKey(): string { return self::$authApplePrivateKey; }
+  /**
+   * Return whether Apple federated auth signing credentials are configured.
+   */
+  public static function authAppleCredentialsPresent(): bool
+  {
+    return self::$authAppleClientId !== ''
+      && self::$authAppleTeamId !== ''
+      && self::$authAppleKeyId !== ''
+      && self::$authApplePrivateKey !== '';
+  }
+  /**
    * Handles authMicrosoftClientId operation.
    */
   public static function authMicrosoftClientId(): string { return self::$authMicrosoftClientId; }
   /**
-   * Convert environment variable string to boolean.
-   *
-   * @param string $value
-   * @return bool
+   * Optional explicit WebAuthn relying-party ID override.
    */
+  public static function webauthnRpId(): string { return self::$webauthnRpId; }
+  /**
+   * Normalize multiline secret env values (literal \n → newline).
+   */
+  private static function normalizeMultilineSecret(string $value): string
+  {
+    $trimmed = trim($value);
+    if ($trimmed === '') {
+      return '';
+    }
+
+    return str_replace('\\n', "\n", $trimmed);
+  }
+
   private static function toBool(string $value): bool
   {
     return isset(self::TRUTHY_BOOL_SET[strtolower($value)]);

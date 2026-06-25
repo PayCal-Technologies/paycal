@@ -16,6 +16,7 @@ final class FederatedAuth
 
   private const LOCAL_ALLOWED_HOSTS = [
     'dev.paycal.local',
+    'mac.paycal.app',
     'localhost',
     '127.0.0.1',
   ];
@@ -122,6 +123,7 @@ final class FederatedAuth
         'id' => 'google',
         'label' => 'Google',
         'button_label' => 'Continue with Google',
+        'button_label_key' => 'AUTH_FEDERATED_CONTINUE_GOOGLE',
         'icon_key' => 'google',
         'enabled' => Environment::authProviderGoogleEnabled(),
         'client_id_present' => Environment::authGoogleClientId() !== '',
@@ -138,15 +140,18 @@ final class FederatedAuth
         'id' => 'apple',
         'label' => 'Apple',
         'button_label' => 'Continue with Apple',
+        'button_label_key' => 'AUTH_FEDERATED_CONTINUE_APPLE',
         'icon_key' => 'apple',
         'enabled' => Environment::authProviderAppleEnabled(),
-        'client_id_present' => Environment::authAppleClientId() !== '',
+        'client_id_present' => self::appleCredentialsPresent(),
         'callback_path' => '/api/v1/auth/federated/callback/apple',
         'issuer' => 'https://appleid.apple.com',
         'authorization_endpoint' => 'https://appleid.apple.com/auth/authorize',
         'token_endpoint' => 'https://appleid.apple.com/auth/token',
         'jwks_uri' => 'https://appleid.apple.com/auth/keys',
-        'scopes' => ['openid', 'email', 'name'],
+        'scopes' => ['name', 'email'],
+        'response_mode' => 'form_post',
+        'callback_methods' => ['POST'],
         'supports_fedcm' => false,
         'fedcm_enabled' => false,
       ],
@@ -154,6 +159,7 @@ final class FederatedAuth
         'id' => 'microsoft',
         'label' => 'Microsoft',
         'button_label' => 'Continue with Microsoft',
+        'button_label_key' => 'AUTH_FEDERATED_CONTINUE_MICROSOFT',
         'icon_key' => 'microsoft',
         'enabled' => Environment::authProviderMicrosoftEnabled(),
         'client_id_present' => Environment::authMicrosoftClientId() !== '',
@@ -187,6 +193,27 @@ final class FederatedAuth
   }
 
   /**
+   * Return whether Apple federated auth credentials are configured.
+   */
+  public static function appleCredentialsPresent(): bool
+  {
+    return Environment::authAppleCredentialsPresent();
+  }
+
+  /**
+   * Resolve the OAuth client ID for a provider.
+   */
+  public static function providerClientId(string $providerId): string
+  {
+    return match ($providerId) {
+      'google' => Environment::authGoogleClientId(),
+      'apple' => Environment::authAppleClientId(),
+      'microsoft' => Environment::authMicrosoftClientId(),
+      default => '',
+    };
+  }
+
+  /**
    * Build the provider authorization URL.
    */
   public static function authorizationUrl(string $providerId, string $state, string $nonce): string
@@ -194,18 +221,28 @@ final class FederatedAuth
     $provider = self::provider($providerId);
     $endpoint = is_string($provider['authorization_endpoint'] ?? null) ? $provider['authorization_endpoint'] : '';
     $scopes = is_array($provider['scopes'] ?? null) ? $provider['scopes'] : ['openid', 'email', 'profile'];
+    $clientId = self::providerClientId($providerId);
+    if ($endpoint === '' || $clientId === '') {
+      return '';
+    }
 
-    $query = http_build_query([
-      'client_id' => Environment::authGoogleClientId(),
+    $params = [
+      'client_id' => $clientId,
       'redirect_uri' => self::callbackUrl($providerId),
       'response_type' => 'code',
-      'scope' => implode(' ', array_map('strval', $scopes)),
       'state' => $state,
       'nonce' => $nonce,
-      'prompt' => 'select_account',
-    ], '', '&', PHP_QUERY_RFC3986);
+    ];
 
-    return $endpoint . '?' . $query;
+    if ($providerId === 'apple') {
+      $params['response_mode'] = 'form_post';
+      $params['scope'] = implode(' ', array_map('strval', $scopes));
+    } else {
+      $params['scope'] = implode(' ', array_map('strval', $scopes));
+      $params['prompt'] = 'select_account';
+    }
+
+    return $endpoint . '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
   }
 
   /** @return array{state: string, nonce: string, mode: string, user_uuid: string} */
@@ -443,6 +480,56 @@ final class FederatedAuth
 
   /**
    * @param array<string, mixed> $jwks
+   * @return array<string, string>
+   */
+  public static function validateAppleIdToken(string $idToken, array $jwks, string $expectedNonce): array
+  {
+    return self::validateJwt($idToken, $jwks, Environment::authAppleClientId(), 'https://appleid.apple.com', $expectedNonce);
+  }
+
+  /**
+   * Build the Apple OAuth client secret JWT.
+   */
+  public static function buildAppleClientSecret(): string
+  {
+    if (!self::appleCredentialsPresent()) {
+      return '';
+    }
+
+    $now = time();
+    return self::signEs256Jwt(
+      ['alg' => 'ES256', 'kid' => Environment::authAppleKeyId()],
+      [
+        'iss' => Environment::authAppleTeamId(),
+        'iat' => $now,
+        'exp' => $now + 300,
+        'aud' => 'https://appleid.apple.com',
+        'sub' => Environment::authAppleClientId(),
+      ],
+      Environment::authApplePrivateKey(),
+    );
+  }
+
+  /**
+   * @param array<string, string> $claims
+   */
+  public static function emailVerifiedForProvider(string $providerId, array $claims): bool
+  {
+    $email = trim($claims['email'] ?? '');
+    if ($email === '') {
+      return false;
+    }
+
+    if ($providerId === 'apple') {
+      $verified = strtolower(trim($claims['email_verified'] ?? ''));
+      return $verified !== 'false';
+    }
+
+    return ($claims['email_verified'] ?? '') === 'true';
+  }
+
+  /**
+   * @param array<string, mixed> $jwks
    * @param string|array<int, string> $issuer
    * @return array<string, string>
    */
@@ -561,10 +648,12 @@ final class FederatedAuth
         continue;
       }
 
+      $buttonLabelKey = $provider['button_label_key'] ?? '';
       $providers[] = [
         'id' => $provider['id'],
         'label' => $provider['label'],
         'button_label' => $provider['button_label'],
+        'button_label_key' => is_string($buttonLabelKey) ? $buttonLabelKey : '',
         'icon_key' => $provider['icon_key'],
         'supports_fedcm' => $provider['supports_fedcm'] === true,
         'fedcm_enabled' => $provider['fedcm_enabled'] === true,
@@ -627,6 +716,77 @@ final class FederatedAuth
     }
     $decoded = base64_decode(strtr($input, '-_', '+/'), true);
     return is_string($decoded) ? $decoded : '';
+  }
+
+  /**
+   * @param array<string, string> $header
+   * @param array<string, int|string> $payload
+   */
+  private static function signEs256Jwt(array $header, array $payload, string $privateKeyPem): string
+  {
+    $segments = [
+      self::base64UrlEncode(json_encode($header, JSON_UNESCAPED_SLASHES) ?: '{}'),
+      self::base64UrlEncode(json_encode($payload, JSON_UNESCAPED_SLASHES) ?: '{}'),
+    ];
+    $signingInput = implode('.', $segments);
+
+    $privateKey = openssl_pkey_get_private($privateKeyPem);
+    if ($privateKey === false) {
+      return '';
+    }
+
+    $derSignature = '';
+    if (!openssl_sign($signingInput, $derSignature, $privateKey, OPENSSL_ALGO_SHA256)) {
+      return '';
+    }
+
+    $rawSignature = self::ecdsaDerSignatureToJose($derSignature);
+    if ($rawSignature === '') {
+      return '';
+    }
+
+    $segments[] = self::base64UrlEncode($rawSignature);
+    return implode('.', $segments);
+  }
+
+  private static function base64UrlEncode(string $input): string
+  {
+    return rtrim(strtr(base64_encode($input), '+/', '-_'), '=');
+  }
+
+  private static function ecdsaDerSignatureToJose(string $der): string
+  {
+    if ($der === '' || ord($der[0]) !== 0x30) {
+      return '';
+    }
+
+    $offset = 2;
+    if (ord($der[1]) > 0x80) {
+      $offset = 2 + (ord($der[1]) & 0x7f);
+    }
+
+    if (!isset($der[$offset]) || ord($der[$offset]) !== 0x02) {
+      return '';
+    }
+
+    $rLength = ord($der[$offset + 1]);
+    $r = substr($der, $offset + 2, $rLength);
+    $sOffset = $offset + 2 + $rLength;
+    if (!isset($der[$sOffset]) || ord($der[$sOffset]) !== 0x02) {
+      return '';
+    }
+
+    $sLength = ord($der[$sOffset + 1]);
+    $s = substr($der, $sOffset + 2, $sLength);
+    $r = ltrim($r, "\x00");
+    $s = ltrim($s, "\x00");
+    if ($r === '' || $s === '') {
+      return '';
+    }
+
+    $partLength = max(strlen($r), strlen($s));
+    return str_pad($r, $partLength, "\x00", STR_PAD_LEFT)
+      . str_pad($s, $partLength, "\x00", STR_PAD_LEFT);
   }
 
   /** @param array<string, mixed> $jwks */

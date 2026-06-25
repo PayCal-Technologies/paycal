@@ -58,6 +58,8 @@ require_once HTML . '/header.php';
           type="button"
           class="help-image-button"
           data-help-popover-open="work-site-setup-popover"
+          commandfor="work-site-setup-popover"
+          command="toggle-popover"
           aria-haspopup="dialog"
           aria-controls="work-site-setup-popover"
           aria-expanded="false"
@@ -87,6 +89,8 @@ require_once HTML . '/header.php';
               type="button"
               class="btn btn_secondary help-image-popover-close"
               data-help-popover-close="work-site-setup-popover"
+              commandfor="work-site-setup-popover"
+              command="hide-popover"
               aria-label="<?php echo htmlspecialchars(help_ws_i18n('HELP_WORK_SITE_POPOVER_CLOSE_ARIA'), ENT_QUOTES, 'UTF-8'); ?>"
             ><?php echo htmlspecialchars(help_ws_i18n('CLOSE'), ENT_QUOTES, 'UTF-8'); ?></button>
           </div>

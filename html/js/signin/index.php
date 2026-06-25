@@ -43,6 +43,9 @@ $authI18nKeys = [
   'AUTH_JS_USE_ANOTHER_PASSKEY',
   'AUTH_JS_EDIT_EMAIL',
   'AUTH_RECOVER_ACCOUNT',
+  'AUTH_FEDERATED_CONTINUE_GOOGLE',
+  'AUTH_FEDERATED_CONTINUE_APPLE',
+  'AUTH_FEDERATED_CONTINUE_MICROSOFT',
 ];
 $authI18n = [];
 foreach ($authI18nKeys as $authI18nKey) {
@@ -165,6 +168,43 @@ const focusEmailInput = () => {
     emailInputEl.focus();
     emailInputEl.select();
   }
+};
+
+const isSigninPanelActive = () => {
+  const shell = document.getElementById('auth-shell');
+  if (shell && shell.classList.contains('is-register')) {
+    return false;
+  }
+
+  const signinPanel = document.getElementById('panel-signin');
+  if (signinPanel && signinPanel.getAttribute('aria-hidden') === 'true') {
+    return false;
+  }
+
+  return true;
+};
+
+const shouldAutofocusSigninEmail = () => {
+  if (!isSigninPanelActive()) {
+    return false;
+  }
+  if (!(emailInputEl instanceof HTMLInputElement)) {
+    return false;
+  }
+  if (emailInputEl.disabled) {
+    return false;
+  }
+  if (document.querySelector('.auth-verification-panel')) {
+    return false;
+  }
+  return true;
+};
+
+const tryAutofocusSigninEmail = () => {
+  if (!shouldAutofocusSigninEmail()) {
+    return;
+  }
+  focusEmailInput();
 };
 
 const recoveryUrlWithLanguage = () => {
@@ -552,6 +592,15 @@ const providerIconText = (providerId) => {
   }
 };
 
+const federatedButtonLabel = (provider) => {
+  const labelKey = String(provider?.button_label_key || '').trim();
+  if (labelKey !== '' && typeof AUTH_T[labelKey] === 'string' && AUTH_T[labelKey].trim() !== '') {
+    return AUTH_T[labelKey].trim();
+  }
+
+  return String(provider?.button_label || provider?.label || '').trim();
+};
+
 const renderFederatedProviders = (providers) => {
   if (!federatedSigninEl || !federatedProvidersEl) return;
   federatedProvidersEl.replaceChildren();
@@ -564,7 +613,7 @@ const renderFederatedProviders = (providers) => {
 
   visibleProviders.forEach((provider) => {
     const providerId = String(provider?.id || '').trim();
-    const buttonLabel = String(provider?.button_label || provider?.label || '').trim();
+    const buttonLabel = federatedButtonLabel(provider);
     if (providerId === '' || buttonLabel === '') {
       return;
     }
@@ -781,32 +830,42 @@ const tryPassiveImmediateUiSignin = async () => {
     // Passive enhancement: ignore other failures silently.
   } finally {
     signinInFlight = false;
+    tryAutofocusSigninEmail();
   }
-};
-
-const isSigninPanelActive = () => {
-  const shell = document.getElementById('auth-shell');
-  if (shell && shell.classList.contains('is-register')) {
-    return false;
-  }
-
-  const signinPanel = document.getElementById('panel-signin');
-  if (signinPanel && signinPanel.getAttribute('aria-hidden') === 'true') {
-    return false;
-  }
-
-  return true;
 };
 
 // Keep passkey sign-in user-initiated to avoid background 401s from silent
 // conditional mediation probes that create confusing console noise.
 loadFederatedProviders();
-tryPassiveImmediateUiSignin();
 
 const passkeyButton = document.getElementById('signin-passkey');
+
+const shouldTriggerSigninPasskeyFromEmail = () => {
+  if (!shouldAutofocusSigninEmail()) {
+    return false;
+  }
+  if (!(passkeyButton instanceof HTMLButtonElement) || passkeyButton.disabled) {
+    return false;
+  }
+  return true;
+};
+
 if (passkeyButton) {
   passkeyButton.addEventListener('click', async () => {
     await runPasskeySignin(false);
+  });
+}
+
+if (emailInputEl) {
+  emailInputEl.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') {
+      return;
+    }
+    if (!shouldTriggerSigninPasskeyFromEmail()) {
+      return;
+    }
+    e.preventDefault();
+    void runPasskeySignin(false);
   });
 }
 
@@ -977,7 +1036,7 @@ const authShell = document.getElementById('auth-shell');
 if (authShell) {
   const tabButtons = Array.from(document.querySelectorAll('.auth-tab[data-tab]'));
 
-  const setTab = (tab) => {
+  const setTab = (tab, { autofocusEmail = false } = {}) => {
     const isRegister = tab === 'register';
     authShell.classList.toggle('is-register', isRegister);
 
@@ -1013,12 +1072,16 @@ if (authShell) {
       // Using hidden/display:none collapses the track width and can push panels off-canvas.
       signinPanel.hidden = false;
       registerPanel.hidden = false;
+
+      if (!showRegister && autofocusEmail) {
+        tryAutofocusSigninEmail();
+      }
     }
   };
 
   const activateTabButton = (btn, { focus = false } = {}) => {
     const tab = btn?.getAttribute('data-tab') || 'signin';
-    setTab(tab);
+    setTab(tab, { autofocusEmail: tab === 'signin' });
     const url = new URL(window.location.href);
     url.searchParams.set('auth_tab', tab);
     history.replaceState(null, '', `${url.pathname}?${url.searchParams.toString()}`);
@@ -1072,6 +1135,13 @@ if (authShell) {
 
   setTab(authShell.classList.contains('is-register') ? 'register' : 'signin');
 }
+
+const initAuthSigninFocus = async () => {
+  await tryPassiveImmediateUiSignin();
+  tryAutofocusSigninEmail();
+};
+
+initAuthSigninFocus();
 
 // Prevent default form submission for both signin and register forms
 // since form handling is done via button click listeners for passkey workflows

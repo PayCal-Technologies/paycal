@@ -27,6 +27,15 @@ final class AdminPopoverBehaviorContractTest extends TestCase
     $this->assertStringContainsString('syncAdminPopoverState();', $coreJs);
   }
 
+  public function testCoreJsLogsUnconditionalAdminNavBindDiagnostics(): void
+  {
+    $coreJs = $this->readProjectFile('js/core/index.php');
+
+    $this->assertStringContainsString("adminNavLog('bind', {", $coreJs);
+    $this->assertStringContainsString("adminNavLog('bind-skipped', {", $coreJs);
+    $this->assertStringContainsString('__PAYCAL_CORE_AUTO_INIT_VERSION__', $coreJs);
+  }
+
   public function testCoreJsCollectsMenuItemsByMenuitemRole(): void
   {
     $coreJs = $this->readProjectFile('js/core/index.php');

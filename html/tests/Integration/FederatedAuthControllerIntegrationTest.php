@@ -98,6 +98,29 @@ final class FederatedAuthControllerIntegrationTest extends TestCase
     $this->assertSame([], FederatedAuth::linkedProvider($this->userUUID, 'google'));
   }
 
+  public function testUnlinkAllowsAppleProviderWithValidSettingsCsrfToken(): void
+  {
+    FederatedAuth::linkProviderIdentity($this->userUUID, 'apple', [
+      'sub' => 'apple-subject-' . bin2hex(random_bytes(4)),
+      'email' => $this->email,
+      'email_verified' => 'true',
+    ]);
+
+    try {
+      $csrfToken = $this->settingsCsrfToken();
+      $payload = $this->invokeUnlink([
+        'provider' => 'apple',
+        'csrf_token' => $csrfToken,
+      ]);
+
+      $this->assertSame('success', $payload['status'] ?? null, json_encode($payload));
+      $this->assertSame(200, (int) ($payload['__http_code'] ?? 0));
+      $this->assertSame([], FederatedAuth::linkedProvider($this->userUUID, 'apple'));
+    } finally {
+      FederatedAuth::unlinkProviderIdentity($this->userUUID, 'apple');
+    }
+  }
+
   private function linkGoogleProvider(): void
   {
     FederatedAuth::linkProviderIdentity($this->userUUID, 'google', [

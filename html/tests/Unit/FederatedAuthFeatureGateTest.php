@@ -90,6 +90,129 @@ final class FederatedAuthFeatureGateTest extends TestCase
     $this->assertSame([], FederatedAuth::availableProvidersForHost('dev.paycal.local'));
   }
 
+  public function testAppleProviderRequiresFullCredentials(): void
+  {
+    Environment::bootstrap($this->enabledGoogleEnv([
+      'PAYCAL_AUTH_PROVIDER_GOOGLE_ENABLED' => 'false',
+      'PAYCAL_AUTH_PROVIDER_APPLE_ENABLED' => 'true',
+      'PAYCAL_AUTH_APPLE_CLIENT_ID' => 'apple-client-id',
+    ]));
+
+    $this->assertSame([], FederatedAuth::availableProvidersForHost('dev.paycal.local'));
+
+    Environment::bootstrap($this->enabledAppleEnv());
+
+    $providers = FederatedAuth::availableProvidersForHost('dev.paycal.local');
+    $this->assertCount(1, $providers);
+    $this->assertSame('apple', $providers[0]['id']);
+    $this->assertSame('AUTH_FEDERATED_CONTINUE_APPLE', $providers[0]['button_label_key']);
+  }
+
+  public function testAppleAuthorizationUrlUsesFormPostAndAppleClientId(): void
+  {
+    Environment::bootstrap($this->enabledAppleEnv([
+      'PAYCAL_AUTH_APPLE_CLIENT_ID' => 'com.paycal.services',
+    ]));
+
+    $state = FederatedAuth::createOAuthState('apple', 'signin', '/');
+    $url = FederatedAuth::authorizationUrl('apple', $state['state'], $state['nonce']);
+
+    $this->assertStringContainsString('client_id=com.paycal.services', $url);
+    $this->assertStringContainsString('response_mode=form_post', $url);
+    $this->assertStringContainsString('scope=name%20email', $url);
+    $this->assertStringNotContainsString('prompt=select_account', $url);
+  }
+
+  public function testAppleIdTokenValidationRequiresIssuerAudienceAndNonce(): void
+  {
+    Environment::bootstrap($this->enabledAppleEnv([
+      'PAYCAL_AUTH_APPLE_CLIENT_ID' => 'paycal-apple-client',
+    ]));
+
+    $key = openssl_pkey_new([
+      'private_key_type' => OPENSSL_KEYTYPE_RSA,
+      'private_key_bits' => 2048,
+    ]);
+    $this->assertNotFalse($key);
+
+    $csr = openssl_csr_new(['commonName' => 'PayCal Test'], $key);
+    $this->assertNotFalse($csr);
+    $cert = openssl_csr_sign($csr, null, $key, 1);
+    $this->assertNotFalse($cert);
+
+    openssl_x509_export($cert, $certPem);
+    $certBody = trim(str_replace(['-----BEGIN CERTIFICATE-----', '-----END CERTIFICATE-----', "\r", "\n"], '', $certPem));
+    $jwks = ['keys' => [['kid' => 'test-kid', 'x5c' => [$certBody]]]];
+
+    $jwt = $this->signedJwt($key, [
+      'iss' => 'https://appleid.apple.com',
+      'aud' => 'paycal-apple-client',
+      'exp' => time() + 300,
+      'iat' => time() - 10,
+      'nonce' => 'nonce-123',
+      'sub' => 'apple-subject',
+      'email' => 'person@example.test',
+      'email_verified' => true,
+    ]);
+
+    $claims = FederatedAuth::validateAppleIdToken($jwt, $jwks, 'nonce-123');
+    $this->assertSame('apple-subject', $claims['sub']);
+    $this->assertSame('person@example.test', $claims['email']);
+    $this->assertSame([], FederatedAuth::validateAppleIdToken($jwt, $jwks, 'wrong-nonce'));
+  }
+
+  public function testBuildAppleClientSecretReturnsSignedJwt(): void
+  {
+    $key = openssl_pkey_new([
+      'private_key_type' => OPENSSL_KEYTYPE_EC,
+      'curve_name' => 'prime256v1',
+    ]);
+    $this->assertNotFalse($key);
+
+    openssl_pkey_export($key, $privateKeyPem);
+    $this->assertIsString($privateKeyPem);
+
+    Environment::bootstrap($this->enabledAppleEnv([
+      'PAYCAL_AUTH_APPLE_CLIENT_ID' => 'com.paycal.services',
+      'PAYCAL_AUTH_APPLE_TEAM_ID' => 'TEAM123456',
+      'PAYCAL_AUTH_APPLE_KEY_ID' => 'KEY123456',
+      'PAYCAL_AUTH_APPLE_PRIVATE_KEY' => str_replace("\n", '\\n', $privateKeyPem),
+    ]));
+
+    $secret = FederatedAuth::buildAppleClientSecret();
+    $this->assertNotSame('', $secret);
+    $parts = explode('.', $secret);
+    $this->assertCount(3, $parts);
+
+    $header = json_decode(base64_decode(strtr($parts[0], '-_', '+/')), true);
+    $payload = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
+    $this->assertIsArray($header);
+    $this->assertIsArray($payload);
+    $this->assertSame('ES256', $header['alg'] ?? null);
+    $this->assertSame('KEY123456', $header['kid'] ?? null);
+    $this->assertSame('TEAM123456', $payload['iss'] ?? null);
+    $this->assertSame('com.paycal.services', $payload['sub'] ?? null);
+    $this->assertSame('https://appleid.apple.com', $payload['aud'] ?? null);
+  }
+
+  public function testEmailVerifiedForProviderTreatsAppleEmailAsVerifiedUnlessExplicitFalse(): void
+  {
+    $this->assertTrue(FederatedAuth::emailVerifiedForProvider('apple', [
+      'email' => 'person@example.test',
+    ]));
+    $this->assertTrue(FederatedAuth::emailVerifiedForProvider('apple', [
+      'email' => 'person@example.test',
+      'email_verified' => 'true',
+    ]));
+    $this->assertFalse(FederatedAuth::emailVerifiedForProvider('apple', [
+      'email' => 'person@example.test',
+      'email_verified' => 'false',
+    ]));
+    $this->assertFalse(FederatedAuth::emailVerifiedForProvider('google', [
+      'email' => 'person@example.test',
+    ]));
+  }
+
   public function testLocalGateUsesExactHostMatching(): void
   {
     Environment::bootstrap($this->enabledGoogleEnv());
@@ -97,6 +220,8 @@ final class FederatedAuthFeatureGateTest extends TestCase
     $this->assertTrue(FederatedAuth::localGatePassesForHost('dev.paycal.local'));
     $this->assertTrue(FederatedAuth::localGatePassesForHost('dev.paycal.local:443'));
     $this->assertTrue(FederatedAuth::localGatePassesForHost('https://dev.paycal.local/api/v1/auth/providers'));
+    $this->assertTrue(FederatedAuth::localGatePassesForHost('mac.paycal.app'));
+    $this->assertTrue(FederatedAuth::localGatePassesForHost('mac.paycal.app:443'));
     $this->assertTrue(FederatedAuth::localGatePassesForHost('localhost'));
     $this->assertTrue(FederatedAuth::localGatePassesForHost('127.0.0.1'));
 
@@ -257,6 +382,29 @@ final class FederatedAuthFeatureGateTest extends TestCase
    * @param array<string, string> $overrides
    * @return array<string, string>
    */
+  private function enabledAppleEnv(array $overrides = []): array
+  {
+    return $this->envDefaults(array_merge([
+      'PAYCAL_AUTH_FEDERATED_SIGNIN_ENABLED' => 'true',
+      'PAYCAL_AUTH_FEDERATED_SIGNIN_LOCAL_ONLY' => 'true',
+      'PAYCAL_AUTH_PROVIDER_GOOGLE_ENABLED' => 'false',
+      'PAYCAL_AUTH_PROVIDER_APPLE_ENABLED' => 'true',
+      'PAYCAL_AUTH_PROVIDER_MICROSOFT_ENABLED' => 'false',
+      'PAYCAL_AUTH_PROVIDER_FEDCM_ENABLED' => 'false',
+      'PAYCAL_AUTH_APPLE_CLIENT_ID' => 'apple-client-id',
+      'PAYCAL_AUTH_APPLE_TEAM_ID' => 'TEAM123456',
+      'PAYCAL_AUTH_APPLE_KEY_ID' => 'KEY123456',
+      'PAYCAL_AUTH_APPLE_PRIVATE_KEY' => '-----BEGIN '
+        . 'PRIVATE KEY-----' . "\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg\n"
+        . '-----END '
+        . 'PRIVATE KEY-----',
+    ], $overrides));
+  }
+
+  /**
+   * @param array<string, string> $overrides
+   * @return array<string, string>
+   */
   private function enabledGoogleEnv(array $overrides = []): array
   {
     return $this->envDefaults(array_merge([
@@ -312,6 +460,10 @@ final class FederatedAuthFeatureGateTest extends TestCase
       'PAYCAL_AUTH_FEDERATED_AUTO_CREATE_LOCAL' => 'false',
       'PAYCAL_AUTH_GOOGLE_CLIENT_ID' => '',
       'PAYCAL_AUTH_GOOGLE_CLIENT_SECRET' => '',
+      'PAYCAL_AUTH_APPLE_CLIENT_ID' => '',
+      'PAYCAL_AUTH_APPLE_TEAM_ID' => '',
+      'PAYCAL_AUTH_APPLE_KEY_ID' => '',
+      'PAYCAL_AUTH_APPLE_PRIVATE_KEY' => '',
     ];
 
     return array_merge($defaults, $overrides);

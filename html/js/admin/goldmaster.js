@@ -1,12 +1,9 @@
 const dialog = document.getElementById('goldmaster_dialog');
 const openButtons = Array.from(document.querySelectorAll('[data-goldmaster-open]'));
-const closeButtons = Array.from(document.querySelectorAll('[data-goldmaster-close]'));
 const copyButton = document.querySelector('[data-goldmaster-copy]');
 const copyStatus = document.querySelector('[data-goldmaster-copy-status]');
 const viewFileButton = document.querySelector('[data-goldmaster-view-file]');
 const filePreview = document.querySelector('[data-goldmaster-file-preview]');
-
-let lastTrigger = null;
 
 function focusDialog() {
   if (!dialog) {
@@ -24,44 +21,25 @@ function openGoldMaster(trigger = null) {
     return;
   }
 
-  if (trigger instanceof HTMLElement) {
-    lastTrigger = trigger;
+  const pc = window.PayCalCore;
+  if (pc && pc.state) {
+    pc.state.lastFocused = trigger instanceof HTMLElement ? trigger : document.activeElement;
+    pc.state.modal_is_active = true;
   }
 
   if (!dialog.open) {
     dialog.showModal();
   }
 
+  dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-hidden', 'false');
+
   requestAnimationFrame(focusDialog);
-}
-
-function closeGoldMaster() {
-  if (!(dialog instanceof HTMLDialogElement) || !dialog.open) {
-    return;
-  }
-
-  dialog.close();
-
-  if (lastTrigger instanceof HTMLElement && document.contains(lastTrigger)) {
-    lastTrigger.focus({ preventScroll: true });
-  }
 }
 
 openButtons.forEach((button) => {
   button.addEventListener('click', () => openGoldMaster(button));
 });
-
-closeButtons.forEach((button) => {
-  button.addEventListener('click', closeGoldMaster);
-});
-
-if (dialog) {
-  dialog.addEventListener('cancel', () => {
-    if (lastTrigger instanceof HTMLElement && document.contains(lastTrigger)) {
-      requestAnimationFrame(() => lastTrigger.focus({ preventScroll: true }));
-    }
-  });
-}
 
 if (copyButton) {
   copyButton.addEventListener('click', async () => {

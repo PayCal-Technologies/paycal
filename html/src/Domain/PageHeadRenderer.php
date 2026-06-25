@@ -11,6 +11,9 @@ final class PageHeadRenderer
 {
   private const ROBOTS_DIRECTIVE = 'index, follow, noai, noimageai, noodp, noydir, maximage-preview: large';
 
+  /** sha256 of inline JSON in renderSpeculationRules() — stable while rules JSON is unchanged. */
+  public const SPECULATION_RULES_INLINE_HASH = "'sha256-NIDsJMLCZm+WEjdq/r2s8xoviAH1K9nw5rmW2ievj5A='";
+
   /** @var array<string, string> */
   private const PAGE_FILE_MAP = [
     'PAGE_ABOUT' => 'content',
@@ -304,8 +307,9 @@ HTML;
   {
     $cspNonce = htmlspecialchars((string) $context['cspNonce'], ENT_QUOTES, 'UTF-8');
     $jsonLd = (string) $context['jsonLdDocument'];
-    $guardian = htmlspecialchars(Environment::appURL('js/guardian.js'), ENT_QUOTES, 'UTF-8');
-    $jsBase = htmlspecialchars(Environment::appURL('js/'), ENT_QUOTES, 'UTF-8');
+    $cacheVersion = rawurlencode(Environment::appVersion());
+    $guardian = htmlspecialchars(Environment::appURL('js/guardian.js') . '?v=' . $cacheVersion, ENT_QUOTES, 'UTF-8');
+    $jsBase = htmlspecialchars(Environment::appURL('js/') . '?v=' . $cacheVersion, ENT_QUOTES, 'UTF-8');
 
     $html = Render::template('header-application-json-linked-data', [
       '__CSP_NONCE__' => (string) $context['cspNonce'],
@@ -327,16 +331,47 @@ HTML;
     if ($context['isAuthenticated']) {
       $html .= "  <script type=\"module\" src=\"{$jsBase}\" nonce=\"{$cspNonce}\"></script>\n";
       if ($context['loadPhantomWing']) {
-        $html .= "  <script type=\"module\" src=\"{$jsBase}phantomwing/\" nonce=\"{$cspNonce}\"></script>\n";
+        $phantomWing = htmlspecialchars(Environment::appURL('js/phantomwing/') . '?v=' . $cacheVersion, ENT_QUOTES, 'UTF-8');
+        $html .= "  <script type=\"module\" src=\"{$phantomWing}\" nonce=\"{$cspNonce}\"></script>\n";
       }
-      $html .= "  <script type=\"module\" src=\"{$jsBase}encryption/\" nonce=\"{$cspNonce}\"></script>\n";
-      $html .= "  <script type=\"module\" src=\"{$jsBase}work-integrity/\" nonce=\"{$cspNonce}\"></script>\n";
+      $encryption = htmlspecialchars(Environment::appURL('js/encryption/') . '?v=' . $cacheVersion, ENT_QUOTES, 'UTF-8');
+      $workIntegrity = htmlspecialchars(Environment::appURL('js/work-integrity/') . '?v=' . $cacheVersion, ENT_QUOTES, 'UTF-8');
+      $html .= "  <script type=\"module\" src=\"{$encryption}\" nonce=\"{$cspNonce}\"></script>\n";
+      $html .= "  <script type=\"module\" src=\"{$workIntegrity}\" nonce=\"{$cspNonce}\"></script>\n";
     }
 
     return $html;
   }
 
-  public static function renderSpeculationRules(string $cspNonce): string
+  public static function renderSpeculationRules(string $cspNonce = ''): string
+  {
+    $json = self::speculationRulesJson();
+    if ($json === '') {
+      return '';
+    }
+
+    $nonceAttr = $cspNonce !== ''
+      ? ' nonce="' . self::attr($cspNonce) . '"'
+      : '';
+
+    return <<<HTML
+  <script type="speculationrules"{$nonceAttr}>
+{$json}
+  </script>
+
+HTML;
+  }
+
+  /**
+   * Inline script body hashed for script-src (excludes the script element wrapper).
+   */
+  public static function speculationRulesInlineBody(): string
+  {
+    $json = self::speculationRulesJson();
+    return $json === '' ? '' : "\n{$json}\n  ";
+  }
+
+  private static function speculationRulesJson(): string
   {
     $rules = [
       'prefetch' => [[
@@ -356,23 +391,13 @@ HTML;
             ['not' => ['selector_matches' => '[download], [target], [rel~=nofollow], [data-no-speculation]']],
           ],
         ],
-        'eagerness' => 'moderate',
+        'eagerness' => 'eager',
         'tag' => 'paycal-document-prefetch',
       ]],
     ];
     $json = json_encode($rules, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    if ($json === false) {
-      return '';
-    }
 
-    $nonce = self::attr($cspNonce);
-
-    return <<<HTML
-  <script type="speculationrules" nonce="{$nonce}">
-{$json}
-  </script>
-
-HTML;
+    return is_string($json) ? $json : '';
   }
 
   private static function attr(string $value): string

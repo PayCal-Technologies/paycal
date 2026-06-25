@@ -9,7 +9,7 @@ namespace PayCal\Domain;
 require __DIR__ . '/_bootstrap.php';
 
 ?>
-import PC from "<?php echo Config\Environment::appURL('js/'); ?>";
+import PC from "<?php echo Config\Environment::appURL('js/'); ?>?v=<?php echo rawurlencode(Config\Environment::appVersion()); ?>";
 import PW from "<?php echo Config\Environment::appURL('js/phantomwing/'); ?>";
 import { createDataGrid, bindDataGridKeyboardNavigation } from "/js/datagrid/";
 import { initializeBillingSection } from "../core/billing.js";

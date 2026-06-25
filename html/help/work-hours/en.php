@@ -55,6 +55,8 @@ require_once HTML . '/header.php';
           type="button"
           class="help-image-button"
           data-help-popover-open="work-hours-entry-surface-popover"
+          commandfor="work-hours-entry-surface-popover"
+          command="toggle-popover"
           aria-haspopup="dialog"
           aria-controls="work-hours-entry-surface-popover"
           aria-expanded="false"
@@ -84,6 +86,8 @@ require_once HTML . '/header.php';
               type="button"
               class="btn btn_secondary help-image-popover-close"
               data-help-popover-close="work-hours-entry-surface-popover"
+              commandfor="work-hours-entry-surface-popover"
+              command="hide-popover"
               aria-label="<?php echo htmlspecialchars(help_wh_i18n('HELP_WORK_HOURS_POPOVER_CLOSE_ARIA'), ENT_QUOTES, 'UTF-8'); ?>"
             ><?php echo htmlspecialchars(help_wh_i18n('CLOSE'), ENT_QUOTES, 'UTF-8'); ?></button>
           </div>

@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const closers = document.querySelectorAll('[data-help-popover-close]');
   const popovers = document.querySelectorAll('.help-image-popover');
   const supportsPopoverApi = typeof HTMLElement !== 'undefined' && 'showPopover' in HTMLElement.prototype;
+  const supportsInvokerCommands = typeof HTMLButtonElement !== 'undefined'
+    && Object.prototype.hasOwnProperty.call(HTMLButtonElement.prototype, 'commandForElement');
 
   function setActiveLink() {
     const currentHash = window.location.hash || '#panel-getting-started';
@@ -118,21 +120,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  openers.forEach((button) => {
-    button.addEventListener('click', () => {
-      const popover = getPopover(button.getAttribute('data-help-popover-open'));
-      if (!popover) {
-        return;
-      }
+  if (!supportsInvokerCommands) {
+    openers.forEach((button) => {
+      button.addEventListener('click', () => {
+        const popover = getPopover(button.getAttribute('data-help-popover-open'));
+        if (!popover) {
+          return;
+        }
 
-      if (isPopoverOpen(popover)) {
-        hidePopover(popover);
-        return;
-      }
+        if (isPopoverOpen(popover)) {
+          hidePopover(popover);
+          return;
+        }
 
-      showPopover(popover);
+        showPopover(popover);
+      });
     });
-  });
+
+    closers.forEach((button) => {
+      button.addEventListener('click', () => {
+        hidePopover(getPopover(button.getAttribute('data-help-popover-close')));
+      });
+    });
+  }
 
   document.querySelectorAll('.help-image-popover').forEach((popover) => {
     popover.addEventListener('click', (event) => {
@@ -153,33 +163,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  closers.forEach((button) => {
-    button.addEventListener('click', () => {
-      hidePopover(getPopover(button.getAttribute('data-help-popover-close')));
+  if (!supportsInvokerCommands) {
+    document.addEventListener('click', (event) => {
+      popovers.forEach((popover) => {
+        if (!isPopoverOpen(popover)) {
+          return;
+        }
+
+        if (popover.contains(event.target)) {
+          return;
+        }
+
+        const opener = document.querySelector(
+          '[data-help-popover-open="' + popover.id + '"]'
+        );
+
+        if (opener && opener.contains(event.target)) {
+          return;
+        }
+
+        hidePopover(popover);
+      });
     });
-  });
-
-  document.addEventListener('click', (event) => {
-    popovers.forEach((popover) => {
-      if (!isPopoverOpen(popover)) {
-        return;
-      }
-
-      if (popover.contains(event.target)) {
-        return;
-      }
-
-      const opener = document.querySelector(
-        '[data-help-popover-open="' + popover.id + '"]'
-      );
-
-      if (opener && opener.contains(event.target)) {
-        return;
-      }
-
-      hidePopover(popover);
-    });
-  });
+  }
 
   window.addEventListener('hashchange', setActiveLink);
   setActiveLink();

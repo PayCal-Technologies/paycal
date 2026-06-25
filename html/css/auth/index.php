@@ -398,12 +398,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   }
 
   .federated-signin-button {
+    position: relative;
     width: 100%;
     min-height: 2.85rem;
-    display: grid;
-    grid-template-columns: 1.8rem minmax(0, 1fr);
+    display: flex;
     align-items: center;
-    gap: 0.65rem;
+    justify-content: center;
     border: 1px solid var(--line-strong);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.94);
@@ -416,7 +416,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     white-space: normal !important;
     overflow-wrap: anywhere !important;
     cursor: pointer;
-    text-align: left;
+    text-align: center;
   }
 
   .federated-signin-button:hover {
@@ -429,6 +429,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   }
 
   .federated-signin-icon {
+    position: absolute;
+    left: 0.82rem;
     width: 1.8rem;
     height: 1.8rem;
     display: inline-grid;
@@ -442,6 +444,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
   .federated-signin-text {
     min-width: 0;
+    text-align: center;
     letter-spacing: 0 !important;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
@@ -449,13 +452,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
   .auth-panel .auth-recover-link {
     text-align: center;
-    margin: 1rem 0 1rem;
-  }
-
-  .auth-panel .auth-recover-divider {
-    border: 0;
-    border-top: 1px solid var(--line);
-    margin: 0.85rem 0 0.75rem;
+    margin: 0.65rem 0 0;
   }
 
   .auth-panel .auth-recover-link a {
@@ -541,25 +538,15 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     background: rgba(255, 255, 255, 0.12);
   }
 
-  .auth-signin-email-hint {
-    margin: 0.35rem 0 0;
-    color: var(--text-2);
-    font-size: 0.95rem;
-    line-height: 1.4;
-  }
-
   .auth-signin-primary {
     display: grid;
     gap: 0;
   }
 
-  .auth-signin-alt-heading {
+  .auth-signin-divider {
+    border: 0;
+    border-top: 1px solid var(--line);
     margin: 1.1rem 0 0.65rem;
-    color: var(--text-1);
-    font-size: 0.92rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
   }
 
   .auth-signin-notice {

@@ -171,7 +171,8 @@ class Layout
 
     // CSP for public pages (no unsafe-inline needed)
     $csp = [
-      'default-src' => ["'none'"],
+      // Same-origin required: default-src governs speculation-rule navigational prefetches.
+      'default-src' => ["'self'", $origin],
       'base-uri' => ["'self'", $origin],
       'connect-src' => ["'self'", $origin],
       'frame-src' => ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
@@ -181,7 +182,7 @@ class Layout
       'media-src' => ["'self'", $origin],
       'manifest-src' => ["'self'", $origin],
       'object-src' => ["'none'"],
-      'script-src' => ["'nonce-{$cspNonce}'", "'strict-dynamic'", "'inline-speculation-rules'", "'self'", $origin],
+      'script-src' => ["'nonce-{$cspNonce}'", "'strict-dynamic'", "'inline-speculation-rules'", PageHeadRenderer::SPECULATION_RULES_INLINE_HASH, "'self'", $origin],
       'style-src' => ["'self'", $origin],
       'style-src-elem' => ["'self'", $origin],
       'frame-ancestors' => ["'none'"],

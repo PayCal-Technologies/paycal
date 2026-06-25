@@ -23,6 +23,9 @@ final class FederatedAuthController
 {
   private const SETTINGS_CSRF_FORM_TYPE = 'settings';
 
+  /** @var array<int, string> */
+  private const SUPPORTED_PROVIDERS = ['google', 'apple'];
+
   /**
    * Return available federated sign-in providers.
    */
@@ -50,7 +53,7 @@ final class FederatedAuthController
     $mode = $this->queryString('mode') === 'link' ? 'link' : 'signin';
     $strongUserUUID = FederatedAuth::currentStrongUserUUID();
 
-    if ($providerId !== 'google' || !FederatedAuth::providerIsAvailableForHost($providerId, $host)) {
+    if (!$this->isSupportedProvider($providerId) || !FederatedAuth::providerIsAvailableForHost($providerId, $host)) {
       Response::error('[Auth] Federated provider unavailable.', [], HttpStatus::HTTP_FORBIDDEN);
       return;
     }
@@ -65,155 +68,30 @@ final class FederatedAuthController
 
     $state = FederatedAuth::createOAuthState($providerId, $mode, $mode === 'link' ? '/settings/security/' : '/');
     $location = FederatedAuth::authorizationUrl($providerId, $state['state'], $state['nonce']);
+    if ($location === '') {
+      Response::error('[Auth] Federated provider unavailable.', [], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
     header('Location: ' . $location, true, 302);
   }
 
   /**
-   * Complete a federated sign-in callback.
+   * Complete a federated sign-in callback from a GET redirect.
    */
   #[Route('auth/federated/callback/{provider}', ['GET'])]
   public function callback(string $provider): void
   {
-    $providerId = strtolower(trim($provider));
-    $host = FederatedAuth::requestHost();
-    $hadAuthenticatedSession = Authentication::validateAndTouchSession();
-
-    if ($providerId !== 'google' || !FederatedAuth::providerIsAvailableForHost($providerId, $host)) {
-      $this->redirectOAuthFailure($hadAuthenticatedSession, 'provider_unavailable');
-      return;
-    }
-
-    $code = $this->queryString('code');
-    $stateId = $this->queryString('state');
-    if ($code === '' || $stateId === '') {
-      $this->redirectOAuthFailure($hadAuthenticatedSession, 'missing_callback_params');
-      return;
-    }
-
-    $state = FederatedAuth::consumeOAuthState($stateId, $providerId);
-    if ($state === []) {
-      $this->redirectOAuthFailure($hadAuthenticatedSession, 'invalid_state');
-      return;
-    }
-
-    $claims = $this->claimsForGoogleCode($code, $state['nonce']);
-    if ($claims === [] || ($claims['sub'] ?? '') === '') {
-      $this->redirectOAuthFailure($hadAuthenticatedSession, 'invalid_provider_token');
-      return;
-    }
-
-    if ($state['mode'] === 'link') {
-      $userUUID = $state['user_uuid'];
-      if ($userUUID === '' || UserRepository::getByUUID($userUUID) === null) {
-        $this->redirectOAuthResult('link_failed');
-        return;
-      }
-
-      try {
-        FederatedAuth::linkProviderIdentity($userUUID, $providerId, $claims);
-      } catch (\RuntimeException) {
-        $this->redirectOAuthResult('already_linked');
-        return;
-      }
-
-      $this->redirectOAuthResult('linked');
-      return;
-    }
-
-    $userUUID = FederatedAuth::resolveLinkedUserUUID($providerId, $claims);
-    if ($userUUID === '' || UserRepository::getByUUID($userUUID) === null) {
-      $userUUID = $this->linkVerifiedGoogleEmailAlias($claims);
-      if ($userUUID === '') {
-        $userUUID = $this->autoCreateGoogleUser($claims);
-      }
-      if ($userUUID === '') {
-        $this->redirectOAuthFailure($hadAuthenticatedSession, 'provider_not_linked');
-        return;
-      }
-    }
-
-    $sessionHash = bin2hex(random_bytes(32));
-    Authentication::setSession($sessionHash, $userUUID);
-    Database::hset(Keys::SESSION . ':' . $sessionHash, [
-      'auth_method' => 'federated_google',
-      'auth_strength' => 'standard',
-    ]);
-    Authentication::setCookie($sessionHash);
-    UserRepository::touchLastSignin($userUUID);
-    FederatedAuth::touchProviderSignin($userUUID, $providerId, $claims);
-
-    if ($hadAuthenticatedSession) {
-      $this->redirectOAuthResult('linked');
-      return;
-    }
-
-    header('Location: /', true, 302);
+    $this->completeCallback($provider);
   }
 
-  /** @param array<string, string> $claims */
-  private function linkVerifiedGoogleEmailAlias(array $claims): string
+  /**
+   * Complete a federated sign-in callback from a POST redirect (Apple).
+   */
+  #[Route('auth/federated/callback/{provider}', ['POST'])]
+  public function callbackPost(string $provider): void
   {
-    if (($claims['email_verified'] ?? '') !== 'true') {
-      return '';
-    }
-
-    $email = InputSanitizer::sanitizeEmail((string) ($claims['email'] ?? ''));
-    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-      return '';
-    }
-
-    $userUUID = UserRepository::getUUIDFromEmail($email);
-    if ($userUUID === '' || UserRepository::getByUUID($userUUID) === null) {
-      return '';
-    }
-
-    try {
-      FederatedAuth::linkProviderIdentity($userUUID, 'google', $claims);
-    } catch (\RuntimeException) {
-      return '';
-    }
-
-    return $userUUID;
-  }
-
-  /** @param array<string, string> $claims */
-  private function autoCreateGoogleUser(array $claims): string
-  {
-    if (!Environment::authFederatedAutoCreateLocal()) {
-      return '';
-    }
-
-    if (($claims['email_verified'] ?? '') !== 'true') {
-      return '';
-    }
-
-    $email = InputSanitizer::sanitizeEmail((string) ($claims['email'] ?? ''));
-    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-      return '';
-    }
-
-    if (UserRepository::getUUIDFromEmail($email) !== '') {
-      return '';
-    }
-
-    $fullName = InputSanitizer::sanitizeString(trim((string) ($claims['name'] ?? '')));
-    if ($fullName === '') {
-      $fullName = $email;
-    }
-
-    $userUUID = User::generateUserUUID();
-    UserRepository::setUser($userUUID, $email, AuthLevel::USER, $fullName, '', '');
-    Database::hset(Keys::USER . ':' . $userUUID, [
-      'email_verified' => '1',
-      'email_verified_at' => (string) time(),
-      'last_auth_method' => 'federated_google',
-    ]);
-
-    FederatedAuth::linkProviderIdentity($userUUID, 'google', $claims);
-    $businessService = new BusinessDiscoveryService();
-    $businessService->ensurePersonalBusiness($userUUID);
-
-    return $userUUID;
+    $this->completeCallback($provider);
   }
 
   /**
@@ -254,7 +132,7 @@ final class FederatedAuthController
     }
 
     $providerId = strtolower(trim($this->scalarString($body['provider'] ?? '')));
-    if ($providerId !== 'google') {
+    if (!$this->isSupportedProvider($providerId)) {
       Response::error('[Auth] Federated provider unavailable.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
@@ -263,6 +141,249 @@ final class FederatedAuthController
     Response::success('[Auth] Federated provider unlinked.', [
       'providers' => FederatedAuth::linkedProvidersForUser($userUUID),
     ]);
+  }
+
+  private function completeCallback(string $provider): void
+  {
+    $providerId = strtolower(trim($provider));
+    $host = FederatedAuth::requestHost();
+    $hadAuthenticatedSession = Authentication::validateAndTouchSession();
+
+    if (!$this->isSupportedProvider($providerId) || !FederatedAuth::providerIsAvailableForHost($providerId, $host)) {
+      $this->redirectOAuthFailure($hadAuthenticatedSession, 'provider_unavailable');
+      return;
+    }
+
+    $code = $this->callbackParam('code');
+    $stateId = $this->callbackParam('state');
+    if ($code === '' || $stateId === '') {
+      $this->redirectOAuthFailure($hadAuthenticatedSession, 'missing_callback_params');
+      return;
+    }
+
+    $state = FederatedAuth::consumeOAuthState($stateId, $providerId);
+    if ($state === []) {
+      $this->redirectOAuthFailure($hadAuthenticatedSession, 'invalid_state');
+      return;
+    }
+
+    $claims = $this->claimsForProviderCode($providerId, $code, $state['nonce']);
+    $claims = $this->mergeAppleUserClaims($providerId, $claims, $this->callbackParam('user'));
+    if ($claims === [] || ($claims['sub'] ?? '') === '') {
+      $this->redirectOAuthFailure($hadAuthenticatedSession, 'invalid_provider_token');
+      return;
+    }
+
+    if ($state['mode'] === 'link') {
+      $userUUID = $state['user_uuid'];
+      if ($userUUID === '' || UserRepository::getByUUID($userUUID) === null) {
+        $this->redirectOAuthResult('link_failed');
+        return;
+      }
+
+      try {
+        FederatedAuth::linkProviderIdentity($userUUID, $providerId, $claims);
+      } catch (\RuntimeException) {
+        $this->redirectOAuthResult('already_linked');
+        return;
+      }
+
+      $this->redirectOAuthResult('linked');
+      return;
+    }
+
+    $userUUID = FederatedAuth::resolveLinkedUserUUID($providerId, $claims);
+    if ($userUUID === '' || UserRepository::getByUUID($userUUID) === null) {
+      $userUUID = $this->linkVerifiedEmailAlias($providerId, $claims);
+      if ($userUUID === '') {
+        $userUUID = $this->autoCreateFederatedUser($providerId, $claims);
+      }
+      if ($userUUID === '') {
+        $this->redirectOAuthFailure($hadAuthenticatedSession, 'provider_not_linked');
+        return;
+      }
+    }
+
+    $sessionHash = bin2hex(random_bytes(32));
+    Authentication::setSession($sessionHash, $userUUID);
+    Database::hset(Keys::SESSION . ':' . $sessionHash, [
+      'auth_method' => $this->federatedAuthMethod($providerId),
+      'auth_strength' => 'standard',
+    ]);
+    Authentication::setCookie($sessionHash);
+    UserRepository::touchLastSignin($userUUID);
+    FederatedAuth::touchProviderSignin($userUUID, $providerId, $claims);
+
+    if ($hadAuthenticatedSession) {
+      $this->redirectOAuthResult('linked');
+      return;
+    }
+
+    header('Location: /', true, 302);
+  }
+
+  /** @param array<string, string> $claims */
+  private function linkVerifiedEmailAlias(string $providerId, array $claims): string
+  {
+    if (!FederatedAuth::emailVerifiedForProvider($providerId, $claims)) {
+      return '';
+    }
+
+    $email = InputSanitizer::sanitizeEmail((string) ($claims['email'] ?? ''));
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      return '';
+    }
+
+    $userUUID = UserRepository::getUUIDFromEmail($email);
+    if ($userUUID === '' || UserRepository::getByUUID($userUUID) === null) {
+      return '';
+    }
+
+    try {
+      FederatedAuth::linkProviderIdentity($userUUID, $providerId, $claims);
+    } catch (\RuntimeException) {
+      return '';
+    }
+
+    return $userUUID;
+  }
+
+  /** @param array<string, string> $claims */
+  private function autoCreateFederatedUser(string $providerId, array $claims): string
+  {
+    if (!Environment::authFederatedAutoCreateLocal()) {
+      return '';
+    }
+
+    if (!FederatedAuth::emailVerifiedForProvider($providerId, $claims)) {
+      return '';
+    }
+
+    $email = InputSanitizer::sanitizeEmail((string) ($claims['email'] ?? ''));
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      return '';
+    }
+
+    if (UserRepository::getUUIDFromEmail($email) !== '') {
+      return '';
+    }
+
+    $fullName = InputSanitizer::sanitizeString(trim((string) ($claims['name'] ?? '')));
+    if ($fullName === '') {
+      $fullName = $email;
+    }
+
+    $userUUID = User::generateUserUUID();
+    UserRepository::setUser($userUUID, $email, AuthLevel::USER, $fullName, '', '');
+    Database::hset(Keys::USER . ':' . $userUUID, [
+      'email_verified' => '1',
+      'email_verified_at' => (string) time(),
+      'last_auth_method' => $this->federatedAuthMethod($providerId),
+    ]);
+
+    FederatedAuth::linkProviderIdentity($userUUID, $providerId, $claims);
+    $businessService = new BusinessDiscoveryService();
+    $businessService->ensurePersonalBusiness($userUUID);
+
+    return $userUUID;
+  }
+
+  /**
+   * @param array<string, string> $claims
+   * @return array<string, string>
+   */
+  private function mergeAppleUserClaims(string $providerId, array $claims, string $userJson): array
+  {
+    if ($providerId !== 'apple' || ($claims['name'] ?? '') !== '' || $userJson === '') {
+      return $claims;
+    }
+
+    $decoded = json_decode($userJson, true);
+    if (!is_array($decoded) || !isset($decoded['name']) || !is_array($decoded['name'])) {
+      return $claims;
+    }
+
+    $parts = [];
+    foreach (['firstName', 'lastName'] as $field) {
+      $value = $decoded['name'][$field] ?? '';
+      if (is_scalar($value)) {
+        $part = trim((string) $value);
+        if ($part !== '') {
+          $parts[] = $part;
+        }
+      }
+    }
+
+    if ($parts !== []) {
+      $claims['name'] = InputSanitizer::sanitizeString(implode(' ', $parts));
+    }
+
+    return $claims;
+  }
+
+  /** @return array<string, string> */
+  private function claimsForProviderCode(string $providerId, string $code, string $nonce): array
+  {
+    return match ($providerId) {
+      'google' => $this->claimsForGoogleCode($code, $nonce),
+      'apple' => $this->claimsForAppleCode($code, $nonce),
+      default => [],
+    };
+  }
+
+  /** @return array<string, string> */
+  private function claimsForGoogleCode(string $code, string $nonce): array
+  {
+    $tokenResponse = $this->postForm('https://oauth2.googleapis.com/token', [
+      'code' => $code,
+      'client_id' => Environment::authGoogleClientId(),
+      'client_secret' => Environment::authGoogleClientSecret(),
+      'redirect_uri' => FederatedAuth::callbackUrl('google'),
+      'grant_type' => 'authorization_code',
+    ]);
+
+    $idToken = FederatedAuth::idTokenFromTokenResponse($tokenResponse);
+    if ($idToken === '') {
+      return [];
+    }
+
+    $jwks = $this->getJson('https://www.googleapis.com/oauth2/v3/certs');
+    return FederatedAuth::validateGoogleIdToken($idToken, $jwks, $nonce);
+  }
+
+  /** @return array<string, string> */
+  private function claimsForAppleCode(string $code, string $nonce): array
+  {
+    $clientSecret = FederatedAuth::buildAppleClientSecret();
+    if ($clientSecret === '') {
+      return [];
+    }
+
+    $tokenResponse = $this->postForm('https://appleid.apple.com/auth/token', [
+      'code' => $code,
+      'client_id' => Environment::authAppleClientId(),
+      'client_secret' => $clientSecret,
+      'redirect_uri' => FederatedAuth::callbackUrl('apple'),
+      'grant_type' => 'authorization_code',
+    ]);
+
+    $idToken = FederatedAuth::idTokenFromTokenResponse($tokenResponse);
+    if ($idToken === '') {
+      return [];
+    }
+
+    $jwks = $this->getJson('https://appleid.apple.com/auth/keys');
+    return FederatedAuth::validateAppleIdToken($idToken, $jwks, $nonce);
+  }
+
+  private function isSupportedProvider(string $providerId): bool
+  {
+    return in_array($providerId, self::SUPPORTED_PROVIDERS, true);
+  }
+
+  private function federatedAuthMethod(string $providerId): string
+  {
+    return 'federated_' . $providerId;
   }
 
   /** @param array<string, mixed> $body */
@@ -290,6 +411,21 @@ final class FederatedAuthController
   }
 
   /**
+   * Read a callback parameter from GET or POST.
+   */
+  private function callbackParam(string $key): string
+  {
+    $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    $method = strtoupper(is_string($requestMethod) ? $requestMethod : 'GET');
+    if ($method === 'POST') {
+      $value = $_POST[$key] ?? '';
+      return $this->scalarString($value);
+    }
+
+    return $this->queryString($key);
+  }
+
+  /**
    * Read a query string value as trimmed text.
    */
   private function queryString(string $key): string
@@ -304,26 +440,6 @@ final class FederatedAuthController
   private function scalarString(mixed $value): string
   {
     return is_scalar($value) ? trim((string) $value) : '';
-  }
-
-  /** @return array<string, string> */
-  private function claimsForGoogleCode(string $code, string $nonce): array
-  {
-    $tokenResponse = $this->postForm('https://oauth2.googleapis.com/token', [
-      'code' => $code,
-      'client_id' => Environment::authGoogleClientId(),
-      'client_secret' => Environment::authGoogleClientSecret(),
-      'redirect_uri' => FederatedAuth::callbackUrl('google'),
-      'grant_type' => 'authorization_code',
-    ]);
-
-    $idToken = FederatedAuth::idTokenFromTokenResponse($tokenResponse);
-    if ($idToken === '') {
-      return [];
-    }
-
-    $jwks = $this->getJson('https://www.googleapis.com/oauth2/v3/certs');
-    return FederatedAuth::validateGoogleIdToken($idToken, $jwks, $nonce);
   }
 
   /**

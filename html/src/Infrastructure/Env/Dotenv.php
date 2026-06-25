@@ -65,6 +65,10 @@ final class Dotenv
             throw new \RuntimeException("Environment file not found: {$file}");
         }
 
+        if (!is_readable($file)) {
+            throw new \RuntimeException("Environment file not readable: {$file}");
+        }
+
         $this->parse($file, $forceKeys);
     }
 
@@ -77,7 +81,7 @@ final class Dotenv
     public function safeLoad(array $forceKeys = []): void
     {
         $file = $this->path . '/.env';
-        if (!is_file($file)) {
+        if (!is_file($file) || !is_readable($file)) {
             return;
         }
 
