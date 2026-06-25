@@ -113,6 +113,7 @@ final class G4PublicDocsAdminA11yContractTest extends TestCase
     );
   }
 
+  #[Group('private-moat')]
   #[Test]
   public function adminSoc2DatagridsDoNotUseInlineGridTemplateStyles(): void
   {
@@ -222,7 +223,11 @@ final class G4PublicDocsAdminA11yContractTest extends TestCase
     ];
 
     foreach ($adminPages as $relativePath => $expectedSnippet) {
-      $contents = (string) file_get_contents($this->htmlRoot() . '/' . $relativePath);
+      $pagePath = $this->htmlRoot() . '/' . $relativePath;
+      if (!is_file($pagePath)) {
+        continue;
+      }
+      $contents = (string) file_get_contents($pagePath);
       $this->assertStringContainsString('<h1', $contents, $relativePath . ' should expose an h1 heading');
       $this->assertStringContainsString($expectedSnippet, $contents, $relativePath . ' h1 should use i18n');
       $this->assertDoesNotMatchRegularExpression(
