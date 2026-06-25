@@ -74,7 +74,7 @@ $createOnLoad = InputSanitizer::getString('create') === '1';
     </div>
   </section>
 
-  <dialog id="modal_business_group" class="dialog business_group_editor_dialog" aria-modal="true" aria-labelledby="modal_business_group_title" aria-describedby="modal_business_group_aria">
+  <dialog id="modal_business_group" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo Strings::i18n('BUSINESS_GROUPS_EDITOR_TITLE'); ?>" class="dialog business_group_editor_dialog" aria-modal="true" aria-labelledby="modal_business_group_title" aria-describedby="modal_business_group_aria">
     <div class="modal_aria visually_hidden">
       <span id="modal_business_group_aria"><?php echo Strings::i18n('BUSINESS_GROUPS_EDITOR_ARIA'); ?></span>
     </div>
@@ -82,7 +82,7 @@ $createOnLoad = InputSanitizer::getString('create') === '1';
       <input type="hidden" id="business_groups_group_id" value="">
       <section class="modal_header">
         <h2 id="modal_business_group_title" class="modal_title"><?php echo Strings::i18n('BUSINESS_GROUPS_EDITOR_TITLE'); ?></h2>
-        <button type="button" class="btn_close" data-dialog-close="modal_business_group" aria-label="<?php echo Strings::i18n('CLOSE'); ?>">&times;</button>
+        <button type="button" class="btn_close" data-dialog-close="modal_business_group" commandfor="modal_business_group" command="close" aria-label="<?php echo Strings::i18n('CLOSE'); ?>">&times;</button>
       </section>
       <section class="modal_content business_group_editor_content">
         <div class="business_group_editor_col business_group_editor_col_main">
@@ -102,16 +102,16 @@ $createOnLoad = InputSanitizer::getString('create') === '1';
         <div class="business_groups_form_actions">
           <button type="button" class="btn btn_danger" id="business_groups_delete" hidden><?php echo Strings::i18n('BUSINESS_GROUPS_DELETE_ACTION'); ?></button>
           <button type="submit" class="btn btn_primary" id="business_groups_submit"><?php echo Strings::i18n('BUSINESS_GROUPS_CREATE'); ?></button>
-          <button type="button" class="btn btn_secondary" id="business_groups_cancel" data-dialog-close="modal_business_group"><?php echo Strings::i18n('CANCEL'); ?></button>
+          <button type="button" class="btn btn_secondary" id="business_groups_cancel" data-dialog-close="modal_business_group" commandfor="modal_business_group" command="close"><?php echo Strings::i18n('CANCEL'); ?></button>
         </div>
       </section>
     </form>
   </dialog>
 
-  <dialog id="modal_business_group_confirm" class="dialog business_group_editor_dialog business_group_confirm_dialog" aria-modal="true" aria-labelledby="modal_business_group_confirm_title" aria-describedby="modal_business_group_confirm_message">
+  <dialog id="modal_business_group_confirm" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo Strings::i18n('BUSINESS_GROUPS_ARCHIVE_ACTION'); ?>" class="dialog business_group_editor_dialog business_group_confirm_dialog" aria-modal="true" aria-labelledby="modal_business_group_confirm_title" aria-describedby="modal_business_group_confirm_message">
     <section class="modal_header">
       <h2 id="modal_business_group_confirm_title" class="modal_title"><?php echo Strings::i18n('BUSINESS_GROUPS_ARCHIVE_ACTION'); ?></h2>
-      <button type="button" class="btn_close" data-dialog-close="modal_business_group_confirm" aria-label="<?php echo Strings::i18n('CLOSE'); ?>">&times;</button>
+      <button type="button" class="btn_close" data-dialog-close="modal_business_group_confirm" commandfor="modal_business_group_confirm" command="close" aria-label="<?php echo Strings::i18n('CLOSE'); ?>">&times;</button>
     </section>
     <section class="modal_content business_group_confirm_content">
       <p id="modal_business_group_confirm_message"></p>
@@ -119,7 +119,7 @@ $createOnLoad = InputSanitizer::getString('create') === '1';
     <section class="modal_footer">
       <div class="business_groups_form_actions">
         <button type="button" class="btn btn_primary" id="business_group_confirm_yes"><?php echo Strings::i18n('BUSINESS_GROUPS_ARCHIVE_ACTION'); ?></button>
-        <button type="button" class="btn btn_secondary" id="business_group_confirm_cancel" data-dialog-close="modal_business_group_confirm"><?php echo Strings::i18n('CANCEL'); ?></button>
+        <button type="button" class="btn btn_secondary" id="business_group_confirm_cancel" data-dialog-close="modal_business_group_confirm" commandfor="modal_business_group_confirm" command="close"><?php echo Strings::i18n('CANCEL'); ?></button>
       </div>
     </section>
   </dialog>

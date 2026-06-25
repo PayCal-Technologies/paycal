@@ -145,15 +145,39 @@ class AccountController
         // Resolve the passkey wrapper for the selected credential from multi-wrapper storage.
         $passkeyWrappedDekKey = $this->passkeyWrappedDekKey($user->user_uuid);
         $wrappedCredentialCount = 0;
+        $wrappedDekCandidates = [];
         foreach ($credentialIds as $candidateCredentialId) {
             $candidateWrapped = (string) Database::hget($passkeyWrappedDekKey, $candidateCredentialId);
             if ($candidateWrapped !== '') {
                 $wrappedCredentialCount++;
+                $wrappedDekCandidates[] = [
+                    'credentialId' => $candidateCredentialId,
+                    'wrappedDekPasskey' => $candidateWrapped,
+                ];
             }
         }
 
         if ($credentialId !== '') {
             $wrappedDekPasskey = (string) Database::hget($passkeyWrappedDekKey, $credentialId);
+        }
+
+        $legacyWrappedDekPasskey = trim((string) ($user->wrapped_dek_passkey ?? ''));
+        if ($wrappedDekPasskey === '' && $legacyWrappedDekPasskey !== '') {
+            $legacyCredentialId = $credentialId !== '' ? $credentialId : ($credentialIds[0] ?? '');
+            if ($legacyCredentialId !== '') {
+                $wrappedDekPasskey = $legacyWrappedDekPasskey;
+                if ($credentialId === '') {
+                    $credentialId = $legacyCredentialId;
+                    $credentialSource = 'legacy_wrapped_dek';
+                }
+                if ($wrappedCredentialCount === 0) {
+                    $wrappedCredentialCount = 1;
+                    $wrappedDekCandidates[] = [
+                        'credentialId' => $legacyCredentialId,
+                        'wrappedDekPasskey' => $legacyWrappedDekPasskey,
+                    ];
+                }
+            }
         }
 
         $wrappedDekPasskeyMeta = [
@@ -220,6 +244,7 @@ class AccountController
             'encryptionSalt' => $salt,
             'wrappedDekPasskey' => $wrappedDekPasskey,
             'wrappedDekPasskeyForCredential' => $wrappedDekPasskey,
+            'wrappedDekCandidates' => $wrappedDekCandidates,
             'dekVersion' => $dekVersion,
             'cryptoVersion' => $cryptoVersion,
             'authStrength' => $authStrength,

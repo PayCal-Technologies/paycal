@@ -12,6 +12,23 @@ namespace PayCal\Domain;
   <section class="panel businesses_governance_panel businesses_definitions_panel" aria-labelledby="businesses_hierarchy_guide_title">
     <div class="businesses_section_header">
       <h2 id="businesses_hierarchy_guide_title"><?php echo businesses_index_i18n_html('BUSINESS_GOVERNANCE_MATRIX_TITLE'); ?></h2>
+      <div class="businesses_header_actions">
+        <button
+          id="businesses_definitions_help_button"
+          type="button"
+          class="businesses_help_button"
+          data-dialog-open="businesses_definitions_dialog"
+          commandfor="businesses_definitions_dialog"
+          command="show-modal"
+          aria-haspopup="dialog"
+          aria-controls="businesses_definitions_dialog"
+          aria-expanded="false"
+          aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_OPEN_DEFINITIONS_BTN'); ?>"
+          title="<?php echo businesses_index_i18n_html('BUSINESSES_DEFINITIONS_TITLE'); ?>"
+        >
+          <span aria-hidden="true">?</span>
+        </button>
+      </div>
     </div>
     <p class="help_text businesses_hierarchy_intro"><?php echo businesses_index_i18n_html('BUSINESSES_HIERARCHY_INTRO'); ?></p>
     <p class="help_text businesses_hierarchy_ownership_note" role="note"><?php echo businesses_index_i18n_html('BUSINESSES_HIERARCHY_OWNERSHIP_NOTE'); ?></p>

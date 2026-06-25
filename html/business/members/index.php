@@ -181,13 +181,15 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
         </button>
         <dialog
           id="business_members_report_panel"
+          data-dialog-invoker-bridge
+          data-dialog-close-tts="<?php echo htmlspecialchars($memberReportI18n['BUSINESS_MEMBERS_REPORT_DIALOG_TITLE'], ENT_QUOTES, 'UTF-8'); ?>"
           class="business_members_report_panel"
           aria-modal="true"
           aria-label="<?php echo htmlspecialchars($memberReportI18n['BUSINESS_MEMBERS_REPORT_OPTIONS_ARIA'], ENT_QUOTES, 'UTF-8'); ?>"
         >
           <div class="business_members_report_dialog_header">
             <h4><?php echo htmlspecialchars($memberReportI18n['BUSINESS_MEMBERS_REPORT_DIALOG_TITLE'], ENT_QUOTES, 'UTF-8'); ?></h4>
-            <button type="button" class="btn_close business_members_report_close" id="business_members_report_close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
+            <button type="button" class="btn_close business_members_report_close" id="business_members_report_close" data-dialog-close="business_members_report_panel" commandfor="business_members_report_panel" command="close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
           </div>
           <div class="business_members_report_selected">
             <h5 class="business_members_report_section_title">
@@ -309,15 +311,18 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
 
   <dialog
     id="business_members_info_dialog"
+    data-dialog-invoker-bridge
     class="dialog business_members_info_dialog"
     aria-modal="true"
     aria-labelledby="business_members_info_dialog_title"
     aria-describedby="business_members_info_dialog_body"
+    data-dialog-open-tts="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_GUIDE'); ?>"
+    data-dialog-close-tts="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_GUIDE'); ?>"
     data-dialog-close-on-backdrop="true"
   >
     <section class="modal_header">
-      <h2 id="business_members_info_dialog_title" class="modal_title">Members Guide</h2>
-      <button type="button" class="btn_close" data-dialog-close="business_members_info_dialog" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
+      <h2 id="business_members_info_dialog_title" class="modal_title"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_GUIDE'); ?></h2>
+      <button type="button" class="btn_close" data-dialog-close="business_members_info_dialog" commandfor="business_members_info_dialog" command="close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
     </section>
     <section id="business_members_info_dialog_body" class="modal_content business_members_info_dialog_content">
       <div class="business_members_info_dialog_grid">
@@ -431,7 +436,7 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
       </div>
     </section>
     <section class="modal_footer">
-      <button type="button" class="btn btn_secondary" data-dialog-close="business_members_info_dialog"><?php echo businesses_index_i18n_html('CLOSE'); ?></button>
+      <button type="button" class="btn btn_secondary" data-dialog-close="business_members_info_dialog" commandfor="business_members_info_dialog" command="close"><?php echo businesses_index_i18n_html('CLOSE'); ?></button>
     </section>
   </dialog>
 

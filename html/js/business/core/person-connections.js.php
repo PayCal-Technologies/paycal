@@ -249,11 +249,17 @@
   };
 
   const closePersonManageDialog = () => {
-    state.personManageConnectionId = '';
     if (elements.personManageDialog instanceof HTMLDialogElement && elements.personManageDialog.open) {
       elements.personManageDialog.close();
     }
   };
+
+  if (elements.personManageDialog instanceof HTMLDialogElement && elements.personManageDialog.dataset.personManageCloseBound !== '1') {
+    elements.personManageDialog.dataset.personManageCloseBound = '1';
+    elements.personManageDialog.addEventListener('close', () => {
+      state.personManageConnectionId = '';
+    });
+  }
 
   const savePersonManageDialog = async (event) => {
     event.preventDefault();

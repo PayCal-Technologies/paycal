@@ -1,4 +1,4 @@
-  <dialog id="modal_cal_picker" data-dialog-close-on-backdrop="true" aria-modal="true" aria-labelledby="date_picker_title" aria-describedby="date_picker_aria date_picker_meta">
+  <dialog id="modal_cal_picker" data-dialog-invoker-bridge data-dialog-close-tts="__MODAL_TITLE__" data-dialog-close-on-backdrop="true" aria-modal="true" aria-labelledby="date_picker_title" aria-describedby="date_picker_aria date_picker_meta">
     <div class="modal_aria visually_hidden">
       <span id="date_picker_aria">__MODAL_ARIA__</span>
     </div>
@@ -6,7 +6,7 @@
       <span id="date_picker_meta">__MODAL_META__</span>
     </div>
     <section class="modal_header">
-      <button type="button" class="btn btn_close" data-dialog-close="modal_cal_picker" aria-label="__CLOSE__">&times;</button>
+      <button type="button" class="btn btn_close" data-dialog-close="modal_cal_picker" commandfor="modal_cal_picker" command="close" aria-label="__CLOSE__">&times;</button>
       <h2 id="date_picker_title" class="modal_title centered">__MODAL_TITLE__</h2>
     </section>
     <section class="modal_content">
@@ -18,7 +18,7 @@
         <button id="date_picker_go_btn" class="btn btn_primary" type="button">
           __GO__
         </button>
-        <button id="date_picker_close_btn" class="btn btn_cancel" type="button" data-dialog-close="modal_cal_picker">
+        <button id="date_picker_close_btn" class="btn btn_cancel" type="button" data-dialog-close="modal_cal_picker" commandfor="modal_cal_picker" command="close">
           __CLOSE__
         </button>
       </div>

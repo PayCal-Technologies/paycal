@@ -1323,6 +1323,11 @@ button.cal_menu_selected:focus-visible {
   box-shadow: none;
 }
 
+/* Locked cells use pointer-events: none so clicks cannot reach them; restore hover while Shift shows earnings tooltip. */
+#calendar-v2-root.calendar_shift_tooltip_hover .datagrid_month_cell.datagrid_month_cell_locked {
+  pointer-events: auto;
+}
+
 /* Day number header */
 .datagrid_month_cell_header {
   display: flex;

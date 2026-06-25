@@ -2,7 +2,7 @@
 
   const closeMembershipConsentDialog = () => {
     if (elements.membershipConsentDialog instanceof HTMLDialogElement && elements.membershipConsentDialog.open) {
-      elements.membershipConsentDialog.close('cancel');
+      elements.membershipConsentDialog.close();
     }
   };
 
@@ -76,20 +76,7 @@
           disclaimer_text: disclaimerInput === '' ? T.membershipConsentDefaultDisclaimer : disclaimerInput,
         });
 
-        if (elements.membershipConsentDialog instanceof HTMLDialogElement && elements.membershipConsentDialog.open) {
-          elements.membershipConsentDialog.close('confirm');
-        }
-      };
-
-      const onCancelClick = (event) => {
-        event.preventDefault();
         closeMembershipConsentDialog();
-      };
-
-      const onDialogClick = (event) => {
-        if (event.target === elements.membershipConsentDialog) {
-          closeMembershipConsentDialog();
-        }
       };
 
       const onDialogClose = () => {
@@ -101,17 +88,11 @@
       const cleanup = () => {
         elements.membershipConsentForm?.removeEventListener('submit', onSubmit);
         elements.membershipConsentAcknowledge?.removeEventListener('change', refreshMembershipConsentMatrix);
-        elements.membershipConsentCancel?.removeEventListener('click', onCancelClick);
-        elements.membershipConsentClose?.removeEventListener('click', onCancelClick);
-        elements.membershipConsentDialog?.removeEventListener('click', onDialogClick);
         elements.membershipConsentDialog?.removeEventListener('close', onDialogClose);
       };
 
       elements.membershipConsentForm.addEventListener('submit', onSubmit);
       elements.membershipConsentAcknowledge.addEventListener('change', refreshMembershipConsentMatrix);
-      elements.membershipConsentCancel?.addEventListener('click', onCancelClick);
-      elements.membershipConsentClose?.addEventListener('click', onCancelClick);
-      elements.membershipConsentDialog.addEventListener('click', onDialogClick);
       elements.membershipConsentDialog.addEventListener('close', onDialogClose);
 
       elements.membershipConsentDialog.showModal();

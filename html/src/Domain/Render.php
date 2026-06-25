@@ -885,6 +885,8 @@ class Render
    * - footerHtml (string, optional): inner content for .modal_footer
    * - closeLabel (string, optional): close button aria-label
    * - titleClass (string, optional): title class list
+   * - invokerBridge (bool, optional): enable data-dialog-invoker-bridge + commandfor close
+   * - closeTts (string, optional): data-dialog-close-tts label for TTS on close
    *
    * @return string fully rendered dialog HTML
    */
@@ -922,6 +924,9 @@ class Render
     $footerHtml = is_string($footerHtmlRaw) ? $footerHtmlRaw : '';
     $formInnerHtmlRaw = $options['formInnerHtml'] ?? '';
     $formInnerHtml = is_string($formInnerHtmlRaw) ? $formInnerHtmlRaw : '';
+    $invokerBridge = !empty($options['invokerBridge']);
+    $closeTtsRaw = $options['closeTts'] ?? '';
+    $closeTts = is_string($closeTtsRaw) ? $closeTtsRaw : '';
 
     $dialogAttributesRaw = $options['dialogAttributes'] ?? [];
     $formAttributesRaw = $options['formAttributes'] ?? null;
@@ -960,12 +965,27 @@ class Render
     if ($dialogClass !== '') {
       $dialogAttrs['class'] = $dialogClass;
     }
+    if ($invokerBridge) {
+      $dialogAttrs['data-dialog-invoker-bridge'] = '';
+      if ($closeTts !== '') {
+        $dialogAttrs['data-dialog-close-tts'] = $closeTts;
+      }
+    }
     $dialogAttrs = array_merge($dialogAttrs, $dialogAttributes);
 
-    $headerHtml = '<section class="modal_header">'
-      . '<button type="button" class="btn btn_close" data-dialog-close="'
+    $closeButtonAttrs = 'data-dialog-close="'
       . htmlspecialchars($id, ENT_QUOTES, 'UTF-8')
-      . '" aria-label="'
+      . '"';
+    if ($invokerBridge) {
+      $closeButtonAttrs .= ' commandfor="'
+        . htmlspecialchars($id, ENT_QUOTES, 'UTF-8')
+        . '" command="close"';
+    }
+
+    $headerHtml = '<section class="modal_header">'
+      . '<button type="button" class="btn btn_close" '
+      . $closeButtonAttrs
+      . ' aria-label="'
       . htmlspecialchars($closeLabel, ENT_QUOTES, 'UTF-8')
       . '">&times;</button>'
       . '<h1 id="'

@@ -672,7 +672,7 @@ echo Render::template('keyboard-shortcuts', $renders);
   <div id="signal_panel_resize" class="signal_panel_resize" role="separator" aria-label="<?php echo Strings::headerI18n('DASHBOARD_RESIZE_GRIP_ARIA'); ?>"></div>
 </section>
 
-<dialog id="modal_signout" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo htmlspecialchars(Strings::headerI18n('SIGN_OUT'), ENT_QUOTES, 'UTF-8'); ?>" aria-modal="true" aria-labelledby="modal_signout_title" aria-describedby="modal_signout_aria modal_signout_meta">
+<dialog id="modal_signout" data-dialog-invoker-bridge data-dialog-open-tts="<?php echo htmlspecialchars(Strings::headerI18n('SIGN_OUT'), ENT_QUOTES, 'UTF-8'); ?>" data-dialog-close-tts="<?php echo htmlspecialchars(Strings::headerI18n('SIGN_OUT'), ENT_QUOTES, 'UTF-8'); ?>" aria-modal="true" aria-labelledby="modal_signout_title" aria-describedby="modal_signout_aria modal_signout_meta">
   <div class="modal_aria visually_hidden">
     <span id="modal_signout_aria"><?php echo Strings::headerI18n('SIGN_OUT_DIALOG_DESCRIPTION'); ?></span>
   </div>
@@ -843,7 +843,7 @@ echo Render::template('keyboard-shortcuts', $renders);
           <li class="pages"><a href="/help/" data-help-trigger="true" data-nav-shortcut="h" aria-keyshortcuts="h" accesskey="h"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['shortcuts']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('KEYBOARD'); ?></span></a></li>
 <?php } // end $isAuthenticated nav ?>
 <?php if ($isAuthenticated) { ?>
-      <li class="pages nav_signout"><a href="/signout/" id="call_signout_modal" data-no-speculation><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['signout']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('SIGN_OUT'); ?></span></a></li>
+      <li class="pages nav_signout"><button type="button" id="call_signout_modal" class="nav_signout_button" data-dialog-open="modal_signout" commandfor="modal_signout" command="show-modal" data-no-speculation aria-haspopup="dialog" aria-controls="modal_signout"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['signout']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('SIGN_OUT'); ?></span></button></li>
 <?php } ?>
     </ul>
   </nav>

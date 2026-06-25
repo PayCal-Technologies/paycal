@@ -771,16 +771,27 @@ final class PasskeyController
       return;
     }
 
-    $sessionHash = bin2hex(random_bytes(self::SECRET_BYTES));
-    Authentication::setSession($sessionHash, $expectedUserUUID);
-    Database::hset(Keys::SESSION . ':' . $sessionHash, [
-      'auth_method' => 'passkey',
-      'auth_strength' => 'strong',
-      'credential_id' => $credentialId,
-      'passkey_stepup_at' => (string) time(),
-    ]);
-    Authentication::setCookie($sessionHash);
-    UserRepository::touchLastSignin($expectedUserUUID);
+    $now = (string) time();
+    $sessionPromoted = false;
+    if (Authentication::validateAndTouchSession()) {
+      $currentUserUUID = User::currentUUID();
+      if ($this->isValidUserUUID($currentUserUUID) && hash_equals($currentUserUUID, $expectedUserUUID)) {
+        $sessionPromoted = $this->promoteCurrentSessionToPasskeyCredential($expectedUserUUID, $credentialId, $now);
+      }
+    }
+
+    if (!$sessionPromoted) {
+      $sessionHash = bin2hex(random_bytes(self::SECRET_BYTES));
+      Authentication::setSession($sessionHash, $expectedUserUUID);
+      Database::hset(Keys::SESSION . ':' . $sessionHash, [
+        'auth_method' => 'passkey',
+        'auth_strength' => 'strong',
+        'credential_id' => $credentialId,
+        'passkey_stepup_at' => $now,
+      ]);
+      Authentication::setCookie($sessionHash);
+      UserRepository::touchLastSignin($expectedUserUUID);
+    }
 
     $updateFields = [
       'last_used_at' => (string) time(),
@@ -823,6 +834,7 @@ final class PasskeyController
       'auth_strength' => 'strong',
       'mutation_allowed' => true,
       'credential_id' => $credentialId,
+      'session_promoted' => $sessionPromoted,
       'suspected_clone' => $suspectedClone,
     ]);
   }

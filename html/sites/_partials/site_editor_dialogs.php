@@ -24,7 +24,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
   : site_editor_i18n('SITES_PERSONAL_PLANNING_EMPTY');
 ?>
   <!-- Create Site Dialog -->
-  <dialog id='modal_create_site' class='dialog' aria-modal='true' aria-labelledby='modal_create_site_title' aria-describedby='modal_create_site_aria'>
+  <dialog id='modal_create_site' data-dialog-invoker-bridge data-dialog-close-tts='<?php echo site_editor_i18n('CREATE_SITE'); ?>' class='dialog' aria-modal='true' aria-labelledby='modal_create_site_title' aria-describedby='modal_create_site_aria'>
     <div class='modal_aria visually_hidden'>
       <span id='modal_create_site_aria'><?php echo site_editor_i18n('CREATE_SITE'); ?></span>
     </div>
@@ -32,7 +32,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
       <input type='hidden' id='create_site_status' name='status' value='active'>
       <section class='modal_header'>
         <h2 id='modal_create_site_title' class='modal_title'><?php echo site_editor_i18n('CREATE_SITE'); ?></h2>
-        <button type='button' class='btn_close' data-dialog-close='modal_create_site' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
+        <button type='button' class='btn_close' data-dialog-close='modal_create_site' commandfor='modal_create_site' command='close' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
       </section>
       <section class='modal_content f_column'>
         <!-- Site Name -->
@@ -155,7 +155,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
           <button type='submit' id='create_site_submit' class='btn btn_primary'>
             <?php echo site_editor_i18n('CREATE'); ?>
           </button>
-          <button type='button' id='create_site_cancel' class='btn btn_secondary' data-dialog-close='modal_create_site'>
+          <button type='button' id='create_site_cancel' class='btn btn_secondary' data-dialog-close='modal_create_site' commandfor='modal_create_site' command='close'>
             <?php echo site_editor_i18n('CLOSE'); ?>
           </button>
         </div>
@@ -164,7 +164,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
   </dialog>
 
   <!-- Edit Site Dialog -->
-  <dialog id='modal_edit_site' class='dialog' aria-modal='true' aria-labelledby='modal_edit_site_title' aria-describedby='modal_edit_site_aria'>
+  <dialog id='modal_edit_site' data-dialog-invoker-bridge data-dialog-close-tts='<?php echo site_editor_i18n('EDIT_SITE'); ?>' class='dialog' aria-modal='true' aria-labelledby='modal_edit_site_title' aria-describedby='modal_edit_site_aria'>
     <div class='modal_aria visually_hidden'>
       <span id='modal_edit_site_aria'><?php echo site_editor_i18n('EDIT_SITE'); ?></span>
     </div>
@@ -173,7 +173,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
       <input type='hidden' id='edit_site_owner_uuid' name='owner_uuid' value=''>
       <section class='modal_header'>
         <h2 id='modal_edit_site_title' class='modal_title'><?php echo site_editor_i18n('EDIT_SITE'); ?></h2>
-        <button type='button' class='btn_close' data-dialog-close='modal_edit_site' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
+        <button type='button' class='btn_close' data-dialog-close='modal_edit_site' commandfor='modal_edit_site' command='close' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
       </section>
       <section class='modal_content'>
 
@@ -479,7 +479,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
           <?php endif; ?>
           <button type='button' id='edit_site_delete' class='btn btn_danger' hidden><?php echo site_editor_i18n('SITES_DELETE_ACTION'); ?></button>
           <button type='submit' id='edit_site_submit' class='btn btn_primary'><?php echo site_editor_i18n('SITES_SAVE_SITE'); ?></button>
-          <button type='button' id='edit_site_cancel' class='btn btn_secondary' data-dialog-close='modal_edit_site'>
+          <button type='button' id='edit_site_cancel' class='btn btn_secondary' data-dialog-close='modal_edit_site' commandfor='modal_edit_site' command='close'>
             <?php echo site_editor_i18n('CLOSE'); ?>
           </button>
         </div>
@@ -488,11 +488,11 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
   </dialog>
 
   <!-- Confirmation Dialog for Delete Site -->
-  <dialog id='modal_confirm_delete_site' class='dialog' aria-modal='true' aria-labelledby='modal_confirm_delete_site_title' aria-describedby='confirm_delete_site_aria confirm_delete_site_message'>
+  <dialog id='modal_confirm_delete_site' data-dialog-invoker-bridge data-dialog-close-tts='<?php echo site_editor_i18n('SITES_CONFIRM_ARCHIVE_TITLE'); ?>' class='dialog' aria-modal='true' aria-labelledby='modal_confirm_delete_site_title' aria-describedby='confirm_delete_site_aria confirm_delete_site_message'>
     <p id='confirm_delete_site_aria' class='visually_hidden'><?php echo site_editor_i18n('SITES_CONFIRM_ARCHIVE_ARIA'); ?></p>
     <section class='modal_header'>
       <h2 id='modal_confirm_delete_site_title' class='modal_title'><?php echo site_editor_i18n('SITES_CONFIRM_ARCHIVE_TITLE'); ?></h2>
-      <button type='button' class='btn_close' data-dialog-close='modal_confirm_delete_site' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
+      <button type='button' class='btn_close' data-dialog-close='modal_confirm_delete_site' commandfor='modal_confirm_delete_site' command='close' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
     </section>
     <section class='modal_content'>
       <p id='confirm_delete_site_message'></p>
@@ -502,7 +502,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
         <button type='button' id='confirm_delete_site_yes' class='btn btn_primary'>
           <?php echo site_editor_i18n('SITES_ARCHIVE_SITE'); ?>
         </button>
-        <button type='button' id='confirm_delete_site_no' class='btn btn_secondary'>
+        <button type='button' id='confirm_delete_site_no' class='btn btn_secondary' data-dialog-close='modal_confirm_delete_site' commandfor='modal_confirm_delete_site' command='close'>
           <?php echo site_editor_i18n('CANCEL'); ?>
         </button>
       </div>
@@ -510,11 +510,11 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
   </dialog>
 
   <!-- Archived Work Viewer Dialog -->
-  <dialog id='modal_archived_work' class='dialog modal_archived_work' aria-modal='true' aria-labelledby='archived_work_title' aria-describedby='archived_work_aria archived_work_content'>
+  <dialog id='modal_archived_work' data-dialog-invoker-bridge data-dialog-close-tts='<?php echo site_editor_i18n('SITES_ARCHIVED_WORK_TITLE'); ?>' class='dialog modal_archived_work' aria-modal='true' aria-labelledby='archived_work_title' aria-describedby='archived_work_aria archived_work_content'>
     <p id='archived_work_aria' class='visually_hidden'><?php echo site_editor_i18n('SITES_ARCHIVED_WORK_ARIA'); ?></p>
     <section class='modal_header'>
       <h2 class='modal_title' id='archived_work_title'><?php echo site_editor_i18n('SITES_ARCHIVED_WORK_TITLE'); ?></h2>
-      <button type='button' class='btn_close' data-dialog-close='modal_archived_work' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
+      <button type='button' class='btn_close' data-dialog-close='modal_archived_work' commandfor='modal_archived_work' command='close' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
     </section>
     <section class='modal_content' id='archived_work_content'>
       <p class='archived_work_loading'><?php echo site_editor_i18n('LOADING'); ?></p>
@@ -524,7 +524,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
         <button type='button' id='archived_work_finality_delete' class='btn btn_danger hidden'>
           🗑️ <?php echo site_editor_i18n('SITES_FINALITY_DELETE_BUTTON'); ?>
         </button>
-        <button type='button' id='archived_work_close' class='btn btn_secondary'>
+        <button type='button' id='archived_work_close' class='btn btn_secondary' data-dialog-close='modal_archived_work' commandfor='modal_archived_work' command='close'>
           <?php echo site_editor_i18n('CLOSE'); ?>
         </button>
       </div>
@@ -532,11 +532,11 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
   </dialog>
 
   <!-- Finality Delete Confirmation Dialog -->
-  <dialog id='modal_finality_delete' class='dialog' aria-modal='true' aria-labelledby='modal_finality_delete_title' aria-describedby='finality_delete_aria finality_delete_message'>
+  <dialog id='modal_finality_delete' data-dialog-invoker-bridge data-dialog-close-tts='<?php echo site_editor_i18n('SITES_FINALITY_DELETE_TITLE'); ?>' class='dialog' aria-modal='true' aria-labelledby='modal_finality_delete_title' aria-describedby='finality_delete_aria finality_delete_message'>
     <p id='finality_delete_aria' class='visually_hidden'><?php echo site_editor_i18n('SITES_FINALITY_DELETE_ARIA'); ?></p>
     <section class='modal_header'>
       <h2 id='modal_finality_delete_title' class='modal_title modal_title_danger'>⚠️ <?php echo site_editor_i18n('SITES_FINALITY_DELETE_TITLE'); ?></h2>
-      <button type='button' class='btn_close' data-dialog-close='modal_finality_delete' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
+      <button type='button' class='btn_close' data-dialog-close='modal_finality_delete' commandfor='modal_finality_delete' command='close' aria-label='<?php echo site_editor_i18n('CLOSE'); ?>'>&times;</button>
     </section>
     <section class='modal_content'>
       <p id='finality_delete_message'></p>
@@ -546,7 +546,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
         <button type='button' id='finality_delete_yes' class='btn btn_danger'>
           <?php echo site_editor_i18n('SITES_FINALITY_DELETE_CONFIRM'); ?>
         </button>
-        <button type='button' id='finality_delete_no' class='btn btn_secondary'>
+        <button type='button' id='finality_delete_no' class='btn btn_secondary' data-dialog-close='modal_finality_delete' commandfor='modal_finality_delete' command='close'>
           <?php echo site_editor_i18n('CLOSE'); ?>
         </button>
       </div>

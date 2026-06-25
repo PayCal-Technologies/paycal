@@ -812,6 +812,13 @@ CALENDAR_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24"
 CALENDAR_UNKNOWN_ERROR Error desconocido
 CALENDAR_UNLOCK_REQUIRED_EDIT Se requiere desbloqueo seguro antes de editar. Inicie sesion con su passkey de nuevo e intente otra vez.
 CALENDAR_UNLOCK_REQUIRED_SAVE Se requiere desbloqueo antes de guardar. Use el desbloqueo con passkey y guarde de nuevo.
+CALENDAR_REAUTH_SESSION_TITLE Reautenticando
+CALENDAR_REAUTH_SESSION_MESSAGE Por su seguridad, estamos reautenticando su sesión.
+CALENDAR_REAUTH_SESSION_ARIA Reautenticación con passkey en curso
+CALENDAR_REAUTH_CANCELLED Se canceló la autenticación con passkey.
+CALENDAR_REAUTH_FAILED No se pudo reautenticar su sesión. Inténtelo de nuevo.
+CALENDAR_REAUTH_DEK_UNLOCK_FAILED Passkey verificada, pero no se pudieron desbloquear las entradas cifradas. Inténtelo de nuevo o contacte con soporte.
+SECURITY_DEK_ZEROIZED_TOAST Su sesión segura de edición finalizó. Use su passkey para desbloquear de nuevo.
 CALENDAR_VIEW_AS Ver como
 CALENDAR_WEB_AUTHN_UNSUPPORTED Este navegador no puede usar passkeys, por lo que las entradas cifradas no se pueden desbloquear aqui. Use un navegador compatible con WebAuthn en una conexion segura (HTTPS).
 CALENDAR_WORK_ENTRY_LABEL Entrada de trabajo
@@ -1501,6 +1508,10 @@ FOOTER Footer
 FOOTER_COPYRIGHT © %s PayCal Technologies Inc. All rights reserved.
 FOOTER_TRADEMARK PayCal™ es una marca comercial de PayCal Technologies Inc. (registro pendiente).
 FOOTER_SOC2_BADGE_ARIA SOC 2 listo para auditoría — ver detalles de cumplimiento
+FOOTER_SOCIAL_ARIA Redes sociales
+FOOTER_SOCIAL_REDDIT_ARIA PayCal en Reddit
+FOOTER_SOCIAL_FACEBOOK_ARIA PayCal en Facebook
+FOOTER_SOCIAL_LINKEDIN_ARIA PayCal en LinkedIn
 FOR for
 FORECAST_ANCHOR_DATE Rotation Anchor Date
 FORECAST_ANCHOR_DATE_HINT First day of the first work block
@@ -2368,6 +2379,7 @@ SESSION_TIMEOUT_MODAL_ARIA This dialog warns you that your session is about to e
 SESSION_TIMEOUT_MODAL_META Session timeout warning and extension
 SESSION_TIMEOUT_STAY_LOGGED_IN Stay Logged In
 SESSION_TIMEOUT_TITLE Session Timeout
+SECURITY_DEK_ZEROIZED_TOAST Your secure editing session ended for your protection. Use your passkey to unlock again.
 SETTINGS Settings
 SETTINGS_ACCESSIBILITY_TYPOGRAPHY_FORM_ARIA Typography and readability preferences
 SETTINGS_DIAGNOSTICS_BASIC_DESC Start here for common fixes. Copy support info when contacting us.
@@ -4026,6 +4038,8 @@ BUSINESSES_MEMBERS_COL_YTD_GROSS YTD Gross
 BUSINESSES_MEMBERS_SECURITY_SETUP_HELP Finish security setup to protect this workspace.
 BUSINESSES_MEMBERS_FILTER_ALL All Roles
 BUSINESSES_MEMBERS_FILTER_ARIA Filter by role
+BUSINESSES_MEMBERS_GUIDE Members Guide
+BUSINESSES_MEMBERS_GUIDE_OPEN_ARIA Open Members guide
 BUSINESSES_MEMBERS_GRID_ARIA Business members results
 BUSINESSES_MEMBERS_GRID_CONTEXT Rows show member name with email, role, and status, plus joined date, hours, earnings, and row actions. Use the Columns menu to show or hide optional columns.
 BUSINESSES_MEMBERS_GRID_SR Business members grid. Use search to filter, sortable headers to order, click a row to open member reports, click role in the name cell to change role, or use the row menu for more actions.

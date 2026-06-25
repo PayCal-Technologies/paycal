@@ -256,37 +256,33 @@ namespace PayCal\Domain;
   };
 
   const siteEditorBindDialogCloseButtons = () => {
-    document.querySelectorAll('[data-dialog-close]').forEach((button) => {
-      if (!(button instanceof HTMLElement) || button.dataset.siteEditorCloseBound === '1') {
+    SITE_EDITOR_DIALOG_IDS.forEach((dialogId) => {
+      const dialog = siteEditorGetElement(dialogId);
+      if (!(dialog instanceof HTMLDialogElement) || dialog.dataset.siteEditorCloseCleanupBound === '1') {
         return;
       }
-      button.dataset.siteEditorCloseBound = '1';
-      button.addEventListener('click', (event) => {
-        const dialogId = String(button.dataset.dialogClose || '');
-        if (!SITE_EDITOR_DIALOG_IDS.has(dialogId)) {
-          return;
+      dialog.dataset.siteEditorCloseCleanupBound = '1';
+      dialog.addEventListener('close', () => {
+        if (dialogId === 'modal_create_site') {
+          const form = siteEditorGetElement('create_site_form');
+          if (form instanceof HTMLFormElement) {
+            form.reset();
+          }
+          siteEditorSetFormStatus('create_site_form_status', '');
+        } else if (dialogId === 'modal_edit_site') {
+          siteEditorSetFormStatus('edit_site_form_status', '');
+        } else if (dialogId === 'modal_confirm_delete_site') {
+          siteEditorDeleteSiteId = null;
+          siteEditorDeleteSiteName = null;
+          siteEditorDeleteOwnerUUID = '';
+          siteEditorDeleteSiteStatus = 'active';
+          const confirmBtn = siteEditorGetElement('confirm_delete_site_yes');
+          if (confirmBtn instanceof HTMLButtonElement) {
+            confirmBtn.disabled = false;
+          }
         }
-        event.preventDefault();
-        event.stopPropagation();
-        const dialog = siteEditorGetElement(dialogId);
-        siteEditorCloseDialog(dialog);
       });
     });
-
-    const deleteModal = siteEditorGetElement('modal_confirm_delete_site');
-    if (deleteModal instanceof HTMLDialogElement && deleteModal.dataset.siteEditorDeleteBound !== '1') {
-      deleteModal.dataset.siteEditorDeleteBound = '1';
-      deleteModal.addEventListener('close', () => {
-        siteEditorDeleteSiteId = null;
-        siteEditorDeleteSiteName = null;
-        siteEditorDeleteOwnerUUID = '';
-        siteEditorDeleteSiteStatus = 'active';
-        const confirmBtn = siteEditorGetElement('confirm_delete_site_yes');
-        if (confirmBtn instanceof HTMLButtonElement) {
-          confirmBtn.disabled = false;
-        }
-      });
-    }
   };
 
   const siteEditorPopulatePlanningFields = (businessName, settings, businessId, ownerUUID) => {
@@ -490,12 +486,6 @@ namespace PayCal\Domain;
       const deleteYesBtn = siteEditorGetElement('confirm_delete_site_yes');
       deleteYesBtn?.addEventListener('click', () => {
         handleSiteEditorConfirmDelete().catch((error) => PW.error(error));
-      });
-
-      const deleteNoBtn = siteEditorGetElement('confirm_delete_site_no');
-      deleteNoBtn?.addEventListener('click', () => {
-        const modal = siteEditorGetElement('modal_confirm_delete_site');
-        siteEditorCloseDialog(modal);
       });
 
       const unlinkBtn = siteEditorGetElement('edit_site_unlink_business');

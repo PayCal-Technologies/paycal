@@ -117,6 +117,8 @@ $auditMetricValue = static function (int $count): string {
 
 </div>
 
+<?php require __DIR__ . '/../_partials/dialogs.php'; ?>
+
 <?php
 require __DIR__ . '/../_partials/footer_shared.php';
 require_once \PayCal\Domain\Config\Environment::appHome() . 'html/footer.php';

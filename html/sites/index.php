@@ -221,11 +221,11 @@ require __DIR__ . '/_partials/site_editor_dialogs.php';
 
 
   <!-- Orphaned Work Recovery Dialog -->
-  <dialog id='modal_orphaned_work' class='dialog modal_orphaned_work' aria-modal='true' aria-labelledby='modal_orphaned_work_title' aria-describedby='modal_orphaned_work_aria modal_orphaned_work_desc'>
+  <dialog id='modal_orphaned_work' data-dialog-invoker-bridge data-dialog-close-tts='<?php echo sites_index_i18n('SITES_ORPHANED_MODAL_TITLE'); ?>' class='dialog modal_orphaned_work' aria-modal='true' aria-labelledby='modal_orphaned_work_title' aria-describedby='modal_orphaned_work_aria modal_orphaned_work_desc'>
     <p id='modal_orphaned_work_aria' class='visually_hidden'><?php echo sites_index_i18n('SITES_ORPHANED_MODAL_ARIA'); ?></p>
     <section class='modal_header'>
       <h2 id='modal_orphaned_work_title' class='modal_title'>🔧 <?php echo sites_index_i18n('SITES_ORPHANED_MODAL_TITLE'); ?></h2>
-      <button type='button' class='btn_close' data-dialog-close='modal_orphaned_work' aria-label='<?php echo sites_index_i18n('CLOSE'); ?>'>&times;</button>
+      <button type='button' class='btn_close' data-dialog-close='modal_orphaned_work' commandfor='modal_orphaned_work' command='close' aria-label='<?php echo sites_index_i18n('CLOSE'); ?>'>&times;</button>
     </section>
     <section class='modal_content'>
       <div id='modal_orphaned_work_desc' class='orphaned_work_disclaimer'>
@@ -236,18 +236,18 @@ require __DIR__ . '/_partials/site_editor_dialogs.php';
       </div>
     </section>
     <section class='modal_footer'>
-      <button type='button' class='btn btn_secondary' data-dialog-close='modal_orphaned_work'>
+      <button type='button' class='btn btn_secondary' data-dialog-close='modal_orphaned_work' commandfor='modal_orphaned_work' command='close'>
         <?php echo sites_index_i18n('CLOSE'); ?>
       </button>
     </section>
   </dialog>
 
   <!-- Recovery Site Dialog -->
-  <dialog id='modal_recovery_site' class='dialog' aria-modal='true' aria-labelledby='modal_recovery_site_title' aria-describedby='recovery_site_aria recovery_site_info'>
+  <dialog id='modal_recovery_site' data-dialog-invoker-bridge data-dialog-close-tts='<?php echo sites_index_i18n('SITES_RECOVERY_SITE_TITLE'); ?>' class='dialog' aria-modal='true' aria-labelledby='modal_recovery_site_title' aria-describedby='recovery_site_aria recovery_site_info'>
     <p id='recovery_site_aria' class='visually_hidden'><?php echo sites_index_i18n('SITES_RECOVERY_SITE_ARIA'); ?></p>
     <section class='modal_header'>
       <h2 id='modal_recovery_site_title' class='modal_title'><?php echo sites_index_i18n('SITES_RECOVERY_SITE_TITLE'); ?></h2>
-      <button type='button' class='btn_close' data-dialog-close='modal_recovery_site' aria-label='<?php echo sites_index_i18n('CLOSE'); ?>'>&times;</button>
+      <button type='button' class='btn_close' data-dialog-close='modal_recovery_site' commandfor='modal_recovery_site' command='close' aria-label='<?php echo sites_index_i18n('CLOSE'); ?>'>&times;</button>
     </section>
     <form id='recovery_site_form'>
       <input type='hidden' id='recovery_orphaned_site_id' name='orphaned_site_id' value=''>
@@ -344,7 +344,7 @@ require __DIR__ . '/_partials/site_editor_dialogs.php';
           <button type='submit' id='recovery_site_submit' class='btn btn_primary'>
             <?php echo sites_index_i18n('SITES_CREATE_SITE_BIND_WORK'); ?>
           </button>
-          <button type='button' class='btn btn_secondary' data-dialog-close='modal_recovery_site'>
+          <button type='button' class='btn btn_secondary' data-dialog-close='modal_recovery_site' commandfor='modal_recovery_site' command='close'>
             <?php echo sites_index_i18n('CLOSE'); ?>
           </button>
         </div>

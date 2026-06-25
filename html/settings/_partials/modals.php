@@ -3,9 +3,9 @@
 namespace PayCal\Domain;
 
 ?>
-  <dialog id="modal_business_consent_revoke" aria-modal="true" aria-labelledby="modal_business_consent_revoke_title" aria-describedby="modal_business_consent_revoke_desc">
+  <dialog id="modal_business_consent_revoke" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo settings_index_i18n('SETTINGS_DATA_CONSENT_REVOKE_MODAL_TITLE'); ?>" aria-modal="true" aria-labelledby="modal_business_consent_revoke_title" aria-describedby="modal_business_consent_revoke_desc">
     <section class="modal_header">
-      <button type="button" class="btn btn_close" data-dialog-close="modal_business_consent_revoke" aria-label="<?php echo settings_index_i18n('CLOSE'); ?>">&times;</button>
+      <button type="button" class="btn btn_close" data-dialog-close="modal_business_consent_revoke" commandfor="modal_business_consent_revoke" command="close" aria-label="<?php echo settings_index_i18n('CLOSE'); ?>">&times;</button>
       <h2 id="modal_business_consent_revoke_title" class="modal_title centered"><?php echo settings_index_i18n('SETTINGS_DATA_CONSENT_REVOKE_MODAL_TITLE'); ?></h2>
     </section>
     <section class="modal_content f_column">
@@ -14,21 +14,21 @@ namespace PayCal\Domain;
     </section>
     <section class="modal_footer">
       <div class="modal_controls flex centered">
-        <button type="button" id="business_consent_revoke_cancel_btn" class="btn btn_cancel f_just_center mar_md"><?php echo settings_index_i18n('CANCEL'); ?></button>
+        <button type="button" id="business_consent_revoke_cancel_btn" class="btn btn_cancel f_just_center mar_md" data-dialog-close="modal_business_consent_revoke" commandfor="modal_business_consent_revoke" command="close"><?php echo settings_index_i18n('CANCEL'); ?></button>
         <button type="button" id="business_consent_revoke_confirm_btn" class="btn btn_delete f_just_center mar_md"><?php echo settings_index_i18n('SETTINGS_DATA_CONSENT_REVOKE'); ?></button>
       </div>
     </section>
   </dialog>
 
   <!-- MODAL CHANGE EMAIL -->
-  <dialog id="modal_change_email" aria-modal="true" aria-labelledby="modal_change_email_title" aria-describedby="modal_change_email_desc change_email_status">
+  <dialog id="modal_change_email" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo settings_index_i18n('CHANGE_EMAIL'); ?>" aria-modal="true" aria-labelledby="modal_change_email_title" aria-describedby="modal_change_email_desc change_email_status">
   <form id="change_email_form" name="change_email_form" aria-label="<?php echo settings_index_i18n('CHANGE_EMAIL'); ?>">
   <input class="visually_hidden" type="text" name="username" value="NOTUSED" autocomplete="username" hidden tabindex="-1" aria-hidden="true">
   <input type="hidden" name="csrf_token" value="<?php echo $csrfNonce; ?>">
   <input type="hidden" id="change_email_txn_id" value="">
 
     <section class="modal_header">
-      <button type="button" class="btn btn_close" data-dialog-close="modal_change_email" aria-label="<?php echo settings_index_i18n('CLOSE'); ?>">&times;</button>
+      <button type="button" class="btn btn_close" data-dialog-close="modal_change_email" commandfor="modal_change_email" command="close" aria-label="<?php echo settings_index_i18n('CLOSE'); ?>">&times;</button>
       <h2 id="modal_change_email_title" class="modal_title centered"><?php echo settings_index_i18n('CHANGE_EMAIL'); ?></h2>
     </section>
 
@@ -166,7 +166,7 @@ ob_start();
 ?>
       <div class="modal_controls flex centered">
         <button id="pay_period_preview_apply" type="button" class="btn btn_primary f_just_center mar_md"><?php echo settings_index_i18n('SAVE'); ?></button>
-        <button id="pay_period_preview_cancel" type="button" class="btn btn_cancel f_just_center mar_md"><?php echo settings_index_i18n('CANCEL'); ?></button>
+        <button id="pay_period_preview_cancel" type="button" class="btn btn_cancel f_just_center mar_md" data-dialog-close="modal_pay_period_preview" commandfor="modal_pay_period_preview" command="close"><?php echo settings_index_i18n('CANCEL'); ?></button>
       </div>
 <?php
 $payPeriodPreviewFooter = (string) ob_get_clean();
@@ -179,6 +179,8 @@ echo Render::dialog([
   'contentHtml' => $payPeriodPreviewContent,
   'footerHtml' => $payPeriodPreviewFooter,
   'closeLabel' => settings_index_i18n('CLOSE'),
+  'invokerBridge' => true,
+  'closeTts' => settings_index_i18n('PAY_PERIOD'),
 ]);
 ?>
 
@@ -219,7 +221,7 @@ ob_start();
 ?>
       <div class="modal_controls flex centered">
         <button id="delete_account_submit" class="btn btn_delete f_just_center mar_md"><?php echo settings_index_i18n('DELETE_ACCOUNT'); ?></button>
-        <button class="btn btn_cancel f_just_center mar_md" id="delete_account_cancel_btn"><?php echo settings_index_i18n('CANCEL'); ?></button>
+        <button class="btn btn_cancel f_just_center mar_md" id="delete_account_cancel_btn" data-dialog-close="modal_delete_account" commandfor="modal_delete_account" command="close"><?php echo settings_index_i18n('CANCEL'); ?></button>
       </div>
 <?php
 $deleteAccountModalFooter = (string) ob_get_clean();
@@ -240,6 +242,8 @@ echo Render::dialog([
   'contentHtml' => $deleteAccountModalContent,
   'footerHtml' => $deleteAccountModalFooter,
   'closeLabel' => settings_index_i18n('CLOSE'),
+  'invokerBridge' => true,
+  'closeTts' => settings_index_i18n('DELETE_ACCOUNT'),
 ]);
 ?>
 
@@ -263,9 +267,9 @@ echo Render::dialog([
     </div>
   </template>
 <!-- IMPORT CONFIRM DIALOG -->
-<dialog id="modal_import_confirm" aria-modal="true" aria-labelledby="modal_import_confirm_title" aria-describedby="modal_import_confirm_desc">
+<dialog id="modal_import_confirm" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo settings_index_i18n('SETTINGS_JS_MODAL_CONFIRM_IMPORT'); ?>" aria-modal="true" aria-labelledby="modal_import_confirm_title" aria-describedby="modal_import_confirm_desc">
   <section class="modal_header">
-    <button type="button" class="btn btn_close" data-dialog-close="modal_import_confirm" aria-label="<?php echo settings_index_i18n('CLOSE'); ?>">&times;</button>
+    <button type="button" class="btn btn_close" data-dialog-close="modal_import_confirm" commandfor="modal_import_confirm" command="close" aria-label="<?php echo settings_index_i18n('CLOSE'); ?>">&times;</button>
     <h2 id="modal_import_confirm_title" class="modal_title centered">Confirm Import</h2>
   </section>
   <section class="modal_content f_column">
@@ -275,7 +279,7 @@ echo Render::dialog([
   <section class="modal_footer">
     <div class="modal_controls flex centered">
       <button id="import_confirm_proceed_btn" type="button" class="btn btn_primary f_just_center mar_md">Commit Import</button>
-      <button id="import_confirm_cancel_btn" type="button" class="btn btn_cancel f_just_center mar_md"><?php echo settings_index_i18n('CANCEL'); ?></button>
+      <button id="import_confirm_cancel_btn" type="button" class="btn btn_cancel f_just_center mar_md" data-dialog-close="modal_import_confirm" commandfor="modal_import_confirm" command="close"><?php echo settings_index_i18n('CANCEL'); ?></button>
     </div>
   </section>
 </dialog>

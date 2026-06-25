@@ -62,15 +62,15 @@ namespace PayCal\Domain;
 
 <?php require __DIR__ . '/../_archive/partials/browser_panel.php'; ?>
 
-    <dialog id="connections_person_manage_dialog" class="modal connections_person_manage_dialog" aria-labelledby="connections_person_manage_title">
+    <dialog id="connections_person_manage_dialog" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo businesses_index_i18n_html('CONNECTIONS_MANAGE_PERSON_TITLE'); ?>" class="modal connections_person_manage_dialog" aria-labelledby="connections_person_manage_title">
       <form id="connections_person_manage_form" method="dialog" class="modal_content connections_person_manage_content">
         <header class="modal_header">
           <h2 id="connections_person_manage_title"><?php echo businesses_index_i18n_html('CONNECTIONS_MANAGE_PERSON_TITLE'); ?></h2>
-          <button type="button" class="modal_close" data-dialog-close="connections_person_manage_dialog" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
+          <button type="button" class="modal_close" data-dialog-close="connections_person_manage_dialog" commandfor="connections_person_manage_dialog" command="close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
         </header>
         <div id="connections_person_manage_body" class="connections_person_manage_body"></div>
         <footer class="modal_actions">
-          <button type="button" class="btn btn_secondary" id="connections_person_manage_cancel"><?php echo businesses_index_i18n_html('CANCEL'); ?></button>
+          <button type="button" class="btn btn_secondary" id="connections_person_manage_cancel" data-dialog-close="connections_person_manage_dialog" commandfor="connections_person_manage_dialog" command="close"><?php echo businesses_index_i18n_html('CANCEL'); ?></button>
           <button type="submit" class="btn btn_primary"><?php echo businesses_index_i18n_html('SAVE'); ?></button>
         </footer>
       </form>

@@ -60,7 +60,7 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL
       <p class="text-muted">Canonical examples for humans and AI agents.</p>
     </div>
     <div class="goldmaster-admin-actions">
-      <button type="button" class="btn btn_primary" data-goldmaster-open>Open GoldMaster</button>
+      <button type="button" class="btn btn_primary" data-dialog-open="goldmaster_dialog" commandfor="goldmaster_dialog" command="show-modal">Open GoldMaster</button>
       <a class="btn btn_secondary" href="/transparency/goldmaster/" target="_blank" rel="noopener noreferrer">Transparency article</a>
       <a class="btn btn_secondary" href="/admin/">Back to Admin</a>
     </div>
@@ -75,7 +75,7 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL
         <p>GoldMaster keeps PayCal consistent. These curated examples define the preferred patterns for future work.</p>
       </div>
       <div class="admin-card-footer">
-        <button type="button" class="btn btn_primary" data-goldmaster-open>Browse Examples</button>
+        <button type="button" class="btn btn_primary" data-dialog-open="goldmaster_dialog" commandfor="goldmaster_dialog" command="show-modal">Browse Examples</button>
       </div>
     </article>
 
@@ -91,7 +91,7 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . htmlspecialchars(Render::cssURL
   </div>
 </section>
 
-<dialog id="goldmaster_dialog" data-dialog-invoker-bridge class="dialog goldmaster-dialog" data-dialog-close-tts="GoldMaster" aria-modal="true" aria-labelledby="goldmaster_dialog_title" aria-describedby="goldmaster_dialog_desc" <?= $openDialogOnLoad ? 'data-open-on-load="1"' : '' ?>>
+<dialog id="goldmaster_dialog" data-dialog-invoker-bridge class="dialog goldmaster-dialog" data-dialog-open-tts="GoldMaster" data-dialog-close-tts="GoldMaster" aria-modal="true" aria-labelledby="goldmaster_dialog_title" aria-describedby="goldmaster_dialog_desc" <?= $openDialogOnLoad ? 'data-open-on-load="1"' : '' ?>>
   <section class="modal_header">
     <div>
       <h2 id="goldmaster_dialog_title" class="modal_title">GoldMaster</h2>

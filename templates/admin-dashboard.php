@@ -132,6 +132,8 @@ __SITE_COLOR_PALETTE_HTML__
 <!-- MODAL EDIT USER -->
 <dialog
   id="modal_edit_user"
+  data-dialog-invoker-bridge
+  data-dialog-close-tts="__ADMIN_EDIT_USER_TITLE__"
   role="dialog"
   aria-modal="true"
   aria-labelledby="modal_edit_user_title"
@@ -176,6 +178,8 @@ __SITE_COLOR_PALETTE_HTML__
         aria-label="__ADMIN_EDIT_USER_CLOSE_ARIA__"
         data-action="close"
         data-dialog-close="modal_edit_user"
+        commandfor="modal_edit_user"
+        command="close"
       >
         ×
       </button>
@@ -309,6 +313,8 @@ __SITE_COLOR_PALETTE_HTML__
               class="btn btn_cancel"
               data-action="close"
               data-dialog-close="modal_edit_user"
+              commandfor="modal_edit_user"
+              command="close"
             >
               Close
             </button>

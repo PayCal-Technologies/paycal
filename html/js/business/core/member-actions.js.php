@@ -30,15 +30,7 @@
     message: document.getElementById('businesses_member_revoke_dialog_message'),
     confirmButton: document.getElementById('businesses_member_revoke_confirm'),
     cancelButton: document.getElementById('businesses_member_revoke_cancel'),
-    closeButton: document.getElementById('businesses_member_revoke_close'),
   });
-
-  const closeMemberRevokeDialog = () => {
-    const { dialog } = getMemberRevokeDialogElements();
-    if (dialog instanceof HTMLDialogElement && dialog.open) {
-      dialog.close('cancel');
-    }
-  };
 
   const promptMemberRevokeDialog = async (memberUuid, memberName, trigger) => {
     const {
@@ -46,8 +38,6 @@
       form,
       message,
       confirmButton,
-      cancelButton,
-      closeButton,
     } = getMemberRevokeDialogElements();
 
     if (!(dialog instanceof HTMLDialogElement) || !(form instanceof HTMLFormElement) || !(message instanceof HTMLElement)) {
@@ -76,11 +66,6 @@
         }
       };
 
-      const onCancel = (event) => {
-        event.preventDefault();
-        closeMemberRevokeDialog();
-      };
-
       const onDialogClose = () => {
         if (!settled) {
           settle(false);
@@ -92,14 +77,10 @@
 
       const cleanup = () => {
         form.removeEventListener('submit', onSubmit);
-        cancelButton?.removeEventListener('click', onCancel);
-        closeButton?.removeEventListener('click', onCancel);
         dialog.removeEventListener('close', onDialogClose);
       };
 
       form.addEventListener('submit', onSubmit);
-      cancelButton?.addEventListener('click', onCancel);
-      closeButton?.addEventListener('click', onCancel);
       dialog.addEventListener('close', onDialogClose);
 
       state.lastFocused = trigger instanceof HTMLElement ? trigger : document.activeElement;
@@ -159,7 +140,6 @@
     dialog: document.getElementById('businesses_member_reports_dialog'),
     title: document.getElementById('businesses_member_reports_dialog_title'),
     body: document.getElementById('businesses_member_reports_dialog_body'),
-    closeButton: document.getElementById('businesses_member_reports_close'),
   });
 
   const formatMemberReportsDialogTitle = (memberName) => (
@@ -215,6 +195,14 @@
 
     state.lastFocused = trigger instanceof HTMLElement ? trigger : document.activeElement;
     PC.openModal('businesses_member_reports_dialog');
+
+    const { dialog: reportsDialog } = getMemberReportsDialogElements();
+    if (reportsDialog instanceof HTMLDialogElement && reportsDialog.dataset.memberReportsCloseBound !== '1') {
+      reportsDialog.dataset.memberReportsCloseBound = '1';
+      reportsDialog.addEventListener('close', () => {
+        resetMemberReportsDialogState();
+      });
+    }
 
     try {
       const year = new Date().getFullYear();

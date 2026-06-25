@@ -945,6 +945,8 @@ BUSINESSES_MEMBERS_COL_YTD_GROSS YTD Gross
 BUSINESSES_MEMBERS_SECURITY_SETUP_HELP Finish security setup to protect this workspace.
 BUSINESSES_MEMBERS_FILTER_ALL All Roles
 BUSINESSES_MEMBERS_FILTER_ARIA Filter by role
+BUSINESSES_MEMBERS_GUIDE Members Guide
+BUSINESSES_MEMBERS_GUIDE_OPEN_ARIA Open Members guide
 BUSINESSES_MEMBERS_FILTER_PLACEHOLDER Filter members...
 BUSINESSES_MEMBERS_GRID_ARIA Business members results
 BUSINESSES_MEMBERS_GRID_CONTEXT Rows show member name with email, role, and status, plus joined date, hours, earnings, and row actions. Use the Columns menu to show or hide optional columns.
@@ -1468,6 +1470,13 @@ CALENDAR_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24"
 CALENDAR_UNKNOWN_ERROR Unknown error
 CALENDAR_UNLOCK_REQUIRED_EDIT Secure unlock is required before editing. Sign in with your passkey again and retry.
 CALENDAR_UNLOCK_REQUIRED_SAVE Unlock required before save. Use passkey unlock and then save again.
+CALENDAR_REAUTH_SESSION_TITLE Re-authenticating
+CALENDAR_REAUTH_SESSION_MESSAGE For your security we are re-authenticating your session.
+CALENDAR_REAUTH_SESSION_ARIA Passkey re-authentication in progress
+CALENDAR_REAUTH_CANCELLED Passkey authentication was cancelled.
+CALENDAR_REAUTH_FAILED Unable to re-authenticate your session. Try again.
+CALENDAR_REAUTH_DEK_UNLOCK_FAILED Passkey verified, but encrypted entries could not be unlocked. Try again or contact support.
+SECURITY_DEK_ZEROIZED_TOAST Your secure editing session ended. Use your passkey to unlock again.
 CALENDAR_VIEW_AS View as
 CALENDAR_VIEW_MODE_ARIA Calendar view
 CALENDAR_WEB_AUTHN_UNSUPPORTED This browser cannot use passkeys, so encrypted entries cannot be unlocked here. Use a WebAuthn-capable browser on a secure connection (HTTPS).
@@ -2169,6 +2178,10 @@ FOOTER Footer
 FOOTER_COPYRIGHT © %s PayCal Technologies Inc. All rights reserved.
 FOOTER_TRADEMARK PayCal™ is a trademark of PayCal Technologies Inc. (registration pending).
 FOOTER_SOC2_BADGE_ARIA SOC 2 Audit-Ready — view compliance details
+FOOTER_SOCIAL_ARIA Social media
+FOOTER_SOCIAL_REDDIT_ARIA PayCal on Reddit
+FOOTER_SOCIAL_FACEBOOK_ARIA PayCal on Facebook
+FOOTER_SOCIAL_LINKEDIN_ARIA PayCal on LinkedIn
 FOR for
 FORECAST_ANCHOR_DATE Rotation Anchor Date
 FORECAST_ANCHOR_DATE_HINT First day of the first work block
@@ -2860,6 +2873,7 @@ PROFILE_BILLING_CONNECT_LINK Connect to a business
 PROFILE_BILLING_CURRENT_PLAN Current plan
 PROFILE_BILLING_DISABLE_PREMIUM Disable Premium
 PROFILE_BILLING_DOWNGRADE_ARIA Type DOWNGRADE ME to confirm downgrade
+PROFILE_BILLING_DOWNGRADE_FREE_DIALOG_TITLE Downgrade to Free?
 PROFILE_BILLING_DOWNGRADE_HELP If Stripe portal does not show a cancellation option, you can cancel Premium here immediately.
 PROFILE_BILLING_DOWNGRADE_PHRASE DOWNGRADE ME
 PROFILE_BILLING_DOWNGRADE_PROMPT_PREFIX Type
@@ -3066,6 +3080,7 @@ SESSION_TIMEOUT_MODAL_ARIA This dialog warns you that your session is about to e
 SESSION_TIMEOUT_MODAL_META Session timeout warning and extension
 SESSION_TIMEOUT_STAY_LOGGED_IN Stay Logged In
 SESSION_TIMEOUT_TITLE Session Timeout
+SECURITY_DEK_ZEROIZED_TOAST Your secure editing session ended for your protection. Use your passkey to unlock again.
 SETTINGS Settings
 SETTINGS_ACCESSIBILITY_TYPOGRAPHY_FORM_ARIA Typography and readability preferences
 SETTINGS_DIAGNOSTICS_BASIC_DESC Start here for common fixes. Copy support info when contacting us.

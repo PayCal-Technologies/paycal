@@ -232,6 +232,57 @@ body[data-nav-primary-position='right'] #page_header.nav_component--header .nav_
   outline-offset: 2px;
 }
 
+.nav_component--footer .footer_social {
+  width: 100%;
+  margin: 0.5rem 0 0;
+}
+
+.nav_component--footer .footer_social ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  gap: var(--gap-md, 1rem);
+}
+
+.nav_component--footer .footer_social li {
+  flex: 0 0 auto;
+}
+
+.nav_component--footer .footer_social_link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: 4px;
+  color: color-mix(in srgb, var(--color-text) 88%, var(--panel-border));
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.nav_component--footer .footer_social_link:hover,
+.nav_component--footer .footer_social_link:focus {
+  background-color: var(--panel-text);
+  color: var(--panel-bg);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav_component--footer .footer_social_link:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #0096d6);
+  outline-offset: 2px;
+}
+
+.nav_component--footer .footer_social_icon {
+  flex-shrink: 0;
+  display: block;
+}
+
 .nav_component--footer .footer_copyright {
   width: 100%;
   margin: 0.65rem auto 0;
@@ -331,15 +382,37 @@ body[data-nav-primary-position='right'] #page_header.nav_component--header .nav_
   transition: var(--depth-interaction-transition, background-color var(--short-transition) ease);
 }
 
+.nav_menu li.pages > button {
+  display: flex;
+  flex-grow: 1;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  text-align: center;
+  color: var(--nav-menu-fore, var(--color-text));
+  background-color: var(--nav-menu-back, transparent);
+  text-decoration: none;
+  letter-spacing: 0.05rem;
+  font: inherit;
+  cursor: pointer;
+  transition: var(--depth-interaction-transition, background-color var(--short-transition) ease);
+}
+
 .nav_menu a.nav_admin_toggle {
   cursor: pointer;
 }
 
 .nav_menu a:active,
-.nav_menu a.nav_admin_toggle:active { border-top: calc(var(--border-size)) inset var(--panel-border); }
+.nav_menu a.nav_admin_toggle:active,
+.nav_menu li.pages > button:active { border-top: calc(var(--border-size)) inset var(--panel-border); }
 
 .nav_menu li:hover a,
-.nav_menu li:hover a.nav_admin_toggle {
+.nav_menu li:hover a.nav_admin_toggle,
+.nav_menu li:hover > button {
   border: var(--border-size) double var(--color-text);
   border-radius: 0;
   background-color: var(--color-text);
@@ -348,7 +421,8 @@ body[data-nav-primary-position='right'] #page_header.nav_component--header .nav_
 }
 
 .nav_menu li.active a,
-.nav_menu li.active a.nav_admin_toggle {
+.nav_menu li.active a.nav_admin_toggle,
+.nav_menu li.active > button {
   border: 0;
   border-radius: 0;
   border-top-left-radius: var(--border-radius);
@@ -363,8 +437,10 @@ span.active svg { fill: var(--color-text); }
 
 .nav_menu li.active:hover a,
 .nav_menu li.active:hover a.nav_admin_toggle,
+.nav_menu li.active:hover > button,
 .nav_menu li:focus-within a,
-.nav_menu li:focus-within a.nav_admin_toggle {
+.nav_menu li:focus-within a.nav_admin_toggle,
+.nav_menu li:focus-within > button {
   background-color: var(--color-bg);
   color: var(--color-text);
   transition: background-color var(--short-transition) ease;

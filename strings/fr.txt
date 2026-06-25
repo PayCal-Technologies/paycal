@@ -1092,6 +1092,8 @@ BUSINESSES_MEMBERS_SECURITY_SETUP_HELP Finish security setup to protect this wor
 BUSINESSES_MEMBERS_COLUMNS_GEAR Columns ⚙
 BUSINESSES_MEMBERS_FILTER_ALL All Roles
 BUSINESSES_MEMBERS_FILTER_ARIA Filter by role
+BUSINESSES_MEMBERS_GUIDE Members Guide
+BUSINESSES_MEMBERS_GUIDE_OPEN_ARIA Open Members guide
 BUSINESSES_MEMBERS_FILTER_PLACEHOLDER Filter members...
 BUSINESSES_MEMBERS_GRID_ARIA Business members results
 BUSINESSES_MEMBERS_GRID_CONTEXT Rows show member name with email, role, and status, plus joined date, hours, earnings, and row actions. Use the Columns menu to show or hide optional columns.
@@ -1481,6 +1483,13 @@ CALENDAR_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24"
 CALENDAR_UNKNOWN_ERROR Erreur inconnue
 CALENDAR_UNLOCK_REQUIRED_EDIT Déverrouillez la période pour modifier cette entrée.
 CALENDAR_UNLOCK_REQUIRED_SAVE Déverrouillez la période pour enregistrer.
+CALENDAR_REAUTH_SESSION_TITLE Réauthentification
+CALENDAR_REAUTH_SESSION_MESSAGE Pour votre sécurité, nous réauthentifions votre session.
+CALENDAR_REAUTH_SESSION_ARIA Réauthentification par passkey en cours
+CALENDAR_REAUTH_CANCELLED L'authentification par passkey a été annulée.
+CALENDAR_REAUTH_FAILED Impossible de réauthentifier votre session. Réessayez.
+CALENDAR_REAUTH_DEK_UNLOCK_FAILED Passkey vérifiée, mais les entrées chiffrées n'ont pas pu être déverrouillées. Réessayez ou contactez le support.
+SECURITY_DEK_ZEROIZED_TOAST Votre session de modification sécurisée a expiré. Utilisez votre passkey pour déverrouiller à nouveau.
 CALENDAR_VIEW_AS Voir en tant que
 CALENDAR_WEB_AUTHN_UNSUPPORTED WebAuthn n’est pas pris en charge sur cet appareil.
 CALENDAR_WORK_ENTRY_LABEL Entrée de travail
@@ -2180,6 +2189,10 @@ FOCUS Focus
 FOOTER Footer
 FOOTER_COPYRIGHT © %s PayCal Technologies Inc. All rights reserved.
 FOOTER_SOC2_BADGE_ARIA SOC 2 Audit-Ready — view compliance details
+FOOTER_SOCIAL_ARIA Réseaux sociaux
+FOOTER_SOCIAL_REDDIT_ARIA PayCal sur Reddit
+FOOTER_SOCIAL_FACEBOOK_ARIA PayCal sur Facebook
+FOOTER_SOCIAL_LINKEDIN_ARIA PayCal sur LinkedIn
 FOOTER_TRADEMARK PayCal™ est une marque de commerce de PayCal Technologies Inc. (enregistrement en attente).
 FOR for
 FORECAST_ANCHOR_DATE Rotation Anchor Date
@@ -3077,6 +3090,7 @@ SESSION_TIMEOUT_MODAL_ARIA This dialog warns you that your session is about to e
 SESSION_TIMEOUT_MODAL_META Session timeout warning and extension
 SESSION_TIMEOUT_STAY_LOGGED_IN Stay Logged In
 SESSION_TIMEOUT_TITLE Session Timeout
+SECURITY_DEK_ZEROIZED_TOAST Your secure editing session ended for your protection. Use your passkey to unlock again.
 SESSIONS Sessions
 SET_AS_DEFAULT Définir par défaut.
 SETTINGS Paramètres

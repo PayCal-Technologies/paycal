@@ -3,11 +3,11 @@
 namespace PayCal\Domain;
 
 ?>
-  <dialog id="businesses_definitions_dialog" class="dialog businesses_definitions_dialog" aria-modal="true" aria-labelledby="businesses_definitions_title" aria-describedby="businesses_definitions_aria">
+  <dialog id="businesses_definitions_dialog" aria-modal="true" aria-labelledby="businesses_definitions_title" aria-describedby="businesses_definitions_aria" data-dialog-invoker-bridge data-dialog-open-tts="<?php echo businesses_index_i18n_html('BUSINESSES_DEFINITIONS_TITLE'); ?>" data-dialog-close-tts="<?php echo businesses_index_i18n_html('BUSINESSES_DEFINITIONS_TITLE'); ?>" data-dialog-close-on-backdrop="true" class="dialog businesses_definitions_dialog">
     <form method="dialog">
       <section class="modal_header businesses_definitions_dialog_header">
         <h2 id="businesses_definitions_title" class="modal_title"><?php echo businesses_index_i18n_html('BUSINESSES_DEFINITIONS_TITLE'); ?></h2>
-        <button type="button" id="businesses_definitions_close" class="btn_close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
+        <button type="button" id="businesses_definitions_close" class="btn_close" data-dialog-close="businesses_definitions_dialog" commandfor="businesses_definitions_dialog" command="close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
       </section>
       <section class="modal_content f_column businesses_definitions_dialog_content">
         <p id="businesses_definitions_aria" class="help_text"><?php echo businesses_index_i18n_html('BUSINESSES_DEFINITIONS_ARIA'); ?></p>
@@ -52,27 +52,27 @@ namespace PayCal\Domain;
     </form>
   </dialog>
 
-  <dialog id="businesses_current_details_dialog" class="dialog businesses_current_details_dialog" aria-modal="true" aria-labelledby="businesses_current_details_title" aria-describedby="businesses_current_details_aria">
+  <dialog id="businesses_current_details_dialog" aria-modal="true" aria-labelledby="businesses_current_details_title" aria-describedby="businesses_current_details_aria" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo businesses_index_i18n_html('BUSINESSES_CURRENT_DETAILS_TITLE'); ?>" class="dialog businesses_current_details_dialog">
     <form method="dialog">
       <section class="modal_header">
         <h2 id="businesses_current_details_title" class="modal_title"><?php echo businesses_index_i18n_html('BUSINESSES_CURRENT_DETAILS_TITLE'); ?></h2>
-        <button type="button" class="btn_close" data-dialog-close="businesses_current_details_dialog" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
+        <button type="button" class="btn_close" data-dialog-close="businesses_current_details_dialog" commandfor="businesses_current_details_dialog" command="close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
       </section>
       <section class="modal_content f_column businesses_current_details_content">
         <p id="businesses_current_details_aria" class="help_text"><?php echo businesses_index_i18n_html('BUSINESSES_CURRENT_DETAILS_ARIA'); ?></p>
         <div id="businesses_current_details_body" class="businesses_current_details_body"></div>
       </section>
       <section class="modal_footer">
-        <button type="button" class="btn btn_secondary" data-dialog-close="businesses_current_details_dialog"><?php echo businesses_index_i18n_html('CLOSE'); ?></button>
+        <button type="button" class="btn btn_secondary" data-dialog-close="businesses_current_details_dialog" commandfor="businesses_current_details_dialog" command="close"><?php echo businesses_index_i18n_html('CLOSE'); ?></button>
       </section>
     </form>
   </dialog>
 
-  <dialog id="businesses_membership_consent_dialog" class="dialog businesses_membership_consent_dialog" aria-modal="true" aria-labelledby="businesses_membership_consent_title" aria-describedby="businesses_membership_consent_desc">
+  <dialog id="businesses_membership_consent_dialog" aria-modal="true" aria-labelledby="businesses_membership_consent_title" aria-describedby="businesses_membership_consent_desc" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBERSHIP_CONSENT_TITLE'); ?>" data-dialog-close-on-backdrop="true" class="dialog businesses_membership_consent_dialog">
     <form id="businesses_membership_consent_form" method="dialog">
       <section class="modal_header">
         <h2 id="businesses_membership_consent_title" class="modal_title"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBERSHIP_CONSENT_TITLE'); ?></h2>
-        <button type="button" id="businesses_membership_consent_close" class="btn_close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
+        <button type="button" id="businesses_membership_consent_close" class="btn_close" data-dialog-close="businesses_membership_consent_dialog" commandfor="businesses_membership_consent_dialog" command="close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
       </section>
       <section class="modal_content f_column businesses_membership_consent_content">
         <p id="businesses_membership_consent_desc" class="help_text"><?php echo businesses_index_i18n_html('BUSINESSES_MEMBERSHIP_CONSENT_DESC'); ?></p>
@@ -109,7 +109,7 @@ namespace PayCal\Domain;
       <section class="modal_footer">
         <div class="flex f_center f_space_around">
           <button type="submit" id="businesses_membership_consent_confirm" class="btn btn_primary"><?php echo businesses_index_i18n_html('CONTINUE'); ?></button>
-          <button type="button" id="businesses_membership_consent_cancel" class="btn btn_secondary"><?php echo businesses_index_i18n_html('CANCEL'); ?></button>
+          <button type="button" id="businesses_membership_consent_cancel" class="btn btn_secondary" data-dialog-close="businesses_membership_consent_dialog" commandfor="businesses_membership_consent_dialog" command="close"><?php echo businesses_index_i18n_html('CANCEL'); ?></button>
         </div>
       </section>
     </form>

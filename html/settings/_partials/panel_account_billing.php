@@ -87,12 +87,12 @@ $billingManagerLabel = $isStripeBilling ? 'Stripe' : 'Local';
       </section>
 
       <?php if ($isStripeBilling) { ?>
-        <dialog id="billing_downgrade_free_dialog" class="subscription_downgrade_dialog" aria-labelledby="billing_downgrade_free_dialog_title">
+        <dialog id="billing_downgrade_free_dialog" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo settings_index_i18n('PROFILE_BILLING_DOWNGRADE_FREE_DIALOG_TITLE'); ?>" class="subscription_downgrade_dialog" aria-labelledby="billing_downgrade_free_dialog_title">
           <form method="dialog">
             <h3 id="billing_downgrade_free_dialog_title">Downgrade to Free?</h3>
             <p id="billing_downgrade_free_dialog_body">Free removes paid plan access immediately. You may lose access to paid reports, exports, business records, sites, group roles, listings, and audit tools.</p>
             <div class="subscription_dialog_actions">
-              <button type="button" id="billing_downgrade_free_cancel" class="btn btn_secondary">Cancel</button>
+              <button type="button" id="billing_downgrade_free_cancel" class="btn btn_secondary" data-dialog-close="billing_downgrade_free_dialog" commandfor="billing_downgrade_free_dialog" command="close">Cancel</button>
               <button type="button" id="billing_downgrade_free_continue" class="btn btn_delete">Continue</button>
             </div>
           </form>

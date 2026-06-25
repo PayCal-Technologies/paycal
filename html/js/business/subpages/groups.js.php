@@ -124,16 +124,8 @@
   };
 
   const closeBusinessGroupEditor = () => {
-    const { dialog, form, groupIdInput } = getBusinessGroupEditorElements();
-    if (form instanceof HTMLFormElement) {
-      form.reset();
-    }
-    if (groupIdInput instanceof HTMLInputElement) {
-      groupIdInput.value = '';
-    }
+    const { dialog } = getBusinessGroupEditorElements();
     closeBusinessGroupDialog(dialog);
-    document.body.classList.remove('business_group_modal_open');
-    setBusinessGroupEditorStatus('');
   };
 
   const openBusinessGroupEditor = (group = null) => {
@@ -458,18 +450,18 @@
       });
     });
 
-    document.querySelectorAll('[data-dialog-close="modal_business_group"]').forEach((button) => {
-      button.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        closeBusinessGroupEditor();
-      });
-    });
-
     const { dialog } = getBusinessGroupEditorElements();
     if (dialog instanceof HTMLDialogElement) {
       dialog.addEventListener('close', () => {
+        const { form, groupIdInput } = getBusinessGroupEditorElements();
+        if (form instanceof HTMLFormElement) {
+          form.reset();
+        }
+        if (groupIdInput instanceof HTMLInputElement) {
+          groupIdInput.value = '';
+        }
         document.body.classList.remove('business_group_modal_open');
+        setBusinessGroupEditorStatus('');
       });
     }
 

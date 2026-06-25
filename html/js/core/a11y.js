@@ -77,6 +77,32 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
   }
 
   /**
+   * Post-open a11y side effects shared by openModal() and the Invoker bridge.
+   * Guarded so command+click paths cannot double-announce.
+   */
+  function applyModalOpenEffects(el, openTtsText = "") {
+    if (!(el instanceof HTMLElement)) return;
+    if (el.dataset.paycalOpenEffectsApplied === '1') return;
+    el.dataset.paycalOpenEffectsApplied = '1';
+    queueMicrotask(() => {
+      delete el.dataset.paycalOpenEffectsApplied;
+    });
+
+    state.modal_is_active = true;
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-hidden', 'false');
+
+    const firstFocusable = el.querySelector('a[href], input, button, textarea, select, [tabindex]:not([tabindex="-1"])');
+    if (firstFocusable) firstFocusable.focus();
+
+    if (state.audio_feedback === "all") {
+      try {
+        textToSpeechFn(configObj.OPENED_DIALOG + ` ${openTtsText}`);
+      } catch {}
+    }
+  }
+
+  /**
    * Open modal dialog with accessibility features.
    * - Sets aria-modal="true"
    * - Auto-focuses first focusable element
@@ -86,7 +112,7 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
   function openModal(id, text = "") {
     const el = getElementFn(id);
     if (!el) return;
-    
+
     if (el instanceof HTMLDialogElement) {
       ensureDialogChrome(el);
       if (el.open) {
@@ -95,25 +121,14 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
       }
       state.lastFocused = document.activeElement;
       el.showModal();
-    } else {
-      state.lastFocused = document.activeElement;
-      el.classList.remove('hidden');
-      el.classList.add('display-flex');
+      applyModalOpenEffects(el, text);
+      return;
     }
-    
-    state.modal_is_active = true;
-    el.setAttribute('aria-modal', 'true');
-    el.setAttribute('aria-hidden', 'false');
-    
-    const firstFocusable = el.querySelector('a[href], input, button, textarea, select, [tabindex]:not([tabindex="-1"])');
-    if (firstFocusable) firstFocusable.focus();
-    
-    if (state.audio_feedback === "all") {
-      try {
-        textToSpeechFn(configObj.OPENED_DIALOG + ` ${text}`);
-      } catch {}
-    }
-    
+
+    state.lastFocused = document.activeElement;
+    el.classList.remove('hidden');
+    el.classList.add('display-flex');
+    applyModalOpenEffects(el, text);
   }
 
   /**
@@ -192,18 +207,26 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
   /**
    * Golden Invoker Commands + PayCal a11y bridge
    * -------------------------------------------
-   * Mark a <dialog> with data-dialog-invoker-bridge and optional data-dialog-close-tts.
-   * Close controls keep data-dialog-close for fallback/contract tests and add:
+   * Dialog: data-dialog-invoker-bridge, optional data-dialog-open-tts / data-dialog-close-tts.
+   *
+   * Open control (when no JS prep is needed before showModal):
+   *   commandfor="{dialogId}" command="show-modal"
+   *   data-dialog-open="{dialogId}"  (legacy fallback for delegation → openModal)
+   *
+   * Close control:
    *   commandfor="{dialogId}" command="close"
+   *   data-dialog-close="{dialogId}"  (legacy fallback for delegation → closeModal)
    *
-   * Invoker-capable browsers: command="close" (or Escape → cancel/close) closes natively;
-   * this bridge listens for close/cancel and runs applyModalCloseEffects (TTS, focus,
-   * aria-hidden, modal_is_active). Delegated [data-dialog-close] clicks are skipped when
-   * invoker close is active so closeModal() does not double-fire.
+   * Invoker-capable browsers: command="show-modal" opens natively; this bridge runs
+   * applyModalOpenEffects (ensureDialogChrome, lastFocused, TTS, focus, aria, modal_is_active)
+   * via the dialog command event and/or capture-phase open-control clicks. command="close"
+   * (or Escape → cancel/close) closes natively; close/cancel runs applyModalCloseEffects.
+   * Delegated [data-dialog-open]/[data-dialog-close] clicks are skipped when invoker is
+   * active so openModal()/closeModal() do not double-fire.
    *
-   * Legacy browsers: [data-dialog-close] delegation calls closeModal() as before.
-   * Open paths that need prep (forms, fetched content) still use openModal(); only use
-   * command="show-modal" when no JS prep is required before showModal().
+   * Legacy browsers: [data-dialog-open] / [data-dialog-close] delegation as before.
+   * Open paths that need prep (form reset, fetched content, calendar pickers) still use
+   * openModal(); only use command="show-modal" when no JS prep is required before showModal().
    */
   function bindDialogInvokerBridge(dialog) {
     if (!(dialog instanceof HTMLDialogElement)) return;
@@ -211,6 +234,27 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
     dialog.dataset.invokerBridgeBound = '1';
 
     const getCloseLabel = () => dialog.getAttribute('data-dialog-close-tts') || '';
+    const getOpenLabel = () => dialog.getAttribute('data-dialog-open-tts') || '';
+
+    const scheduleOpenEffects = (wasOpen) => {
+      queueMicrotask(() => {
+        if (!dialog.open) return;
+        if (wasOpen) {
+          state.modal_is_active = true;
+          return;
+        }
+        applyModalOpenEffects(dialog, getOpenLabel());
+      });
+    };
+
+    const prepareInvokerOpen = (source) => {
+      ensureDialogChrome(dialog);
+      const wasOpen = dialog.open;
+      if (!wasOpen) {
+        state.lastFocused = source instanceof HTMLElement ? source : document.activeElement;
+      }
+      return wasOpen;
+    };
 
     const handleNativeClose = () => {
       if (dialog.dataset.paycalCloseViaModal === '1') return;
@@ -219,6 +263,25 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
 
     dialog.addEventListener('close', handleNativeClose);
     dialog.addEventListener('cancel', handleNativeClose);
+
+    dialog.addEventListener('command', (event) => {
+      if (event.command !== 'show-modal') return;
+      const wasOpen = prepareInvokerOpen(event.source);
+      scheduleOpenEffects(wasOpen);
+    });
+
+    if (dialog.id) {
+      const openSelector = `button[commandfor="${dialog.id}"][command="show-modal"]`;
+      queryAllFn(openSelector).forEach((control) => {
+        if (control.dataset.invokerOpenBound === '1') return;
+        control.dataset.invokerOpenBound = '1';
+
+        control.addEventListener('click', () => {
+          const wasOpen = prepareInvokerOpen(control);
+          scheduleOpenEffects(wasOpen);
+        }, { capture: true });
+      });
+    }
   }
 
   function bindAllDialogInvokerBridges() {
@@ -287,6 +350,7 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
     addAudioFocusListener,
     openModal,
     closeModal,
+    applyModalOpenEffects,
     applyModalCloseEffects,
     bindDialogInvokerBridge,
     bindAllDialogInvokerBridges,

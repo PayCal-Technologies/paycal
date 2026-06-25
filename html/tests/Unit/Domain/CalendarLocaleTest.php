@@ -298,6 +298,12 @@ final class CalendarLocaleTest extends TestCase
       'CALENDAR_LOCKED_CANNOT_EDIT',
       'CALENDAR_LOCKED_CANNOT_EDIT_GRACE',
       'CALENDAR_UNLOCK_REQUIRED_EDIT',
+      'CALENDAR_REAUTH_SESSION_TITLE',
+      'CALENDAR_REAUTH_SESSION_MESSAGE',
+      'CALENDAR_REAUTH_SESSION_ARIA',
+      'CALENDAR_REAUTH_CANCELLED',
+      'CALENDAR_REAUTH_FAILED',
+      'CALENDAR_REAUTH_DEK_UNLOCK_FAILED',
       'CALENDAR_WEB_AUTHN_UNSUPPORTED',
       'CALENDAR_EMAIL_VERIFICATION_REQUIRED',
       'CALENDAR_WORK_ENTRY_LABEL',
@@ -310,9 +316,14 @@ final class CalendarLocaleTest extends TestCase
       $this->assertStringContainsString("'{$key}'", $index);
     }
 
+    $this->assertStringContainsString('id="modal_calendar_reauth" data-dialog-invoker-bridge', $index);
     $this->assertStringContainsString("'CALENDAR_LOCKED_CANNOT_EDIT'", $calendarJs);
     $this->assertStringContainsString('formatLockedDateMessage(', $calendarJs);
-    $this->assertStringContainsString("'CALENDAR_UNLOCK_REQUIRED_EDIT'", $calendarJs);
+    $this->assertStringContainsString("'CALENDAR_REAUTH_CANCELLED'", $calendarJs);
+    $this->assertStringContainsString('performPasskeyStepUpReauth', $calendarJs);
+    $this->assertStringContainsString('notifyDekZeroizedToUser', $calendarJs);
+    $this->assertStringContainsString('getDekIdleTimeoutMs', $calendarJs);
+    $this->assertStringContainsString('form_ttl_calendar_seconds', $calendarJs);
     $this->assertStringContainsString("calendarI18n('DATE_PICKER'", $calendarJs);
     $this->assertStringNotContainsString('MSG_CAL_LOCKED_CANNOT_EDIT', $calendarJs);
 

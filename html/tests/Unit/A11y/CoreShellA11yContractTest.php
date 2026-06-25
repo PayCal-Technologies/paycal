@@ -92,6 +92,18 @@ final class CoreShellA11yContractTest extends TestCase
     $this->assertStringContainsString("'FOOTER_SOC2_BADGE_ARIA'", $footer);
     $this->assertStringContainsString("\$i18n['FOOTER_SOC2_BADGE_ARIA']", $footer);
     $this->assertStringNotContainsString('aria-label="SOC 2 Audit-Ready', $footer);
+
+    $this->assertStringContainsString("'FOOTER_SOCIAL_REDDIT_ARIA'", $footer);
+    $this->assertStringContainsString("\$i18n['FOOTER_SOCIAL_REDDIT_ARIA']", $footer);
+    $this->assertStringContainsString("'FOOTER_SOCIAL_FACEBOOK_ARIA'", $footer);
+    $this->assertStringContainsString("\$i18n['FOOTER_SOCIAL_FACEBOOK_ARIA']", $footer);
+    $this->assertStringContainsString("'FOOTER_SOCIAL_LINKEDIN_ARIA'", $footer);
+    $this->assertStringContainsString("\$i18n['FOOTER_SOCIAL_LINKEDIN_ARIA']", $footer);
+    $this->assertStringContainsString('class="footer_social"', $footer);
+    $this->assertStringContainsString('rel="noopener noreferrer"', $footer);
+    $this->assertStringContainsString('https://www.reddit.com/r/PayCal', $footer);
+    $this->assertStringContainsString('https://www.facebook.com/profile.php?id=61583146649256', $footer);
+    $this->assertStringContainsString('https://www.linkedin.com/company/paycaltech/', $footer);
   }
 
   #[Test]
@@ -102,6 +114,10 @@ final class CoreShellA11yContractTest extends TestCase
     $requiredKeys = [
       'DASHBOARD_RESIZE_GRIP_ARIA',
       'FOOTER_SOC2_BADGE_ARIA',
+      'FOOTER_SOCIAL_ARIA',
+      'FOOTER_SOCIAL_REDDIT_ARIA',
+      'FOOTER_SOCIAL_FACEBOOK_ARIA',
+      'FOOTER_SOCIAL_LINKEDIN_ARIA',
       'SKIP_TO_CONTENT',
     ];
 

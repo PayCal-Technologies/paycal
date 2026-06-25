@@ -24,16 +24,6 @@ const debugLog = (...args) => {
 };
 const getErrorMessage = (error) => error?.message || String(error);
 
-const SITE_PAGE_DIALOG_IDS = new Set([
-  'modal_create_site',
-  'modal_edit_site',
-  'modal_confirm_delete_site',
-  'modal_archived_work',
-  'modal_finality_delete',
-  'modal_orphaned_work',
-  'modal_recovery_site',
-]);
-
 const openSitesDialog = (dialog) => {
   if (!(dialog instanceof HTMLDialogElement)) {
     return;
@@ -814,32 +804,46 @@ document.addEventListener("DOMContentLoaded", async () =>
   // ============================================================================
 
   /**
-   * Setup dialog close buttons
+   * Bind dialog close cleanup (invoker bridge handles close controls).
    */
   function setupDialogCloseButtons() {
     debugLog('setupDialogCloseButtons called');
-    const closeButtons = document.querySelectorAll('[data-dialog-close]');
 
-    closeButtons.forEach(button => {
-      button.addEventListener('click', (event) => {
-        const dialogId = button.dataset.dialogClose;
-        if (!SITE_PAGE_DIALOG_IDS.has(String(dialogId || ''))) {
-          return;
+    const bindDialogCloseCleanup = (dialogId, onClose) => {
+      const dialog = PC.getElement(dialogId);
+      if (!(dialog instanceof HTMLDialogElement) || dialog.dataset.sitesCloseCleanupBound === '1') {
+        return;
+      }
+      dialog.dataset.sitesCloseCleanupBound = '1';
+      dialog.addEventListener('close', () => {
+        if (typeof onClose === 'function') {
+          onClose();
         }
-        event.preventDefault();
-        event.stopPropagation();
-        const dialog = PC.getElement(dialogId);
-        closeSitesDialog(dialog);
       });
-    });
+    };
 
-    // Reset delete state when modal closes
-    const deleteModal = PC.getElement('modal_confirm_delete_site');
-    deleteModal?.addEventListener('close', () => {
+    bindDialogCloseCleanup('modal_confirm_delete_site', () => {
       currentDeleteSiteId = null;
       currentDeleteSiteName = null;
       const confirmBtn = PC.getElement('confirm_delete_site_yes');
       if (confirmBtn) confirmBtn.disabled = false;
+    });
+
+    bindDialogCloseCleanup('modal_archived_work', () => {
+      currentArchivedSiteId = null;
+      currentArchivedSiteName = null;
+    });
+
+    bindDialogCloseCleanup('modal_create_site', () => {
+      const form = PC.getElement('create_site_form');
+      if (form instanceof HTMLFormElement) {
+        form.reset();
+      }
+      setFormStatus('create_site_form_status', '');
+    });
+
+    bindDialogCloseCleanup('modal_edit_site', () => {
+      setFormStatus('edit_site_form_status', '');
     });
   }
 
@@ -1396,21 +1400,12 @@ document.addEventListener("DOMContentLoaded", async () =>
   const deleteYesBtn = PC.getElement('confirm_delete_site_yes');
   deleteYesBtn?.addEventListener('click', handleConfirmDelete);
 
-  const deleteNoBtn = PC.getElement('confirm_delete_site_no');
-  deleteNoBtn?.addEventListener('click', closeDeleteDialog);
-
   // Archived work handlers
-  const archivedWorkClose = PC.getElement('archived_work_close');
-  archivedWorkClose?.addEventListener('click', closeArchivedWorkDialog);
-
   const archivedWorkFinalityBtn = PC.getElement('archived_work_finality_delete');
   archivedWorkFinalityBtn?.addEventListener('click', openFinalityDeleteConfirm);
 
   const finalityDeleteYes = PC.getElement('finality_delete_yes');
   finalityDeleteYes?.addEventListener('click', handleFinalityDelete);
-
-  const finalityDeleteNo = PC.getElement('finality_delete_no');
-  finalityDeleteNo?.addEventListener('click', closeFinalityDeleteConfirm);
 
   // Run orphaned-work discovery on load so recovery banner appears automatically.
   checkOrphanedWork();

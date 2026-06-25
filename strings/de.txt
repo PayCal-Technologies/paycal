@@ -812,6 +812,13 @@ CALENDAR_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24"
 CALENDAR_UNKNOWN_ERROR Unbekannter Fehler
 CALENDAR_UNLOCK_REQUIRED_EDIT Sichere Entsperrung ist vor der Bearbeitung erforderlich. Melden Sie sich erneut mit Ihrem Passkey an und versuchen Sie es noch einmal.
 CALENDAR_UNLOCK_REQUIRED_SAVE Entsperrung vor dem Speichern erforderlich. Verwenden Sie die Passkey-Entsperrung und speichern Sie erneut.
+CALENDAR_REAUTH_SESSION_TITLE Erneute Authentifizierung
+CALENDAR_REAUTH_SESSION_MESSAGE Zu Ihrer Sicherheit authentifizieren wir Ihre Sitzung erneut.
+CALENDAR_REAUTH_SESSION_ARIA Passkey-Neuauthentifizierung läuft
+CALENDAR_REAUTH_CANCELLED Die Passkey-Authentifizierung wurde abgebrochen.
+CALENDAR_REAUTH_FAILED Ihre Sitzung konnte nicht erneut authentifiziert werden. Versuchen Sie es erneut.
+CALENDAR_REAUTH_DEK_UNLOCK_FAILED Passkey bestätigt, aber verschlüsselte Einträge konnten nicht entsperrt werden. Versuchen Sie es erneut oder kontaktieren Sie den Support.
+SECURITY_DEK_ZEROIZED_TOAST Ihre sichere Bearbeitungssitzung ist abgelaufen. Verwenden Sie Ihren Passkey zum erneuten Entsperren.
 CALENDAR_VIEW_AS Anzeigen als
 CALENDAR_WEB_AUTHN_UNSUPPORTED Dieser Browser kann keine Passkeys verwenden, daher koennen verschluesselte Eintraege hier nicht entsperrt werden. Verwenden Sie einen WebAuthn-faehigen Browser ueber eine sichere Verbindung (HTTPS).
 CALENDAR_WORK_ENTRY_LABEL Arbeitseintrag
@@ -1501,6 +1508,10 @@ FOOTER Footer
 FOOTER_COPYRIGHT © %s PayCal Technologies Inc. All rights reserved.
 FOOTER_TRADEMARK PayCal™ ist eine Marke von PayCal Technologies Inc. (Eintragung ausstehend).
 FOOTER_SOC2_BADGE_ARIA SOC 2 auditbereit — Compliance-Details anzeigen
+FOOTER_SOCIAL_ARIA Soziale Medien
+FOOTER_SOCIAL_REDDIT_ARIA PayCal auf Reddit
+FOOTER_SOCIAL_FACEBOOK_ARIA PayCal auf Facebook
+FOOTER_SOCIAL_LINKEDIN_ARIA PayCal auf LinkedIn
 FOR for
 FORECAST_ANCHOR_DATE Rotation Anchor Date
 FORECAST_ANCHOR_DATE_HINT First day of the first work block
@@ -2368,6 +2379,7 @@ SESSION_TIMEOUT_MODAL_ARIA This dialog warns you that your session is about to e
 SESSION_TIMEOUT_MODAL_META Session timeout warning and extension
 SESSION_TIMEOUT_STAY_LOGGED_IN Stay Logged In
 SESSION_TIMEOUT_TITLE Session Timeout
+SECURITY_DEK_ZEROIZED_TOAST Your secure editing session ended for your protection. Use your passkey to unlock again.
 SETTINGS Einstellungen
 SETTINGS_ACCESSIBILITY_TYPOGRAPHY_FORM_ARIA Typography and readability preferences
 SETTINGS_DIAGNOSTICS_BASIC_DESC Start here for common fixes. Copy support info when contacting us.
@@ -4026,6 +4038,8 @@ BUSINESSES_MEMBERS_COL_YTD_GROSS YTD Gross
 BUSINESSES_MEMBERS_SECURITY_SETUP_HELP Finish security setup to protect this workspace.
 BUSINESSES_MEMBERS_FILTER_ALL All Roles
 BUSINESSES_MEMBERS_FILTER_ARIA Filter by role
+BUSINESSES_MEMBERS_GUIDE Members Guide
+BUSINESSES_MEMBERS_GUIDE_OPEN_ARIA Open Members guide
 BUSINESSES_MEMBERS_GRID_ARIA Business members results
 BUSINESSES_MEMBERS_GRID_CONTEXT Rows show member name with email, role, and status, plus joined date, hours, earnings, and row actions. Use the Columns menu to show or hide optional columns.
 BUSINESSES_MEMBERS_GRID_SR Business members grid. Use search to filter, sortable headers to order, click a row to open member reports, click role in the name cell to change role, or use the row menu for more actions.

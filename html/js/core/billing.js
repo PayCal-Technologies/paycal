@@ -492,7 +492,6 @@ export const initializeBillingSection = async (options = {}) => {
   const downgradeFreeStatus = root.querySelector('#billing_downgrade_free_status');
   const downgradeFreeDialog = root.querySelector('#billing_downgrade_free_dialog');
   const downgradeFreeDialogBody = root.querySelector('#billing_downgrade_free_dialog_body');
-  const downgradeFreeCancelBtn = root.querySelector('#billing_downgrade_free_cancel');
   const downgradeFreeContinueBtn = root.querySelector('#billing_downgrade_free_continue');
   const upgradeBusinessPlanBtn = root.querySelector('#billing_upgrade_business_plan_btn');
   const upgradeBusinessPlanStatus = root.querySelector('#billing_upgrade_business_plan_status');
@@ -1220,14 +1219,6 @@ export const initializeBillingSection = async (options = {}) => {
         if (downgradePhraseInput instanceof HTMLInputElement) {
           downgradePhraseInput.focus();
         }
-      }
-    });
-  }
-
-  if (downgradeFreeCancelBtn instanceof HTMLButtonElement) {
-    downgradeFreeCancelBtn.addEventListener('click', () => {
-      if (typeof HTMLDialogElement !== 'undefined' && downgradeFreeDialog instanceof HTMLDialogElement) {
-        downgradeFreeDialog.close('cancel');
       }
     });
   }

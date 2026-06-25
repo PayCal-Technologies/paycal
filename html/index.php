@@ -1103,19 +1103,32 @@ require_once Environment::appHome().'html/header.php';
 	</ul>
 </div>
 
+<!-- Calendar passkey re-authentication dialog -->
+	<dialog id="modal_calendar_reauth" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_REAUTH_SESSION_TITLE'), ENT_QUOTES, 'UTF-8'); ?>" aria-modal="true" aria-labelledby="modal_calendar_reauth_title" aria-describedby="modal_calendar_reauth_desc modal_calendar_reauth_aria">
+		<div class="modal_aria visually_hidden">
+			<span id="modal_calendar_reauth_aria"><?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_REAUTH_SESSION_ARIA'), ENT_QUOTES, 'UTF-8'); ?></span>
+		</div>
+		<section class="modal_header centered">
+			<h1 id="modal_calendar_reauth_title" class="modal_title"><?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_REAUTH_SESSION_TITLE'), ENT_QUOTES, 'UTF-8'); ?></h1>
+		</section>
+		<section class="modal_content centered">
+			<p id="modal_calendar_reauth_desc"><?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_REAUTH_SESSION_MESSAGE'), ENT_QUOTES, 'UTF-8'); ?></p>
+		</section>
+	</dialog>
+
 <!-- Calendar Entry Modal Dialog -->
-	<dialog id="calendar-modal" class="calendar_modal" data-dialog-close-on-backdrop="true" aria-modal="true" aria-labelledby="calendar-modal-date" aria-describedby="calendar-modal-desc">
+	<dialog id="calendar-modal" class="calendar_modal" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo htmlspecialchars((string) html_index_i18n('I_WORK_DETAILS'), ENT_QUOTES, 'UTF-8'); ?>" data-dialog-close-on-backdrop="true" aria-modal="true" aria-labelledby="calendar-modal-date" aria-describedby="calendar-modal-desc">
 		<p id="calendar-modal-desc" class="visually_hidden"><?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_MODAL_DESC'), ENT_QUOTES, 'UTF-8'); ?></p>
 		<section class="modal_header calendar_modal_header">
 			<h2 id="calendar-modal-date"><?php echo htmlspecialchars((string) html_index_i18n('DATE'), ENT_QUOTES, 'UTF-8'); ?></h2>
-			<button type="button" class="btn btn_close calendar_modal_close" data-dialog-close="calendar-modal" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('CLOSE'), ENT_QUOTES, 'UTF-8'); ?>">&times;</button>
+			<button type="button" class="btn btn_close calendar_modal_close" data-dialog-close="calendar-modal" commandfor="calendar-modal" command="close" aria-label="<?php echo htmlspecialchars((string) html_index_i18n('CLOSE'), ENT_QUOTES, 'UTF-8'); ?>">&times;</button>
 		</section>
 	<section class="modal_content calendar_modal_body">
 		<div id="calendar-modal-content"><?php echo htmlspecialchars((string) html_index_i18n('CALENDAR_MODAL_EMPTY'), ENT_QUOTES, 'UTF-8'); ?></div>
 	</section>
 	<section class="modal_footer calendar_modal_footer">
 		<button type="button" class="btn btn_primary calendar_modal_action calendar_modal_action_save" data-action="save"><?php echo htmlspecialchars((string) html_index_i18n('SAVE'), ENT_QUOTES, 'UTF-8'); ?></button>
-		<button type="button" class="btn btn_cancel calendar_modal_action calendar_modal_action_close" data-dialog-close="calendar-modal"><?php echo htmlspecialchars((string) html_index_i18n('CLOSE'), ENT_QUOTES, 'UTF-8'); ?></button>
+		<button type="button" class="btn btn_cancel calendar_modal_action calendar_modal_action_close" data-dialog-close="calendar-modal" commandfor="calendar-modal" command="close"><?php echo htmlspecialchars((string) html_index_i18n('CLOSE'), ENT_QUOTES, 'UTF-8'); ?></button>
 	</section>
 	</dialog>
 
@@ -1161,6 +1174,12 @@ $cspNonce = (is_string($cspNonceRaw) && $cspNonceRaw !== '') ? $cspNonceRaw : Us
 	'CALENDAR_LOCKED_CANNOT_EDIT',
 	'CALENDAR_LOCKED_CANNOT_EDIT_GRACE',
 	'CALENDAR_UNLOCK_REQUIRED_EDIT',
+	'CALENDAR_REAUTH_SESSION_TITLE',
+	'CALENDAR_REAUTH_SESSION_MESSAGE',
+	'CALENDAR_REAUTH_SESSION_ARIA',
+	'CALENDAR_REAUTH_CANCELLED',
+	'CALENDAR_REAUTH_FAILED',
+	'CALENDAR_REAUTH_DEK_UNLOCK_FAILED',
 	'CALENDAR_WEB_AUTHN_UNSUPPORTED',
 	'CALENDAR_EMAIL_VERIFICATION_REQUIRED',
 	'CALENDAR_UNLOCK_REQUIRED_SAVE',

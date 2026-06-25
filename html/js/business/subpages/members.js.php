@@ -14,6 +14,7 @@
   let memberReportSelectionMembers = [];
   let memberGroupOptionsCache = null;
   let membersKeyboardActiveRowId = '';
+  let membersReportCloseShouldFocusSearch = false;
 
   const isBusinessMembersSubPage = () => resolveBusinessSubPage() === 'members';
   const safeAttr = (value) => safeText(value).replace(/'/g, '&#039;');
@@ -2161,6 +2162,7 @@
       elements.membersReportPanel.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
           event.preventDefault();
+          membersReportCloseShouldFocusSearch = true;
           setMembersReportPanelOpen(false, { focusSearch: true });
         }
       });
@@ -2169,13 +2171,17 @@
         if (elements.membersReportToggle instanceof HTMLButtonElement) {
           elements.membersReportToggle.setAttribute('aria-expanded', 'false');
         }
+        if (membersReportCloseShouldFocusSearch) {
+          focusMembersGridSearchSoon(false);
+          membersReportCloseShouldFocusSearch = false;
+        }
       });
     }
 
     if (elements.membersReportClose instanceof HTMLButtonElement) {
       elements.membersReportClose.addEventListener('click', () => {
-        setMembersReportPanelOpen(false, { focusSearch: true });
-      });
+        membersReportCloseShouldFocusSearch = true;
+      }, { capture: true });
     }
 
     if (elements.membersReportType instanceof HTMLSelectElement) {
@@ -2784,28 +2790,16 @@
 
   const bindBusinessMembersInfoDialog = () => {
     syncMembersGridElementRefs();
-    const button = elements.membersInfoButton;
     const dialog = elements.membersInfoDialog;
-    if (!(button instanceof HTMLButtonElement) || !(dialog instanceof HTMLDialogElement)) {
+    if (!(dialog instanceof HTMLDialogElement)) {
       return;
     }
 
-    if (button.dataset.membersInfoBound === '1') {
+    if (dialog.dataset.membersInfoCloseBound === '1') {
       return;
     }
 
-    button.dataset.membersInfoBound = '1';
-    button.addEventListener('click', () => {
-      if (!dialog.open) {
-        dialog.showModal();
-      }
-
-      const closeButton = dialog.querySelector('[data-dialog-close="business_members_info_dialog"]');
-      if (closeButton instanceof HTMLElement) {
-        closeButton.focus({ preventScroll: true });
-      }
-    });
-
+    dialog.dataset.membersInfoCloseBound = '1';
     dialog.addEventListener('close', () => {
       focusMembersGridSearchSoon(false);
     });

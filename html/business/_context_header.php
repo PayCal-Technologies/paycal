@@ -44,10 +44,13 @@ if (isset($workspaceBusiness) && is_array($workspaceBusiness)) {
       type="button"
       class="business_members_info_button"
       id="business_members_info_button"
+      data-dialog-open="business_members_info_dialog"
+      commandfor="business_members_info_dialog"
+      command="show-modal"
       aria-haspopup="dialog"
       aria-controls="business_members_info_dialog"
-      aria-label="Open Members guide"
-      title="Members guide"
+      aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_GUIDE_OPEN_ARIA'); ?>"
+      title="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_GUIDE'); ?>"
     >
       <span aria-hidden="true">i</span>
     </button>

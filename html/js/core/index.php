@@ -17,6 +17,8 @@ $i18nKeys = [
   'CLOSED_DIALOG',
   'KEYBOARD_SHORTCUTS',
   'OPENED_DIALOG',
+  'SECURITY_DEK_ZEROIZED_TOAST',
+  'SESSION_TIMEOUT_TITLE',
   'SIGN_OUT',
   'WORK_DETAILS',
 ];
@@ -165,6 +167,7 @@ import BinaryCodec from '/js/core/binary-codec.js';
 import { escapePattern } from '/js/core/regex.js';
 import SetUtils from '/js/core/set-utils.js';
 import BrowserCapabilities from '/js/core/capabilities.js';
+import createSecurityTimers from '/js/core/security-timers.js';
 
 const PayCalCore = (() => {
 
@@ -218,6 +221,8 @@ const PayCalCore = (() => {
     CLOSED_DIALOG        : '<?php echo htmlspecialchars($i18n['CLOSED_DIALOG'], ENT_QUOTES, 'UTF-8'); ?>',
     WORK_DETAILS         : '<?php echo htmlspecialchars($i18n['WORK_DETAILS'], ENT_QUOTES, 'UTF-8'); ?>',
     SIGN_OUT             : '<?php echo htmlspecialchars($i18n['SIGN_OUT'], ENT_QUOTES, 'UTF-8'); ?>',
+    SECURITY_DEK_ZEROIZED_TOAST : '<?php echo htmlspecialchars($i18n['SECURITY_DEK_ZEROIZED_TOAST'], ENT_QUOTES, 'UTF-8'); ?>',
+    SESSION_TIMEOUT_TITLE      : '<?php echo htmlspecialchars($i18n['SESSION_TIMEOUT_TITLE'], ENT_QUOTES, 'UTF-8'); ?>',
     pc_UUID_set          : '<?php echo \PayCal\Domain\SystemConfig::PC_UUID_SET; ?>',
     pc_verification_set  : '<?php echo \PayCal\Domain\SystemConfig::PC_VERIFICATION_SET; ?>',
     session_timeout_seconds : <?php echo (int) $user->getSessionTimeoutSeconds(); ?>,
@@ -241,6 +246,13 @@ const PayCalCore = (() => {
       echo implode(", ", $langEntries);
     ?> }
   };
+
+  const securityTimers = createSecurityTimers({
+    session_timeout_seconds: config.session_timeout_seconds,
+    form_ttl_settings_seconds: config.form_ttl_settings_seconds,
+    form_ttl_calendar_seconds: config.form_ttl_calendar_seconds,
+    form_ttl_general_seconds: config.form_ttl_general_seconds,
+  });
 
   /** STATE */
   let state = {
@@ -474,6 +486,13 @@ const PayCalCore = (() => {
     if (!supportsInvokerCommands) return false;
     if (!control.hasAttribute('commandfor')) return false;
     return control.getAttribute('command') === 'close';
+  };
+
+  const isInvokerOpenControl = (control) => {
+    if (!(control instanceof Element)) return false;
+    if (!supportsInvokerCommands) return false;
+    if (!control.hasAttribute('commandfor')) return false;
+    return control.getAttribute('command') === 'show-modal';
   };
 
   function closeModal(id, text = "") {
@@ -1288,7 +1307,6 @@ const PayCalCore = (() => {
 
     // Clock + session timer widget (absent in sidebar nav mode — use getElementById to skip PW warning)
     const timeEl = document.getElementById("current_time");
-    const clockStartedAt = Date.now();
     let clockMode = localStorage.getItem('paycal_time_mode') || 'clock';
     const timePopoverEl = document.createElement('div');
     timePopoverEl.id = 'tray_time_popover';
@@ -1296,6 +1314,111 @@ const PayCalCore = (() => {
     timePopoverEl.setAttribute('role', 'tooltip');
     timePopoverEl.setAttribute('aria-label', 'Session timers');
     document.body.appendChild(timePopoverEl);
+
+    securityTimers.bindActivity();
+
+    const performAutoSignout = () => {
+      const form = document.getElementById('signout_form');
+      if (form instanceof HTMLFormElement) {
+        form.submit();
+        return;
+      }
+      window.location.href = '/signout/';
+    };
+
+    const zeroizeDekOnTimeout = async (scope) => {
+      try {
+        if (window.PayCalCrypto?.hasDek && typeof window.PayCalCrypto.clear === 'function') {
+          await window.PayCalCrypto.clear();
+          return;
+        }
+      } catch (err) {
+        PW.error('[SecurityTimers] DEK zeroize failed:', err);
+      }
+
+      securityTimers.notifyDekZeroized(scope);
+      const message = config.SECURITY_DEK_ZEROIZED_TOAST
+        || 'Your secure editing session ended. Use your passkey to unlock again.';
+      showToast(message, 'warning', 8000);
+    };
+
+    let sessionModalInterval = null;
+    const sessionTimeoutDialog = document.getElementById('modal_session_timeout');
+    const sessionTimeoutCountdownEl = document.getElementById('session_timeout_countdown');
+    const sessionExtendBtn = document.getElementById('session_extend_btn');
+
+    const updateSessionTimeoutModalCountdown = () => {
+      if (!sessionTimeoutCountdownEl) {
+        return;
+      }
+      const remaining = securityTimers.getRemainingSeconds('session');
+      sessionTimeoutCountdownEl.textContent = String(Math.max(0, remaining));
+      if (remaining <= 0) {
+        performAutoSignout();
+      }
+    };
+
+    const closeSessionTimeoutModal = () => {
+      if (sessionModalInterval !== null) {
+        clearInterval(sessionModalInterval);
+        sessionModalInterval = null;
+      }
+      if (sessionTimeoutDialog instanceof HTMLDialogElement && sessionTimeoutDialog.open) {
+        closeModal('modal_session_timeout', config.SESSION_TIMEOUT_TITLE);
+      }
+    };
+
+    const openSessionTimeoutModal = () => {
+      if (!(sessionTimeoutDialog instanceof HTMLDialogElement)) {
+        return;
+      }
+      if (sessionTimeoutDialog.open) {
+        updateSessionTimeoutModalCountdown();
+        return;
+      }
+      updateSessionTimeoutModalCountdown();
+      openModal('modal_session_timeout', config.SESSION_TIMEOUT_TITLE);
+      if (sessionModalInterval !== null) {
+        clearInterval(sessionModalInterval);
+      }
+      sessionModalInterval = window.setInterval(updateSessionTimeoutModalCountdown, 1000);
+    };
+
+    if (sessionExtendBtn instanceof HTMLButtonElement) {
+      sessionExtendBtn.addEventListener('click', () => {
+        securityTimers.recordActivity();
+        securityTimers.clearSessionWarningShown();
+        closeSessionTimeoutModal();
+        readResource('settings', { timeoutMs: 5000 }).catch((error) => {
+          PW.error('[SecurityTimers] Session extend ping failed:', error);
+        });
+      });
+    }
+
+    if (sessionTimeoutDialog instanceof HTMLDialogElement) {
+      sessionTimeoutDialog.addEventListener('close', () => {
+        if (sessionModalInterval !== null) {
+          clearInterval(sessionModalInterval);
+          sessionModalInterval = null;
+        }
+      });
+    }
+
+    securityTimers.setOnExpire('sessionWarning', openSessionTimeoutModal);
+    securityTimers.setOnExpire('session', () => {
+      performAutoSignout();
+    });
+    securityTimers.setOnExpire('account', () => {
+      void zeroizeDekOnTimeout('account_timeout');
+    });
+    securityTimers.setOnExpire('calendar', () => {
+      void zeroizeDekOnTimeout('calendar_timeout');
+    });
+    securityTimers.start();
+
+    if (typeof window !== 'undefined') {
+      window.PayCalSecurityTimers = securityTimers;
+    }
 
     const formatCompactCountdown = (seconds) => {
       const safe = Math.max(0, Number(seconds) || 0);
@@ -1314,22 +1437,10 @@ const PayCalCore = (() => {
       return mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`;
     };
 
-    const runtimeTimeouts = {
-      session_timeout_seconds: Number(config.session_timeout_seconds) || 0,
-      form_ttl_settings_seconds: Number(config.form_ttl_settings_seconds) || 0,
-      form_ttl_calendar_seconds: Number(config.form_ttl_calendar_seconds) || 0,
-      form_ttl_general_seconds: Number(config.form_ttl_general_seconds) || 0,
-    };
-
-    const getRemaining = (totalSeconds) => {
-      const elapsed = Math.floor((Date.now() - clockStartedAt) / 1000);
-      return Math.max(0, Number(totalSeconds || 0) - elapsed);
-    };
-
     const getTimerSummaryLines = () => {
-      const sessionLeft = getRemaining(runtimeTimeouts.session_timeout_seconds);
-      const accountLeft = getRemaining(runtimeTimeouts.form_ttl_settings_seconds);
-      const calendarLeft = getRemaining(runtimeTimeouts.form_ttl_calendar_seconds);
+      const sessionLeft = securityTimers.getRemainingSeconds('session');
+      const accountLeft = securityTimers.getRemainingSeconds('account');
+      const calendarLeft = securityTimers.getRemainingSeconds('calendar');
       return {
         sessionLeft,
         lines: [
@@ -1371,11 +1482,28 @@ const PayCalCore = (() => {
 
     window.addEventListener('paycal:security-timeouts-updated', (event) => {
       const next = event?.detail || {};
-      runtimeTimeouts.session_timeout_seconds = Number(next.session_timeout_seconds ?? runtimeTimeouts.session_timeout_seconds) || 0;
-      runtimeTimeouts.form_ttl_settings_seconds = Number(next.form_ttl_settings_seconds ?? runtimeTimeouts.form_ttl_settings_seconds) || 0;
-      runtimeTimeouts.form_ttl_calendar_seconds = Number(next.form_ttl_calendar_seconds ?? runtimeTimeouts.form_ttl_calendar_seconds) || 0;
-      runtimeTimeouts.form_ttl_general_seconds = Number(next.form_ttl_general_seconds ?? runtimeTimeouts.form_ttl_general_seconds) || 0;
+      securityTimers.updateTimeouts(next);
+      config.session_timeout_seconds = Number(next.session_timeout_seconds ?? config.session_timeout_seconds) || 0;
+      config.form_ttl_settings_seconds = Number(next.form_ttl_settings_seconds ?? config.form_ttl_settings_seconds) || 0;
+      config.form_ttl_calendar_seconds = Number(next.form_ttl_calendar_seconds ?? config.form_ttl_calendar_seconds) || 0;
+      config.form_ttl_general_seconds = Number(next.form_ttl_general_seconds ?? config.form_ttl_general_seconds) || 0;
       escSignoutWindowMs = normalizeEscWindow(next.emergency_signout_window_ms ?? escSignoutWindowMs);
+      renderCurrentTimeWidget();
+    });
+
+    window.addEventListener('paycal:security-activity', () => {
+      renderCurrentTimeWidget();
+    });
+
+    window.addEventListener('paycal:crypto-dek-zeroized', () => {
+      renderCurrentTimeWidget();
+    });
+
+    window.addEventListener('paycal:crypto-dek-unlocked', () => {
+      renderCurrentTimeWidget();
+    });
+
+    window.addEventListener('paycal:security-timers-tick', () => {
       renderCurrentTimeWidget();
     });
 
@@ -1657,6 +1785,22 @@ const PayCalCore = (() => {
     document.addEventListener('click', (event) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
+
+      const openControl = target.closest('[data-dialog-open]');
+      if (openControl instanceof Element) {
+        if (!isInvokerOpenControl(openControl)) {
+          const dialogId = openControl.getAttribute('data-dialog-open');
+          if (dialogId) {
+            event.preventDefault();
+            const dialogEl = getElement(dialogId);
+            const openLabel = dialogEl instanceof HTMLElement
+              ? (dialogEl.getAttribute('data-dialog-open-tts') || '')
+              : '';
+            openModal(dialogId, openLabel);
+            return;
+          }
+        }
+      }
 
       const closeControl = target.closest('[data-dialog-close]');
       if (!(closeControl instanceof Element)) return;
@@ -2370,9 +2514,6 @@ const PayCalCore = (() => {
       });
     }
 
-    // Sign Out: open via JS (nav link has href); close via Invoker bridge + data-dialog-close fallback
-    addClickAndEnterListener("call_signout_modal", (e) => { e.preventDefault(); openModal("modal_signout", config.SIGN_OUT); });
-
     // Log initialization complete
     const initColor = 'color: #00aa00; font-weight: bold; font-size: 12px; background: #f0fff0; padding: 6px; border-radius: 4px;';
     PW.log('✓ PayCalCore initialization complete');
@@ -2482,6 +2623,11 @@ const PayCalCore = (() => {
     // Cleanup function
     cleanupHandler = () => {
       clearHoverHelpDismissTimer();
+      securityTimers.stop();
+      if (sessionModalInterval !== null) {
+        clearInterval(sessionModalInterval);
+        sessionModalInterval = null;
+      }
       clearInterval(clockInterval);
       if (orgNotificationsIntervalId !== null) {
         clearInterval(orgNotificationsIntervalId);
@@ -2515,6 +2661,7 @@ const PayCalCore = (() => {
     queryAll,
     addAudioFocusListener,
     closeModal,
+    bindAllDialogInvokerBridges,
     deleteResource,
     copyAttribute,
     getDataAttribute,
@@ -2550,6 +2697,7 @@ const PayCalCore = (() => {
     escapePattern,
     setUtils: SetUtils,
     capabilities: BrowserCapabilities,
+    securityTimers,
   };
 })();
 

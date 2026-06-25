@@ -2652,14 +2652,6 @@ require_once __DIR__ . '/_bootstrap.php';
         PC.showToast(message, 'error', 7000, true);
       });
     });
-    elements.personManageCancel?.addEventListener('click', () => {
-      closePersonManageDialog();
-    });
-    document.querySelectorAll('[data-dialog-close="connections_person_manage_dialog"]').forEach((button) => {
-      button.addEventListener('click', () => {
-        closePersonManageDialog();
-      });
-    });
     bindBusinessBrowserEvents();
     elements.currentMeta?.addEventListener('click', (event) => {
       const target = event.target instanceof Element
@@ -2687,11 +2679,6 @@ require_once __DIR__ . '/_bootstrap.php';
           PC.showToast(message, 'error', 7000, true);
         });
       }
-    });
-    document.querySelectorAll('[data-dialog-close="businesses_current_details_dialog"]').forEach((button) => {
-      button.addEventListener('click', () => {
-        closeCurrentBusinessDetailsDialog();
-      });
     });
     elements.memberForm?.addEventListener('submit', (event) => {
       handleMemberPersonalBusiness(event).catch((error) => {
@@ -3065,28 +3052,10 @@ require_once __DIR__ . '/_bootstrap.php';
       }
     };
 
-    if (elements.definitionsHelpButton instanceof HTMLButtonElement) {
-      elements.definitionsHelpButton.addEventListener('click', () => {
-        if (elements.definitionsDialog instanceof HTMLDialogElement && !elements.definitionsDialog.open) {
-          elements.definitionsDialog.showModal();
-          syncDefinitionsHelpExpanded(true);
-          elements.definitionsCloseButton?.focus();
-        }
-      });
-    }
-
-    if (elements.definitionsCloseButton instanceof HTMLButtonElement) {
-      elements.definitionsCloseButton.addEventListener('click', () => {
-        if (elements.definitionsDialog instanceof HTMLDialogElement && elements.definitionsDialog.open) {
-          elements.definitionsDialog.close();
-        }
-      });
-    }
-
     if (elements.definitionsDialog instanceof HTMLDialogElement) {
-      elements.definitionsDialog.addEventListener('click', (event) => {
-        if (event.target === elements.definitionsDialog) {
-          elements.definitionsDialog.close();
+      elements.definitionsDialog.addEventListener('command', (event) => {
+        if (event.command === 'show-modal') {
+          syncDefinitionsHelpExpanded(true);
         }
       });
 

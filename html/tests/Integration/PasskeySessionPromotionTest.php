@@ -162,6 +162,13 @@ final class PasskeySessionPromotionTest extends TestCase
     $this->assertNotSame('', (string) ($challengeData['challenge'] ?? ''));
   }
 
+  public function testLoginFinishPromotesExistingSessionWhenAvailable(): void
+  {
+    $controllerSource = (string) file_get_contents(dirname(__DIR__, 2) . '/src/Controllers/PasskeyController.php');
+    $this->assertStringContainsString('promoteCurrentSessionToPasskeyCredential($expectedUserUUID, $credentialId, $now)', $controllerSource);
+    $this->assertStringContainsString("'session_promoted' => \$sessionPromoted", $controllerSource);
+  }
+
   private function promote(string $credentialId, string $now): bool
   {
     $controller = new PasskeyController();

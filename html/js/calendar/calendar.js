@@ -45,6 +45,15 @@
   const calendarDailyEarningsLoadingYears = new Set();
   let calendarHoverTooltipEl = null;
   let calendarHoverTooltipCell = null;
+  let calendarHoveredCell = null;
+  let calendarHoverTooltipLastX = 0;
+  let calendarHoverTooltipLastY = 0;
+  const CALENDAR_TOOLTIP_SUPPRESS_MS = 400;
+  const CALENDAR_MODAL_CLOSE_TOOLTIP_SUPPRESS_MS = 300;
+  let calendarSuppressTooltipUntil = 0;
+  let calendarSuppressFocusTooltipFromModalClose = false;
+  let calendarSuppressFocusTooltipFromModalCloseTimer = null;
+  let calendarBootFocusTooltipSuppressed = true;
   // In-memory clipboard: never touches any storage API; cleared by zeroize and on page unload.
   let calendarClipboard = null;
 
@@ -235,9 +244,11 @@
   let cryptoIdleTimer = null;
   let cryptoHiddenZeroizeTimer = null;
   let payCalDekEnsurePromise = null;
+  let payCalDekEnsureInteractiveRequested = false;
+  let payCalRequiresPasskeyStepUp = false;
   const CRYPTO_IDLE_TIMEOUT_DEFAULT_MS = 5 * 60 * 1000;
   const CRYPTO_IDLE_TIMEOUT_MIN_MS = 60 * 1000;
-  const CRYPTO_IDLE_TIMEOUT_MAX_MS = 30 * 60 * 1000;
+  const CRYPTO_IDLE_TIMEOUT_MAX_MS = 24 * 60 * 60 * 1000;
   const CRYPTO_HIDDEN_ZEROIZE_DELAY_MS = 15 * 1000;
   function calendarWebAuthnUnsupportedMessage() {
     return calendarI18n(
@@ -255,16 +266,58 @@
   }
 
   function resolveCryptoIdleTimeoutMs() {
-    const sessionTimeoutSeconds = Number(window?.PayCalCore?.config?.session_timeout_seconds || 0);
-    if (sessionTimeoutSeconds > 0) {
-      const boundedFromSession = Math.max(
+    const timers = window?.PayCalCore?.securityTimers;
+    if (timers && typeof timers.getDekIdleTimeoutMs === 'function') {
+      return timers.getDekIdleTimeoutMs();
+    }
+
+    const accountTimeoutSeconds = Number(window?.PayCalCore?.config?.form_ttl_settings_seconds || 0);
+    const calendarTimeoutSeconds = Number(window?.PayCalCore?.config?.form_ttl_calendar_seconds || 0);
+    let dekTimeoutSeconds = 0;
+    if (accountTimeoutSeconds > 0 && calendarTimeoutSeconds > 0) {
+      dekTimeoutSeconds = Math.min(accountTimeoutSeconds, calendarTimeoutSeconds);
+    } else if (accountTimeoutSeconds > 0) {
+      dekTimeoutSeconds = accountTimeoutSeconds;
+    } else if (calendarTimeoutSeconds > 0) {
+      dekTimeoutSeconds = calendarTimeoutSeconds;
+    }
+
+    if (dekTimeoutSeconds > 0) {
+      return Math.max(
         CRYPTO_IDLE_TIMEOUT_MIN_MS,
-        Math.min(CRYPTO_IDLE_TIMEOUT_MAX_MS, sessionTimeoutSeconds * 1000)
+        Math.min(CRYPTO_IDLE_TIMEOUT_MAX_MS, dekTimeoutSeconds * 1000)
       );
-      return boundedFromSession;
     }
 
     return CRYPTO_IDLE_TIMEOUT_DEFAULT_MS;
+  }
+
+  function finalizeDekUnlock() {
+    if (window.PayCalCore?.securityTimers && typeof window.PayCalCore.securityTimers.notifyDekUnlocked === 'function') {
+      window.PayCalCore.securityTimers.notifyDekUnlocked();
+    }
+  }
+
+  function notifyDekZeroizedToUser(reason) {
+    if (window.PayCalCore?.securityTimers && typeof window.PayCalCore.securityTimers.notifyDekZeroized === 'function') {
+      window.PayCalCore.securityTimers.notifyDekZeroized(reason);
+    } else if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('paycal:crypto-dek-zeroized', {
+        detail: { reason: String(reason || 'unknown') },
+      }));
+    }
+
+    const message = window.PayCalCore?.config?.SECURITY_DEK_ZEROIZED_TOAST
+      || calendarI18n(
+        'SECURITY_DEK_ZEROIZED_TOAST',
+        'Your secure editing session ended. Use your passkey to unlock again.'
+      );
+
+    if (reason !== 'pagehide' && window.PayCalCore && typeof window.PayCalCore.showToast === 'function') {
+      window.PayCalCore.showToast(message, 'warning', 8000, false);
+    } else if (reason !== 'pagehide' && window.PayCalCore && typeof window.PayCalCore.updateStatusMessage === 'function') {
+      window.PayCalCore.updateStatusMessage(message, 'warning', 8000);
+    }
   }
 
   function clearCryptoIdleTimer() {
@@ -302,21 +355,7 @@
   }
 
   function armCryptoIdleTimer() {
-    clearCryptoIdleTimer();
-
-    if (!PayCalCryptoState.hasDek) {
-      return;
-    }
-
-    const timeoutMs = resolveCryptoIdleTimeoutMs();
-    cryptoIdleTimer = setTimeout(() => {
-      void zeroizeCryptoState('idle_timeout', { strict: true }).catch((err) => {
-        cryptoLog('[CRYPTO] Strict idle-timeout zeroize failed', {
-          reason: 'idle_timeout',
-          error: err?.message || String(err),
-        });
-      });
-    }, timeoutMs);
+    // DEK idle expiry is enforced centrally by PayCalCore.securityTimers.
   }
 
   function resetMainThreadCryptoState() {
@@ -398,6 +437,8 @@
 
     scrubSensitiveCalendarDom(reason);
     resetMainThreadCryptoState();
+    payCalRequiresPasskeyStepUp = true;
+    notifyDekZeroizedToUser(reason);
 
     if (strict && workerClearError) {
       throw workerClearError;
@@ -416,7 +457,7 @@
         scheduleHiddenTabZeroize();
       } else if (document.visibilityState === 'visible') {
         clearCryptoHiddenZeroizeTimer();
-        armCryptoIdleTimer();
+        window.PayCalCore?.securityTimers?.recordActivity?.();
       }
     });
 
@@ -429,14 +470,207 @@
       });
     });
 
-    const activityEvents = ['pointerdown', 'keydown', 'touchstart', 'focus'];
-    activityEvents.forEach((eventName) => {
-      document.addEventListener(eventName, () => {
-        armCryptoIdleTimer();
-      }, { passive: true });
+    window.addEventListener('paycal:security-timeouts-updated', (event) => {
+      const next = event?.detail || {};
+      if (window.PayCalCore?.config && next.form_ttl_calendar_seconds !== undefined) {
+        window.PayCalCore.config.form_ttl_calendar_seconds = Number(next.form_ttl_calendar_seconds) || 0;
+      }
     });
 
     cryptoLifecycleZeroizeBound = true;
+  }
+
+  function showCalendarReauthDialog() {
+    const dialog = document.getElementById('modal_calendar_reauth');
+    if (!dialog) {
+      return;
+    }
+
+    const title = calendarI18n('CALENDAR_REAUTH_SESSION_TITLE', 'Re-authenticating');
+    if (window.PayCalCore && typeof window.PayCalCore.openModal === 'function') {
+      window.PayCalCore.openModal('modal_calendar_reauth', title);
+      return;
+    }
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+  }
+
+  function closeCalendarReauthDialog() {
+    const dialog = document.getElementById('modal_calendar_reauth');
+    if (!dialog || !dialog.open) {
+      return;
+    }
+
+    const title = calendarI18n('CALENDAR_REAUTH_SESSION_TITLE', 'Re-authenticating');
+    if (window.PayCalCore && typeof window.PayCalCore.closeModal === 'function') {
+      window.PayCalCore.closeModal('modal_calendar_reauth', title);
+      return;
+    }
+
+    dialog.close();
+  }
+
+  async function performPasskeyStepUpReauth() {
+    const codec = window.PayCalBinaryCodec;
+    if (!codec || typeof codec.fromBase64Url !== 'function' || typeof codec.toBase64Url !== 'function') {
+      cryptoError('[CRYPTO] Passkey step-up unavailable: PayCalBinaryCodec missing');
+      throw new Error('passkey_codec_unavailable');
+    }
+
+    const b64urlToBuffer = codec.fromBase64Url;
+    const bufferToB64url = codec.toBase64Url;
+
+    cryptoLog('[CRYPTO] Passkey step-up: requesting login challenge');
+    const loginStartResponse = await fetch('/api/v1/auth/passkey/login/start', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ stepUp: true }),
+    });
+
+    const loginStartPayload = await loginStartResponse.json().catch(() => ({}));
+    if (!loginStartResponse.ok || loginStartPayload.status !== 'success') {
+      cryptoError('[CRYPTO] Passkey step-up login/start failed', {
+        status: loginStartResponse.status,
+        message: loginStartPayload.message || '',
+        error: loginStartPayload.error || loginStartPayload.data?.error || '',
+      });
+      const startError = new Error(loginStartPayload.message || 'passkey_start_failed');
+      startError.code = String(loginStartPayload.error || loginStartPayload.data?.error || 'passkey_start_failed');
+      throw startError;
+    }
+
+    const challengeId = loginStartPayload.challengeId || loginStartPayload.data?.challengeId;
+    const publicKey = loginStartPayload.publicKey || loginStartPayload.data?.publicKey || {};
+    if (!challengeId) {
+      cryptoError('[CRYPTO] Passkey step-up login/start missing challengeId');
+      throw new Error('passkey_start_failed');
+    }
+
+    const options = { ...publicKey };
+    options.challenge = b64urlToBuffer(options.challenge || '');
+    options.allowCredentials = Array.isArray(options.allowCredentials)
+      ? options.allowCredentials.map((credential) => ({
+        ...credential,
+        id: b64urlToBuffer(credential.id),
+      }))
+      : [];
+
+    cryptoLog('[CRYPTO] Passkey step-up: awaiting WebAuthn assertion', {
+      allowCredentialCount: options.allowCredentials.length,
+    });
+
+    let assertion;
+    try {
+      assertion = await navigator.credentials.get({ publicKey: options });
+    } catch (err) {
+      if (err && err.name === 'NotAllowedError') {
+        const cancelError = new Error('passkey_cancelled');
+        cancelError.code = 'passkey_cancelled';
+        throw cancelError;
+      }
+
+      cryptoError('[CRYPTO] Passkey step-up WebAuthn get failed', {
+        name: err?.name || '',
+        message: err?.message || String(err),
+      });
+      throw err;
+    }
+
+    if (!assertion) {
+      const cancelError = new Error('passkey_cancelled');
+      cancelError.code = 'passkey_cancelled';
+      throw cancelError;
+    }
+
+    cryptoLog('[CRYPTO] Passkey step-up: finishing login', {
+      credentialFp: safeFingerprint(assertion.id || ''),
+    });
+
+    const loginFinishResponse = await fetch('/api/v1/auth/passkey/login/finish', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        challengeId,
+        stepUp: true,
+        assertion: {
+          id: assertion.id,
+          type: assertion.type,
+          rawId: bufferToB64url(assertion.rawId),
+          response: {
+            clientDataJSON: bufferToB64url(assertion.response.clientDataJSON),
+            authenticatorData: bufferToB64url(assertion.response.authenticatorData),
+            signature: bufferToB64url(assertion.response.signature),
+            userHandle: assertion.response.userHandle ? bufferToB64url(assertion.response.userHandle) : null,
+          },
+        },
+      }),
+    });
+
+    const loginFinishPayload = await loginFinishResponse.json().catch(() => ({}));
+    if (!loginFinishResponse.ok || loginFinishPayload.status !== 'success') {
+      cryptoError('[CRYPTO] Passkey step-up login/finish failed', {
+        status: loginFinishResponse.status,
+        message: loginFinishPayload.message || '',
+        error: loginFinishPayload.error || loginFinishPayload.data?.error || '',
+      });
+      const finishError = new Error(loginFinishPayload.message || 'passkey_finish_failed');
+      finishError.code = String(loginFinishPayload.error || loginFinishPayload.data?.error || 'passkey_finish_failed');
+      throw finishError;
+    }
+
+    const finishData = (loginFinishPayload.data && typeof loginFinishPayload.data === 'object')
+      ? loginFinishPayload.data
+      : loginFinishPayload;
+    const credentialId = finishData.credential_id || finishData.credentialId || '';
+    if (!credentialId) {
+      cryptoError('[CRYPTO] Passkey step-up login/finish missing credential_id', {
+        sessionPromoted: finishData.session_promoted,
+      });
+      throw new Error('passkey_finish_failed');
+    }
+
+    cryptoLog('[CRYPTO] Passkey step-up succeeded', {
+      credentialFp: safeFingerprint(credentialId),
+      sessionPromoted: !!finishData.session_promoted,
+    });
+
+    return { credentialId };
+  }
+
+  function reportInteractiveDekUnlockFailure(err) {
+    const code = String(err?.code || err?.message || '');
+    let message;
+    if (code === 'passkey_cancelled') {
+      message = calendarI18n(
+        'CALENDAR_REAUTH_CANCELLED',
+        'Passkey authentication was cancelled.'
+      );
+    } else if (code === 'dek_unwrap_failed') {
+      message = calendarI18n(
+        'CALENDAR_REAUTH_DEK_UNLOCK_FAILED',
+        'Passkey verified, but encrypted entries could not be unlocked. Try again or contact support.'
+      );
+    } else if (!isWebAuthnCapableBrowser()) {
+      message = calendarWebAuthnUnsupportedMessage();
+    } else {
+      message = calendarI18n(
+        'CALENDAR_REAUTH_FAILED',
+        'Unable to re-authenticate your session. Try again.'
+      );
+    }
+
+    cryptoError('[CRYPTO] Interactive DEK unlock failed for user', {
+      code,
+      message: err?.message || '',
+    });
+
+    if (window.PayCalCore && typeof window.PayCalCore.updateStatusMessage === 'function') {
+      window.PayCalCore.updateStatusMessage(message, 'error', 5000);
+    }
   }
 
   function safeFingerprint(value) {
@@ -621,41 +855,10 @@
   }
 
   /**
-   * Ensure the in-memory Data Encryption Key (DEK) is available before decrypting entries.
-   *
-   * Plain-language behavior:
-   * 1) Load bootstrap data from server.
-   * 2) Try passkey-based unwrap first (non-interactive when possible).
-  * 3) Keep unlock flow passkey-only.
-   * 4) Only generate a brand-new DEK for first-time setup with no existing wrappers.
+   * Load bootstrap data and unwrap or generate the DEK without interactive WebAuthn.
    */
-  async function ensurePayCalDEK(options = {}) {
-    const interactive = options.interactive !== false;
-    cryptoLog('[CRYPTO] ensurePayCalDEK called:', {
-      hasDek: PayCalCryptoState.hasDek,
-      hasCredentialId: !!PayCalCryptoState.credentialId,
-      interactive,
-      hasPendingEnsure: !!payCalDekEnsurePromise,
-    });
-
-    if (PayCalCryptoState.hasDek) {
-      return true;
-    }
-
-    if (!isWebAuthnCapableBrowser()) {
-      cryptoLog('[CRYPTO] Passkey unlock unavailable: browser lacks WebAuthn capability', {
-        isSecureContext: !!window.isSecureContext,
-        hasPublicKeyCredential: typeof window.PublicKeyCredential !== 'undefined',
-        hasCredentialsApi: typeof navigator.credentials !== 'undefined' && navigator.credentials !== null,
-      });
-      return false;
-    }
-
-    if (payCalDekEnsurePromise) {
-      return payCalDekEnsurePromise;
-    }
-
-    payCalDekEnsurePromise = (async () => {
+  async function attemptBootstrapDekUnlock(options = {}) {
+      const preferredCredentialId = String(options.preferredCredentialId || '').trim();
       let bootstrapData = null;
       try {
         const response = await fetch('/api/v1/user/account/bootstrap', {
@@ -679,21 +882,44 @@
         PayCalCryptoState.dekVersion = Number(bootstrapData.dekVersion || 1);
         PayCalCryptoState.cryptoVersion = Number(bootstrapData.cryptoVersion || 1);
         bootstrapData.wrappedCredentialCount = Number(bootstrapData.wrappedCredentialCount || 0);
+        bootstrapData.wrappedDekCandidates = Array.isArray(bootstrapData.wrappedDekCandidates)
+          ? bootstrapData.wrappedDekCandidates.filter((candidate) => (
+            candidate
+            && typeof candidate === 'object'
+            && candidate.credentialId
+            && candidate.wrappedDekPasskey
+          ))
+          : [];
+
+        if (preferredCredentialId) {
+          const preferredCandidate = bootstrapData.wrappedDekCandidates.find(
+            (candidate) => candidate.credentialId === preferredCredentialId
+          );
+          if (preferredCandidate) {
+            bootstrapData.wrappedDekPasskey = preferredCandidate.wrappedDekPasskey;
+          }
+        }
         
         // Deterministic credential selection priority:
-        // If backend returned a passkey wrapper, bootstrapData.credentialId is the
-        // credential that owns that wrapper and must be used first.
-        const credentialCandidates = bootstrapData.wrappedDekPasskey
+        // After passkey step-up, always prefer the credential that just authenticated.
+        const credentialCandidates = preferredCredentialId
           ? [
-            bootstrapData.credentialId,
-            bootstrapData.sessionCredentialId,
+            preferredCredentialId,
             PayCalCryptoState.credentialId,
+            bootstrapData.sessionCredentialId,
+            bootstrapData.credentialId,
           ]
-          : [
-            PayCalCryptoState.credentialId,
-            bootstrapData.sessionCredentialId,
-            bootstrapData.credentialId,
-          ];
+          : bootstrapData.wrappedDekPasskey
+            ? [
+              bootstrapData.credentialId,
+              bootstrapData.sessionCredentialId,
+              PayCalCryptoState.credentialId,
+            ]
+            : [
+              PayCalCryptoState.credentialId,
+              bootstrapData.sessionCredentialId,
+              bootstrapData.credentialId,
+            ];
 
         const dedupedCandidates = uniqueTruthy(credentialCandidates);
         PayCalCryptoState.credentialId = dedupedCandidates[0] || null;
@@ -842,6 +1068,7 @@
           derivationMode: 'credential-only',
           credentialFp: safeFingerprint(PayCalCryptoState.credentialId || ''),
           userFp: safeFingerprint(PayCalCryptoState.userId || ''),
+          preferredCredentialFp: safeFingerprint(preferredCredentialId || ''),
         });
         await callCryptoWorker('unwrapWithPasskeyCredential', {
           wrappedDekPasskey: bootstrapData.wrappedDekPasskey,
@@ -854,7 +1081,7 @@
         });
         PayCalCryptoState.hasDek = true;
         cryptoLog('[CRYPTO] Canonical unwrap succeeded');
-        armCryptoIdleTimer();
+        finalizeDekUnlock();
         return true;
       } catch (err) {
         cryptoLog('[CRYPTO] Canonical unwrap failed, attempting legacy fallback:', {
@@ -891,7 +1118,7 @@
           cryptoLog('[CRYPTO] Legacy unwrap succeeded and canonical migration persisted');
 
           PayCalCryptoState.hasDek = true;
-          armCryptoIdleTimer();
+          finalizeDekUnlock();
           return true;
         } catch (legacyErr) {
           cryptoLog('[CRYPTO] Passkey unwrap failed after canonical+legacy attempts:', {
@@ -899,9 +1126,39 @@
             credentialFp: safeFingerprint(PayCalCryptoState.credentialId || ''),
             userFp: safeFingerprint(PayCalCryptoState.userId || ''),
           });
-          return false;
         }
       }
+    }
+
+    if (bootstrapData.wrappedDekCandidates.length > 0) {
+      const candidateOrder = uniqueTruthy([
+        preferredCredentialId,
+        PayCalCryptoState.credentialId,
+        ...bootstrapData.wrappedDekCandidates.map((candidate) => candidate.credentialId),
+      ]);
+
+      for (const candidateCredentialId of candidateOrder) {
+        const candidate = bootstrapData.wrappedDekCandidates.find(
+          (entry) => entry.credentialId === candidateCredentialId
+        );
+        if (!candidate) {
+          continue;
+        }
+
+        PayCalCryptoState.credentialId = candidate.credentialId;
+        const unlocked = await tryPasskeyUnwrapFromEnvelope(
+          candidate.wrappedDekPasskey,
+          `bootstrap_candidate:${safeFingerprint(candidate.credentialId)}`
+        );
+        if (unlocked) {
+          finalizeDekUnlock();
+          return true;
+        }
+      }
+    }
+
+    if (PayCalCryptoState.credentialId && bootstrapData.wrappedDekPasskey) {
+      return false;
     }
 
     if (PayCalCryptoState.credentialId && !bootstrapData.wrappedDekPasskey && bootstrapData.wrappedCredentialCount > 0) {
@@ -948,11 +1205,101 @@
         PayCalCryptoState.hasDek = true;
         PayCalCryptoState.dekVersion = Number(wrapped.dekVersion || 1);
         PayCalCryptoState.cryptoVersion = Number(wrapped.cryptoVersion || 1);
-        armCryptoIdleTimer();
+        finalizeDekUnlock();
         return true;
       } catch (err) {
         cryptoError('[CRYPTO] Passkey bootstrap generation failed:', err);
         return false;
+      }
+  }
+
+  /**
+   * Ensure the in-memory Data Encryption Key (DEK) is available before decrypting entries.
+   *
+   * Plain-language behavior:
+   * 1) Load bootstrap data from server.
+   * 2) Try passkey-based unwrap first (non-interactive when possible).
+   * 3) When interactive is required (e.g. after idle zeroize), run passkey step-up via WebAuthn.
+   * 4) Only generate a brand-new DEK for first-time setup with no existing wrappers.
+   */
+  async function ensurePayCalDEK(options = {}) {
+    const interactive = options.interactive !== false;
+    if (interactive) {
+      payCalDekEnsureInteractiveRequested = true;
+    }
+
+    cryptoLog('[CRYPTO] ensurePayCalDEK called:', {
+      hasDek: PayCalCryptoState.hasDek,
+      hasCredentialId: !!PayCalCryptoState.credentialId,
+      interactive,
+      requiresPasskeyStepUp: payCalRequiresPasskeyStepUp,
+      hasPendingEnsure: !!payCalDekEnsurePromise,
+      interactiveRequested: payCalDekEnsureInteractiveRequested,
+    });
+
+    if (PayCalCryptoState.hasDek) {
+      return true;
+    }
+
+    if (!isWebAuthnCapableBrowser()) {
+      cryptoLog('[CRYPTO] Passkey unlock unavailable: browser lacks WebAuthn capability', {
+        isSecureContext: !!window.isSecureContext,
+        hasPublicKeyCredential: typeof window.PublicKeyCredential !== 'undefined',
+        hasCredentialsApi: typeof navigator.credentials !== 'undefined' && navigator.credentials !== null,
+      });
+      if (interactive) {
+        reportInteractiveDekUnlockFailure(new Error('webauthn_unsupported'));
+      }
+      return false;
+    }
+
+    if (payCalDekEnsurePromise) {
+      return payCalDekEnsurePromise;
+    }
+
+    payCalDekEnsurePromise = (async () => {
+      try {
+        if (!payCalRequiresPasskeyStepUp) {
+          let silentUnlocked = false;
+          try {
+            silentUnlocked = await attemptBootstrapDekUnlock();
+          } catch (err) {
+            cryptoLog('[CRYPTO] Silent bootstrap DEK unlock failed', {
+              error: err?.message || String(err),
+            });
+          }
+          if (silentUnlocked) {
+            return true;
+          }
+        }
+
+        if (!payCalDekEnsureInteractiveRequested) {
+          return false;
+        }
+
+        showCalendarReauthDialog();
+        try {
+          const { credentialId } = await performPasskeyStepUpReauth();
+          PayCalCryptoState.credentialId = credentialId;
+          payCalRequiresPasskeyStepUp = false;
+
+          const unlocked = await attemptBootstrapDekUnlock({ preferredCredentialId: credentialId });
+          if (!unlocked) {
+            reportInteractiveDekUnlockFailure(new Error('dek_unwrap_failed'));
+          }
+          return unlocked;
+        } catch (err) {
+          cryptoLog('[CRYPTO] Interactive passkey re-auth failed', {
+            error: err?.message || String(err),
+            code: err?.code || '',
+          });
+          reportInteractiveDekUnlockFailure(err);
+          return false;
+        } finally {
+          closeCalendarReauthDialog();
+        }
+      } finally {
+        payCalDekEnsureInteractiveRequested = false;
       }
     })();
 
@@ -1492,6 +1839,7 @@
     const debugEl = document.getElementById('calendar-debug-indicator');
     
     if (grids.length > 0) {
+      resetCalendarHoverTooltipOnInit();
       initCalendarViewToggle();
 
       grids.forEach((calendarGrid) => {
@@ -1627,6 +1975,8 @@
         } else {
           focusLog('[Calendar Focus] No target day determined');
         }
+
+        finalizeCalendarBootFocus();
       }, 100); // Small delay to ensure DOM is settled
     } else {
       console.error('[Calendar] Grid element #calendar-grid not found');
@@ -2121,11 +2471,14 @@
   function attachGridCellHandlers(grid) {
     if (!grid) return;
 
+    hideCalendarHoverTooltip();
+
     const cells = grid.querySelectorAll('.datagrid_month_cell');
     cells.forEach((cell, index) => {
       if (!cell) return;
 
       cell.addEventListener('click', handleGridCellClick);
+      cell.addEventListener('pointerdown', handleGridCellPointerDown);
       cell.addEventListener('keydown', handleGridCellKeydown);
       cell.addEventListener('focus', () => setGridCellFocusState(cell, false));
       cell.addEventListener('mouseenter', handleCalendarCellTooltipEnter);
@@ -2143,6 +2496,44 @@
     if (cells.length > 0) {
       setGridCellFocusState(cells[0], true);
     }
+  }
+
+  function suppressCalendarTooltip(durationMs = CALENDAR_TOOLTIP_SUPPRESS_MS) {
+    const nextUntil = Date.now() + durationMs;
+    calendarSuppressTooltipUntil = Math.max(calendarSuppressTooltipUntil, nextUntil);
+    hideCalendarHoverTooltip();
+  }
+
+  function clearCalendarModalCloseTooltipSuppression() {
+    calendarSuppressFocusTooltipFromModalClose = false;
+    if (calendarSuppressFocusTooltipFromModalCloseTimer) {
+      clearTimeout(calendarSuppressFocusTooltipFromModalCloseTimer);
+      calendarSuppressFocusTooltipFromModalCloseTimer = null;
+    }
+  }
+
+  function suppressCalendarTooltipAfterModalClose() {
+    calendarSuppressFocusTooltipFromModalClose = true;
+    suppressCalendarTooltip(CALENDAR_MODAL_CLOSE_TOOLTIP_SUPPRESS_MS);
+    if (calendarSuppressFocusTooltipFromModalCloseTimer) {
+      clearTimeout(calendarSuppressFocusTooltipFromModalCloseTimer);
+    }
+    calendarSuppressFocusTooltipFromModalCloseTimer = setTimeout(() => {
+      calendarSuppressFocusTooltipFromModalClose = false;
+      calendarSuppressFocusTooltipFromModalCloseTimer = null;
+    }, CALENDAR_MODAL_CLOSE_TOOLTIP_SUPPRESS_MS);
+  }
+
+  function isCalendarTooltipSuppressed() {
+    return Date.now() < calendarSuppressTooltipUntil;
+  }
+
+  function handleGridCellPointerDown(event) {
+    if (isCalendarEarningsTooltipHoverEnabled(event)) {
+      return;
+    }
+
+    suppressCalendarTooltip();
   }
 
   function ensureCalendarHoverTooltip() {
@@ -2223,6 +2614,9 @@
   }
 
   function showCalendarHoverTooltip(cell, clientX, clientY) {
+    if (!calendarShiftKeyHeld) {
+      return;
+    }
     if (!cell) {
       return;
     }
@@ -2241,10 +2635,53 @@
   }
 
   function hideCalendarHoverTooltip() {
-    const tooltip = ensureCalendarHoverTooltip();
-    tooltip.classList.add('hidden');
-    tooltip.setAttribute('aria-hidden', 'true');
+    if (!calendarHoverTooltipEl) {
+      const existing = document.getElementById('calendar_day_hover_tooltip');
+      if (!existing) {
+        calendarHoverTooltipCell = null;
+        return;
+      }
+      calendarHoverTooltipEl = existing;
+    }
+
+    calendarHoverTooltipEl.classList.add('hidden');
+    calendarHoverTooltipEl.setAttribute('aria-hidden', 'true');
     calendarHoverTooltipCell = null;
+  }
+
+  function resetCalendarHoverTooltipOnInit() {
+    calendarHoveredCell = null;
+    calendarHoverTooltipCell = null;
+    calendarBootFocusTooltipSuppressed = true;
+    hideCalendarHoverTooltip();
+  }
+
+  function finalizeCalendarBootFocus() {
+    calendarBootFocusTooltipSuppressed = true;
+    calendarHoveredCell = null;
+    hideCalendarHoverTooltip();
+  }
+
+  function isCalendarEarningsTooltipHoverEnabled(event = null) {
+    return calendarShiftKeyHeld;
+  }
+
+  function syncCalendarShiftTooltipHoverClass(event = null) {
+    const root = document.getElementById('calendar-v2-root');
+    if (!root) {
+      return;
+    }
+
+    const active = isCalendarEarningsTooltipHoverEnabled(event);
+    root.classList.toggle('calendar_shift_tooltip_hover', active);
+  }
+
+  function maybeShowCalendarHoverTooltipForPointer(cell, clientX, clientY, event = null) {
+    syncCalendarShiftTooltipHoverClass(event);
+    if (!cell || !isCalendarEarningsTooltipHoverEnabled(event)) {
+      return;
+    }
+    showCalendarHoverTooltip(cell, clientX, clientY);
   }
 
   function handleCalendarCellTooltipEnter(event) {
@@ -2255,26 +2692,52 @@
       return;
     }
 
+    calendarHoveredCell = cell;
     const x = Number.isFinite(event.clientX) ? event.clientX : 0;
     const y = Number.isFinite(event.clientY) ? event.clientY : 0;
-    showCalendarHoverTooltip(cell, x, y);
+    calendarHoverTooltipLastX = x;
+    calendarHoverTooltipLastY = y;
+    maybeShowCalendarHoverTooltipForPointer(cell, x, y, event);
   }
 
   function handleCalendarCellTooltipMove(event) {
-    if (!calendarHoverTooltipCell) {
+    const x = Number.isFinite(event.clientX) ? event.clientX : 0;
+    const y = Number.isFinite(event.clientY) ? event.clientY : 0;
+    calendarHoverTooltipLastX = x;
+    calendarHoverTooltipLastY = y;
+
+    if (calendarHoverTooltipCell) {
+      positionCalendarHoverTooltip(x, y);
       return;
     }
 
-    const x = Number.isFinite(event.clientX) ? event.clientX : 0;
-    const y = Number.isFinite(event.clientY) ? event.clientY : 0;
-    positionCalendarHoverTooltip(x, y);
+    const cell = event.currentTarget && event.currentTarget.closest
+      ? event.currentTarget.closest('.datagrid_month_cell')
+      : null;
+    maybeShowCalendarHoverTooltipForPointer(cell, x, y, event);
   }
 
   function handleCalendarCellTooltipLeave() {
+    calendarHoveredCell = null;
     hideCalendarHoverTooltip();
   }
 
   function handleCalendarCellTooltipFocus(event) {
+    if (!calendarShiftKeyHeld) {
+      return;
+    }
+
+    if (calendarSuppressFocusTooltipFromModalClose || isCalendarTooltipSuppressed()) {
+      return;
+    }
+
+    if (calendarBootFocusTooltipSuppressed) {
+      if (!event || !event.isTrusted) {
+        return;
+      }
+      calendarBootFocusTooltipSuppressed = false;
+    }
+
     const cell = event.currentTarget && event.currentTarget.closest
       ? event.currentTarget.closest('.datagrid_month_cell')
       : null;
@@ -2295,6 +2758,8 @@
    * @param {MouseEvent} event - The click event
    */
   function handleGridCellClick(event) {
+    suppressCalendarTooltip();
+
     const cell = event.currentTarget.closest('.datagrid_month_cell');
     if (!cell) {
       calendarConsoleDebug('cell click ignored: no calendar cell', {
@@ -2332,7 +2797,22 @@
     }
 
     logRowInteraction('click', dateId);
-    openModalForDate(dateId);
+    void openModalForDate(dateId).catch((err) => {
+      calendarConsoleDebug('openModalForDate failed', {
+        dateId,
+        error: err?.message || String(err),
+      });
+      if (window.PayCalCore && typeof window.PayCalCore.updateStatusMessage === 'function') {
+        window.PayCalCore.updateStatusMessage(
+          calendarI18n(
+            'CALENDAR_UNLOCK_REQUIRED_EDIT',
+            'Secure unlock is required before editing. Sign in with your passkey again and retry.'
+          ),
+          'error',
+          5000
+        );
+      }
+    });
   }
 
   /**
@@ -2364,6 +2844,19 @@
 
     const dateId = cell.getAttribute('data-id');
     if (!dateId) return;
+
+    if (
+      event.key === 'Tab'
+      || event.key === 'ArrowUp'
+      || event.key === 'ArrowDown'
+      || event.key === 'ArrowLeft'
+      || event.key === 'ArrowRight'
+      || event.key === 'Home'
+      || event.key === 'End'
+    ) {
+      clearCalendarModalCloseTooltipSuppression();
+      calendarBootFocusTooltipSuppressed = false;
+    }
 
     coreLog('[Calendar KeyDown]', event.key, 'on cell', cell.getAttribute('data-id'));
 
@@ -3205,6 +3698,127 @@
     return false;
   }
 
+  function isAnyCalendarDialogActive() {
+    if (isCalendarModalOpen()) {
+      return true;
+    }
+
+    if (document.querySelector('dialog[open]')) {
+      return true;
+    }
+
+    const coreState = window.PayCalCore && window.PayCalCore.state;
+    if (coreState && coreState.modal_is_active) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function isCalendarInteractiveTarget(target) {
+    if (!(target instanceof Element)) {
+      return false;
+    }
+
+    return Boolean(target.closest(
+      'a[href], button, input, select, textarea, label, summary, [role="button"], [role="link"], [role="menuitem"], [role="tab"], [contenteditable="true"], dialog, [aria-modal="true"]'
+    ));
+  }
+
+  function resolveCalendarGridFocusCell() {
+    const grid = document.querySelector('#calendar-grid .datagrid_month_grid');
+    if (!grid) {
+      return null;
+    }
+
+    const trackedDate = window._CALENDAR_LAST_GRID_FOCUS_DATE;
+    if (trackedDate) {
+      const trackedCell = grid.querySelector(`.datagrid_month_cell[data-id="${trackedDate}"]`);
+      if (trackedCell) {
+        return trackedCell;
+      }
+    }
+
+    return grid.querySelector('.datagrid_month_cell[tabindex="0"]')
+      || grid.querySelector('.datagrid_month_cell');
+  }
+
+  function restoreCalendarGridFocusAfterDeadspaceClick() {
+    if (!isCalendarPageContext()) {
+      return;
+    }
+
+    if (isAnyCalendarDialogActive()) {
+      return;
+    }
+
+    if (calendarShiftKeyHeld) {
+      return;
+    }
+
+    const contextMenu = document.getElementById('calendar_day_context_menu');
+    if (contextMenu && !contextMenu.classList.contains('hidden')) {
+      return;
+    }
+
+    const active = document.activeElement;
+    if (active instanceof Element) {
+      if (active.closest('.datagrid_month_cell')) {
+        return;
+      }
+
+      if (isCalendarInteractiveTarget(active)) {
+        return;
+      }
+    }
+
+    const cell = resolveCalendarGridFocusCell();
+    if (!cell) {
+      return;
+    }
+
+    setGridCellFocusState(cell, true, { preventScroll: true });
+    focusLog('[Calendar Focus] Deadspace click restored grid cell focus', {
+      dateId: cell.getAttribute('data-id'),
+    });
+  }
+
+  function handleCalendarDeadspacePointerDown(event) {
+    if (!isCalendarPageContext()) {
+      return;
+    }
+
+    if (isAnyCalendarDialogActive()) {
+      return;
+    }
+
+    if (calendarShiftKeyHeld || event.shiftKey) {
+      return;
+    }
+
+    const contextMenu = document.getElementById('calendar_day_context_menu');
+    if (contextMenu && !contextMenu.classList.contains('hidden')) {
+      return;
+    }
+
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    if (target.closest('.datagrid_month_cell')) {
+      return;
+    }
+
+    if (isCalendarInteractiveTarget(target)) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      setTimeout(restoreCalendarGridFocusAfterDeadspaceClick, 0);
+    });
+  }
+
   function isDatePickerOpen() {
     const pickerModal = document.getElementById('modal_cal_picker');
     return !!(pickerModal && pickerModal.open);
@@ -3292,10 +3906,18 @@
     document.addEventListener('keydown', function(event) {
       if (isCalendarPageContext() && event.shiftKey && !calendarShiftKeyHeld) {
         calendarShiftKeyHeld = true;
+        syncCalendarShiftTooltipHoverClass(event);
         const activeCell = document.querySelector('#calendar-grid .datagrid_month_grid .datagrid_month_cell[tabindex="0"]')
           || (document.activeElement && document.activeElement.closest ? document.activeElement.closest('.datagrid_month_cell') : null);
         calendarShiftAnchorDateId = activeCell ? (activeCell.getAttribute('data-id') || '') : '';
         refreshShiftRangeSelectionOnActiveCell();
+        if (calendarHoveredCell && !calendarHoverTooltipCell) {
+          showCalendarHoverTooltip(
+            calendarHoveredCell,
+            calendarHoverTooltipLastX,
+            calendarHoverTooltipLastY
+          );
+        }
       }
 
       if (event.defaultPrevented) {
@@ -3319,6 +3941,7 @@
 
         event.preventDefault();
         event.stopPropagation();
+        calendarBootFocusTooltipSuppressed = false;
         if (event.key === 'Home') {
           navigateGridCellHome(activeCell);
         } else {
@@ -3474,7 +4097,22 @@
 
       calendarShiftKeyHeld = false;
       calendarShiftAnchorDateId = '';
+      syncCalendarShiftTooltipHoverClass();
+      hideCalendarHoverTooltip();
     });
+
+    window.addEventListener('blur', function() {
+      if (!calendarShiftKeyHeld) {
+        return;
+      }
+
+      calendarShiftKeyHeld = false;
+      calendarShiftAnchorDateId = '';
+      syncCalendarShiftTooltipHoverClass();
+      hideCalendarHoverTooltip();
+    });
+
+    document.addEventListener('mousedown', handleCalendarDeadspacePointerDown, true);
   }
 
   // =========================================================================
@@ -3567,6 +4205,14 @@
     if (closeBtn) {
       // Let core delegated [data-dialog-close] handling close this dialog.
     }
+
+    // Capture phase: suppress before invoker bridge applyModalCloseEffects restores focus.
+    modal.addEventListener('close', () => {
+      suppressCalendarTooltipAfterModalClose();
+    }, { capture: true });
+    modal.addEventListener('cancel', () => {
+      suppressCalendarTooltipAfterModalClose();
+    }, { capture: true });
     
     if (actionBtns && actionBtns.length > 0) {
       actionBtns.forEach(btn => {
@@ -3663,6 +4309,7 @@
       const grids = getCalendarGrids();
       const activeGrid = getActiveCalendarGrid() || document.getElementById('calendar-grid');
 
+      resetCalendarHoverTooltipOnInit();
       initCalendarViewToggle();
       mountCalendarViewToolbar();
 
@@ -3691,7 +4338,12 @@
 
       const focusDay = options.focusDay;
       if (typeof focusDay === 'string' && focusDay !== '' && activeGrid) {
-        setTimeout(() => focusTargetDay(focusDay, activeGrid), 25);
+        setTimeout(() => {
+          focusTargetDay(focusDay, activeGrid);
+          finalizeCalendarBootFocus();
+        }, 25);
+      } else {
+        finalizeCalendarBootFocus();
       }
     };
 
@@ -4173,6 +4825,9 @@
    * @param {string} dateId - The date identifier
    */
   async function openModalForDate(dateId) {
+    suppressCalendarTooltip(600);
+    hideCalendarHoverTooltip();
+
     const modal = document.getElementById('calendar-modal');
     if (!modal) {
       calendarConsoleDebug('openModalForDate aborted: modal missing', {
@@ -4197,21 +4852,20 @@
     });
 
     if (!PayCalCryptoState.hasDek) {
-      // User interaction required: first-time DEK generation or passkey assertion for unwrap
+      const hadDekBeforeUnlock = PayCalCryptoState.hasDek;
       const hasDek = await ensurePayCalDEK({ interactive: true });
       if (!hasDek) {
         calendarConsoleDebug('openModalForDate blocked: DEK unlock required', {
           dateId,
           hasDek,
         });
-        const unlockMessage = isWebAuthnCapableBrowser()
-          ? calendarI18n(
-            'CALENDAR_UNLOCK_REQUIRED_EDIT',
-            'Secure unlock is required before editing. Sign in with your passkey again and retry.'
-          )
-          : calendarWebAuthnUnsupportedMessage();
-        PayCalCore.updateStatusMessage(unlockMessage, 'error', 5000);
         return;
+      }
+
+      if (!hadDekBeforeUnlock && PayCalCryptoState.hasDek) {
+        for (const calendarGrid of getCalendarGrids()) {
+          await hydrateEncryptedCalendarGrid(calendarGrid);
+        }
       }
     }
 
@@ -4302,6 +4956,8 @@
   function closeModal() {
     const modal = document.getElementById('calendar-modal');
     if (!modal) return;
+
+    suppressCalendarTooltipAfterModalClose();
 
     // Disable elements while closing to prevent accidental clicks
     setModalElementsDisabled(true);
@@ -5886,8 +6542,11 @@
         return {
           hasDek: PayCalCryptoState.hasDek,
           profileMarker: window.PAYCAL_USER_PROFILE_ENCRYPTED,
+          requiresPasskeyStepUp: payCalRequiresPasskeyStepUp,
+          cryptoIdleTimeoutMs: resolveCryptoIdleTimeoutMs(),
         };
       },
+      resolveCryptoIdleTimeoutMs,
     };
   }
 

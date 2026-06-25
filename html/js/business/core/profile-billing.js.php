@@ -5,8 +5,6 @@
       || document.getElementById('billing_upgrade_business_subscribed_btn')
       || document.getElementById('billing_upgrade_btn');
     const routeGateDialog = document.getElementById('businesses_route_gate_dialog');
-    const routeGateCloseBtn = document.getElementById('businesses_route_gate_close_btn');
-    const routeGateCloseX = document.getElementById('businesses_route_gate_close_x');
     const routeGateBillingBtn = document.getElementById('businesses_route_gate_billing_btn');
     const billingPanel = document.getElementById('panel-billing');
 
@@ -28,22 +26,6 @@
         routeGateDialog.close();
       }
     };
-
-    if (routeGateCloseBtn instanceof HTMLButtonElement) {
-      routeGateCloseBtn.addEventListener('click', closeRouteGateDialog);
-    }
-
-    if (routeGateCloseX instanceof HTMLButtonElement) {
-      routeGateCloseX.addEventListener('click', closeRouteGateDialog);
-    }
-
-    if (routeGateDialog instanceof HTMLDialogElement) {
-      routeGateDialog.addEventListener('click', (event) => {
-        if (event.target === routeGateDialog) {
-          closeRouteGateDialog();
-        }
-      });
-    }
 
     if (routeGateBillingBtn instanceof HTMLButtonElement) {
       routeGateBillingBtn.addEventListener('click', () => {

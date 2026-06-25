@@ -2294,6 +2294,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     PC.closeModal('modal_change_email', SETTINGS_T.CHANGE_EMAIL);
   });
 
+  const changeEmailDialog = PC.getElement('modal_change_email');
+  if (changeEmailDialog instanceof HTMLDialogElement && changeEmailDialog.dataset.changeEmailCloseBound !== '1') {
+    changeEmailDialog.dataset.changeEmailCloseBound = '1';
+    changeEmailDialog.addEventListener('close', () => {
+      resetChangeEmailModal();
+    });
+  }
+
   const CHANGE_EMAIL_I18N = {
     enterBothEmails: <?php echo json_encode(Strings::i18n('CHANGE_EMAIL_STATUS_ENTER_BOTH_EMAILS'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>,
     enterNewEmail: <?php echo json_encode(Strings::i18n('CHANGE_EMAIL_ERROR_ENTER_NEW_EMAIL'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>,
@@ -2485,8 +2493,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     PC.openModal('modal_delete_account', SETTINGS_T.DELETE_ACCOUNT);
     PC.getElement('delete_account_confirm_phrase').focus();
   });
-  PC.addClickAndEnterListener('delete_account_cancel_btn', (e) => { e.preventDefault(); PC.closeModal('modal_delete_account', SETTINGS_T.DELETE_ACCOUNT); });
-
 
   const deleteAccountForm = PC.getElement('delete_account_form');
   const deleteConfirmInput = PC.getElement('delete_account_confirm_phrase');
@@ -3224,9 +3230,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   updateRecoveryEmailUI();
-
-  PC.addClickAndEnterListener('call_signout_modal',          (e) => { e.preventDefault(); PC.openModal('modal_signout', <?php echo json_encode($i18n['SIGN_OUT'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>); });
-  PC.addClickAndEnterListener('signout_cancel_btn',          (e) => { e.preventDefault(); PC.closeModal('modal_signout', <?php echo json_encode($i18n['SIGN_OUT'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>); });
 
   /* CALENDAR */
   handleRadioGroup('calendar_autofocus', 'settings/calendar', <?php echo json_encode($i18n['UPDATING_CALENDAR_AUTOFOCUS_TO'] . ' {value}', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>);
@@ -4438,11 +4441,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       PC.openModal('modal_pay_period_preview', 'Pay Period');
     });
   }
-  const previewCancel = document.getElementById('pay_period_preview_cancel');
-  if (previewCancel) {
-    previewCancel.addEventListener('click', () => {
+  const payPeriodPreviewDialog = document.getElementById('modal_pay_period_preview');
+  if (payPeriodPreviewDialog instanceof HTMLDialogElement && payPeriodPreviewDialog.dataset.payPeriodPreviewCloseBound !== '1') {
+    payPeriodPreviewDialog.dataset.payPeriodPreviewCloseBound = '1';
+    payPeriodPreviewDialog.addEventListener('close', () => {
       stopPayPeriodPreviewWatch();
-      PC.closeModal('modal_pay_period_preview', 'Pay Period');
     });
   }
   const previewApply = document.getElementById('pay_period_preview_apply');
@@ -4464,7 +4467,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const securityLevelHintEl = PC.getElement('security_level_hint');
   const emergencySignoutSliderEl = PC.getElement('emergency_signout_window_ms');
   const emergencySignoutValueEl = PC.getElement('emergency_signout_window_ms_value');
-  const securityStartTs = Date.now();
 
   const securitySelects = {
     session_timeout: PC.getElement('session_timeout'),
@@ -4602,12 +4604,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const writeRemainingTimeouts = () => {
+    const timers = PC.securityTimers;
     const values = getCurrentSecurityValues();
-    const elapsed = Math.floor((Date.now() - securityStartTs) / 1000);
     const timeoutMap = {
-      signout: Number(values.session_timeout),
-      account: Number(values.form_ttl_settings),
-      calendar: Number(values.form_ttl_calendar),
+      signout: { kind: 'session', total: Number(values.session_timeout) },
+      account: { kind: 'account', total: Number(values.form_ttl_settings) },
+      calendar: { kind: 'calendar', total: Number(values.form_ttl_calendar) },
     };
 
     const remainingIds = {
@@ -4616,8 +4618,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       calendar: 'security_remaining_calendar',
     };
 
-    Object.entries(timeoutMap).forEach(([key, total]) => {
-      const remaining = Math.max(0, total - elapsed);
+    Object.entries(timeoutMap).forEach(([key, entry]) => {
+      const remaining = timers
+        ? timers.getRemainingSeconds(entry.kind)
+        : Math.max(0, entry.total);
       const el = PC.getElement(remainingIds[key]);
       if (el) {
         el.textContent = remaining > 0
@@ -4704,6 +4708,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   writeRemainingTimeouts();
   emitSecurityTimeoutUpdate();
   setInterval(writeRemainingTimeouts, 1000);
+  window.addEventListener('paycal:security-activity', writeRemainingTimeouts);
+  window.addEventListener('paycal:security-timers-tick', writeRemainingTimeouts);
+  window.addEventListener('paycal:crypto-dek-zeroized', writeRemainingTimeouts);
+  window.addEventListener('paycal:crypto-dek-unlocked', writeRemainingTimeouts);
 
   // Delete account confirmation input: convert to uppercase
   // Replaces previous inline oninput handler for WCAG/CSP compliance

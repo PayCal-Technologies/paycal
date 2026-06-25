@@ -812,6 +812,13 @@ CALENDAR_SVG <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24"
 CALENDAR_UNKNOWN_ERROR Onbekende fout
 CALENDAR_UNLOCK_REQUIRED_EDIT Beveiligde ontgrendeling is vereist voordat u kunt bewerken. Meld u opnieuw aan met uw passkey en probeer het opnieuw.
 CALENDAR_UNLOCK_REQUIRED_SAVE Ontgrendeling vereist vóór opslaan. Gebruik passkey-ontgrendeling en sla opnieuw op.
+CALENDAR_REAUTH_SESSION_TITLE Opnieuw authenticeren
+CALENDAR_REAUTH_SESSION_MESSAGE Voor uw veiligheid authenticeren we uw sessie opnieuw.
+CALENDAR_REAUTH_SESSION_ARIA Passkey-herauthenticatie bezig
+CALENDAR_REAUTH_CANCELLED Passkey-authenticatie is geannuleerd.
+CALENDAR_REAUTH_FAILED Kan uw sessie niet opnieuw authenticeren. Probeer het opnieuw.
+CALENDAR_REAUTH_DEK_UNLOCK_FAILED Passkey geverifieerd, maar versleutelde items konden niet worden ontgrendeld. Probeer het opnieuw of neem contact op met support.
+SECURITY_DEK_ZEROIZED_TOAST Uw beveiligde bewerkingssessie is beëindigd. Gebruik uw passkey om opnieuw te ontgrendelen.
 CALENDAR_VIEW_AS Weergeven als
 CALENDAR_WEB_AUTHN_UNSUPPORTED Deze browser kan geen passkeys gebruiken, dus versleutelde items kunnen hier niet worden ontgrendeld. Gebruik een WebAuthn-compatibele browser via een beveiligde verbinding (HTTPS).
 CALENDAR_WORK_ENTRY_LABEL Werkinvoer
@@ -1501,6 +1508,10 @@ FOOTER Footer
 FOOTER_COPYRIGHT © %s PayCal Technologies Inc. All rights reserved.
 FOOTER_TRADEMARK PayCal™ is een handelsmerk van PayCal Technologies Inc. (registratie in behandeling).
 FOOTER_SOC2_BADGE_ARIA SOC 2 audit-klaar — compliance-details bekijken
+FOOTER_SOCIAL_ARIA Sociale media
+FOOTER_SOCIAL_REDDIT_ARIA PayCal op Reddit
+FOOTER_SOCIAL_FACEBOOK_ARIA PayCal op Facebook
+FOOTER_SOCIAL_LINKEDIN_ARIA PayCal op LinkedIn
 FOR for
 FORECAST_ANCHOR_DATE Rotation Anchor Date
 FORECAST_ANCHOR_DATE_HINT First day of the first work block
@@ -2368,6 +2379,7 @@ SESSION_TIMEOUT_MODAL_ARIA This dialog warns you that your session is about to e
 SESSION_TIMEOUT_MODAL_META Session timeout warning and extension
 SESSION_TIMEOUT_STAY_LOGGED_IN Stay Logged In
 SESSION_TIMEOUT_TITLE Session Timeout
+SECURITY_DEK_ZEROIZED_TOAST Your secure editing session ended for your protection. Use your passkey to unlock again.
 SETTINGS Instellingen
 SETTINGS_ACCESSIBILITY_TYPOGRAPHY_FORM_ARIA Typography and readability preferences
 SETTINGS_DIAGNOSTICS_BASIC_DESC Start here for common fixes. Copy support info when contacting us.
@@ -4026,6 +4038,8 @@ BUSINESSES_MEMBERS_COL_YTD_GROSS YTD Gross
 BUSINESSES_MEMBERS_SECURITY_SETUP_HELP Finish security setup to protect this workspace.
 BUSINESSES_MEMBERS_FILTER_ALL All Roles
 BUSINESSES_MEMBERS_FILTER_ARIA Filter by role
+BUSINESSES_MEMBERS_GUIDE Members Guide
+BUSINESSES_MEMBERS_GUIDE_OPEN_ARIA Open Members guide
 BUSINESSES_MEMBERS_GRID_ARIA Business members results
 BUSINESSES_MEMBERS_GRID_CONTEXT Rows show member name with email, role, and status, plus joined date, hours, earnings, and row actions. Use the Columns menu to show or hide optional columns.
 BUSINESSES_MEMBERS_GRID_SR Business members grid. Use search to filter, sortable headers to order, click a row to open member reports, click role in the name cell to change role, or use the row menu for more actions.
