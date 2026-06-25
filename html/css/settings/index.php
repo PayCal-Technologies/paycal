@@ -2269,7 +2269,7 @@ header('Expires: 0');
 .passkey_card_grid {
   margin-top: 0.6rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(13.2rem, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
   gap: 0.75rem;
 }
 
@@ -2282,7 +2282,7 @@ header('Expires: 0');
   flex-direction: column;
   gap: 0.55rem;
   min-height: 100%;
-  padding: 2.3rem 0.95rem 0.95rem;
+  padding: 2rem 1rem 1rem;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: var(--radius-sm, 0.25rem);
   background: color-mix(in srgb, var(--surface-color, #20252b) 86%, #000 14%);
@@ -2476,6 +2476,10 @@ html[data-depth="high"] .passkey_card:focus-within {
   flex: 0 0 auto;
 }
 
+.passkey_card_header:has(.passkey_card_menu:not([hidden])) {
+  z-index: 5;
+}
+
 .passkey_card_menu_trigger {
   min-width: 2rem;
   min-height: 2rem;
@@ -2507,13 +2511,13 @@ html[data-depth="high"] .passkey_card:focus-within {
   position: absolute;
   top: calc(100% + 0.25rem);
   right: 0;
-  z-index: 4;
+  z-index: 6;
   min-width: 8.5rem;
   padding: 0.25rem;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.14));
   border-radius: var(--radius-sm, 0.25rem);
-  background: var(--surface-color, #20252b);
-  box-shadow: var(--depth-dialog-shadow, var(--depth-panel-shadow, none));
+  background-color: color-mix(in srgb, var(--surface-color, #20252b) 96%, #000 4%);
+  box-shadow: var(--depth-dialog-shadow, var(--depth-panel-shadow, 0 8px 24px rgba(0, 0, 0, 0.28)));
 }
 
 .passkey_card_menu[hidden] {
