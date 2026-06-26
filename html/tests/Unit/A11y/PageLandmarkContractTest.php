@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
 #[Group('a11y')]
+#[Group('private-moat')]
 final class PageLandmarkContractTest extends TestCase
 {
   #[Test]
