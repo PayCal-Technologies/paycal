@@ -79,6 +79,7 @@ final class PageHeadRendererContractTest extends TestCase
       'isDocPdfView' => false,
       'isAuthenticated' => true,
       'loadPhantomWing' => false,
+      'loadWebVitalsDiagnostics' => false,
     ]);
 
     $this->assertStringContainsString('js/guardian.js?v=', $html);

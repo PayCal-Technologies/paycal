@@ -43,6 +43,25 @@ export default (() => {
   let overlaySidebarTimeoutSeconds = 5; // synced from PayCalCore.config on init
   let overlayIdleTimer = null;   // auto-collapse after pointer idle in overlay mode
   let overlayIdleMoveFrame = null;
+  let cachedNavRect = null;
+  let cachedNavRectAt = 0;
+
+  function invalidateNavRectCache() {
+    cachedNavRect = null;
+    cachedNavRectAt = 0;
+  }
+
+  function getNavRect() {
+    if (!nav) return null;
+
+    const now = performance.now();
+    if (!cachedNavRect || now - cachedNavRectAt > 250) {
+      cachedNavRect = nav.getBoundingClientRect();
+      cachedNavRectAt = now;
+    }
+
+    return cachedNavRect;
+  }
 
   function isCompactDrawerViewport() {
     return window.matchMedia(`(max-width: ${COMPACT_DRAWER_MAX_PX}px)`).matches;
@@ -280,7 +299,8 @@ export default (() => {
   function isPointerNearSidebar(event) {
     if (!isSidebarMode() || !isPointerInViewport(event)) return false;
 
-    const rect = nav.getBoundingClientRect();
+    const rect = getNavRect();
+    if (!rect) return false;
     const pos = document.body.getAttribute('data-nav-primary-position');
     return pos === 'right'
       ? event.clientX >= rect.left - proximityPx
@@ -302,7 +322,10 @@ export default (() => {
       }
 
       queueResponsiveSync();
-      window.addEventListener('resize', queueResponsiveSync, { passive: true });
+      window.addEventListener('resize', () => {
+        invalidateNavRectCache();
+        queueResponsiveSync();
+      }, { passive: true });
       window.addEventListener('load', queueResponsiveSync, { once: true });
 
       if (!isSidebarMode()) return;
@@ -402,12 +425,11 @@ export default (() => {
       if (saved === '0') {
         applyBodyClass('collapsed');
         setCollapsedInteractivity(true);
-        persistState(true);
       } else {
         applyBodyClass('pinned');
         setCollapsedInteractivity(false);
-        persistState(false);
       }
+      localStorage.setItem(STORAGE_KEY, saved);
 
       if (isCompactDrawerViewport()) {
         applyBodyClass('collapsed');

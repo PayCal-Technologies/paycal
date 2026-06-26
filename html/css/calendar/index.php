@@ -1127,6 +1127,7 @@ button.cal_menu_selected:focus-visible {
   gap: 0;
   width: 100%;
   min-width: 0;
+  min-height: 140px;
   box-sizing: border-box;
 }
 

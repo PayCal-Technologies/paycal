@@ -3223,18 +3223,6 @@
     const pointerY = typeof event.clientY === 'number' && event.clientY > 0
       ? event.clientY
       : rect.top + Math.floor(rect.height / 2);
-    let x = pointerX;
-    let y = pointerY;
-
-    const menuWidth = menu.offsetWidth || 160;
-    const menuHeight = menu.offsetHeight || 180;
-    const maxX = window.innerWidth - menuWidth - 8;
-    const maxY = window.innerHeight - menuHeight - 8;
-
-    if (x > maxX) x = maxX;
-    if (y > maxY) y = maxY;
-    if (x < 8) x = 8;
-    if (y < 8) y = 8;
 
     const currentAnchor = menu.parentElement;
     if (currentAnchor && currentAnchor.classList && currentAnchor.classList.contains('context-menu-anchor')) {
@@ -3243,22 +3231,39 @@
 
     activeContextMenuAnchorCell = targetCell;
     targetCell.classList.add('context-menu-anchor');
-    const pointerPrefersRight = pointerX >= rect.left + (rect.width / 2);
-    const pointerPrefersTop = pointerY >= rect.top + (rect.height / 2);
-    menu.classList.toggle('context-menu-align-right', x >= maxX || pointerPrefersRight);
-    menu.classList.toggle('context-menu-align-top', y >= maxY || pointerPrefersTop);
     targetCell.appendChild(menu);
 
-    const firstItem = Array.from(menu.querySelectorAll('[role="menuitem"][data-action]')).find((item) => item.getAttribute('aria-disabled') !== 'true');
+    const pointerPrefersRight = pointerX >= rect.left + (rect.width / 2);
+    const pointerPrefersTop = pointerY >= rect.top + (rect.height / 2);
     const openedWithPointer = activeContextMenuOpenMode === 'pointer';
-    if (firstItem && !openedWithPointer) {
-      firstItem.focus();
-      return;
-    }
 
-    if (openedWithPointer) {
-      targetCell.focus({ preventScroll: true });
-    }
+    requestAnimationFrame(() => {
+      let x = pointerX;
+      let y = pointerY;
+
+      const menuWidth = menu.offsetWidth || 160;
+      const menuHeight = menu.offsetHeight || 180;
+      const maxX = window.innerWidth - menuWidth - 8;
+      const maxY = window.innerHeight - menuHeight - 8;
+
+      if (x > maxX) x = maxX;
+      if (y > maxY) y = maxY;
+      if (x < 8) x = 8;
+      if (y < 8) y = 8;
+
+      menu.classList.toggle('context-menu-align-right', x >= maxX || pointerPrefersRight);
+      menu.classList.toggle('context-menu-align-top', y >= maxY || pointerPrefersTop);
+
+      const firstItem = Array.from(menu.querySelectorAll('[role="menuitem"][data-action]')).find((item) => item.getAttribute('aria-disabled') !== 'true');
+      if (firstItem && !openedWithPointer) {
+        firstItem.focus();
+        return;
+      }
+
+      if (openedWithPointer) {
+        targetCell.focus({ preventScroll: true });
+      }
+    });
   }
 
   function hideDayContextMenu() {

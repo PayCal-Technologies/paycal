@@ -5,8 +5,11 @@
   "license": "UNLICENSED",
   "author": "PayCal Technologies Inc.",
   "scripts": {
-    "lint:js": "eslint html/js/**/*.js tools/js-security-check.mjs",
-    "test:js": "npm run lint:js && node tools/js-security-check.mjs",
+    "lint:js:static": "eslint html/js/**/*.js tools/js-security-check.mjs tools/lint-php-js.mjs",
+    "lint:js:php": "node tools/lint-php-js.mjs",
+    "lint:js": "npm run lint:js:static && npm run lint:js:php",
+    "test:js:unit": "node tests/crypto/paycal-code-vectors.mjs && node tests/core-helpers.mjs && node tests/security-timers.mjs",
+    "test:js": "npm run lint:js && npm run test:js:unit && node tools/js-security-check.mjs",
     "test:smoke:ui": "npx playwright test -c playwright.smoke.config.js",
     "test:smoke:ui:headed": "npx playwright test -c playwright.smoke.config.js --headed",
     "test:smoke:ui:install": "npx playwright install chromium",
@@ -24,25 +27,27 @@
     "test:a11y:shortcuts": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-shortcuts.spec.js",
     "test:a11y:shortcut-map": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-shortcut-map.spec.js",
     "test:a11y:live-regions": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-live-regions.spec.js",
-    "test:a11y:playwright:suite": "npm run test:a11y:wcag && npm run test:a11y:reflow && npm run test:a11y:headings && npm run test:a11y:complex-descriptions && npm run test:a11y:menu-keyboard && npm run test:a11y:navigation-paths && npm run test:a11y:shortcuts && npm run test:a11y:shortcut-map && npm run test:a11y:live-regions",
+    "test:a11y:playwright:suite": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-regression.spec.js tests/smoke-ui/wcag-reflow.spec.js tests/smoke-ui/wcag-heading-structure.spec.js tests/smoke-ui/wcag-complex-descriptions.spec.js tests/smoke-ui/wcag-menu-keyboard.spec.js tests/smoke-ui/wcag-navigation-paths.spec.js tests/smoke-ui/wcag-shortcuts.spec.js tests/smoke-ui/wcag-shortcut-map.spec.js tests/smoke-ui/wcag-live-regions.spec.js --workers=${PAYCAL_A11Y_WORKERS:-2}",
     "test:a11y:phpunit:suite": "./vendor/bin/phpunit -c phpunit.xml --testsuite \"PayCal Accessibility\"",
     "test:a11y:lightpanda": "bash tools/lightpanda/run-wcag-lightpanda.sh",
     "test:a11y:browser-matrix": "npm run test:a11y:playwright:suite && npm run test:a11y:lightpanda",
     "test:a11y:all": "npm run test:a11y:phpunit:suite && npm run test:a11y:playwright:suite && npm run test:a11y:wcag:strict && npm run test:a11y:reflow:strict && npm run test:a11y:contrast && npm run test:a11y:contrast:strict && npm run test:a11y:lightpanda",
     "test:a11y:contrast": "node scripts/generate-theme-contrast-matrix.js",
-    "test:a11y:contrast:strict": "PAYCAL_CONTRAST_STRICT=1 npm run test:a11y:contrast"
+    "test:a11y:contrast:strict": "PAYCAL_CONTRAST_STRICT=1 npm run test:a11y:contrast",
+    "test:web-vitals": "npx playwright test -c playwright.web-vitals.config.js",
+    "test:web-vitals:strict": "PAYCAL_WEB_VITALS_STRICT=1 npm run test:web-vitals",
+    "test:web-vitals:report": "npx playwright test -c playwright.web-vitals.config.js",
+    "dev:web-vitals": "npm run test:web-vitals"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.1",
     "@playwright/test": "^1.58.2",
     "eslint": "^10.1.0",
-    "globals": "^17.4.0"
-  },
-  "dependencies": {
-    "pdf-lib": "^1.17.1"
+    "globals": "^17.4.0",
+    "web-vitals": "^5.3.0"
   },
   "overrides": {
     "flatted": "^3.4.2",
-    "brace-expansion": "^5.0.5"
+    "brace-expansion": "^5.0.6"
   }
 }

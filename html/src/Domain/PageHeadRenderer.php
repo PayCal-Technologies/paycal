@@ -224,14 +224,22 @@ HTML;
 HTML;
   }
 
-  public static function renderResourceHints(): string
+  /**
+   * @param array{loadWebVitalsDiagnostics?: bool} $context
+   */
+  public static function renderResourceHints(array $context = []): string
   {
     $origin = htmlspecialchars(Environment::appBaseURL(), ENT_QUOTES, 'UTF-8');
 
-    return <<<HTML
+    $html = <<<HTML
   <link rel="preconnect" href="{$origin}">
 
 HTML;
+
+    $fontUrl = htmlspecialchars(Environment::appURL('fonts/open-dyslexic-400.woff2'), ENT_QUOTES, 'UTF-8');
+    $html .= "  <link rel=\"preload\" href=\"{$fontUrl}\" as=\"font\" type=\"font/woff2\" crossorigin>\n";
+
+    return $html;
   }
 
   private static function cssVersion(string $baseVersion, string $cssEndpoint): string
@@ -300,6 +308,7 @@ HTML;
    *   jsonLdDocument: string,
    *   isAuthenticated: bool,
    *   loadPhantomWing: bool,
+   *   loadWebVitalsDiagnostics: bool,
    *   isDocPdfView: bool,
    * } $context
    */
@@ -338,6 +347,14 @@ HTML;
       $workIntegrity = htmlspecialchars(Environment::appURL('js/work-integrity/') . '?v=' . $cacheVersion, ENT_QUOTES, 'UTF-8');
       $html .= "  <script type=\"module\" src=\"{$encryption}\" nonce=\"{$cspNonce}\"></script>\n";
       $html .= "  <script type=\"module\" src=\"{$workIntegrity}\" nonce=\"{$cspNonce}\"></script>\n";
+      if ($context['loadWebVitalsDiagnostics']) {
+        $webVitalsDiagnostics = htmlspecialchars(
+          Environment::appURL('js/dev/web-vitals-diagnostics/') . '?v=' . $cacheVersion,
+          ENT_QUOTES,
+          'UTF-8'
+        );
+        $html .= "  <script type=\"module\" src=\"{$webVitalsDiagnostics}\" nonce=\"{$cspNonce}\"></script>\n";
+      }
     }
 
     return $html;

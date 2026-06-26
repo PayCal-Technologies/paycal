@@ -320,6 +320,7 @@ $pageFile = PageHeadRenderer::pageFileFor((string) $currentPage);
 $cssVersion = (string) time();
 $canonicalPath = $requestPathForStructuredData === '/' ? '' : ltrim($requestPathForStructuredData, '/');
 $loadPhantomWing = AdminSurface::userCanAccess() && in_array(Environment::appEnv(), ['dev', 'mac'], true);
+$loadWebVitalsDiagnostics = Environment::isWebVitalsDiagnosticsEnabled();
 $isDocPdfView = ContentView::isDocPage($currentPage) && (($_GET['view'] ?? '') === 'pdf');
 $headContext = [
   'pageLanguage' => $pageLanguage,
@@ -333,6 +334,7 @@ $headContext = [
   'pageFile' => $pageFile,
   'isAuthenticated' => $isAuthenticated,
   'loadPhantomWing' => $loadPhantomWing,
+  'loadWebVitalsDiagnostics' => $loadWebVitalsDiagnostics,
   'isDocPdfView' => $isDocPdfView,
   'jsonLdDocument' => $jsonLdDocument,
 ];
@@ -358,7 +360,7 @@ echo PageHeadRenderer::renderDublinCoreMeta($headContext);
 ?>
   <title><?php echo $pageTitle; ?></title>
 <?php
-echo PageHeadRenderer::renderResourceHints();
+echo PageHeadRenderer::renderResourceHints($headContext);
 echo PageHeadRenderer::renderStylesheets($headContext);
 echo PageHeadRenderer::renderScripts($headContext);
 ?>

@@ -48,14 +48,25 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 .earnings_async_slot {
   width: 100%;
+  min-height: 8rem;
   padding: 0.85rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm, 6px);
   background: var(--elevated-surface, var(--surface));
+  box-sizing: border-box;
+}
+
+.earnings_async_slot[data-earnings-slot="ytd"] {
+  min-height: 11rem;
 }
 
 .earnings_async_slot[data-earnings-slot="payperiods"] {
+  min-height: 10rem;
   container-type: inline-size;
+}
+
+.earnings_async_slot[data-earnings-slot="monthly"] {
+  min-height: 14rem;
 }
 
 .earnings_panel_title {
@@ -1717,11 +1728,13 @@ svg[data-compact-chart="true"] .earnings-crosshair {
   flex-direction: column;
   gap: 0;
   margin: 0 0 var(--gap-md, 1.25rem);
+  min-height: 11.5rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm, 6px);
   overflow: hidden;
   opacity: 0.65;
+  box-sizing: border-box;
 }
 
 .et_skeleton_header {
@@ -1745,7 +1758,9 @@ svg[data-compact-chart="true"] .earnings-crosshair {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0.5rem;
+  min-height: 5.5rem;
   padding: 1rem 0 1.25rem;
+  box-sizing: border-box;
 }
 
 .et_skeleton_exec_item {

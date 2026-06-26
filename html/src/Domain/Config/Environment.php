@@ -185,6 +185,13 @@ final class Environment
    */
   public static function isLocalMac()        : bool   { return self::$appEnv === 'mac'; }
   /**
+   * Local dev-only Web Vitals diagnostics (never production).
+   */
+  public static function isWebVitalsDiagnosticsEnabled(): bool
+  {
+    return in_array(self::$appEnv, ['dev', 'mac'], true);
+  }
+  /**
    * Handles appScheme operation.
    */
   public static function appScheme()         : string { return self::$appScheme; }

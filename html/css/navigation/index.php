@@ -42,6 +42,14 @@ body[data-nav-initial-state='static'] {
   --nav-sticky: static;
 }
 
+/* Side-nav uses pinned/collapsed — keep top sticky hook static (sidebar is position:fixed). */
+body[data-nav-primary-position='left'][data-nav-initial-state='collapsed'],
+body[data-nav-primary-position='right'][data-nav-initial-state='collapsed'],
+body[data-nav-primary-position='left'][data-nav-initial-state='pinned'],
+body[data-nav-primary-position='right'][data-nav-initial-state='pinned'] {
+  --nav-sticky: static;
+}
+
 #main {
   width: 100%;
   padding-inline: var(--page-edge-inline);
@@ -1448,6 +1456,20 @@ body[data-nav-primary-position='right'] #main {
 }
 
 /* Pre-hydration: apply server-provided sidebar state before JS boot. */
+body.nav-pinned:not(.nav-overlay-mode):not(.nav-ready)[data-nav-primary-position='left']:not(:has(#page_header.nav_component--public)) #main,
+body.nav-pinned:not(.nav-overlay-mode):not(.nav-ready)[data-nav-primary-position='left']:not(:has(#page_header.nav_component--public)) #page_footer {
+  margin-left: var(--nav-inline-size);
+  width: calc(100% - var(--nav-inline-size));
+  max-width: calc(100% - var(--nav-inline-size));
+}
+
+body.nav-pinned:not(.nav-overlay-mode):not(.nav-ready)[data-nav-primary-position='right']:not(:has(#page_header.nav_component--public)) #main,
+body.nav-pinned:not(.nav-overlay-mode):not(.nav-ready)[data-nav-primary-position='right']:not(:has(#page_header.nav_component--public)) #page_footer {
+  margin-right: var(--nav-inline-size);
+  width: calc(100% - var(--nav-inline-size));
+  max-width: calc(100% - var(--nav-inline-size));
+}
+
 body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header:not(.nav_component--public) {
   transform: translateX(calc(-100% + var(--nav-collapsed-strip-size)));
 }

@@ -227,10 +227,11 @@ const triggerBusinessUpgradeCelebration = () => {
 
     document.body.classList.remove('business-upgrade-celebrate');
     overlay.classList.remove('is-landing');
-    void overlay.offsetWidth;
-    overlay.classList.add('is-landing');
-    document.body.classList.add('business-upgrade-celebrate');
-    void playBusinessUpgradeSound();
+    requestAnimationFrame(() => {
+      overlay.classList.add('is-landing');
+      document.body.classList.add('business-upgrade-celebrate');
+      void playBusinessUpgradeSound();
+    });
 
     businessUpgradeHighlightTimer = window.setTimeout(() => {
       if (status instanceof HTMLElement) {
