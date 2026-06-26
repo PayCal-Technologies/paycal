@@ -114,17 +114,17 @@ final class CapabilityTokenService
       ];
     }
 
-    if (Database::exists(Keys::capabilityReplay($token))) {
-      return [
-        'ok' => false,
-        'code' => 'CAPABILITY_REPLAY',
-        'message' => 'Capability token was already consumed.',
-      ];
-    }
-
     $key = Keys::capabilityToken($userUuid, $token);
     $stored = Database::hgetall($key);
     if ($stored === []) {
+      if (Database::exists(Keys::capabilityReplay($token))) {
+        return [
+          'ok' => false,
+          'code' => 'CAPABILITY_REPLAY',
+          'message' => 'Capability token was already consumed.',
+        ];
+      }
+
       return [
         'ok' => false,
         'code' => 'CAPABILITY_UNKNOWN',
@@ -167,8 +167,15 @@ final class CapabilityTokenService
       ];
     }
 
+    if (!Database::setnx(Keys::capabilityReplay($token), '1', self::REPLAY_TTL_SECONDS)) {
+      return [
+        'ok' => false,
+        'code' => 'CAPABILITY_REPLAY',
+        'message' => 'Capability token was already consumed.',
+      ];
+    }
+
     Database::unlink($key);
-    Database::set(Keys::capabilityReplay($token), '1', self::REPLAY_TTL_SECONDS);
 
     return [
       'ok' => true,

@@ -949,6 +949,15 @@ final class PasskeyController
       return;
     }
 
+    if (!$this->hasRecentPasskeyStepUp()) {
+      Response::error(
+        '[PASSKEY] Passkey confirmation required before updating a passkey.',
+        ['step_up_required' => true, 'recommended_method' => 'passkey'],
+        HttpStatus::HTTP_FORBIDDEN
+      );
+      return;
+    }
+
     Database::hset($credentialKey, ['device_name' => $newName]);
 
     SecurityLog::log('passkey_renamed', [

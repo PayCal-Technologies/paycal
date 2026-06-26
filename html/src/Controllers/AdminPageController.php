@@ -203,8 +203,8 @@ class AdminPageController
    */
   private static function adminCorrelationContext(): string
   {
-    $raw = InputSanitizer::sanitizeString(InputSanitizer::getString('correlation_context'));
-    return $raw === '' ? 'admin-dashboard-default' : strtolower($raw);
+    // Server-fixed context only; never accept client ?correlation_context= input.
+    return 'security-incident';
   }
 
   /**

@@ -1017,7 +1017,7 @@ final class BusinessDiscoveryController
   /**
    * POST businesses/{businessId}/members/reports/audit
    *
-   * Records a business audit event after a selected-member report batch runs.
+   * Deprecated: report audit events are emitted only by the server export workflow.
    */
   #[Route('businesses/{businessId}/members/reports/audit', ['POST'])]
   public function recordMemberReportsAudit(string $businessId): void
@@ -1026,80 +1026,11 @@ final class BusinessDiscoveryController
       return;
     }
 
-    $businessId = InputSanitizer::sanitizeString($businessId);
-    $allowedStrings = [
-      'report_key',
-      'report_scope',
-      'year',
-      'format',
-      'delivery',
-      'member_count',
-      'succeeded',
-      'failed',
-      'duration_ms',
-      'generated_at',
-      'event_phase',
-      'result',
-      'reason',
-      'generation_path',
-      'trust_level',
-    ];
-    $filtered = self::filterBusinessPost($allowedStrings, ['member_uuids']);
-    if (false === $filtered) {
-      Response::error('[Business] RequestGuard failed.', [], HttpStatus::HTTP_BAD_REQUEST);
-      return;
-    }
-
-    $access = (new BusinessDiscoveryService())->listConnections(User::currentUUID(), $businessId);
-    if (!$access['success']) {
-      Response::error('[Business] Business access denied.', $access['data'], self::serviceFailureHttpStatus($access));
-      return;
-    }
-
-    $scalar = static function (mixed $value): string {
-      return is_scalar($value) ? trim((string) $value) : '';
-    };
-    $memberUuids = [];
-    if (is_array($filtered['member_uuids'] ?? null)) {
-      foreach ($filtered['member_uuids'] as $memberUuid) {
-        if (is_scalar($memberUuid)) {
-          $memberUuidClean = trim(InputSanitizer::sanitizeString((string) $memberUuid));
-          if ($memberUuidClean !== '') {
-            $memberUuids[] = $memberUuidClean;
-          }
-        }
-      }
-    }
-
-    $eventPhase = strtolower($scalar($filtered['event_phase'] ?? 'requested'));
-    if ($eventPhase !== 'requested' && $eventPhase !== 'request') {
-      Response::error(
-        '[Business] Export completion audit events must be emitted by the server export workflow.',
-        ['allowed_event_phase' => 'requested'],
-        HttpStatus::HTTP_FORBIDDEN
-      );
-      return;
-    }
-    $eventType = 'business.member.report.export.requested';
-
-    (new BusinessDiscoveryService())->appendBusinessAuditEvent(
-      $businessId,
-      $eventType,
-      User::currentUUID(),
-      [
-        'report_key' => $scalar($filtered['report_key'] ?? ''),
-        'report_scope' => $scalar($filtered['report_scope'] ?? ''),
-        'year' => $scalar($filtered['year'] ?? ''),
-        'format' => $scalar($filtered['format'] ?? ''),
-        'delivery' => $scalar($filtered['delivery'] ?? ''),
-        'member_count' => $scalar($filtered['member_count'] ?? ''),
-        'member_uuids' => $memberUuids,
-        'result' => 'requested',
-        'reason' => $scalar($filtered['reason'] ?? ''),
-      ],
+    Response::error(
+      '[Business] Report audit events must be emitted by the server export workflow.',
+      ['allowed_event_source' => 'server_export'],
+      HttpStatus::HTTP_FORBIDDEN
     );
-
-    Response::success('[Business] Report batch audit recorded.', [], HttpStatus::HTTP_OK);
   }
 
   /**

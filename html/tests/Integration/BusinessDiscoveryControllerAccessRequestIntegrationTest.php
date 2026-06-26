@@ -697,13 +697,8 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
     $this->assertNotContains('settings.updated', $eventTypes);
   }
 
-  public function testRecordMemberReportsAuditHandlesBulkHundredMemberBatch(): void
+  public function testRecordMemberReportsAuditRejectsClientAuditWrites(): void
   {
-    $memberUuids = [];
-    for ($index = 1; $index <= 100; $index++) {
-      $memberUuids[] = sprintf('bulk-member-%03d-%s', $index, substr($this->businessId, -6));
-    }
-
     $payload = $this->invokeControllerRoute('recordMemberReportsAudit', $this->businessId, 'POST', [
       'report_key' => 'bulk_member_reports',
       'report_scope' => 'yearly',
@@ -711,42 +706,14 @@ final class BusinessDiscoveryControllerAccessRequestIntegrationTest extends Test
       'format' => 'zip',
       'delivery' => 'zip',
       'member_count' => '100',
-      'succeeded' => '97',
-      'failed' => '3',
-      'duration_ms' => '12345',
-      'generated_at' => '2026-06-18T12:00:00+00:00',
       'event_phase' => 'requested',
-      'result' => 'requested',
-      'reason' => '',
-      'generation_path' => 'mixed_server_authorized_and_browser_convenience',
-      'trust_level' => 'mixed_package_server_authorized_pdf_and_browser_convenience_csv',
-      'member_uuids' => $memberUuids,
+      'member_uuids' => ['client-forged-request'],
       'csrf_token' => 'test-csrf',
     ]);
 
-    $this->assertSame('success', $payload['status'] ?? null, json_encode($payload));
-    $this->assertSame(200, $payload['__http_code'] ?? null, json_encode($payload));
-
-    $event = $this->latestBusinessAuditEventOfType('business.member.report.export.requested');
-    $this->assertSame($this->ownerUUID, (string) ($event['actor_uuid'] ?? ''));
-
-    $details = json_decode((string) ($event['details'] ?? '{}'), true);
-    $this->assertIsArray($details);
-    $this->assertSame('bulk_member_reports', (string) ($details['report_key'] ?? ''));
-    $this->assertSame('yearly', (string) ($details['report_scope'] ?? ''));
-    $this->assertSame('2026', (string) ($details['year'] ?? ''));
-    $this->assertSame('zip', (string) ($details['format'] ?? ''));
-    $this->assertSame('100', (string) ($details['member_count'] ?? ''));
-    $this->assertSame('', (string) ($details['succeeded'] ?? ''));
-    $this->assertSame('', (string) ($details['failed'] ?? ''));
-    $this->assertSame('requested', (string) ($details['result'] ?? ''));
-    $this->assertSame('', (string) ($details['generation_path'] ?? ''));
-    $this->assertSame('', (string) ($details['trust_level'] ?? ''));
-
-    $recordedMembers = array_values(array_filter(explode(',', (string) ($details['member_uuids'] ?? ''))));
-    $this->assertCount(100, $recordedMembers);
-    $this->assertSame($memberUuids[0], $recordedMembers[0]);
-    $this->assertSame($memberUuids[99], $recordedMembers[99]);
+    $this->assertSame('error', $payload['status'] ?? null, json_encode($payload));
+    $this->assertSame(403, $payload['__http_code'] ?? null, json_encode($payload));
+    $this->assertStringContainsString('server export workflow', (string) ($payload['message'] ?? ''));
   }
 
   public function testRecordMemberReportsAuditRejectsClientCompletedEvent(): void

@@ -10,6 +10,7 @@ use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Infrastructure\Resilience\RedisReliabilityService;
 use PayCal\Domain\Response;
+use PayCal\Domain\Config\SystemConfig;
 use PayCal\Domain\User;
 use PayCal\Domain\UserFields;
 
@@ -219,6 +220,15 @@ class DEKController
             return;
         }
 
+        if (!self::hasRecentPasskeyStepUp()) {
+            Response::error(
+                '[DEK] Passkey confirmation required before storing a wrapped DEK.',
+                ['step_up_required' => true, 'recommended_method' => 'passkey'],
+                HttpStatus::HTTP_FORBIDDEN
+            );
+            return;
+        }
+
         $wrappedDekPasskey = $body['wrappedDekPasskey'] ?? null;
         $dekVersionRaw = $body['dekVersion'] ?? 1;
         $cryptoVersionRaw = $body['cryptoVersion'] ?? 1;
@@ -307,5 +317,34 @@ class DEKController
         ]);
 
         Response::success('[DEK] Wrapped DEK stored.', ['credentialId' => $credentialId]);
+    }
+
+    /**
+     * Require a strong passkey-backed session or recent passkey step-up.
+     */
+    private static function hasRecentPasskeyStepUp(): bool
+    {
+        $sessionHash = Authentication::getSessionHashFromCookie();
+        if ($sessionHash === null || $sessionHash === '') {
+            return false;
+        }
+
+        $sessionKey = Keys::SESSION . ':' . $sessionHash;
+        $strength = strtolower((string) Database::hget($sessionKey, 'auth_strength'));
+        if ($strength === 'strong') {
+            return true;
+        }
+
+        $stepUpTimestamp = (int) Database::hget($sessionKey, 'passkey_stepup_at');
+        if ($stepUpTimestamp <= 0) {
+            return false;
+        }
+
+        $maxAge = (int) SystemConfig::get('email_change_stepup_max_age_seconds');
+        if ($maxAge <= 0) {
+            $maxAge = 900;
+        }
+
+        return (time() - $stepUpTimestamp) <= $maxAge;
     }
 }

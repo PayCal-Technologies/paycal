@@ -396,6 +396,14 @@ final class Keys
   }
 
   /**
+   * Handles accountRecoveryProofNonceClaim operation.
+   */
+  public static function accountRecoveryProofNonceClaim(string $txnId): string
+  {
+    return 'account_recovery:proof_nonce_claim' . self::SEPARATOR . $txnId;
+  }
+
+  /**
    * Handles accountRecoveryMagicLink operation.
    */
   public static function accountRecoveryMagicLink(string $token): string

@@ -3038,6 +3038,15 @@ final class BusinessDiscoveryService
       return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_LINK_SITES_FOR_THIS_BUSINE'));
     }
 
+    if (!$this->canMutateSitesForOwner($actorUUID, $siteOwnerUUID)) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_LINK_SITES_FOR_THIS_BUSINE'));
+    }
+
+    $ownerConnection = $this->connection($businessId, $siteOwnerUUID);
+    if ([] === $ownerConnection || ($ownerConnection['status'] ?? '') !== self::MEMBERSHIP_STATE_ACTIVE) {
+      return $this->fail(Strings::i18n('BUSINESSES_API_SITE_NOT_FOUND'));
+    }
+
     $siteKey = Keys::SITE . ':' . $siteOwnerUUID . ':' . $siteId;
     if (!Database::exists($siteKey)) {
       return $this->fail(Strings::i18n('BUSINESSES_API_SITE_NOT_FOUND'));

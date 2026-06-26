@@ -1907,31 +1907,6 @@
     setMembersReportSummaryVisible(true);
   };
 
-  const recordMembersReportAudit = async (batch, eventPhase = 'completed', reason = '') => {
-    try {
-      await postForm(`/api/v1/businesses/${encodeURIComponent(batch.orgId)}/members/reports/audit`, {
-        report_key: batch.reportKey,
-        report_scope: batch.scope,
-        year: batch.year,
-        format: batch.format,
-        delivery: batch.delivery,
-        member_count: batch.total,
-        succeeded: batch.generated,
-        failed: batch.failed,
-        duration_ms: batch.durationMs,
-        generated_at: batch.generatedAt,
-        event_phase: eventPhase,
-        result: eventPhase,
-        reason,
-        generation_path: batch.generationPath,
-        trust_level: batch.trustLevel,
-        member_uuids: batch.results.map((result) => result.member.id),
-      });
-    } catch (error) {
-      PW.error(error);
-    }
-  };
-
   const generateReportsForSelectedMembers = async () => {
     if (memberReportBatchRunning) {
       return;
@@ -2020,15 +1995,6 @@
     };
 
     try {
-      await recordMembersReportAudit({
-        ...batch,
-        results: members.map((member) => ({ member })),
-      }, 'requested');
-      await recordMembersReportAudit({
-        ...batch,
-        results: members.map((member) => ({ member })),
-      }, 'started');
-
       for (let index = 0; index < members.length; index += 1) {
         const member = members[index];
         setMembersReportStatus(formatPhpTemplate(T.memberReportsProgress, [
@@ -2082,7 +2048,6 @@
       }
 
       updateMembersReportSummary(batch);
-      await recordMembersReportAudit(batch, batch.failed > 0 ? 'failed' : 'completed', batch.failed > 0 ? 'one_or_more_member_reports_failed' : '');
 
       const message = batch.failed > 0
         ? formatPhpTemplate(T.memberReportsGeneratedFailed, [
@@ -2098,7 +2063,6 @@
       PC.showToast(message, batch.failed > 0 ? 'error' : 'save', 7000, true);
     } catch (error) {
       batch.durationMs = Math.round(performance.now() - startedAt);
-      await recordMembersReportAudit(batch, 'failed', error instanceof Error && error.message ? error.message : T.memberReportsGenerationFailed);
       throw error;
     } finally {
       memberReportBatchRunning = false;

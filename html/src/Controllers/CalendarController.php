@@ -633,6 +633,17 @@ class CalendarController
         'grouped_entries' => $total
       ], 'batch_start');
 
+      if (BusinessDiscoveryService::isDelegatedWorkMode($mode)) {
+        $preWriteDiscovery = new BusinessDiscoveryService();
+        if (!$preWriteDiscovery->canMutateWorkForOwner($actorUUID, $targetUserUUID, $businessId)) {
+          self::incrementBusinessWriteDeniedCounter('insufficient_scope');
+          self::appendBusinessWorkWriteAudit($businessId, $actorUUID, $targetUserUUID, 'denied', 'insufficient_scope', $dayId, 0);
+          Response::error('[CC] Insufficient business scope for delegated work mutation.', [], HttpStatus::HTTP_FORBIDDEN);
+
+          return;
+        }
+      }
+
       foreach ($grouped as $workDetails) {
         $workDetails['cal_work_save_as_default'] = InputSanitizer::postString('cal_work_save_as_default');
 

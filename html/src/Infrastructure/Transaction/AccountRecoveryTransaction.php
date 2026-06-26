@@ -307,10 +307,12 @@ final class AccountRecoveryTransaction
 
     $proofNonce = rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
     $expiresAt = time() + max(30, (int) SystemConfig::get('account_recovery_proof_nonce_ttl_seconds'));
+    $ttlSeconds = max(1, $expiresAt - time());
     $this->write([
       'proof_nonce_hash' => hash('sha256', $proofNonce),
       'proof_nonce_expires_at' => (string) $expiresAt,
     ]);
+    Database::set(Keys::accountRecoveryProofNonceClaim($this->txnId), $proofNonce, $ttlSeconds);
 
     return ['proofNonce' => $proofNonce, 'expiresAt' => $expiresAt];
   }
@@ -320,7 +322,10 @@ final class AccountRecoveryTransaction
    */
   public function verifyProof(string $proof, string $proofNonce, string $expectedProof, string $fingerprintHash, string $ipClass): bool
   {
-    $valid = $this->status() === self::STATUS_EMAIL_VERIFIED
+    $claimedNonce = Database::getdel(Keys::accountRecoveryProofNonceClaim($this->txnId));
+    $valid = $claimedNonce !== ''
+      && hash_equals($claimedNonce, $proofNonce)
+      && $this->status() === self::STATUS_EMAIL_VERIFIED
       && !$this->isExpired()
       && $this->matchesClientBinding($fingerprintHash, $ipClass)
       && hash_equals((string) ($this->data['proof_nonce_hash'] ?? ''), hash('sha256', $proofNonce))

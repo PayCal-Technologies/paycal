@@ -474,11 +474,13 @@ final class User
    */
   public function verifyFormNonce(string $formType, string $nonce): bool
   {
-    $key = "user:{$this->user_uuid}:csrf:{$formType}:{$nonce}";
+    if ($nonce === '') {
+      return false;
+    }
 
-    return Database::exists($key);
-    // Don't delete the token - just verify it exists and is valid (TTL-based)
-    // This allows multiple submissions with the same token
+    $key = "user:{$this->user_uuid}:csrf:{$formType}:{$nonce}";
+    // GETDEL atomically reads and removes the nonce in one round trip.
+    return Database::getdel($key) !== '';
   }
 
 

@@ -104,7 +104,7 @@ final class AdminPageControllerIntegrationTest extends TestCase
 
   public function testDashboardIncludesAdminEnrichmentWhenContextAllowed(): void
   {
-    $output = $this->runDashboardSubprocess(['correlation_context' => 'security-incident']);
+    $output = $this->runDashboardSubprocess([]);
     $expectedFingerprint = substr(hash('sha256', 'paycal-admin-session-fingerprint:' . $this->targetSessionHash), 0, 16);
 
     $this->assertStringContainsString('Target User', $output);
@@ -115,29 +115,25 @@ final class AdminPageControllerIntegrationTest extends TestCase
     $this->assertMatchesRegularExpression("/data-registered-at='\\d+'/", $output);
   }
 
-  public function testDashboardOmitsAdminEnrichmentWhenContextDenied(): void
+  public function testDashboardIgnoresClientCorrelationContextDenialAttempt(): void
   {
     $output = $this->runDashboardSubprocess(['correlation_context' => 'unknown-correlation-context']);
+    $expectedFingerprint = substr(hash('sha256', 'paycal-admin-session-fingerprint:' . $this->targetSessionHash), 0, 16);
 
     $this->assertStringContainsString('Target User', $output);
     $this->assertStringNotContainsString($this->targetSessionHash, $output);
-    $this->assertStringNotContainsString("data-credential-count='1'", $output);
-    $this->assertStringContainsString("data-credential-count='0'", $output);
-    $this->assertStringContainsString("data-last-session-at=''", $output);
-    $this->assertStringContainsString("data-last-session-hash=''", $output);
-    $this->assertStringContainsString("data-registered-at=''", $output);
-    $this->assertStringContainsString("data-last-passkey-used-at=''", $output);
+    $this->assertStringContainsString("data-last-session-hash='" . $expectedFingerprint . "'", $output);
+    $this->assertStringContainsString("data-credential-count='1'", $output);
   }
 
-  public function testDashboardDefaultsToDenySafeEnrichmentWhenContextUnset(): void
+  public function testDashboardDefaultsToServerSideEnrichmentWhenContextUnset(): void
   {
     $output = $this->runDashboardSubprocess([]);
+    $expectedFingerprint = substr(hash('sha256', 'paycal-admin-session-fingerprint:' . $this->targetSessionHash), 0, 16);
 
     $this->assertStringContainsString('Target User', $output);
     $this->assertStringNotContainsString($this->targetSessionHash, $output);
-    $this->assertStringContainsString("data-credential-count='0'", $output);
-    $this->assertStringContainsString("data-last-session-at=''", $output);
-    $this->assertStringContainsString("data-last-session-hash=''", $output);
-    $this->assertStringContainsString("data-last-passkey-used-at=''", $output);
+    $this->assertStringContainsString("data-credential-count='1'", $output);
+    $this->assertStringContainsString("data-last-session-hash='" . $expectedFingerprint . "'", $output);
   }
 }

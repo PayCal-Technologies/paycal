@@ -247,6 +247,7 @@ final class RequestGuard
       return false;
     }
 
+    // verifyFormNonce uses GETDEL for atomic single-use (same contract as validateCSRFToken).
     return User::current()->verifyFormNonce($formType, $csrfToken);
   }
 

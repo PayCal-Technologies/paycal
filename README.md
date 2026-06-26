@@ -280,7 +280,7 @@ Localization source files live in `strings/`. Backup files such as `*.bak` are n
 Suite inventory (as of 2026-06-26):
 
 - **2,452 listed tests**
-- **288 repository test files**
+- **289 repository test files**
 - **Active public suite file split:** **144 Unit**, **61 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
 - **2 Manual verification files**
 
