@@ -1641,10 +1641,13 @@ DATAGRID_INVALID_RESPONSE Invalid DataGrid response.
 DATAGRID_ITEM_LABEL_ENTRIES entries
 DATAGRID_NEXT_MONTH_ARIA Next month (] or Page Down)
 DATAGRID_NO_ENTRIES_FOUND No entries found.
+DATAGRID_PAGINATION_ARIA Data grid pagination
 DATAGRID_PAGINATION_RANGE Showing %d–%d of %d %s
 DATAGRID_PREVIOUS_MONTH_ARIA Previous month ([ or Page Up)
 DATAGRID_RELOAD_FAILED DataGrid reload failed.
+DATAGRID_SEARCH_ARIA Search data grid
 DATAGRID_SEARCH_PLACEHOLDER Search…
+DATAGRID_TOOLBAR_ARIA Data grid toolbar
 DATE Date
 DATE_PICKER Sélecteur de date
 DATE_PICKER_ACTIONS_ARIA Date picker actions
@@ -1915,6 +1918,7 @@ EARNINGS_PAYROLL_SPREAD_ACROSS_SITES Payroll is spread across {count} sites - he
 EARNINGS_PER_MONTH_AVG_SUFFIX /mo avg
 EARNINGS_PERCENT_CONCENTRATION {pct}% concentration
 EARNINGS_PERCENT_PAYROLL_FROM_SITE {pct}% of payroll originates from "{site}".
+EARNINGS_PIEGRAPHS_MONTH_SELECT_ARIA Select month for composition chart
 EARNINGS_PIEGRAPHS_NO_VALUES Aucune valeur disponible.
 EARNINGS_POSITIVE Positive
 EARNINGS_POSITIVE_TRENDS Positive Trends
@@ -1998,6 +2002,7 @@ EARNINGS_TREND_NO_DATA_DESC Line chart showing gross earnings trend across {year
 EARNINGS_TREND_NO_DATA_STATUS Earnings trend chart for {year} loaded with no data points.
 EARNINGS_TREND_NO_NUMERIC_DESC Line chart showing gross earnings trend across {year}. Data points were present but contained invalid numeric values.
 EARNINGS_TREND_NO_NUMERIC_STATUS Earnings trend chart for {year} loaded with no numeric data points.
+EARNINGS_TREND_TOUCH_HINT Touch chart to reveal values
 EARNINGS_TREND_UPDATED_DESC Line chart showing gross earnings trend across {year}. Data spans {firstDate} to {lastDate} with {points} points. Values range from ${minValue} to ${maxValue} and overall trend is {direction}.
 EARNINGS_TREND_UPDATED_STATUS Earnings trend chart updated for {year}. {points} points from {firstDate} to {lastDate}.
 EARNINGS_TREND_Y_AXIS_LABEL {amount} ({pct})
@@ -4736,3 +4741,29 @@ SETTINGS_RECOVERY_KEY_UPDATED_UNKNOWN Unknown
 SITES_BUSINESS_PLANNING_LOCKED Business Planning requires PayCal Business or a manager/coordinator role in this business.
 BUSINESS_PROTECTED_WORK_NOT_AVAILABLE This member's work data is not available to reports yet. Confirm their connection and data consent are active.
 BUSINESS_PROTECTED_WORK_NO_SHARED_WORK No approved work entries are available for this member yet.
+BUSINESS_REPORTS_TOOLBAR_ARIA Business report controls
+BUSINESS_REPORTS_SECTIONS_ARIA Report sections
+BUSINESS_REPORTS_FILTERS_ARIA Report filters
+BUSINESS_REPORTS_FILTER_PERIOD_ARIA Period
+BUSINESS_REPORTS_FILTER_COMPARE_ARIA Comparison period
+BUSINESS_REPORTS_FILTER_SITE_ARIA Site
+BUSINESS_REPORTS_FILTER_GROUP_ARIA Group
+BUSINESS_REPORTS_FILTER_MEMBER_ARIA Member
+BUSINESS_REPORTS_CUSTOMIZE_DRAWER_ARIA Customize report view
+BUSINESS_REPORTS_PRESETS_ARIA Report presets
+BUSINESS_REPORTS_INSUFFICIENT_HISTORY Insufficient history for a meaningful chart.
+BUSINESS_MEMBERS_REPORT_SELECTED_LIST_ARIA Selected members for report generation
+BUSINESS_MEMBERS_REPORT_ADD_LIST_ARIA Members available to add
+BUSINESS_MEMBERS_REPORT_REMOVE_ARIA Remove %s
+BUSINESS_MEMBERS_ROLE_MATRIX_ARIA Role permission matrix
+REPORTS_PRINT_DIALOG_DESC Choose how this reports page should be prepared for Chrome print or Save as PDF.
+REPORTS_PRINT_MODE_LEGEND Print color mode
+REPORTS_PRINT_MODE_BW Black & white
+REPORTS_PRINT_MODE_GRAYSCALE Grayscale
+REPORTS_PRINT_MODE_COLOR Full color
+REPORTS_PRINT_MODE_BW_DESC Highest contrast and lowest ink use. Charts print as black lines on white paper.
+REPORTS_PRINT_MODE_GRAYSCALE_DESC Printer-friendly gray tones with more separation between report series.
+REPORTS_PRINT_MODE_COLOR_DESC Preserves report chart colors while keeping page backgrounds white.
+SETTINGS_ACCENT_PREVIEW_ARIA Accent preview
+SETTINGS_TEXT_SIZE_SLIDER_ARIA Text size adjustment
+SETTINGS_SPACING_SLIDER_ARIA Spacing adjustment

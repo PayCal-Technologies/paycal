@@ -609,6 +609,7 @@ BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_SITES_FOR_THIS_BUSINE You do n
 BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_SITE_SETTINGS_FOR_THI You do not have permission to view site settings for this business.
 BUSINESSES_AUDIT_ACTOR actor
 BUSINESSES_AUDIT_ARIA Business audit timeline
+BUSINESSES_AUDIT_FILTER_ARIA Filter audit events
 BUSINESSES_AUDIT_CONTROL_TEST_DENIED Audit control tests require dev admin access and manage-access permission for this business.
 BUSINESSES_AUDIT_CONTROL_TEST_FAILED Unable to generate audit control test error.
 BUSINESSES_AUDIT_CONTROL_TEST_GENERATE_BTN Generate Test Error
@@ -810,6 +811,7 @@ BUSINESSES_FREE_INTRO_HELP Search for a business to connect with, or review your
 BUSINESSES_FREE_INTRO_PANEL_HELP Business discovery and membership overview.
 BUSINESSES_FREE_INTRO_TITLE Find Your Business
 BUSINESSES_GRID_ARIA Business overview
+BUSINESSES_LIST_FILTER_ARIA Filter businesses
 BUSINESSES_GRID_PANEL_HELP Overview of your business workspace with launch points to members, sites, business reports, and settings.
 BUSINESSES_GRID_PLACEHOLDER Loading your business overview...
 BUSINESSES_GRID_REASON_FAILED failed to load
@@ -855,6 +857,7 @@ BUSINESSES_INDUSTRY_UNAVAILABLE Industry unavailable
 BUSINESSES_INTRO Your business connects sites and member access while keeping work entries user-owned.
 BUSINESSES_INVALID_ROLE_SELECTED Invalid role selected.
 BUSINESSES_INVITES_HISTORY_ARIA Invite and access request history
+BUSINESSES_INVITES_HISTORY_FILTER_ARIA Filter invite and access request history
 BUSINESSES_INVITES_HISTORY_H4 Invite &amp; Access History
 BUSINESSES_INVITES_HISTORY_LOADING Loading history...
 BUSINESSES_INVITES_LOADED_COUNT Invites list loaded. %d invite%s shown.
@@ -948,6 +951,7 @@ BUSINESSES_MEMBERS_FILTER_ARIA Filter by role
 BUSINESSES_MEMBERS_GUIDE Members Guide
 BUSINESSES_MEMBERS_GUIDE_OPEN_ARIA Open Members guide
 BUSINESSES_MEMBERS_FILTER_PLACEHOLDER Filter members...
+BUSINESSES_MEMBERS_SEARCH_ARIA Filter members
 BUSINESSES_MEMBERS_GRID_ARIA Business members results
 BUSINESSES_MEMBERS_GRID_CONTEXT Rows show member name with email, role, and status, plus joined date, hours, earnings, and row actions. Use the Columns menu to show or hide optional columns.
 BUSINESSES_MEMBERS_GRID_INIT_FAILED Unable to initialize members grid.
@@ -1006,6 +1010,7 @@ BUSINESSES_MEMBER_PANEL_HELP Grant someone access to collaborate on linked busin
 BUSINESSES_MEMBER_PLACEHOLDER Member email or business name
 BUSINESSES_MEMBER_REPORTS_DENIED Your current role cannot view member reports.
 BUSINESSES_MEMBER_REPORTS_DIALOG_TITLE Reports
+BUSINESSES_MEMBER_REPORTS_CONTENT_ARIA Member earnings reports
 BUSINESSES_MEMBER_REPORTS_DIALOG_TITLE_NAMED %s — Reports
 BUSINESSES_MEMBER_REPORTS_LOADED_FOR Reports loaded for %s.
 BUSINESSES_MEMBER_REPORTS_LOADING Loading reports for %s...
@@ -1352,6 +1357,17 @@ BUSINESS_REPORTS_LOADING_ANALYTICS_YEAR Loading reports analytics for %s.
 BUSINESS_REPORTS_NO_ACCESS You need an active business membership with financial access to view reports.
 BUSINESS_REPORTS_NO_ANALYTICS_YEAR No payroll analytics for %d.
 BUSINESS_REPORTS_TITLE Reports
+BUSINESS_REPORTS_TOOLBAR_ARIA Business report controls
+BUSINESS_REPORTS_SECTIONS_ARIA Report sections
+BUSINESS_REPORTS_FILTERS_ARIA Report filters
+BUSINESS_REPORTS_FILTER_PERIOD_ARIA Period
+BUSINESS_REPORTS_FILTER_COMPARE_ARIA Comparison period
+BUSINESS_REPORTS_FILTER_SITE_ARIA Site
+BUSINESS_REPORTS_FILTER_GROUP_ARIA Group
+BUSINESS_REPORTS_FILTER_MEMBER_ARIA Member
+BUSINESS_REPORTS_CUSTOMIZE_DRAWER_ARIA Customize report view
+BUSINESS_REPORTS_PRESETS_ARIA Report presets
+BUSINESS_REPORTS_INSUFFICIENT_HISTORY Insufficient history for a meaningful chart.
 BUSINESS_ROUTE_GATE_BILLING_BTN View billing options
 BUSINESS_ROUTE_GATE_HELP Business workspace pages require the Business tier. Upgrade from billing below, or connect to an existing business from your profile.
 BUSINESS_ROUTE_GATE_TITLE Business tier required
@@ -1365,6 +1381,7 @@ BUSINESS_SITES_CREATE_NAME_REQUIRED Site name is required.
 BUSINESS_SITES_CREATE_PROMPT Enter a name for the new business site
 BUSINESS_SITES_CREATE_TITLE Create business site
 BUSINESS_SITES_CREATE_WAGE Hourly wage
+BUSINESS_SITES_FILTER_ARIA Filter business sites
 BUSINESS_SITES_FILTER_PLACEHOLDER Filter sites…
 BUSINESS_SITES_GRID_ARIA Business linked sites data grid
 BUSINESS_SITES_GRID_COLUMN_BUDGET Budget
@@ -1629,10 +1646,13 @@ DATAGRID_INVALID_RESPONSE Invalid DataGrid response.
 DATAGRID_ITEM_LABEL_ENTRIES entries
 DATAGRID_NEXT_MONTH_ARIA Next month (] or Page Down)
 DATAGRID_NO_ENTRIES_FOUND No entries found.
+DATAGRID_PAGINATION_ARIA Data grid pagination
 DATAGRID_PAGINATION_RANGE Showing %d–%d of %d %s
 DATAGRID_PREVIOUS_MONTH_ARIA Previous month ([ or Page Up)
 DATAGRID_RELOAD_FAILED DataGrid reload failed.
+DATAGRID_SEARCH_ARIA Search data grid
 DATAGRID_SEARCH_PLACEHOLDER Search…
+DATAGRID_TOOLBAR_ARIA Data grid toolbar
 DATE Date
 DATE_PICKER Date Picker
 DATE_PICKER_ACTIONS_ARIA Date picker actions
@@ -1903,10 +1923,19 @@ EARNINGS_PAY_PERIOD_WARNING_INVALID_START Warning: Pay period start date is miss
 EARNINGS_PERCENT_CONCENTRATION {pct}% concentration
 EARNINGS_PERCENT_PAYROLL_FROM_SITE {pct}% of payroll originates from "{site}".
 EARNINGS_PER_MONTH_AVG_SUFFIX /mo avg
+EARNINGS_PIEGRAPHS_MONTH_SELECT_ARIA Select month for composition chart
 EARNINGS_PIEGRAPHS_NO_VALUES No values available.
 EARNINGS_POSITIVE Positive
 EARNINGS_POSITIVE_TRENDS Positive Trends
 EARNINGS_PRINT_REPORT Print Report
+REPORTS_PRINT_DIALOG_DESC Choose how this reports page should be prepared for Chrome print or Save as PDF.
+REPORTS_PRINT_MODE_LEGEND Print color mode
+REPORTS_PRINT_MODE_BW Black & white
+REPORTS_PRINT_MODE_GRAYSCALE Grayscale
+REPORTS_PRINT_MODE_COLOR Full color
+REPORTS_PRINT_MODE_BW_DESC Highest contrast and lowest ink use. Charts print as black lines on white paper.
+REPORTS_PRINT_MODE_GRAYSCALE_DESC Printer-friendly gray tones with more separation between report series.
+REPORTS_PRINT_MODE_COLOR_DESC Preserves report chart colors while keeping page backgrounds white.
 EARNINGS_PRIORITY Priority
 EARNINGS_RECOMMENDED_ACTIONS Recommendations
 EARNINGS_RECOMMENDED_ACTIONS_SUBTITLE Auto-generated from this period\
@@ -1986,6 +2015,7 @@ EARNINGS_TREND_NO_DATA_DESC Line chart showing gross earnings trend across {year
 EARNINGS_TREND_NO_DATA_STATUS Earnings trend chart for {year} loaded with no data points.
 EARNINGS_TREND_NO_NUMERIC_DESC Line chart showing gross earnings trend across {year}. Data points were present but contained invalid numeric values.
 EARNINGS_TREND_NO_NUMERIC_STATUS Earnings trend chart for {year} loaded with no numeric data points.
+EARNINGS_TREND_TOUCH_HINT Touch chart to reveal values
 EARNINGS_TREND_UPDATED_DESC Line chart showing gross earnings trend across {year}. Data spans {firstDate} to {lastDate} with {points} points. Values range from {minValue} to {maxValue} and overall trend is {direction}.
 EARNINGS_TREND_UPDATED_STATUS Earnings trend chart updated for {year}. {points} points from {firstDate} to {lastDate}.
 EARNINGS_TREND_Y_AXIS_LABEL {amount} ({pct})
@@ -3295,6 +3325,9 @@ SETTINGS_APPEARANCE_NOTIFICATIONS_TITLE Notifications
 SETTINGS_APPEARANCE_SIDEBAR_FORM_ARIA Sidebar appearance preferences
 SETTINGS_APPEARANCE_SIDEBAR_TITLE Sidebar
 SETTINGS_APPEARANCE_THEME_TITLE Theme
+SETTINGS_ACCENT_PREVIEW_ARIA Accent preview
+SETTINGS_TEXT_SIZE_SLIDER_ARIA Text size adjustment
+SETTINGS_SPACING_SLIDER_ARIA Spacing adjustment
 SETTINGS_DURATION_LABEL Duration
 SETTINGS_ACCESSIBILITY_EXTRAS_ARIA Accessibility extras form
 SETTINGS_ACCESSIBILITY_EXTRAS_TITLE Screen reader and shortcuts
@@ -3714,6 +3747,7 @@ SITES_EARNINGS_FAILED_LOAD Failed to load earnings data
 SITES_EARNINGS_HISTORY_DISCLAIMER History of your earnings per personal site.
 SITES_EARNINGS_REVIEW_HELP Review yearly earnings analytics grouped by site.
 SITES_EARNINGS_TOTALS_ARIA Site earnings totals summary
+SITES_FILTER_ARIA Filter sites
 SITES_EARNINGS_YEAR_HELP Choose a year to view site earnings totals and breakdowns.
 SITES_EARNINGS_YEAR_TABS_ARIA Earnings year tabs
 SITES_EDITOR_SETTINGS_HEADING Site Settings
@@ -4649,6 +4683,10 @@ BUSINESS_MEMBERS_REPORT_PRIVACY_NOTICE Downloaded reports are no longer protecte
 BUSINESS_MEMBERS_REPORT_PROGRESS Generating %d of %d: %s
 BUSINESS_MEMBERS_REPORT_SELECTED_FILTER_PLACEHOLDER Find selected member...
 BUSINESS_MEMBERS_REPORT_SELECTED_HEADING Selected members
+BUSINESS_MEMBERS_REPORT_SELECTED_LIST_ARIA Selected members for report generation
+BUSINESS_MEMBERS_REPORT_ADD_LIST_ARIA Members available to add
+BUSINESS_MEMBERS_REPORT_REMOVE_ARIA Remove %s
+BUSINESS_MEMBERS_ROLE_MATRIX_ARIA Role permission matrix
 BUSINESS_MEMBERS_REPORT_SETTINGS_HEADING Report Settings
 BUSINESS_MEMBERS_REPORT_UNSUPPORTED_OPTION Unsupported report option.
 BUSINESS_MEMBERS_REPORTS_GENERATED_HEADING Reports generated
@@ -4689,6 +4727,7 @@ BUSINESS_GROUPS_EDITOR_DETAILS Group details
 BUSINESS_GROUPS_EDITOR_TITLE Edit group
 BUSINESS_GROUPS_EDITOR_USAGE Group usage
 BUSINESS_GROUPS_EDITOR_USAGE_HELP Group members, reporting coverage, and assignment tools will appear here as the Groups workflow expands.
+BUSINESS_GROUPS_FILTER_ARIA Filter groups
 BUSINESS_GROUPS_FILTER_PLACEHOLDER Filter groups...
 BUSINESS_GROUPS_GRID_ARIA Business member groups grid
 BUSINESS_GROUPS_GRID_INIT_FAILED Unable to initialize groups grid.
