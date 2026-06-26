@@ -67,7 +67,7 @@ final class EmailVerificationController
    *
    * GET /auth/verify-email?token=<token>
    */
-  #[Route('auth/verify-email', ['GET'])]
+  #[Route('auth/verify-email', ['GET', 'POST'])]
   /**
    * Handles verifyEmail operation.
    */
@@ -80,20 +80,28 @@ final class EmailVerificationController
       return;
     }
 
-    $rawToken = $_GET['token'] ?? '';
-    $rawCode = $_GET['code'] ?? '';
-    $tokenRawString = is_string($rawToken) ? $rawToken : '';
-    $codeRawString = is_string($rawCode) ? $rawCode : '';
-    $token = InputSanitizer::sanitizeString($tokenRawString);
-    $code = strtoupper(InputSanitizer::sanitizeString($codeRawString));
+    $requestMethod = isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD'])
+      ? strtoupper($_SERVER['REQUEST_METHOD'])
+      : 'GET';
+
+    $rawToken = isset($_GET['token']) && is_string($_GET['token']) ? $_GET['token'] : '';
+    $rawCode = '';
+    if ($requestMethod === 'POST') {
+      $verificationCode = InputSanitizer::postString('verification_code');
+      $rawCode = $verificationCode !== '' ? $verificationCode : InputSanitizer::postString('code');
+    }
+    if ($requestMethod === 'GET' && isset($_GET['code'])) {
+      $this->redirectWithError('Please enter your verification code on the verify page.');
+
+      return;
+    }
+    $token = InputSanitizer::sanitizeString($rawToken);
+    $code = strtoupper(str_replace('-', '', InputSanitizer::sanitizeString($rawCode)));
     $lookupValue = $token !== '' ? $token : $code;
     $verificationMode = $token !== '' ? 'token' : ($code !== '' ? 'code' : 'none');
     $remoteIp = isset($_SERVER['REMOTE_ADDR']) && is_string($_SERVER['REMOTE_ADDR'])
       ? $_SERVER['REMOTE_ADDR']
       : 'unknown';
-    $requestMethod = isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD'])
-      ? $_SERVER['REQUEST_METHOD']
-      : 'UNKNOWN';
     $requestUri = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI'])
       ? $_SERVER['REQUEST_URI']
       : '';

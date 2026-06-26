@@ -1,7 +1,5 @@
 <?php declare(strict_types=1);
 
-use PayCal\Domain\Config\SystemConfig;
-use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Strings;
 
 require_once '../config.php';
@@ -24,16 +22,6 @@ foreach ($i18nKeys as $i18nKey) {
 }
 
 $error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $verificationCode = InputSanitizer::postString('verification_code');
-  $code = strtoupper(str_replace('-', '', $verificationCode));
-  if (strlen($code) !== SystemConfig::PC_VERIFICATION_LENGTH) {
-    $error = $i18n['VERIFY_ERROR_INVALID_CODE_LENGTH'];
-  } else {
-    header('Location: /auth/verify-email/?code=' . urlencode($code));
-    exit;
-  }
-}
 $pageLanguage = defined('USER_LANGUAGE') ? (string) USER_LANGUAGE : 'en';
 $cssVersion = \PayCal\Domain\Environment::appVersion();
 ?>
@@ -52,7 +40,7 @@ $cssVersion = \PayCal\Domain\Environment::appVersion();
     <?php if ($error) { ?>
       <p class="error" role="alert"><?php echo htmlspecialchars($error); ?></p>
     <?php } ?>
-    <form action="" method="post" autocomplete="off" aria-label="<?php echo htmlspecialchars($i18n['VERIFY_FORM_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
+    <form action="/api/v1/auth/verify-email" method="post" autocomplete="off" aria-label="<?php echo htmlspecialchars($i18n['VERIFY_FORM_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
       <label for="verification_code" class="verification-label"><?php echo htmlspecialchars($i18n['VERIFY_CODE_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label><br>
       <input type="text" id="verification_code" name="verification_code" maxlength="7" pattern="[A-Z]{3}-[A-Z]{3}" class="verification-input" inputmode="text" aria-required="true" aria-label="<?php echo htmlspecialchars($i18n['VERIFY_CODE_INPUT_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" required autofocus placeholder="<?php echo htmlspecialchars($i18n['VERIFY_CODE_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>" data-verify-code-format="true">
       <button type="submit"><?php echo htmlspecialchars($i18n['VERIFY_BUTTON'], ENT_QUOTES, 'UTF-8'); ?></button>

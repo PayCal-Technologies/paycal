@@ -5,6 +5,7 @@ namespace PayCal\Controllers;
 use PayCal\Domain\Attributes\Route;
 use PayCal\Domain\Log;
 use PayCal\Domain\MetricsService;
+use PayCal\Domain\Authentication;
 use PayCal\Domain\Response;
 use PayCal\Infrastructure\Queue\StripeBillingQueueMonitor;
 use PayCal\Domain\User;
@@ -102,15 +103,30 @@ class HealthController
    */
   public function getHealthCheck(): void
   {
+    $isAdmin = Authentication::validateAndTouchSession() && User::isAdmin();
+
+    if (!$isAdmin) {
+      try {
+        MetricsService::getRedisInfo();
+        Response::json('ok', 'Health check passed.', 200, ['status' => 'ok']);
+      } catch (\Exception) {
+        Response::json('error', 'Service unavailable.', 503, ['status' => 'error']);
+      }
+
+      return;
+    }
+
     try {
       $redis = MetricsService::getRedisInfo();
 
       Response::json('ok', 'Health check passed.', 200, [
+        'status' => 'ok',
         'redis' => 'connected',
         'uptime_days' => strval($redis['uptime_in_days'] ?? 0),
       ]);
     } catch (\Exception $e) {
       Response::json('error', 'Service unavailable.', 503, [
+        'status' => 'error',
         'redis' => 'disconnected',
         'error' => 'Service unavailable',
       ]);

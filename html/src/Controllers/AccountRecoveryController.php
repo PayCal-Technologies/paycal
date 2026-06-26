@@ -118,8 +118,9 @@ final class AccountRecoveryController
 
     if ($user !== null && $user->email_verified) {
       $code = Security::generateVerificationCode(PayCalCode::EMAIL_TOTAL_LENGTH);
-      $transaction->storeEmailCode($code);
-      EmailGarum::sendAccountRecoveryCode($user->email, $user->full_name, $code);
+      if (EmailGarum::sendAccountRecoveryCode($user->email, $user->full_name, $code)) {
+        $transaction->storeEmailCode($code);
+      }
     }
 
     // Equalize response time to prevent account enumeration
@@ -232,8 +233,9 @@ final class AccountRecoveryController
     $user = $transaction->userUuid() !== '' ? User::getByUUID($transaction->userUuid()) : null;
     if ($user !== null) {
       $code = Security::generateVerificationCode(PayCalCode::EMAIL_TOTAL_LENGTH);
-      $transaction->storeEmailCode($code);
-      EmailGarum::sendAccountRecoveryCode($user->email, $user->full_name, $code);
+      if (EmailGarum::sendAccountRecoveryCode($user->email, $user->full_name, $code)) {
+        $transaction->storeEmailCode($code);
+      }
     }
 
     // Equalize response time to prevent account enumeration
@@ -662,6 +664,13 @@ final class AccountRecoveryController
   {
     Authentication::abortIfUnauthenticated();
     $body = $this->jsonBody();
+    if (!$this->requireSettingsCsrf($body)) {
+      return;
+    }
+    if (!$this->hasRecentPasskeyStepUp()) {
+      $this->fail('Passkey confirmation required before storing recovery material.', HttpStatus::HTTP_FORBIDDEN);
+    }
+
     $wrappedDekRecovery = $this->scalarString($body['wrappedDekRecovery'] ?? '');
     $recoveryProofKey = $this->scalarString($body['recoveryProofKey'] ?? '');
     $accountRecoverySalt = $this->scalarString($body['accountRecoverySalt'] ?? '');
@@ -1006,6 +1015,51 @@ final class AccountRecoveryController
     }
     $decoded = base64_decode($padded, true);
     return $decoded === false ? null : $decoded;
+  }
+
+  /**
+   * @param array<string, mixed> $body
+   */
+  private function requireSettingsCsrf(array $body): bool
+  {
+    $token = $this->scalarString($body['csrf_token'] ?? '');
+    if ($token === '' && isset($_SERVER['HTTP_X_CSRF_TOKEN']) && is_scalar($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+      $token = InputSanitizer::sanitizeString((string) $_SERVER['HTTP_X_CSRF_TOKEN']);
+    }
+
+    if ($token === '' || !User::current()->verifyFormNonce('settings', $token)) {
+      Response::error('[AccountRecovery] Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+
+      return false;
+    }
+
+    return true;
+  }
+
+  private function hasRecentPasskeyStepUp(): bool
+  {
+    $sessionHash = Authentication::getSessionHashFromCookie();
+    if ($sessionHash === null || $sessionHash === '') {
+      return false;
+    }
+
+    $sessionKey = Keys::SESSION . ':' . $sessionHash;
+    $strength = strtolower((string) Database::hget($sessionKey, 'auth_strength'));
+    if ($strength === 'strong') {
+      return true;
+    }
+
+    $stepUpTimestamp = (int) Database::hget($sessionKey, 'passkey_stepup_at');
+    if ($stepUpTimestamp <= 0) {
+      return false;
+    }
+
+    $maxAge = (int) SystemConfig::get('email_change_stepup_max_age_seconds');
+    if ($maxAge <= 0) {
+      $maxAge = 900;
+    }
+
+    return (time() - $stepUpTimestamp) <= $maxAge;
   }
 
 }

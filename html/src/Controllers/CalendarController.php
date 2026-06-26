@@ -1341,6 +1341,13 @@ class CalendarController
   {
     $user = User::current();
 
+    $csrfToken = InputSanitizer::postString('csrf_token');
+    if (!$user->verifyFormNonce('calendar', $csrfToken)) {
+      Response::error('[CC] Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+
+      return;
+    }
+
     Log::info('[CC] Repair corrupt entries endpoint called', 'user_uuid=' . $user->user_uuid);
     Lens::add('Calendar Repair Request', [
       'user_uuid' => $user->user_uuid,

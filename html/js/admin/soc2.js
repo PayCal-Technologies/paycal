@@ -8,6 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const timeLabels = Array.from(document.querySelectorAll('.soc2-time-label'));
   const localTimeSlots = Array.from(document.querySelectorAll('.soc2-time-local[data-time-utc]'));
 
+  const SCRIPT_ACTION_CAPABILITIES = {
+    run_runtime_export: 'admin.soc2.runtime-export',
+    run_bundle_refresh: 'admin.soc2.bundle-refresh',
+    run_compliance_snapshot: 'admin.soc2.compliance-snapshot',
+  };
+
   let localized = {};
   const userLocale = i18nNode?.getAttribute('data-locale') || undefined;
   const rawMessages = i18nNode?.getAttribute('data-messages') || '{}';
@@ -124,19 +130,69 @@ document.addEventListener('DOMContentLoaded', () => {
     busyBanner.hidden = false;
   };
 
+  const mintCapabilityToken = async (action) => {
+    const response = await fetch(`/api/v1/admin/capability/${encodeURIComponent(action)}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    });
+    const payload = await response.json();
+    if (!response.ok || payload.status !== 'success') {
+      throw new Error(payload.message || 'Capability token request failed.');
+    }
+
+    const token = String(payload.capability?.token || payload.data?.capability?.token || '').trim();
+    if (!token) {
+      throw new Error('Capability token missing.');
+    }
+
+    return token;
+  };
+
   actionForms.forEach((form) => {
-    form.addEventListener('submit', () => {
+    form.addEventListener('submit', async (event) => {
       const actionInput = form.querySelector('input[name="action"]');
       const action = actionInput instanceof HTMLInputElement ? actionInput.value : '';
+      const capabilityAction = SCRIPT_ACTION_CAPABILITIES[action] || '';
+
+      if (capabilityAction !== '') {
+        event.preventDefault();
+
+        let message = msg('busy_default', 'SOC 2 action in progress. Running export and generation tasks. Please wait.');
+        if (action === 'run_runtime_export') {
+          message = msg('busy_runtime_export', 'Running runtime evidence export. Gathering auth and access traces now.');
+        } else if (action === 'run_bundle_refresh') {
+          message = msg('busy_bundle_refresh', 'Running bundle refresh and validation. This can take a few moments.');
+        } else if (action === 'run_compliance_snapshot') {
+          message = msg('busy_snapshot', 'Generating SOC 2 compliance snapshot markdown. Please wait.');
+        }
+
+        showBusy(message);
+        disableActionControls(form);
+
+        try {
+          const capabilityToken = await mintCapabilityToken(capabilityAction);
+          let capabilityInput = form.querySelector('input[name="capability_token"]');
+          if (!(capabilityInput instanceof HTMLInputElement)) {
+            capabilityInput = document.createElement('input');
+            capabilityInput.type = 'hidden';
+            capabilityInput.name = 'capability_token';
+            form.appendChild(capabilityInput);
+          }
+          capabilityInput.value = capabilityToken;
+          form.submit();
+        } catch (error) {
+          announce(error instanceof Error ? error.message : 'Capability token request failed.');
+          form.classList.remove('is-busy');
+          const actionRow = form.closest('.soc2-actions-row');
+          actionRow?.classList.remove('is-busy');
+        }
+
+        return;
+      }
 
       let message = msg('busy_default', 'SOC 2 action in progress. Running export and generation tasks. Please wait.');
-      if (action === 'run_runtime_export') {
-        message = msg('busy_runtime_export', 'Running runtime evidence export. Gathering auth and access traces now.');
-      } else if (action === 'run_bundle_refresh') {
-        message = msg('busy_bundle_refresh', 'Running bundle refresh and validation. This can take a few moments.');
-      } else if (action === 'run_compliance_snapshot') {
-        message = msg('busy_snapshot', 'Generating SOC 2 compliance snapshot markdown. Please wait.');
-      } else if (action === 'refresh_gcs_inventory') {
+      if (action === 'refresh_gcs_inventory') {
         message = msg('busy_gcs_refresh', 'Querying Google Cloud Storage for SOC 2 evidence objects. Please wait.');
       }
 

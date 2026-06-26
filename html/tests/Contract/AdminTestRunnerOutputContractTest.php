@@ -6,14 +6,16 @@ use PHPUnit\Framework\TestCase;
 #[Group('contract')]
 final class AdminTestRunnerOutputContractTest extends TestCase
 {
-  public function testRunnerDoesNotPersistRawPhpunitOutput(): void
+  public function testLegacyRunApiEndpointWasRemoved(): void
   {
-    $runApi = (string) file_get_contents(__DIR__ . '/../../api/tests/run.php');
+    $this->assertFileDoesNotExist(__DIR__ . '/../../api/tests/run.php');
+  }
+
+  public function testWsRunnerDoesNotPersistRawPhpunitOutput(): void
+  {
     $wsEndpoint = (string) file_get_contents(__DIR__ . '/../../ws/index.php');
 
-    $this->assertStringNotContainsString("'output' => \$output", $runApi);
     $this->assertStringNotContainsString("'output' => \$fullOutput", $wsEndpoint);
-    $this->assertStringContainsString("'rawOutputStored' => false", $runApi);
     $this->assertStringContainsString("'rawOutputStored' => false", $wsEndpoint);
   }
 

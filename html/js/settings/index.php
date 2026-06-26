@@ -1877,11 +1877,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       setRecoveryKeyStatus('Working…', 'info');
       let material = await recoveryCrypto.createRecoveryMaterial();
       let recoveryCodeForDisplay = String(material.recoveryKey || '').trim();
+      const settingsCsrf = getSettingsCsrfToken();
       const requestPayload = {
         wrappedDekRecovery: material.wrappedDekRecovery,
         accountRecoverySalt: material.accountRecoverySalt,
         recoveryProofKey: material.recoveryProofKey,
         recoveryKey: material.recoveryKey,
+        csrf_token: settingsCsrf,
       };
       let requestBody = JSON.stringify(requestPayload);
 
@@ -1892,7 +1894,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch('/api/v1/user/account/recovery-key', {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'X-CSRF-Token': settingsCsrf,
+        },
         body: requestBody,
       });
 

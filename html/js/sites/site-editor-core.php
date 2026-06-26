@@ -5,12 +5,47 @@ namespace PayCal\Domain;
 /**
  * Shared site editor dialog logic for personal /sites and business /business/sites.
  */
+$sitesEditorCsrfNonce = User::current()->generateFormNonce('settings');
 ?>
-  const SITE_EDITOR_FORM_HEADERS = Object.freeze({
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'X-Requested-With': 'XMLHttpRequest',
-    Accept: 'application/json',
-  });
+  const SITE_EDITOR_CSRF_TOKEN = <?php echo json_encode($sitesEditorCsrfNonce, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+  const siteEditorResolveCsrfToken = () => {
+    const businessInput = document.getElementById('businesses_csrf_token');
+    if (businessInput instanceof HTMLInputElement) {
+      const businessToken = businessInput.value.trim();
+      if (businessToken !== '') {
+        return businessToken;
+      }
+    }
+    return SITE_EDITOR_CSRF_TOKEN;
+  };
+
+  const siteEditorAppendCsrf = (params) => {
+    const token = siteEditorResolveCsrfToken();
+    if (params instanceof URLSearchParams) {
+      if (token !== '') {
+        params.set('csrf_token', token);
+      }
+      return params;
+    }
+    if (params instanceof FormData) {
+      if (token !== '') {
+        params.set('csrf_token', token);
+      }
+      return params;
+    }
+    return params;
+  };
+
+  const siteEditorMutationHeaders = () => {
+    const token = siteEditorResolveCsrfToken();
+    return {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-Requested-With': 'XMLHttpRequest',
+      Accept: 'application/json',
+      ...(token !== '' ? { 'X-CSRF-Token': token } : {}),
+    };
+  };
 
   let siteEditorColorPickSave = false;
   let siteEditorDeleteSiteId = null;
@@ -723,8 +758,8 @@ namespace PayCal\Domain;
         const response = await fetch(endpoint, {
           method: 'POST',
           credentials: 'include',
-          headers: SITE_EDITOR_FORM_HEADERS,
-          body: new URLSearchParams(formData),
+          headers: siteEditorMutationHeaders(),
+          body: siteEditorAppendCsrf(new URLSearchParams(formData)),
         });
         const payload = await response.json();
         if (payload?.status !== 'success') {
@@ -768,8 +803,8 @@ namespace PayCal\Domain;
           const response = await fetch(`${apiBase}/sites/update`, {
             method: 'POST',
             credentials: 'include',
-            headers: SITE_EDITOR_FORM_HEADERS,
-            body: new URLSearchParams(formData),
+            headers: siteEditorMutationHeaders(),
+            body: siteEditorAppendCsrf(new URLSearchParams(formData)),
           });
           const payload = await response.json();
           if (payload?.status !== 'success') {
@@ -795,7 +830,7 @@ namespace PayCal\Domain;
           });
           const planResponse = await fetch(
             `${apiBase}/businesses/${encodeURIComponent(planOrgId)}/sites/${encodeURIComponent(planOwner)}/${encodeURIComponent(planSiteId)}/settings/update`,
-            { method: 'POST', credentials: 'include', headers: SITE_EDITOR_FORM_HEADERS, body: planBody },
+            { method: 'POST', credentials: 'include', headers: siteEditorMutationHeaders(), body: siteEditorAppendCsrf(planBody) },
           );
           const planPayload = await planResponse.json();
           if (planPayload?.status !== 'success') {
@@ -829,7 +864,7 @@ namespace PayCal\Domain;
       }
 
       try {
-        const body = new URLSearchParams({ id: siteEditorDeleteSiteId });
+        const body = siteEditorAppendCsrf(new URLSearchParams({ id: siteEditorDeleteSiteId }));
         let url = siteEditorDeleteSiteStatus === 'archived'
           ? `${apiBase}/sites/permanent-delete`
           : `${apiBase}/sites/delete`;
@@ -851,7 +886,7 @@ namespace PayCal\Domain;
         const response = await fetch(url, {
           method: 'POST',
           credentials: 'include',
-          headers: SITE_EDITOR_FORM_HEADERS,
+          headers: siteEditorMutationHeaders(),
           body,
         });
         const payload = await response.json();
@@ -943,7 +978,7 @@ namespace PayCal\Domain;
               }
               fetch(
                 `${apiBase}/businesses/${encodeURIComponent(businessId)}/sites/${encodeURIComponent(ownerUUID)}/${encodeURIComponent(siteId)}/restore`,
-                { method: 'POST', credentials: 'include', headers: SITE_EDITOR_FORM_HEADERS, body: new URLSearchParams() },
+                { method: 'POST', credentials: 'include', headers: siteEditorMutationHeaders(), body: siteEditorAppendCsrf(new URLSearchParams()) },
               )
                 .then((response) => response.json())
                 .then(async (payload) => {

@@ -1506,9 +1506,25 @@ require_once __DIR__ . '/_bootstrap.php';
     }
 
     const year = new Date().getFullYear();
-    const url = `/api/v1/businesses/${encodeURIComponent(orgId)}/cache/warm?year=${encodeURIComponent(String(year))}`;
+    const url = `/api/v1/businesses/${encodeURIComponent(orgId)}/cache/warm`;
+    const csrfToken = elements.csrfToken instanceof HTMLInputElement
+      ? String(elements.csrfToken.value || '').trim()
+      : '';
 
-    apiRequest(url, { timeoutMs: 10000 }).catch((error) => {
+    const body = new URLSearchParams({ year: String(year) });
+    if (csrfToken !== '') {
+      body.set('csrf_token', csrfToken);
+    }
+
+    apiRequest(url, {
+      method: 'POST',
+      timeoutMs: 10000,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        ...(csrfToken !== '' ? { 'X-CSRF-Token': csrfToken } : {}),
+      },
+      body,
+    }).catch((error) => {
       PW.error(error);
     });
   };

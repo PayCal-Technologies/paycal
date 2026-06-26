@@ -626,7 +626,7 @@ class Authentication
       return;
     }
 
-    foreach (Database::scanKeys(Keys::SESSION . ':*') as $sessionKey) {
+    foreach (Database::scanKeysForWrite(Keys::SESSION . ':*') as $sessionKey) {
       $key = (string) $sessionKey;
       if ($key === '' || Database::hget($key, 'user_uuid') !== $userUUID) {
         continue;
@@ -648,7 +648,7 @@ class Authentication
       return;
     }
 
-    foreach (Database::scanKeys(Keys::SESSION . ':*') as $sessionKey) {
+    foreach (Database::scanKeysForWrite(Keys::SESSION . ':*') as $sessionKey) {
       $key = (string) $sessionKey;
       if ($key === '' || Database::hget($key, 'user_uuid') !== $userUUID) {
         continue;
@@ -670,7 +670,7 @@ class Authentication
       return;
     }
 
-    foreach (Database::scanKeys(Keys::SESSION . ':*') as $sessionKey) {
+    foreach (Database::scanKeysForWrite(Keys::SESSION . ':*') as $sessionKey) {
       $key = (string) $sessionKey;
       if ($key === '' || Database::hget($key, 'user_uuid') !== $userUUID) {
         continue;

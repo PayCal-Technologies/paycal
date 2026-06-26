@@ -91,6 +91,9 @@ class AdminController
     'admin.argus.package',
     'admin.argus.scope',
     'admin.argus.preset',
+    'admin.soc2.runtime-export',
+    'admin.soc2.bundle-refresh',
+    'admin.soc2.compliance-snapshot',
   ];
 
   /**
@@ -1210,21 +1213,21 @@ class AdminController
   private static function purgeUserData(string $userUUID, string $email, string $newEmail): void
   {
     // Work entries and archived work
-    foreach (Database::scanKeys(Keys::WORK . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::WORK . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
-    foreach (Database::scanKeys(Keys::WORK . ':archived:' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::WORK . ':archived:' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
 
     // Site and earnings/cache records
-    foreach (Database::scanKeys(Keys::SITE . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::SITE . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
-    foreach (Database::scanKeys(Keys::EARNING . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::EARNING . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
-    foreach (Database::scanKeys(Keys::LOCK_BOUNDARY . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::LOCK_BOUNDARY . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
     Database::unlink(Keys::VERIFICATION_CODES . ':' . $userUUID);
@@ -1251,13 +1254,13 @@ class AdminController
 
     // User nonces/csrf and user hash
     Database::unlink(Keys::USER . ':' . $userUUID . ':nonce');
-    foreach (Database::scanKeys(Keys::USER . ':' . $userUUID . ':csrf:*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::USER . ':' . $userUUID . ':csrf:*') as $key) {
       Database::unlink($key);
     }
     Database::unlink(Keys::USER . ':' . $userUUID);
 
     // Session keys
-    foreach (Database::scanKeys(Keys::SESSION . ':*') as $sessionKey) {
+    foreach (Database::scanKeysForWrite(Keys::SESSION . ':*') as $sessionKey) {
       $sessionUserUUID = (string) Database::hget($sessionKey, 'user_uuid');
       if ($sessionUserUUID === $userUUID) {
         Database::unlink($sessionKey);
@@ -1271,7 +1274,7 @@ class AdminController
       $userUUID . '*',
     ];
     foreach ($uuidSweepPatterns as $pattern) {
-      foreach (Database::scanKeys($pattern) as $key) {
+      foreach (Database::scanKeysForWrite($pattern) as $key) {
         Database::unlink($key);
       }
     }

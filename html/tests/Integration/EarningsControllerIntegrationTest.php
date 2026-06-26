@@ -57,7 +57,15 @@ $sessionHash = hash('sha256', bin2hex(random_bytes(32)));
     $_SERVER['REQUEST_METHOD'] = 'POST';
     $_SERVER['CONTENT_TYPE'] = 'application/json';
     $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-    $GLOBALS['mock_php_input_legacy_export'] = str_replace('__CURRENT_USER_UUID__', $userUUID, __PAYLOAD__);
+    $user = \PayCal\Domain\User::getByUUID($userUUID);
+    $csrfToken = $user->generateFormNonce('settings');
+    $payloadJson = str_replace('__CURRENT_USER_UUID__', $userUUID, __PAYLOAD__);
+    $payloadData = json_decode($payloadJson, true);
+    if (!is_array($payloadData)) {
+      $payloadData = [];
+    }
+    $payloadData['csrf_token'] = $csrfToken;
+    $GLOBALS['mock_php_input_legacy_export'] = json_encode($payloadData);
 
 class MockPhpInputStreamLegacyExport {
   public mixed $context = null;
@@ -148,7 +156,15 @@ $_SERVER['CONTENT_TYPE'] = 'application/json';
 $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 $_SERVER['HTTP_HOST'] = 'paycal.test';
 $_SERVER['SCRIPT_NAME'] = '/api/index.php';
-$GLOBALS['mock_php_input_legacy_export_route'] = str_replace('__CURRENT_USER_UUID__', $userUUID, __PAYLOAD__);
+$user = \PayCal\Domain\User::getByUUID($userUUID);
+$csrfToken = $user->generateFormNonce('settings');
+$payloadJson = str_replace('__CURRENT_USER_UUID__', $userUUID, __PAYLOAD__);
+$payloadData = json_decode($payloadJson, true);
+if (!is_array($payloadData)) {
+  $payloadData = [];
+}
+$payloadData['csrf_token'] = $csrfToken;
+$GLOBALS['mock_php_input_legacy_export_route'] = json_encode($payloadData);
 
 class MockPhpInputStreamLegacyExportRoute {
   public mixed $context = null;

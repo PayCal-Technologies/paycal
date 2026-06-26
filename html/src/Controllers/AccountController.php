@@ -10,9 +10,11 @@ use PayCal\Domain\Database;
 use PayCal\Domain\Encryption\EnvelopeFormat;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\Constants\Keys;
+use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\RecoveryKey;
 use PayCal\Infrastructure\Resilience\RedisReliabilityService;
 use PayCal\Domain\Response;
+use PayCal\Domain\Config\SystemConfig;
 use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Domain\User;
 use PayCal\Domain\UserFields;
@@ -279,6 +281,18 @@ class AccountController
         }
 
         $payload = $this->jsonBody();
+        if (!$this->requireSettingsCsrf($payload)) {
+            return;
+        }
+        if (!$this->hasRecentPasskeyStepUp()) {
+            Response::error(
+                '[Account] Passkey confirmation required before storing recovery material.',
+                ['step_up_required' => true, 'recommended_method' => 'passkey'],
+                HttpStatus::HTTP_FORBIDDEN
+            );
+            return;
+        }
+
         $wrappedDekRecovery = $this->scalarString($payload['wrappedDekRecovery'] ?? '');
         $accountRecoverySalt = $this->scalarString($payload['accountRecoverySalt'] ?? '');
         $recoveryProofKey = $this->scalarString($payload['recoveryProofKey'] ?? '');
@@ -381,5 +395,50 @@ class AccountController
     {
         Response::error($message, [], $status);
         throw new \RuntimeException($message);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function requireSettingsCsrf(array $payload): bool
+    {
+        $token = $this->scalarString($payload['csrf_token'] ?? '');
+        if ($token === '' && isset($_SERVER['HTTP_X_CSRF_TOKEN']) && is_scalar($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+            $token = InputSanitizer::sanitizeString((string) $_SERVER['HTTP_X_CSRF_TOKEN']);
+        }
+
+        if ($token === '' || !User::current()->verifyFormNonce('settings', $token)) {
+            Response::error('[Account] Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private function hasRecentPasskeyStepUp(): bool
+    {
+        $sessionHash = Authentication::getSessionHashFromCookie();
+        if ($sessionHash === null || $sessionHash === '') {
+            return false;
+        }
+
+        $sessionKey = Keys::SESSION . ':' . $sessionHash;
+        $strength = strtolower((string) Database::hget($sessionKey, 'auth_strength'));
+        if ($strength === 'strong') {
+            return true;
+        }
+
+        $stepUpTimestamp = (int) Database::hget($sessionKey, 'passkey_stepup_at');
+        if ($stepUpTimestamp <= 0) {
+            return false;
+        }
+
+        $maxAge = (int) SystemConfig::get('email_change_stepup_max_age_seconds');
+        if ($maxAge <= 0) {
+            $maxAge = 900;
+        }
+
+        return (time() - $stepUpTimestamp) <= $maxAge;
     }
 }

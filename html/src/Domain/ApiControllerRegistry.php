@@ -23,7 +23,6 @@ use PayCal\Controllers\SecurityController;
 use PayCal\Controllers\SettingsController;
 use PayCal\Controllers\SitesController;
 use PayCal\Controllers\Soc2StatusController;
-use PayCal\Controllers\UserController;
 
 /**
  * ApiControllerRegistry.php
@@ -73,7 +72,6 @@ final class ApiControllerRegistry
       SettingsController::class,
       SitesController::class,
       Soc2StatusController::class,
-      UserController::class,
     ];
 
     if (AdminSurface::isEnabled()) {

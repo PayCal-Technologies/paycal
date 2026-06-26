@@ -231,6 +231,11 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
   {
     $sessionHash = bin2hex(random_bytes(16));
     Authentication::setSession($sessionHash, $userUuid);
+    Database::hset(Keys::SESSION . ':' . $sessionHash, [
+      'auth_strength' => 'strong',
+      'passkey_stepup_at' => (string) time(),
+    ]);
+
     return $sessionHash;
   }
 
@@ -593,11 +598,15 @@ final class AccountRecoveryControllerIntegrationTest extends TestCase
   {
     $fixture = $this->createUserWithRecoveryMaterial('backfill@example.com');
     $sessionHash = $this->createSession($fixture['userUuid']);
+    $user = \PayCal\Domain\User::getByUUID($fixture['userUuid']);
+    $this->assertInstanceOf(\PayCal\Domain\User::class, $user);
+    $csrfToken = $user->generateFormNonce('settings');
 
     $response = $this->runControllerCall('backfillRecoveryMaterial', [
       'wrappedDekRecovery' => $fixture['wrappedDekRecovery'],
       'recoveryProofKey' => $fixture['recoveryProofKey'],
       'accountRecoverySalt' => $fixture['recoverySalt'],
+      'csrf_token' => $csrfToken,
     ], $sessionHash);
 
     $this->assertSame('success', $response['status'] ?? null);

@@ -1137,6 +1137,10 @@ class EarningsController
       return;
     }
 
+    if (!self::verifyExportCsrf($postData)) {
+      return;
+    }
+
     // Extract and validate required fields
     $format = isset($postData['format']) && is_string($postData['format']) ? strtolower(trim($postData['format'])) : '';
     $scope = isset($postData['scope']) && is_string($postData['scope']) ? strtolower(trim($postData['scope'])) : 'yearly';
@@ -1212,6 +1216,10 @@ class EarningsController
 
     if (!is_array($postData)) {
       Response::error('[EC] JSON payload must be an object.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    if (!self::verifyExportCsrf($postData)) {
       return;
     }
 
@@ -1317,6 +1325,10 @@ class EarningsController
 
     if (!is_array($postData)) {
       Response::error('[EC] JSON payload must be an object.', [], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
+    if (!self::verifyExportCsrf($postData)) {
       return;
     }
 
@@ -1579,5 +1591,26 @@ class EarningsController
   private static function currentUserHasPremiumReporting(): bool
   {
     return SubscriptionRepository::isPremiumActive(User::currentUUID());
+  }
+
+  /**
+   * @param array<mixed, mixed> $postData
+   */
+  private static function verifyExportCsrf(array $postData): bool
+  {
+    $token = isset($postData['csrf_token']) && is_string($postData['csrf_token'])
+      ? InputSanitizer::sanitizeString($postData['csrf_token'])
+      : '';
+    if ($token === '' && isset($_SERVER['HTTP_X_CSRF_TOKEN']) && is_scalar($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+      $token = InputSanitizer::sanitizeString((string) $_SERVER['HTTP_X_CSRF_TOKEN']);
+    }
+
+    if ($token === '' || !User::current()->verifyFormNonce('settings', $token)) {
+      Response::error('[EC] Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+
+      return false;
+    }
+
+    return true;
   }
 }

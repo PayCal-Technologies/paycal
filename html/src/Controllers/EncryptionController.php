@@ -88,6 +88,10 @@ class EncryptionController
       return;
     }
 
+    if (!$this->requirePaycalClientHeader()) {
+      return;
+    }
+
     $userId = User::currentUUID();
 
     // Get JSON body
@@ -233,6 +237,10 @@ class EncryptionController
     if (!Authentication::validateAndTouchSession()) {
       \PayCal\Domain\Response::error('[EncryptionC] User not authenticated.', [], HttpStatus::HTTP_UNAUTHORIZED);
 
+      return;
+    }
+
+    if (!$this->requirePaycalClientHeader()) {
       return;
     }
 
@@ -383,6 +391,18 @@ class EncryptionController
     $summary['decryption-min-success-rate'] = 0.95;
 
     Response::success('[EncryptionC] Telemetry summary.', $summary, HttpStatus::HTTP_OK);
+  }
+
+  private function requirePaycalClientHeader(): bool
+  {
+    $header = $_SERVER['HTTP_X_PAYCAL_CLIENT'] ?? '';
+    if (!is_scalar($header) || trim((string) $header) !== 'paycal') {
+      Response::error('[EncryptionC] Missing client header.', [], HttpStatus::HTTP_FORBIDDEN);
+
+      return false;
+    }
+
+    return true;
   }
 }
 

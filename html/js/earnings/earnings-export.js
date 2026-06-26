@@ -8,6 +8,20 @@ import { resolveUserLocale } from '/js/core/locale.js';
 
 const USER_LOCALE = resolveUserLocale();
 
+const exportCsrfToken = () => {
+  const token = typeof window !== 'undefined' ? window.PAYCAL_EXPORT_CSRF : '';
+  return typeof token === 'string' ? token : '';
+};
+
+const withExportCsrfBody = (payload) => {
+  const csrf = exportCsrfToken();
+  if (csrf === '') {
+    return payload;
+  }
+
+  return { ...payload, csrf_token: csrf };
+};
+
 function toNumber(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -1063,11 +1077,14 @@ export async function downloadPdfServerSide(scope, rows, report, filename, start
   const normalizedPrintMode = ['bw', 'grayscale', 'color'].includes(String(printMode || '').toLowerCase())
     ? String(printMode).toLowerCase()
     : 'color';
-  const body = JSON.stringify({ scope, rows, report, year, start_date: startDate, end_date: endDate, print_mode: normalizedPrintMode });
+  const body = JSON.stringify(withExportCsrfBody({ scope, rows, report, year, start_date: startDate, end_date: endDate, print_mode: normalizedPrintMode }));
 
   const resp = await fetch('/api/v1/export/pdf', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': exportCsrfToken(),
+    },
     body,
   });
 
@@ -1089,11 +1106,14 @@ export async function downloadPdfServerSide(scope, rows, report, filename, start
 
 export async function downloadXlsxFile(scope, rows, report, filename, startDate = '', endDate = '') {
   const year = Number(report?.meta?.year) || new Date().getFullYear();
-  const body = JSON.stringify({ scope, rows, report, year, start_date: startDate, end_date: endDate });
+  const body = JSON.stringify(withExportCsrfBody({ scope, rows, report, year, start_date: startDate, end_date: endDate }));
 
   const resp = await fetch('/api/v1/export/xlsx', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': exportCsrfToken(),
+    },
     body,
   });
 

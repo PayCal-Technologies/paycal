@@ -10,9 +10,8 @@ Authentication::abortIfUnauthenticated();
 
 function wsReadCapabilityTokenFromRequest(): string
 {
-  $tokenFromQuery = wsGetStringQuery('capability_token');
-  if ($tokenFromQuery !== '') {
-    return $tokenFromQuery;
+  if (wsGetStringQuery('capability_token') !== '') {
+    return '';
   }
 
   $headerRaw = $_SERVER['HTTP_X_PAYCAL_CAPABILITY'] ?? '';

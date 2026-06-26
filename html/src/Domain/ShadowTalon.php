@@ -324,7 +324,7 @@ HTML;
       'message' => $throwable->getMessage(),
       'file' => $throwable->getFile(),
       'line' => $throwable->getLine(),
-      'request_uri' => self::serverString($_SERVER, 'REQUEST_URI'),
+      'request_uri' => self::safeRequestUriForLog($_SERVER),
       'request_method' => self::serverString($_SERVER, 'REQUEST_METHOD'),
       'host' => self::serverString($_SERVER, 'HTTP_HOST'),
       'client_ip' => Security::getClientIPAddress(),
@@ -490,6 +490,27 @@ HTML;
     $scheme = ($https !== '' && $https !== 'off') ? 'https' : 'http';
 
     return $scheme . '://' . $host;
+  }
+
+  /**
+   * Log-safe request URI: path only, with optional query fingerprint (no raw query values).
+   *
+   * @param array<string, mixed> $server
+   */
+  private static function safeRequestUriForLog(array $server): string
+  {
+    $requestUri = self::serverString($server, 'REQUEST_URI');
+    $path = parse_url($requestUri, PHP_URL_PATH);
+    if (!is_string($path) || $path === '') {
+      return '/';
+    }
+
+    $query = parse_url($requestUri, PHP_URL_QUERY);
+    if (!is_string($query) || $query === '') {
+      return $path;
+    }
+
+    return $path . '?[q=' . substr(hash('sha256', $query), 0, 12) . ']';
   }
 
   /**

@@ -38,6 +38,8 @@ Authentication::redirectHomeIfUnauthenticated();
 
 Lens::boot('sites');
 
+$sitesCsrfNonce = User::current()->generateFormNonce('settings');
+
 $pageTitle = sites_index_i18n('SITES') . ' - [' . sites_index_i18n('SITE_NAME') . ']';
 $pageLabel = sites_index_i18n('SITES');
 $pageLanguage = (string) User::current()->language;

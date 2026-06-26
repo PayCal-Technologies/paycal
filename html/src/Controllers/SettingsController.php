@@ -312,22 +312,22 @@ class SettingsController
       return;
     }
 
-    foreach (Database::scanKeys(Keys::WORK . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::WORK . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
-    foreach (Database::scanKeys(Keys::WORK . ':archived:' . $userUUID . ':*') as $key) {
-      Database::unlink($key);
-    }
-
-    foreach (Database::scanKeys(Keys::SITE . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::WORK . ':archived:' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
 
-    foreach (Database::scanKeys(Keys::EARNING . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::SITE . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
 
-    foreach (Database::scanKeys(Keys::LOCK_BOUNDARY . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::EARNING . ':' . $userUUID . ':*') as $key) {
+      Database::unlink($key);
+    }
+
+    foreach (Database::scanKeysForWrite(Keys::LOCK_BOUNDARY . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
 
@@ -987,23 +987,23 @@ class SettingsController
     }
 
     // Remove all work entries for user (active + archived)
-    foreach (Database::scanKeys(Keys::WORK . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::WORK . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
-    foreach (Database::scanKeys(Keys::WORK . ':archived:' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::WORK . ':archived:' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
 
     // Remove all site records for user
-    foreach (Database::scanKeys(Keys::SITE . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::SITE . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
 
     // Remove earnings/cache records for user if present
-    foreach (Database::scanKeys(Keys::EARNING . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::EARNING . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
-    foreach (Database::scanKeys(Keys::LOCK_BOUNDARY . ':' . $userUUID . ':*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::LOCK_BOUNDARY . ':' . $userUUID . ':*') as $key) {
       Database::unlink($key);
     }
     Database::unlink(Keys::VERIFICATION_CODES . ':' . $userUUID);
@@ -1030,13 +1030,13 @@ class SettingsController
 
     // Remove nonce keys and user record
     Database::unlink(Keys::USER . ':' . $userUUID . ':nonce');
-    foreach (Database::scanKeys(Keys::USER . ':' . $userUUID . ':csrf:*') as $key) {
+    foreach (Database::scanKeysForWrite(Keys::USER . ':' . $userUUID . ':csrf:*') as $key) {
       Database::unlink($key);
     }
     Database::unlink($userKey);
 
     // Remove all sessions belonging to this user
-    foreach (Database::scanKeys(Keys::SESSION . ':*') as $sessionKey) {
+    foreach (Database::scanKeysForWrite(Keys::SESSION . ':*') as $sessionKey) {
       $sessionUserUUID = (string) Database::hget($sessionKey, 'user_uuid');
       if ($sessionUserUUID === $userUUID) {
         Database::unlink($sessionKey);
@@ -1050,7 +1050,7 @@ class SettingsController
       $userUUID . '*',
     ];
     foreach ($uuidSweepPatterns as $pattern) {
-      foreach (Database::scanKeys($pattern) as $key) {
+      foreach (Database::scanKeysForWrite($pattern) as $key) {
         Database::unlink($key);
       }
     }

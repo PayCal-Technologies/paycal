@@ -6,7 +6,7 @@ PayCal helps workers understand pay, taxes, sites, pay periods, and business-sha
 
 Latest documented release: **v1.059.011**
 
-[![Test Suite](https://img.shields.io/badge/tests-2452%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2449%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -279,9 +279,9 @@ Localization source files live in `strings/`. Backup files such as `*.bak` are n
 
 Suite inventory (as of 2026-06-26):
 
-- **2,452 listed tests**
+- **2,449 listed tests**
 - **289 repository test files**
-- **Active public suite file split:** **144 Unit**, **61 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
+- **Active public suite file split:** **144 Unit**, **60 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
 - **2 Manual verification files**
 
 Latest validation snapshot (2026-06-22):
@@ -298,7 +298,7 @@ Latest validation snapshot (2026-06-22):
 | Configured public suite | Files | Purpose |
 |------|------:|---------|
 | PayCal Unit | 133 | Domain, service, renderer, policy, and invariant behavior |
-| PayCal Integration | 61 | Controller/API flows, auth, encryption, account lifecycle, and cross-service behavior |
+| PayCal Integration | 60 | Controller/API flows, auth, encryption, account lifecycle, and cross-service behavior |
 | PayCal Contract | 40 | Stable API, route, manifest, persistence, and architecture boundaries |
 | PayCal Timezone | 1 | Timezone-sensitive pay-period behavior |
 | PayCal Accessibility | 24 | ARIA, WCAG, keyboard, and accessibility contracts |

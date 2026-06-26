@@ -2183,8 +2183,12 @@
     cryptoLog('[CRYPTO] Auto-repairing corrupt encrypted entries', { dates, count: dates.length });
 
     try {
+      const csrfToken = (typeof PC !== 'undefined' && PC.state && PC.state.csrfNonce)
+        ? String(PC.state.csrfNonce)
+        : '';
       const requestBody = new URLSearchParams({
         dates: JSON.stringify(dates),
+        csrf_token: csrfToken,
       });
       cryptoLog('[CRYPTO] Repair request body:', requestBody.toString());
       

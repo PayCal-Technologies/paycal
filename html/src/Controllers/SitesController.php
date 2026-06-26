@@ -74,6 +74,7 @@ final class SitesController
 {
   private const GRID_PAGE_SIZE = 10;
   private const STATUS_ENTRY_LOCKED = 'ENTRY_LOCKED';
+  private const CSRF_FORM_TYPE = 'settings';
 
   /**
    * Handles resolveSiteOwnerUUIDForMutation operation.
@@ -606,6 +607,10 @@ final class SitesController
    */
   public function updateSites(): void
   {
+    if (!$this->requireSitesCsrf()) {
+      return;
+    }
+
     $ownerUUID = $this->resolveSiteOwnerUUIDForMutation();
     if (null === $ownerUUID) {
       return;
@@ -662,6 +667,10 @@ final class SitesController
    */
   public function deleteSite(): void
   {
+    if (!$this->requireSitesCsrf()) {
+      return;
+    }
+
     $ownerUUID = $this->resolveSiteOwnerUUIDForMutation();
     if (null === $ownerUUID) {
       return;
@@ -732,6 +741,10 @@ final class SitesController
    */
   public function permanentDelete(): void
   {
+    if (!$this->requireSitesCsrf()) {
+      return;
+    }
+
     $ownerUUID = $this->resolveSiteOwnerUUIDForMutation();
     if (null === $ownerUUID) {
       return;
@@ -1112,6 +1125,10 @@ final class SitesController
    */
   public function createSite(): void
   {
+    if (!$this->requireSitesCsrf()) {
+      return;
+    }
+
     $ownerUUID = $this->resolveSiteOwnerUUIDForMutation();
     if (null === $ownerUUID) {
       return;
@@ -1186,6 +1203,10 @@ final class SitesController
    */
   public function recoverOrphanedWork(): void
   {
+    if (!$this->requireSitesCsrf()) {
+      return;
+    }
+
     $ownerUUID = $this->resolveSiteOwnerUUIDForMutation();
     if (null === $ownerUUID) {
       return;
@@ -1490,5 +1511,24 @@ final class SitesController
     unset($row);
 
     return $result;
+  }
+
+  private function requireSitesCsrf(): bool
+  {
+    $csrfToken = InputSanitizer::postString('csrf_token');
+    if ($csrfToken === '') {
+      $header = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+      if (is_scalar($header) && trim((string) $header) !== '') {
+        $csrfToken = InputSanitizer::sanitizeString((string) $header);
+      }
+    }
+
+    if ($csrfToken === '' || !User::current()->verifyFormNonce(self::CSRF_FORM_TYPE, $csrfToken)) {
+      Response::error('[Sites] Invalid CSRF token.', [], HttpStatus::HTTP_FORBIDDEN);
+
+      return false;
+    }
+
+    return true;
   }
 }

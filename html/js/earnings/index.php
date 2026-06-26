@@ -12,6 +12,7 @@ Javascript::renderModuleContentType('application/javascript');
 Javascript::renderDocBlock();
 
 $user = User::current();
+$earningsCsrfNonce = $user->generateFormNonce('settings');
 $earningsI18nKeys = [
   'GROSS', 'NET', 'DEDUCTIONS', 'EARNINGS_PIEGRAPHS_NO_VALUES', 'EARNINGS_LABEL',
   'DATE', 'SITE', 'WAGE', 'HOURS', 'REGULAR_HOURS', 'OVERTIME_HOURS', 'LOA', 'TRAVEL',
@@ -261,6 +262,8 @@ function verifySignature(serialized, signatureBase64, publicKeyBase64) {
 ?>
 window.PAYROLL_SIGNING_PUBLIC_KEYS = <?php echo json_encode($publicKeys, JSON_UNESCAPED_SLASHES); ?>;
 window.PAYROLL_SIGNING_REVOKED_KEYS = <?php echo json_encode($revokedKeys, JSON_UNESCAPED_SLASHES); ?>;
+const EARNINGS_CSRF_TOKEN = <?php echo json_encode($earningsCsrfNonce, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+Object.defineProperty(window, 'PAYCAL_EXPORT_CSRF', { configurable: true, enumerable: false, writable: true, value: EARNINGS_CSRF_TOKEN });
 // Module-private: not exposed on window. Keeping the UUID out of the global
 // object prevents injected scripts from scraping it by name, even when
 // non-enumerable. Zeroed in clearEarningsTransientGlobals on page unload.
@@ -900,12 +903,16 @@ document.addEventListener("DOMContentLoaded", () => {
   async function initializeExport(scope, format, year) {
     const response = await fetch('/api/v1/export/init', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': EARNINGS_CSRF_TOKEN,
+      },
       credentials: 'same-origin',
       body: JSON.stringify({
         scope,
         format,
         year: Number(year),
+        csrf_token: EARNINGS_CSRF_TOKEN,
       }),
     });
     if (!response.ok) {

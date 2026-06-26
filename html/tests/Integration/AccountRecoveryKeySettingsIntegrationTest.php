@@ -90,6 +90,8 @@ final class AccountRecoveryKeySettingsIntegrationTest extends TestCase
         Database::hset(Keys::SESSION . ':' . $sessionHash, [
             'user_uuid' => $userUUID,
             'created_at' => date('c'),
+            'auth_strength' => 'strong',
+            'passkey_stepup_at' => (string) time(),
         ]);
         Database::expire(Keys::SESSION . ':' . $sessionHash, 3600);
 
@@ -137,11 +139,16 @@ final class AccountRecoveryKeySettingsIntegrationTest extends TestCase
         $recoveryKey = 'K3HWR7-QTMAPG-C9';
         $this->assertMatchesRegularExpression('/^[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}-[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}-[ABCDEFGHJKLMNPQRTUWXYZ346789]{2}$/', $recoveryKey);
 
+        $user = \PayCal\Domain\User::getByUUID($userUUID);
+        $this->assertInstanceOf(\PayCal\Domain\User::class, $user);
+        $csrfToken = $user->generateFormNonce('settings');
+
         $response = $this->runAccountCall('createRecoveryKey', [
             'wrappedDekRecovery' => $wrappedDekRecovery,
             'accountRecoverySalt' => $accountRecoverySalt,
             'recoveryProofKey' => $recoveryProofKey,
             'recoveryKey' => $recoveryKey,
+            'csrf_token' => $csrfToken,
         ], $sessionHash);
 
         $this->assertSame('success', $response['status'] ?? null);

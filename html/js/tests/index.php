@@ -19,6 +19,7 @@ Javascript::renderDocBlock();
 import PC from "<?php echo Render::jsModuleURL(); ?>";
 
 let activeTestStream = null;
+let activeTestStreamAbort = null;
 let isStoppingTestStream = false;
 
 async function getCapabilityToken(action) {
@@ -43,6 +44,69 @@ async function getCapabilityToken(action) {
   return token;
 }
 
+
+async function streamTestSuiteEvents(capabilityToken, handlers, abortSignal) {
+  const response = await fetch('/ws/?channel=test_suite_stream', {
+    method: 'GET',
+    credentials: 'include',
+    signal: abortSignal,
+    headers: {
+      Accept: 'text/event-stream',
+      'X-Paycal-Capability': capabilityToken,
+    },
+  });
+
+  if (!response.ok || !response.body) {
+    throw new Error(`Live stream failed (${response.status}).`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  const dispatchEvent = (block) => {
+    const lines = block.split('\n');
+    let eventName = 'message';
+    const dataLines = [];
+    lines.forEach((line) => {
+      if (line.startsWith('event:')) {
+        eventName = line.slice(6).trim();
+      } else if (line.startsWith('data:')) {
+        dataLines.push(line.slice(5).trim());
+      }
+    });
+
+    const handler = handlers[eventName];
+    if (typeof handler !== 'function') {
+      return;
+    }
+
+    handler({ data: dataLines.join('\n') });
+  };
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    buffer += decoder.decode(value, { stream: true });
+    let boundary = buffer.indexOf('\n\n');
+    while (boundary !== -1) {
+      const block = buffer.slice(0, boundary).trim();
+      buffer = buffer.slice(boundary + 2);
+      if (block !== '') {
+        dispatchEvent(block);
+      }
+      boundary = buffer.indexOf('\n\n');
+    }
+  }
+
+  const trailing = buffer.trim();
+  if (trailing !== '') {
+    dispatchEvent(trailing);
+  }
+}
 
 /**
  * Test Dashboard JavaScript
@@ -84,10 +148,11 @@ async function handleRunTests() {
   const finalResultCallout = document.getElementById('final_result_callout');
   const finalResultMessage = document.getElementById('final_result_message');
 
-  if (activeTestStream !== null) {
-    activeTestStream.close();
-    activeTestStream = null;
+  if (activeTestStreamAbort !== null) {
+    activeTestStreamAbort.abort();
+    activeTestStreamAbort = null;
   }
+  activeTestStream = null;
   
   btn.disabled = true;
   if (stopBtn) {
@@ -119,130 +184,121 @@ async function handleRunTests() {
   }
 
   const legacyWsHttpBase = '/ws/';
+  const streamAbort = new AbortController();
+  activeTestStreamAbort = streamAbort;
+  activeTestStream = streamAbort;
   
   try {
     const capabilityToken = await getCapabilityToken('admin.tests.run');
-    const stream = new EventSource(`${legacyWsHttpBase}?channel=test_suite_stream&capability_token=${encodeURIComponent(capabilityToken)}`);
-    activeTestStream = stream;
-
-    stream.addEventListener('start', () => {
-      statusDiv.textContent = 'Streaming PHPUnit output...';
-      statusDiv.className = 'status centered info';
-    });
-
-    stream.addEventListener('line', (event) => {
-      let payload = null;
-      try {
-        payload = JSON.parse(event.data);
-      } catch (_err) {
-        payload = null;
-      }
-
-      const line = String(payload?.text || '');
-      if (resultsTextarea) {
-        resultsTextarea.value += (resultsTextarea.value === '' ? '' : '\n') + line;
-        resultsTextarea.scrollTop = resultsTextarea.scrollHeight;
-      }
-    });
-
-    stream.addEventListener('done', (event) => {
-      let data = null;
-      try {
-        data = JSON.parse(event.data);
-      } catch (_err) {
-        data = null;
-      }
-
-      const total = Number(data?.testCount || 0);
-      const assertions = Number(data?.assertionCount || 0);
-      const failures = Number(data?.failures || 0);
-      const success = Boolean(data?.success);
-
-      if (success || total > 0) {
-        statusDiv.textContent = '✅ Tests completed! ' + total + ' tests, ' + assertions + ' assertions.';
-        statusDiv.className = 'status centered success';
-
-        if (finalResultCallout && finalResultMessage) {
-          finalResultCallout.classList.remove('hidden', 'info', 'error');
-          finalResultCallout.classList.add('success');
-          finalResultMessage.textContent = 'Completed: ' + total + ' tests, ' + assertions + ' assertions, ' + failures + ' failures.';
-        }
-      } else {
-        statusDiv.textContent = '❌ Test run failed';
-        statusDiv.className = 'status centered error';
-
-        if (finalResultCallout && finalResultMessage) {
-          finalResultCallout.classList.remove('hidden', 'info', 'success');
-          finalResultCallout.classList.add('error');
-          finalResultMessage.textContent = 'Failed: no complete test totals were produced.';
-        }
-      }
-
-      const passRate = total > 0 ? Math.round(((total - failures) / total) * 100) : 0;
-      if (passRateElement) {
-        passRateElement.textContent = passRate + '%';
-      }
-
-      if (lastRunResultsDiv) {
-        lastRunResultsDiv.textContent = 'Last run: ' + total + ' tests, ' + assertions + ' assertions, ' + failures + ' failures (' + (data?.timestamp || 'just now') + ')';
-      }
-
-      const downloadBtn = document.getElementById('btn_download_report');
-      if (downloadBtn) {
-        downloadBtn.classList.remove('hidden');
-      }
-
-      btn.disabled = false;
-      if (stopBtn) {
-        stopBtn.disabled = true;
-        stopBtn.classList.add('hidden');
-      }
-      spinner.classList.add('hidden');
-
-      stream.close();
-      if (activeTestStream === stream) {
-        activeTestStream = null;
-      }
-    });
-
-    stream.addEventListener('error', () => {
-      if (isStoppingTestStream) {
-        statusDiv.textContent = '⏹ Test run stopped.';
+    await streamTestSuiteEvents(capabilityToken, {
+      start: () => {
+        statusDiv.textContent = 'Streaming PHPUnit output...';
         statusDiv.className = 'status centered info';
-
-        if (finalResultCallout && finalResultMessage) {
-          finalResultCallout.classList.remove('hidden', 'success', 'error');
-          finalResultCallout.classList.add('info');
-          finalResultMessage.textContent = 'Stopped by user before completion.';
+      },
+      line: (event) => {
+        let payload = null;
+        try {
+          payload = JSON.parse(event.data);
+        } catch (_err) {
+          payload = null;
         }
-      } else {
-        statusDiv.textContent = '❌ Live stream connection failed.';
-        statusDiv.className = 'status centered error';
 
-        if (finalResultCallout && finalResultMessage) {
-          finalResultCallout.classList.remove('hidden', 'info', 'success');
-          finalResultCallout.classList.add('error');
-          finalResultMessage.textContent = 'Stream failed before completion.';
+        const line = String(payload?.text || '');
+        if (resultsTextarea) {
+          resultsTextarea.value += (resultsTextarea.value === '' ? '' : '\n') + line;
+          resultsTextarea.scrollTop = resultsTextarea.scrollHeight;
         }
-      }
+      },
+      done: (event) => {
+        let data = null;
+        try {
+          data = JSON.parse(event.data);
+        } catch (_err) {
+          data = null;
+        }
 
-      if (lastRunResultsDiv) {
-        lastRunResultsDiv.textContent = isStoppingTestStream
-          ? 'Live run was stopped by user.'
-          : 'Live run failed before completion.';
-      }
+        const total = Number(data?.testCount || 0);
+        const assertions = Number(data?.assertionCount || 0);
+        const failures = Number(data?.failures || 0);
+        const success = Boolean(data?.success);
 
-      btn.disabled = false;
-      if (stopBtn) {
-        stopBtn.disabled = true;
-        stopBtn.classList.add('hidden');
-      }
-      spinner.classList.add('hidden');
+        if (success || total > 0) {
+          statusDiv.textContent = '✅ Tests completed! ' + total + ' tests, ' + assertions + ' assertions.';
+          statusDiv.className = 'status centered success';
 
-      stream.close();
-      if (activeTestStream === stream) {
+          if (finalResultCallout && finalResultMessage) {
+            finalResultCallout.classList.remove('hidden', 'info', 'error');
+            finalResultCallout.classList.add('success');
+            finalResultMessage.textContent = 'Completed: ' + total + ' tests, ' + assertions + ' assertions, ' + failures + ' failures.';
+          }
+        } else {
+          statusDiv.textContent = '❌ Test run failed';
+          statusDiv.className = 'status centered error';
+
+          if (finalResultCallout && finalResultMessage) {
+            finalResultCallout.classList.remove('hidden', 'info', 'success');
+            finalResultCallout.classList.add('error');
+            finalResultMessage.textContent = 'Failed: no complete test totals were produced.';
+          }
+        }
+
+        const passRate = total > 0 ? Math.round(((total - failures) / total) * 100) : 0;
+        if (passRateElement) {
+          passRateElement.textContent = passRate + '%';
+        }
+
+        if (lastRunResultsDiv) {
+          lastRunResultsDiv.textContent = 'Last run: ' + total + ' tests, ' + assertions + ' assertions, ' + failures + ' failures (' + (data?.timestamp || 'just now') + ')';
+        }
+
+        const downloadBtn = document.getElementById('btn_download_report');
+        if (downloadBtn) {
+          downloadBtn.classList.remove('hidden');
+        }
+
+        btn.disabled = false;
+        if (stopBtn) {
+          stopBtn.disabled = true;
+          stopBtn.classList.add('hidden');
+        }
+        spinner.classList.add('hidden');
         activeTestStream = null;
-      }
+      },
+      error: () => {
+        if (isStoppingTestStream) {
+          statusDiv.textContent = '⏹ Test run stopped.';
+          statusDiv.className = 'status centered info';
+
+          if (finalResultCallout && finalResultMessage) {
+            finalResultCallout.classList.remove('hidden', 'success', 'error');
+            finalResultCallout.classList.add('info');
+            finalResultMessage.textContent = 'Stopped by user before completion.';
+          }
+        } else {
+          statusDiv.textContent = '❌ Live stream connection failed.';
+          statusDiv.className = 'status centered error';
+
+          if (finalResultCallout && finalResultMessage) {
+            finalResultCallout.classList.remove('hidden', 'info', 'success');
+            finalResultCallout.classList.add('error');
+            finalResultMessage.textContent = 'Stream failed before completion.';
+          }
+        }
+
+        if (lastRunResultsDiv) {
+          lastRunResultsDiv.textContent = isStoppingTestStream
+            ? 'Live run was stopped by user.'
+            : 'Live run failed before completion.';
+        }
+
+        btn.disabled = false;
+        if (stopBtn) {
+          stopBtn.disabled = true;
+          stopBtn.classList.add('hidden');
+        }
+        spinner.classList.add('hidden');
+        activeTestStream = null;
+      },
     });
   } catch (error) {
     statusDiv.textContent = '❌ Error running tests: ' + error.message;
@@ -264,7 +320,10 @@ function handleStopTests() {
   }
 
   isStoppingTestStream = true;
-  activeTestStream.close();
+  if (activeTestStreamAbort !== null) {
+    activeTestStreamAbort.abort();
+    activeTestStreamAbort = null;
+  }
   activeTestStream = null;
 
   statusDiv.textContent = '⏹ Stopping test run...';

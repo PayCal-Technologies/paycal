@@ -429,6 +429,7 @@ async function _pw_post_telemetry(type, fields) {
       credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
+        'X-Paycal-Client': 'paycal',
       },
       keepalive: true,
       body: JSON.stringify({ type, fields: _pw_redact_value(fields) }),

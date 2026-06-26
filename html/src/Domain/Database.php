@@ -508,7 +508,31 @@ class Database
    */
   public static function scanKeys(string $pattern, int $scanCount = self::DEFAULT_KEY_SCAN_COUNT): array
   {
-    $redis   = self::getReadInstance();
+    return self::scanKeysOnInstance(self::getReadInstance(), $pattern, $scanCount);
+  }
+
+
+  /**
+   * SCAN on the write primary — use before unlink/del on enumerated keys.
+   *
+   * Read-replica enumeration can miss freshly written session/CSRF keys under
+   * replication lag, leaving one-shot tokens reusable after logout.
+   *
+   * @param string $pattern   Pattern to match (e.g. "session:*")
+   * @param int    $scanCount Number of keys per batch
+   * @return array<string> Matching Database keys
+   */
+  public static function scanKeysForWrite(string $pattern, int $scanCount = self::DEFAULT_KEY_SCAN_COUNT): array
+  {
+    return self::scanKeysOnInstance(self::getWriteInstance(), $pattern, $scanCount);
+  }
+
+
+  /**
+   * @return array<string>
+   */
+  private static function scanKeysOnInstance(Redis $redis, string $pattern, int $scanCount): array
+  {
     $rCursor = null;
     $keys    = [];
     $iterations = 0;

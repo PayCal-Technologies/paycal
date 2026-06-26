@@ -19,6 +19,9 @@ if (!function_exists('site_editor_i18n')) {
 $siteEditorContext = isset($siteEditorContext) && is_string($siteEditorContext)
   ? $siteEditorContext
   : 'personal';
+$sitesCsrfNonce = isset($sitesCsrfNonce) && is_string($sitesCsrfNonce) && $sitesCsrfNonce !== ''
+  ? $sitesCsrfNonce
+  : User::current()->generateFormNonce('settings');
 $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
   ? site_editor_i18n('BUSINESS_SITES_PLANNING_SCOPE_NOTE')
   : site_editor_i18n('SITES_PERSONAL_PLANNING_EMPTY');
@@ -29,6 +32,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
       <span id='modal_create_site_aria'><?php echo site_editor_i18n('CREATE_SITE'); ?></span>
     </div>
     <form id='create_site_form' method='POST' action='<?php echo Environment::appURL('api/sites/create/'); ?>'>
+      <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($sitesCsrfNonce ?? '', ENT_QUOTES, 'UTF-8'); ?>">
       <input type='hidden' id='create_site_status' name='status' value='active'>
       <section class='modal_header'>
         <h2 id='modal_create_site_title' class='modal_title'><?php echo site_editor_i18n('CREATE_SITE'); ?></h2>
@@ -169,6 +173,7 @@ $siteEditorPlanningEmptyText = $siteEditorContext === 'business'
       <span id='modal_edit_site_aria'><?php echo site_editor_i18n('EDIT_SITE'); ?></span>
     </div>
     <form id='edit_site_form' method='POST' action='<?php echo Environment::appURL('api/sites/update/'); ?>' data-site-editor-context='<?php echo htmlspecialchars($siteEditorContext, ENT_QUOTES, 'UTF-8'); ?>'>
+      <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($sitesCsrfNonce ?? '', ENT_QUOTES, 'UTF-8'); ?>">
       <input type='hidden' id='edit_site_id' name='id' value=''>
       <input type='hidden' id='edit_site_owner_uuid' name='owner_uuid' value=''>
       <section class='modal_header'>

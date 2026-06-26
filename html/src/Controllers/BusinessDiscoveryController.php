@@ -1992,14 +1992,21 @@ final class BusinessDiscoveryController
    * Pre-populates the business workspace cache (roster, sites, business reports,
    * member summaries). Intended to be called non-blocking from the dashboard.
    */
-  #[Route('businesses/{businessId}/cache/warm', ['GET', 'POST'])]
+  #[Route('businesses/{businessId}/cache/warm', ['POST'])]
   /**
    * Handles warmWorkspaceCache operation.
    */
   public function warmWorkspaceCache(string $businessId): void
   {
+    if (!self::requireBusinessCsrfPost()) {
+      return;
+    }
+
     $businessId = InputSanitizer::sanitizeString($businessId);
-    $yearRaw = InputSanitizer::getString('year');
+    $yearRaw = InputSanitizer::postString('year');
+    if ($yearRaw === '') {
+      $yearRaw = InputSanitizer::getString('year') ?? '';
+    }
     $year = $yearRaw !== '' ? (int) $yearRaw : null;
 
     $result = BusinessWorkspaceWarmer::requestWarm($businessId, User::currentUUID(), $year);

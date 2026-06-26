@@ -10,6 +10,7 @@ Javascript::renderModuleContentType('text/javascript');
 Javascript::renderDocBlock();
 
 $user = User::current();
+$sitesCsrfNonce = $user->generateFormNonce('settings');
 $availableEarningsYears = iterator_to_array(Work::getAvailableYears($user->user_uuid));
 if ([] === $availableEarningsYears) {
   $availableEarningsYears = [(int) date('Y')];
@@ -23,6 +24,28 @@ const debugLog = (...args) => {
   PW.log('[Sites Debug]', ...args);
 };
 const getErrorMessage = (error) => error?.message || String(error);
+const SITES_CSRF_TOKEN = <?php echo json_encode($sitesCsrfNonce, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+const appendSitesCsrf = (params) => {
+  if (params instanceof URLSearchParams) {
+    params.set('csrf_token', SITES_CSRF_TOKEN);
+    return params;
+  }
+
+  if (params instanceof FormData) {
+    params.set('csrf_token', SITES_CSRF_TOKEN);
+    return params;
+  }
+
+  return params;
+};
+
+const sitesMutationHeaders = () => ({
+  'Content-Type': 'application/x-www-form-urlencoded',
+  'X-Requested-With': 'XMLHttpRequest',
+  Accept: 'application/json',
+  ...(SITES_CSRF_TOKEN ? { 'X-CSRF-Token': SITES_CSRF_TOKEN } : {}),
+});
 
 const openSitesDialog = (dialog) => {
   if (!(dialog instanceof HTMLDialogElement)) {
@@ -337,7 +360,8 @@ document.addEventListener("DOMContentLoaded", async () =>
       const httpResponse = await fetch(apiUrl('sites/create'), {
         method: 'POST',
         credentials: 'include',
-        body: new URLSearchParams(formData)
+        headers: sitesMutationHeaders(),
+        body: appendSitesCsrf(new URLSearchParams(formData))
       });
 
       const responseData = await httpResponse.json();
@@ -501,7 +525,8 @@ document.addEventListener("DOMContentLoaded", async () =>
       const httpResponse = await fetch(apiUrl('sites/update'), {
         method: 'POST',
         credentials: 'include',
-        body: new URLSearchParams(formData)
+        headers: sitesMutationHeaders(),
+        body: appendSitesCsrf(new URLSearchParams(formData))
       });
 
       const responseData = await httpResponse.json();
@@ -659,8 +684,8 @@ document.addEventListener("DOMContentLoaded", async () =>
       const httpResponse = await fetch(url, {
         method,
         credentials: 'include',
-        headers: FORM_HEADERS,
-        body: new URLSearchParams({ id: currentDeleteSiteId })
+        headers: sitesMutationHeaders(),
+        body: appendSitesCsrf(new URLSearchParams({ id: currentDeleteSiteId }))
       });
 
       const responseData = await httpResponse.json();
@@ -1257,8 +1282,8 @@ document.addEventListener("DOMContentLoaded", async () =>
       const httpResponse = await fetch(apiUrl('sites/finality-delete'), {
         method: 'DELETE',
         credentials: 'include',
-        headers: FORM_HEADERS,
-        body: new URLSearchParams({ site_id: currentArchivedSiteId })
+        headers: sitesMutationHeaders(),
+        body: appendSitesCsrf(new URLSearchParams({ site_id: currentArchivedSiteId }))
       });
 
       const responseData = await httpResponse.json();
@@ -1658,9 +1683,9 @@ document.addEventListener("DOMContentLoaded", async () =>
       debugLog('Submitting recovery site form');
       const httpResponse = await fetch(apiUrl('sites/recover'), {
         method: 'POST',
-        headers: FORM_JSON_AJAX_HEADERS,
+        headers: sitesMutationHeaders(),
         credentials: 'include',
-        body: params
+        body: appendSitesCsrf(params)
       });
 
       const data = await httpResponse.json();
