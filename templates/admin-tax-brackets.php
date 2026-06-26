@@ -3,7 +3,7 @@
 </div>
 
 <!-- PAGE TOP -->
-<section class='w100' role="main" aria-label="__ADMIN_TAX_BRACKETS_EDITOR_ARIA__">
+<section class='w100' role="region" aria-label="__ADMIN_TAX_BRACKETS_EDITOR_ARIA__">
   <h1>__PAGE_LABEL__</h1>
 </section>
 

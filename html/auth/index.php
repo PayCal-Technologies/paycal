@@ -166,7 +166,8 @@ require_once __DIR__ . '/../header.php';
             <form id="signin-form" method="POST" action="/auth/<?php echo $authLanguageQuery; ?>">
               <section>
                 <label for="email"><?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-                <input type="email" id="email" name="email" value="<?php echo $emailValue; ?>" autocomplete="username webauthn" placeholder="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>"<?php echo ($isRegisterTab || $verificationSuccess) ? '' : ' autofocus'; ?>>
+                <input type="email" id="email" name="email" value="<?php echo $emailValue; ?>" autocomplete="username webauthn" placeholder="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars($i18n['AUTH_SIGNIN_EMAIL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" aria-describedby="signin-passkey-status signin_email_error signin-notice"<?php echo ($isRegisterTab || $verificationSuccess) ? '' : ' autofocus'; ?>>
+                <p id="signin_email_error" class="auth-field-error" role="alert" aria-live="polite"></p>
               </section>
 
               <section class="auth-signin-primary">
@@ -196,22 +197,26 @@ require_once __DIR__ . '/../header.php';
 
               <section>
                 <label for="register-full-name"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_FULL_NAME_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-                <input type="text" id="register-full-name" name="full_name" value="<?php echo $registerFullNameValue; ?>" autocomplete="name" required>
+                <input type="text" id="register-full-name" name="full_name" value="<?php echo $registerFullNameValue; ?>" autocomplete="name" required aria-required="true" aria-describedby="register-passkey-status register_full_name_error">
+                <p id="register_full_name_error" class="auth-field-error" role="alert" aria-live="polite"></p>
               </section>
 
               <section>
                 <label for="register-email"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_EMAIL_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-                <input type="email" id="register-email" name="register_email" value="<?php echo $registerEmailValue; ?>" autocomplete="email" required>
+                <input type="email" id="register-email" name="register_email" value="<?php echo $registerEmailValue; ?>" autocomplete="email" required aria-required="true" aria-describedby="register-passkey-status register_email_error">
+                <p id="register_email_error" class="auth-field-error" role="alert" aria-live="polite"></p>
               </section>
 
               <section>
                 <label for="invite_code"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_INVITE_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-                <input type="text" id="invite_code" name="invite_code" value="<?php echo $registerInviteValue; ?>" autocomplete="off">
+                <input type="text" id="invite_code" name="invite_code" value="<?php echo $registerInviteValue; ?>" autocomplete="off" aria-describedby="register-passkey-status register_invite_code_error">
+                <p id="register_invite_code_error" class="auth-field-error" role="alert" aria-live="polite"></p>
               </section>
 
               <section>
                 <label for="register-device-name"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_DEVICE_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>
-                <input type="text" id="register-device-name" name="device_name" value="" placeholder="<?php echo htmlspecialchars($i18n['AUTH_REGISTER_DEVICE_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>" autocomplete="off" required>
+                <input type="text" id="register-device-name" name="device_name" value="" placeholder="<?php echo htmlspecialchars($i18n['AUTH_REGISTER_DEVICE_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>" autocomplete="off" required aria-required="true" aria-describedby="register-passkey-status register_device_name_error">
+                <p id="register_device_name_error" class="auth-field-error" role="alert" aria-live="polite"></p>
               </section>
 
               <button id="register-passkey" type="button" class="btn btn_primary" aria-label="<?php echo htmlspecialchars($i18n['AUTH_REGISTER_CREATE_BUTTON'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_CREATE_BUTTON'], ENT_QUOTES, 'UTF-8'); ?></button>

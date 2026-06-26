@@ -522,6 +522,7 @@ final class BusinessDiscoveryController
 
     $grid = \PayCal\Domain\DataGrid::create('businesses', 'Businesses');
     $grid->enableSearch('Filter businesses…');
+    $grid->setControlsAriaLabel(Strings::i18n('BUSINESSES_LIST_FILTER_ARIA'));
     $grid->enableSorting();
     $grid->addColumn('name', 'Name', true);
     $grid->addColumn('business_type', 'Type', true);
@@ -3111,6 +3112,7 @@ final class BusinessDiscoveryController
 
     $grid = DataGrid::create($gridId, $title);
     $grid->enableSearch('Filter audit events...');
+    $grid->setControlsAriaLabel(Strings::i18n('BUSINESSES_AUDIT_FILTER_ARIA'));
     $grid->setSearchValue($search);
     $grid->enableSorting();
     $grid->addColumn('created_at', 'Timestamp', true);
@@ -3279,6 +3281,7 @@ final class BusinessDiscoveryController
 
     $grid = DataGrid::create('businesses-invite-history-grid', 'Invite & Access Request History');
     $grid->enableSearch('Filter invite/request history...');
+    $grid->setControlsAriaLabel(Strings::i18n('BUSINESSES_INVITES_HISTORY_FILTER_ARIA'));
     $grid->enableSorting();
     $grid->addColumn('invitee_email', 'Email', true);
     $grid->addColumn('role', 'Role', true);

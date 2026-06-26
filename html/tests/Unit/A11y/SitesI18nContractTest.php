@@ -116,6 +116,7 @@ final class SitesI18nContractTest extends TestCase
     $controller = (string) file_get_contents($projectRoot . '/html/src/Controllers/SitesController.php');
 
     $this->assertStringContainsString("Strings::i18n('BUSINESS_SITES_FILTER_PLACEHOLDER')", $controller);
+    $this->assertStringContainsString("setControlsAriaLabel(Strings::i18n('SITES_FILTER_ARIA'))", $controller);
     $this->assertStringContainsString("Strings::i18n('SITE')", $controller);
     $this->assertStringContainsString("Strings::i18n('BUSINESS_SITES_STATUS_TAG_PERSONAL')", $controller);
     $this->assertStringContainsString("Strings::i18n('BUSINESS_SITES_GRID_COLUMN_ENTRIES')", $controller);

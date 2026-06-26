@@ -17,6 +17,25 @@ function isIsoDateKey(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
 }
 
+function markPieGraphDecorative(el) {
+  if (el && typeof el.setAttribute === 'function') {
+    el.setAttribute('aria-hidden', 'true');
+  }
+}
+
+function syncPieGraphSvgDescription(svgEl, legendEl) {
+  if (!svgEl || typeof svgEl.setAttribute !== 'function') {
+    return;
+  }
+
+  const legendId = legendEl?.id ? String(legendEl.id) : '';
+  if (legendId !== '') {
+    svgEl.setAttribute('aria-describedby', legendId);
+  } else {
+    svgEl.removeAttribute('aria-describedby');
+  }
+}
+
 function parseMoneyLike(value) {
   const normalized = String(value ?? '0').replace(/[^0-9.-]/g, '');
   const amount = Number(normalized);
@@ -92,6 +111,7 @@ export function createPieGraphHelpers(options = {}) {
       return;
     }
 
+    syncPieGraphSvgDescription(svgEl, legendEl);
     const segments = pieSegmentsFromTotals(totals, palette);
     const normalizedTotals = normalizeCompositionTotals(totals);
     const total = normalizedTotals.gross;
@@ -144,6 +164,7 @@ export function createPieGraphHelpers(options = {}) {
     cutout.setAttribute('r', '46');
     cutout.setAttribute('class', 'earnings_piegraphs_cutout');
     cutout.setAttribute('fill', 'var(--surface, #111)');
+    markPieGraphDecorative(cutout);
     svgEl.appendChild(cutout);
 
     const totalText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -151,6 +172,7 @@ export function createPieGraphHelpers(options = {}) {
     totalText.setAttribute('y', String(cy + 4));
     totalText.setAttribute('text-anchor', 'middle');
     totalText.setAttribute('class', 'earnings_piegraphs_total');
+    markPieGraphDecorative(totalText);
     totalText.textContent = formatPieAmount(total);
     const totalTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
     totalTitle.textContent = `${labels.gross}: ${formatPieAmount(total)}`;
@@ -160,7 +182,7 @@ export function createPieGraphHelpers(options = {}) {
     if (guardian && typeof guardian.setHTML === 'function') {
       guardian.setHTML(legendEl, parts.map((seg) => (
         `<div class="earnings_piegraphs_legend_row" data-seg-key="${escapeHtml(seg.key)}">`
-        + `<span class="earnings_piegraphs_legend_dot earnings_piegraphs_legend_dot_${seg.key}"></span>`
+        + `<span class="earnings_piegraphs_legend_dot earnings_piegraphs_legend_dot_${seg.key}" aria-hidden="true"></span>`
         + `<span class="earnings_piegraphs_legend_label">${escapeHtml(seg.label)}</span>`
         + `<span class="earnings_piegraphs_legend_value">${formatPieAmount(seg.value)} (${formatPiePercent(seg.pct)})</span>`
         + `</div>`

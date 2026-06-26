@@ -212,12 +212,14 @@ function setFieldError(fieldId, message) {
   if (message) {
     field.setAttribute('aria-invalid', 'true');
     field.setAttribute('aria-describedby', `${fieldId}_error`);
+    field.setAttribute('aria-errormessage', `${fieldId}_error`);
     errorEl.textContent = message;
     errorEl.hidden = false;
     return;
   }
 
   field.removeAttribute('aria-invalid');
+  field.removeAttribute('aria-errormessage');
   if (field.hasAttribute('aria-describedby') && field.getAttribute('aria-describedby') === `${fieldId}_error`) {
     field.removeAttribute('aria-describedby');
   }

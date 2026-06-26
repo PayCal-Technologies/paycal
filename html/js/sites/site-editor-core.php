@@ -150,7 +150,12 @@ namespace PayCal\Domain;
     if (!(input instanceof HTMLElement)) {
       return;
     }
-    input.setAttribute('aria-invalid', isInvalid ? 'true' : 'false');
+    if (isInvalid) {
+      input.setAttribute('aria-invalid', 'true');
+    } else {
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-errormessage');
+    }
   };
 
   const siteEditorSetFormStatus = (statusElementId, message) => {
@@ -177,6 +182,13 @@ namespace PayCal\Domain;
     const errorEl = siteEditorGetElement(errorElementId);
     if (errorEl instanceof HTMLElement) {
       errorEl.textContent = text;
+      if (input instanceof HTMLElement) {
+        if (text.length > 0 && errorEl.id !== '') {
+          input.setAttribute('aria-errormessage', errorEl.id);
+        } else {
+          input.removeAttribute('aria-errormessage');
+        }
+      }
     }
   };
 

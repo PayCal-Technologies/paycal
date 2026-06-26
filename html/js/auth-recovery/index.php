@@ -61,6 +61,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
   const recoveryKeyInput = document.getElementById('recovery-key');
   const codeErrorEl = document.getElementById('recovery-code-error');
   const recoveryKeyErrorEl = document.getElementById('recovery-key-error');
+  const emailErrorEl = document.getElementById('recovery-email-error');
   const verifySubmitButton = verifyForm?.querySelector('button[type="submit"]');
   const deviceNameInput = document.getElementById('recovery-device-name');
   const workerVersion = document.body?.dataset?.workerVersion || String(Date.now());
@@ -161,7 +162,16 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
       errorEl.dataset.tone = message ? tone : '';
     }
     if (input) {
-      input.setAttribute('aria-invalid', message && tone === 'error' ? 'true' : 'false');
+      const isError = Boolean(message) && tone === 'error';
+      if (isError) {
+        input.setAttribute('aria-invalid', 'true');
+        if (errorEl?.id) {
+          input.setAttribute('aria-errormessage', errorEl.id);
+        }
+      } else {
+        input.removeAttribute('aria-invalid');
+        input.removeAttribute('aria-errormessage');
+      }
     }
   }
 
@@ -255,10 +265,13 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
     setStep(1);
 
     if (!emailInput?.value?.trim()) {
+      setFieldMessage(emailInput, emailErrorEl, 'Enter your account email to request a new recovery link.', 'error');
       setStatus('Enter your account email to request a new recovery link.', 'error');
       emailInput?.focus();
       return;
     }
+
+    setFieldMessage(emailInput, emailErrorEl, '', 'error');
 
     await startRecovery({ preventDefault() {} });
   }
@@ -526,6 +539,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
       return;
     }
     startInFlight = true;
+    setFieldMessage(emailInput, emailErrorEl, '', 'error');
     setStatus('Sending code…');
     setActionBusy(sendCodeButton, true);
     try {
@@ -925,7 +939,10 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
   }
 
   startForm?.addEventListener('submit', (event) => {
-    startRecovery(event).catch((error) => setStatus(error.message || 'Recovery failed. Try again.', 'error'));
+    startRecovery(event).catch((error) => {
+      setFieldMessage(emailInput, emailErrorEl, error.message || 'Recovery failed. Try again.', 'error');
+      setStatus(error.message || 'Recovery failed. Try again.', 'error');
+    });
   });
   verifyForm?.addEventListener('submit', (event) => {
     verifyRecovery(event).catch((error) => setRecoveryErrorStatus(error));
@@ -948,6 +965,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
     cancelRecovery().catch((error) => setStatus(error.message || RECOVERY_T.AUTH_JS_RECOVER_CANCEL_FAILED));
   });
   emailInput?.addEventListener('input', () => {
+    setFieldMessage(emailInput, emailErrorEl, '', 'error');
     updateVerifyButtonState();
     scheduleAutoSubmit();
   });

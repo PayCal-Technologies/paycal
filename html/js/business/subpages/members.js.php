@@ -1479,7 +1479,7 @@
         selectedMatches.map((member) => (
           '<span class="business_members_report_member_pill" role="listitem">'
           + '<span class="business_members_report_member_pill_name">' + safeText(member.name) + '</span>'
-          + '<button type="button" class="business_members_report_member_remove" data-member-id="' + safeAttr(member.id) + '" aria-label="Remove ' + safeAttr(member.name) + '">&times;</button>'
+          + '<button type="button" class="business_members_report_member_remove" data-member-id="' + safeAttr(member.id) + '" aria-label="' + safeAttr(formatPhpTemplate(T.memberReportRemoveAria, [member.name])) + '">&times;</button>'
           + '</span>'
         )).join(''),
       );

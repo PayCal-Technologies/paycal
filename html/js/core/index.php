@@ -158,16 +158,15 @@ foreach ($i18nKeys as $i18nKey) {
  * ============================================================================
  */
 
-import PW from '/js/phantomwing/';
-import NavigationToggle from '/js/navigation-toggle.js';
-import RuntimeIntegrity from '/js/runtime-integrity.js';
-import SignalPanel from '/js/signal-panel.js';
-import A11yModule from '/js/core/a11y.js';
-import BinaryCodec from '/js/core/binary-codec.js';
-import { escapePattern } from '/js/core/regex.js';
-import SetUtils from '/js/core/set-utils.js';
-import BrowserCapabilities from '/js/core/capabilities.js';
-import createSecurityTimers from '/js/core/security-timers.js';
+import PW from '<?php echo Render::jsModuleURL('phantomwing'); ?>';
+import NavigationToggle from '<?php echo Render::jsStaticURL('js/navigation-toggle.js'); ?>';
+import RuntimeIntegrity from '<?php echo Render::jsStaticURL('js/runtime-integrity.js'); ?>';
+import A11yModule from '<?php echo Render::jsStaticURL('js/core/a11y.js'); ?>';
+import BinaryCodec from '<?php echo Render::jsStaticURL('js/core/binary-codec.js'); ?>';
+import { escapePattern } from '<?php echo Render::jsStaticURL('js/core/regex.js'); ?>';
+import SetUtils from '<?php echo Render::jsStaticURL('js/core/set-utils.js'); ?>';
+import BrowserCapabilities from '<?php echo Render::jsStaticURL('js/core/capabilities.js'); ?>';
+import createSecurityTimers from '<?php echo Render::jsStaticURL('js/core/security-timers.js'); ?>';
 
 const PayCalCore = (() => {
 
@@ -2531,12 +2530,20 @@ const PayCalCore = (() => {
       }
     }
 
-    if (SignalPanel && typeof SignalPanel.init === 'function') {
-      try {
-        SignalPanel.init({ core: PayCalCore, PW });
-      } catch (err) {
-        PW.warn('Signal Panel initialization failed:', err);
-      }
+    if (document.getElementById('signal_panel')) {
+      const signalPanelModuleUrl = '<?php echo Render::jsStaticURL('js/signal-panel.js'); ?>';
+      void import(signalPanelModuleUrl).then((module) => {
+        const SignalPanel = module?.default;
+        if (SignalPanel && typeof SignalPanel.init === 'function') {
+          try {
+            SignalPanel.init({ core: PayCalCore, PW });
+          } catch (err) {
+            PW.warn('Signal Panel initialization failed:', err);
+          }
+        }
+      }).catch((err) => {
+        PW.warn('Signal Panel module load failed:', err);
+      });
     }
 
     const getBusinessesNavLink = () => document.querySelector(

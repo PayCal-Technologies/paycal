@@ -18,6 +18,23 @@ function resolveElement(target) {
   return null;
 }
 
+function syncFieldErrorMessageBinding(inputEl, errorEl, hasError) {
+  if (!isElement(inputEl) || !isElement(errorEl)) {
+    return;
+  }
+
+  const errorId = String(errorEl.id || '').trim();
+  if (errorId === '') {
+    return;
+  }
+
+  if (hasError) {
+    inputEl.setAttribute('aria-errormessage', errorId);
+  } else {
+    inputEl.removeAttribute('aria-errormessage');
+  }
+}
+
 export function setFieldInvalidState(input, isInvalid) {
   const inputEl = resolveElement(input);
   if (!isElement(inputEl)) {
@@ -28,6 +45,7 @@ export function setFieldInvalidState(input, isInvalid) {
     inputEl.setAttribute('aria-invalid', 'true');
   } else {
     inputEl.removeAttribute('aria-invalid');
+    inputEl.removeAttribute('aria-errormessage');
   }
 
   return true;
@@ -47,8 +65,13 @@ export function setFieldErrorText(errorTarget, message, { trim = true } = {}) {
 export function setFieldErrorState(input, errorTarget, message, { trim = true } = {}) {
   const text = String(message ?? '');
   const renderedText = trim ? text.trim() : text;
-  setFieldInvalidState(input, renderedText.length > 0);
-  setFieldErrorText(errorTarget, renderedText, { trim: false });
+  const inputEl = resolveElement(input);
+  const errorEl = resolveElement(errorTarget);
+  const hasError = renderedText.length > 0;
+
+  setFieldInvalidState(inputEl, hasError);
+  setFieldErrorText(errorEl, renderedText, { trim: false });
+  syncFieldErrorMessageBinding(inputEl, errorEl, hasError);
   return renderedText;
 }
 

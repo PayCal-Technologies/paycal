@@ -4257,6 +4257,33 @@
   /**
    * Attach handlers to month navigation buttons.
    */
+  const CALENDAR_RANGE_PICKER_DISCLOSURES = [
+    { triggerId: 'cal_picker_button', dialogId: 'modal_cal_picker' },
+    { triggerId: 'cal_week_picker_button', dialogId: 'modal_cal_week_picker' },
+    { triggerId: 'cal_payperiod_picker_button', dialogId: 'modal_cal_payperiod_picker' },
+  ];
+
+  function syncCalendarRangePickerExpanded(triggerId, expanded) {
+    const trigger = document.getElementById(triggerId);
+    if (trigger instanceof HTMLElement) {
+      trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+  }
+
+  function bindCalendarRangePickerDisclosures() {
+    CALENDAR_RANGE_PICKER_DISCLOSURES.forEach(({ triggerId, dialogId }) => {
+      const dialog = document.getElementById(dialogId);
+      if (!(dialog instanceof HTMLDialogElement) || dialog.dataset.rangePickerDisclosureBound === '1') {
+        return;
+      }
+
+      dialog.dataset.rangePickerDisclosureBound = '1';
+      const collapse = () => syncCalendarRangePickerExpanded(triggerId, false);
+      dialog.addEventListener('close', collapse);
+      dialog.addEventListener('cancel', collapse);
+    });
+  }
+
   function attachMonthNavigationHandlers() {
     const prevBtn = document.querySelector('.calendar_range_controls[data-calendar-range-controls="month"] [data-action="prev-month"]');
     const nextBtn = document.querySelector('.calendar_range_controls[data-calendar-range-controls="month"] [data-action="next-month"]');
@@ -4287,6 +4314,7 @@
     };
 
     normalizeMonthNavA11yHints();
+    bindCalendarRangePickerDisclosures();
 
     const announceCurrentMonth = () => {
       const statusEl = document.getElementById('calendar-month-status');
@@ -4614,6 +4642,7 @@
         if (window.PayCalCore && typeof window.PayCalCore.openModal === 'function') {
           window.PayCalCore.openModal('modal_cal_picker', calendarI18n('DATE_PICKER', 'Date Picker'));
         }
+        syncCalendarRangePickerExpanded('cal_picker_button', true);
 
         if (yearInput && typeof yearInput.focus === 'function') {
           setTimeout(() => yearInput.focus(), 100);
@@ -4755,6 +4784,7 @@
         if (window.PayCalCore && typeof window.PayCalCore.openModal === 'function') {
           window.PayCalCore.openModal('modal_cal_week_picker', calendarI18n('CALENDAR_WEEK_PICKER_TITLE', 'Select week'));
         }
+        syncCalendarRangePickerExpanded('cal_week_picker_button', true);
         if (weekDateInput instanceof HTMLInputElement && typeof weekDateInput.focus === 'function') {
           setTimeout(() => weekDateInput.focus(), 100);
         }
@@ -4784,6 +4814,7 @@
         if (window.PayCalCore && typeof window.PayCalCore.openModal === 'function') {
           window.PayCalCore.openModal('modal_cal_payperiod_picker', calendarI18n('CALENDAR_PAY_PERIOD_PICKER_TITLE', 'Select pay period'));
         }
+        syncCalendarRangePickerExpanded('cal_payperiod_picker_button', true);
       });
     }
 

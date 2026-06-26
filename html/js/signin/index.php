@@ -56,6 +56,7 @@ foreach ($authI18nKeys as $authI18nKey) {
 import { fromBase64Url as b64urlToBuffer, toBase64Url as bufferToB64url } from '/js/core/binary-codec.js';
 import { isWebAuthnCapableBrowser } from '/js/core/capabilities.js';
 import { setActionBusy as setButtonBusy } from '/js/core/actions.js';
+import { clearFieldErrorStates, setFieldErrorState } from '/js/core/forms.js';
 import { formatTemplate as formatAuthMessage } from '/js/core/template.js';
 
 // Passkey-only auth helpers for /auth
@@ -101,6 +102,71 @@ const setRegisterStatus = (msg) => {
 const signinNoticeEl = document.getElementById('signin-notice');
 const signinErrorActionsEl = document.getElementById('signin-error-actions');
 const emailInputEl = document.getElementById('email');
+
+const REGISTER_FIELD_PAIRS = [
+  ['register-full-name', 'register_full_name_error'],
+  ['register-email', 'register_email_error'],
+  ['invite_code', 'register_invite_code_error'],
+  ['register-device-name', 'register_device_name_error'],
+];
+
+const clearRegisterFieldErrors = () => {
+  clearFieldErrorStates(REGISTER_FIELD_PAIRS);
+};
+
+const clearSigninEmailFieldError = () => {
+  setFieldErrorState(emailInputEl, 'signin_email_error', '');
+};
+
+const emailLooksValid = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+
+const applyRegisterFieldErrorsFromMessage = (message) => {
+  clearRegisterFieldErrors();
+  const normalized = String(message || '').trim();
+  if (normalized === '') {
+    return;
+  }
+
+  if (/full name is required/i.test(normalized) || normalized === AUTH_T.AUTH_JS_ENTER_FULL_NAME) {
+    setFieldErrorState(document.getElementById('register-full-name'), 'register_full_name_error', AUTH_T.AUTH_JS_ENTER_FULL_NAME);
+    return;
+  }
+  if (/valid email is required/i.test(normalized) || normalized === AUTH_T.AUTH_JS_ENTER_VALID_EMAIL || normalized === AUTH_T.AUTH_JS_EMAIL_REQUIRED) {
+    setFieldErrorState(document.getElementById('register-email'), 'register_email_error', AUTH_T.AUTH_JS_ENTER_VALID_EMAIL);
+    return;
+  }
+  if (/already registered/i.test(normalized) || normalized === AUTH_T.AUTH_JS_EMAIL_ALREADY_REGISTERED) {
+    setFieldErrorState(document.getElementById('register-email'), 'register_email_error', AUTH_T.AUTH_JS_EMAIL_ALREADY_REGISTERED);
+    return;
+  }
+  if (/invalid invite code/i.test(normalized) || normalized === AUTH_T.AUTH_JS_INVALID_INVITE_CODE) {
+    setFieldErrorState(document.getElementById('invite_code'), 'register_invite_code_error', AUTH_T.AUTH_JS_INVALID_INVITE_CODE);
+  }
+};
+
+const validateRegisterFields = ({ fullName, email }) => {
+  clearRegisterFieldErrors();
+  let firstInvalidField = null;
+
+  if (!fullName) {
+    setFieldErrorState(document.getElementById('register-full-name'), 'register_full_name_error', AUTH_T.AUTH_JS_ENTER_FULL_NAME);
+    firstInvalidField = firstInvalidField || document.getElementById('register-full-name');
+  }
+
+  if (!email) {
+    setFieldErrorState(document.getElementById('register-email'), 'register_email_error', AUTH_T.AUTH_JS_EMAIL_REQUIRED);
+    firstInvalidField = firstInvalidField || document.getElementById('register-email');
+  } else if (!emailLooksValid(email)) {
+    setFieldErrorState(document.getElementById('register-email'), 'register_email_error', AUTH_T.AUTH_JS_ENTER_VALID_EMAIL);
+    firstInvalidField = firstInvalidField || document.getElementById('register-email');
+  }
+
+  if (firstInvalidField instanceof HTMLElement) {
+    firstInvalidField.focus();
+  }
+
+  return firstInvalidField === null;
+};
 
 const hideSigninNotice = () => {
   if (signinNoticeEl) {
@@ -449,6 +515,9 @@ const renderSigninFailure = (failure, retryHandler) => {
       }]);
       return;
     case 'credential_mismatch':
+      if (emailInputEl instanceof HTMLInputElement) {
+        setFieldErrorState(emailInputEl, 'signin_email_error', AUTH_T.AUTH_JS_PASSKEY_MISMATCH_DETAIL);
+      }
       showSigninNotice(
         AUTH_T.AUTH_JS_PASSKEY_CREDENTIAL_REJECTED,
         AUTH_T.AUTH_JS_PASSKEY_MISMATCH_DETAIL,
@@ -782,10 +851,18 @@ const runPasskeySignin = async (preferPhoneFlow = false) => {
   try {
     hideAuthBanner();
     hideSigninNotice();
+    clearSigninEmailFieldError();
     showSigninErrorActions([]);
 
     if (!isWebAuthnCapableBrowser()) {
       showAuthError(WEB_AUTHN_UNSUPPORTED_MESSAGE, 'signin');
+      return;
+    }
+
+    const email = emailInputEl instanceof HTMLInputElement ? emailInputEl.value.trim() : '';
+    if (email !== '' && !emailLooksValid(email)) {
+      setFieldErrorState(emailInputEl, 'signin_email_error', AUTH_T.AUTH_JS_ENTER_VALID_EMAIL);
+      emailInputEl.focus();
       return;
     }
 
@@ -912,6 +989,7 @@ if (registerButton) {
 
     try {
       hideAuthBanner();
+      clearRegisterFieldErrors();
 
       if (!isWebAuthnCapableBrowser()) {
         const msg = WEB_AUTHN_UNSUPPORTED_MESSAGE;
@@ -929,9 +1007,8 @@ if (registerButton) {
       const inviteCode = inviteInput?.value?.trim() || '';
       const deviceName = deviceInput?.value?.trim() || suggestedDeviceNameFromEmail(email);
 
-      if (!fullName || !email) {
-        const msg = 'Full name and email are required.';
-        showAuthError(msg, 'register');
+      if (!validateRegisterFields({ fullName, email })) {
+        setRegisterStatus(DEFAULT_REGISTER_STATUS);
         return;
       }
 
@@ -946,6 +1023,7 @@ if (registerButton) {
       const startPayload = startPayloadRaw && typeof startPayloadRaw === 'object' ? startPayloadRaw : {};
       if (!startResponse.ok || startPayload.status !== 'success') {
         const friendly = signupFriendlyMessage(startPayload.message);
+        applyRegisterFieldErrorsFromMessage(friendly);
         if (/already registered/i.test(String(startPayload.message || ''))) {
           showAuthError(friendly, 'register');
           return;
@@ -1010,6 +1088,7 @@ if (registerButton) {
       window.location.href = '/';
     } catch (error) {
       const msg = error?.message || 'Registration failed. Try again.';
+      applyRegisterFieldErrorsFromMessage(msg);
       showAuthError(msg, 'register');
     } finally {
       registerInFlight = false;

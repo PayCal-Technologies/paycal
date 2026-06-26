@@ -15,7 +15,7 @@ final class A11yModuleWiringContractTest extends TestCase
     $htmlRoot = dirname(__DIR__, 3);
     $coreJs = (string) file_get_contents($htmlRoot . '/js/core/index.php');
 
-    $this->assertStringContainsString("import A11yModule from '/js/core/a11y.js';", $coreJs);
+    $this->assertStringContainsString("Render::jsStaticURL('js/core/a11y.js')", $coreJs);
     $this->assertStringContainsString('const a11y = A11yModule(state, getElement, query, queryAll, textToSpeech, config);', $coreJs);
   }
 

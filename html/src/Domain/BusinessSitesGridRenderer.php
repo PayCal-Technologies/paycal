@@ -293,6 +293,7 @@ final class BusinessSitesGridRenderer
     $grid = DataGrid::create('business-sites-' . $status, Strings::i18n('BUSINESS_SITES_TITLE'));
     $grid->setClass('datagrid_mobile_cards business_sites_mobile_cards');
     $grid->enableSearch(Strings::i18n('BUSINESS_SITES_FILTER_PLACEHOLDER'));
+    $grid->setControlsAriaLabel(Strings::i18n('BUSINESS_SITES_FILTER_ARIA'));
     $grid->setSearchValue($search);
     $grid->enableSorting();
     $grid->enableColumnVisibility();

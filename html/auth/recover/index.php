@@ -76,24 +76,25 @@ foreach ($i18nKeys as $i18nKey) {
           <div class="recovery-field recovery-email-field">
             <label for="recovery-email">Email address</label>
             <div class="recovery-email-row">
-              <input id="recovery-email" name="email" type="email" autocomplete="email" required>
+              <input id="recovery-email" name="email" type="email" autocomplete="email" required aria-required="true" aria-describedby="recovery-status recovery-email-error">
               <button id="recovery-send-code" type="submit" class="btn btn_secondary">Send code</button>
             </div>
+            <p class="recovery-field-error" id="recovery-email-error" role="alert" aria-live="polite"></p>
           </div>
           <p class="recovery-status" id="recovery-status" aria-live="assertive"><?php echo htmlspecialchars($hasMagicLinkToken ? $i18n['AUTH_RECOVER_STATUS_MAGIC_LINK'] : '', ENT_QUOTES, 'UTF-8'); ?></p>
         </form>
         <form id="recovery-verify-form" class="recovery-code-form">
           <div id="recovery-code-block" class="recovery-field">
             <label for="recovery-code">Verification code</label>
-            <input id="recovery-code" name="code" type="text" autocomplete="one-time-code" maxlength="6" required aria-describedby="recovery-code-error">
+            <input id="recovery-code" name="code" type="text" autocomplete="one-time-code" maxlength="6" required aria-required="true" aria-describedby="recovery-code-error">
             <p class="recovery-hint">Sent to your email.</p>
-            <p class="recovery-field-error" id="recovery-code-error" aria-live="polite"></p>
+            <p class="recovery-field-error" id="recovery-code-error" role="alert" aria-live="polite"></p>
           </div>
           <div id="recovery-key-block" class="recovery-field is-hidden">
             <label for="recovery-key">Recovery code</label>
             <input id="recovery-key" name="recoveryKey" type="text" autocomplete="off" spellcheck="false" maxlength="60" aria-describedby="recovery-key-error">
             <p class="recovery-hint">Saved when you secured your account.</p>
-            <p class="recovery-field-error" id="recovery-key-error" aria-live="polite"></p>
+            <p class="recovery-field-error" id="recovery-key-error" role="alert" aria-live="polite"></p>
           </div>
           <div class="recovery-actions">
             <button type="submit" class="btn btn_primary" disabled aria-disabled="true">Verify and continue</button>

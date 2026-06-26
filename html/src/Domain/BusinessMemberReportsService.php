@@ -713,7 +713,7 @@ final class BusinessMemberReportsService
         <p id="{$graphId}_desc">{$lineGraphDesc}</p>
         <p id="{$graphId}_status" role="status" aria-live="polite" aria-atomic="true">{$lineGraphStatus}</p>
       </div>
-      <svg id="{$graphId}" width="100%" height="300" role="img" aria-labelledby="{$graphId}_title" aria-describedby="{$graphId}_desc {$graphId}_status"></svg>
+      <svg id="{$graphId}" width="100%" height="300" role="img" aria-labelledby="{$graphId}_title" aria-describedby="{$graphId}_desc {$graphId}_status" focusable="false"></svg>
     </div>
   </section>
 
@@ -824,6 +824,9 @@ HTML;
     $panelTitle = htmlspecialchars(Strings::i18n('EARNINGS_COMPOSITION_PANEL_TITLE'), ENT_QUOTES, 'UTF-8');
     $ytdTitle = htmlspecialchars(Strings::i18n('EARNINGS_YTD_COMPOSITION'), ENT_QUOTES, 'UTF-8');
     $monthlyTitle = htmlspecialchars(Strings::i18n('EARNINGS_MONTHLY_COMPOSITION'), ENT_QUOTES, 'UTF-8');
+    $monthLabel = htmlspecialchars(Strings::i18n('EARNINGS_PIEGRAPHS_MONTH_SELECT_ARIA'), ENT_QUOTES, 'UTF-8');
+    $ytdLegendId = 'member_reports_piegraphs_ytd_legend_' . $yearAttr;
+    $monthLegendId = 'member_reports_piegraphs_month_legend_' . $yearAttr;
 
     return '<section class="panel w100 earnings_panel earnings_piegraphs_panel" id="member_reports_piegraphs_panel_' . $yearAttr . '" data-earnings-piegraphs-year="' . $yearAttr . '">'
       . '<h2 class="earnings_panel_title">' . $panelTitle . '</h2>'
@@ -831,16 +834,16 @@ HTML;
       . '<article class="panel earnings_panel earnings_piegraphs_card">'
       . '<h3 class="earnings_piegraphs_card_title">' . $ytdTitle . '</h3>'
       . '<div class="earnings_piegraphs_month_controls_spacer" aria-hidden="true"></div>'
-      . '<svg id="member_reports_piegraphs_ytd_svg_' . $yearAttr . '" class="earnings_piegraphs_svg" viewBox="0 0 240 240" role="img" aria-label="' . $ytdTitle . ' ' . $yearAttr . '"></svg>'
-      . '<div id="member_reports_piegraphs_ytd_legend_' . $yearAttr . '" class="earnings_piegraphs_legend" aria-live="polite"></div>'
+      . '<svg id="member_reports_piegraphs_ytd_svg_' . $yearAttr . '" class="earnings_piegraphs_svg" viewBox="0 0 240 240" role="img" aria-label="' . $ytdTitle . ' ' . $yearAttr . '" aria-describedby="' . $ytdLegendId . '" focusable="false"></svg>'
+      . '<div id="' . $ytdLegendId . '" class="earnings_piegraphs_legend" aria-live="polite"></div>'
       . '</article>'
       . '<article class="panel earnings_panel earnings_piegraphs_card">'
       . '<h3 class="earnings_piegraphs_card_title">' . $monthlyTitle . '</h3>'
       . '<div class="earnings_piegraphs_month_controls">'
-      . '<select id="member_reports_piegraphs_month_select_' . $yearAttr . '" class="earnings_piegraphs_month_select"></select>'
+      . '<select id="member_reports_piegraphs_month_select_' . $yearAttr . '" class="earnings_piegraphs_month_select" aria-label="' . $monthLabel . '"></select>'
       . '</div>'
-      . '<svg id="member_reports_piegraphs_month_svg_' . $yearAttr . '" class="earnings_piegraphs_svg" viewBox="0 0 240 240" role="img" aria-label="' . $monthlyTitle . ' ' . $yearAttr . '"></svg>'
-      . '<div id="member_reports_piegraphs_month_legend_' . $yearAttr . '" class="earnings_piegraphs_legend" aria-live="polite"></div>'
+      . '<svg id="member_reports_piegraphs_month_svg_' . $yearAttr . '" class="earnings_piegraphs_svg" viewBox="0 0 240 240" role="img" aria-label="' . $monthlyTitle . ' ' . $yearAttr . '" aria-describedby="' . $monthLegendId . '" focusable="false"></svg>'
+      . '<div id="' . $monthLegendId . '" class="earnings_piegraphs_legend" aria-live="polite"></div>'
       . '</article>'
       . '</div>'
       . '</section>';

@@ -1131,7 +1131,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('Intl.NumberFormat', $pieGraphCoreJs);
     $this->assertStringContainsString("month: 'short'", $pieGraphCoreJs);
 
-    $this->assertStringContainsString("from '/js/earnings/pie-graph-core.js'", $earningsJs);
+    $this->assertStringContainsString("Render::jsStaticURL('js/earnings/pie-graph-core.js')", $earningsJs);
     $this->assertStringContainsString("batchI18n('EARNINGS_COMPOSITION_PANEL_TITLE')", $earningsDomain);
     $this->assertStringContainsString("Strings::i18n('EARNINGS_COMPOSITION_PANEL_TITLE')", $memberReportsService);
     $this->assertStringContainsString("org_js_index_i18n('EARNINGS_PIEGRAPHS_NO_VALUES')", $businessStateJs);

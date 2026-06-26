@@ -569,7 +569,14 @@
       const isActive = String(button.dataset.reportTabButton || '') === activeTab;
       button.classList.toggle('active', isActive);
       button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      button.setAttribute('tabindex', isActive ? '0' : '-1');
     });
+
+    const panel = document.getElementById('business_reports_panel');
+    const activeTabButton = document.querySelector(`[data-report-tab-button="${activeTab}"]`);
+    if (panel instanceof HTMLElement && activeTabButton instanceof HTMLElement && activeTabButton.id) {
+      panel.setAttribute('aria-labelledby', `${activeTabButton.id} business_reports_panel_heading`);
+    }
 
     reportModules().forEach((module) => {
       const key = reportModuleKey(module);
@@ -749,7 +756,7 @@
       if (!module.querySelector('.business_reports_insufficient_history')) {
         const note = document.createElement('p');
         note.className = 'business_reports_insufficient_history';
-        note.textContent = 'Insufficient history for a meaningful chart.';
+        note.textContent = T.reportsInsufficientHistory || 'Insufficient history for a meaningful chart.';
         module.appendChild(note);
       }
     });
@@ -811,6 +818,39 @@
         persistReportParams({ tab });
         applyReportVisibility();
       });
+      button.addEventListener('keydown', (event) => {
+        const tabs = Array.from(document.querySelectorAll('[data-report-tab-button]'))
+          .filter((candidate) => candidate instanceof HTMLButtonElement);
+        const index = tabs.indexOf(button);
+        if (index < 0) {
+          return;
+        }
+
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          button.click();
+          return;
+        }
+
+        if (event.key === 'ArrowRight' || event.key === 'ArrowLeft' || event.key === 'Home' || event.key === 'End') {
+          event.preventDefault();
+          let nextIndex = index;
+          if (event.key === 'ArrowRight') {
+            nextIndex = (index + 1) % tabs.length;
+          } else if (event.key === 'ArrowLeft') {
+            nextIndex = (index - 1 + tabs.length) % tabs.length;
+          } else if (event.key === 'Home') {
+            nextIndex = 0;
+          } else if (event.key === 'End') {
+            nextIndex = tabs.length - 1;
+          }
+          const nextTab = tabs[nextIndex];
+          if (nextTab) {
+            nextTab.click();
+            nextTab.focus();
+          }
+        }
+      });
     });
 
     document.querySelectorAll('[data-report-filter]').forEach((filter) => {
@@ -844,31 +884,41 @@
     });
 
     const customizeDrawer = document.querySelector('[data-report-customize-drawer]');
-    document.querySelector('[data-report-customize-open]')?.addEventListener('click', () => {
+    const customizeOpen = document.querySelector('[data-report-customize-open]');
+    const syncCustomizeDrawer = (expanded) => {
       if (customizeDrawer instanceof HTMLElement) {
-        customizeDrawer.hidden = false;
+        customizeDrawer.hidden = !expanded;
       }
+      if (customizeOpen instanceof HTMLElement) {
+        customizeOpen.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      }
+    };
+    customizeOpen?.addEventListener('click', () => {
+      syncCustomizeDrawer(true);
     });
     document.querySelector('[data-report-customize-close]')?.addEventListener('click', () => {
-      if (customizeDrawer instanceof HTMLElement) {
-        customizeDrawer.hidden = true;
-      }
+      syncCustomizeDrawer(false);
     });
 
     const exportDrawer = document.querySelector('[data-report-export-drawer]');
+    const exportOpen = document.querySelector('[data-report-export-open]');
     const exportPanel = document.querySelector('[data-report-export-panel]');
-    document.querySelector('[data-report-export-open]')?.addEventListener('click', () => {
+    const syncExportDrawer = (expanded) => {
       if (exportDrawer instanceof HTMLElement) {
-        exportDrawer.hidden = false;
+        exportDrawer.hidden = !expanded;
       }
+      if (exportOpen instanceof HTMLElement) {
+        exportOpen.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      }
+    };
+    exportOpen?.addEventListener('click', () => {
+      syncExportDrawer(true);
       if (exportPanel instanceof HTMLElement) {
         exportPanel.hidden = false;
       }
     });
     document.querySelector('[data-report-export-close]')?.addEventListener('click', () => {
-      if (exportDrawer instanceof HTMLElement) {
-        exportDrawer.hidden = true;
-      }
+      syncExportDrawer(false);
       if (exportPanel instanceof HTMLElement) {
         exportPanel.hidden = true;
       }

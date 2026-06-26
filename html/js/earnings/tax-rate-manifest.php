@@ -12,6 +12,7 @@ CORS::renderContentType('application/javascript');
 Javascript::renderDocBlock();
 
 $manifestPath = __DIR__ . '/../../src/Domain/TaxRateTablesData.json';
+HttpCache::sendPrivateWithFileEtag($manifestPath);
 $rawManifest = is_file($manifestPath) ? file_get_contents($manifestPath) : false;
 $decodedManifest = is_string($rawManifest) ? json_decode($rawManifest, true) : null;
 

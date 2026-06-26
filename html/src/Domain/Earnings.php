@@ -1398,7 +1398,7 @@ class Earnings
       'panel_title' => self::batchI18n('EARNINGS_COMPOSITION_PANEL_TITLE'),
       'ytd_title' => self::batchI18n('EARNINGS_YTD_COMPOSITION'),
       'monthly_title' => self::batchI18n('EARNINGS_MONTHLY_COMPOSITION'),
-      'month_label' => self::batchI18n('EARNINGS_MONTH'),
+      'month_label' => self::batchI18n('EARNINGS_PIEGRAPHS_MONTH_SELECT_ARIA'),
     ];
 
     $privateRendered = EarningsPieGraphsExtensionBridge::render($year, $payload);
@@ -1605,7 +1605,7 @@ class Earnings
         <p id="earnings_line_graph_{$year}_desc">{$lineGraphDesc}</p>
         <p id="earnings_line_graph_{$year}_status" role="status" aria-live="polite" aria-atomic="true">{$lineGraphStatus}</p>
       </div>
-      <svg id="earnings_line_graph_{$year}" width="100%" height="300" role="img" aria-labelledby="earnings_line_graph_{$year}_title" aria-describedby="earnings_line_graph_{$year}_desc earnings_line_graph_{$year}_status"></svg>
+      <svg id="earnings_line_graph_{$year}" width="100%" height="300" role="img" aria-labelledby="earnings_line_graph_{$year}_title" aria-describedby="earnings_line_graph_{$year}_desc earnings_line_graph_{$year}_status" focusable="false"></svg>
     </div>
   </section>
 

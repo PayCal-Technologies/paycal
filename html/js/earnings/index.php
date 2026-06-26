@@ -20,7 +20,7 @@ $earningsI18nKeys = [
   'EARNINGS_TREND_NO_NUMERIC_DESC', 'EARNINGS_TREND_UPDATED_STATUS', 'EARNINGS_TREND_UPDATED_DESC',
   'EARNINGS_CHART_DATA_LOAD_FAILED', 'EARNINGS_TREND_LOAD_FAILED_STATUS',
   'EARNINGS_TREND_DIRECTION_INCREASING', 'EARNINGS_TREND_DIRECTION_DECREASING', 'EARNINGS_TREND_DIRECTION_FLAT',
-  'EARNINGS_TREND_HOVER_TOOLTIP', 'EARNINGS_TREND_Y_AXIS_LABEL',
+  'EARNINGS_TREND_HOVER_TOOLTIP', 'EARNINGS_TREND_Y_AXIS_LABEL', 'EARNINGS_TREND_TOUCH_HINT',
   'EARNINGS_DAILY_LOAD_FAILED_PREFIX', 'EARNINGS_DAILY_NO_DATA_FOR_YEAR', 'EARNINGS_UNKNOWN_ERROR',
   'EARNINGS_FORECAST_TITLE', 'EARNINGS_FORECAST_BADGE_ESTIMATE', 'EARNINGS_FORECAST_BADGE_NOT_CRA',
   'EARNINGS_FORECAST_WORKSPACE_ARIA', 'EARNINGS_FORECAST_LOADING', 'EARNINGS_FORECAST_NEXT_PAYCHECK',
@@ -49,23 +49,24 @@ $earningsI18n = [];
 foreach ($earningsI18nKeys as $earningsI18nKey) {
   $earningsI18n[$earningsI18nKey] = Strings::i18n($earningsI18nKey);
 }
-?>import PC from '/js/';
-import PW from '/js/phantomwing/';
-import nacl from '/js/vendor/tweetnacl.js';
-import EarningsExport from '/js/earnings/earnings-export.js';
-import { fromBase64 as decodeBase64 } from '/js/core/binary-codec.js';
+?>import PC from '<?php echo Render::jsModuleURL(); ?>';
+import PW from '<?php echo Render::jsModuleURL('phantomwing'); ?>';
+import nacl from '<?php echo Render::jsStaticURL('js/vendor/tweetnacl.js'); ?>';
+import EarningsExport from '<?php echo Render::jsStaticURL('js/earnings/earnings-export.js'); ?>';
+import { fromBase64 as decodeBase64 } from '<?php echo Render::jsStaticURL('js/core/binary-codec.js'); ?>';
 import {
   buildPieGraphDataset,
   createPieGraphHelpers,
   getPieGraphPalette,
-} from '/js/earnings/pie-graph-core.js';
-import { createEarningsFormatHelpers } from '/js/earnings/format.js';
-import { initForecastWorkspace } from '/js/earnings/forecast-calculator.js';
-import { escapeHtml } from '/js/core/escape.js';
+} from '<?php echo Render::jsStaticURL('js/earnings/pie-graph-core.js'); ?>';
+import { createEarningsFormatHelpers } from '<?php echo Render::jsStaticURL('js/earnings/format.js'); ?>';
+import { drawLineGraph } from '<?php echo Render::jsStaticURL('js/earnings/trend-chart.js'); ?>';
+import { initForecastWorkspace } from '<?php echo Render::jsStaticURL('js/earnings/forecast-calculator.js'); ?>';
+import { escapeHtml } from '<?php echo Render::jsStaticURL('js/core/escape.js'); ?>';
 import {
   formatI18n as formatConfigI18n,
   getI18nLabel as getConfigI18nLabel,
-} from '/js/core/template.js';
+} from '<?php echo Render::jsStaticURL('js/core/template.js'); ?>';
 
 // === Canonical Verification Payload Utilities ===
 // Fixed key order, no whitespace, locale-independent, v1
@@ -555,33 +556,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  function isCompactTrendChart(width) {
-    const compactByWidth = Number.isFinite(width) && width <= 480;
-    const compactByPointer = typeof window !== 'undefined'
-      && typeof window.matchMedia === 'function'
-      && window.matchMedia('(pointer: coarse) and (max-width: 700px)').matches;
-    return compactByWidth || compactByPointer;
-  }
-
-  function syncTrendTouchHint(linegraphSVG, visible) {
-    const container = linegraphSVG.parentElement;
-    if (!container || typeof container.querySelectorAll !== 'function') {
-      return;
-    }
-
-    let hint = Array.from(container.querySelectorAll('.earnings-chart-touch-hint'))
-      .find((candidate) => candidate?.dataset?.chartFor === linegraphSVG.id);
-    if (!hint) {
-      hint = document.createElement('p');
-      hint.className = 'earnings-chart-touch-hint';
-      hint.dataset.chartFor = linegraphSVG.id;
-      linegraphSVG.insertAdjacentElement('afterend', hint);
-    }
-
-    hint.textContent = getI18nLabel('EARNINGS_TREND_TOUCH_HINT', 'Touch to reveal');
-    hint.hidden = !visible;
-  }
-
   // === Canonical Verification: Trust-Layer Hash Check ===
   // Fetches canonical payloads/hashes from trust-layer API, reconstructs and verifies client-side
 
@@ -723,444 +697,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function draw_line_graph(data, svgID) {
-    const SVG_NS = "http://www.w3.org/2000/svg";
-    const linegraphSVG = PC.getElement(svgID);
-    
-    if (!linegraphSVG) {
-      PW.warn(`[GRAPH] SVG element not found: ${svgID}`);
-      return;
-    }
-    if (!data || typeof data !== 'object') {
-      PW.warn(`[GRAPH] Invalid data: received type ${typeof data}, expected object`);
-      return;
-    }
-
-    // --- prep & sort ---
-    const rawPairs = Object.entries(data).map(([dateKey, amount]) => {
-      const dateMs = parseDateKeyToLocalMs(dateKey);
-      const numericAmount = Number(amount);
-      return {
-        dateKey,
-        dateMs,
-        amount: numericAmount,
-        valid: Number.isFinite(dateMs) && Number.isFinite(numericAmount),
-      };
+    drawLineGraph(data, svgID, {
+      getElement: (id) => PC.getElement(id),
+      warn: (message) => PW.warn(message),
+      userLocale: PC.config.USER_LOCALE,
+      getI18nLabel,
+      formatI18n,
+      formatHelpers: earningsFormatHelpers,
+      onStatus: announceEarningsGraphStatus,
+      onError: announceEarningsGraphError,
     });
-
-    const invalidPoints = rawPairs.filter((entry) => !entry.valid).length;
-    if (invalidPoints > 0) {
-      PW.warn(`[GRAPH] Filtered ${invalidPoints} invalid earnings point(s) for ${svgID}`);
-    }
-
-    const pairs = rawPairs
-      .filter((entry) => entry.valid)
-      .sort((a, b) => a.dateMs - b.dateMs);
-
-    const yearFromId = Number((svgID.match(/(\d{4})$/) || [])[1]);
-    if (!pairs.length) {
-      if (Number.isFinite(yearFromId)) {
-        announceEarningsGraphStatus(yearFromId, [], []);
-      }
-      return;
-    }
-
-    const dateKeys = pairs.map((entry) => entry.dateKey);
-    const datesMs = pairs.map((entry) => entry.dateMs);
-    const amounts = pairs.map((entry) => entry.amount);
-
-    if (datesMs.length === 0 || amounts.length === 0) {
-      if (Number.isFinite(yearFromId)) {
-        announceEarningsGraphStatus(yearFromId, [], []);
-      }
-      return;
-    }
-
-    // Extract year directly from string to avoid timezone issues
-    const derivedYear = parseInt(String(dateKeys[0]).split('-')[0], 10);
-    const year = Number.isFinite(derivedYear) ? derivedYear : yearFromId;
-
-    if (!Number.isFinite(year)) {
-      PW.warn(`[GRAPH] Could not derive chart year from ${svgID}`);
-      return;
-    }
-
-    announceEarningsGraphStatus(year, dateKeys, amounts);
-
-    // X domain: full year
-    const xMin = new Date(year, 0, 1).getTime();
-    const xMax = new Date(year, 11, 31, 23, 59, 59, 999).getTime();
-
-    // Y domain: min..rounded max (nearest 10)
-    const yMin = Math.min(0, ...amounts);
-    const yMaxRaw = Math.max(...amounts);
-
-    if (!Number.isFinite(yMin) || !Number.isFinite(yMaxRaw)) {
-      PW.warn(`[GRAPH] Invalid Y-axis domain for ${svgID}`);
-      announceEarningsGraphError(year, 'Chart data contained invalid numeric values.');
-      return;
-    }
-
-    const yMax = Math.ceil(yMaxRaw / 10) * 10;
-
-    // --- size & margins (left auto based on label width) ---
-    const parentWidth = linegraphSVG.parentElement?.clientWidth;
-    const width = Number.isFinite(parentWidth) ? Number(parentWidth) : 0;
-    const height = 200;
-    
-    if (width <= 0) {
-      return;
-    }
-    
-    const compactChart = isCompactTrendChart(width);
-    let margin = compactChart
-      ? { top: 10, right: 8, bottom: 10, left: 8 }
-      : { top: 10, right: 16, bottom: 32, left: 40 };
-
-    // probe widest Y label text (e.g., "12345 (100%)")
-    linegraphSVG.setAttribute("width", width);
-    linegraphSVG.setAttribute("height", height);
-    linegraphSVG.dataset.compactChart = compactChart ? 'true' : 'false';
-    linegraphSVG.textContent = '';
-    syncTrendTouchHint(linegraphSVG, compactChart);
-
-    // Get theme primary color for graph elements
-    const rootStyles = getComputedStyle(document.documentElement);
-    const primaryColor = rootStyles.getPropertyValue('--color-primary').trim() || '#3a86ff';
-    const textColor = rootStyles.getPropertyValue('--color-text').trim() || '#000';
-    const graphStrokeStrong = `${primaryColor}cc`;
-    const graphStrokeNormal = `${primaryColor}66`;
-    const graphStrokeLight = `${primaryColor}26`;
-    const graphStrokeVeryLight = `${primaryColor}03`;
-    const tooltipBg = rootStyles.getPropertyValue('--panel-bg').trim()
-      || rootStyles.getPropertyValue('--surface').trim()
-      || 'rgba(255, 255, 255, 0.98)';
-    const tooltipBorder = rootStyles.getPropertyValue('--panel-border').trim()
-      || rootStyles.getPropertyValue('--border').trim()
-      || 'rgba(200, 200, 200, 0.8)';
-
-    if (!compactChart) {
-      const probe = document.createElementNS(SVG_NS, "text");
-      probe.setAttribute("font-size", "13");
-      probe.textContent = formatI18n(
-        'EARNINGS_TREND_Y_AXIS_LABEL',
-        '{amount} ({pct})',
-        { amount: earningsFormatHelpers.formatCurrency(yMax), pct: earningsFormatHelpers.formatPercent(100, 0) },
-      );
-      linegraphSVG.appendChild(probe);
-      let labelWidth = 0;
-      try {
-        labelWidth = Math.ceil(probe.getBBox().width);
-      } catch (error) {
-        PW.warn(`[GRAPH] Unable to measure Y-axis label width for ${svgID}`);
-      }
-      linegraphSVG.removeChild(probe);
-      margin.left = Math.max(margin.left, labelWidth + 12);
-    }
-
-    const innerW = Math.max(0, width - margin.left - margin.right);
-    const innerH = Math.max(0, height - margin.top - margin.bottom);
-
-    if (innerW <= 0 || innerH <= 0) {
-      PW.warn(`[GRAPH] Invalid chart inner dimensions for ${svgID}`);
-      return;
-    }
-
-    // --- scales ---
-    const xSpan = xMax - xMin;
-    if (!Number.isFinite(xSpan) || xSpan <= 0) {
-      PW.warn(`[GRAPH] Invalid X-axis domain for ${svgID}`);
-      return;
-    }
-
-    const xScale = d => ((d - xMin) / xSpan) * innerW + margin.left;
-
-    const yScale = (yMax === yMin)
-      ? () => margin.top + innerH / 2
-      : v => (margin.top + innerH) - ((v - yMin) / (yMax - yMin)) * innerH;
-
-    // --- path (area fill under curve) ---
-    let dPath = `M ${xScale(datesMs[0])},${yScale(amounts[0])}`;
-    for (let i = 1; i < datesMs.length; i++) {
-      const x1 = xScale(datesMs[i - 1]), y1 = yScale(amounts[i - 1]);
-      const x2 = xScale(datesMs[i]),     y2 = yScale(amounts[i]);
-      const xc = (x1 + x2) / 2;
-      dPath += ` C ${xc},${y1} ${xc},${y2} ${x2},${y2}`;
-    }
-    // close area to baseline
-    dPath += ` L ${xScale(datesMs[datesMs.length - 1])},${margin.top + innerH}`;
-    dPath += ` L ${xScale(datesMs[0])},${margin.top + innerH} Z`;
-
-    // --- gradient defs ---
-    const defs = document.createElementNS(SVG_NS, "defs");
-    const grad = document.createElementNS(SVG_NS, "linearGradient");
-    const gradientId = `verticalGradient_${svgID}`;
-    grad.setAttribute("id", gradientId);
-    grad.setAttribute("x1", "0%"); grad.setAttribute("y1", "0%");
-    grad.setAttribute("x2", "0%"); grad.setAttribute("y2", "100%");
-    const stop1 = document.createElementNS(SVG_NS, "stop");
-    stop1.setAttribute("offset", "0%");
-    stop1.setAttribute("stop-color", graphStrokeLight);
-    const stop2 = document.createElementNS(SVG_NS, "stop");
-    stop2.setAttribute("offset", "100%");
-    stop2.setAttribute("stop-color", graphStrokeVeryLight);
-    grad.appendChild(stop1); grad.appendChild(stop2);
-    defs.appendChild(grad);
-    linegraphSVG.appendChild(defs);
-
-    // --- area fill ---
-    const areaPath = document.createElementNS(SVG_NS, "path");
-    areaPath.setAttribute("d", dPath);
-    areaPath.setAttribute("fill", `url(#${gradientId})`);
-    areaPath.setAttribute("stroke", "none");
-    linegraphSVG.appendChild(areaPath);
-
-    // --- stroke on top (same curve without closing) ---
-    let strokePath = `M ${xScale(datesMs[0])},${yScale(amounts[0])}`;
-    for (let i = 1; i < datesMs.length; i++) {
-      const x1 = xScale(datesMs[i - 1]), y1 = yScale(amounts[i - 1]);
-      const x2 = xScale(datesMs[i]),     y2 = yScale(amounts[i]);
-      const xc = (x1 + x2) / 2;
-      strokePath += ` C ${xc},${y1} ${xc},${y2} ${x2},${y2}`;
-    }
-    const linePath = document.createElementNS(SVG_NS, "path");
-    linePath.setAttribute("d", strokePath);
-    linePath.setAttribute("stroke", graphStrokeStrong);
-    linePath.setAttribute("stroke-width", "2");
-    linePath.setAttribute("fill", "none");
-    linegraphSVG.appendChild(linePath);
-
-    // --- axes: baseline & Y axis ---
-    const xAxisLine = document.createElementNS(SVG_NS, "line");
-    xAxisLine.setAttribute("x1", margin.left);
-    xAxisLine.setAttribute("x2", margin.left + innerW);
-    xAxisLine.setAttribute("y1", margin.top + innerH);
-    xAxisLine.setAttribute("y2", margin.top + innerH);
-    xAxisLine.setAttribute("stroke", graphStrokeNormal);
-    xAxisLine.setAttribute("stroke-width", "1");
-    linegraphSVG.appendChild(xAxisLine);
-
-    const yAxisLine = document.createElementNS(SVG_NS, "line");
-    yAxisLine.setAttribute("x1", margin.left);
-    yAxisLine.setAttribute("x2", margin.left);
-    yAxisLine.setAttribute("y1", margin.top + innerH);
-    yAxisLine.setAttribute("y2", margin.top);
-    yAxisLine.setAttribute("stroke", graphStrokeNormal);
-    yAxisLine.setAttribute("stroke-width", "1");
-    linegraphSVG.appendChild(yAxisLine);
-
-    // --- Y labels & gridlines at min, 25%, 50%, 75%, 100% ---
-    const yPercents = [0, 0.25, 0.5, 0.75, 1];
-    yPercents.forEach(p => {
-      const v = Math.round(yMin + (yMax - yMin) * p);
-      const y = yScale(v);
-
-      if (p > 0) {
-        const gl = document.createElementNS(SVG_NS, "line");
-        gl.setAttribute("x1", margin.left);
-        gl.setAttribute("x2", margin.left + innerW);
-        gl.setAttribute("y1", y);
-        gl.setAttribute("y2", y);
-        gl.setAttribute("stroke", graphStrokeLight);
-        gl.setAttribute("stroke-width", "1");
-        linegraphSVG.appendChild(gl);
-      }
-
-      if (!compactChart) {
-        const t = document.createElementNS(SVG_NS, "text");
-        t.classList.add('earnings-chart-axis-label', 'earnings-chart-axis-label-y');
-        t.setAttribute("x", margin.left - 10);
-        t.setAttribute("y", y + 3);
-        t.setAttribute("text-anchor", "end");
-        t.setAttribute("font-size", "13");
-        t.setAttribute("fill", textColor);
-        t.textContent = formatI18n(
-          'EARNINGS_TREND_Y_AXIS_LABEL',
-          '{amount} ({pct})',
-          { amount: earningsFormatHelpers.formatCurrency(v), pct: earningsFormatHelpers.formatPercent(p * 100, 0) },
-        );
-        linegraphSVG.appendChild(t);
-      }
-    });
-
-    // --- month labels (localized) ---
-    if (!compactChart) {
-      const monthFormatter = new Intl.DateTimeFormat(PC.config.USER_LOCALE, { month: "short" });
-      for (let m = 0; m < 12; m++) {
-        const mid = new Date(year, m, 15).getTime();
-        const x = xScale(mid);
-        const y = margin.top + innerH + 15;
-
-        const label = document.createElementNS(SVG_NS, "text");
-        label.classList.add('earnings-chart-axis-label', 'earnings-chart-axis-label-x');
-        label.setAttribute("x", x);
-        label.setAttribute("y", y);
-        label.setAttribute("text-anchor", "middle");
-        label.setAttribute("font-size", "13");
-        label.setAttribute("fill", textColor);
-        label.textContent = monthFormatter.format(new Date(year, m, 1));
-        linegraphSVG.appendChild(label);
-      }
-    }
-
-    // === Mouseover tooltip / hover tracker ===
-    const overlay = document.createElementNS(SVG_NS, "rect");
-    overlay.setAttribute("x", margin.left);
-    overlay.setAttribute("y", margin.top);
-    overlay.setAttribute("width", innerW);
-    overlay.setAttribute("height", innerH);
-    overlay.setAttribute("fill", "transparent");
-    overlay.setAttribute("pointer-events", "all");
-    overlay.classList.add("earnings-crosshair");
-
-    // hairline, dot, tooltip group
-    const hair = document.createElementNS(SVG_NS, "line");
-    hair.setAttribute("stroke", graphStrokeNormal);
-    hair.setAttribute("stroke-width", "1");
-    hair.classList.add("svg-hidden");
-
-    const dot = document.createElementNS(SVG_NS, "circle");
-    dot.setAttribute("r", "3");
-    dot.setAttribute("fill", graphStrokeStrong);
-    dot.classList.add("svg-hidden");
-
-    const tipG = document.createElementNS(SVG_NS, "g");
-    tipG.classList.add("svg-hidden");
-    const tipRect = document.createElementNS(SVG_NS, "rect");
-    tipRect.setAttribute("rx", "2");
-    tipRect.setAttribute("ry", "2");
-    tipRect.setAttribute("fill", tooltipBg);
-    tipRect.setAttribute("stroke", tooltipBorder);
-    tipRect.setAttribute("stroke-width", "0.5");
-    const tipText = document.createElementNS(SVG_NS, "text");
-    tipText.setAttribute("font-size", "14");
-    tipText.setAttribute("fill", textColor);
-    tipText.setAttribute("x", "5");
-    tipText.setAttribute("y", "16");
-    tipG.appendChild(tipRect);
-    tipG.appendChild(tipText);
-
-    linegraphSVG.appendChild(hair);
-    linegraphSVG.appendChild(dot);
-    linegraphSVG.appendChild(tipG);
-    linegraphSVG.appendChild(overlay);
-
-    // helpers
-    function getSVGX(clientX) {
-      const ctm = linegraphSVG.getScreenCTM();
-      if (!ctm) {
-        return Number.NaN;
-      }
-      const pt = linegraphSVG.createSVGPoint();
-      pt.x = clientX;
-      const cursor = pt.matrixTransform(ctm.inverse());
-      return cursor.x;
-    }
-    function invX(px) {
-      return xMin + ((px - margin.left) / innerW) * xSpan;
-    }
-    function nearestIndex(t) {
-      let lo = 0, hi = datesMs.length - 1;
-      while (hi - lo > 1) {
-        const mid = (hi + lo) >> 1;
-        if (datesMs[mid] < t) lo = mid; else hi = mid;
-      }
-      return (t - datesMs[lo] < datesMs[hi] - t) ? lo : hi;
-    }
-
-    // event handlers
-    const setVisible = (el, visible) => {
-      el.classList.toggle("svg-hidden", !visible);
-      el.classList.toggle("svg-visible", visible);
-    };
-
-    const hideInteraction = () => {
-      setVisible(hair, false);
-      setVisible(dot, false);
-      setVisible(tipG, false);
-    };
-
-    const revealAtClientX = (clientX) => {
-      const px = getSVGX(clientX);
-      if (!Number.isFinite(px)) return;
-      if (px < margin.left || px > margin.left + innerW) return;
-      const t = invX(px);
-      const i = nearestIndex(t);
-      const x = xScale(datesMs[i]);
-      const y = yScale(amounts[i]);
-
-      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-
-      hair.setAttribute("x1", x);
-      hair.setAttribute("x2", x);
-      hair.setAttribute("y1", margin.top);
-      hair.setAttribute("y2", margin.top + innerH);
-      setVisible(hair, true);
-
-      dot.setAttribute("cx", x);
-      dot.setAttribute("cy", y);
-      setVisible(dot, true);
-
-      const dateStr = formatDateKeyShort(dateKeys[i], PC.config.USER_LOCALE);
-      const amountValue = Number(amounts[i]);
-      if (!Number.isFinite(amountValue)) return;
-      tipText.textContent = formatI18n(
-        'EARNINGS_TREND_HOVER_TOOLTIP',
-        '{date}: {amount}',
-        { date: dateStr, amount: earningsFormatHelpers.formatCurrency(amountValue) },
-      );
-      const bbox = tipText.getBBox();
-      const tipWidth = bbox.width + 8;
-      const tipHeight = bbox.height + 6;
-      tipRect.setAttribute("width", tipWidth);
-      tipRect.setAttribute("height", tipHeight);
-
-      let tx = x + 8;
-      if (tx + tipWidth > margin.left + innerW) tx = x - tipWidth - 8;
-      tx = Math.max(margin.left + 2, Math.min(tx, margin.left + innerW - tipWidth - 2));
-      let ty = y - tipHeight - 8;
-      if (ty < margin.top) ty = y + 12;
-      ty = Math.max(margin.top + 2, Math.min(ty, margin.top + innerH - tipHeight - 2));
-
-      tipG.setAttribute("transform", `translate(${tx},${ty})`);
-      setVisible(tipG, true);
-    };
-
-    overlay.addEventListener("mousemove", evt => {
-      revealAtClientX(evt.clientX);
-    });
-
-    overlay.addEventListener("pointerdown", evt => {
-      if (evt.pointerType !== 'mouse') {
-        evt.preventDefault();
-        revealAtClientX(evt.clientX);
-      }
-    });
-
-    overlay.addEventListener("pointermove", evt => {
-      if (evt.pointerType !== 'mouse') {
-        evt.preventDefault();
-        revealAtClientX(evt.clientX);
-      }
-    });
-
-    overlay.addEventListener("touchstart", evt => {
-      const touch = evt.touches?.[0] || evt.changedTouches?.[0];
-      if (!touch) return;
-      evt.preventDefault();
-      revealAtClientX(touch.clientX);
-    }, { passive: false });
-
-    overlay.addEventListener("touchmove", evt => {
-      const touch = evt.touches?.[0] || evt.changedTouches?.[0];
-      if (!touch) return;
-      evt.preventDefault();
-      revealAtClientX(touch.clientX);
-    }, { passive: false });
-
-    overlay.addEventListener("mouseleave", () => {
-      hideInteraction();
-    });
-
   }
 
   async function fetch_gross_year(year) {
@@ -1716,6 +1262,87 @@ async function render_daily_year(year) {
     loadSection('monthly', year, `earnings_monthly_${year}`);
   }
 
+  function scheduleIdleTask(task, timeoutMs = 3000) {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(task, { timeout: timeoutMs });
+      return;
+    }
+
+    window.setTimeout(task, 250);
+  }
+
+  function loadPriorityYearContent(year) {
+    loadSection('ytd', year, `earnings_ytd_${year}`);
+    loadGraphForYear(year);
+  }
+
+  function loadSecondaryYearSections(year) {
+    loadSection('payperiods', year, `earnings_pay_periods_${year}`);
+    loadSection('monthly', year, `earnings_monthly_${year}`);
+  }
+
+  function scheduleDailyForYear(year) {
+    if (loadedDaily.has(year)) {
+      return;
+    }
+
+    const section = document.getElementById(`daily_earnings_${year}`);
+    if (!section) {
+      return;
+    }
+
+    let started = false;
+    const startLoad = () => {
+      if (started || loadedDaily.has(year)) {
+        return;
+      }
+      started = true;
+      loadDailyForYear(year);
+    };
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) {
+          return;
+        }
+        observer.disconnect();
+        scheduleIdleTask(startLoad, 4000);
+      }, { rootMargin: '240px 0px' });
+      observer.observe(section);
+      scheduleIdleTask(() => {
+        observer.disconnect();
+        startLoad();
+      }, 8000);
+      return;
+    }
+
+    scheduleIdleTask(startLoad, 4000);
+  }
+
+  function loadYearContentProgressive(year, { includeDaily = true, secondaryDelayMs = 1800 } = {}) {
+    loadPriorityYearContent(year);
+    scheduleIdleTask(() => {
+      loadSecondaryYearSections(year);
+    }, secondaryDelayMs);
+
+    if (includeDaily) {
+      scheduleDailyForYear(year);
+    }
+  }
+
+  function scheduleTrustLayerVerification(year) {
+    const run = () => {
+      void verifyCanonicalHashesForYear(year);
+    };
+
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(run, { timeout: 5000 });
+      return;
+    }
+
+    window.setTimeout(run, 250);
+  }
+
   function loadGraphForYear(year) {
     if (loadedGraphs.has(year)) {
       const svgId = `earnings_line_graph_${year}`;
@@ -1732,7 +1359,7 @@ async function render_daily_year(year) {
         const svgId = `earnings_line_graph_${year}`;
         graphDataCache[year] = data;
         draw_line_graph(data, svgId);
-        verifyCanonicalHashesForYear(year);
+        scheduleTrustLayerVerification(year);
       })
       .catch(error => {
         const message = PC.resolveThrownMessage(error, getI18nLabel('EARNINGS_UNABLE_TO_RETRIEVE_TREND', 'Unable to retrieve earnings trend data.'));
@@ -1803,9 +1430,7 @@ async function render_daily_year(year) {
     const year = parseInt(tab.dataset.tabTarget.replace('tab-', ''), 10);
     if (!isNaN(year)) {
       if (lazyMode) {
-        loadSectionsForYear(year);
-        loadGraphForYear(year);
-        loadDailyForYear(year);
+        loadYearContentProgressive(year, { secondaryDelayMs: 600 });
       } else {
         eagerLoadToken += 1;
         loadSectionsForYear(year);
@@ -1873,10 +1498,16 @@ function initializeEarningsGraphs() {
       }
 
       const queueYear = prioritizedYears[index];
-      loadSectionsForYear(queueYear);
-      loadGraphForYear(queueYear);
+      loadPriorityYearContent(queueYear);
       if (index === 0) {
-        loadDailyForYear(queueYear);
+        scheduleIdleTask(() => {
+          loadSecondaryYearSections(queueYear);
+        }, 900);
+        scheduleDailyForYear(queueYear);
+      } else {
+        scheduleIdleTask(() => {
+          loadSecondaryYearSections(queueYear);
+        }, 1800);
       }
 
       const jitterMs = 120 + Math.floor(Math.random() * 140);
@@ -1905,9 +1536,7 @@ function initializeEarningsGraphs() {
     return;
   }
 
-  loadSectionsForYear(year);
-  loadGraphForYear(year);
-  loadDailyForYear(year);
+  loadYearContentProgressive(year);
 }
 
   // Initialize graphs on page load

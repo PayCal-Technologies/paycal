@@ -10,7 +10,26 @@ CORS::handleORIGIN();
 CORS::renderContentType('application/javascript');
 
 Javascript::renderDocBlock();
+
+$reportsPrintI18nKeys = [
+  'CLOSE',
+  'CANCEL',
+  'EARNINGS_PRINT_REPORT',
+  'REPORTS_PRINT_DIALOG_DESC',
+  'REPORTS_PRINT_MODE_LEGEND',
+  'REPORTS_PRINT_MODE_BW',
+  'REPORTS_PRINT_MODE_GRAYSCALE',
+  'REPORTS_PRINT_MODE_COLOR',
+  'REPORTS_PRINT_MODE_BW_DESC',
+  'REPORTS_PRINT_MODE_GRAYSCALE_DESC',
+  'REPORTS_PRINT_MODE_COLOR_DESC',
+];
+$reportsPrintI18n = [];
+foreach ($reportsPrintI18nKeys as $reportsPrintI18nKey) {
+  $reportsPrintI18n[$reportsPrintI18nKey] = Strings::i18n($reportsPrintI18nKey);
+}
 ?>
+const REPORTS_PRINT_T = <?php echo json_encode($reportsPrintI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 const REPORTS_PRINT_STORAGE_KEY = 'paycal.reports.printMode';
 const REPORTS_PRINT_DEFAULT_MODE = 'bw';
 const REPORTS_PRINT_MODES = new Set(['bw', 'grayscale', 'color']);
@@ -48,15 +67,15 @@ const writePrintMode = (mode) => {
 };
 
 const modeLabels = {
-  bw: 'Black & white',
-  grayscale: 'Grayscale',
-  color: 'Full color',
+  bw: REPORTS_PRINT_T.REPORTS_PRINT_MODE_BW,
+  grayscale: REPORTS_PRINT_T.REPORTS_PRINT_MODE_GRAYSCALE,
+  color: REPORTS_PRINT_T.REPORTS_PRINT_MODE_COLOR,
 };
 
 const modeDescriptions = {
-  bw: 'Highest contrast and lowest ink use. Charts print as black lines on white paper.',
-  grayscale: 'Printer-friendly gray tones with more separation between report series.',
-  color: 'Preserves report chart colors while keeping page backgrounds white.',
+  bw: REPORTS_PRINT_T.REPORTS_PRINT_MODE_BW_DESC,
+  grayscale: REPORTS_PRINT_T.REPORTS_PRINT_MODE_GRAYSCALE_DESC,
+  color: REPORTS_PRINT_T.REPORTS_PRINT_MODE_COLOR_DESC,
 };
 
 const setReportsPrintMarkup = (target, markup) => {
@@ -118,19 +137,20 @@ const ensurePrintDialog = () => {
   dialog.id = 'reports_print_dialog';
   dialog.className = 'dialog reports_print_dialog';
   dialog.setAttribute('data-dialog-invoker-bridge', '');
-  dialog.setAttribute('data-dialog-close-tts', 'Print report');
+  dialog.setAttribute('data-dialog-close-tts', REPORTS_PRINT_T.EARNINGS_PRINT_REPORT);
+  dialog.setAttribute('aria-modal', 'true');
   dialog.setAttribute('aria-labelledby', 'reports_print_dialog_title');
   dialog.setAttribute('aria-describedby', 'reports_print_dialog_desc');
   setReportsPrintMarkup(dialog, `
     <form method="dialog" class="reports_print_form">
       <section class="modal_header reports_print_header">
-        <h2 id="reports_print_dialog_title" class="modal_title">Print report</h2>
-        <button type="button" class="btn_close" data-dialog-close="reports_print_dialog" commandfor="reports_print_dialog" command="close" data-reports-print-close aria-label="Close">&times;</button>
+        <h2 id="reports_print_dialog_title" class="modal_title">${REPORTS_PRINT_T.EARNINGS_PRINT_REPORT}</h2>
+        <button type="button" class="btn_close" data-dialog-close="reports_print_dialog" commandfor="reports_print_dialog" command="close" data-reports-print-close aria-label="${REPORTS_PRINT_T.CLOSE}">&times;</button>
       </section>
       <section class="modal_content reports_print_content">
-        <p id="reports_print_dialog_desc" class="reports_print_desc">Choose how this reports page should be prepared for Chrome print or Save as PDF.</p>
+        <p id="reports_print_dialog_desc" class="reports_print_desc">${REPORTS_PRINT_T.REPORTS_PRINT_DIALOG_DESC}</p>
         <fieldset class="reports_print_modes">
-          <legend class="visually_hidden">Print color mode</legend>
+          <legend class="visually_hidden">${REPORTS_PRINT_T.REPORTS_PRINT_MODE_LEGEND}</legend>
           ${Array.from(REPORTS_PRINT_MODES).map((mode) => `
             <label class="reports_print_mode" data-print-mode-option="${mode}">
               <input type="radio" name="reports_print_mode" value="${mode}">
@@ -143,8 +163,8 @@ const ensurePrintDialog = () => {
         </fieldset>
       </section>
       <section class="modal_footer reports_print_footer">
-        <button type="button" class="btn btn_secondary" data-dialog-close="reports_print_dialog" commandfor="reports_print_dialog" command="close" data-reports-print-close>Cancel</button>
-        <button type="submit" class="btn btn_primary" value="print">Print</button>
+        <button type="button" class="btn btn_secondary" data-dialog-close="reports_print_dialog" commandfor="reports_print_dialog" command="close" data-reports-print-close>${REPORTS_PRINT_T.CANCEL}</button>
+        <button type="submit" class="btn btn_primary" value="print">${REPORTS_PRINT_T.EARNINGS_PRINT_REPORT}</button>
       </section>
     </form>
   `);
@@ -217,8 +237,8 @@ const ensurePrintButton = () => {
   const toolbar = document.createElement('div');
   toolbar.className = 'reports_print_toolbar';
   setReportsPrintMarkup(toolbar, `
-    <button type="button" class="btn btn_secondary reports_print_button" id="reports_print_options_button" aria-haspopup="dialog" aria-controls="reports_print_dialog">
-      Print report
+    <button type="button" class="btn btn_secondary reports_print_button" id="reports_print_options_button" aria-haspopup="dialog" aria-controls="reports_print_dialog" aria-label="${REPORTS_PRINT_T.EARNINGS_PRINT_REPORT}">
+      ${REPORTS_PRINT_T.EARNINGS_PRINT_REPORT}
     </button>
   `);
   mount.insertAdjacentElement('beforebegin', toolbar);

@@ -32,7 +32,41 @@ Javascript::renderDocBlock();
 
 ?>
 
-import PW from "<?php echo Environment::appURL('js/phantomwing/'); ?>";
+const _pwModuleUrl = '<?php echo Render::jsModuleURL('phantomwing'); ?>';
+let _pwModulePromise = null;
+
+function _resolvePW() {
+  if (!_pwModulePromise) {
+    _pwModulePromise = import(_pwModuleUrl).then((module) => module.default).catch(() => null);
+  }
+
+  return _pwModulePromise;
+}
+
+function _emitIntegrity(level, msg, label, date, entry, rule) {
+  void _resolvePW().then((PW) => {
+    if (!PW) {
+      if (level === 'error') {
+        console.error(msg);
+      } else {
+        console.warn(msg);
+      }
+      return;
+    }
+
+    if (level === 'error') {
+      PW.error(msg);
+    } else {
+      PW.warn(msg);
+    }
+
+    PW.report('integrity', `work_entry.${rule.id}`, {
+      context: label,
+      date,
+      site_id: String(entry.site_id || ''),
+    });
+  });
+}
 
 // ============================================================================
 // INTEGRITY RULES
@@ -112,18 +146,7 @@ function check(entry, ctx = {}) {
       if (!rule.test(entry)) continue;
 
       const msg = `[WorkIntegrity:${label}] ${rule.msg(entry)} — date: ${date}`;
-      if (rule.level === 'error') {
-        PW.error(msg);
-      } else {
-        PW.warn(msg);
-      }
-
-      // Telemetry: aggregated, k-anon gated, never contains personal data.
-      PW.report('integrity', `work_entry.${rule.id}`, {
-        context: label,
-        date,
-        site_id: String(entry.site_id || ''),
-      });
+      _emitIntegrity(rule.level, msg, label, date, entry, rule);
     } catch {
       // Integrity checks must never throw into the caller.
     }

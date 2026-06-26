@@ -6,8 +6,12 @@
       input.classList.toggle('input_error', message !== '');
       if (message !== '') {
         input.setAttribute('aria-invalid', 'true');
+        if (errorElement?.id) {
+          input.setAttribute('aria-errormessage', errorElement.id);
+        }
       } else {
         input.removeAttribute('aria-invalid');
+        input.removeAttribute('aria-errormessage');
       }
     }
     if (errorElement) {

@@ -181,6 +181,9 @@ function renderCalendar(data) {
          ${PC.state.prevSVG}
       </a>
       <button id="cal_picker_button"
+         aria-haspopup="dialog"
+         aria-expanded="false"
+         aria-controls="modal_cal_picker"
          aria-label="${data.monthName} ${data.year}"
          aria-keyshortcuts="ALT+\\"
         accesskey="\\">
@@ -286,11 +289,27 @@ function attachCalendarEventListeners() {
   // Calendar picker button
   const pickerBtn = PC.getElement('cal_picker_button');
   if (pickerBtn) {
+    const pickerDialog = PC.getElement('modal_cal_picker');
+    const syncPickerExpanded = (expanded) => {
+      pickerBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    };
+
+    if (pickerDialog instanceof HTMLDialogElement && pickerDialog.dataset.pickerDisclosureBound !== '1') {
+      pickerDialog.dataset.pickerDisclosureBound = '1';
+      pickerDialog.addEventListener('close', () => syncPickerExpanded(false));
+      pickerDialog.addEventListener('cancel', () => syncPickerExpanded(false));
+    }
+
     pickerBtn.addEventListener('click', (e) => {
-      var button = e.target;
-      var expanded = button.getAttribute('aria-expanded') === 'true';
-      button.setAttribute('aria-label', String(!expanded));
+      const expanded = pickerBtn.getAttribute('aria-expanded') === 'true';
+      if (expanded) {
+        PC.closeModal('modal_cal_picker', 'Date Picker');
+        syncPickerExpanded(false);
+        return;
+      }
+
       PC.openModal('modal_cal_picker', 'Date Picker');
+      syncPickerExpanded(true);
 
       // Focus the currently selected year button when opening
       const selectedYearBtn = PC.query('#cal_menu_left button.cal_menu_selected');

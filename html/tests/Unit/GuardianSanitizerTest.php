@@ -58,6 +58,8 @@ final class GuardianSanitizerTest extends TestCase
     
     $this->assertStringContainsString('RuntimeIntegrity', $content);
     $this->assertStringContainsString('start', $content);
+    $this->assertStringContainsString("import(signalPanelModuleUrl)", $content);
+    $this->assertStringNotContainsString("import SignalPanel from", $content);
   }
 
   public function testRuntimeIntegrityAllowsExplicitAuditWindow(): void

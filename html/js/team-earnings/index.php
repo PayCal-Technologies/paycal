@@ -28,12 +28,12 @@ foreach ($teamEarningsI18nKeys as $teamEarningsI18nKey) {
 }
 
 ?>
-import PC from '/js/';
-import { escapeHtml } from '/js/core/escape.js';
+import PC from '<?php echo Render::jsModuleURL(); ?>';
+import { escapeHtml } from '<?php echo Render::jsStaticURL('js/core/escape.js'); ?>';
 import {
   formatI18n as formatConfigI18n,
   getI18nLabel as getConfigI18nLabel,
-} from '/js/core/template.js';
+} from '<?php echo Render::jsStaticURL('js/core/template.js'); ?>';
 
 Object.assign(PC.config, <?php echo json_encode($teamEarningsI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 

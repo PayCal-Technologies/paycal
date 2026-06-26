@@ -74,6 +74,12 @@ function resolveTouchHintLabel(getI18nLabel) {
   return 'Touch to reveal';
 }
 
+function markEarningsChartDecorative(el) {
+  if (el && typeof el.setAttribute === 'function') {
+    el.setAttribute('aria-hidden', 'true');
+  }
+}
+
 function syncTouchHint(linegraphSVG, hintText, visible) {
   const container = linegraphSVG.parentElement;
   if (!container || typeof container.querySelectorAll !== 'function') {
@@ -434,12 +440,14 @@ export function drawLineGraph(data, svgId, options = {}) {
   grad.appendChild(stop1);
   grad.appendChild(stop2);
   defs.appendChild(grad);
+  markEarningsChartDecorative(defs);
   linegraphSVG.appendChild(defs);
 
   const areaPath = document.createElementNS(SVG_NS, 'path');
   areaPath.setAttribute('d', dPath);
   areaPath.setAttribute('fill', `url(#${gradientId})`);
   areaPath.setAttribute('stroke', 'none');
+  markEarningsChartDecorative(areaPath);
   linegraphSVG.appendChild(areaPath);
 
   let strokePath = `M ${xScale(datesMs[0])},${yScale(amounts[0])}`;
@@ -456,6 +464,7 @@ export function drawLineGraph(data, svgId, options = {}) {
   linePath.setAttribute('stroke', graphStrokeStrong);
   linePath.setAttribute('stroke-width', '2');
   linePath.setAttribute('fill', 'none');
+  markEarningsChartDecorative(linePath);
   linegraphSVG.appendChild(linePath);
 
   const xAxisLine = document.createElementNS(SVG_NS, 'line');
@@ -465,6 +474,7 @@ export function drawLineGraph(data, svgId, options = {}) {
   xAxisLine.setAttribute('y2', margin.top + innerH);
   xAxisLine.setAttribute('stroke', graphStrokeNormal);
   xAxisLine.setAttribute('stroke-width', '1');
+  markEarningsChartDecorative(xAxisLine);
   linegraphSVG.appendChild(xAxisLine);
 
   const yAxisLine = document.createElementNS(SVG_NS, 'line');
@@ -474,6 +484,7 @@ export function drawLineGraph(data, svgId, options = {}) {
   yAxisLine.setAttribute('y2', margin.top);
   yAxisLine.setAttribute('stroke', graphStrokeNormal);
   yAxisLine.setAttribute('stroke-width', '1');
+  markEarningsChartDecorative(yAxisLine);
   linegraphSVG.appendChild(yAxisLine);
 
   const yPercents = [0, 0.25, 0.5, 0.75, 1];
@@ -489,6 +500,7 @@ export function drawLineGraph(data, svgId, options = {}) {
       gl.setAttribute('y2', y);
       gl.setAttribute('stroke', graphStrokeLight);
       gl.setAttribute('stroke-width', '1');
+      markEarningsChartDecorative(gl);
       linegraphSVG.appendChild(gl);
     }
 
@@ -501,6 +513,7 @@ export function drawLineGraph(data, svgId, options = {}) {
       t.setAttribute('font-size', '13');
       t.setAttribute('fill', textColor);
       t.textContent = formatYAxisLabel(v, p * 100);
+      markEarningsChartDecorative(t);
       linegraphSVG.appendChild(t);
     }
   });
@@ -520,6 +533,7 @@ export function drawLineGraph(data, svgId, options = {}) {
       label.setAttribute('font-size', '13');
       label.setAttribute('fill', textColor);
       label.textContent = monthFormatter.format(new Date(year, m, 1));
+      markEarningsChartDecorative(label);
       linegraphSVG.appendChild(label);
     }
   }
@@ -537,14 +551,17 @@ export function drawLineGraph(data, svgId, options = {}) {
   hair.setAttribute('stroke', graphStrokeNormal);
   hair.setAttribute('stroke-width', '1');
   hair.classList.add('svg-hidden');
+  markEarningsChartDecorative(hair);
 
   const dot = document.createElementNS(SVG_NS, 'circle');
   dot.setAttribute('r', '3');
   dot.setAttribute('fill', graphStrokeStrong);
   dot.classList.add('svg-hidden');
+  markEarningsChartDecorative(dot);
 
   const tipG = document.createElementNS(SVG_NS, 'g');
   tipG.classList.add('svg-hidden');
+  markEarningsChartDecorative(tipG);
   const tipRect = document.createElementNS(SVG_NS, 'rect');
   tipRect.setAttribute('rx', '2');
   tipRect.setAttribute('ry', '2');

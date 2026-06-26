@@ -164,6 +164,7 @@ final class BusinessGroupsGridRenderer
     $grid = DataGrid::create($gridId, Strings::i18n('BUSINESS_GROUPS_TITLE'));
     $grid->setClass('datagrid_mobile_cards business_groups_mobile_cards');
     $grid->enableSearch(Strings::i18n('BUSINESS_GROUPS_FILTER_PLACEHOLDER'));
+    $grid->setControlsAriaLabel(Strings::i18n('BUSINESS_GROUPS_FILTER_ARIA'));
     $grid->setSearchValue($search);
     $grid->enableSorting();
     $grid->enableColumnVisibility();

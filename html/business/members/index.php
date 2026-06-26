@@ -79,6 +79,8 @@ $memberReportI18nKeys = [
   'BUSINESS_MEMBERS_REPORT_LABEL',
   'BUSINESS_MEMBERS_REPORT_SETTINGS_HEADING',
   'BUSINESS_MEMBERS_REPORT_SELECTED_HEADING',
+  'BUSINESS_MEMBERS_REPORT_SELECTED_LIST_ARIA',
+  'BUSINESS_MEMBERS_REPORT_ADD_LIST_ARIA',
   'BUSINESS_MEMBERS_REPORT_ADD_MEMBERS',
   'BUSINESS_MEMBERS_REPORT_SELECTED_FILTER_PLACEHOLDER',
   'BUSINESS_MEMBERS_REPORT_ADD_PLACEHOLDER',
@@ -197,11 +199,11 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
               <span id="business_members_report_selected_count" class="business_members_report_section_count">0</span>
             </h5>
             <input id="business_members_report_member_filter" type="search" placeholder="<?php echo htmlspecialchars($memberReportI18n['BUSINESS_MEMBERS_REPORT_SELECTED_FILTER_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>">
-            <div id="business_members_report_member_pills" class="business_members_report_member_pills" role="list" aria-label="Selected members for report generation"></div>
+            <div id="business_members_report_member_pills" class="business_members_report_member_pills" role="list" aria-label="<?php echo htmlspecialchars($memberReportI18n['BUSINESS_MEMBERS_REPORT_SELECTED_LIST_ARIA'], ENT_QUOTES, 'UTF-8'); ?>"></div>
             <p id="business_members_report_member_empty" class="business_members_report_member_empty" hidden>No selected members match this filter.</p>
             <label for="business_members_report_member_add"><?php echo htmlspecialchars($memberReportI18n['BUSINESS_MEMBERS_REPORT_ADD_MEMBERS'], ENT_QUOTES, 'UTF-8'); ?></label>
             <input id="business_members_report_member_add" type="search" placeholder="<?php echo htmlspecialchars($memberReportI18n['BUSINESS_MEMBERS_REPORT_ADD_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>">
-            <div id="business_members_report_member_add_results" class="business_members_report_member_add_results" role="list" aria-label="Members available to add"></div>
+            <div id="business_members_report_member_add_results" class="business_members_report_member_add_results" role="list" aria-label="<?php echo htmlspecialchars($memberReportI18n['BUSINESS_MEMBERS_REPORT_ADD_LIST_ARIA'], ENT_QUOTES, 'UTF-8'); ?>"></div>
           </div>
           <div class="business_members_report_settings">
             <h5 class="business_members_report_section_title"><?php echo htmlspecialchars($memberReportI18n['BUSINESS_MEMBERS_REPORT_SETTINGS_HEADING'], ENT_QUOTES, 'UTF-8'); ?></h5>
@@ -394,7 +396,7 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
               <p class="business_members_role_limit">Cannot edit or manage anything.</p>
             </article>
           </div>
-          <div class="business_members_role_matrix" role="table" aria-label="Role permission matrix">
+          <div class="business_members_role_matrix" role="table" aria-label="<?php echo businesses_index_i18n_html('BUSINESS_MEMBERS_ROLE_MATRIX_ARIA'); ?>">
             <div class="business_members_role_matrix_header" role="row">
               <span role="columnheader">Role</span>
               <span role="columnheader">Access</span>

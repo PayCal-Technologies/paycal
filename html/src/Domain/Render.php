@@ -1175,4 +1175,71 @@ class Render
     return $base . '.' . (string) filemtime($fullPath);
   }
 
+  /**
+   * PHP-backed ES module URL for import statements inside generated JS bundles.
+   *
+   * @param string $name Module folder name, or '-' / '' for the core entry at /js/.
+   */
+  public static function jsModuleURL(string $name = '-'): string
+  {
+    $name = trim($name, '/');
+    $jsBase = 'js';
+
+    if ($name === '' || $name === '-') {
+      $path = $jsBase . '/';
+    } elseif (in_array($name, self::phpBackedJsModules(), true)) {
+      $path = $jsBase . '/' . $name . '/';
+    } else {
+      $path = $jsBase . '/' . $name . '/';
+    }
+
+    $cacheVersion = \PayCal\Domain\Config\Environment::appVersion();
+
+    return \PayCal\Domain\Config\Environment::appURL($path) . '?v=' . rawurlencode($cacheVersion);
+  }
+
+  /**
+   * Static .js asset URL (under html/) with deploy/file cache versioning.
+   *
+   * @param string $relativePath Path relative to html/, e.g. js/navigation-toggle.js
+   */
+  public static function jsStaticURL(string $relativePath): string
+  {
+    $relativePath = ltrim(trim($relativePath), '/');
+    $cacheVersion = self::assetCacheVersion($relativePath);
+
+    return \PayCal\Domain\Config\Environment::appURL($relativePath) . '?v=' . rawurlencode($cacheVersion);
+  }
+
+  /**
+   * @return list<string>
+   */
+  private static function phpBackedJsModules(): array
+  {
+    return [
+      'encryption',
+      'calendar',
+      'earnings',
+      'reports-print',
+      'team-earnings',
+      'sites',
+      'business',
+      'businesses',
+      'business-profile',
+      'settings',
+      'register',
+      'signin',
+      'admin',
+      'help',
+      'core',
+      'datagrid',
+      'payperiods',
+      'contact',
+      'tests',
+      'dev',
+      'phantomwing',
+      'work-integrity',
+    ];
+  }
+
 }

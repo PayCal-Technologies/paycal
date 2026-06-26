@@ -174,7 +174,7 @@ $themeIcon = static function (string $icon): string {
           ></button>
         <?php $accentIndex++; } ?>
         </div>
-        <div class="settings_accent_preview" id="accent_preset_preview" aria-label="Accent preview">
+        <div class="settings_accent_preview" id="accent_preset_preview" aria-label="<?php echo settings_index_i18n('SETTINGS_ACCENT_PREVIEW_ARIA'); ?>">
           <div class="settings_accent_preview_window">
             <div class="settings_accent_preview_titlebar">
               <span id="accent_preset_preview_label"><?php echo htmlspecialchars($accentPresetLabel, ENT_QUOTES, 'UTF-8'); ?></span>
@@ -232,7 +232,7 @@ $themeIcon = static function (string $icon): string {
       <label for="text_slider" class="w25"><?php echo settings_index_i18n('TEXT'); ?></label>
       <div class="w75">
         <div class="proximity_slider_wrap" data-hover-help="Text size adjustment. 0 is the default.">
-          <input type="range" id="text_slider" name="text" min="-5" max="5" step="1" value="<?php echo $textSliderValue; ?>" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="<?php echo $textSliderValue; ?>" aria-label="Text size adjustment">
+          <input type="range" id="text_slider" name="text" min="-5" max="5" step="1" value="<?php echo $textSliderValue; ?>" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="<?php echo $textSliderValue; ?>" aria-label="<?php echo settings_index_i18n('SETTINGS_TEXT_SIZE_SLIDER_ARIA'); ?>">
           <output for="text_slider" id="text_slider_value"><?php echo htmlspecialchars($textSliderLabel, ENT_QUOTES, 'UTF-8'); ?></output>
         </div>
       </div>
@@ -242,7 +242,7 @@ $themeIcon = static function (string $icon): string {
       <label for="spacing_slider" class="w25"><?php echo settings_index_i18n('SPACING'); ?></label>
       <div class="w75">
         <div class="proximity_slider_wrap" data-hover-help="Spacing adjustment. 0 is the default.">
-          <input type="range" id="spacing_slider" name="spacing" min="-5" max="5" step="1" value="<?php echo $spacingSliderValue; ?>" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="<?php echo $spacingSliderValue; ?>" aria-label="Spacing adjustment">
+          <input type="range" id="spacing_slider" name="spacing" min="-5" max="5" step="1" value="<?php echo $spacingSliderValue; ?>" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="<?php echo $spacingSliderValue; ?>" aria-label="<?php echo settings_index_i18n('SETTINGS_SPACING_SLIDER_ARIA'); ?>">
           <output for="spacing_slider" id="spacing_slider_value"><?php echo htmlspecialchars($spacingSliderLabel, ENT_QUOTES, 'UTF-8'); ?></output>
         </div>
       </div>

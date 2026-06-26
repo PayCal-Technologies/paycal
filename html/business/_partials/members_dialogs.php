@@ -44,7 +44,7 @@ namespace PayCal\Domain;
       <button type="button" id="businesses_member_reports_close" class="btn_close" data-dialog-close="businesses_member_reports_dialog" commandfor="businesses_member_reports_dialog" command="close" aria-label="<?php echo businesses_index_i18n_html('CLOSE'); ?>">&times;</button>
     </section>
     <section class="modal_content businesses_member_reports_dialog_content">
-      <div id="businesses_member_reports_dialog_body" class="businesses_member_reports_dialog_body earnings_member_reports_mount" role="region" aria-live="polite" aria-busy="false"></div>
+      <div id="businesses_member_reports_dialog_body" class="businesses_member_reports_dialog_body earnings_member_reports_mount" role="region" aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBER_REPORTS_CONTENT_ARIA'); ?>" aria-live="polite" aria-busy="false"></div>
     </section>
     <section class="modal_footer">
       <button type="button" class="btn btn_secondary" data-dialog-close="businesses_member_reports_dialog" commandfor="businesses_member_reports_dialog" command="close"><?php echo businesses_index_i18n_html('CLOSE'); ?></button>

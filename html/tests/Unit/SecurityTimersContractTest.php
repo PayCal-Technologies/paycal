@@ -17,7 +17,7 @@ final class SecurityTimersContractTest extends TestCase
     $settingsJs = (string) file_get_contents($projectRoot . '/html/js/settings/index.php');
     $index = (string) file_get_contents($projectRoot . '/html/index.php');
 
-    $this->assertStringContainsString("import createSecurityTimers from '/js/core/security-timers.js';", $coreJs);
+    $this->assertStringContainsString("Render::jsStaticURL('js/core/security-timers.js')", $coreJs);
     $this->assertStringContainsString('securityTimers,', $coreJs);
     $this->assertStringContainsString('getDekIdleTimeoutMs', $securityTimersJs);
     $this->assertStringContainsString('notifyDekZeroized', $calendarJs);

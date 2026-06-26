@@ -176,6 +176,9 @@ class DataGrid
       'DATAGRID_DATA_GRID',
       'DATAGRID_CALENDAR_MONTH_NAVIGATION',
       'DATAGRID_COLUMN_VISIBILITY_ARIA',
+      'DATAGRID_TOOLBAR_ARIA',
+      'DATAGRID_SEARCH_ARIA',
+      'DATAGRID_PAGINATION_ARIA',
       'ACTION',
       'SEARCH',
       'DATAGRID_NO_ENTRIES_FOUND',
@@ -249,8 +252,10 @@ class DataGrid
     ?>
     <?php $columnVisibilityEnabled = !empty($this->meta['columnVisibilityEnabled']); ?>
     <div id="<?php echo $this->escape($this->id); ?>" class="datagrid <?php echo $this->escape($columnClass); ?> <?php echo $this->escape($layoutClass.$chromeClass.$customClass); ?>" data-grid="<?php echo $this->escape($this->id); ?>" data-page="<?php echo $page; ?>" data-total-pages="<?php echo $totalPages; ?>" data-year="<?php echo $this->escape(self::toString($this->meta['year'] ?? date('Y'))); ?>" data-month="<?php echo $this->escape(self::toString($this->meta['month'] ?? date('m'))); ?>" data-autofocus="<?php echo $this->escape(self::toString($this->meta['autofocus'] ?? 'current')); ?>" data-date-label-position="<?php echo $this->escape(self::toString($this->meta['dateLabelPosition'] ?? 'left')); ?>" data-work-entry-position="<?php echo $this->escape(self::toString($this->meta['workEntryPosition'] ?? 'left')); ?>"<?php echo $columnVisibilityEnabled ? ' data-column-visibility="1"' : ''; ?> role="region" aria-label="<?php echo $this->escape(self::toString($this->meta['title'] ?? $this->id, $i18n['DATAGRID_DATA_GRID'])); ?>"<?php echo '' !== $descriptionId ? ' aria-describedby="' . $this->escape($descriptionId) . '"' : ''; ?>>
-      <?php if (!empty($controls) || (!empty($this->meta['searchEnabled']) && !$mergedSearchPaginationToolbar)) { ?>
-      <div class="datagrid_controls" role="navigation" aria-label="<?php echo $this->escape($i18n['DATAGRID_CALENDAR_MONTH_NAVIGATION']); ?>">
+      <?php if (!empty($controls) || (!empty($this->meta['searchEnabled']) && !$mergedSearchPaginationToolbar)) {
+        $controlsStripLandmark = $this->resolveControlsStripLandmark($i18n, array_values($controls), !empty($this->meta['searchEnabled']));
+      ?>
+      <div class="datagrid_controls" role="<?php echo $this->escape($controlsStripLandmark['role']); ?>" aria-label="<?php echo $this->escape($controlsStripLandmark['label']); ?>">
         <?php foreach ($controls as $control) {
           $controlType = self::toString($control['type'] ?? 'secondary', 'secondary');
           $controlClass = 'datagrid_control';
@@ -583,8 +588,8 @@ class DataGrid
     ?>
     <div
       class="datagrid_toolbar datagrid_toolbar_search_pagination"
-      role="navigation"
-      aria-label="<?php echo $this->escape(Strings::i18n('DATAGRID_DATA_GRID')); ?>"
+      role="toolbar"
+      aria-label="<?php echo $this->escape($this->resolveToolbarAriaLabel()); ?>"
       <?php if (null !== $pagination) { ?>
       data-pagination-start="<?php echo $pagination['start']; ?>"
       data-pagination-end="<?php echo $pagination['end']; ?>"
@@ -604,7 +609,7 @@ class DataGrid
       <div class="datagrid_toolbar_center">
         <span class="datagrid_page datagrid_page_info" role="status"><?php echo $this->escape($pagination['rangeLabel']); ?></span>
       </div>
-      <div class="datagrid_toolbar_end datagrid_pagination" role="group" aria-label="<?php echo $this->escape(Strings::i18n('DATAGRID_DATA_GRID')); ?>">
+      <div class="datagrid_toolbar_end datagrid_pagination" role="group" aria-label="<?php echo $this->escape(Strings::i18n('DATAGRID_PAGINATION_ARIA')); ?>">
         <button
           type="button"
           class="datagrid_pagination_btn<?php echo $arrowsOnly ? ' datagrid_pagination_btn_icon' : ''; ?>"
@@ -648,7 +653,7 @@ class DataGrid
     <div
       class="datagrid_pagination datagrid_pagination_<?php echo $this->escape($position); ?>"
       role="navigation"
-      aria-label="<?php echo $this->escape(Strings::i18n('DATAGRID_DATA_GRID')); ?>"
+      aria-label="<?php echo $this->escape(Strings::i18n('DATAGRID_PAGINATION_ARIA')); ?>"
       data-pagination-start="<?php echo $pagination['start']; ?>"
       data-pagination-end="<?php echo $pagination['end']; ?>"
       data-pagination-total="<?php echo $pagination['total']; ?>"
@@ -689,6 +694,7 @@ class DataGrid
       'PREVIOUS',
       'NEXT',
       'ACTION',
+      'DATAGRID_CALENDAR_MONTH_NAVIGATION',
       'DATAGRID_NO_ENTRIES_FOUND',
       'CALENDAR_WORK_ENTRY_LABEL',
       'CALENDAR_ENCRYPTED_DETAILS_UNAVAILABLE',
@@ -823,6 +829,11 @@ class DataGrid
     $compactNavCurrentAnchor = self::toString($compactNavigation['currentAnchor'] ?? '', '');
     $compactNavPrevAria = self::toString($compactNavigation['prevAriaLabel'] ?? '', '');
     $compactNavNextAria = self::toString($compactNavigation['nextAriaLabel'] ?? '', '');
+    $compactNavPickerDialogId = match ($compactNavPickerAction) {
+      'open-week-picker' => 'modal_cal_week_picker',
+      'open-pay-period-picker' => 'modal_cal_payperiod_picker',
+      default => 'modal_cal_picker',
+    };
     $gridLabelledBy = $compactNavPickerId !== '' ? $compactNavPickerId : 'cal_picker_button';
     $gridRangeAnchorAttr = $compactNavCurrentAnchor !== ''
       ? ' data-range-anchor="' . $this->escape($compactNavCurrentAnchor) . '"'
@@ -840,7 +851,7 @@ class DataGrid
     ?>
     <div id="<?php echo $this->escape($this->id); ?>" class="datagrid datagrid_layout_month datagrid_date_label_<?php echo $this->escape($dateLabelPositionClass); ?> datagrid_day_heading_<?php echo $this->escape($dayNamePositionClass); ?><?php echo $this->escape($chromeClass); ?>" data-grid="<?php echo $this->escape($this->id); ?>" data-page="<?php echo $page; ?>" data-year="<?php echo $this->escape((string) $year); ?>" data-month="<?php echo $this->escape((string) $month); ?>" data-autofocus="<?php echo $this->escape(self::toString($this->meta['autofocus'] ?? 'today', 'today')); ?>" data-date-label-position="<?php echo $this->escape(self::toString($this->meta['dateLabelPosition'] ?? 'left', 'left')); ?>" data-day-heading-position="<?php echo $this->escape($dayNamePosition); ?>" data-work-entry-position="<?php echo $this->escape(self::toString($this->meta['workEntryPosition'] ?? 'left', 'left')); ?>" data-lockboundary="<?php echo $this->escape(self::toString($this->meta['lockBoundary'] ?? '')); ?>"<?php echo $gridRangeAnchorAttr . $gridViewModeAttr; ?>>
       <?php if ($hasControlStrip) { ?>
-      <div class="datagrid_controls">
+      <div class="datagrid_controls" role="navigation" aria-label="<?php echo $this->escape($i18n['DATAGRID_CALENDAR_MONTH_NAVIGATION']); ?>">
         <?php if ($beforeWeekdayHeadersHtml !== '') { ?>
           <?php echo $beforeWeekdayHeadersHtml; ?>
         <?php } ?>
@@ -851,6 +862,9 @@ class DataGrid
           class="calendar-v2-month-title"
           data-action="<?php echo $this->escape($compactNavPickerAction); ?>"
           data-anchor="<?php echo $this->escape($compactNavCurrentAnchor); ?>"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="<?php echo $this->escape($compactNavPickerDialogId); ?>"
           aria-label="<?php echo htmlspecialchars($compactNavPickerAria, ENT_QUOTES, 'UTF-8'); ?>"
           aria-keyshortcuts="ALT+\\"
           accesskey="\\"
@@ -885,6 +899,9 @@ class DataGrid
           data-action="open-month-picker"
           data-year="<?php echo $year; ?>"
           data-month="<?php echo $month; ?>"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="modal_cal_picker"
           aria-label="<?php echo htmlspecialchars($currentMonthName, ENT_QUOTES, 'UTF-8'); ?>"
           aria-keyshortcuts="ALT+\\"
           accesskey="\\"
@@ -1262,6 +1279,14 @@ class DataGrid
     $this->meta['search'] = $value;
   }
 
+  /**
+   * Set an accessible name for the table-layout controls strip (search and/or action buttons).
+   */
+  public function setControlsAriaLabel(string $label): void
+  {
+    $this->meta['controlsAriaLabel'] = $label;
+  }
+
   // ...existing code...
   /**
    * Static factory method to create a DataGrid instance.
@@ -1292,6 +1317,51 @@ class DataGrid
   private function escape(string $value): string
   {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+  }
+
+  /**
+   * @param array<string, string> $i18n
+   * @param list<array<string, mixed>> $controls
+   * @return array{role: string, label: string}
+   */
+  private function resolveControlsStripLandmark(array $i18n, array $controls, bool $hasSearch): array
+  {
+    $customLabel = trim(self::toString($this->meta['controlsAriaLabel'] ?? ''));
+    if ($customLabel !== '') {
+      return [
+        'role' => $controls !== [] ? 'toolbar' : 'search',
+        'label' => $customLabel,
+      ];
+    }
+
+    if ($controls !== []) {
+      return [
+        'role' => 'toolbar',
+        'label' => $i18n['DATAGRID_TOOLBAR_ARIA'],
+      ];
+    }
+
+    if ($hasSearch) {
+      return [
+        'role' => 'search',
+        'label' => $i18n['DATAGRID_SEARCH_ARIA'],
+      ];
+    }
+
+    return [
+      'role' => 'toolbar',
+      'label' => $i18n['DATAGRID_TOOLBAR_ARIA'],
+    ];
+  }
+
+  private function resolveToolbarAriaLabel(): string
+  {
+    $customLabel = trim(self::toString($this->meta['controlsAriaLabel'] ?? ''));
+    if ($customLabel !== '') {
+      return $customLabel;
+    }
+
+    return Strings::i18n('DATAGRID_TOOLBAR_ARIA');
   }
 
   private function sanitizeClassList(string $classList): string

@@ -854,6 +854,7 @@ final class SitesController
 
     $grid = DataGrid::create("sites-{$status}", Strings::i18n('SITES'));
     $grid->enableSearch(Strings::i18n('BUSINESS_SITES_FILTER_PLACEHOLDER'));
+    $grid->setControlsAriaLabel(Strings::i18n('SITES_FILTER_ARIA'));
     $grid->enableSorting();
     $grid->enableColumnVisibility();
     $grid->addColumn('site_name', Strings::i18n('SITE'), true, 'minmax(14rem, 3fr)', null, true, false, true);

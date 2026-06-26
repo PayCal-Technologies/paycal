@@ -101,7 +101,6 @@ const SignalPanel = (() => {
     state.core = core || null;
     state.PW = PW || null;
 
-    patchFetchForStatuses();
     bindErrorCapture();
     bindTabs();
     bindForm();
@@ -179,6 +178,7 @@ const SignalPanel = (() => {
 
   const open = (tab = 'feedback', opener = null) => {
     if (!state.panel) return;
+    patchFetchForStatuses();
     state.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     refreshContext();
     state.panel.hidden = false;

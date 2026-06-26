@@ -22,8 +22,8 @@ Javascript::renderDocBlock();
 
 ?>
 
-import PW from '/js/phantomwing/';
-import { fromBase64, latin1FromBase64 } from '/js/core/binary-codec.js';
+import PW from '<?php echo Render::jsModuleURL('phantomwing'); ?>';
+import { fromBase64, latin1FromBase64 } from '<?php echo Render::jsStaticURL('js/core/binary-codec.js'); ?>';
 
 /**
  * PayCal Encryption - ES6 Module

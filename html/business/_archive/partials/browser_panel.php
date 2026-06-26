@@ -8,8 +8,8 @@ namespace PayCal\Domain;
       <h2 class="businesses_panel_title"><?php echo businesses_index_i18n_html('BUSINESSES_FIND_ANOTHER'); ?></h2>
       <p class="help_text"><?php echo businesses_index_i18n_html('BUSINESSES_FIND_ANOTHER_HELP'); ?></p>
     </header>
-    <form id="businesses_browser_search_form" class="businesses_browser_search_form" method="dialog" role="search">
-      <label for="businesses_browser_search_input" class="businesses_browser_search_label">Search by business name or owner email.</label>
+    <form id="businesses_browser_search_form" class="businesses_browser_search_form" method="dialog" role="search" aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_BROWSER_SEARCH_ARIA'); ?>">
+      <label for="businesses_browser_search_input" class="businesses_browser_search_label"><?php echo businesses_index_i18n_html('BUSINESSES_BROWSER_SEARCH_ARIA'); ?></label>
       <div class="businesses_browser_search_controls">
         <input id="businesses_browser_search_input" type="search" maxlength="200" autocomplete="off" placeholder="<?php echo businesses_index_i18n_html('BUSINESSES_BROWSER_SEARCH_PLACEHOLDER'); ?>">
         <button id="businesses_browser_search_button" type="submit" class="btn btn_secondary"><?php echo businesses_index_i18n_html('SEARCH'); ?></button>

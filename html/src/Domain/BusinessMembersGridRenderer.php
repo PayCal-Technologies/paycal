@@ -344,6 +344,7 @@ final class BusinessMembersGridRenderer
     $grid = DataGrid::create('business-members', Strings::i18n('BUSINESSES_MEMBERS_H3'));
     $grid->enableSearch(Strings::i18n('BUSINESSES_MEMBERS_FILTER_PLACEHOLDER'));
     $grid->setSearchValue($search);
+    $grid->setControlsAriaLabel(Strings::i18n('BUSINESSES_MEMBERS_SEARCH_ARIA'));
     $grid->setToolbarLayout('search_pagination');
     $grid->setToolbarAfterStartHtml($this->membersToolbarSlotSkeleton());
     $grid->setPaginationArrowsOnly();

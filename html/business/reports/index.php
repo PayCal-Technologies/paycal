@@ -37,6 +37,16 @@ $i18nKeys = [
   'BUSINESS_EXPORT_DOWNLOAD_ZIP',
   'BUSINESS_EXPORT_DOWNLOAD_MANIFEST',
   'BUSINESS_EXPORT_VIEW_AUDIT_LOG',
+  'BUSINESS_REPORTS_TOOLBAR_ARIA',
+  'BUSINESS_REPORTS_SECTIONS_ARIA',
+  'BUSINESS_REPORTS_FILTERS_ARIA',
+  'BUSINESS_REPORTS_FILTER_PERIOD_ARIA',
+  'BUSINESS_REPORTS_FILTER_COMPARE_ARIA',
+  'BUSINESS_REPORTS_FILTER_SITE_ARIA',
+  'BUSINESS_REPORTS_FILTER_GROUP_ARIA',
+  'BUSINESS_REPORTS_FILTER_MEMBER_ARIA',
+  'BUSINESS_REPORTS_CUSTOMIZE_DRAWER_ARIA',
+  'BUSINESS_REPORTS_PRESETS_ARIA',
 ];
 $i18n = [];
 foreach ($i18nKeys as $i18nKey) {
@@ -220,19 +230,19 @@ asort($reportMemberOptions, SORT_NATURAL | SORT_FLAG_CASE);
     </form>
     <?php endif; ?>
 
-    <section class="business_reports_toolbar" aria-label="Business report controls" data-business-reports-toolbar>
-      <nav class="business_reports_tabs" aria-label="Report sections">
-        <button type="button" class="business_reports_tab" data-report-tab-button="overview">Overview</button>
-        <button type="button" class="business_reports_tab" data-report-tab-button="payroll">Payroll</button>
-        <button type="button" class="business_reports_tab" data-report-tab-button="workforce">Workforce</button>
-        <button type="button" class="business_reports_tab" data-report-tab-button="sites">Sites</button>
-        <button type="button" class="business_reports_tab" data-report-tab-button="groups">Groups</button>
-        <button type="button" class="business_reports_tab" data-report-tab-button="risks">Risks</button>
+    <section class="business_reports_toolbar" aria-label="<?php echo htmlspecialchars($i18n['BUSINESS_REPORTS_TOOLBAR_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" data-business-reports-toolbar>
+      <nav class="business_reports_tabs" role="tablist" aria-label="<?php echo htmlspecialchars($i18n['BUSINESS_REPORTS_SECTIONS_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
+        <button type="button" class="business_reports_tab active" role="tab" id="business_reports_tab_overview" aria-controls="business_reports_panel" aria-selected="true" tabindex="0" data-report-tab-button="overview">Overview</button>
+        <button type="button" class="business_reports_tab" role="tab" id="business_reports_tab_payroll" aria-controls="business_reports_panel" aria-selected="false" tabindex="-1" data-report-tab-button="payroll">Payroll</button>
+        <button type="button" class="business_reports_tab" role="tab" id="business_reports_tab_workforce" aria-controls="business_reports_panel" aria-selected="false" tabindex="-1" data-report-tab-button="workforce">Workforce</button>
+        <button type="button" class="business_reports_tab" role="tab" id="business_reports_tab_sites" aria-controls="business_reports_panel" aria-selected="false" tabindex="-1" data-report-tab-button="sites">Sites</button>
+        <button type="button" class="business_reports_tab" role="tab" id="business_reports_tab_groups" aria-controls="business_reports_panel" aria-selected="false" tabindex="-1" data-report-tab-button="groups">Groups</button>
+        <button type="button" class="business_reports_tab" role="tab" id="business_reports_tab_risks" aria-controls="business_reports_panel" aria-selected="false" tabindex="-1" data-report-tab-button="risks">Risks</button>
       </nav>
-      <div class="business_reports_filters" aria-label="Report filters">
+      <div class="business_reports_filters" aria-label="<?php echo htmlspecialchars($i18n['BUSINESS_REPORTS_FILTERS_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
         <label>
           <span>Period</span>
-          <select data-report-filter="year" aria-label="Period">
+          <select data-report-filter="year" aria-label="<?php echo htmlspecialchars($i18n['BUSINESS_REPORTS_FILTER_PERIOD_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
             <?php foreach ([(int) date('Y') - 1, (int) date('Y')] as $reportFilterYear): ?>
             <option value="<?php echo $reportFilterYear; ?>"<?php echo $reportFilterYear === $teamEarningsYear ? ' selected' : ''; ?>><?php echo $reportFilterYear; ?></option>
             <?php endforeach; ?>
@@ -240,7 +250,7 @@ asort($reportMemberOptions, SORT_NATURAL | SORT_FLAG_CASE);
         </label>
         <label>
           <span>Compare</span>
-          <select data-report-filter="compare" aria-label="Comparison period">
+          <select data-report-filter="compare" aria-label="<?php echo htmlspecialchars($i18n['BUSINESS_REPORTS_FILTER_COMPARE_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
             <option value="">None</option>
             <option value="previous-period">Previous period</option>
             <option value="previous-year">Previous year</option>
@@ -248,7 +258,7 @@ asort($reportMemberOptions, SORT_NATURAL | SORT_FLAG_CASE);
         </label>
         <label>
           <span>Site</span>
-          <select data-report-filter="site" aria-label="Site">
+          <select data-report-filter="site" aria-label="<?php echo htmlspecialchars($i18n['BUSINESS_REPORTS_FILTER_SITE_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
             <option value="">All sites</option>
             <?php foreach ($reportSiteOptions as $siteValue => $siteLabel): ?>
             <option value="<?php echo htmlspecialchars($siteValue, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $selectedReportSite === $siteValue ? ' selected' : ''; ?>><?php echo htmlspecialchars($siteLabel, ENT_QUOTES, 'UTF-8'); ?></option>
@@ -257,7 +267,7 @@ asort($reportMemberOptions, SORT_NATURAL | SORT_FLAG_CASE);
         </label>
         <label>
           <span>Group</span>
-          <select data-report-filter="group" aria-label="Group">
+          <select data-report-filter="group" aria-label="<?php echo htmlspecialchars($i18n['BUSINESS_REPORTS_FILTER_GROUP_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
             <option value="">All groups</option>
             <?php foreach ($reportGroupOptions as $groupValue => $groupLabel): ?>
             <option value="<?php echo htmlspecialchars($groupValue, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $selectedReportGroup === $groupValue ? ' selected' : ''; ?>><?php echo htmlspecialchars($groupLabel, ENT_QUOTES, 'UTF-8'); ?></option>
@@ -266,7 +276,7 @@ asort($reportMemberOptions, SORT_NATURAL | SORT_FLAG_CASE);
         </label>
         <label>
           <span>Member</span>
-          <select data-report-filter="member" aria-label="Member">
+          <select data-report-filter="member" aria-label="<?php echo htmlspecialchars($i18n['BUSINESS_REPORTS_FILTER_MEMBER_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
             <option value="">All members</option>
             <?php foreach ($reportMemberOptions as $memberValue => $memberLabel): ?>
             <option value="<?php echo htmlspecialchars($memberValue, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $selectedReportMember === $memberValue ? ' selected' : ''; ?>><?php echo htmlspecialchars($memberLabel, ENT_QUOTES, 'UTF-8'); ?></option>
@@ -277,17 +287,17 @@ asort($reportMemberOptions, SORT_NATURAL | SORT_FLAG_CASE);
           <input type="checkbox" data-report-filter="exceptions">
           <span>Exceptions only</span>
         </label>
-        <button type="button" class="btn btn_secondary btn_compact" data-report-customize-open>Customize</button>
-        <button type="button" class="btn btn_primary btn_compact" data-report-export-open>Export</button>
+        <button type="button" class="btn btn_secondary btn_compact" data-report-customize-open aria-expanded="false" aria-controls="business_reports_customize_drawer">Customize</button>
+        <button type="button" class="btn btn_primary btn_compact" data-report-export-open aria-expanded="false" aria-controls="business_reports_export_drawer">Export</button>
       </div>
     </section>
 
-    <aside class="business_reports_customize_drawer" data-report-customize-drawer hidden aria-label="Customize report view">
+    <aside id="business_reports_customize_drawer" class="business_reports_customize_drawer" data-report-customize-drawer hidden aria-label="<?php echo htmlspecialchars($i18n['BUSINESS_REPORTS_CUSTOMIZE_DRAWER_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
       <div class="business_reports_drawer_header">
         <h2>Customize View</h2>
         <button type="button" class="btn btn_secondary btn_compact" data-report-customize-close>Close</button>
       </div>
-      <div class="business_reports_preset_row" role="group" aria-label="Report presets">
+      <div class="business_reports_preset_row" role="group" aria-label="<?php echo htmlspecialchars($i18n['BUSINESS_REPORTS_PRESETS_ARIA'], ENT_QUOTES, 'UTF-8'); ?>">
         <button type="button" class="btn btn_secondary btn_compact" data-report-preset="executive">Executive</button>
         <button type="button" class="btn btn_secondary btn_compact" data-report-preset="payroll">Payroll</button>
         <button type="button" class="btn btn_secondary btn_compact" data-report-preset="workforce">Workforce</button>
@@ -304,7 +314,7 @@ asort($reportMemberOptions, SORT_NATURAL | SORT_FLAG_CASE);
       </div>
     </aside>
 
-    <aside class="business_reports_export_drawer" data-report-export-drawer hidden aria-labelledby="business_reports_export_heading">
+    <aside id="business_reports_export_drawer" class="business_reports_export_drawer" data-report-export-drawer hidden aria-labelledby="business_reports_export_heading">
       <div class="business_reports_drawer_header">
         <h2 id="business_reports_export_heading">Export</h2>
         <button type="button" class="btn btn_secondary btn_compact" data-report-export-close>Close</button>
@@ -358,7 +368,7 @@ asort($reportMemberOptions, SORT_NATURAL | SORT_FLAG_CASE);
       </div>
     </section>
 
-    <section class="business_reports_panel_shell" aria-labelledby="business_reports_panel_heading" aria-describedby="business_reports_sr_status"<?php if ($teamPanelRenderSuccess) { ?> data-ssr-reports-panel="1"<?php } ?>>
+    <section class="business_reports_panel_shell" id="business_reports_panel" role="tabpanel" aria-labelledby="business_reports_panel_heading" aria-describedby="business_reports_sr_status"<?php if ($teamPanelRenderSuccess) { ?> data-ssr-reports-panel="1"<?php } ?>>
       <h3 id="business_reports_panel_heading" class="visually_hidden"><?php echo Strings::i18n('BUSINESS_REPORTS_ANALYTICS_HEADING'); ?></h3>
       <?php echo $teamPanelHtml; ?>
     </section>
