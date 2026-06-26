@@ -197,7 +197,7 @@ final class BusinessesCspStyleContractTest extends TestCase
 
     $this->assertStringContainsString('data-grid="csp-contract-grid"', $html);
     $this->assertStringContainsString('datagrid_col_internal_count datagrid_align_right datagrid_col_hidden', $html);
-    $this->assertStringContainsString('data-col-key="internal_count" aria-hidden="true"', $html);
+    $this->assertStringContainsString('data-col-key="internal_count" aria-hidden="true" inert', $html);
     $this->assertNoInlineStyles($html, 'DataGrid::table output');
   }
 

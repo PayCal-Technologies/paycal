@@ -8,7 +8,7 @@ Authentication::abortIfUnauthenticated();
 
 CORS::handleORIGIN();
 
-CORS::renderContentType('text/javascript');
+Javascript::renderModuleContentType('text/javascript');
 Javascript::renderDocBlock();
 
 $user = User::current();
@@ -161,7 +161,7 @@ foreach ($i18nKeys as $i18nKey) {
 import PW from '<?php echo Render::jsModuleURL('phantomwing'); ?>';
 import NavigationToggle from '<?php echo Render::jsStaticURL('js/navigation-toggle.js'); ?>';
 import RuntimeIntegrity from '<?php echo Render::jsStaticURL('js/runtime-integrity.js'); ?>';
-import A11yModule from '<?php echo Render::jsStaticURL('js/core/a11y.js'); ?>';
+import A11yModule, { setInertHiddenState } from '<?php echo Render::jsStaticURL('js/core/a11y.js'); ?>';
 import BinaryCodec from '<?php echo Render::jsStaticURL('js/core/binary-codec.js'); ?>';
 import { escapePattern } from '<?php echo Render::jsStaticURL('js/core/regex.js'); ?>';
 import SetUtils from '<?php echo Render::jsStaticURL('js/core/set-utils.js'); ?>';
@@ -452,6 +452,10 @@ const PayCalCore = (() => {
 
   function trapFocusWithin(container, event) {
     return a11y.trapFocusWithin(container, event);
+  }
+
+  function applyInertHiddenState(container, hidden, options = {}) {
+    setInertHiddenState(container, hidden, options);
   }
 
   function addAudioFocusListener(el, prefix = "", suffix = "") {
@@ -2667,6 +2671,7 @@ const PayCalCore = (() => {
     query,
     queryAll,
     addAudioFocusListener,
+    setInertHiddenState: applyInertHiddenState,
     closeModal,
     bindAllDialogInvokerBridges,
     deleteResource,

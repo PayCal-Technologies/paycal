@@ -7,14 +7,14 @@ require_once '../../config.php';
 Authentication::abortIfUnauthenticated();
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 
 Javascript::renderDocBlock();
 
 ?>
 
-import PC from '<?php echo Environment::appURL('js/'); ?>';
-import PW from '<?php echo Environment::appURL('js/phantomwing/'); ?>';
+import PC from '<?php echo Render::jsModuleURL(); ?>';
+import PW from '<?php echo Render::jsModuleURL('phantomwing'); ?>';
 
 document.addEventListener("DOMContentLoaded", () => {
 

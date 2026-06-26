@@ -28,6 +28,15 @@ namespace PayCal\Domain;
 class Javascript
 {
   /**
+   * Content-Type plus no-store for PHP-backed JS modules (user i18n/prefs/session salt).
+   */
+  public static function renderModuleContentType(string $type): void
+  {
+    HttpCache::sendNoStore();
+    CORS::renderContentType($type);
+  }
+
+  /**
    * Output docblock template which includes current year.
    *
    * @return void
@@ -37,5 +46,29 @@ class Javascript
     echo Render::template('javascript-docblock', [
         '__DATE__' => date('Y'),
     ]);
+  }
+
+  /**
+   * Begin tracing .js.php segments for a dev/mac inline source map.
+   */
+  public static function beginSourceMapBundle(string $moduleSlug): void
+  {
+    JavascriptSourceMap::begin($moduleSlug);
+  }
+
+  /**
+   * Require a bundle segment and record it when source maps are enabled.
+   */
+  public static function emitJsSegment(string $absolutePath): void
+  {
+    JavascriptSourceMap::emitSegment($absolutePath);
+  }
+
+  /**
+   * Append //# sourceMappingURL when dev/mac source maps are enabled.
+   */
+  public static function finishSourceMapBundle(): void
+  {
+    JavascriptSourceMap::finishInlineReference();
   }
 }

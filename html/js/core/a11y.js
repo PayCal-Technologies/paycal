@@ -4,8 +4,70 @@
  * Keyboard navigation, focus management, modal handling, dialog focus traps.
  * 
  * IMPORT:
- *   import A11yModule from '/js/core/a11y.js';
+ *   import A11yModule, { setInertHiddenState } from '/js/core/a11y.js';
  */
+
+const FOCUSABLE_INERT_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled]):not([type="hidden"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+/**
+ * Hide a container from assistive tech without leaving focusable descendants tabbable.
+ * Uses inert when supported; falls back to tabindex="-1" on descendants.
+ */
+export function setInertHiddenState(container, hidden, { blurFocus = true } = {}) {
+  if (!(container instanceof HTMLElement)) {
+    return;
+  }
+
+  const focusables = () => Array.from(container.querySelectorAll(FOCUSABLE_INERT_SELECTOR));
+
+  if (hidden) {
+    if (blurFocus) {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && container.contains(active)) {
+        active.blur();
+      }
+    }
+
+    container.setAttribute('aria-hidden', 'true');
+    if ('inert' in container) {
+      container.inert = true;
+    } else {
+      container.setAttribute('inert', '');
+      focusables().forEach((element) => {
+        if (!element.hasAttribute('data-paycal-inert-tabindex')) {
+          element.setAttribute('data-paycal-inert-tabindex', element.getAttribute('tabindex') ?? '');
+        }
+        element.setAttribute('tabindex', '-1');
+      });
+    }
+    return;
+  }
+
+  container.setAttribute('aria-hidden', 'false');
+  if ('inert' in container) {
+    container.inert = false;
+  }
+  container.removeAttribute('inert');
+  focusables().forEach((element) => {
+    if (!element.hasAttribute('data-paycal-inert-tabindex')) {
+      return;
+    }
+    const previousTabIndex = element.getAttribute('data-paycal-inert-tabindex');
+    if (previousTabIndex === '') {
+      element.removeAttribute('tabindex');
+    } else {
+      element.setAttribute('tabindex', previousTabIndex);
+    }
+    element.removeAttribute('data-paycal-inert-tabindex');
+  });
+}
 
 const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, configObj) => (() => {
 
@@ -356,6 +418,7 @@ const A11yModule = (state, getElementFn, queryFn, queryAllFn, textToSpeechFn, co
     bindAllDialogInvokerBridges,
     ensureDialogChrome,
     ensureAllDialogsChrome,
+    setInertHiddenState,
   };
 })();
 

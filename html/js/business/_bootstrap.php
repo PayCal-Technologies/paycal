@@ -19,7 +19,7 @@ if (function_exists('org_js_index_i18n') === false) {
 Authentication::abortIfUnauthenticated();
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 Javascript::renderDocBlock();
 
 ?>

@@ -207,13 +207,7 @@ foreach ($i18nKeys as $i18nKey) {
 }
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
-
-if (!headers_sent()) {
-  header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-  header('Pragma: no-cache');
-  header('Expires: 0');
-}
+Javascript::renderModuleContentType('application/javascript');
 
 Javascript::renderDocBlock();
 
@@ -223,8 +217,8 @@ Javascript::renderDocBlock();
  * Settings Page Logic
  */
 
-import PC from "<?php echo Environment::appURL('js/'); ?>";
-import PW from "<?php echo Environment::appURL('js/phantomwing/'); ?>";
+import PC from "<?php echo Render::jsModuleURL(); ?>";
+import PW from "<?php echo Render::jsModuleURL('phantomwing'); ?>";
 import { initializeBillingSection } from "../core/billing.js";
 import { fromBase64Url as b64urlToBuffer, toBase64, toBase64Url as bufferToB64url } from "../core/binary-codec.js";
 import { isWebAuthnCapableBrowser } from "../core/capabilities.js";

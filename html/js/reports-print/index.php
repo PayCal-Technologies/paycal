@@ -7,7 +7,7 @@ require_once '../../config.php';
 Authentication::abortIfUnauthenticated();
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 
 Javascript::renderDocBlock();
 

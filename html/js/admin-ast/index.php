@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../config.php';
 Authentication::abortIfUnauthenticated();
 Authentication::isAdminOrDie();
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 Javascript::renderDocBlock();
 
 ?>

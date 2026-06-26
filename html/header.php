@@ -280,8 +280,13 @@ header('Accept-CH: Sec-CH-UA-Platform');
 
 $platformToken = PlatformToken::detect();
 
-// SEO-RELATED HEADER
-header('X-Robots-Tag: index, follow, noai, noimageai, noodp, noydir, maximage-preview: large');
+// SEO-RELATED HEADER — robots.txt Disallow is not security; private pages must noindex.
+header(
+  'X-Robots-Tag: '
+  . (CrawlPolicy::shouldIndexPage($currentPage, $isAuthenticated)
+    ? 'index, follow, noai, noimageai, noodp, noydir, maximage-preview: large'
+    : 'noindex, nofollow')
+);
 
 /*
  * PHPSTAN ANALYSIS REMEDIATION
@@ -842,7 +847,7 @@ echo Render::template('keyboard-shortcuts', $renders);
           ], (string) $currentPage);
         } ?>
         <?php echo Render::renderNavLinks([Render::settingsUtilityNavLink()], (string) $currentPage); ?>
-          <li class="pages"><a href="/help/" data-help-trigger="true" data-nav-shortcut="h" aria-keyshortcuts="h" accesskey="h"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['shortcuts']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('KEYBOARD'); ?></span></a></li>
+          <li class="pages"><a href="/help/" data-help-trigger="true" data-nav-shortcut="h" aria-keyshortcuts="h"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['shortcuts']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('KEYBOARD'); ?></span></a></li>
 <?php } // end $isAuthenticated nav ?>
 <?php if ($isAuthenticated) { ?>
       <li class="pages nav_signout"><button type="button" id="call_signout_modal" class="nav_signout_button" data-dialog-open="modal_signout" commandfor="modal_signout" command="show-modal" data-no-speculation aria-haspopup="dialog" aria-controls="modal_signout"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['signout']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('SIGN_OUT'); ?></span></button></li>

@@ -194,8 +194,8 @@ $themeIcon = static function (string $icon): string {
                 <div class="settings_accent_preview_report_value">$1,842.50</div>
                 <div class="settings_accent_preview_bar"><span></span></div>
               </div>
-              <div class="settings_accent_preview_controls" aria-hidden="true">
-                <button type="button" class="settings_accent_preview_button">Example</button>
+              <div class="settings_accent_preview_controls" inert aria-hidden="true">
+                <button type="button" class="settings_accent_preview_button" tabindex="-1">Example</button>
                 <span class="settings_accent_preview_pill">Selected</span>
               </div>
             </div>

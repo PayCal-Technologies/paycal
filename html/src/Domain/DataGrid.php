@@ -388,7 +388,7 @@ class DataGrid
                 $headingClass .= ' datagrid_col_hidden';
               }
             ?>
-              <div class="<?php echo $this->escape($headingClass); ?>" role="columnheader" id="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>"<?php echo '' !== $columnWidth ? ' data-col-width="' . $this->escape($columnWidth) . '"' : ''; ?><?php echo $defaultVisible ? '' : ' aria-hidden="true"'; ?>>
+              <div class="<?php echo $this->escape($headingClass); ?>" role="columnheader" id="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>"<?php echo '' !== $columnWidth ? ' data-col-width="' . $this->escape($columnWidth) . '"' : ''; ?><?php echo $defaultVisible ? '' : ' aria-hidden="true" inert'; ?>>
                 <?php if ($isSortable) { ?>
                   <button type="button" class="datagrid_sort" data-column="<?php echo $this->escape($columnKey); ?>">
                     <?php echo $this->escape($columnLabel); ?>
@@ -449,7 +449,7 @@ class DataGrid
                     $value = $compute($row, $column);
                   }
                 ?>
-                  <div class="<?php echo $this->escape($itemClass); ?>" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>" data-col-label="<?php echo $this->escape($columnLabel); ?>"<?php echo '' !== $columnWidth ? ' data-col-width="' . $this->escape($columnWidth) . '"' : ''; ?><?php echo $defaultVisible ? '' : ' aria-hidden="true"'; ?>>
+                  <div class="<?php echo $this->escape($itemClass); ?>" role="gridcell" aria-labelledby="<?php echo $this->escape($columnHeaderId); ?>" data-col-key="<?php echo $this->escape($columnKey); ?>" data-col-label="<?php echo $this->escape($columnLabel); ?>"<?php echo '' !== $columnWidth ? ' data-col-width="' . $this->escape($columnWidth) . '"' : ''; ?><?php echo $defaultVisible ? '' : ' aria-hidden="true" inert'; ?>>
                     <?php if (!empty($column['rawHtml'])) { ?>
                       <?php echo self::toString($value); ?>
                     <?php } else { ?>
@@ -1026,8 +1026,10 @@ class DataGrid
             return self::formatCompactNumber($num);
           };
           $totalHoursValue = self::toFloat($row['total_hours'] ?? 0);
+          $cellColIndex = ($index % 7) + 1;
+          $cellRowIndex = (int) floor($index / 7) + 1;
         ?>
-          <div class="<?php echo $this->escape($cellClasses); ?>"<?php echo $isToday ? ' aria-current="date"' : ''; ?><?php echo $isLocked ? ' aria-disabled="true"' : ''; ?> data-id="<?php echo $this->escape($dateId); ?>" data-date="<?php echo $this->escape($dateId); ?>" data-date-aria="<?php echo $this->escape($dateAriaLabel); ?>" data-locked="<?php echo $isLocked ? '1' : '0'; ?>" data-work-entries="<?php echo $workEntriesJson; ?>"<?php echo $totalHoursValue > 0 ? ' data-total-hours="' . $this->escape($formatHours($totalHoursValue)) . '"' : ''; ?>>
+          <div class="<?php echo $this->escape($cellClasses); ?>" role="gridcell" aria-colindex="<?php echo $cellColIndex; ?>" aria-rowindex="<?php echo $cellRowIndex; ?>"<?php echo $isToday ? ' aria-current="date"' : ''; ?><?php echo $isLocked ? ' aria-disabled="true"' : ''; ?> data-id="<?php echo $this->escape($dateId); ?>" data-date="<?php echo $this->escape($dateId); ?>" data-date-aria="<?php echo $this->escape($dateAriaLabel); ?>" data-locked="<?php echo $isLocked ? '1' : '0'; ?>" data-work-entries="<?php echo $workEntriesJson; ?>"<?php echo $totalHoursValue > 0 ? ' data-total-hours="' . $this->escape($formatHours($totalHoursValue)) . '"' : ''; ?>>
             <div class="datagrid_month_cell_header datagrid_month_cell_header_<?php echo $this->escape($dateLabelPositionClass); ?>" aria-hidden="true">
               <span class="datagrid_month_cell_day datagrid_month_cell_day_<?php echo $this->escape($dateLabelPositionClass); ?>"><?php
               try {

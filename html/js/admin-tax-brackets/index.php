@@ -10,11 +10,11 @@ Authentication::abortIfUnauthenticated();
 Authentication::isAdminOrDie();
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 Javascript::renderDocBlock();
 ?>
 
-import PW from '<?php echo Environment::appURL('js/phantomwing/'); ?>';
+import PW from '<?php echo Render::jsModuleURL('phantomwing'); ?>';
 
 function getApiBase() {
   const configNode = document.getElementById('admin-tax-brackets-config');

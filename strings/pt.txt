@@ -1705,8 +1705,8 @@ HELP_LEGAL_TERMS_TEXT The Terms & Conditions of Use Policy covers the basic rule
 HELP_LEGAL_TERMS_TITLE Terms of Service
 HELP_LEGAL_TITLE Policies & Legal
 HELP_LEGAL_TRANSPARENCY_LINK Open the Transparency Hub
-HELP_PAGE_TEASER Check out our <a href/__v20251116__/help/ accesskey'h'><em>H</em>elp Page</a> for videos and more!
-HELP_PAGE_TEASER_HTML Check out our <a href="/__v20251116__/help/" accesskey="h"><em>H</em>elp  Page</a> for videos and more!
+HELP_PAGE_TEASER Check out our <a href/__v20251116__/help/><em>H</em>elp Page</a> for videos and more!
+HELP_PAGE_TEASER_HTML Check out our <a href="/__v20251116__/help/"><em>H</em>elp  Page</a> for videos and more!
 HELP_PAY_PERIODS_CHECK_1 Compare the preview to a real pay stub, company schedule, or previous payroll period.
 HELP_PAY_PERIODS_CHECK_2 Make sure the first labeled day in each period lands on the weekday you expect.
 HELP_PAY_PERIODS_CHECK_3 Make sure the last day of the period lands on the correct end day before you save.

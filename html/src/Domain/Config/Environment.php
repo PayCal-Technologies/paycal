@@ -191,6 +191,66 @@ final class Environment
   {
     return in_array(self::$appEnv, ['dev', 'mac'], true);
   }
+
+  /**
+   * Dev/mac-only PHP JS bundle source maps (never production).
+   */
+  public static function isPhpJsSourceMapsEnabled(): bool
+  {
+    return in_array(self::$appEnv, ['dev', 'mac'], true);
+  }
+
+  /**
+   * Production-only public search indexing (robots.txt, sitemap.xml, X-Robots-Tag).
+   *
+   * Requires paycal.app (or www) as APP_DOMAIN / request host and a non-dev APP_ENV.
+   * dev.paycal.app, mac.paycal.app, and local mirrors always block indexing.
+   */
+  public static function allowsPublicIndexing(): bool
+  {
+    if (in_array(self::$appEnv, ['mac', 'dev', 'local', 'test'], true)) {
+      return false;
+    }
+
+    return self::isProductionPublicHost();
+  }
+
+  /**
+   * Whether the serving host is the production marketing domain.
+   */
+  public static function isProductionPublicHost(): bool
+  {
+    $host = self::resolveServingHost();
+
+    return in_array($host, ['paycal.app', 'www.paycal.app'], true);
+  }
+
+  /**
+   * Normalize APP_DOMAIN or HTTP_HOST for host-based policy checks.
+   */
+  private static function resolveServingHost(): string
+  {
+    $domain = self::normalizeHost(self::$appDomain);
+    if ($domain !== '') {
+      return $domain;
+    }
+
+    $httpHost = $_SERVER['HTTP_HOST'] ?? '';
+    return self::normalizeHost(is_string($httpHost) ? $httpHost : '');
+  }
+
+  private static function normalizeHost(string $host): string
+  {
+    $normalized = strtolower(trim($host));
+    if ($normalized === '') {
+      return '';
+    }
+
+    $normalized = preg_replace('/:\d+$/', '', $normalized) ?? $normalized;
+    $normalized = preg_replace('/^[a-z][a-z0-9+\-.]*:\/\//i', '', $normalized) ?? $normalized;
+
+    return rtrim($normalized, '/');
+  }
   /**
    * Handles appScheme operation.
    */

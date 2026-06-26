@@ -6,7 +6,7 @@ require_once '../../config.php';
 
 Authentication::abortIfUnauthenticated();
 CORS::handleORIGIN();
-CORS::renderContentType('text/javascript');
+Javascript::renderModuleContentType('text/javascript');
 Javascript::renderDocBlock();
 
 $user = User::current();
@@ -50,9 +50,9 @@ const closeSitesDialog = (dialog) => {
   dialog.setAttribute('aria-hidden', 'true');
 };
 
-import PC from "<?php echo Environment::appURL('js/'); ?>";
-import PW from "<?php echo Environment::appURL('js/phantomwing/'); ?>";
-import { createDataGrid, bindDataGridKeyboardNavigation } from "/js/datagrid/";
+import PC from '<?php echo Render::jsModuleURL(); ?>';
+import PW from '<?php echo Render::jsModuleURL('phantomwing'); ?>';
+import { createDataGrid, bindDataGridKeyboardNavigation } from '<?php echo Render::jsModuleURL('datagrid'); ?>';
 
 <?php require __DIR__ . '/i18n.php'; ?>
 
@@ -876,7 +876,7 @@ document.addEventListener("DOMContentLoaded", async () =>
         }
         const active = key === state || (state === 'data' && (key === 'list' || key === 'totals'));
         el.classList.toggle('is-active', active);
-        el.setAttribute('aria-hidden', active ? 'false' : 'true');
+        PC.setInertHiddenState(el, !active);
       });
     };
 

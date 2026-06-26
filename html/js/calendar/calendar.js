@@ -1752,7 +1752,16 @@
 
         const isActive = key === normalized;
         panel.classList.toggle('hidden', !isActive);
-        panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+        if (window.PayCalCore?.setInertHiddenState) {
+          window.PayCalCore.setInertHiddenState(panel, !isActive);
+        } else {
+          panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+          if (isActive) {
+            panel.removeAttribute('inert');
+          } else {
+            panel.setAttribute('inert', '');
+          }
+        }
       });
 
       root.dataset.activeView = normalized;

@@ -4,9 +4,9 @@ Privacy-first payroll, work-entry, reporting, and business-member payroll visibi
 
 PayCal helps workers understand pay, taxes, sites, pay periods, and business-shared work data while keeping sensitive work records behind passkey authentication, encrypted envelopes, explicit consent, and audit trails.
 
-Latest documented release: **v1.059.009**
+Latest documented release: **v1.059.010**
 
-[![Test Suite](https://img.shields.io/badge/tests-2408%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2442%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -279,9 +279,9 @@ Localization source files live in `strings/`. Backup files such as `*.bak` are n
 
 Suite inventory (as of 2026-06-26):
 
-- **2,408 listed tests**
-- **280 repository test files**
-- **Active public suite file split:** **142 Unit**, **61 Integration**, **41 Contract**, **1 Timezone**, **18 Accessibility**
+- **2,442 listed tests**
+- **285 repository test files**
+- **Active public suite file split:** **144 Unit**, **61 Integration**, **41 Contract**, **1 Timezone**, **21 Accessibility**
 - **2 Manual verification files**
 
 Latest validation snapshot (2026-06-22):
@@ -356,6 +356,13 @@ npm run test:a11y:contrast
 ```
 
 ## Recent Releases
+
+## v1.059.010 (2026-06-26)
+
+- Accessibility: unique keyboard shortcuts (no duplicate accesskeys), `inert` on aria-hidden panels, focus contract coverage.
+- SEO: dynamic `robots.php` / `sitemap.php`, host-aware `X-Robots-Tag`, crawl policy for auth surfaces.
+- Performance: `Cache-Control: no-store` on PHP JS modules; nginx static asset cache documentation updates.
+- Dev/mac: optional inline source maps for PHP JS bundles (not enabled in production).
 
 ## Unreleased (2026-06-21)
 

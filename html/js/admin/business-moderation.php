@@ -10,11 +10,11 @@ Authentication::abortIfUnauthenticated();
 AdminSurface::redirectHomeIfPageUnavailable('/admin/business-moderation/');
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 Javascript::renderDocBlock();
 
 ?>
-import PC from "<?php echo Environment::appURL('js/'); ?>";
+import PC from "<?php echo Render::jsModuleURL(); ?>";
 
 /**
  * @param {string} id

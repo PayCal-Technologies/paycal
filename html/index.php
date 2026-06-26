@@ -1075,13 +1075,13 @@ require_once Environment::appHome().'html/header.php';
 		</div>
 	</div>
 
-	<div id="calendar-view-month" class="calendar_view_panel<?php echo $calendarDefaultView === 'month' ? '' : ' hidden'; ?>" data-calendar-view="month"<?php echo $calendarDefaultView === 'month' ? '' : ' aria-hidden="true"'; ?>>
+	<div id="calendar-view-month" class="calendar_view_panel<?php echo $calendarDefaultView === 'month' ? '' : ' hidden'; ?>" data-calendar-view="month"<?php echo $calendarDefaultView === 'month' ? '' : ' inert aria-hidden="true"'; ?>>
 		<?php echo $grid->table(); ?>
 	</div>
-	<div id="calendar-view-week" class="calendar_view_panel<?php echo $calendarDefaultView === 'week' ? '' : ' hidden'; ?>" data-calendar-view="week"<?php echo $calendarDefaultView === 'week' ? '' : ' aria-hidden="true"'; ?>>
+	<div id="calendar-view-week" class="calendar_view_panel<?php echo $calendarDefaultView === 'week' ? '' : ' hidden'; ?>" data-calendar-view="week"<?php echo $calendarDefaultView === 'week' ? '' : ' inert aria-hidden="true"'; ?>>
 		<?php echo $weekGrid->table(); ?>
 	</div>
-	<div id="calendar-view-pay-period" class="calendar_view_panel<?php echo $calendarDefaultView === 'pay_period' ? '' : ' hidden'; ?>" data-calendar-view="pay_period"<?php echo $calendarDefaultView === 'pay_period' ? '' : ' aria-hidden="true"'; ?>>
+	<div id="calendar-view-pay-period" class="calendar_view_panel<?php echo $calendarDefaultView === 'pay_period' ? '' : ' hidden'; ?>" data-calendar-view="pay_period"<?php echo $calendarDefaultView === 'pay_period' ? '' : ' inert aria-hidden="true"'; ?>>
 		<?php echo $payPeriodGrid->table(); ?>
 	</div>
 </section>

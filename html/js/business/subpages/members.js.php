@@ -16,7 +16,22 @@
   let membersKeyboardActiveRowId = '';
   let membersReportCloseShouldFocusSearch = false;
 
-  const isBusinessMembersSubPage = () => resolveBusinessSubPage() === 'members';
+  const syncInertHiddenState = (container, hidden, options = {}) => {
+    if (typeof PC?.setInertHiddenState === 'function') {
+      PC.setInertHiddenState(container, hidden, options);
+      return;
+    }
+    if (!(container instanceof HTMLElement)) {
+      return;
+    }
+    container.toggleAttribute('aria-hidden', hidden);
+    if (hidden) {
+      container.setAttribute('inert', '');
+    } else {
+      container.removeAttribute('inert');
+    }
+  };
+
   const safeAttr = (value) => safeText(value).replace(/'/g, '&#039;');
   const setText = (element, value) => {
     if (element instanceof HTMLElement) {
@@ -442,7 +457,7 @@
 
     if (elements.membersPendingDetails instanceof HTMLDetailsElement) {
       elements.membersPendingDetails.classList.toggle('is-empty', normalized === 0);
-      elements.membersPendingDetails.setAttribute('aria-hidden', normalized === 0 ? 'true' : 'false');
+      syncInertHiddenState(elements.membersPendingDetails, normalized === 0);
       if (normalized === 0) {
         elements.membersPendingDetails.open = false;
       }
@@ -563,7 +578,7 @@
 
     if (elements.membersPendingDetails instanceof HTMLDetailsElement) {
       elements.membersPendingDetails.classList.remove('is-empty');
-      elements.membersPendingDetails.setAttribute('aria-hidden', 'false');
+      syncInertHiddenState(elements.membersPendingDetails, false);
       elements.membersPendingDetails.open = true;
     }
 
@@ -730,7 +745,7 @@
       const active = visible && getMembersBulkSelectedCount() > 0;
       elements.membersBulkToolbar.dataset.accessAllowed = visible ? '1' : '0';
       elements.membersBulkToolbar.classList.toggle('is-active', active);
-      elements.membersBulkToolbar.setAttribute('aria-hidden', active ? 'false' : 'true');
+      syncInertHiddenState(elements.membersBulkToolbar, !active);
     }
     integrateMembersToolbarLayout();
   };
@@ -743,13 +758,13 @@
     const canAccess = String(elements.membersBulkToolbar.dataset.accessAllowed || '0') === '1';
     const active = canAccess && hasSelection;
     elements.membersBulkToolbar.classList.toggle('is-active', active);
-    elements.membersBulkToolbar.setAttribute('aria-hidden', active ? 'false' : 'true');
+    syncInertHiddenState(elements.membersBulkToolbar, !active);
     elements.membersBulkToolbar.dataset.hasSelection = hasSelection ? '1' : '0';
 
     const filters = document.querySelector('[data-grid="business-members"] .business_members_toolbar_filters');
     if (filters instanceof HTMLElement) {
       filters.classList.toggle('is-inactive', canAccess && hasSelection);
-      filters.setAttribute('aria-hidden', canAccess && hasSelection ? 'true' : 'false');
+      syncInertHiddenState(filters, canAccess && hasSelection);
     }
 
     if (!hasSelection) {

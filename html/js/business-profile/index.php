@@ -7,14 +7,14 @@
 require __DIR__ . '/../business/_bootstrap.php';
 
 ?>
-import PC from "<?php echo \PayCal\Domain\Config\Environment::appURL('js/'); ?>";
-import PW from "<?php echo \PayCal\Domain\Config\Environment::appURL('js/phantomwing/'); ?>";
-import { createDataGrid } from "/js/datagrid/";
-import { initializeBillingSection } from "../core/billing.js";
+import PC from '<?php echo \PayCal\Domain\Render::jsModuleURL(); ?>';
+import PW from '<?php echo \PayCal\Domain\Render::jsModuleURL('phantomwing'); ?>';
+import { createDataGrid } from '<?php echo \PayCal\Domain\Render::jsModuleURL('datagrid'); ?>';
+import { initializeBillingSection } from '<?php echo \PayCal\Domain\Render::jsStaticURL('js/core/billing.js'); ?>';
 import {
   buildPayPeriodPreviewState,
   resolvePayPeriodPreviewSelection,
-} from "/js/core/pay-period-preview.js";
+} from '<?php echo \PayCal\Domain\Render::jsStaticURL('js/core/pay-period-preview.js'); ?>';
 
 (() => {
   'use strict';

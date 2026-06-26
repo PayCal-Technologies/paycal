@@ -27,7 +27,16 @@
   if (profileBtn && profileMenu) {
     const syncProfileMenuState = (open) => {
       profileBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      profileMenu.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (open) {
+        profileMenu.removeAttribute('aria-hidden');
+        profileMenu.setAttribute('aria-hidden', 'false');
+        profileMenu.removeAttribute('inert');
+        profileMenu.inert = false;
+      } else {
+        profileMenu.setAttribute('aria-hidden', 'true');
+        profileMenu.setAttribute('inert', '');
+        profileMenu.inert = true;
+      }
     };
 
     syncProfileMenuState(false);

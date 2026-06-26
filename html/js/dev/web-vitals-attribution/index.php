@@ -18,7 +18,6 @@ if (!is_file($vendorPath)) {
 }
 
 CORS::handleORIGIN();
-CORS::renderContentType('text/javascript');
-header('Cache-Control: no-store');
+Javascript::renderModuleContentType('text/javascript');
 
 readfile($vendorPath);

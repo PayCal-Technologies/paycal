@@ -12,10 +12,9 @@ if (!Environment::isWebVitalsDiagnosticsEnabled()) {
 }
 
 CORS::handleORIGIN();
-CORS::renderContentType('text/javascript');
-header('Cache-Control: no-store');
+Javascript::renderModuleContentType('text/javascript');
 
-$attributionUrl = Environment::appURL('js/dev/web-vitals-attribution/') . '?v=' . rawurlencode(Environment::appVersion());
+$attributionUrl = Render::jsModuleURL('dev/web-vitals-attribution');
 $attributionUrlJs = json_encode($attributionUrl, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 
 echo <<<JS

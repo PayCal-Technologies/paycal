@@ -5,7 +5,7 @@ namespace PayCal\Domain;
 require_once __DIR__ . '/../../config.php';
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 
 $authI18nKeys = [
   'AUTH_SIGNIN_PASSKEY_STATUS',

@@ -1280,7 +1280,11 @@ require_once __DIR__ . '/_bootstrap.php';
         : true;
       tabNode.classList.toggle('is-hidden-reserved', !visible);
       tabNode.classList.remove('hidden');
-      tabNode.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      if (typeof PC?.setInertHiddenState === 'function') {
+        PC.setInertHiddenState(tabNode, !visible);
+      } else {
+        tabNode.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      }
       tabNode.tabIndex = visible ? 0 : -1;
     });
   };

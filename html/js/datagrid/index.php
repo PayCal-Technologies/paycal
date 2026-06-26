@@ -8,12 +8,13 @@ Authentication::abortIfUnauthenticated();
 
 CORS::handleORIGIN();
 
-CORS::renderContentType('text/javascript');
+Javascript::renderModuleContentType('text/javascript');
 Javascript::renderDocBlock();
 ?>
 
-import PC from "<?php echo Environment::appURL('js/'); ?>";
-import { formatPhpTemplate } from '/js/core/template.js';
+import PC from '<?php echo Render::jsModuleURL(); ?>';
+import { setInertHiddenState } from '<?php echo Render::jsStaticURL('js/core/a11y.js'); ?>';
+import { formatPhpTemplate } from '<?php echo Render::jsStaticURL('js/core/template.js'); ?>';
 
 
 window.PAYCAL_DEBUG = typeof window.PAYCAL_DEBUG !== 'undefined' ? window.PAYCAL_DEBUG : false;
@@ -806,11 +807,7 @@ function applyColumnVisibility(grid, visibilityByKey)
 
     const visible = visibilityByKey[columnKey] !== false;
     element.classList.toggle('datagrid_col_hidden', !visible);
-    if (visible) {
-      element.removeAttribute('aria-hidden');
-    } else {
-      element.setAttribute('aria-hidden', 'true');
-    }
+    setInertHiddenState(element, !visible, { blurFocus: false });
   });
 
   if (table instanceof HTMLElement) {

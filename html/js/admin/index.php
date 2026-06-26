@@ -28,13 +28,13 @@ foreach ($i18nKeys as $i18nKey) {
 
 CORS::handleORIGIN();
 
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 Javascript::renderDocBlock();
 
 ?>
 
-import PC from "<?php echo Environment::appURL('js/'); ?>";
-import PW from "<?php echo Environment::appURL('js/phantomwing/'); ?>";
+import PC from "<?php echo Render::jsModuleURL(); ?>";
+import PW from "<?php echo Render::jsModuleURL('phantomwing'); ?>";
 
 const MSG_RESET_LIMIT_ERROR = <?php echo json_encode($i18n['ADMIN_LIMITS_RESET_ERROR']); ?>;
 const MSG_RESET_CATEGORY_LIMITS_ERROR = <?php echo json_encode($i18n['ADMIN_LIMITS_RESET_CATEGORY_ERROR']); ?>;

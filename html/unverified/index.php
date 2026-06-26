@@ -63,7 +63,7 @@ $pageLanguage = defined('USER_LANGUAGE') ? (string) USER_LANGUAGE : 'en';
     <div class="header-logo"><?php echo htmlspecialchars($i18n['SITE_NAME'], ENT_QUOTES, 'UTF-8'); ?></div>
     <div class="header-profile">
       <button class="profile-btn" id="profile-btn" aria-label="<?php echo htmlspecialchars($i18n['UNVERIFIED_PROFILE_MENU_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" aria-haspopup="menu" aria-controls="profile-menu" aria-expanded="false"><?php echo htmlspecialchars($i18n['PROFILE'], ENT_QUOTES, 'UTF-8'); ?></button>
-      <nav class="profile-menu" id="profile-menu" aria-label="<?php echo htmlspecialchars($i18n['UNVERIFIED_PROFILE_MENU_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true">
+      <nav class="profile-menu" id="profile-menu" aria-label="<?php echo htmlspecialchars($i18n['UNVERIFIED_PROFILE_MENU_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true" inert>
         <a href="/settings/"><?php echo htmlspecialchars($i18n['SETTINGS'], ENT_QUOTES, 'UTF-8'); ?></a>
         <a href="/help/"><?php echo htmlspecialchars($i18n['HELP'], ENT_QUOTES, 'UTF-8'); ?></a>
         <button id="logout-btn" aria-label="<?php echo htmlspecialchars($i18n['UNVERIFIED_LOGOUT_ARIA'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($i18n['UNVERIFIED_LOGOUT'], ENT_QUOTES, 'UTF-8'); ?></button>

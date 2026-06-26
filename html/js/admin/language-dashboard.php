@@ -33,12 +33,12 @@ Authentication::abortIfUnauthenticated();
 Authentication::isAdminOrDie();
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 Javascript::renderDocBlock();
 
 ?>
 
-import PC from "<?php echo Environment::appURL('js/'); ?>";
+import PC from "<?php echo Render::jsModuleURL(); ?>";
 
 const API = PC.config.pc_api;
 

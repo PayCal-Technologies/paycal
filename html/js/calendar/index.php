@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../config.php';
 Authentication::abortIfUnauthenticated();
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 
 Javascript::renderDocBlock();
 
@@ -64,9 +64,9 @@ switch ($user->calendar_autofocus) {
 }
 ?>
 
-import PC from '<?php echo Environment::appURL('js/'); ?>';
-import PW from '<?php echo Environment::appURL('js/phantomwing/'); ?>';
-import { fromBase64, latin1FromBase64, latin1ToBase64, toBase64 } from '<?php echo Environment::appURL('js/core/binary-codec.js'); ?>';
+import PC from '<?php echo Render::jsModuleURL(); ?>';
+import PW from '<?php echo Render::jsModuleURL('phantomwing'); ?>';
+import { fromBase64, latin1FromBase64, latin1ToBase64, toBase64 } from '<?php echo Render::jsStaticURL('js/core/binary-codec.js'); ?>';
 
 let sites = <?php echo Sites::getSitesAsJson($user->user_uuid); ?>;
 let calendarSiteCatalogRefresh = null;

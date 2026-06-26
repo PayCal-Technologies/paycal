@@ -5,7 +5,7 @@ namespace PayCal\Domain;
 require_once '../../config.php';
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 
 Javascript::renderDocBlock();
 

@@ -7,7 +7,7 @@ require_once __DIR__.'/../../config.php';
 Authentication::abortIfUnauthenticated();
 
 CORS::handleORIGIN();
-CORS::renderContentType('text/javascript');
+Javascript::renderModuleContentType('text/javascript');
 ?>
 // ============================================================================
 // PARANOID MODE CONTROLS — rendered by server at module load time

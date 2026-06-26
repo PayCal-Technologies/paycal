@@ -5,7 +5,7 @@ namespace PayCal\Domain;
 require_once __DIR__ . '/../../config.php';
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript; charset=utf-8');
+Javascript::renderModuleContentType('application/javascript; charset=utf-8');
 
 $recoveryI18nKeys = [
   'AUTH_RECOVER_SEND_CODE',

@@ -197,15 +197,15 @@ require_once Environment::appHome().'html/header.php';
             </div>
           </div>
 
-          <div id='site_earnings_list' class='site_earnings_state' aria-hidden="true">
+          <div id='site_earnings_list' class='site_earnings_state' aria-hidden="true" inert>
             <!-- Site earnings rows populated via JavaScript -->
           </div>
 
-          <div id='site_earnings_totals' class='site_earnings_state earnings_totals_container' aria-hidden="true">
+          <div id='site_earnings_totals' class='site_earnings_state earnings_totals_container' aria-hidden="true" inert>
             <!-- Totals summary populated via JavaScript -->
           </div>
 
-          <div id='site_earnings_empty' class='site_earnings_state f_center earnings_empty_container' aria-hidden="true">
+          <div id='site_earnings_empty' class='site_earnings_state f_center earnings_empty_container' aria-hidden="true" inert>
             <span><?php echo sites_index_i18n('SITES_NO_EARNINGS_FOR_YEAR'); ?></span>
           </div>
         </div>

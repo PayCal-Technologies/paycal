@@ -16,7 +16,7 @@ require_once '../../config.php';
 // No auth required for capability detection (public feature)
 
 CORS::handleORIGIN();
-CORS::renderContentType('application/javascript');
+Javascript::renderModuleContentType('application/javascript');
 
 Javascript::renderDocBlock();
 

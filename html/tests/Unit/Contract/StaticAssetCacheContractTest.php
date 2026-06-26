@@ -11,6 +11,52 @@ use PHPUnit\Framework\TestCase;
 final class StaticAssetCacheContractTest extends TestCase
 {
   #[Test]
+  public function businessEntrypointUsesVersionedModuleUrls(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $businessJs = (string) file_get_contents($projectRoot . '/html/js/business/index.php');
+
+    $this->assertStringContainsString("Render::jsModuleURL()", $businessJs);
+    $this->assertStringContainsString("Render::jsModuleURL('phantomwing')", $businessJs);
+    $this->assertStringContainsString("Render::jsModuleURL('datagrid')", $businessJs);
+    $this->assertStringContainsString("Render::jsStaticURL('js/core/pay-period-preview.js')", $businessJs);
+    $this->assertStringNotContainsString('from "/js/datagrid/"', $businessJs);
+    $this->assertStringNotContainsString("appURL('js/')", $businessJs);
+  }
+
+  #[Test]
+  public function datagridEntrypointUsesVersionedModuleUrls(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $datagridJs = (string) file_get_contents($projectRoot . '/html/js/datagrid/index.php');
+
+    $this->assertStringContainsString("Render::jsModuleURL()", $datagridJs);
+    $this->assertStringContainsString("Render::jsStaticURL('js/core/template.js')", $datagridJs);
+    $this->assertStringNotContainsString("appURL('js/')", $datagridJs);
+  }
+
+  #[Test]
+  public function phpJsModulesSendNoStoreViaRenderModuleContentType(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $entrypoints = [
+      '/html/js/core/index.php',
+      '/html/js/phantomwing/index.php',
+      '/html/js/business/_bootstrap.php',
+      '/html/js/datagrid/index.php',
+    ];
+
+    foreach ($entrypoints as $relativePath) {
+      $source = (string) file_get_contents($projectRoot . $relativePath);
+      $this->assertStringContainsString(
+        'Javascript::renderModuleContentType',
+        $source,
+        $relativePath . ' must send no-store module headers',
+      );
+    }
+  }
+
+  #[Test]
   public function earningsLazyLoadDefersDailyYearFetch(): void
   {
     $projectRoot = dirname(__DIR__, 4);
@@ -41,6 +87,16 @@ final class StaticAssetCacheContractTest extends TestCase
     $this->assertStringNotContainsString("Render::jsScript('encryption')", $footer);
     $this->assertStringContainsString("Render::jsScript('plaintext-work-capture')", $footer);
     $this->assertStringContainsString("(\$currentPage ?? '') === 'PAGE_INDEX'", $footer);
+  }
+
+  #[Test]
+  public function javascriptRenderModuleContentTypeSetsNoStore(): void
+  {
+    $projectRoot = dirname(__DIR__, 4);
+    $javascript = (string) file_get_contents($projectRoot . '/html/src/Domain/Javascript.php');
+
+    $this->assertStringContainsString('renderModuleContentType', $javascript);
+    $this->assertStringContainsString('HttpCache::sendNoStore()', $javascript);
   }
 
   #[Test]

@@ -97,19 +97,19 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringNotContainsString('fetchLiveRequestsSnapshot', $dashboardJs);
     $this->assertStringNotContainsString('updateExecutiveSummary', $dashboardJs);
     $this->assertStringContainsString('initializeDatagridReloadHandlers', $datagridReloadJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/datagrid-reload-handlers.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/datagrid-reload-handlers.js.php'", $businessRouterJs);
     $this->assertStringNotContainsString('loadBusinessContextHeaderMetrics', $contextHeaderJs);
     $this->assertStringNotContainsString('initializeInlineEditorMount', $businessesJs);
     $this->assertStringNotContainsString('initializeTabNavigation', $businessesJs);
     $this->assertStringContainsString('initialize().catch', $businessRouterJs);
-    $this->assertStringContainsString("require __DIR__ . '/subpages/dashboard.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/subpages/dashboard.js.php'", $businessRouterJs);
     $this->assertStringContainsString('resolveBusinessSubPage', $businessesJs);
     $this->assertStringContainsString('openDetailsPage', $businessesJs);
     $this->assertStringContainsString('openMembersPage', $businessesJs);
     $this->assertStringContainsString('openSitesPage', $businessesJs);
     $this->assertStringContainsString('openPayrollPage', $businessesJs);
     $this->assertStringContainsString('openAuditPage', $businessesJs);
-    $this->assertStringContainsString("require __DIR__ . '/subpages/audit.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/subpages/audit.js.php'", $businessRouterJs);
   }
 
   #[Test]
@@ -264,7 +264,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('bindBusinessDetailsContactPanelEvents', $contactCardsJs);
     $this->assertStringContainsString("businessWorkspace?.addEventListener('click', handleContactCardPanelClick)", $contactCardsJs);
     $this->assertStringContainsString('BUSINESSES_CONTACT_CLEAR', $contactCardsJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/contact-cards.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/contact-cards.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/contact-cards.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const bindBusinessDetailsContactPanelEvents =', $businessesJs);
     $this->assertStringContainsString('aria-haspopup="dialog"', $businessPanel);
@@ -505,10 +505,10 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('member_reports_monthly_', $memberReportsService);
     $this->assertStringContainsString('member_reports_daily_earnings_', $memberReportsService);
     $this->assertStringContainsString('member_reports_piegraphs_panel_', $memberReportsService);
-    $this->assertStringContainsString('/js/earnings/member-reports-view.js', $businessJsIndex);
+    $this->assertStringContainsString("jsStaticURL('js/earnings/member-reports-view.js')", $businessJsIndex);
     $this->assertStringContainsString('initMemberReportsEarningsView', $memberReportsViewJs);
     $this->assertStringContainsString('data-member-export-scope', $memberReportsViewJs);
-    $this->assertStringContainsString("require __DIR__ . '/subpages/members.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/subpages/members.js.php'", $businessRouterJs);
     $this->assertStringNotContainsString('loadBusinessDetailViews(orgId)', $businessesJs);
     $this->assertStringNotContainsString("resolveBusinessSubPage() === 'members' && elements.liveRequestsList", $businessesJs);
   }
@@ -519,6 +519,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $projectRoot = dirname(__DIR__, 4);
     $sitesPage = (string) file_get_contents($projectRoot . '/html/business/sites/index.php');
     $businessCss = (string) file_get_contents($projectRoot . '/html/css/business/index.php');
+    $businessesCss = (string) file_get_contents($projectRoot . '/html/css/businesses/index.php');
     $sitesCss = (string) file_get_contents($projectRoot . '/html/css/sites/index.php');
     $siteEditorDialogs = (string) file_get_contents($projectRoot . '/html/sites/_partials/site_editor_dialogs.php');
     $discoveryPanel = (string) file_get_contents($projectRoot . '/html/business/_partials/editor_sites_discovery_panel.php');
@@ -566,6 +567,8 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('#main:has(#business-workspace.business_sites)', $businessCss);
     $this->assertStringContainsString('--businesses-content-width: 100%', $businessCss);
     $this->assertStringContainsString('[data-grid="business-sites-active"]', $businessCss);
+    $this->assertStringContainsString('#main:has(#business-workspace.business_sites)', $businessesCss);
+    $this->assertStringContainsString('[data-grid="business-sites-active"]', $sitesCss);
     $this->assertStringContainsString("siteEditorContext = 'business'", $sitesPage);
     $this->assertStringContainsString('site_editor_dialogs.php', $sitesPage);
     $this->assertStringContainsString('modal_create_site', $siteEditorDialogs);
@@ -584,8 +587,8 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('loadBusinessSitesGrid', $sitesJs);
     $this->assertStringContainsString('startDiscoveryPolling', $discoveryCoreJs);
     $this->assertStringContainsString('handleDiscovery', $discoveryCoreJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/discovery.js.php'", $businessRouterJs);
-    $this->assertStringContainsString("require __DIR__ . '/subpages/sites.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/discovery.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/subpages/sites.js.php'", $businessRouterJs);
     $this->assertStringContainsString('loadBusinessSitesGrid', $sitesJs);
     $this->assertStringContainsString('ensureBusinessSitesGridManager', $sitesJs);
     $this->assertStringContainsString('initSiteEditor', $sitesJs);
@@ -747,7 +750,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString("'page' => 'PAGE_BUSINESS_AUDIT', 'href' => '/business/audit/', 'label_key' => 'BUSINESS_NAV_AUDIT', 'min_role' => 'coordinator'", $businessNav);
 
     $this->assertStringContainsString("resolveBusinessSubPage() === 'audit'", $businessesJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/audit-grids.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/audit-grids.js.php'", $businessRouterJs);
     $this->assertStringContainsString('openAuditPage', $auditSubpageJs);
     $this->assertStringContainsString('loadBusinessAudit', $auditSubpageJs);
     $this->assertStringContainsString('startRealtimeAuditPolling', $auditSubpageJs);
@@ -1358,7 +1361,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const postJsonRaw = async', $apiCoreJs);
     $this->assertStringContainsString("document.getElementById('businesses_csrf_token')", $apiCoreJs);
     $this->assertStringContainsString("'X-CSRF-Token': csrfToken", $apiCoreJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/api.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/api.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/api.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const apiRequest = async', $workspaceJs);
     $this->assertStringNotContainsString('const postForm = async', $workspaceJs);
@@ -1379,7 +1382,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const startBusinessNotificationPolling =', $businessGridJs);
     $this->assertStringContainsString('const markBusinessNotificationsRead = async', $businessGridJs);
     $this->assertStringContainsString("const legacyWsHttpBase = '/ws/';", $businessGridJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/business-grid.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/business-grid.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/business-grid.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const loadGrid = async', $workspaceJs);
     $this->assertStringNotContainsString('const loadBusinesses = async', $workspaceJs);
@@ -1402,7 +1405,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const bindAccessLookupInput =', $accessLookupJs);
     $this->assertStringContainsString('/api/v1/businesses/access/search', $accessLookupJs);
     $this->assertStringContainsString('fetchAccessLookupSuggestions(trimmed)', $businessBrowserJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/access-lookup.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/access-lookup.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/access-lookup.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const extractLookupEmail =', $workspaceJs);
     $this->assertStringNotContainsString('const fetchAccessLookupSuggestions = async', $workspaceJs);
@@ -1423,7 +1426,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const initTimezoneFinder =', $searchablePickerJs);
     $this->assertStringContainsString('displayCurrencyValue', $searchablePickerJs);
     $this->assertStringContainsString('displayTimezoneValue', $searchablePickerJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/searchable-picker.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/searchable-picker.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/searchable-picker.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const initSearchListbox =', $workspaceJs);
     $this->assertStringNotContainsString('const initCurrencyFinder =', $workspaceJs);
@@ -1443,7 +1446,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const buildPayrollExceptionsCsv =', $reportExportUtilsJs);
     $this->assertStringContainsString('const buildPayrollPackageManifestCsv =', $reportExportUtilsJs);
     $this->assertStringContainsString('const downloadPayrollPackageZip = async', $reportExportUtilsJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/report-export-utils.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/report-export-utils.js.php'", $businessRouterJs);
     $this->assertStringNotContainsString('const buildPayrollPackageCsv =', $reportsSubpageJs);
     $this->assertStringNotContainsString('const buildPayrollSiteSummaryCsv =', $reportsSubpageJs);
     $this->assertStringNotContainsString('const buildPayrollPackageManifestCsv =', $reportsSubpageJs);
@@ -1463,7 +1466,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const promptMembershipConsent = async', $membershipConsentJs);
     $this->assertStringContainsString('elements.membershipConsentDialog.showModal()', $membershipConsentJs);
     $this->assertStringContainsString("promptMembershipConsent('Approve access request')", $accessManagementJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/membership-consent.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/membership-consent.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/membership-consent.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const closeMembershipConsentDialog =', $workspaceJs);
     $this->assertStringNotContainsString('const promptMembershipConsent = async', $workspaceJs);
@@ -1484,7 +1487,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const setStackMessage =', $displayUtilsJs);
     $this->assertStringContainsString('const setDatagridMessage =', $displayUtilsJs);
     $this->assertStringContainsString('const setDiscoveryPanelStatus =', $displayUtilsJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/display-utils.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/display-utils.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/display-utils.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const normalizeBusinessScopeTokens =', $workspaceJs);
     $this->assertStringNotContainsString('const setDatagridMessage =', $workspaceJs);
@@ -1504,7 +1507,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const historyTimestampPopoverController = createAnchoredPopoverController', $timestampPopoversJs);
     $this->assertStringContainsString('const enhanceInviteHistoryTimestampCells =', $timestampPopoversJs);
     $this->assertStringContainsString('const enhanceMembersJoinedTimestampCells =', $timestampPopoversJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/timestamp-popovers.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/timestamp-popovers.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/timestamp-popovers.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const formatInviteTimestamp =', $workspaceJs);
     $this->assertStringNotContainsString('const enhanceMembersJoinedTimestampCells =', $workspaceJs);
@@ -1529,9 +1532,9 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('alignBiweeklyToAnchor: false', $workspaceJs);
     $this->assertStringContainsString('includeSummary: true', $personalSettingsJs);
     $this->assertStringContainsString("headerMode: 'stripbar'", $workspaceJs);
-    $this->assertStringContainsString('from "/js/core/pay-period-preview.js"', $businessRouterJs);
-    $this->assertStringContainsString('from "/js/core/pay-period-preview.js"', $profileRouterJs);
-    $this->assertStringNotContainsString("require __DIR__ . '/core/pay-period-preview.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Render::jsStaticURL('js/core/pay-period-preview.js')", $businessRouterJs);
+    $this->assertStringContainsString("Render::jsStaticURL('js/core/pay-period-preview.js')", $profileRouterJs);
+    $this->assertStringNotContainsString("Javascript::emitJsSegment(__DIR__ . '/core/pay-period-preview.js.php'", $businessRouterJs);
     $this->assertStringNotContainsString("require __DIR__ . '/../business/core/pay-period-preview.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const buildPayPeriodRibbonCalendar =', $uiHelpersJs);
     $this->assertStringNotContainsString('const currentPeriod =', $workspaceJs);
@@ -1551,7 +1554,7 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const canManageBusinessAccess =', $permissionsJs);
     $this->assertStringContainsString('const canGenerateAuditControlTest =', $permissionsJs);
     $this->assertStringContainsString('const showAccessManagementDeniedWarning =', $permissionsJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/business-permissions.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/business-permissions.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/business-permissions.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const canUsePremiumOrgFeatures =', $workspaceJs);
     $this->assertStringNotContainsString('const canManageBusinessAccess =', $workspaceJs);
@@ -1576,8 +1579,8 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
     $this->assertStringContainsString('const handlePersonConnectionAction = async', $personConnectionsJs);
     $this->assertStringContainsString('formatConnectionStatusLabel(status || T.unknown)', $personConnectionsJs);
     $this->assertStringContainsString('/api/v1/connections/people', $personConnectionsJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/current-business-panel.js.php'", $businessRouterJs);
-    $this->assertStringContainsString("require __DIR__ . '/core/person-connections.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/current-business-panel.js.php'", $businessRouterJs);
+    $this->assertStringContainsString("Javascript::emitJsSegment(__DIR__ . '/core/person-connections.js.php'", $businessRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/current-business-panel.js.php'", $profileRouterJs);
     $this->assertStringContainsString("require __DIR__ . '/../business/core/person-connections.js.php'", $profileRouterJs);
     $this->assertStringNotContainsString('const renderCurrentBusinessPanel =', $workspaceJs);

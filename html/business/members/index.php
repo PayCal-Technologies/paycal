@@ -141,6 +141,7 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
     <div
       id="business_members_bulk_toolbar"
       class="business_members_bulk_toolbar business_members_bulk_toolbar_compact"
+      inert
       aria-hidden="true"
       aria-label="<?php echo businesses_index_i18n_html('BUSINESSES_MEMBERS_BULK_TOOLBAR_ARIA'); ?>"
     >
@@ -280,7 +281,7 @@ $membersPendingCount = max(0, (int) ($membersPageMetrics['pending'] ?? 0));
     <details
       id="business_members_pending_details"
       class="business_members_pending_details<?php echo $membersPendingCount <= 0 ? ' is-empty' : ''; ?>"
-      <?php if ($membersPendingCount <= 0) { ?>aria-hidden="true"<?php } ?>
+      <?php if ($membersPendingCount <= 0) { ?>inert aria-hidden="true"<?php } ?>
     >
       <summary class="business_members_pending_summary">
         <span id="business_members_pending_summary_label"><?php echo htmlspecialchars($membersPendingSummary, ENT_QUOTES, 'UTF-8'); ?></span>
