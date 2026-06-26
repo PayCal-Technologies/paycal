@@ -8,22 +8,22 @@ use PHPUnit\Framework\TestCase;
 final class CalendarHoverTooltipContractTest extends TestCase
 {
   #[Test]
-  public function calendarDayHoverTooltipRequiresShiftForMouseHover(): void
+  public function calendarDayHoverTooltipRequiresAltForMouseHover(): void
   {
     $calendarJs = (string) file_get_contents(dirname(__DIR__, 3) . '/js/calendar/calendar.js');
 
     $this->assertStringContainsString('calendarShiftKeyHeld', $calendarJs);
     $this->assertStringContainsString('isCalendarEarningsTooltipHoverEnabled', $calendarJs);
-    $this->assertStringContainsString('return calendarShiftKeyHeld', $calendarJs);
+    $this->assertStringContainsString('return calendarAltKeyHeld', $calendarJs);
     $this->assertStringContainsString('maybeShowCalendarHoverTooltipForPointer', $calendarJs);
     $this->assertStringContainsString('calendarHoveredCell', $calendarJs);
     $this->assertStringContainsString('hideCalendarHoverTooltip();', $calendarJs);
 
-    $shiftKeyupStart = strpos($calendarJs, "if (event.key !== 'Shift' || !calendarShiftKeyHeld)");
-    $this->assertNotFalse($shiftKeyupStart);
-    $shiftKeyupBody = substr($calendarJs, $shiftKeyupStart, 250);
-    $this->assertStringContainsString('hideCalendarHoverTooltip();', $shiftKeyupBody);
-    $this->assertStringNotContainsString('if (calendarHoveredCell)', $shiftKeyupBody);
+    $altKeyupStart = strpos($calendarJs, "if (event.key !== 'Alt' || !calendarAltKeyHeld)");
+    $this->assertNotFalse($altKeyupStart);
+    $altKeyupBody = substr($calendarJs, $altKeyupStart, 250);
+    $this->assertStringContainsString('hideCalendarHoverTooltip();', $altKeyupBody);
+    $this->assertStringNotContainsString('if (calendarHoveredCell)', $altKeyupBody);
 
     $attachHandlersStart = strpos($calendarJs, 'function attachGridCellHandlers(grid)');
     $this->assertNotFalse($attachHandlersStart);
@@ -32,27 +32,27 @@ final class CalendarHoverTooltipContractTest extends TestCase
   }
 
   #[Test]
-  public function calendarDayHoverTooltipNeverShowsOnFocusWithoutShift(): void
+  public function calendarDayHoverTooltipNeverShowsOnFocusWithoutAlt(): void
   {
     $calendarJs = (string) file_get_contents(dirname(__DIR__, 3) . '/js/calendar/calendar.js');
 
     $this->assertStringContainsString('handleCalendarCellTooltipFocus', $calendarJs);
     $this->assertStringContainsString('isCalendarTooltipSuppressed', $calendarJs);
     $this->assertStringNotContainsString(
-      'Keyboard users: focused day cells still show earnings without Shift.',
+      'Keyboard users: focused day cells still show earnings without Alt.',
       $calendarJs
     );
-    $this->assertStringNotContainsString('allowWithoutShift', $calendarJs);
+    $this->assertStringNotContainsString('allowWithoutAlt', $calendarJs);
 
     $showHandlerStart = strpos($calendarJs, 'function showCalendarHoverTooltip(cell, clientX, clientY)');
     $this->assertNotFalse($showHandlerStart);
     $showHandlerBody = substr($calendarJs, $showHandlerStart, 200);
-    $this->assertStringContainsString('if (!calendarShiftKeyHeld)', $showHandlerBody);
+    $this->assertStringContainsString('if (!calendarAltKeyHeld)', $showHandlerBody);
 
     $focusHandlerStart = strpos($calendarJs, 'function handleCalendarCellTooltipFocus(event)');
     $this->assertNotFalse($focusHandlerStart);
     $focusHandlerBody = substr($calendarJs, $focusHandlerStart, 500);
-    $this->assertStringContainsString('if (!calendarShiftKeyHeld)', $focusHandlerBody);
+    $this->assertStringContainsString('if (!calendarAltKeyHeld)', $focusHandlerBody);
     $this->assertStringContainsString('if (calendarSuppressFocusTooltipFromModalClose || isCalendarTooltipSuppressed())', $focusHandlerBody);
   }
 
@@ -88,16 +88,16 @@ final class CalendarHoverTooltipContractTest extends TestCase
   }
 
   #[Test]
-  public function lockedCalendarCellsRestorePointerEventsWhileShiftTooltipHoverIsActive(): void
+  public function lockedCalendarCellsRestorePointerEventsWhileAltTooltipHoverIsActive(): void
   {
     $htmlRoot = dirname(__DIR__, 3);
     $calendarJs = (string) file_get_contents($htmlRoot . '/js/calendar/calendar.js');
     $calendarCss = (string) file_get_contents($htmlRoot . '/css/calendar/index.php');
 
-    $this->assertStringContainsString('syncCalendarShiftTooltipHoverClass', $calendarJs);
-    $this->assertStringContainsString('calendar_shift_tooltip_hover', $calendarJs);
+    $this->assertStringContainsString('syncCalendarAltTooltipHoverClass', $calendarJs);
+    $this->assertStringContainsString('calendar_alt_tooltip_hover', $calendarJs);
     $this->assertStringContainsString(
-      '#calendar-v2-root.calendar_shift_tooltip_hover .datagrid_month_cell.datagrid_month_cell_locked',
+      '#calendar-v2-root.calendar_alt_tooltip_hover .datagrid_month_cell.datagrid_month_cell_locked',
       $calendarCss
     );
     $this->assertStringContainsString('pointer-events: auto', $calendarCss);
@@ -121,7 +121,7 @@ final class CalendarHoverTooltipContractTest extends TestCase
     $focusHandlerStart = strpos($calendarJs, 'function handleCalendarCellTooltipFocus(event)');
     $this->assertNotFalse($focusHandlerStart);
     $focusHandlerBody = substr($calendarJs, $focusHandlerStart, 500);
-    $this->assertStringContainsString('if (!calendarShiftKeyHeld)', $focusHandlerBody);
+    $this->assertStringContainsString('if (!calendarAltKeyHeld)', $focusHandlerBody);
     $this->assertStringContainsString('calendarBootFocusTooltipSuppressed', $focusHandlerBody);
     $this->assertStringContainsString('!event.isTrusted', $focusHandlerBody);
 

@@ -170,6 +170,16 @@ html[data-depth="high"] {
   --calendar-event-text: var(--color-text);
   --calendar-range-bg: color-mix(in srgb, var(--color-primary) 20%, transparent);
 
+  /* Calendar earnings badges (gross / net / deductions) */
+  --calendar-earnings-badge-gross-accent: var(--color-primary);
+  --calendar-earnings-badge-net-accent: var(--color-success);
+  --calendar-earnings-badge-deductions-accent: var(--color-warning);
+  --calendar-earnings-badge-gross-bg: color-mix(in srgb, var(--panel-bg) 76%, var(--calendar-earnings-badge-gross-accent));
+  --calendar-earnings-badge-net-bg: color-mix(in srgb, var(--panel-bg) 65%, var(--calendar-earnings-badge-net-accent));
+  --calendar-earnings-badge-deductions-bg: color-mix(in srgb, var(--panel-bg) 78%, var(--calendar-earnings-badge-deductions-accent) 22%);
+  --calendar-earnings-badge-entries-bg: color-mix(in srgb, var(--panel-bg) 85%, var(--color-primary));
+  --calendar-earnings-badge-hours-bg: color-mix(in srgb, var(--panel-bg) 85%, var(--color-success));
+
   /* Status bar component tokens (info/working/paste) */
   --status-info-bg: #1f8bff;
   --status-info-text: #031a33;

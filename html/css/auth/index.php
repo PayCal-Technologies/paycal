@@ -18,7 +18,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     --surface-3: #444444;
     --text-0: #ffffff;
     --text-1: #cccccc;
-    --text-2: #999999;
+    --text-2: var(--color-text-muted, #6c7b86);
     --line: rgba(255, 255, 255, 0.10);
     --line-strong: rgba(255, 255, 255, 0.24);
     --brand: #0078D7;

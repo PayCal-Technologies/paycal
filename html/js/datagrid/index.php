@@ -203,11 +203,17 @@ export function bindDataGridKeyboardNavigation(config = {})
     row.classList.add(activeRowClass);
     syncRows();
 
-    if (options.scroll !== false && typeof row.scrollIntoView === 'function') {
-      row.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    }
     if (options.focus !== false) {
-      row.focus({ preventScroll: true });
+      try {
+        row.focus({ preventScroll: true });
+      } catch {
+        row.focus();
+      }
+    }
+
+    const skipScroll = options.scroll === false || options.preventScroll === true;
+    if (!skipScroll) {
+      scrollDatagridRowIntoView(row);
     }
 
     return true;
@@ -633,6 +639,17 @@ function getColumnVisibilityToggleInputs(scope)
       && !element.closest('[hidden]'));
 }
 
+function scrollDatagridRowIntoView(row)
+{
+  if (!(row instanceof HTMLElement) || typeof row.scrollIntoView !== 'function') {
+    return;
+  }
+
+  // Instant nearest-edge scroll avoids fighting sticky header/sidebar and
+  // honors prefers-reduced-motion (no smooth scroll animation).
+  row.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+}
+
 function focusFirstDatagridRow(grid)
 {
   if (!(grid instanceof HTMLElement)) {
@@ -647,10 +664,12 @@ function focusFirstDatagridRow(grid)
     return false;
   }
 
-  row.focus({ preventScroll: true });
-  if (typeof row.scrollIntoView === 'function') {
-    row.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  try {
+    row.focus({ preventScroll: true });
+  } catch {
+    row.focus();
   }
+  scrollDatagridRowIntoView(row);
 
   return true;
 }

@@ -36,6 +36,7 @@
   let calendarLockedForVerification = false;
   let calendarScreenMode = 'normal';
   let calendarShiftKeyHeld = false;
+  let calendarAltKeyHeld = false;
   let calendarShiftAnchorDateId = '';
   const calendarSiteWageMatrix = Object.create(null);
   const calendarSiteWageById = new Map();
@@ -2358,6 +2359,16 @@
   // MONTH GRID NAVIGATION (for calendar v2)
   // =========================================================================
 
+  function scrollGridCellIntoView(cell) {
+    if (!cell || typeof cell.scrollIntoView !== 'function') {
+      return;
+    }
+
+    // Instant nearest-edge scroll avoids fighting sticky header/sidebar and
+    // honors prefers-reduced-motion (no smooth scroll animation).
+    cell.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+  }
+
   /**
    * Keep one active/selected day cell for keyboard and screen-reader parity.
    * @param {HTMLElement} targetCell
@@ -2386,10 +2397,15 @@
     applyShiftRangeSelection(grid, targetCell);
 
     if (focusCell) {
+      const skipScroll = focusOptions?.preventScroll === true;
       try {
-        targetCell.focus(focusOptions || { preventScroll: true });
+        targetCell.focus({ ...(focusOptions || {}), preventScroll: true });
       } catch {
         targetCell.focus();
+      }
+
+      if (!skipScroll) {
+        scrollGridCellIntoView(targetCell);
       }
     }
 
@@ -2623,7 +2639,7 @@
   }
 
   function showCalendarHoverTooltip(cell, clientX, clientY) {
-    if (!calendarShiftKeyHeld) {
+    if (!calendarAltKeyHeld) {
       return;
     }
     if (!cell) {
@@ -2672,21 +2688,24 @@
   }
 
   function isCalendarEarningsTooltipHoverEnabled(event = null) {
-    return calendarShiftKeyHeld;
+    if (event && event.altKey) {
+      return true;
+    }
+    return calendarAltKeyHeld;
   }
 
-  function syncCalendarShiftTooltipHoverClass(event = null) {
+  function syncCalendarAltTooltipHoverClass(event = null) {
     const root = document.getElementById('calendar-v2-root');
     if (!root) {
       return;
     }
 
     const active = isCalendarEarningsTooltipHoverEnabled(event);
-    root.classList.toggle('calendar_shift_tooltip_hover', active);
+    root.classList.toggle('calendar_alt_tooltip_hover', active);
   }
 
   function maybeShowCalendarHoverTooltipForPointer(cell, clientX, clientY, event = null) {
-    syncCalendarShiftTooltipHoverClass(event);
+    syncCalendarAltTooltipHoverClass(event);
     if (!cell || !isCalendarEarningsTooltipHoverEnabled(event)) {
       return;
     }
@@ -2732,7 +2751,7 @@
   }
 
   function handleCalendarCellTooltipFocus(event) {
-    if (!calendarShiftKeyHeld) {
+    if (!calendarAltKeyHeld) {
       return;
     }
 
@@ -3766,7 +3785,7 @@
       return;
     }
 
-    if (calendarShiftKeyHeld) {
+    if (calendarShiftKeyHeld || calendarAltKeyHeld) {
       return;
     }
 
@@ -3806,7 +3825,7 @@
       return;
     }
 
-    if (calendarShiftKeyHeld || event.shiftKey) {
+    if (calendarShiftKeyHeld || event.shiftKey || calendarAltKeyHeld || event.altKey) {
       return;
     }
 
@@ -3920,11 +3939,15 @@
     document.addEventListener('keydown', function(event) {
       if (isCalendarPageContext() && event.shiftKey && !calendarShiftKeyHeld) {
         calendarShiftKeyHeld = true;
-        syncCalendarShiftTooltipHoverClass(event);
         const activeCell = document.querySelector('#calendar-grid .datagrid_month_grid .datagrid_month_cell[tabindex="0"]')
           || (document.activeElement && document.activeElement.closest ? document.activeElement.closest('.datagrid_month_cell') : null);
         calendarShiftAnchorDateId = activeCell ? (activeCell.getAttribute('data-id') || '') : '';
         refreshShiftRangeSelectionOnActiveCell();
+      }
+
+      if (isCalendarPageContext() && event.altKey && !calendarAltKeyHeld) {
+        calendarAltKeyHeld = true;
+        syncCalendarAltTooltipHoverClass(event);
         if (calendarHoveredCell && !calendarHoverTooltipCell) {
           showCalendarHoverTooltip(
             calendarHoveredCell,
@@ -4105,24 +4128,33 @@
     });
 
     document.addEventListener('keyup', function(event) {
-      if (event.key !== 'Shift' || !calendarShiftKeyHeld) {
+      if (event.key === 'Shift' && calendarShiftKeyHeld) {
+        calendarShiftKeyHeld = false;
+        calendarShiftAnchorDateId = '';
         return;
       }
 
-      calendarShiftKeyHeld = false;
-      calendarShiftAnchorDateId = '';
-      syncCalendarShiftTooltipHoverClass();
+      if (event.key !== 'Alt' || !calendarAltKeyHeld) {
+        return;
+      }
+
+      calendarAltKeyHeld = false;
+      syncCalendarAltTooltipHoverClass();
       hideCalendarHoverTooltip();
     });
 
     window.addEventListener('blur', function() {
-      if (!calendarShiftKeyHeld) {
+      if (calendarShiftKeyHeld) {
+        calendarShiftKeyHeld = false;
+        calendarShiftAnchorDateId = '';
+      }
+
+      if (!calendarAltKeyHeld) {
         return;
       }
 
-      calendarShiftKeyHeld = false;
-      calendarShiftAnchorDateId = '';
-      syncCalendarShiftTooltipHoverClass();
+      calendarAltKeyHeld = false;
+      syncCalendarAltTooltipHoverClass();
       hideCalendarHoverTooltip();
     });
 

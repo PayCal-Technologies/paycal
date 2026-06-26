@@ -3136,7 +3136,7 @@ svg[data-compact-chart="true"] .earnings-crosshair {
 
 .reports_print_desc {
   margin: 0;
-  color: var(--color-text-muted, #aab4c8);
+  color: var(--color-text-muted);
   line-height: 1.45;
 }
 
@@ -3183,7 +3183,7 @@ svg[data-compact-chart="true"] .earnings-crosshair {
 }
 
 .reports_print_mode_desc {
-  color: var(--color-text-muted, #aab4c8);
+  color: var(--color-text-muted);
   line-height: 1.35;
   font-size: var(--font-sm, 0.87rem);
 }

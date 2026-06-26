@@ -375,11 +375,16 @@
         syncMembersGridKeyboardRows(row);
         row.focus({ preventScroll: true });
       });
-    } else if (options.scroll === 'nearest' && typeof row.scrollIntoView === 'function') {
-      row.focus({ preventScroll: true });
-      row.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
     } else {
-      row.focus();
+      const skipScroll = options.preventScroll === true || options.scroll === false;
+      try {
+        row.focus({ preventScroll: true });
+      } catch {
+        row.focus();
+      }
+      if (!skipScroll) {
+        row.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+      }
     }
     return true;
   };

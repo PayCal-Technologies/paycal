@@ -1257,22 +1257,21 @@ button.cal_menu_selected:focus-visible {
   line-height: var(--cal-work-entry-line-height);
   padding: 0.1rem 0.35rem;
   border-radius: var(--radius-sm, 0.25rem);
-  --earnings-badge-bg: color-mix(in srgb, var(--panel-bg) 70%, var(--accent-color, #4d8ef0));
+  --earnings-badge-bg: var(--calendar-earnings-badge-gross-bg);
   background: var(--earnings-badge-bg);
-  color: var(--work-entry-fore, var(--work-fore));
   color: contrast-color(var(--earnings-badge-bg) vs #fff, #111);
 }
 
 .calendar_earnings_badge_gross {
-  --earnings-badge-bg: color-mix(in srgb, var(--panel-bg) 70%, var(--accent-color, #4d8ef0));
+  --earnings-badge-bg: var(--calendar-earnings-badge-gross-bg);
 }
 
 .calendar_earnings_badge_net {
-  --earnings-badge-bg: color-mix(in srgb, var(--panel-bg) 65%, var(--color-success, #2e7d32));
+  --earnings-badge-bg: var(--calendar-earnings-badge-net-bg);
 }
 
 .calendar_earnings_badge_deductions {
-  --earnings-badge-bg: color-mix(in srgb, var(--panel-bg) 65%, var(--earnings-piegraphs-color-deductions, #f2d2a6));
+  --earnings-badge-bg: var(--calendar-earnings-badge-deductions-bg);
 }
 
 .datagrid_month_cell.datagrid_month_cell_today .datagrid_month_cell_header {
@@ -1324,8 +1323,8 @@ button.cal_menu_selected:focus-visible {
   box-shadow: none;
 }
 
-/* Locked cells use pointer-events: none so clicks cannot reach them; restore hover while Shift shows earnings tooltip. */
-#calendar-v2-root.calendar_shift_tooltip_hover .datagrid_month_cell.datagrid_month_cell_locked {
+/* Locked cells use pointer-events: none so clicks cannot reach them; restore hover while Alt/Option shows earnings tooltip. */
+#calendar-v2-root.calendar_alt_tooltip_hover .datagrid_month_cell.datagrid_month_cell_locked {
   pointer-events: auto;
 }
 
@@ -1436,9 +1435,8 @@ button.cal_menu_selected:focus-visible {
   height: 20px;
   padding: 0 6px;
   border-radius: 10px;
-  --entries-badge-bg: color-mix(in srgb, var(--panel-bg) 85%, var(--color-primary, #00bcd4));
+  --entries-badge-bg: var(--calendar-earnings-badge-entries-bg);
   background: var(--entries-badge-bg);
-  color: var(--work-entry-fore, var(--work-fore));
   color: contrast-color(var(--entries-badge-bg) vs #fff, #111);
   font-size: var(--cal-work-entry-badge-font-size);
   font-weight: 700;
@@ -1453,9 +1451,8 @@ button.cal_menu_selected:focus-visible {
   height: 20px;
   padding: 0 6px;
   border-radius: 10px;
-  --hours-badge-bg: color-mix(in srgb, var(--panel-bg) 85%, var(--color-success, #4caf50));
+  --hours-badge-bg: var(--calendar-earnings-badge-hours-bg);
   background: var(--hours-badge-bg);
-  color: var(--work-entry-fore, var(--work-fore));
   color: contrast-color(var(--hours-badge-bg) vs #fff, #111);
   font-size: var(--cal-work-entry-badge-font-size);
   font-weight: 700;
@@ -2111,9 +2108,8 @@ button.cal_menu_selected:focus-visible {
   height: 20px;
   padding: 0 6px;
   border-radius: 10px;
-  --entries-badge-bg: color-mix(in srgb, var(--panel-bg) 85%, var(--color-primary, #00bcd4));
+  --entries-badge-bg: var(--calendar-earnings-badge-entries-bg);
   background: var(--entries-badge-bg);
-  color: var(--work-entry-fore, var(--work-fore));
   color: contrast-color(var(--entries-badge-bg) vs #fff, #111);
   font-size: var(--cal-work-entry-badge-font-size);
   font-weight: 700;
@@ -2128,9 +2124,8 @@ button.cal_menu_selected:focus-visible {
   height: 20px;
   padding: 0 6px;
   border-radius: 10px;
-  --hours-badge-bg: color-mix(in srgb, var(--panel-bg) 85%, var(--color-success, #4caf50));
+  --hours-badge-bg: var(--calendar-earnings-badge-hours-bg);
   background: var(--hours-badge-bg);
-  color: var(--work-entry-fore, var(--work-fore));
   color: contrast-color(var(--hours-badge-bg) vs #fff, #111);
   font-size: var(--cal-work-entry-badge-font-size);
   font-weight: 700;
@@ -2382,7 +2377,6 @@ foreach (SiteColorPalette::pickerPalette() as $pc) {
   echo "  --work-site-tint: color-mix(in srgb, {$h} 22%, var(--work-tint-mix-base, var(--work-entry-back, var(--work-back, var(--color-surface-muted, #1e2330)))));\n";
   echo "  background: var(--work-site-tint);\n";
   echo "  border-left: 3px solid {$h};\n";
-  echo "  color: var(--work-entry-fore, var(--work-fore));\n";
   echo "  color: contrast-color(var(--work-site-tint) vs #fff, #111);\n";
   echo "}\n";
 }

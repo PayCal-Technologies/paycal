@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 final class CalendarSiteColorContrastTest extends TestCase
 {
   private const SITE_TINT_PERCENT = 22.0;
-  private const WCAG_AA_NORMAL = 4.5;
+  private const WCAG_AA_NORMAL = 4.75;
 
   #[Test]
   public function calendarCssUsesRuntimeContrastForSiteTintedWorkEntries(): void

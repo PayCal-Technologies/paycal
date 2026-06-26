@@ -2275,7 +2275,7 @@ details summary:hover {
   box-sizing: border-box;
   background: var(--public-beta-echo-bg);
   background-clip: border-box;
-  color: var(--panel-text);
+  color: contrast-color(var(--public-beta-echo-bg) vs #fff, #111);
   border: 0;
   border-radius: 0 !important;
   -webkit-border-radius: 0 !important;
@@ -2315,7 +2315,7 @@ details summary:hover {
   border: 1px solid color-mix(in srgb, var(--public-beta-echo-accent) 68%, var(--panel-border) 32%);
   border-radius: 0;
   background: color-mix(in srgb, var(--panel-bg) 68%, white 10%);
-  color: var(--panel-text);
+  color: contrast-color(color-mix(in srgb, var(--panel-bg) 68%, white 10%) vs #fff, #111);
   font-size: 0.82em;
   white-space: nowrap;
 }

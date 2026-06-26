@@ -27,6 +27,8 @@ final class CalendarGridFocusContractTest extends TestCase
     $this->assertStringContainsString('isAnyCalendarDialogActive()', $handlerBody);
     $this->assertStringContainsString('calendarShiftKeyHeld', $handlerBody);
     $this->assertStringContainsString('event.shiftKey', $handlerBody);
+    $this->assertStringContainsString('calendarAltKeyHeld', $handlerBody);
+    $this->assertStringContainsString('event.altKey', $handlerBody);
     $this->assertStringContainsString("target.closest('.datagrid_month_cell')", $handlerBody);
     $this->assertStringContainsString('isCalendarInteractiveTarget(target)', $handlerBody);
     $this->assertStringContainsString('requestAnimationFrame', $handlerBody);
@@ -68,6 +70,29 @@ final class CalendarGridFocusContractTest extends TestCase
     $this->assertStringContainsString('[role="button"]', $interactiveBody);
     $this->assertStringContainsString('[role="menuitem"]', $interactiveBody);
     $this->assertStringContainsString('dialog', $interactiveBody);
+  }
+
+  #[Test]
+  public function calendarGridCellFocusScrollsIntoViewWhenNotSuppressed(): void
+  {
+    $calendarJs = (string) file_get_contents(dirname(__DIR__, 3) . '/js/calendar/calendar.js');
+
+    $this->assertStringContainsString('function scrollGridCellIntoView(cell)', $calendarJs);
+
+    $scrollStart = strpos($calendarJs, 'function scrollGridCellIntoView(cell)');
+    $this->assertNotFalse($scrollStart);
+    $scrollBody = substr($calendarJs, $scrollStart, 450);
+
+    $this->assertStringContainsString('scrollIntoView({ block: \'nearest\', inline: \'nearest\'', $scrollBody);
+    $this->assertStringContainsString("behavior: 'auto'", $scrollBody);
+
+    $focusStart = strpos($calendarJs, 'function setGridCellFocusState(targetCell');
+    $this->assertNotFalse($focusStart);
+    $focusBody = substr($calendarJs, $focusStart, 1200);
+
+    $this->assertStringContainsString('preventScroll: true', $focusBody);
+    $this->assertStringContainsString('scrollGridCellIntoView(targetCell)', $focusBody);
+    $this->assertStringContainsString('focusOptions?.preventScroll === true', $focusBody);
   }
 
   #[Test]

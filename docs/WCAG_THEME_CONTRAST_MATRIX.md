@@ -1,6 +1,6 @@
 # WCAG Theme Contrast Matrix
 
-Generated: 2026-06-20
+Generated: 2026-06-26
 
 Scope: `html/css/*_dark/index.php` and `html/css/*_light/index.php` tokens.
 

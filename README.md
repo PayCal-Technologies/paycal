@@ -4,9 +4,9 @@ Privacy-first payroll, work-entry, reporting, and business-member payroll visibi
 
 PayCal helps workers understand pay, taxes, sites, pay periods, and business-shared work data while keeping sensitive work records behind passkey authentication, encrypted envelopes, explicit consent, and audit trails.
 
-Latest documented release: **v1.059.010**
+Latest documented release: **v1.059.011**
 
-[![Test Suite](https://img.shields.io/badge/tests-2442%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2452%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -279,9 +279,9 @@ Localization source files live in `strings/`. Backup files such as `*.bak` are n
 
 Suite inventory (as of 2026-06-26):
 
-- **2,442 listed tests**
-- **285 repository test files**
-- **Active public suite file split:** **144 Unit**, **61 Integration**, **41 Contract**, **1 Timezone**, **21 Accessibility**
+- **2,452 listed tests**
+- **288 repository test files**
+- **Active public suite file split:** **144 Unit**, **61 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
 - **2 Manual verification files**
 
 Latest validation snapshot (2026-06-22):
@@ -301,7 +301,7 @@ Latest validation snapshot (2026-06-22):
 | PayCal Integration | 61 | Controller/API flows, auth, encryption, account lifecycle, and cross-service behavior |
 | PayCal Contract | 40 | Stable API, route, manifest, persistence, and architecture boundaries |
 | PayCal Timezone | 1 | Timezone-sensitive pay-period behavior |
-| PayCal Accessibility | 12 | ARIA, WCAG, keyboard, and accessibility contracts |
+| PayCal Accessibility | 24 | ARIA, WCAG, keyboard, and accessibility contracts |
 
 Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-06-26 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes public-excluded SOC2/Exploit/private-moat files and the two manual verification files.
 
@@ -356,6 +356,11 @@ npm run test:a11y:contrast
 ```
 
 ## Recent Releases
+
+## v1.059.011 (2026-06-26)
+
+- WCAG 4.75 contrast for calendar earnings badges and shared surfaces.
+- Calendar Alt/Option earnings hover tooltip; keyboard scroll-into-view for month grid and datagrids.
 
 ## v1.059.010 (2026-06-26)
 
