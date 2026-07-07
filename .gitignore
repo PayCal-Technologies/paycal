@@ -118,6 +118,8 @@ scripts/.DS_Store
 !.github/sync-to-dev/SKILLS.md
 
 # Source dumps — never commit full codebase export files
+html/readme-preview-*/
+html/source-dump-*/
 *-source-dump*.txt
 *-source-dump*.sql
 *-source-dump*.json

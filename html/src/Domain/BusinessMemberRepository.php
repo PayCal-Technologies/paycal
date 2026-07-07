@@ -40,6 +40,7 @@ use PayCal\Domain\Constants\Keys;
  *   business:connection:{businessId}:{userUUID} – HASH: role, status, scopes, user_uuid, updated_at
  *   business:user:{userUUID}                    – SET of active business ids the user belongs to
  *   business:connections:user:{userUUID}        – SET of non-terminal business connection ids
+ *   business:owner:{userUUID}                   – SET of owned business ids
  *
  * @category   Domain
  * @package    PayCal\Domain
@@ -185,25 +186,21 @@ final class BusinessMemberRepository
   /**
    * List all business memberships for a single user.
    * Useful for "which orgs is this user in, and in what role?"
-   * Uses active membership plus connection reverse-index SETs.
+   * Uses active membership plus connection reverse-index SETs and owner
+   * mirrors. The owner mirror is intentionally kept as a fallback for
+   * production data created before membership mirrors existed.
    *
    * @param  string $userUUID
    * @return array<int, array{org_id: string, role: string, status: string, scopes: list<string>, updated_at: string}>
    */
   public static function forUser(string $userUUID): array
   {
+    $userUUID = trim($userUUID);
     if ('' === $userUUID) {
       return [];
     }
 
-    $orgIds = array_merge(
-      Database::smembers(Keys::BUSINESS_USER . ':' . $userUUID),
-      Database::smembers(Keys::BUSINESS_CONNECTIONS_USER . ':' . $userUUID),
-    );
-    $orgIds = array_values(array_unique(array_filter(
-      array_map(static fn (mixed $value): string => trim((string) $value), $orgIds),
-      static fn (string $value): bool => $value !== ''
-    )));
+    $orgIds = self::businessIdsForUser($userUUID);
     if ([] === $orgIds) {
       return [];
     }
@@ -218,8 +215,20 @@ final class BusinessMemberRepository
     $memberships = [];
 
     foreach ($connectionKeys as $orgId => $connectionKey) {
+      $ownerMembership = self::ownerMembershipForBusiness($orgId, $userUUID);
       $rel = $connectionHashes[$connectionKey] ?? [];
       if ([] === $rel) {
+        if ($ownerMembership !== null) {
+          $memberships[] = $ownerMembership;
+        }
+
+        continue;
+      }
+
+      if ($ownerMembership !== null) {
+        $ownerMembership['updated_at'] = (string) ($rel['updated_at'] ?? $ownerMembership['updated_at']);
+        $memberships[] = $ownerMembership;
+
         continue;
       }
 
@@ -232,7 +241,55 @@ final class BusinessMemberRepository
       ];
     }
 
+    usort($memberships, static fn (array $a, array $b): int => strcmp((string) $a['org_id'], (string) $b['org_id']));
+
     return $memberships;
+  }
+
+  /** @return list<string> */
+  private static function businessIdsForUser(string $userUUID): array
+  {
+    $orgIds = array_merge(
+      Database::smembers(Keys::BUSINESS_USER . ':' . $userUUID),
+      Database::smembers(Keys::BUSINESS_CONNECTIONS_USER . ':' . $userUUID),
+      Database::smembers(Keys::BUSINESS_OWNER . ':' . $userUUID),
+    );
+
+    $orgIds = array_values(array_unique(array_filter(
+      array_map(static fn (mixed $value): string => trim((string) $value), $orgIds),
+      static fn (string $value): bool => $value !== ''
+    )));
+    sort($orgIds, SORT_STRING);
+
+    return $orgIds;
+  }
+
+  /**
+   * @return array{org_id: string, role: string, status: string, scopes: list<string>, updated_at: string}|null
+   */
+  private static function ownerMembershipForBusiness(string $businessId, string $userUUID): ?array
+  {
+    $business = Database::hgetall(Keys::BUSINESS . ':' . $businessId);
+    if ([] === $business) {
+      return null;
+    }
+
+    if ((string) ($business['owner_uuid'] ?? '') !== $userUUID) {
+      return null;
+    }
+
+    $status = strtolower(trim((string) ($business['status'] ?? 'active')));
+    if (in_array($status, ['archived', 'deleted', 'disabled'], true)) {
+      return null;
+    }
+
+    return [
+      'org_id' => $businessId,
+      'role' => 'owner',
+      'status' => 'active',
+      'scopes' => ['all'],
+      'updated_at' => (string) ($business['updated_at'] ?? $business['created_at'] ?? ''),
+    ];
   }
 
   /**

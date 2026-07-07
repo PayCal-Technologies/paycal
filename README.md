@@ -6,7 +6,7 @@ Workers keep control of sensitive work history. Businesses get authorized report
 
 Latest documented release: **v1.059.011**
 
-[![Test Suite](https://img.shields.io/badge/tests-2732%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2450%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -122,21 +122,21 @@ Set local environment values in `html/.env`, run Redis/PHP/nginx for the target 
 
 | Signal | Current value |
 |--------|--------------:|
-| PHPUnit listed tests | 2732 |
-| Configured PHPUnit files | 308 |
-| Repository PHP test files | 317 |
+| PHPUnit listed tests | 2450 |
+| Configured PHPUnit files | 289 |
+| Repository PHP test files | 289 |
 | Frontend tests | 14 Playwright specs, 7 JS/MJS tests |
 | Static analysis | PHPStan Level 9, ESLint, Vigil policy checks |
 
-Suite inventory (as of 2026-07-03):
+Suite inventory (as of 2026-07-07):
 
-- **2,732 listed tests**
-- **308 repository test files**
-- **Active suite file split:** **155 Unit**, **68 Integration**, **45 Contract**, **8 SOC2**, **1 Timezone**, **25 Accessibility**, **4 Exploit**
+- **2,450 listed tests**
+- **289 repository test files**
+- **Active public suite file split:** **144 Unit**, **60 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
 - **2 Indigenous suite files**
 - **2 Manual verification files**
 
-Current inventory reflects `phpunit.xml` as re-evaluated on 2026-07-03 via `./vendor/bin/phpunit --configuration phpunit.xml --list-tests`. Repository test-file count includes the two manual verification files, which are not configured PHPUnit suites.
+Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-07-07 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes the two manual verification files, which are not configured PHPUnit suites.
 <!-- scribe:quality:end -->
 
 <!-- scribe:recent-releases:begin -->
