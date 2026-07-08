@@ -745,7 +745,6 @@ class DataGrid
     $workEntryClass = ('middle' === $workEntryPosition) ? 'center' : $workEntryPosition;
     $dayNamePositionClass = ('middle' === $dayNamePosition) ? 'center' : $dayNamePosition;
     $dateLabelPositionClass = in_array($dateLabelClass, ['left', 'center', 'right'], true) ? $dateLabelClass : 'left';
-    $dayNamePositionClass = in_array($dayNamePositionClass, ['left', 'center', 'right'], true) ? $dayNamePositionClass : 'center';
     $workEntryFieldsRaw = $this->meta['workEntryFields'] ?? null;
     $workEntryFieldsMeta = null;
     if (is_array($workEntryFieldsRaw)) {
