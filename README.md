@@ -6,7 +6,7 @@ Workers keep control of sensitive work history. Businesses get authorized report
 
 Latest documented release: **v1.059.011**
 
-[![Test Suite](https://img.shields.io/badge/tests-2450%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2454%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
@@ -122,17 +122,17 @@ Set local environment values in `html/.env`, run Redis/PHP/nginx for the target 
 
 | Signal | Current value |
 |--------|--------------:|
-| PHPUnit listed tests | 2450 |
-| Configured PHPUnit files | 289 |
-| Repository PHP test files | 289 |
+| PHPUnit listed tests | 2454 |
+| Configured PHPUnit files | 290 |
+| Repository PHP test files | 290 |
 | Frontend tests | 14 Playwright specs, 7 JS/MJS tests |
 | Static analysis | PHPStan Level 9, ESLint, Vigil policy checks |
 
 Suite inventory (as of 2026-07-07):
 
-- **2,450 listed tests**
-- **289 repository test files**
-- **Active public suite file split:** **144 Unit**, **60 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
+- **2,454 listed tests**
+- **290 repository test files**
+- **Active public suite file split:** **145 Unit**, **60 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
 - **2 Indigenous suite files**
 - **2 Manual verification files**
 

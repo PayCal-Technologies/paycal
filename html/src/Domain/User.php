@@ -160,6 +160,11 @@ final class User
   public string $reserve_name                        = '';
   public string $timezone                            = 'America/Edmonton';
   public string $currency                            = 'CAD';
+  public string $dashboard_name                      = '';
+  public string $signup_selected_tier                = 'free';
+  public string $signup_intent                       = 'worker';
+  public string $signup_theme_mode                   = 'system';
+  public string $onboarding_completed_at             = '';
   public string $session_timeout                     = UserPreferenceDefaults::DEFAULT_SESSION_TIMEOUT;
   public string $emergency_signout_window_ms         = '600';
   public string $editing_grace_days                  = UserPreferenceDefaults::DEFAULT_EDITING_GRACE_DAYS;

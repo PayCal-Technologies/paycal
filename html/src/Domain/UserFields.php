@@ -135,6 +135,11 @@ enum UserFields: string
   case RESERVE_NAME = 'reserve_name';
   case TIMEZONE = 'timezone';
   case CURRENCY = 'currency';
+  case DASHBOARD_NAME = 'dashboard_name';
+  case SIGNUP_SELECTED_TIER = 'signup_selected_tier';
+  case SIGNUP_INTENT = 'signup_intent';
+  case SIGNUP_THEME_MODE = 'signup_theme_mode';
+  case ONBOARDING_COMPLETED_AT = 'onboarding_completed_at';
   case SESSION_TIMEOUT = 'session_timeout';
   case EMERGENCY_SIGNOUT_WINDOW_MS = 'emergency_signout_window_ms';
   case FORM_TTL_SETTINGS = 'form_ttl_settings';

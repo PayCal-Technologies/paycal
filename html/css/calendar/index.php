@@ -36,6 +36,96 @@ body.page-calendar #calendar-v2-root.calendar_full_bleed.panel {
   box-shadow: none;
 }
 
+.first_run_setup {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.8fr);
+  gap: 1rem;
+  align-items: stretch;
+  margin: 0;
+  padding: 1rem;
+  border-bottom: 1px solid var(--panel-border, #d9e2ec);
+  background: color-mix(in srgb, var(--accent-color, var(--color-primary, #2388ff)) 10%, var(--panel-bg, #fff));
+  color: var(--panel-text, #1f2933);
+}
+
+.first_run_setup_summary,
+.first_run_setup_next {
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--accent-color, var(--color-primary, #2388ff)) 32%, var(--panel-border, #d9e2ec));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel-bg, #fff) 88%, transparent);
+  padding: 0.9rem;
+}
+
+.first_run_setup_kicker {
+  margin: 0 0 0.28rem;
+  color: var(--color-text-muted, #52616f);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0 !important;
+}
+
+.first_run_setup h1,
+.first_run_setup h2,
+.first_run_setup h3 {
+  margin: 0;
+  color: var(--panel-text, #1f2933);
+  letter-spacing: 0 !important;
+}
+
+.first_run_setup h1,
+.first_run_setup h2 {
+  font-size: clamp(1.12rem, 1.8vw, 1.45rem);
+  line-height: 1.18;
+}
+
+.first_run_setup h3 {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.first_run_setup_chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.first_run_setup_chips li {
+  border: 1px solid color-mix(in srgb, var(--accent-color, var(--color-primary, #2388ff)) 38%, var(--panel-border, #d9e2ec));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-color, var(--color-primary, #2388ff)) 12%, var(--panel-bg, #fff));
+  color: var(--panel-text, #1f2933);
+  padding: 0.28rem 0.58rem;
+  font-size: 0.88rem;
+  line-height: 1.18;
+}
+
+.first_run_setup_next {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.first_run_setup_next ol {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.first_run_setup_next li {
+  line-height: 1.28;
+}
+
+@media (max-width: 760px) {
+  .first_run_setup {
+    grid-template-columns: 1fr;
+    padding: 0.75rem;
+  }
+}
+
 /* Work-entry typography — floor stays legible; scales with user --font-* tokens */
 :root {
   --cal-work-entry-font-size-min: 0.8125rem;

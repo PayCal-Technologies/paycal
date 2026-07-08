@@ -956,6 +956,270 @@ if (passkeyPhoneButton) {
 const registerButton = document.getElementById('register-passkey');
 const registerEmailInput = document.getElementById('register-email');
 const registerDeviceInput = document.getElementById('register-device-name');
+const signupRegisterForm = document.getElementById('register-form');
+const signupStorageKey = 'paycal.signup.personalization.v1';
+const signupDefaults = {
+  tier: signupRegisterForm instanceof HTMLFormElement ? String(signupRegisterForm.dataset.signupInitialTier || 'free') : 'free',
+  themeMode: 'system',
+  accentPreset: 'blue',
+  textSize: 'standard',
+  spacing: 'comfortable',
+  language: signupRegisterForm instanceof HTMLFormElement ? String(signupRegisterForm.dataset.signupInitialLanguage || 'en') : 'en',
+  payFrequency: 'biweekly',
+  signupIntent: 'worker',
+};
+const signupAccentLabels = {
+  blue: 'Blue',
+  green: 'Green',
+  purple: 'Purple',
+  amber: 'Amber',
+  red: 'Red',
+  slate: 'Slate',
+};
+const signupTierLabels = {
+  free: 'Free Personal',
+  premium: 'Premium',
+  business: 'Business',
+};
+const signupTierTitles = {
+  free: 'Your PayCal',
+  premium: 'Your PayCal Premium',
+  business: 'Your PayCal Business workspace',
+};
+const signupPayLabels = {
+  weekly: 'Weekly',
+  biweekly: 'Biweekly',
+  semimonthly: 'Semimonthly',
+  monthly: 'Monthly',
+};
+const signupIntentLabels = {
+  worker: 'Worker',
+  manager: 'Manager',
+  business: 'Business',
+};
+const signupSystemThemeQuery = typeof window.matchMedia === 'function'
+  ? window.matchMedia('(prefers-color-scheme: light)')
+  : null;
+
+const safeSignupValue = (value, allowed, fallback) => {
+  const normalized = String(value || '').trim().toLowerCase();
+  return allowed.includes(normalized) ? normalized : fallback;
+};
+
+const getCheckedSignupValue = (name, fallback = '') => {
+  if (!(signupRegisterForm instanceof HTMLFormElement)) {
+    return fallback;
+  }
+  const checked = signupRegisterForm.querySelector(`input[name="${name}"]:checked`);
+  return checked instanceof HTMLInputElement ? checked.value : fallback;
+};
+
+const setCheckedSignupValue = (name, value) => {
+  if (!(signupRegisterForm instanceof HTMLFormElement)) {
+    return;
+  }
+  const inputs = Array.from(signupRegisterForm.querySelectorAll(`input[name="${name}"]`));
+  inputs.forEach((input) => {
+    if (input instanceof HTMLInputElement) {
+      input.checked = input.value === value;
+    }
+  });
+};
+
+const setSelectSignupValue = (id, value) => {
+  const select = document.getElementById(id);
+  if (!(select instanceof HTMLSelectElement)) {
+    return;
+  }
+  const hasOption = Array.from(select.options).some((option) => option.value === value);
+  if (hasOption) {
+    select.value = value;
+  }
+};
+
+const selectedSignupAccent = () => {
+  const selected = document.querySelector('.auth-accent-swatch.is-selected');
+  return selected instanceof HTMLElement ? String(selected.dataset.signupAccent || 'blue') : 'blue';
+};
+
+const resolveSignupVariant = (themeMode) => {
+  if (themeMode === 'light') return 'light';
+  if (themeMode === 'dark') return 'dark';
+  return signupSystemThemeQuery?.matches === true ? 'light' : 'dark';
+};
+
+const readStoredSignupPreferences = () => {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(signupStorageKey) || '{}');
+    if (!parsed || typeof parsed !== 'object') {
+      return {};
+    }
+    return {
+      tier: safeSignupValue(parsed.tier, ['free', 'premium', 'business'], signupDefaults.tier),
+      themeMode: safeSignupValue(parsed.themeMode, ['light', 'dark', 'system'], signupDefaults.themeMode),
+      accentPreset: safeSignupValue(parsed.accentPreset, ['blue', 'green', 'purple', 'amber', 'red', 'slate'], signupDefaults.accentPreset),
+      textSize: safeSignupValue(parsed.textSize, ['standard', 'larger'], signupDefaults.textSize),
+      spacing: safeSignupValue(parsed.spacing, ['compact', 'comfortable'], signupDefaults.spacing),
+      language: typeof parsed.language === 'string' ? parsed.language : signupDefaults.language,
+      payFrequency: safeSignupValue(parsed.payFrequency, ['weekly', 'biweekly', 'semimonthly', 'monthly'], signupDefaults.payFrequency),
+      signupIntent: safeSignupValue(parsed.signupIntent, ['worker', 'manager', 'business'], signupDefaults.signupIntent),
+    };
+  } catch (_error) {
+    return {};
+  }
+};
+
+const storeSignupPreferences = (state) => {
+  try {
+    window.localStorage.setItem(signupStorageKey, JSON.stringify({
+      tier: state.tier,
+      themeMode: state.themeMode,
+      accentPreset: state.accentPreset,
+      textSize: state.textSize,
+      spacing: state.spacing,
+      language: state.language,
+      payFrequency: state.payFrequency,
+      signupIntent: state.signupIntent,
+    }));
+  } catch (_error) {
+    // Browser storage is best-effort only.
+  }
+};
+
+const clearStoredSignupPreferences = () => {
+  try {
+    window.localStorage.removeItem(signupStorageKey);
+  } catch (_error) {
+    // Browser storage is best-effort only.
+  }
+};
+
+const readSignupPersonalizationState = () => {
+  const languageSelect = document.getElementById('signup-language');
+  const paySelect = document.getElementById('signup-pay-frequency');
+  const dashboardNameInput = document.getElementById('signup-dashboard-name');
+  const themeMode = safeSignupValue(getCheckedSignupValue('signup_theme_mode', signupDefaults.themeMode), ['light', 'dark', 'system'], signupDefaults.themeMode);
+  const tier = safeSignupValue(getCheckedSignupValue('signup_tier', signupDefaults.tier), ['free', 'premium', 'business'], signupDefaults.tier);
+  const accentPreset = safeSignupValue(selectedSignupAccent(), ['blue', 'green', 'purple', 'amber', 'red', 'slate'], signupDefaults.accentPreset);
+
+  return {
+    tier,
+    themeMode,
+    resolvedVariant: resolveSignupVariant(themeMode),
+    accentPreset,
+    textSize: safeSignupValue(getCheckedSignupValue('signup_text_size', signupDefaults.textSize), ['standard', 'larger'], signupDefaults.textSize),
+    spacing: safeSignupValue(getCheckedSignupValue('signup_spacing', signupDefaults.spacing), ['compact', 'comfortable'], signupDefaults.spacing),
+    language: languageSelect instanceof HTMLSelectElement ? languageSelect.value : signupDefaults.language,
+    payFrequency: paySelect instanceof HTMLSelectElement ? safeSignupValue(paySelect.value, ['weekly', 'biweekly', 'semimonthly', 'monthly'], signupDefaults.payFrequency) : signupDefaults.payFrequency,
+    signupIntent: safeSignupValue(getCheckedSignupValue('signup_intent', signupDefaults.signupIntent), ['worker', 'manager', 'business'], signupDefaults.signupIntent),
+    dashboardName: dashboardNameInput instanceof HTMLInputElement ? dashboardNameInput.value.trim() : '',
+  };
+};
+
+const syncSignupAccentButtons = (accentPreset) => {
+  document.querySelectorAll('.auth-accent-swatch').forEach((button) => {
+    if (!(button instanceof HTMLElement)) {
+      return;
+    }
+    const selected = button.dataset.signupAccent === accentPreset;
+    button.classList.toggle('is-selected', selected);
+    button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  });
+};
+
+const syncSignupTierCards = (tier) => {
+  document.querySelectorAll('[data-signup-tier-card]').forEach((card) => {
+    if (!(card instanceof HTMLElement)) {
+      return;
+    }
+    card.classList.toggle('is-selected', card.dataset.signupTierCard === tier);
+  });
+};
+
+const applySignupPreviewTheme = (state) => {
+  document.documentElement.setAttribute('data-accent-preset', state.accentPreset);
+  document.body.dataset.authPreviewVariant = state.resolvedVariant;
+  const shell = document.getElementById('auth-shell');
+  if (shell instanceof HTMLElement) {
+    shell.dataset.signupPreviewVariant = state.resolvedVariant;
+  }
+};
+
+const updateSignupPreview = (state) => {
+  const tierLabel = signupTierLabels[state.tier] || signupTierLabels.free;
+  const accentLabel = signupAccentLabels[state.accentPreset] || state.accentPreset;
+  const payLabel = signupPayLabels[state.payFrequency] || state.payFrequency;
+  const themeLabel = state.themeMode === 'system' ? 'System' : (state.resolvedVariant === 'light' ? 'Light' : 'Dark');
+  const spacingLabel = state.spacing === 'compact' ? 'Compact' : 'Comfortable';
+  const textLabel = state.textSize === 'larger' ? 'Larger text' : 'Standard text';
+  const intentLabel = signupIntentLabels[state.signupIntent] || signupIntentLabels.worker;
+  const fallbackTitle = signupTierTitles[state.tier] || signupTierTitles.free;
+  const title = state.dashboardName !== '' ? state.dashboardName : fallbackTitle;
+
+  const confirmEl = document.querySelector('[data-signup-tier-confirm]');
+  if (confirmEl) {
+    confirmEl.textContent = `Your starting setup: ${tierLabel}.`;
+  }
+
+  const titleEl = document.querySelector('[data-signup-preview-title]');
+  if (titleEl) {
+    titleEl.textContent = title;
+  }
+
+  const metaEl = document.querySelector('[data-signup-preview-meta]');
+  if (metaEl) {
+    metaEl.textContent = `${themeLabel} theme - ${accentLabel} accent - ${payLabel} pay`;
+  }
+
+  const listEl = document.querySelector('[data-signup-preview-list]');
+  if (listEl) {
+    const items = state.tier === 'business'
+      ? ['Business dashboard', 'Shared calendar view', 'Team reporting', `${spacingLabel} spacing`, textLabel]
+      : [`${spacingLabel} calendar spacing`, textLabel, `${intentLabel} setup`];
+    listEl.replaceChildren(...items.map((item) => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      return li;
+    }));
+  }
+};
+
+const syncSignupPersonalization = ({ persist = true } = {}) => {
+  if (!(signupRegisterForm instanceof HTMLFormElement)) {
+    return;
+  }
+  const state = readSignupPersonalizationState();
+  syncSignupTierCards(state.tier);
+  syncSignupAccentButtons(state.accentPreset);
+  applySignupPreviewTheme(state);
+  updateSignupPreview(state);
+  if (persist) {
+    storeSignupPreferences(state);
+  }
+};
+
+const applyInitialSignupPersonalization = () => {
+  if (!(signupRegisterForm instanceof HTMLFormElement)) {
+    return;
+  }
+  const stored = readStoredSignupPreferences();
+  const initialTier = String(signupRegisterForm.dataset.signupInitialTier || '').trim().toLowerCase();
+  const state = {
+    ...signupDefaults,
+    ...stored,
+    tier: ['free', 'premium', 'business'].includes(initialTier) ? initialTier : (stored.tier || signupDefaults.tier),
+  };
+
+  setCheckedSignupValue('signup_tier', state.tier);
+  setCheckedSignupValue('signup_theme_mode', state.themeMode);
+  setCheckedSignupValue('signup_text_size', state.textSize);
+  setCheckedSignupValue('signup_spacing', state.spacing);
+  setCheckedSignupValue('signup_intent', state.signupIntent);
+  setSelectSignupValue('signup-language', state.language);
+  setSelectSignupValue('signup-pay-frequency', state.payFrequency);
+  syncSignupAccentButtons(state.accentPreset);
+  syncSignupPersonalization({ persist: false });
+};
 
 let lastSuggestedRegisterDeviceName = '';
 const syncSuggestedRegisterDeviceName = () => {
@@ -976,6 +1240,40 @@ if (registerEmailInput && registerDeviceInput) {
   syncSuggestedRegisterDeviceName();
   registerEmailInput.addEventListener('input', syncSuggestedRegisterDeviceName);
   registerEmailInput.addEventListener('blur', syncSuggestedRegisterDeviceName);
+}
+
+if (signupRegisterForm) {
+  applyInitialSignupPersonalization();
+  signupRegisterForm.addEventListener('change', (event) => {
+    const target = event.target;
+    if (
+      target instanceof HTMLInputElement
+      || target instanceof HTMLSelectElement
+    ) {
+      syncSignupPersonalization();
+    }
+  });
+  signupRegisterForm.addEventListener('input', (event) => {
+    if (event.target instanceof HTMLInputElement && event.target.id === 'signup-dashboard-name') {
+      syncSignupPersonalization({ persist: false });
+    }
+  });
+  document.querySelectorAll('.auth-accent-swatch').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!(button instanceof HTMLElement)) {
+        return;
+      }
+      syncSignupAccentButtons(String(button.dataset.signupAccent || 'blue'));
+      syncSignupPersonalization();
+    });
+  });
+  if (signupSystemThemeQuery && typeof signupSystemThemeQuery.addEventListener === 'function') {
+    signupSystemThemeQuery.addEventListener('change', () => {
+      if (getCheckedSignupValue('signup_theme_mode', signupDefaults.themeMode) === 'system') {
+        syncSignupPersonalization({ persist: false });
+      }
+    });
+  }
 }
 
 if (registerButton) {
@@ -1006,6 +1304,7 @@ if (registerButton) {
       const email = emailInput?.value?.trim() || '';
       const inviteCode = inviteInput?.value?.trim() || '';
       const deviceName = deviceInput?.value?.trim() || suggestedDeviceNameFromEmail(email);
+      const signupPersonalization = readSignupPersonalizationState();
 
       if (!validateRegisterFields({ fullName, email })) {
         setRegisterStatus(DEFAULT_REGISTER_STATUS);
@@ -1017,7 +1316,7 @@ if (registerButton) {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ fullName, email, inviteCode, deviceName }),
+        body: JSON.stringify({ fullName, email, inviteCode, deviceName, personalization: signupPersonalization }),
       });
 
       const startPayload = startPayloadRaw && typeof startPayloadRaw === 'object' ? startPayloadRaw : {};
@@ -1085,6 +1384,7 @@ if (registerButton) {
       }
 
       hideAuthBanner();
+      clearStoredSignupPreferences();
       window.location.href = '/';
     } catch (error) {
       const msg = error?.message || 'Registration failed. Try again.';

@@ -924,6 +924,58 @@ $payPeriodGrid = new DataGrid([
 		]),
 ]);
 
+$signupSelectedTier = strtolower(trim((string) ($currentUser->signup_selected_tier ?? '')));
+if (!in_array($signupSelectedTier, ['free', 'premium', 'business'], true)) {
+	$subscription = SubscriptionRepository::get((string) $currentUser->user_uuid);
+	$signupSelectedTier = strtolower((string) ($subscription['tier']->value ?? 'free'));
+}
+if (!in_array($signupSelectedTier, ['free', 'premium', 'business'], true)) {
+	$signupSelectedTier = 'free';
+}
+
+$signupTierLabel = match ($signupSelectedTier) {
+	'business' => 'Business',
+	'premium' => 'Premium',
+	default => 'Free Personal',
+};
+$signupDashboardName = trim((string) ($currentUser->dashboard_name ?? ''));
+$signupDashboardDisplayName = $signupDashboardName !== ''
+	? $signupDashboardName
+	: ($signupSelectedTier === 'business' ? 'your PayCal Business workspace' : 'your PayCal');
+$signupThemeMode = strtolower(trim((string) ($currentUser->signup_theme_mode ?? '')));
+$signupThemeLabel = match ($signupThemeMode) {
+	'light' => 'Light mode',
+	'dark' => 'Dark mode',
+	'system' => 'System theme',
+	default => ((string) ($currentUser->variant ?? 'dark')) === 'light' ? 'Light mode' : 'Dark mode',
+};
+$signupAccentPresets = UserPreferenceDefaults::accentPresets();
+$signupAccentKey = strtolower(trim((string) ($currentUser->accent_preset ?? UserPreferenceDefaults::DEFAULT_ACCENT_PRESET)));
+$signupAccentLabel = (string) ($signupAccentPresets[$signupAccentKey]['label'] ?? $signupAccentPresets[UserPreferenceDefaults::DEFAULT_ACCENT_PRESET]['label']);
+$signupPayFrequency = strtolower(trim((string) ($currentUser->pay_frequency ?? 'biweekly')));
+$signupPayLabel = match ($signupPayFrequency) {
+	'weekly' => 'Weekly pay',
+	'semimonthly' => 'Semimonthly pay',
+	'monthly' => 'Monthly pay',
+	default => 'Biweekly pay',
+};
+$signupSpacingValue = is_numeric($currentUser->spacing ?? null) ? (int) $currentUser->spacing : 0;
+$signupTextValue = is_numeric($currentUser->text ?? null) ? (int) $currentUser->text : 0;
+$signupSpacingLabel = $signupSpacingValue < 0 ? 'Compact calendar spacing' : 'Comfortable calendar spacing';
+$signupTextLabel = $signupTextValue > 0 ? 'Larger text' : 'Standard text';
+$showFirstRunSetup = !$isDelegatedCalendarView && trim((string) ($currentUser->onboarding_completed_at ?? '')) !== '';
+$firstRunSetupItems = [
+	$signupTierLabel,
+	$signupThemeLabel,
+	$signupAccentLabel . ' accent',
+	$signupPayLabel,
+	$signupSpacingLabel,
+	$signupTextLabel,
+];
+$firstRunNextSteps = $signupSelectedTier === 'business'
+	? ['Add a business site', 'Invite a member', 'Create a group', 'Generate your first report']
+	: ['Add your first site', 'Add your first work entry', 'Review your pay period'];
+
 
 $message = '&nbsp;';
 $pageTitle = (string) html_index_i18n('CALENDAR') . ' - [PayCal]';
@@ -933,6 +985,28 @@ $isEmailVerified = User::current()->email_verified ?? false;
 
 require_once Environment::appHome().'html/header.php';
 ?>
+
+<?php if ($showFirstRunSetup): ?>
+<section class="first_run_setup" aria-labelledby="first-run-setup-title">
+	<div class="first_run_setup_summary">
+		<p class="first_run_setup_kicker">Your PayCal is ready</p>
+		<h1 id="first-run-setup-title">Welcome to <?php echo htmlspecialchars($signupDashboardDisplayName, ENT_QUOTES, 'UTF-8'); ?>.</h1>
+		<ul class="first_run_setup_chips" aria-label="Your setup">
+			<?php foreach ($firstRunSetupItems as $firstRunSetupItem): ?>
+				<li><?php echo htmlspecialchars($firstRunSetupItem, ENT_QUOTES, 'UTF-8'); ?></li>
+			<?php endforeach; ?>
+		</ul>
+	</div>
+	<div class="first_run_setup_next">
+		<h2>Next</h2>
+		<ol>
+			<?php foreach ($firstRunNextSteps as $firstRunNextStep): ?>
+				<li><?php echo htmlspecialchars($firstRunNextStep, ENT_QUOTES, 'UTF-8'); ?></li>
+			<?php endforeach; ?>
+		</ol>
+	</div>
+</section>
+<?php endif; ?>
 
 <section
 	id="calendar-v2-root"

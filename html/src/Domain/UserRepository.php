@@ -723,6 +723,24 @@ final class UserRepository
       case 'timezone':
         $user->timezone = $value;
         return;
+      case 'currency':
+        $user->currency = $value;
+        return;
+      case 'dashboard_name':
+        $user->dashboard_name = $value;
+        return;
+      case 'signup_selected_tier':
+        $user->signup_selected_tier = $value;
+        return;
+      case 'signup_intent':
+        $user->signup_intent = $value;
+        return;
+      case 'signup_theme_mode':
+        $user->signup_theme_mode = $value;
+        return;
+      case 'onboarding_completed_at':
+        $user->onboarding_completed_at = $value;
+        return;
       case 'session_timeout':
         $user->session_timeout = $value;
         return;

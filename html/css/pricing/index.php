@@ -78,6 +78,23 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   line-height: 1.6;
 }
 
+.pricing_contrast_label {
+  width: fit-content;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.85rem;
+  margin-top: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-primary, #29a8e0) 42%, var(--panel-border, #333));
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--color-primary, #29a8e0) 12%, transparent);
+  color: var(--text-color, #f5f7fb);
+  padding: 0.28rem 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
 .pricing_card .status_text {
   min-height: 1.25rem;
 }

@@ -201,6 +201,7 @@ final class UserPreferenceDefaults
     'blue' => ['label' => 'Blue', 'hex' => '#3B82F6'],
     'cobalt' => ['label' => 'Cobalt', 'hex' => '#2563EB'],
     'royal' => ['label' => 'Royal', 'hex' => '#1D4ED8'],
+    'slate' => ['label' => 'Slate', 'hex' => '#64748B'],
     'periwinkle' => ['label' => 'Periwinkle', 'hex' => '#818CF8'],
     'indigo' => ['label' => 'Indigo', 'hex' => '#6366F1'],
     'iris' => ['label' => 'Iris', 'hex' => '#4F46E5'],

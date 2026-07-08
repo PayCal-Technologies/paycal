@@ -39,6 +39,11 @@ if (Authentication::validateAndTouchSession()) {
 
 $authTabRaw = InputSanitizer::getString('auth_tab') ?? 'signin';
 $authTab = $authTabRaw === 'register' ? 'register' : 'signin';
+$signupTierRaw = strtolower(trim((string) (InputSanitizer::getString('tier') ?? '')));
+$signupTier = in_array($signupTierRaw, ['free', 'premium', 'business'], true) ? $signupTierRaw : 'free';
+if ($signupTierRaw !== '') {
+  $authTab = 'register';
+}
 
 $signinMessage = InputSanitizer::getString('signin_message') ?? '';
 $verificationSuccess = (InputSanitizer::getString('verification_success') ?? '') === '1';
@@ -79,6 +84,9 @@ $accountRecoveryEnabled = filter_var(\PayCal\Domain\Config\SystemConfig::get('ac
 $immediateUiAllowed = EarlyAccessImmediateUi::signedOutAllowed();
 $immediateUiRuntimeEnabled = EarlyAccessImmediateUi::runtimeEnabled();
 $siteName = Strings::headerI18n('SITE_NAME');
+$signupLanguage = $requestedLanguage !== '' ? $requestedLanguage : Language::DEFAULT;
+$signupAccentKeys = ['blue', 'green', 'purple', 'amber', 'red', 'slate'];
+$signupAccentPresets = array_intersect_key(UserPreferenceDefaults::accentPresets(), array_flip($signupAccentKeys));
 
 $i18nKeys = [
   'AUTH_BETA_NOTICE',
@@ -193,7 +201,136 @@ require_once __DIR__ . '/../header.php';
           </section>
 
           <section class="auth-panel" id="panel-register" role="tabpanel" aria-labelledby="tab-register" aria-label="<?php echo htmlspecialchars($i18n['AUTH_REGISTER_PANEL_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="<?php echo $isRegisterTab ? 'false' : 'true'; ?>"<?php echo $isRegisterTab ? '' : ' inert'; ?>>
-            <form id="register-form" method="POST" action="/auth/<?php echo $authLanguageQuery; ?>">
+            <form id="register-form" method="POST" action="/auth/<?php echo $authLanguageQuery; ?>" data-signup-initial-tier="<?php echo htmlspecialchars($signupTier, ENT_QUOTES, 'UTF-8'); ?>" data-signup-initial-language="<?php echo htmlspecialchars($signupLanguage, ENT_QUOTES, 'UTF-8'); ?>">
+
+              <section class="auth-signup-personalization" aria-labelledby="signup-personalization-heading">
+                <div class="auth-signup-progress" aria-label="Signup steps">
+                  <span class="is-active">Choose tier</span>
+                  <span>Personalize</span>
+                  <span>Secure account</span>
+                </div>
+
+                <h2 id="signup-personalization-heading">Make PayCal yours</h2>
+                <p class="auth-signup-intro">This is the setup you'll start with. You can change it anytime.</p>
+
+                <fieldset class="auth-signup-group auth-signup-tier-group">
+                  <legend>Choose your PayCal</legend>
+                  <div class="auth-tier-options" role="radiogroup" aria-label="Choose your PayCal tier">
+                    <label class="auth-tier-card" data-signup-tier-card="free">
+                      <input type="radio" name="signup_tier" value="free"<?php echo $signupTier === 'free' ? ' checked' : ''; ?>>
+                      <span class="auth-tier-card-title">Free Personal</span>
+                      <span class="auth-tier-card-copy">Personal work calendar, pay periods, and reports.</span>
+                    </label>
+                    <label class="auth-tier-card" data-signup-tier-card="premium">
+                      <input type="radio" name="signup_tier" value="premium"<?php echo $signupTier === 'premium' ? ' checked' : ''; ?>>
+                      <span class="auth-tier-card-title">Premium</span>
+                      <span class="auth-tier-card-copy">Personal forecasting, exports, and advanced reports.</span>
+                    </label>
+                    <label class="auth-tier-card" data-signup-tier-card="business">
+                      <input type="radio" name="signup_tier" value="business"<?php echo $signupTier === 'business' ? ' checked' : ''; ?>>
+                      <span class="auth-tier-card-title">Business</span>
+                      <span class="auth-tier-card-copy">Workspace setup for teams, sites, groups, and reports.</span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <fieldset class="auth-signup-group">
+                  <legend>Personalize your PayCal</legend>
+
+                  <div class="auth-signup-control">
+                    <span class="auth-signup-control-label" id="signup-theme-mode-label">Theme</span>
+                    <div class="auth-segmented" role="radiogroup" aria-labelledby="signup-theme-mode-label">
+                      <label><input type="radio" name="signup_theme_mode" value="light"><span>Light</span></label>
+                      <label><input type="radio" name="signup_theme_mode" value="dark"><span>Dark</span></label>
+                      <label><input type="radio" name="signup_theme_mode" value="system" checked><span>System</span></label>
+                    </div>
+                  </div>
+
+                  <div class="auth-signup-control">
+                    <span class="auth-signup-control-label" id="signup-accent-label">Accent</span>
+                    <div class="auth-accent-options" id="signup-accent-options" role="group" aria-labelledby="signup-accent-label">
+                      <?php foreach ($signupAccentPresets as $accentKey => $accentSpec) {
+                        $accentIndex = array_search($accentKey, array_keys(UserPreferenceDefaults::accentPresets()), true);
+                        if (!is_int($accentIndex)) {
+                          $accentIndex = 0;
+                        }
+                      ?>
+                        <button
+                          type="button"
+                          class="auth-accent-swatch settings_accent_swatch"
+                          data-accent-idx="<?php echo $accentIndex; ?>"
+                          data-signup-accent="<?php echo htmlspecialchars((string) $accentKey, ENT_QUOTES, 'UTF-8'); ?>"
+                          aria-label="<?php echo htmlspecialchars((string) $accentSpec['label'], ENT_QUOTES, 'UTF-8'); ?>"
+                          aria-pressed="<?php echo $accentKey === UserPreferenceDefaults::DEFAULT_ACCENT_PRESET ? 'true' : 'false'; ?>"
+                          title="<?php echo htmlspecialchars((string) $accentSpec['label'], ENT_QUOTES, 'UTF-8'); ?>"
+                        ><span><?php echo htmlspecialchars((string) $accentSpec['label'], ENT_QUOTES, 'UTF-8'); ?></span></button>
+                      <?php } ?>
+                    </div>
+                  </div>
+
+                  <div class="auth-signup-control">
+                    <span class="auth-signup-control-label" id="signup-text-size-label">Text size</span>
+                    <div class="auth-segmented" role="radiogroup" aria-labelledby="signup-text-size-label">
+                      <label><input type="radio" name="signup_text_size" value="standard" checked><span>Standard</span></label>
+                      <label><input type="radio" name="signup_text_size" value="larger"><span>Larger</span></label>
+                    </div>
+                  </div>
+
+                  <div class="auth-signup-control">
+                    <span class="auth-signup-control-label" id="signup-spacing-label">Calendar feel</span>
+                    <div class="auth-segmented" role="radiogroup" aria-labelledby="signup-spacing-label">
+                      <label><input type="radio" name="signup_spacing" value="compact"><span>Compact</span></label>
+                      <label><input type="radio" name="signup_spacing" value="comfortable" checked><span>Comfortable</span></label>
+                    </div>
+                  </div>
+
+                  <div class="auth-signup-grid">
+                    <label for="signup-language">Language</label>
+                    <select id="signup-language" name="signup_language">
+                      <?php foreach (Language::AVAILABLE as $languageCode => $languageLabel) { ?>
+                        <option value="<?php echo htmlspecialchars((string) $languageCode, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $signupLanguage === $languageCode ? ' selected' : ''; ?>><?php echo htmlspecialchars((string) $languageLabel, ENT_QUOTES, 'UTF-8'); ?></option>
+                      <?php } ?>
+                    </select>
+
+                    <label for="signup-pay-frequency">Pay rhythm</label>
+                    <select id="signup-pay-frequency" name="signup_pay_frequency">
+                      <option value="weekly">Weekly</option>
+                      <option value="biweekly" selected>Biweekly</option>
+                      <option value="semimonthly">Semimonthly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                  </div>
+
+                  <div class="auth-signup-control">
+                    <span class="auth-signup-control-label" id="signup-intent-label">First use</span>
+                    <div class="auth-segmented" role="radiogroup" aria-labelledby="signup-intent-label">
+                      <label><input type="radio" name="signup_intent" value="worker" checked><span>Worker</span></label>
+                      <label><input type="radio" name="signup_intent" value="manager"><span>Manager</span></label>
+                      <label><input type="radio" name="signup_intent" value="business"><span>Business</span></label>
+                    </div>
+                  </div>
+
+                  <div class="auth-signup-grid">
+                    <label for="signup-dashboard-name">Calendar or workspace name <span>(optional)</span></label>
+                    <input type="text" id="signup-dashboard-name" name="signup_dashboard_name" maxlength="64" autocomplete="organization" placeholder="My PayCal">
+                  </div>
+                </fieldset>
+
+                <section class="auth-signup-preview" aria-labelledby="signup-preview-title" aria-live="polite">
+                  <p class="auth-signup-preview-kicker" data-signup-tier-confirm>You chose Free Personal.</p>
+                  <h3 id="signup-preview-title" data-signup-preview-title>Your PayCal</h3>
+                  <p data-signup-preview-meta>System theme - Blue accent - Biweekly pay</p>
+                  <ul data-signup-preview-list>
+                    <li>Comfortable calendar spacing</li>
+                    <li>Standard text size</li>
+                    <li>Worker setup</li>
+                  </ul>
+                  <div class="auth-signup-preview-calendar" aria-hidden="true">
+                    <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+                    <strong>6h</strong><strong>8h</strong><span>--</span><strong>10h</strong><strong>8h</strong><span>--</span><span>--</span>
+                  </div>
+                </section>
+              </section>
 
               <section>
                 <label for="register-full-name"><?php echo htmlspecialchars($i18n['AUTH_REGISTER_FULL_NAME_LABEL'], ENT_QUOTES, 'UTF-8'); ?></label>

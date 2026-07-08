@@ -776,3 +776,315 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
       transition: none;
     }
   }
+
+  body[data-auth-preview-variant="light"] {
+    --bg-0: #ffffff;
+    --bg-1: #f5f7fb;
+    --bg-2: #e9eef6;
+    --surface: #ffffff;
+    --surface-2: #f7faff;
+    --surface-3: #eef3fb;
+    --text-0: #17202a;
+    --text-1: #374151;
+    --text-2: #64748b;
+    --line: rgba(30, 41, 59, 0.16);
+    --line-strong: rgba(30, 41, 59, 0.32);
+    --brand: var(--accent-color, #00508f);
+    --brand-ink: var(--accent-contrast-color, #ffffff);
+  }
+
+  body[data-auth-preview-variant="dark"] {
+    --brand: var(--accent-color, #00508f);
+    --brand-ink: var(--accent-contrast-color, #ffffff);
+  }
+
+  .auth-signup-personalization {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.35rem;
+  }
+
+  .auth-signup-progress {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .auth-signup-progress span {
+    min-height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--surface) 84%, transparent);
+    color: var(--text-1);
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+    padding: 0.35rem 0.45rem;
+  }
+
+  .auth-signup-progress span.is-active {
+    border-color: color-mix(in srgb, var(--accent-color, var(--brand)) 72%, var(--line));
+    background: color-mix(in srgb, var(--accent-color, var(--brand)) 18%, var(--surface));
+    color: var(--text-0);
+  }
+
+  .auth-signup-personalization h2 {
+    margin: 0;
+    color: var(--text-0);
+    font-size: 1.28rem;
+    line-height: 1.16;
+    letter-spacing: 0 !important;
+  }
+
+  .auth-signup-intro {
+    margin: -0.65rem 0 0;
+    color: var(--text-1);
+  }
+
+  .auth-signup-group {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 0.85rem;
+    display: grid;
+    gap: 0.82rem;
+    background: color-mix(in srgb, var(--surface) 76%, transparent);
+  }
+
+  .auth-signup-group legend {
+    padding: 0 0.3rem;
+    color: var(--text-0);
+    font-weight: 800;
+    letter-spacing: 0 !important;
+  }
+
+  .auth-tier-options {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .auth-tier-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.18rem 0.55rem;
+    align-items: start;
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text-1);
+    padding: 0.68rem;
+    cursor: pointer;
+  }
+
+  .auth-tier-card input {
+    grid-row: 1 / span 2;
+    margin-top: 0.18rem;
+    accent-color: var(--accent-color, var(--brand));
+  }
+
+  .auth-tier-card-title {
+    color: var(--text-0);
+    font-weight: 800;
+    line-height: 1.16;
+  }
+
+  .auth-tier-card-copy {
+    color: var(--text-1);
+    font-size: 0.95rem;
+    line-height: 1.35;
+  }
+
+  .auth-tier-card.is-selected,
+  .auth-tier-card:focus-within {
+    border-color: color-mix(in srgb, var(--accent-color, var(--brand)) 72%, var(--line));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color, var(--brand)) 20%, transparent);
+  }
+
+  .auth-signup-control {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .auth-signup-control-label {
+    color: var(--text-1);
+    font-weight: 800;
+  }
+
+  .auth-segmented {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+    gap: 0.35rem;
+  }
+
+  .auth-segmented label {
+    position: relative;
+    margin: 0;
+  }
+
+  .auth-segmented input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  .auth-segmented span {
+    min-height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-1);
+    padding: 0.42rem 0.6rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.12;
+    text-align: center;
+  }
+
+  .auth-segmented input:checked + span {
+    border-color: color-mix(in srgb, var(--accent-color, var(--brand)) 76%, var(--line));
+    background: color-mix(in srgb, var(--accent-color, var(--brand)) 18%, var(--surface));
+    color: var(--text-0);
+  }
+
+  .auth-segmented label:focus-within span {
+    outline: 2px solid var(--color-focus-ring, #0096d6);
+    outline-offset: 2px;
+  }
+
+  .auth-accent-options {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(34px, 1fr));
+    gap: 0.42rem;
+  }
+
+  .auth-accent-swatch {
+    position: relative;
+    min-width: 0;
+    aspect-ratio: 1;
+    border: 2px solid var(--line-strong);
+    border-radius: 999px;
+    cursor: pointer;
+    padding: 0;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.34);
+  }
+
+  .auth-accent-swatch span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .auth-accent-swatch.is-selected,
+  .auth-accent-swatch:focus-visible {
+    border-color: var(--text-0);
+    outline: 2px solid var(--color-focus-ring, #0096d6);
+    outline-offset: 2px;
+  }
+
+  .auth-signup-grid {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .auth-signup-grid label {
+    margin: 0;
+  }
+
+  .auth-signup-grid label span {
+    color: var(--text-2);
+    font-weight: 600;
+  }
+
+  .auth-panel select,
+  .auth-signup-grid input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text-0);
+    padding: 0.7rem 0.8rem;
+    outline: none;
+    font: inherit;
+    font-size: var(--text, 1.125rem);
+  }
+
+  .auth-panel select:focus-visible,
+  .auth-signup-grid input[type="text"]:focus-visible {
+    outline: 2px solid var(--color-focus-ring, #0096d6);
+    outline-offset: 2px;
+    border-color: var(--line-strong);
+  }
+
+  .auth-signup-preview {
+    display: grid;
+    gap: 0.58rem;
+    border: 1px solid color-mix(in srgb, var(--accent-color, var(--brand)) 48%, var(--line));
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--accent-color, var(--brand)) 12%, var(--surface));
+    color: var(--text-0);
+    padding: 0.9rem;
+  }
+
+  .auth-signup-preview-kicker {
+    margin: 0;
+    color: var(--text-1);
+    font-weight: 800;
+  }
+
+  .auth-signup-preview h3 {
+    margin: 0;
+    font-size: 1.08rem;
+    line-height: 1.2;
+    letter-spacing: 0 !important;
+  }
+
+  .auth-signup-preview p {
+    margin: 0;
+  }
+
+  .auth-signup-preview ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--text-1);
+  }
+
+  .auth-signup-preview-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.25rem;
+    min-width: 0;
+    border-top: 1px solid var(--line);
+    padding-top: 0.65rem;
+  }
+
+  .auth-signup-preview-calendar > * {
+    min-height: 1.72rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface) 72%, transparent);
+    color: var(--text-1);
+    font-size: 0.82rem;
+    line-height: 1;
+  }
+
+  .auth-signup-preview-calendar strong {
+    background: color-mix(in srgb, var(--accent-color, var(--brand)) 24%, var(--surface));
+    color: var(--text-0);
+  }

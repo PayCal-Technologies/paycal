@@ -35,7 +35,7 @@ $plans = [
     'cadence' => 'CAD/month',
     'summary' => 'Core personal work, wage, calendar, and PDF records with no subscription.',
     'cta' => 'Start free',
-    'href' => '/auth/',
+    'href' => '/auth/?auth_tab=register&tier=free',
   ],
   [
     'name' => 'Premium',
@@ -44,6 +44,7 @@ $plans = [
     'summary' => 'Forecasting, spreadsheet/text exports, advanced graphs, and deeper personal reports for individuals.',
     'plan' => 'premium',
     'cta' => $hasActivePremium ? 'Premium active' : 'Upgrade to Premium',
+    'href' => '/auth/?auth_tab=register&tier=premium',
     'disabled' => $hasActivePremium,
     'featured' => true,
   ],
@@ -52,8 +53,10 @@ $plans = [
     'price' => '$29.99',
     'cadence' => 'CAD/month total',
     'summary' => 'One flat workspace plan for shared member visibility, business reports, audit tools, and aggregate payroll analysis.',
+    'contrast' => 'Compared with Premium: adds shared workspace.',
     'plan' => 'business',
     'cta' => $hasActiveBusiness ? 'Business active' : 'Upgrade to Business',
+    'href' => '/auth/?auth_tab=register&tier=business',
     'disabled' => $hasActiveBusiness,
   ],
 ];
@@ -87,6 +90,9 @@ $features = [
         <div>
           <h2><?php echo htmlspecialchars($plan['name'], ENT_QUOTES, 'UTF-8'); ?></h2>
           <p class="pricing_card_summary"><?php echo htmlspecialchars($plan['summary'], ENT_QUOTES, 'UTF-8'); ?></p>
+          <?php if (isset($plan['contrast'])): ?>
+            <span class="pricing_contrast_label"><?php echo htmlspecialchars((string) $plan['contrast'], ENT_QUOTES, 'UTF-8'); ?></span>
+          <?php endif; ?>
         </div>
         <p class="pricing_price">
           <span><?php echo htmlspecialchars($plan['price'], ENT_QUOTES, 'UTF-8'); ?></span>

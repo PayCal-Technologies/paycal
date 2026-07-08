@@ -12,6 +12,7 @@ use PayCal\Domain\Database;
 use PayCal\Domain\EmailGarum;
 use PayCal\Domain\Config\Environment;
 use PayCal\Domain\Config\SystemConfig;
+use PayCal\Domain\Enums\Subscription;
 use PayCal\Domain\Enums\FormTTL;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\InputSanitizer;
@@ -19,6 +20,8 @@ use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\BusinessDiscoveryService;
 use PayCal\Domain\Response;
 use PayCal\Domain\Security;
+use PayCal\Domain\SignupPersonalization;
+use PayCal\Domain\SubscriptionRepository;
 use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PayCal\Domain\User;
 use PayCal\Domain\UserRepository;
@@ -92,6 +95,7 @@ final class PasskeyController
     $email = InputSanitizer::sanitizeEmail($this->scalarString($body['email'] ?? ''));
     $inviteCode = $this->scalarString($body['inviteCode'] ?? '');
     $deviceName = InputSanitizer::sanitizeString($this->scalarString($body['deviceName'] ?? 'Passkey'));
+    $signupPersonalization = SignupPersonalization::fromSignupPayload($body);
 
     AuthTrace::signupStart('requested', [
       'email_token' => AuthTrace::emailToken($email),
@@ -131,6 +135,16 @@ final class PasskeyController
       $deviceName = 'Passkey';
     }
 
+    if ($signupPersonalization['valid'] !== true) {
+      AuthTrace::signupRejected('start', 'invalid_personalization', [
+        'email_token' => AuthTrace::emailToken($email),
+      ]);
+      Response::error('Invalid signup personalization.', [
+        'errors' => $signupPersonalization['errors'],
+      ], HttpStatus::HTTP_BAD_REQUEST);
+      return;
+    }
+
     $tempUserUUID = User::generateUserUUID();
     $webauthn = $this->createWebAuthn();
     $createArgs = $webauthn->getCreateArgs(
@@ -151,6 +165,7 @@ final class PasskeyController
       'email' => $email,
       'full_name' => $fullName,
       'device_name' => $deviceName,
+      'signup_preferences' => $this->jsonEncodeScalarMap($signupPersonalization['preferences']),
       'created_at' => (string) time(),
     ], self::CHALLENGE_TTL_SECONDS);
 
@@ -205,6 +220,7 @@ final class PasskeyController
     $fullName = InputSanitizer::sanitizeString($this->scalarString($challengeData['full_name'] ?? ''));
     $deviceName = InputSanitizer::sanitizeString($this->scalarString($challengeData['device_name'] ?? 'Passkey'));
     $challengeBinary = $this->decodeB64Url($this->scalarString($challengeData['challenge'] ?? ''));
+    $signupPreferences = SignupPersonalization::fromStoredJson($this->scalarString($challengeData['signup_preferences'] ?? ''));
 
     if ($email === '' || $fullName === '' || $challengeBinary === null) {
       AuthTrace::signupRejected('finish', 'invalid_challenge_payload', [
@@ -290,6 +306,13 @@ final class PasskeyController
       'crypto_version' => '1',
       'last_auth_method' => 'passkey',
     ]);
+
+    $createdUser = UserRepository::getByUUID($userUUID);
+    if ($createdUser instanceof User) {
+      $createdUser->updateSettings(SignupPersonalization::settingsForPersistence($signupPreferences));
+    }
+
+    $this->persistSelectedSignupTier($userUUID, $signupPreferences);
 
     $businessService = new BusinessDiscoveryService();
     $businessService->ensurePersonalBusiness($userUUID);
@@ -1400,6 +1423,49 @@ final class PasskeyController
     }
 
     return (string) json_encode($normalized);
+  }
+
+  /**
+   * Encode a scalar string map for temporary signup challenge storage.
+   *
+   * @param array<string, mixed> $value
+   */
+  private function jsonEncodeScalarMap(array $value): string
+  {
+    $normalized = [];
+    foreach ($value as $key => $item) {
+      if (is_scalar($item) || $item === null) {
+        $normalized[(string) $key] = (string) ($item ?? '');
+      }
+    }
+
+    try {
+      return json_encode($normalized, JSON_THROW_ON_ERROR);
+    } catch (\JsonException) {
+      return '{}';
+    }
+  }
+
+  /**
+   * Persist the selected signup tier for first-run beta onboarding.
+   *
+   * @param array<string, string> $signupPreferences
+   */
+  private function persistSelectedSignupTier(string $userUUID, array $signupPreferences): void
+  {
+    if ($userUUID === '') {
+      return;
+    }
+
+    $tier = SignupPersonalization::selectedTier($signupPreferences);
+    if ($tier === Subscription::BUSINESS) {
+      SubscriptionRepository::upgradeToBusiness($userUUID);
+      return;
+    }
+
+    if ($tier === Subscription::PREMIUM) {
+      SubscriptionRepository::upgradeToPremium($userUUID);
+    }
   }
 
   /**
