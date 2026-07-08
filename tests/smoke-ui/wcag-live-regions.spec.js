@@ -75,7 +75,7 @@ test.describe('WCAG-017 live-region structure: /auth/', () => {
   });
 
   test('auth: register inline status paragraph is polite with role=status', async ({ page }) => {
-    await openPublic(page, '/auth/?auth_tab=register');
+    await openPublic(page, '/auth/signup/');
 
     const register = page.locator('#register-passkey-status');
     await expect(register).toHaveAttribute('role', 'status');
@@ -83,7 +83,7 @@ test.describe('WCAG-017 live-region structure: /auth/', () => {
     await expect(register).toHaveAttribute('aria-atomic', 'true');
   });
 
-  test('auth: no extra aria-live regions outside the expected three', async ({ page }) => {
+  test('auth: no extra aria-live regions outside the expected sign-in regions', async ({ page }) => {
     await openPublic(page, '/auth/');
 
     const liveRegions = await page.evaluate(() => {
@@ -95,7 +95,8 @@ test.describe('WCAG-017 live-region structure: /auth/', () => {
       }));
     });
 
-    // Expected: assertive banner + signin-passkey-status + register-passkey-status
+    // Expected on /auth/: assertive banner + signin-passkey-status.
+    // The register status now lives on /auth/signup/.
     // Plus server-rendered PHP success/error paragraphs which are conditionally present.
     // We filter to permanent (non-conditional) ones.
     const permanent = liveRegions.filter(
@@ -105,7 +106,7 @@ test.describe('WCAG-017 live-region structure: /auth/', () => {
         r.id === 'register-passkey-status'
     );
 
-    expect(permanent.length).toBe(3);
+    expect(permanent.length).toBe(2);
 
     const assertiveCount = liveRegions.filter((r) => r.live === 'assertive').length;
     expect(

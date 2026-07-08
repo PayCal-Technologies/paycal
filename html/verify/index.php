@@ -45,7 +45,7 @@ $cssVersion = \PayCal\Domain\Environment::appVersion();
       <input type="text" id="verification_code" name="verification_code" maxlength="7" pattern="[A-Z]{3}-[A-Z]{3}" class="verification-input" inputmode="text" aria-required="true" aria-label="<?php echo htmlspecialchars($i18n['VERIFY_CODE_INPUT_ARIA'], ENT_QUOTES, 'UTF-8'); ?>" required autofocus placeholder="<?php echo htmlspecialchars($i18n['VERIFY_CODE_PLACEHOLDER'], ENT_QUOTES, 'UTF-8'); ?>" data-verify-code-format="true">
       <button type="submit"><?php echo htmlspecialchars($i18n['VERIFY_BUTTON'], ENT_QUOTES, 'UTF-8'); ?></button>
     </form>
-    <p><a href="/auth/?auth_tab=register"><?php echo htmlspecialchars($i18n['VERIFY_BACK_TO_REGISTER'], ENT_QUOTES, 'UTF-8'); ?></a></p>
+    <p><a href="/auth/signup/"><?php echo htmlspecialchars($i18n['VERIFY_BACK_TO_REGISTER'], ENT_QUOTES, 'UTF-8'); ?></a></p>
   </main>
   <?php $verifyCodeInputSriAttribute = \PayCal\Domain\Render::sriAttribute('js/signin/verify-code-input.js'); ?>
   <script type="module" src="/js/signin/verify-code-input.js?v=<?php echo htmlspecialchars(\PayCal\Domain\Render::assetCacheVersion('js/signin/verify-code-input.js'), ENT_QUOTES, 'UTF-8'); ?>"<?php echo $verifyCodeInputSriAttribute; ?>></script>

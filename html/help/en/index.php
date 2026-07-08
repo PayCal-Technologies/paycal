@@ -2,7 +2,7 @@
 
 $current_page = 'PAGE_HELP';
 
-require_once __DIR__.'/../../config.php';
+require_once __DIR__ . '/../../config.php';
 
 if (function_exists('en_index_i18n') === false) {
   function en_index_i18n(string $key): string
@@ -45,7 +45,7 @@ Authentication::redirectHomeIfUnauthenticated();
       <li><a href="#getting-started"><?php echo en_index_i18n('HELP_TOC_GETTING_STARTED'); ?></a></li>
       <li><a href="#detailed-guides"><?php echo en_index_i18n('DETAILED_GUIDES'); ?></a></li>
       <li><a href="#troubleshooting-faq"><?php echo en_index_i18n('HELP_TOC_TROUBLESHOOTING'); ?> &amp; <?php echo en_index_i18n('HELP_FAQ_SHORT'); ?></a></li>
-      <li><a href="#contact-us"><?php echo en_index_i18n('CONTACT_US'); ?></a></li>
+      <li><a href="/contact/"><?php echo en_index_i18n('CONTACT_US'); ?></a></li>
     </ul>
   </section>
 ?>
@@ -178,7 +178,7 @@ echo Render::template('keyboard-shortcuts-help-list', $aRenders);
     <h2 class="section_header centered"><?php echo en_index_i18n('HELP_GETTING_STARTED_TITLE'); ?></h2>
     <p><?php echo en_index_i18n('HELP_GETTING_STARTED_INTRO'); ?></p>
     <ol>
-      <li><strong><?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_1_TITLE'); ?></strong> <?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_1_PREFIX'); ?> <a href="/auth/?auth_tab=register"><?php echo en_index_i18n('HELP_GETTING_STARTED_REGISTRATION_PAGE'); ?></a> <?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_1_SUFFIX'); ?></li>
+      <li><strong><?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_1_TITLE'); ?></strong> <?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_1_PREFIX'); ?> <a href="/auth/signup/"><?php echo en_index_i18n('HELP_GETTING_STARTED_REGISTRATION_PAGE'); ?></a> <?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_1_SUFFIX'); ?></li>
       <li><strong><?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_2_TITLE'); ?></strong> <?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_2_TEXT'); ?></li>
       <li><strong><?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_3_TITLE'); ?></strong> <?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_3_PREFIX'); ?> <a href="/settings/#sites"><?php echo en_index_i18n('HELP_GETTING_STARTED_SETTINGS_SITES'); ?></a> <?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_3_MIDDLE'); ?> <a href="<?php echo \PayCal\Domain\Environment::appURL('help/en/sites.html'); ?>"><?php echo en_index_i18n('HELP_GETTING_STARTED_SITES_HELP_PAGE'); ?></a>.</li>
       <li><strong><?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_4_TITLE'); ?></strong> <?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_4_PREFIX'); ?> <a href="/settings/#pay_period"><?php echo en_index_i18n('HELP_GETTING_STARTED_SETTINGS_PAY_PERIOD'); ?></a> <?php echo en_index_i18n('HELP_GETTING_STARTED_STEP_4_SUFFIX'); ?></li>
@@ -215,7 +215,6 @@ echo Render::template('keyboard-shortcuts-help-list', $aRenders);
 </section>
 ?>
 ?>
-
 
 
 

@@ -33,10 +33,19 @@ final class FormValidationAriaContractTest extends TestCase
   public function authSignInAndRegisterFieldsExposeValidationContracts(): void
   {
     $authPage = (string) file_get_contents($this->htmlRoot() . '/auth/index.php');
+    $signupPage = (string) file_get_contents($this->htmlRoot() . '/auth/signup/index.php');
 
     $expectedBindings = [
       'id="signin_email_error"',
       'aria-describedby="signin-passkey-status signin_email_error signin-notice"',
+      'role="alert" aria-live="polite"',
+    ];
+
+    foreach ($expectedBindings as $bindingSnippet) {
+      $this->assertStringContainsString($bindingSnippet, $authPage);
+    }
+
+    $expectedSignupBindings = [
       'id="register_full_name_error"',
       'id="register_email_error"',
       'id="register_invite_code_error"',
@@ -49,8 +58,8 @@ final class FormValidationAriaContractTest extends TestCase
       'role="alert" aria-live="polite"',
     ];
 
-    foreach ($expectedBindings as $bindingSnippet) {
-      $this->assertStringContainsString($bindingSnippet, $authPage);
+    foreach ($expectedSignupBindings as $bindingSnippet) {
+      $this->assertStringContainsString($bindingSnippet, $signupPage);
     }
   }
 

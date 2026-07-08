@@ -131,7 +131,7 @@ const applyRegisterFieldErrorsFromMessage = (message) => {
     setFieldErrorState(document.getElementById('register-full-name'), 'register_full_name_error', AUTH_T.AUTH_JS_ENTER_FULL_NAME);
     return;
   }
-  if (/valid email is required/i.test(normalized) || normalized === AUTH_T.AUTH_JS_ENTER_VALID_EMAIL || normalized === AUTH_T.AUTH_JS_EMAIL_REQUIRED) {
+  if (/valid email is required/i.test(normalized) || normalized === AUTH_T.AUTH_JS_ENTER_VALID_EMAIL) {
     setFieldErrorState(document.getElementById('register-email'), 'register_email_error', AUTH_T.AUTH_JS_ENTER_VALID_EMAIL);
     return;
   }
@@ -154,7 +154,7 @@ const validateRegisterFields = ({ fullName, email }) => {
   }
 
   if (!email) {
-    setFieldErrorState(document.getElementById('register-email'), 'register_email_error', AUTH_T.AUTH_JS_EMAIL_REQUIRED);
+    setFieldErrorState(document.getElementById('register-email'), 'register_email_error', AUTH_T.AUTH_JS_ENTER_VALID_EMAIL);
     firstInvalidField = firstInvalidField || document.getElementById('register-email');
   } else if (!emailLooksValid(email)) {
     setFieldErrorState(document.getElementById('register-email'), 'register_email_error', AUTH_T.AUTH_JS_ENTER_VALID_EMAIL);
@@ -1138,7 +1138,7 @@ const syncSignupTierCards = (tier) => {
 
 const applySignupPreviewTheme = (state) => {
   document.documentElement.setAttribute('data-accent-preset', state.accentPreset);
-  document.body.dataset.authPreviewVariant = state.resolvedVariant;
+  delete document.body.dataset.authPreviewVariant;
   const shell = document.getElementById('auth-shell');
   if (shell instanceof HTMLElement) {
     shell.dataset.signupPreviewVariant = state.resolvedVariant;
@@ -1221,6 +1221,69 @@ const applyInitialSignupPersonalization = () => {
   syncSignupPersonalization({ persist: false });
 };
 
+const signupStepOrder = ['tier', 'personalize', 'secure'];
+
+const signupStepIndex = (step) => {
+  const index = signupStepOrder.indexOf(String(step || ''));
+  return index >= 0 ? index : 0;
+};
+
+const setSignupStepInert = (stepEl, shouldBeInert) => {
+  if ('inert' in stepEl) {
+    stepEl.inert = shouldBeInert;
+  }
+  if (shouldBeInert) {
+    stepEl.setAttribute('inert', '');
+  } else {
+    stepEl.removeAttribute('inert');
+  }
+};
+
+const showSignupStep = (step, { focus = false } = {}) => {
+  if (!(signupRegisterForm instanceof HTMLFormElement)) {
+    return;
+  }
+
+  const nextStep = signupStepOrder.includes(step) ? step : signupStepOrder[0];
+  const nextStepIndex = signupStepIndex(nextStep);
+  signupRegisterForm.dataset.signupCurrentStep = nextStep;
+
+  signupRegisterForm.querySelectorAll('[data-signup-step]').forEach((stepEl) => {
+    if (!(stepEl instanceof HTMLElement)) {
+      return;
+    }
+    const active = stepEl.dataset.signupStep === nextStep;
+    stepEl.classList.toggle('is-active', active);
+    stepEl.hidden = !active;
+    stepEl.setAttribute('aria-hidden', active ? 'false' : 'true');
+    setSignupStepInert(stepEl, !active);
+  });
+
+  signupRegisterForm.querySelectorAll('[data-signup-step-trigger]').forEach((trigger) => {
+    if (!(trigger instanceof HTMLElement)) {
+      return;
+    }
+    const triggerStep = String(trigger.dataset.signupStepTrigger || '');
+    const triggerIndex = signupStepIndex(triggerStep);
+    const active = triggerStep === nextStep;
+    trigger.classList.toggle('is-active', active);
+    trigger.classList.toggle('is-complete', triggerIndex < nextStepIndex);
+    if (active) {
+      trigger.setAttribute('aria-current', 'step');
+    } else {
+      trigger.removeAttribute('aria-current');
+    }
+  });
+
+  if (focus) {
+    const activePanel = signupRegisterForm.querySelector(`[data-signup-step="${nextStep}"]`);
+    const heading = activePanel instanceof HTMLElement ? activePanel.querySelector('[data-signup-step-heading]') : null;
+    if (heading instanceof HTMLElement) {
+      heading.focus({ preventScroll: false });
+    }
+  }
+};
+
 let lastSuggestedRegisterDeviceName = '';
 const syncSuggestedRegisterDeviceName = () => {
   if (!registerEmailInput || !registerDeviceInput) return;
@@ -1244,6 +1307,7 @@ if (registerEmailInput && registerDeviceInput) {
 
 if (signupRegisterForm) {
   applyInitialSignupPersonalization();
+  showSignupStep(String(signupRegisterForm.dataset.signupCurrentStep || signupStepOrder[0]));
   signupRegisterForm.addEventListener('change', (event) => {
     const target = event.target;
     if (
@@ -1257,6 +1321,15 @@ if (signupRegisterForm) {
     if (event.target instanceof HTMLInputElement && event.target.id === 'signup-dashboard-name') {
       syncSignupPersonalization({ persist: false });
     }
+  });
+  signupRegisterForm.querySelectorAll('[data-signup-next], [data-signup-back], [data-signup-step-trigger]').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!(button instanceof HTMLElement)) {
+        return;
+      }
+      const nextStep = button.dataset.signupNext || button.dataset.signupBack || button.dataset.signupStepTrigger || signupStepOrder[0];
+      showSignupStep(nextStep, { focus: true });
+    });
   });
   document.querySelectorAll('.auth-accent-swatch').forEach((button) => {
     button.addEventListener('click', () => {
@@ -1306,6 +1379,7 @@ if (registerButton) {
       const deviceName = deviceInput?.value?.trim() || suggestedDeviceNameFromEmail(email);
       const signupPersonalization = readSignupPersonalizationState();
 
+      showSignupStep('secure');
       if (!validateRegisterFields({ fullName, email })) {
         setRegisterStatus(DEFAULT_REGISTER_STATUS);
         return;
@@ -1322,6 +1396,7 @@ if (registerButton) {
       const startPayload = startPayloadRaw && typeof startPayloadRaw === 'object' ? startPayloadRaw : {};
       if (!startResponse.ok || startPayload.status !== 'success') {
         const friendly = signupFriendlyMessage(startPayload.message);
+        showSignupStep('secure');
         applyRegisterFieldErrorsFromMessage(friendly);
         if (/already registered/i.test(String(startPayload.message || ''))) {
           showAuthError(friendly, 'register');
@@ -1388,6 +1463,7 @@ if (registerButton) {
       window.location.href = '/';
     } catch (error) {
       const msg = error?.message || 'Registration failed. Try again.';
+      showSignupStep('secure');
       applyRegisterFieldErrorsFromMessage(msg);
       showAuthError(msg, 'register');
     } finally {

@@ -35,7 +35,7 @@ $plans = [
     'cadence' => 'CAD/month',
     'summary' => 'Core personal work, wage, calendar, and PDF records with no subscription.',
     'cta' => 'Start free',
-    'href' => '/auth/?auth_tab=register&tier=free',
+    'href' => '/auth/signup/?tier=free',
   ],
   [
     'name' => 'Premium',
@@ -44,7 +44,7 @@ $plans = [
     'summary' => 'Forecasting, spreadsheet/text exports, advanced graphs, and deeper personal reports for individuals.',
     'plan' => 'premium',
     'cta' => $hasActivePremium ? 'Premium active' : 'Upgrade to Premium',
-    'href' => '/auth/?auth_tab=register&tier=premium',
+    'href' => '/auth/signup/?tier=premium',
     'disabled' => $hasActivePremium,
     'featured' => true,
   ],
@@ -56,7 +56,7 @@ $plans = [
     'contrast' => 'Compared with Premium: adds shared workspace.',
     'plan' => 'business',
     'cta' => $hasActiveBusiness ? 'Business active' : 'Upgrade to Business',
-    'href' => '/auth/?auth_tab=register&tier=business',
+    'href' => '/auth/signup/?tier=business',
     'disabled' => $hasActiveBusiness,
   ],
 ];

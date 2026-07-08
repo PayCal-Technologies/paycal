@@ -128,7 +128,7 @@ class RegistrationController
     }
 
     self::redirect(
-      '/auth/?auth_tab=register',
+      '/auth/signup/',
       'signin_error',
       $result['message']
     );
