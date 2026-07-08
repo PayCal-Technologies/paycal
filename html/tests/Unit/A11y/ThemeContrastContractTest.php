@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 #[Group('a11y')]
 final class ThemeContrastContractTest extends TestCase
 {
-  private const PAYCAL_CONTRAST_MIN = 4.75;
+  private const PAYCAL_CONTRAST_MIN = 5.00;
 
   #[Test]
   public function contrastMatrixDocumentsPayCalMinimum(): void
@@ -23,7 +23,7 @@ final class ThemeContrastContractTest extends TestCase
       'WCAG_THEME_CONTRAST_MATRIX.md should document PayCal contrast minimum'
     );
     $this->assertStringContainsString(
-      "process.env.PAYCAL_CONTRAST_MIN ?? '4.75'",
+      "process.env.PAYCAL_CONTRAST_MIN ?? '5.0'",
       $matrixScript,
       'Contrast matrix generator should default to PayCal minimum'
     );

@@ -6,8 +6,8 @@ import path from 'path';
 const rootDir = process.cwd();
 const cssRoot = path.join(rootDir, 'html', 'css');
 const outputPath = path.join(rootDir, 'docs', 'WCAG_THEME_CONTRAST_MATRIX.md');
-const contrastTarget = Number.parseFloat(process.env.PAYCAL_CONTRAST_MIN ?? '4.75');
-const minContrast = Number.isFinite(contrastTarget) ? contrastTarget : 4.75;
+const contrastTarget = Number.parseFloat(process.env.PAYCAL_CONTRAST_MIN ?? '5.0');
+const minContrast = Number.isFinite(contrastTarget) ? contrastTarget : 5.0;
 
 const tokenChecks = [
   { key: 'textOnBg', fg: '--color-text', bg: '--color-bg', min: minContrast, label: 'Text on bg' },
