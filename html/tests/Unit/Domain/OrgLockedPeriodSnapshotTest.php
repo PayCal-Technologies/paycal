@@ -14,6 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
+#[Group('redis-write')]
 final class OrgLockedPeriodSnapshotTest extends TestCase
 {
   private string $businessId;

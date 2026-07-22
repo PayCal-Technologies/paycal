@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Database;
 use PayCal\Infrastructure\Audit\SystemAuditRepository;
@@ -12,6 +13,7 @@ use PHPUnit\Framework\TestCase;
  *
  * Validates immutable hash-chain behavior for system audit events.
  */
+#[Group('redis-write')]
 final class SystemAuditRepositoryImmutableLedgerTest extends TestCase
 {
   protected function setUp(): void

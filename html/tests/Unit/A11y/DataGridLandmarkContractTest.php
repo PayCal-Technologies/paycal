@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
 #[Group('a11y')]
+#[Group('redis-write')]
 final class DataGridLandmarkContractTest extends TestCase
 {
   #[Test]

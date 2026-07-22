@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('redis-write')]
 final class BusinessEncryptionServiceTest extends TestCase
 {
   private string $businessId = '';

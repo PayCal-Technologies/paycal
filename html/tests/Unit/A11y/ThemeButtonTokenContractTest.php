@@ -119,7 +119,7 @@ final class ThemeButtonTokenContractTest extends TestCase
     $this->assertStringContainsString("'red' => ['label' => 'Red', 'hex' => '#EF4444']", $defaults);
     $this->assertStringContainsString("'blue' => ['label' => 'Blue', 'hex' => '#3B82F6']", $defaults);
     $this->assertStringContainsString("'rose' => ['label' => 'Rose', 'hex' => '#F43F5E']", $defaults);
-    $this->assertSame(48, substr_count($defaults, "'hex' =>"), 'Accent presets should stay aligned to two 24-column rows.');
+    $this->assertSame(49, substr_count($defaults, "'hex' =>"), 'Accent presets should stay aligned to a complete seven-by-seven palette.');
     $this->assertStringContainsString('$accentPresets = UserPreferenceDefaults::accentPresets();', $settings);
     $this->assertStringContainsString('id="accent_preset_swatches"', $settings);
     $this->assertStringContainsString('id="accent_preset_preview"', $settings);

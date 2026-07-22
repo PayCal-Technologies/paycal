@@ -13,6 +13,7 @@ use PHPUnit\Framework\Attributes\Group;
  *
  */
 #[Group('unit')]
+#[Group('redis-write')]
 final class WorkEntryEncryptionTest extends TestCase
 {
   /**

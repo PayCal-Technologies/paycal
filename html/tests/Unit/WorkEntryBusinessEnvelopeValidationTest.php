@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('redis-write')]
 final class WorkEntryBusinessEnvelopeValidationTest extends TestCase
 {
   private bool $originalStrictEnvelope = false;

@@ -16,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
 #[Group('security')]
+#[Group('redis-write')]
 final class ArgusPackageGatingTest extends TestCase
 {
   /**

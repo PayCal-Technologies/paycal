@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
  * Contract tests for local-only federated sign-in discovery.
  */
 #[Group('unit')]
+#[Group('redis-write')]
 final class FederatedAuthFeatureGateTest extends TestCase
 {
   /** @var array<string, string> */

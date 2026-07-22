@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
 use PayCal\Infrastructure\Transaction\EmailChangeTransaction;
 use PayCal\Domain\Database;
 use PayCal\Domain\Constants\Keys;
@@ -12,6 +13,7 @@ use PHPUnit\Framework\TestCase;
  *
  * Unit tests for EmailChangeTransaction domain class.
  */
+#[Group('redis-write')]
 final class EmailChangeTransactionTest extends TestCase
 {
     private string $testUserUUID = 'test-user-uuid';

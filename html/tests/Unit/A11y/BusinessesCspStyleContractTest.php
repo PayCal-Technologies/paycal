@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
 #[Group('a11y')]
+#[Group('redis-write')]
 final class BusinessesCspStyleContractTest extends TestCase
 {
   private function assertNoInlineStyles(string $html, string $context): void

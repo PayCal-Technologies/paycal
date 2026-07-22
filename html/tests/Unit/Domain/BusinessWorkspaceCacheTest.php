@@ -2,6 +2,7 @@
 
 namespace PayCal\Tests\Unit\Domain;
 
+use PHPUnit\Framework\Attributes\Group;
 use PayCal\Domain\BusinessMembersCache;
 use PayCal\Domain\BusinessWorkspaceCache;
 use PayCal\Domain\BusinessWorkspaceWarmer;
@@ -11,6 +12,7 @@ use PayCal\Domain\TeamEarningsSnapshotBuilder;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
+#[Group('redis-write')]
 final class BusinessWorkspaceCacheTest extends TestCase
 {
   private string $businessId;

@@ -20,6 +20,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('redis-write')]
 final class BusinessMemberReportExportServiceTest extends TestCase
 {
   private string $suffix = '';

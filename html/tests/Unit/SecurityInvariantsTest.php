@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('redis-write')]
 final class SecurityInvariantsTest extends TestCase
 {
   private function src(string $relativePath): string

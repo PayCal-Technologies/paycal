@@ -11,6 +11,7 @@ use PayCal\Infrastructure\RateControl\RateLimiter;
  * @internal
  */
 #[Group('unit')]
+#[Group('redis-write')]
 final class RateLimiterIpTest extends TestCase
 {
   #[Test]

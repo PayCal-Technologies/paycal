@@ -14,6 +14,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass(SitesService::class)]
 #[Group('unit')]
+#[Group('redis-write')]
 final class SitesServiceTest extends TestCase
 {
   private SitesService $service;

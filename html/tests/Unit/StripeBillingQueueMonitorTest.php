@@ -2,6 +2,7 @@
 
 namespace PayCal\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use PayCal\Domain\Database;
 use PayCal\Domain\Constants\Keys;
@@ -12,6 +13,7 @@ use PayCal\Infrastructure\Queue\StripeBillingQueueMonitor;
  *
  * Unit tests for webhook queue monitoring and alerting.
  */
+#[Group('redis-write')]
 final class StripeBillingQueueMonitorTest extends TestCase
 {
   protected function tearDown(): void

@@ -2,11 +2,13 @@
 
 namespace Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
 use PayCal\Infrastructure\Auth\CapabilityTokenService;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Database;
 use PHPUnit\Framework\TestCase;
 
+#[Group('redis-write')]
 final class CapabilityTokenServiceTest extends TestCase
 {
   private string $userUuid;

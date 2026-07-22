@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
+#[Group('redis-write')]
 final class BillingControllerUrlNormalizationTest extends TestCase
 {
   /** @var array<string, mixed> */

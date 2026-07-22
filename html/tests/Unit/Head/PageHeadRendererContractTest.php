@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
 #[Group('contract')]
+#[Group('redis-write')]
 final class PageHeadRendererContractTest extends TestCase
 {
   #[Test]

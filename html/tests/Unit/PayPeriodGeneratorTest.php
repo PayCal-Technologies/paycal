@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
  */
 #[Group('unit')]
 #[Group('pay-periods')]
+#[Group('redis-write')]
 final class PayPeriodGeneratorTest extends TestCase
 {
   private string $userUUID;

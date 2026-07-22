@@ -2,12 +2,14 @@
 
 namespace PayCal\Tests\Unit\Domain;
 
+use PHPUnit\Framework\Attributes\Group;
 use PayCal\Domain\BusinessDashboardMetrics;
 use PayCal\Domain\Constants\Keys;
 use PayCal\Domain\Database;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
+#[Group('redis-write')]
 final class BusinessDashboardMetricsTest extends TestCase
 {
   private string $businessId;

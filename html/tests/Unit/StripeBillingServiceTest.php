@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
+#[Group('redis-write')]
 final class StripeBillingServiceTest extends TestCase
 {
   private StripeBillingService $service;

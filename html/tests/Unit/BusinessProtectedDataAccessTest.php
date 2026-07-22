@@ -14,6 +14,7 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[Group('unit')]
+#[Group('redis-write')]
 final class BusinessProtectedDataAccessTest extends TestCase
 {
   private string $suffix = '';
