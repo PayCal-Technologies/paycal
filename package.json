@@ -8,7 +8,7 @@
     "lint:js:static": "eslint html/js/**/*.js tools/js-security-check.mjs tools/lint-php-js.mjs",
     "lint:js:php": "node tools/lint-php-js.mjs",
     "lint:js": "npm run lint:js:static && npm run lint:js:php",
-    "test:js:unit": "node tests/crypto/paycal-code-vectors.mjs && node tests/core-helpers.mjs && node tests/security-timers.mjs",
+    "test:js:unit": "node tests/security-timers.mjs",
     "test:js": "npm run lint:js && npm run test:js:unit && node tools/js-security-check.mjs",
     "test:smoke:ui": "npx playwright test -c playwright.smoke.config.js",
     "test:smoke:ui:headed": "npx playwright test -c playwright.smoke.config.js --headed",

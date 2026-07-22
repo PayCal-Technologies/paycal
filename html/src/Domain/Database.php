@@ -478,11 +478,16 @@ class Database
     $results = [];
 
     foreach (array_chunk($keys, self::PIPELINE_BATCH_SIZE) as $chunk) {
-      $redis->multi(\Redis::PIPELINE);
-      foreach ($chunk as $key) {
-        $redis->hGetAll($key);
+      try {
+        $redis->multi(\Redis::PIPELINE);
+        foreach ($chunk as $key) {
+          $redis->hGetAll($key);
+        }
+        $responses = (array) $redis->exec();
+      } catch (\Throwable $e) {
+        self::resetQueuedRedisMode($redis);
+        throw $e;
       }
-      $responses = (array) $redis->exec();
 
       foreach ($chunk as $index => $key) {
         $raw = $responses[$index] ?? [];
@@ -637,10 +642,15 @@ class Database
   public static function multi(callable $callback): array
   {
     $redis = self::getWriteInstance()->client;
-    $redis->multi(\Redis::PIPELINE);
-    $callback($redis);
+    try {
+      $redis->multi(\Redis::PIPELINE);
+      $callback($redis);
 
-    return (array) $redis->exec();
+      return (array) $redis->exec();
+    } catch (\Throwable $e) {
+      self::resetQueuedRedisMode($redis);
+      throw $e;
+    }
   }
 
   /**
@@ -660,10 +670,30 @@ class Database
   public static function transaction(callable $callback): array
   {
     $redis = self::getWriteInstance()->client;
-    $redis->multi(\Redis::MULTI);
-    $callback($redis);
+    try {
+      $redis->multi(\Redis::MULTI);
+      $callback($redis);
 
-    return (array) $redis->exec();
+      return (array) $redis->exec();
+    } catch (\Throwable $e) {
+      self::resetQueuedRedisMode($redis);
+      throw $e;
+    }
+  }
+
+  /**
+   * Best-effort cleanup for shared persistent clients left in MULTI/PIPELINE.
+   */
+  private static function resetQueuedRedisMode(\Redis $redis): void
+  {
+    try {
+      $redis->discard();
+    } catch (\Throwable $discardError) {
+      try {
+        $redis->exec();
+      } catch (\Throwable $execError) {
+      }
+    }
   }
 
 
@@ -908,5 +938,4 @@ class Database
   }
 
 }
-
 
