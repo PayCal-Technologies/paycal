@@ -15,6 +15,23 @@ import {
   buildPayPeriodPreviewState,
   resolvePayPeriodPreviewSelection,
 } from '<?php echo \PayCal\Domain\Render::jsStaticURL('js/core/pay-period-preview.js'); ?>';
+import { formatPhpTemplate } from '<?php echo \PayCal\Domain\Render::jsStaticURL('js/core/template.js'); ?>';
+import {
+  clearFieldErrorStates as clearCoreFieldErrorStates,
+  clearFieldInvalidStates as clearCoreFieldInvalidStates,
+  setFieldErrorState as setCoreFieldErrorState,
+} from '<?php echo \PayCal\Domain\Render::jsStaticURL('js/core/forms.js'); ?>';
+import {
+  attachChangeEmailCodeInputHandlers as attachSharedChangeEmailCodeInputHandlers,
+  normalizeChangeEmailVerificationCode,
+  resetChangeEmailModal as resetSharedChangeEmailModal,
+  toggleChangeEmailStep as toggleSharedChangeEmailStep,
+  updateChangeEmailVerifyState as updateSharedChangeEmailVerifyState,
+} from '<?php echo \PayCal\Domain\Render::jsStaticURL('js/account/change-email-ui.js'); ?>';
+import {
+  setPlainStatusText as setCorePlainStatusText,
+  setStatusText as setCoreStatusText,
+} from '<?php echo \PayCal\Domain\Render::jsStaticURL('js/core/status-text.js'); ?>';
 
 (() => {
   'use strict';

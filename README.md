@@ -4,7 +4,7 @@ Privacy-first work-hours, pay visibility, and payroll-adjacent reporting for wor
 
 Workers keep control of sensitive work history. Businesses get authorized reporting without broad plaintext access.
 
-Latest documented release: **v1.059.011**
+Latest documented release: **v1.059.012**
 
 [![Test Suite](https://img.shields.io/badge/tests-2454%20listed-blue)](html/tests/)
 [![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
@@ -141,6 +141,14 @@ Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-07-07 vi
 
 <!-- scribe:recent-releases:begin -->
 ## Recent Releases
+
+## v1.059.012 (2026-08-18)
+
+**Release Focus:** Front-end runtime health fixes for account and business route loading.
+
+- Fixes settings account profile JavaScript imports and account activity rendering.
+- Treats denied best-effort business cache warm requests as non-fatal background work.
+- Mirrors the private release version for the authenticated smoke coverage expansion.
 
 ## v1.059.011 (2026-06-26)
 

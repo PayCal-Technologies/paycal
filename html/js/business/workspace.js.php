@@ -1525,7 +1525,11 @@ require_once __DIR__ . '/_bootstrap.php';
       },
       body,
     }).catch((error) => {
-      PW.error(error);
+      if (Number(error?.status || 0) === 401 || Number(error?.status || 0) === 403) {
+        return;
+      }
+
+      PW.warn(error instanceof Error ? error.message : T.unavailable);
     });
   };
 

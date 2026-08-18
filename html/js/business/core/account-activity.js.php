@@ -204,7 +204,9 @@
 
     try {
       const payload = await apiRequest('/api/v1/user/account/activity');
-      const data = payload?.data && typeof payload.data === 'object' ? payload.data : {};
+      const data = payload?.data && typeof payload.data === 'object'
+        ? payload.data
+        : (payload && typeof payload === 'object' ? payload : {});
       const currentLogin = data?.current_login && typeof data.current_login === 'object' ? data.current_login : {};
       const browser = data?.browser && typeof data.browser === 'object' ? data.browser : {};
       const sessionData = data?.session_data && typeof data.session_data === 'object' ? data.session_data : {};
