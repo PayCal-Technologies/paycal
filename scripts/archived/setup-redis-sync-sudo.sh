@@ -27,7 +27,7 @@ fi
 # Install sudoers file
 echo "Installing sudoers configuration..."
 sudo install -o root -g wheel -m 0440 \
-    /private/var/www/paycal/scripts/redis-sync-sudoers \
+    /private/var/www/paycal-technologies/paycal/scripts/redis-sync-sudoers \
     /etc/sudoers.d/redis-sync
 
 # Verify syntax

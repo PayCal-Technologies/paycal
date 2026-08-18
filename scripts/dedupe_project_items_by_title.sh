@@ -6,7 +6,7 @@ PROJECT_NUMBER="2"
 TMP_JSON="/tmp/paycal_items_dedupe.json"
 gh project item-list "$PROJECT_NUMBER" --owner "$OWNER" --limit 500 --format json > "$TMP_JSON"
 
-LOG="/private/var/www/paycal/ai-notes/project-dedupe-$(date +%Y%m%d-%H%M%S).tsv"
+LOG="/private/var/www/paycal-technologies/paycal/ai-notes/project-dedupe-$(date +%Y%m%d-%H%M%S).tsv"
 printf 'title\tkept_item_id\tdeleted_item_id\n' > "$LOG"
 
 # Build title->list(ids) and delete all but first.

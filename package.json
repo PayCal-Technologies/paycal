@@ -12,6 +12,7 @@
     "test:js": "npm run lint:js && npm run test:js:unit && node tools/js-security-check.mjs",
     "test:smoke:ui": "npx playwright test -c playwright.smoke.config.js",
     "test:smoke:ui:headed": "npx playwright test -c playwright.smoke.config.js --headed",
+    "test:smoke:pages": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/page-*.spec.js",
     "test:smoke:ui:install": "npx playwright install chromium",
     "test:aria:unit": "./vendor/bin/phpunit -c phpunit.xml --testsuite \"PayCal Accessibility\"",
     "test:aria:smoke": "npx playwright test -c playwright.smoke.config.js tests/smoke-ui/wcag-dialog-chrome.spec.js tests/smoke-ui/wcag-live-regions.spec.js tests/smoke-ui/wcag-shortcuts.spec.js tests/smoke-ui/wcag-shortcut-map.spec.js",

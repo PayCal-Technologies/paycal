@@ -85,7 +85,7 @@ final class WebAuthnRpIdTest extends TestCase
       'APP_ENV' => 'mac',
       'APP_SCHEME' => 'https',
       'APP_DOMAIN' => 'localhost',
-      'APP_HOME' => '/private/var/www/paycal-private/',
+      'APP_HOME' => '/private/var/www/paycal-technologies/paycal-private/',
       'API_VERSION' => 'v1',
       'REDIS_SERVER' => 'localhost',
       'REDIS_PORT' => '6379',

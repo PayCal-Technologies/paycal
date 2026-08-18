@@ -31,7 +31,7 @@ final class ArgusSecurityLogIntegrationTest extends TestCase
       'APP_ENV' => 'prod',
       'APP_SCHEME' => 'https',
       'APP_DOMAIN' => 'paycal.app',
-      'APP_HOME' => '/private/var/www/paycal/dev/html/',
+      'APP_HOME' => '/private/var/www/paycal-technologies/paycal/dev/html/',
       'API_VERSION' => 'v1',
       'REDIS_SERVER' => 'localhost',
       'REDIS_PORT' => '6379',

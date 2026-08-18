@@ -243,7 +243,16 @@ class Pager
       }
 
       if (is_array($row) && !empty($row)) {
-        $rows[] = $row;
+        $normalized = [];
+        foreach ($row as $field => $value) {
+          if (is_string($field)) {
+            $normalized[$field] = $value;
+          }
+        }
+
+        if ($normalized !== []) {
+          $rows[] = $normalized;
+        }
       }
     }
 

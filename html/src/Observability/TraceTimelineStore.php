@@ -67,7 +67,16 @@ final class TraceTimelineStore
         }
         $decoded = json_decode($line, true);
         if (is_array($decoded)) {
-          $out[] = $decoded;
+          $event = [];
+          foreach ($decoded as $field => $value) {
+            if (is_string($field)) {
+              $event[$field] = $value;
+            }
+          }
+
+          if ($event !== []) {
+            $out[] = $event;
+          }
         }
       }
 

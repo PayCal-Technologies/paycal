@@ -430,7 +430,7 @@ final class FederatedAuthFeatureGateTest extends TestCase
       'APP_ENV' => 'mac',
       'APP_SCHEME' => 'https',
       'APP_DOMAIN' => 'localhost',
-      'APP_HOME' => '/private/var/www/paycal/dev/html/',
+      'APP_HOME' => '/private/var/www/paycal-technologies/paycal/dev/html/',
       'API_VERSION' => 'v1',
       'REDIS_SERVER' => 'localhost',
       'REDIS_PORT' => '6379',

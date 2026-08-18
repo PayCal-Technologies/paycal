@@ -2019,7 +2019,16 @@ class SettingsController
       }
       $decoded = json_decode($line, true);
       if (is_array($decoded)) {
-        $history[] = $decoded;
+        $entry = [];
+        foreach ($decoded as $field => $value) {
+          if (is_string($field)) {
+            $entry[$field] = $value;
+          }
+        }
+
+        if ($entry !== []) {
+          $history[] = $entry;
+        }
       }
     }
 

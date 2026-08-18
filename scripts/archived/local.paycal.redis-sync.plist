@@ -7,7 +7,7 @@
     
     <key>ProgramArguments</key>
     <array>
-        <string>/private/var/www/paycal-mac/dev/scripts/redis-sync.sh</string>
+        <string>/private/var/www/paycal-technologies/paycal-mac/dev/scripts/redis-sync.sh</string>
         <string>once</string>
     </array>
     
@@ -18,13 +18,13 @@
     <true/>
     
     <key>StandardOutPath</key>
-    <string>/private/var/www/paycal-mac/dev/logs/redis-sync-stdout.log</string>
+    <string>/private/var/www/paycal-technologies/paycal-mac/dev/logs/redis-sync-stdout.log</string>
     
     <key>StandardErrorPath</key>
-    <string>/private/var/www/paycal-mac/dev/logs/redis-sync-stderr.log</string>
+    <string>/private/var/www/paycal-technologies/paycal-mac/dev/logs/redis-sync-stderr.log</string>
     
     <key>WorkingDirectory</key>
-    <string>/private/var/www/paycal-mac/dev</string>
+    <string>/private/var/www/paycal-technologies/paycal-mac/dev</string>
     
     <key>EnvironmentVariables</key>
     <dict>

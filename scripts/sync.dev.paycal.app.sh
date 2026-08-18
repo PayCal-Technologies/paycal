@@ -44,7 +44,7 @@ remote_cmd="
   set -e
   REMOTE_PATH=\"$REMOTE_PATH\"
   if [ -z \"\$REMOTE_PATH\" ]; then
-    for candidate in /var/www/paycal-private /var/www/paycal/dev /var/www/paycal-mac/dev /private/var/www/paycal/dev; do
+    for candidate in /var/www/paycal-private /var/www/paycal/dev /var/www/paycal-mac/dev /private/var/www/paycal-technologies/paycal/dev; do
       if [ -d \"\$candidate\" ]; then
         REMOTE_PATH=\"\$candidate\"
         break
@@ -52,7 +52,7 @@ remote_cmd="
     done
   fi
   if [ -z \"\$REMOTE_PATH\" ]; then
-    echo 'ERROR: remote deploy path not found (checked /var/www/paycal-private, /var/www/paycal/dev, /var/www/paycal-mac/dev, /private/var/www/paycal/dev)' >&2
+    echo 'ERROR: remote deploy path not found (checked /var/www/paycal-private, /var/www/paycal/dev, /var/www/paycal-mac/dev, /private/var/www/paycal-technologies/paycal/dev)' >&2
     exit 1
   fi
   cd \"\$REMOTE_PATH\"

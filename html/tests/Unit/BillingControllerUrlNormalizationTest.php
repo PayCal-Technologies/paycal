@@ -27,7 +27,7 @@ final class BillingControllerUrlNormalizationTest extends TestCase
       'APP_ENV' => 'dev',
       'APP_SCHEME' => 'https',
       'APP_DOMAIN' => 'dev.paycal.local',
-      'APP_HOME' => '/private/var/www/paycal/dev/',
+      'APP_HOME' => '/private/var/www/paycal-technologies/paycal/dev/',
       'API_VERSION' => 'v1',
       'REDIS_SERVER' => 'localhost',
       'REDIS_PORT' => '6379',

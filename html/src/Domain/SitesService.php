@@ -561,7 +561,7 @@ final class SitesService
    * Find orphaned work entries (work entries with no corresponding site).
    * Returns grouped data by site_id with recovered site info from work entries.
    *
-   * @return array{orphaned_groups: list<array{site_id: string, site_name: string, count: int<1, max>, dates: non-empty-list<string>, total_hours: float, total_earnings: float}>, total_count: int<0, max>}
+   * @return array{orphaned_groups: list<array{site_id: string, site_name: string, count: int<1, max>, date_range: non-falsy-string, sample_dates: non-empty-list<string>, total_hours: float, total_earnings: float}>, total_count: int<0, max>}
    */
   public function findOrphanedWork(string $userUUID): array
   {
@@ -628,6 +628,7 @@ final class SitesService
       $group['sample_dates'] = array_slice($group['dates'], 0, 5);
       unset($group['dates']); // Remove full dates array
     }
+    unset($group);
 
     return [
         'orphaned_groups' => array_values($orphanedGroups),

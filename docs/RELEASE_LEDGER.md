@@ -17,7 +17,7 @@ approved SHA == manifest SHA == deployed SHA == runtime SHA
 Primary release state lives in a separate private corporate repository:
 
 ```text
-/private/var/www/paycal-ledgers
+/private/var/www/paycal-technologies/paycal-ledgers
 ```
 
 The repo is product- and target-scoped so PayCal Technologies can release more than one product without redesigning release state:

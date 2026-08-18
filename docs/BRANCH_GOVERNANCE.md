@@ -34,7 +34,7 @@ See `docs/PUBLIC_PROMOTION.md` for the promotion checklist.
 
 ### Release ledger gate
 
-`scripts/paycal checks:ledger-private` verifies that `/private/var/www/paycal-ledgers` is a Git repo and that its GitHub remote is private. Release candidates and target desired state are recorded with:
+`scripts/paycal checks:ledger-private` verifies that `/private/var/www/paycal-technologies/paycal-ledgers` is a Git repo and that its GitHub remote is private. Release candidates and target desired state are recorded with:
 
 ```bash
 scripts/paycal release:candidate

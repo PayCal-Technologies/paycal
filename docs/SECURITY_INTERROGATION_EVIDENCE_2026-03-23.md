@@ -1526,7 +1526,7 @@ Tags: cycle-23, workstream-B, P0, telemetry-governance, encryption-summary, endp
     - `tests/Integration/TelemetryControllerIntegrationTest.php`
     - `tests/Integration/TelemetryControllerPayloadIntegrationTest.php`
   - Result: `passed=19 failed=0`
-  - Command: `cd /private/var/www/paycal/dev/html && ./vendor/bin/phpstan analyse src/Domain/Telemetry/TelemetryRepository.php src/Controllers/TelemetryController.php src/Controllers/EncryptionController.php src/Domain/MetricsService.php tests/Unit/TelemetryRepositoryTest.php tests/Integration/EncryptionControllerIntegrationTest.php --level=9`
+  - Command: `cd /private/var/www/paycal-technologies/paycal/dev/html && ./vendor/bin/phpstan analyse src/Domain/Telemetry/TelemetryRepository.php src/Controllers/TelemetryController.php src/Controllers/EncryptionController.php src/Domain/MetricsService.php tests/Unit/TelemetryRepositoryTest.php tests/Integration/EncryptionControllerIntegrationTest.php --level=9`
   - Result: `[OK] No errors`
 
 3. Which statuses changed (Q1..Q7)

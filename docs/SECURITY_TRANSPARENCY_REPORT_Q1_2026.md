@@ -195,8 +195,8 @@ PayCal collects security-focused telemetry via PhantomWing channel:
 ### Composer Vulnerability Scan Update (2026-04-10)
 
 **Scanner:** `osv-scanner` 2.3.5  
-**Private repo scan input:** `/private/var/www/paycal-private/logs/osv-scan-20260410-204711-async/private.txt`  
-**Public repo scan input:** `/private/var/www/paycal-private/logs/osv-scan-20260410-204711-async/public.txt`
+**Private repo scan input:** `/private/var/www/paycal-technologies/paycal-private/logs/osv-scan-20260410-204711-async/private.txt`
+**Public repo scan input:** `/private/var/www/paycal-technologies/paycal-private/logs/osv-scan-20260410-204711-async/public.txt`
 
 **Result Summary (both repos):**
 - 5 packages affected by 11 known vulnerabilities
@@ -223,8 +223,8 @@ PayCal collects security-focused telemetry via PhantomWing channel:
 3. Re-ran `osv-scanner` after dependency refresh.
 
 **Post-Fix Verification Artifacts:**
-- Private repo post-fix scan: `/private/var/www/paycal-private/logs/osv-post-fix-private.txt` (`No issues found`)
-- Public repo post-fix scan: `/private/var/www/paycal-private/logs/osv-post-fix-public.txt` (`No issues found`)
+- Private repo post-fix scan: `/private/var/www/paycal-technologies/paycal-private/logs/osv-post-fix-private.txt` (`No issues found`)
+- Public repo post-fix scan: `/private/var/www/paycal-technologies/paycal-private/logs/osv-post-fix-public.txt` (`No issues found`)
 
 **Status:** Resolved (validated 2026-04-10)
 

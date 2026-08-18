@@ -23,7 +23,7 @@ echo ""
 
 # Step 1: Check JavaScript file syntax
 echo -e "${YELLOW}Step 1: Checking JavaScript syntax...${NC}"
-cd /private/var/www/paycal/dev/html/js/sites
+cd /private/var/www/paycal-technologies/paycal/dev/html/js/sites
 
 # Try to parse the PHP/JavaScript file for syntax errors
 php -l index.php > /dev/null 2>&1
@@ -38,7 +38,7 @@ echo ""
 
 # Step 2: Check for required functions
 echo -e "${YELLOW}Step 2: Checking for required functions...${NC}"
-cd /private/var/www/paycal/dev/html/js/sites
+cd /private/var/www/paycal-technologies/paycal/dev/html/js/sites
 
 if grep -q "function reloadGrid" index.php; then
   echo -e "${GREEN}✓ Found reloadGrid function${NC}"
@@ -167,7 +167,7 @@ echo ""
 
 # Step 7: Check Sites page HTML
 echo -e "${YELLOW}Step 7: Checking Sites page HTML...${NC}"
-cd /private/var/www/paycal/dev/html/sites
+cd /private/var/www/paycal-technologies/paycal/dev/html/sites
 
 php -l index.php > /dev/null 2>&1
 if [ $? -eq 0 ]; then
@@ -211,7 +211,7 @@ echo ""
 
 # Step 8: Check SitesController
 echo -e "${YELLOW}Step 8: Checking SitesController endpoints...${NC}"
-cd /private/var/www/paycal/dev/html/Controllers
+cd /private/var/www/paycal-technologies/paycal/dev/html/Controllers
 
 if grep -q "public function getGrid" SitesController.php; then
   echo -e "${GREEN}✓ Found getGrid endpoint${NC}"

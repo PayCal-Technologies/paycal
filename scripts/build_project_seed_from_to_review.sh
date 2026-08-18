@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SRC_DIR="/private/var/www/paycal/ai-notes/#to-review"
-OUT_DIR="/private/var/www/paycal/ai-notes"
+SRC_DIR="/private/var/www/paycal-technologies/paycal/ai-notes/#to-review"
+OUT_DIR="/private/var/www/paycal-technologies/paycal/ai-notes"
 TS="$(date +%Y%m%d-%H%M%S)"
 OUT_TSV="$OUT_DIR/project-seed-$TS.tsv"
 OUT_MD="$OUT_DIR/project-seed-$TS.md"

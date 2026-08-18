@@ -20,7 +20,7 @@ final class ShadowTalonTest extends TestCase
       'APP_ENV' => 'dev',
       'APP_SCHEME' => 'https',
       'APP_DOMAIN' => 'paycal.test',
-      'APP_HOME' => '/private/var/www/paycal/dev/html/',
+      'APP_HOME' => '/private/var/www/paycal-technologies/paycal/dev/html/',
       'API_VERSION' => 'v1',
       'REDIS_SERVER' => 'localhost',
       'REDIS_PORT' => '6379',

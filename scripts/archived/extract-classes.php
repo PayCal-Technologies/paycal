@@ -4,8 +4,8 @@
  * Generates a comprehensive markdown documentation file
  */
 
-$workspaceDir = '/private/var/www/paycal/dev/html';
-$outputFile = '/private/var/www/paycal/dev/CLASSES_MASTER_DOCUMENTATION.md';
+$workspaceDir = '/private/var/www/paycal-technologies/paycal/dev/html';
+$outputFile = '/private/var/www/paycal-technologies/paycal/dev/CLASSES_MASTER_DOCUMENTATION.md';
 
 // Find all PHP files in Classes, Controllers, and Enums directories
 $directories = [

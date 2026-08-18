@@ -4,8 +4,8 @@ set -euo pipefail
 OWNER="cshaiku"
 PROJECT_NUMBER="2"
 PROJECT_ID="PVT_kwHOAV7DQM4BSPjO"
-SEED_TSV="/private/var/www/paycal/ai-notes/project-seed-20260319-120726.tsv"
-LOG="/private/var/www/paycal/ai-notes/project-import-$(date +%Y%m%d-%H%M%S).tsv"
+SEED_TSV="/private/var/www/paycal-technologies/paycal/ai-notes/project-seed-20260319-120726.tsv"
+LOG="/private/var/www/paycal-technologies/paycal/ai-notes/project-import-$(date +%Y%m%d-%H%M%S).tsv"
 
 if [[ ! -f "$SEED_TSV" ]]; then
   echo "Seed file not found: $SEED_TSV" >&2

@@ -98,13 +98,13 @@ final class ReleaseLedgerStatus
       return rtrim($env, '/');
     }
 
-    foreach (['/private/var/www/paycal-ledgers', '/home/deploy/paycal-ledgers', '/var/www/paycal-ledgers'] as $candidate) {
+    foreach (['/private/var/www/paycal-technologies/paycal-ledgers', '/home/deploy/paycal-ledgers', '/var/www/paycal-ledgers'] as $candidate) {
       if (is_dir($candidate)) {
         return $candidate;
       }
     }
 
-    return '/private/var/www/paycal-ledgers';
+    return '/private/var/www/paycal-technologies/paycal-ledgers';
   }
 
   /**
