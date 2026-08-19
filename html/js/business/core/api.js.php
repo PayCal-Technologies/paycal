@@ -71,6 +71,46 @@
     return error;
   };
 
+  const normalizeWebLockName = (name) => {
+    const normalized = String(name || '')
+      .trim()
+      .replace(/[^a-zA-Z0-9:._-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 160);
+
+    return normalized === '' ? 'paycal:default' : `paycal:${normalized}`;
+  };
+
+  const supportsWebLocks = () => (
+    typeof navigator !== 'undefined'
+    && navigator.locks
+    && typeof navigator.locks.request === 'function'
+  );
+
+  const withWebLock = async (name, task, options = {}) => {
+    const {
+      unavailableValue = false,
+      ...lockOptions
+    } = options;
+
+    if (typeof task !== 'function') {
+      throw new Error('Web lock task must be callable.');
+    }
+
+    const lockName = normalizeWebLockName(name);
+    if (!supportsWebLocks()) {
+      return task({ name: lockName, mode: lockOptions.mode || 'exclusive' });
+    }
+
+    return navigator.locks.request(lockName, lockOptions, async (lock) => {
+      if (lock === null) {
+        return unavailableValue;
+      }
+
+      return task(lock);
+    });
+  };
+
   const apiFetch = async (url, options = {}) => {
     const { timeoutMs: customTimeoutMs, ...fetchOptions } = options;
     const {

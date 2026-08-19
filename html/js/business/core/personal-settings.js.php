@@ -1,4 +1,6 @@
-<?php namespace PayCal\Domain; ?>
+<?php declare(strict_types=1);
+
+namespace PayCal\Domain; ?>
 
   const getPersonalPayAnchor = () => {
     if (elements.personalPayAnchor instanceof HTMLInputElement || elements.personalPayAnchor instanceof HTMLSelectElement) {
@@ -186,6 +188,9 @@
 
   const loadPersonalBusinessPanel = async () => {
     const panel = document.getElementById('panel-pay-period');
+    if (panel instanceof HTMLElement) {
+      panel.classList.add('settings_panel_pay_period');
+    }
     let settings = {};
     try {
       const raw = typeof panel?.dataset.userSettings === 'string' ? panel.dataset.userSettings : '';
@@ -292,6 +297,9 @@
   const updateProfilePayPeriodManagedBanner = (business) => {
     const panel = document.getElementById('panel-pay-period');
     const banner = document.getElementById('profile_pay_period_managed_banner');
+    if (panel instanceof HTMLElement) {
+      panel.classList.add('settings_panel_pay_period');
+    }
     if (!(panel instanceof HTMLElement) || !(banner instanceof HTMLElement)) {
       return;
     }
@@ -490,31 +498,31 @@
     Guardian.setHTML(elements.personalI18nPreview, `
       <div class="profile_i18n_preview_rows">
         <div class="profile_i18n_preview_pair item_pair">
-          <span class="item_label">Language</span>
+          <span class="item_label label_muted_xs">Language</span>
           <span class="item_value">${escapeHtml(languageLabel)} (${escapeHtml(language)})</span>
         </div>
         <div class="profile_i18n_preview_pair item_pair">
-          <span class="item_label">Locale</span>
+          <span class="item_label label_muted_xs">Locale</span>
           <span class="item_value">${escapeHtml(locale)}</span>
         </div>
         <div class="profile_i18n_preview_pair item_pair">
-          <span class="item_label">Timezone</span>
+          <span class="item_label label_muted_xs">Timezone</span>
           <span class="item_value">${escapeHtml(timeZone)}</span>
         </div>
         <div class="profile_i18n_preview_pair item_pair">
-          <span class="item_label">Currency</span>
+          <span class="item_label label_muted_xs">Currency</span>
           <span class="item_value">${escapeHtml(currency)}</span>
         </div>
         <div class="profile_i18n_preview_pair item_pair">
-          <span class="item_label">Number</span>
+          <span class="item_label label_muted_xs">Number</span>
           <span class="item_value">${escapeHtml(numberSample)}</span>
         </div>
         <div class="profile_i18n_preview_pair item_pair">
-          <span class="item_label">Money</span>
+          <span class="item_label label_muted_xs">Money</span>
           <span class="item_value">${escapeHtml(currencySample)}</span>
         </div>
         <div class="profile_i18n_preview_pair item_pair">
-          <span class="item_label">Date + Time</span>
+          <span class="item_label label_muted_xs">Date + Time</span>
           <span class="item_value">${escapeHtml(dateSample)}</span>
         </div>
       </div>
@@ -610,6 +618,7 @@
     PC.showToast(savingMessage, 'save');
 
     try {
+      return await withWebLock(`profile-settings:${currentUserUUID}`, async () => {
         // Debug: log what we're sending
         const debugPayload = {
           csrf_token: formData.get('csrf_token') ? '***' : 'MISSING',
@@ -628,21 +637,23 @@
 
         const result = await PC.updateResource('account/profile', formData, { timeoutMs: 45000 });
         debugLog('[savePersonalBusinessSettings] Success response', result);
-      state.personalLastSavedSignature = payloadSignature;
+        state.personalLastSavedSignature = payloadSignature;
 
-      const savedLanguage = String(formData.get('language') || '').trim().toLowerCase();
-      if (savedLanguage !== '' && savedLanguage !== previousLanguage) {
-        PC.showToast(T.profileSettingsSaved, 'save');
-        await PC.delay(1);
-        window.location.reload();
-        return;
-      }
+        const savedLanguage = String(formData.get('language') || '').trim().toLowerCase();
+        if (savedLanguage !== '' && savedLanguage !== previousLanguage) {
+          PC.showToast(T.profileSettingsSaved, 'save');
+          await PC.delay(1);
+          window.location.reload();
+          return true;
+        }
 
-      const successMessage = source === 'calendar-day'
-        ? T.payPeriodStartUpdated
-        : T.profileSettingsSaved;
-      PC.showToast(successMessage, 'save');
-      markAutosaveTargetSaved();
+        const successMessage = source === 'calendar-day'
+          ? T.payPeriodStartUpdated
+          : T.profileSettingsSaved;
+        PC.showToast(successMessage, 'save');
+        markAutosaveTargetSaved();
+        return true;
+      });
     } catch (error) {
       PW.error(error);
       debugLog('[savePersonalBusinessSettings] Error caught:', {

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace PayCal\Domain;
 
 require_once __DIR__ . '/_bootstrap.php';
@@ -195,6 +195,20 @@ require_once __DIR__ . '/_bootstrap.php';
     dialogLiveToast: document.getElementById('businesses_dialog_live_toast'),
   };
 
+  const addFoundryHook = (element, className) => {
+    if (element instanceof HTMLElement) {
+      element.classList.add(className);
+    }
+  };
+
+  addFoundryHook(elements.personalForm, 'businesses_personal_form');
+  addFoundryHook(elements.personalDefaultWage, 'businesses_personal_default_wage');
+  addFoundryHook(elements.personalPreview, 'businesses_personal_preview');
+  addFoundryHook(elements.preview, 'businesses_editor_preview');
+  addFoundryHook(elements.editorInlineMount, 'businesses_editor_inline_mount');
+  addFoundryHook(document.getElementById('panel-personal-info'), 'settings_panel_personal_info');
+  addFoundryHook(document.getElementById('panel-pay-period'), 'settings_panel_pay_period');
+
   let liveToastTimerId = null;
   let lastAutosaveTarget = null;
 
@@ -288,9 +302,6 @@ require_once __DIR__ . '/_bootstrap.php';
     businesses_editor_contact_email: 'contact_email',
     businesses_editor_contact_phone: 'contact_phone',
     businesses_editor_website: 'website',
-    businesses_editor_indigenous_owned: 'indigenous_owned',
-    businesses_editor_resident_on_reserve: 'resident_on_reserve',
-    businesses_editor_reserve_name: 'reserve_name',
     businesses_editor_address_line1: 'address_line1',
     businesses_editor_address_line2: 'address_line2',
     businesses_editor_address_city: 'address_city',
@@ -697,25 +708,33 @@ require_once __DIR__ . '/_bootstrap.php';
       return false;
     }
 
+    const businessId = state.selectedBusinessId;
     state.editorSaveInFlight = true;
     try {
-      await postForm(`/api/v1/businesses/${encodeURIComponent(state.selectedBusinessId)}/settings/update`, payload);
-      state.editorLastSavedSignature = signature;
-      syncEditorRiskBaselineFromInputs();
-      let toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_AUTO_SAVE_DETAILS')); ?>';
-      if (source === 'manual') {
-        toastMessage = T.defaultsSaved;
-      } else if (source === 'contact-image') {
-        toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_CONTACT_IMAGE_SAVED')); ?>';
-      } else if (source.startsWith('custom-contact')) {
-        toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_CONTACT_CARD_SAVED')); ?>';
-      }
-      showBusinessesToast(toastMessage, 'save', source === 'manual' ? 5000 : 2600, true);
-      markAutosaveTargetSaved();
-      if (refreshAfterSave) {
-        await refreshIndex(state.selectedBusinessId, true);
-      }
-      return true;
+      return await withWebLock(`business-settings:${businessId}`, async () => {
+        await postForm(`/api/v1/businesses/${encodeURIComponent(businessId)}/settings/update`, payload);
+        if (state.selectedBusinessId !== businessId) {
+          await loadBusinesses();
+          return true;
+        }
+
+        state.editorLastSavedSignature = signature;
+        syncEditorRiskBaselineFromInputs();
+        let toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_AUTO_SAVE_DETAILS')); ?>';
+        if (source === 'manual') {
+          toastMessage = T.defaultsSaved;
+        } else if (source === 'contact-image') {
+          toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_CONTACT_IMAGE_SAVED')); ?>';
+        } else if (source.startsWith('custom-contact')) {
+          toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_CONTACT_CARD_SAVED')); ?>';
+        }
+        showBusinessesToast(toastMessage, 'save', source === 'manual' ? 5000 : 2600, true);
+        markAutosaveTargetSaved();
+        if (refreshAfterSave) {
+          await refreshIndex(businessId, true);
+        }
+        return true;
+      });
     } catch (error) {
       PW.error(error);
       showBusinessesToast(error instanceof Error && error.message ? error.message : T.defaultsSaveFailed, 'error', 7000, true);
@@ -851,20 +870,28 @@ require_once __DIR__ . '/_bootstrap.php';
       elements.payrollSaveButton.disabled = true;
     }
 
+    const businessId = state.selectedBusinessId;
     try {
-      await postForm(`/api/v1/businesses/${encodeURIComponent(state.selectedBusinessId)}/settings/update`, payload);
-      state.payrollLastSavedSignature = signature;
-      state.editorLastSavedSignature = signature;
-      showBusinessesToast(T.payrollSaved, 'save', source === 'manual' ? 5000 : 2600, true);
-      markAutosaveTargetSaved();
-      setPayrollStatus(T.payrollSaved, 'success');
-      if (refreshAfterSave) {
-        await refreshIndex(state.selectedBusinessId, false);
-      } else {
-        await loadBusinesses();
-        applySingleBusinessOverviewMode();
-      }
-      return true;
+      return await withWebLock(`business-settings:${businessId}`, async () => {
+        await postForm(`/api/v1/businesses/${encodeURIComponent(businessId)}/settings/update`, payload);
+        if (state.selectedBusinessId !== businessId) {
+          await loadBusinesses();
+          return true;
+        }
+
+        state.payrollLastSavedSignature = signature;
+        state.editorLastSavedSignature = signature;
+        showBusinessesToast(T.payrollSaved, 'save', source === 'manual' ? 5000 : 2600, true);
+        markAutosaveTargetSaved();
+        setPayrollStatus(T.payrollSaved, 'success');
+        if (refreshAfterSave) {
+          await refreshIndex(businessId, false);
+        } else {
+          await loadBusinesses();
+          applySingleBusinessOverviewMode();
+        }
+        return true;
+      });
     } catch (error) {
       const message = error instanceof Error && error.message ? error.message : T.payrollSaveFailed;
       setPayrollStatus(message, 'error');
@@ -939,6 +966,7 @@ require_once __DIR__ . '/_bootstrap.php';
       return false;
     }
 
+    const businessId = state.selectedBusinessId;
     state.businessDetailsSaveInFlight = true;
     emitBusinessDetailsAutosaveDiagnostic('request-start', {
       source,
@@ -947,38 +975,52 @@ require_once __DIR__ . '/_bootstrap.php';
     });
     const requestStartedAt = performance.now();
     try {
-      const responseData = await postForm(`/api/v1/businesses/${encodeURIComponent(state.selectedBusinessId)}/settings/update`, payload);
-      const requestDurationMs = Math.round(performance.now() - requestStartedAt);
-      state.businessDetailsLastSavedSignature = signature;
-      state.editorLastSavedSignature = signature;
-      let toastMessage = T.businessDetailsSaved;
-      if (source === 'contact-image') {
-        toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_CONTACT_IMAGE_SAVED')); ?>';
-      } else if (source.startsWith('custom-contact')) {
-        toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_CONTACT_CARD_SAVED')); ?>';
-      } else if (source === 'fixed-contact-clear' || source === 'custom-contact-clear') {
-        toastMessage = '';
-      }
-      if (toastMessage !== '') {
-        showBusinessesToast(toastMessage, 'save', 2600, true);
-      }
-      markAutosaveTargetSaved();
-      emitBusinessDetailsAutosaveDiagnostic('request-success', {
-        source,
-        refresh_after_save: refreshAfterSave,
-        request_duration_ms: requestDurationMs,
-        response_key_count: responseData && typeof responseData === 'object' ? Object.keys(responseData).length : 0,
-        toast_message_present: toastMessage !== '',
-        ...payloadSummary,
+      return await withWebLock(`business-settings:${businessId}`, async () => {
+        const responseData = await postForm(`/api/v1/businesses/${encodeURIComponent(businessId)}/settings/update`, payload);
+        const requestDurationMs = Math.round(performance.now() - requestStartedAt);
+        if (state.selectedBusinessId !== businessId) {
+          await loadBusinesses();
+          emitBusinessDetailsAutosaveDiagnostic('request-success-selection-changed', {
+            source,
+            refresh_after_save: refreshAfterSave,
+            request_duration_ms: requestDurationMs,
+            response_key_count: responseData && typeof responseData === 'object' ? Object.keys(responseData).length : 0,
+            ...payloadSummary,
+          });
+          return true;
+        }
+
+        state.businessDetailsLastSavedSignature = signature;
+        state.editorLastSavedSignature = signature;
+        let toastMessage = T.businessDetailsSaved;
+        if (source === 'contact-image') {
+          toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_CONTACT_IMAGE_SAVED')); ?>';
+        } else if (source.startsWith('custom-contact')) {
+          toastMessage = '<?php echo addslashes(org_js_index_i18n('BUSINESSES_CONTACT_CARD_SAVED')); ?>';
+        } else if (source === 'fixed-contact-clear' || source === 'custom-contact-clear') {
+          toastMessage = '';
+        }
+        if (toastMessage !== '') {
+          showBusinessesToast(toastMessage, 'save', 2600, true);
+        }
+        markAutosaveTargetSaved();
+        emitBusinessDetailsAutosaveDiagnostic('request-success', {
+          source,
+          refresh_after_save: refreshAfterSave,
+          request_duration_ms: requestDurationMs,
+          response_key_count: responseData && typeof responseData === 'object' ? Object.keys(responseData).length : 0,
+          toast_message_present: toastMessage !== '',
+          ...payloadSummary,
+        });
+        setBusinessDetailsStatus('');
+        if (refreshAfterSave) {
+          await refreshIndex(businessId, false);
+        } else {
+          await loadBusinesses();
+          applySingleBusinessOverviewMode();
+        }
+        return true;
       });
-      setBusinessDetailsStatus('');
-      if (refreshAfterSave) {
-        await refreshIndex(state.selectedBusinessId, false);
-      } else {
-        await loadBusinesses();
-        applySingleBusinessOverviewMode();
-      }
-      return true;
     } catch (error) {
       const message = error instanceof Error && error.message ? error.message : T.businessDetailsSaveFailed;
       emitBusinessDetailsAutosaveDiagnostic('request-failed', {
@@ -1534,7 +1576,7 @@ require_once __DIR__ . '/_bootstrap.php';
   };
 
   const getSelectedInviteScopes = () => {
-    return Array.from(document.querySelectorAll('#businesses_scope_grid .businesses_scope:checked'))
+    return Array.from(document.querySelectorAll('.businesses_scope_grid .businesses_scope:checked'))
       .map((input) => input instanceof HTMLInputElement ? input.value.trim() : '')
       .filter((value) => value !== '');
   };

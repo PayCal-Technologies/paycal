@@ -165,7 +165,7 @@
     }
   };
 
-  const pollRealtimeAudit = async (businessId) => {
+  const pollRealtimeAuditUnlocked = async (businessId) => {
     if (businessId === '' || state.selectedBusinessId !== businessId) {
       return;
     }
@@ -227,6 +227,16 @@
         loadBusinessConnections(businessId).catch((error) => PW.error(error));
       }
     }
+  };
+
+  const pollRealtimeAudit = async (businessId) => {
+    return withWebLock(`business-audit-poll:${businessId}`, async () => {
+      await pollRealtimeAuditUnlocked(businessId);
+      return true;
+    }, {
+      ifAvailable: true,
+      unavailableValue: false,
+    });
   };
 
   const startRealtimeAuditPolling = (businessId) => {
