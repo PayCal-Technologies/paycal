@@ -240,7 +240,7 @@ class Layout
 <head>
   <base href="{$origin}/">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="{$metaDescription}">
   <meta name="robots" content="index, follow, noai, noimageai">
   <meta name="theme-color" content="#060606">

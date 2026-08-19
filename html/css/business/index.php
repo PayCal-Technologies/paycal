@@ -3665,3 +3665,46 @@ button.business_members_metric_chip_pending:disabled {
     padding-right: 0;
   }
 }
+
+@media (horizontal-viewport-segments: 2) and (max-width: 900px) {
+  body[class*='page-business'] .business_context_header {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    background: var(--color-bg);
+  }
+
+  body[class*='page-business'] .business_workspace {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .business_workspace.business_dashboard .business_dashboard_metrics_grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .business_workspace.business_details .businesses_details_columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .business_group_editor_dialog,
+  .dialog_fullscreen {
+    width: min(env(viewport-segment-width 1 0, calc(100vw - 1rem)), calc(100vw - 1rem));
+    max-width: min(env(viewport-segment-width 1 0, calc(100vw - 1rem)), calc(100vw - 1rem));
+  }
+}
+
+@media (vertical-viewport-segments: 2) and (max-width: 900px) {
+  body[class*='page-business'] .business_context_header {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    background: var(--color-bg);
+  }
+
+  .business_group_editor_dialog,
+  .dialog_fullscreen {
+    max-height: calc(env(viewport-segment-height 0 1, 90dvh) - max(0.5rem, env(safe-area-inset-bottom, 0px)));
+  }
+}

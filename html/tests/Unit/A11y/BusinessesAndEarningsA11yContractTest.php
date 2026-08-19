@@ -1623,11 +1623,21 @@ final class BusinessesAndEarningsA11yContractTest extends TestCase
   {
     $projectRoot = dirname(__DIR__, 4);
     $businessCss = (string) file_get_contents($projectRoot . '/html/css/business/index.php');
+    $navigationCss = (string) file_get_contents($projectRoot . '/html/css/navigation/index.php');
+    $responsiveCss = (string) file_get_contents($projectRoot . '/html/css/responsive/index.php');
     $dataGrid = (string) file_get_contents($projectRoot . '/html/src/Domain/DataGrid.php');
     $sitesRenderer = (string) file_get_contents($projectRoot . '/html/src/Domain/BusinessSitesGridRenderer.php');
     $groupsRenderer = (string) file_get_contents($projectRoot . '/html/src/Domain/BusinessGroupsGridRenderer.php');
 
     $this->assertStringContainsString('Business workspace mobile layouts (<= 768px)', $businessCss);
+    $this->assertStringContainsString('@media (horizontal-viewport-segments: 2) and (max-width: 900px)', $navigationCss);
+    $this->assertStringContainsString('env(viewport-segment-width 0 0, 50vw)', $navigationCss);
+    $this->assertStringContainsString('env(viewport-segment-width 1 0, 50vw)', $navigationCss);
+    $this->assertStringContainsString('env(viewport-segment-left 1 0, 50vw) - env(viewport-segment-right 0 0, 50vw)', $navigationCss);
+    $this->assertStringContainsString('@media (vertical-viewport-segments: 2) and (max-width: 900px)', $navigationCss);
+    $this->assertStringContainsString('env(viewport-segment-height 0 1, 90dvh)', $responsiveCss);
+    $this->assertStringContainsString('.business_workspace.business_dashboard .business_dashboard_metrics_grid', $businessCss);
+    $this->assertStringContainsString('env(viewport-segment-width 1 0, calc(100vw - 1rem))', $businessCss);
     $this->assertStringContainsString('public function setClass(string $class): void', $dataGrid);
     $this->assertStringContainsString('sanitizeClassList', $dataGrid);
     $this->assertStringContainsString("setClass('datagrid_mobile_cards business_sites_mobile_cards')", $sitesRenderer);

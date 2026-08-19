@@ -2059,6 +2059,91 @@ body:not(.nav-collapsed) #page_header.nav_component--header [role='button'] {
 
 }
 
+@media (horizontal-viewport-segments: 2) and (max-width: 900px) {
+  :root {
+    --viewport-segment-left-width: env(viewport-segment-width 0 0, 50vw);
+    --viewport-segment-right-width: env(viewport-segment-width 1 0, 50vw);
+    --viewport-segment-fold-width: max(0px, calc(env(viewport-segment-left 1 0, 50vw) - env(viewport-segment-right 0 0, 50vw)));
+    --viewport-segment-left-offset: env(viewport-segment-left 0 0, 0px);
+    --viewport-segment-right-offset: env(viewport-segment-left 1 0, 50vw);
+    --mobile-nav-bar-size: 3rem;
+  }
+
+  body[data-nav-viewport-compact][data-nav-primary-position='left'],
+  body[data-nav-viewport-compact][data-nav-primary-position='right'] {
+    min-height: 100dvh;
+    background:
+      linear-gradient(
+        to right,
+        transparent 0 var(--viewport-segment-left-width),
+        var(--panel-border) var(--viewport-segment-left-width) calc(var(--viewport-segment-left-width) + var(--viewport-segment-fold-width)),
+        transparent calc(var(--viewport-segment-left-width) + var(--viewport-segment-fold-width)) 100%
+      );
+  }
+
+  body[data-nav-viewport-compact] .mobile_navigation_bar {
+    width: var(--viewport-segment-left-width);
+    max-width: var(--viewport-segment-left-width);
+    min-height: 100dvh;
+    align-content: start;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    grid-template-rows: var(--mobile-nav-bar-size) minmax(0, 1fr);
+    padding-inline: max(0.75rem, env(safe-area-inset-left, 0px)) 0.75rem;
+    border-right: 1px solid var(--panel-border);
+    border-bottom: 0;
+  }
+
+  body[data-nav-viewport-compact] .mobile_navigation_title {
+    text-align: left;
+  }
+
+  body[data-nav-viewport-compact] .app_main,
+  body[data-nav-viewport-compact] .nav_component.nav_component--footer {
+    margin-left: calc(var(--viewport-segment-left-width) + var(--viewport-segment-fold-width)) !important;
+    width: var(--viewport-segment-right-width) !important;
+    max-width: var(--viewport-segment-right-width) !important;
+    padding-inline: max(var(--pad-sm), env(safe-area-inset-left, 0px)) max(var(--pad-sm), env(safe-area-inset-right, 0px)) !important;
+  }
+
+  body[data-nav-viewport-compact] .nav_component.nav_component--header:not(.nav_component--public) {
+    left: var(--viewport-segment-left-offset);
+    width: var(--viewport-segment-left-width);
+    max-width: var(--viewport-segment-left-width);
+  }
+
+  body.nav-collapsed[data-nav-viewport-compact] .nav_component.nav_component--header:not(.nav_component--public),
+  body[data-nav-viewport-compact][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) .nav_component.nav_component--header:not(.nav_component--public) {
+    transform: translateX(-100%);
+  }
+
+  body.nav-pinned[data-nav-viewport-compact] .nav_component.nav_component--header:not(.nav_component--public) {
+    transform: translateX(0);
+    box-shadow: 4px 0 18px color-mix(in srgb, black 30%, transparent);
+  }
+}
+
+@media (vertical-viewport-segments: 2) and (max-width: 900px) {
+  :root {
+    --viewport-segment-top-height: env(viewport-segment-height 0 0, 50vh);
+    --viewport-segment-bottom-height: env(viewport-segment-height 0 1, 50vh);
+    --viewport-segment-fold-height: max(0px, calc(env(viewport-segment-top 0 1, 50vh) - env(viewport-segment-bottom 0 0, 50vh)));
+  }
+
+  body[data-nav-viewport-compact] .mobile_navigation_bar {
+    min-height: min(var(--mobile-nav-bar-size), var(--viewport-segment-top-height));
+    padding-inline: max(0.75rem, env(safe-area-inset-left, 0px)) max(0.75rem, env(safe-area-inset-right, 0px));
+  }
+
+  body[data-nav-viewport-compact] .app_main {
+    min-height: var(--viewport-segment-bottom-height);
+    padding-bottom: max(var(--pad-sm), env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.nav-pinned[data-nav-viewport-compact] .nav_component.nav_component--header:not(.nav_component--public) {
+    max-height: var(--viewport-segment-top-height);
+  }
+}
+
 @media (max-width: 900px) {
   /* Public (unauthenticated) pages: top bar only — no side drawer or hamburger. */
   body:has(#page_header.nav_component--public) #page_header.nav_component--header.nav_component--public {

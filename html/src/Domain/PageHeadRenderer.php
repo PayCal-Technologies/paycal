@@ -84,7 +84,7 @@ final class PageHeadRenderer
     return <<<HTML
   <base href="{$baseHref}">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="{$metaDescription}">
   <meta name="rating" content="general">
   <meta name="copyright" content="Copyright (C) {$year} PayCal Technologies Inc. All rights reserved.">

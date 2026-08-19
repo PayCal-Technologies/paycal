@@ -45,6 +45,7 @@ final class PageHeadRendererContractTest extends TestCase
     ]);
 
     $this->assertStringContainsString('name="description"', $html);
+    $this->assertStringContainsString('name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"', $html);
     $this->assertStringNotContainsString('name="keywords"', $html);
     $this->assertStringNotContainsString('page-subject', $html);
     $this->assertSame(1, substr_count($html, 'name="application-name"'));

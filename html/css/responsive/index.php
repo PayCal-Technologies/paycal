@@ -551,3 +551,21 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     max-width: 100%;
   }
 }
+
+@media (horizontal-viewport-segments: 2) and (max-width: 900px) {
+  dialog {
+    width: min(env(viewport-segment-width 1 0, calc(100vw - 1rem)), calc(100vw - 1rem));
+    max-width: min(env(viewport-segment-width 1 0, calc(100vw - 1rem)), calc(100vw - 1rem));
+    max-height: calc(100dvh - max(1rem, env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px)));
+  }
+
+  .status {
+    max-width: calc(env(viewport-segment-width 1 0, 100vw) - (var(--pad-lg) * 2));
+  }
+}
+
+@media (vertical-viewport-segments: 2) and (max-width: 900px) {
+  dialog {
+    max-height: calc(env(viewport-segment-height 0 1, 90dvh) - max(0.5rem, env(safe-area-inset-bottom, 0px)));
+  }
+}
