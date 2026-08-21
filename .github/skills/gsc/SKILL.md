@@ -15,7 +15,8 @@ Run the PayCal source dump generator and return an audit-ready artifact path.
 1. Run from repo root:
    - `php scripts/generate-source-dump.php`
 2. Parse output and extract the generated dump path.
-   - Default path pattern: `/var/www/paycal/paycal-source-dump-as-at-YYYY-MM-DD.txt`
+   - Default path pattern: `<REPO_ROOT>/tmp/source-dumps/paycal-source-dump-as-at-YYYY-MM-DD.txt`
+   - Use `php scripts/generate-source-dump.php --cleanup` to prune old generated source dump artifacts.
 3. In the chat response, always print:
    - `Output file: <absolute-path>`
 4. If running on macOS and Finder is available, reveal the file immediately:

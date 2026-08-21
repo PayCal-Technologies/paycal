@@ -6,7 +6,7 @@ description: 'Run the PayCal source dump generator, print absolute output path, 
 Execute this workflow in `<REPO_ROOT>`:
 
 1. Run `php scripts/generate-source-dump.php`.
-2. Determine the generated output path from command output (default pattern `/var/www/paycal/paycal-source-dump-as-at-YYYY-MM-DD.txt`).
+2. Determine the generated output path from command output (default pattern `<REPO_ROOT>/tmp/source-dumps/paycal-source-dump-as-at-YYYY-MM-DD.txt`).
 3. Reveal the file in Finder with `open -R <path>`.
 4. Respond with:
    - `Output file: <absolute-path>`

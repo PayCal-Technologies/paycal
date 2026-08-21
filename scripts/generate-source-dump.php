@@ -12,7 +12,46 @@ declare(strict_types=1);
 
 $projectRoot = dirname(__DIR__);
 $outputDate = date('Y-m-d');
-$outputFile = '/var/www/paycal/paycal-source-dump-as-at-' . $outputDate . '.txt';
+$outputDir = $projectRoot . '/tmp/source-dumps';
+$outputFile = $outputDir . '/paycal-source-dump-as-at-' . $outputDate . '.txt';
+$cleanupOnly = false;
+$cleanupDays = 7;
+
+foreach (array_slice($argv, 1) as $arg) {
+    if ($arg === '--help' || $arg === '-h') {
+        echo "Usage: php scripts/generate-source-dump.php [--output=PATH] [--cleanup] [--cleanup-days=N]\n";
+        echo "\nOptions:\n";
+        echo "  --output=PATH       Write to a specific file path (default: tmp/source-dumps/paycal-source-dump-as-at-YYYY-MM-DD.txt).\n";
+        echo "  --cleanup           Delete old generated source dumps and exit.\n";
+        echo "  --cleanup-days=N    Retain generated dumps newer than N days when --cleanup is used (default: 7).\n";
+        exit(0);
+    }
+
+    if ($arg === '--cleanup') {
+        $cleanupOnly = true;
+        continue;
+    }
+
+    if (str_starts_with($arg, '--cleanup-days=')) {
+        $cleanupDays = max(0, (int) substr($arg, strlen('--cleanup-days=')));
+        continue;
+    }
+
+    if (str_starts_with($arg, '--output=')) {
+        $outputFile = substr($arg, strlen('--output='));
+        continue;
+    }
+
+    fwrite(STDERR, "ERROR: Unknown option: {$arg}\n");
+    fwrite(STDERR, "Run with --help for usage.\n");
+    exit(1);
+}
+
+if ($cleanupOnly) {
+    $removed = cleanupSourceDumpArtifacts($projectRoot, $cleanupDays);
+    echo "Removed {$removed} generated source dump artifact(s)\n";
+    exit(0);
+}
 
 // File extensions to include in the analysis dump.
 $includeExtensions = ['php', 'js', 'css'];
@@ -53,6 +92,60 @@ $excludePaths = [
     'html/logs/',
     'logs/',
 ];
+
+function cleanupSourceDumpArtifacts(string $projectRoot, int $retainDays): int
+{
+    $cutoff = time() - ($retainDays * 86400);
+    $removed = 0;
+    $patterns = [
+        $projectRoot . '/tmp/source-dumps/paycal-source-dump-as-at-*.txt',
+        $projectRoot . '/paycal-source-dump-as-at-*.txt',
+        $projectRoot . '/html/source-dump-*',
+    ];
+
+    foreach ($patterns as $pattern) {
+        $matches = glob($pattern);
+        if (!is_array($matches)) {
+            continue;
+        }
+        foreach ($matches as $path) {
+            $mtime = filemtime($path);
+            if ($mtime !== false && $mtime > $cutoff) {
+                continue;
+            }
+            if (is_dir($path)) {
+                if (removeDirectoryRecursive($path)) {
+                    $removed++;
+                }
+                continue;
+            }
+            if (is_file($path) && unlink($path)) {
+                $removed++;
+            }
+        }
+    }
+
+    return $removed;
+}
+
+function removeDirectoryRecursive(string $dir): bool
+{
+    if (!is_dir($dir)) {
+        return false;
+    }
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($iterator as $entry) {
+        if ($entry->isDir()) {
+            rmdir($entry->getPathname());
+        } else {
+            unlink($entry->getPathname());
+        }
+    }
+    return rmdir($dir);
+}
 
 /**
  * @return array{stdout: string, stderr: string, exitCode: int, durationSeconds: float}
@@ -1049,6 +1142,11 @@ appendRemainingTestsSection('TEST FILES (UNLINKED)', $testFiles, $projectRoot, $
 echo "Processed $processedCount files total\n";
 echo "Writing output file...\n";
 
+if (!is_dir(dirname($outputFile)) && !mkdir(dirname($outputFile), 0775, true) && !is_dir(dirname($outputFile))) {
+    echo "ERROR: Failed to create output directory!\n";
+    exit(1);
+}
+
 // Write output
 $result = file_put_contents($outputFile, $output);
 
@@ -1064,4 +1162,6 @@ echo "Size: $sizeMB MB\n";
 echo "Files: $processedCount\n";
 echo "\nReady for analysis with Google Gemini.\n";
 
-exec("open -R " . escapeshellarg($outputFile));
+if (PHP_OS_FAMILY === 'Darwin' && is_executable('/usr/bin/open')) {
+    exec("open -R " . escapeshellarg($outputFile));
+}
