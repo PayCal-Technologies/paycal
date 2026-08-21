@@ -12,3 +12,4 @@ composer.lock
 package.json
 package-lock.json
 tests/security-timers.mjs
+scripts/import-private-public-safe-changes.php

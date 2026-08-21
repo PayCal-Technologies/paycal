@@ -2,6 +2,40 @@
 
 All notable changes are documented in this file using the [Keep a CHANGELOG](https://keepachangelog.com/) principles.
 
+## [5.0.1] - 2026-08-01
+
+### Fixed
+
+* Do not report an option that is spelled out in full as ambiguous
+
+## [5.0.0] - 2026-02-06
+
+### Removed
+
+* This component is no longer supported on PHP 8.3
+
+## [4.2.1] - 2026-05-17
+
+* No changes
+
+## [4.2.0] - 2025-09-14
+
+### Changed
+
+* [#3](https://github.com/sebastianbergmann/cli-parser/pull/3): Print most similar options when reporting unknown options
+
+## [4.1.0] - 2025-09-13
+
+### Changed
+
+* [#2](https://github.com/sebastianbergmann/cli-parser/pull/2): Print similar options when reporting ambiguous options
+
+## [4.0.0] - 2025-02-07
+
+### Removed
+
+* This component is no longer supported on PHP 8.2
+
 ## [3.0.2] - 2024-07-03
 
 ### Changed
@@ -42,6 +76,12 @@ All notable changes are documented in this file using the [Keep a CHANGELOG](htt
 
 * Initial release
 
+[5.0.1]: https://github.com/sebastianbergmann/cli-parser/compare/5.0.0...5.0.1
+[5.0.0]: https://github.com/sebastianbergmann/cli-parser/compare/4.2...5.0.0
+[4.2.1]: https://github.com/sebastianbergmann/cli-parser/compare/4.2.0...4.2.1
+[4.2.0]: https://github.com/sebastianbergmann/cli-parser/compare/4.1.0...4.2.0
+[4.1.0]: https://github.com/sebastianbergmann/cli-parser/compare/4.0.0...4.1.0
+[4.0.0]: https://github.com/sebastianbergmann/cli-parser/compare/3.0...4.0.0
 [3.0.2]: https://github.com/sebastianbergmann/cli-parser/compare/3.0.1...3.0.2
 [3.0.1]: https://github.com/sebastianbergmann/cli-parser/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/sebastianbergmann/cli-parser/compare/2.0...3.0.0

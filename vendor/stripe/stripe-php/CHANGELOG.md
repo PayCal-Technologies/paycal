@@ -1,11 +1,14 @@
 # Changelog
 
+## 21.2.1 - 2026-08-20
+* [#2126](https://github.com/stripe/stripe-php/pull/2126) Don't emit agent hint during tests. Fixes [#2125](https://github.com/stripe/stripe-php/issues/2125)
+
 ## 21.2.0 - 2026-08-10
 * [#2119](https://github.com/stripe/stripe-php/pull/2119) Surface `object` property on `EventNotification`
 * [#2117](https://github.com/stripe/stripe-php/pull/2117) Emit Claude Code plugin hint at module load time
 * [#2115](https://github.com/stripe/stripe-php/pull/2115) Fix v2 timestamp phpdoc type annotations ([#2114](https://github.com/stripe/stripe-php/issues/2114))
 * [#2105](https://github.com/stripe/stripe-php/pull/2105) add/adjust event parsing helpers
-
+  
   - Added methods that return their respective `Event`/`EventNotification` class instances without verifying authenticity. Use them when you've previously verified an event (e.g. you verified, put the event in a queue, and are now processing). Supports events from [AWS EventBridge](https://docs.stripe.com/event-destinations/eventbridge) and [Azure Event Grid](https://docs.stripe.com/event-destinations/eventgrid) natively.
     - `Webhook::constructEventWithoutVerification($payload)`
     - `BaseStripeClient::constructEventWithoutVerification($payload)`
@@ -60,7 +63,7 @@ This release changes the pinned API version to 2026-07-29.dahlia.
   * Add support for snapshot events `FINANCIAL_CONNECTIONS_AUTHORIZATION_EXPECTED_DEACTIVATION_DATE_UPDATED` and `FINANCIAL_CONNECTIONS_AUTHORIZATION_UPCOMING_DEACTIVATION` with resource `FinancialConnections.Authorization`
 
 ## 21.0.0 - 2026-07-15
-This release **does not** change the pinned API version. It's still `2026-06-24.dahlia`.
+This release **does not** change the pinned API version. It's still `2026-06-24.dahlia`. 
 
 We're releasing it as a major out of an abundance of caution, but it should be functionally a patch release for most users. See below.
 
