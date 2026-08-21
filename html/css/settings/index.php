@@ -1213,6 +1213,13 @@ header('Expires: 0');
   transition: var(--depth-interaction-transition, var(--short-transition) all ease);
 }
 
+@supports (text-box: trim-both cap alphabetic) {
+  #panel-calendar .calendar_badge_pills .work_entry_field + label,
+  .settings_toast_position_option {
+    text-box: trim-both cap alphabetic;
+  }
+}
+
 .settings_toast_position_picker {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1311,6 +1318,16 @@ header('Expires: 0');
   text-align: center;
   box-shadow: var(--depth-control-shadow, none);
   transition: var(--depth-interaction-transition, var(--short-transition) all ease);
+}
+
+@supports (text-box: trim-both cap alphabetic) {
+  #panel-style .radio_group.pill_group .radio + label,
+  #panel-calendar .radio_group.pill_group .radio + label,
+  #panel-debugging .radio_group.pill_group .radio + label,
+  #main section.panel.settings_card_group .radio_group.pill_group .radio + label,
+  #main section.panel .radio_group.pill_group .radio + label {
+    text-box: trim-both cap alphabetic;
+  }
 }
 
 #panel-style .radio_group.pill_group .radio:hover + label,

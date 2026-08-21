@@ -80,6 +80,17 @@
   box-shadow: var(--calendar-badge-pill-item-shadow, var(--depth-control-shadow, none));
   transition: var(--calendar-badge-pill-item-transition, var(--depth-interaction-transition, var(--short-transition) all ease));
 }
+
+@supports (text-box: trim-both cap alphabetic) {
+  .calendar_badge_pills .work_entry_field + label,
+  .calendar_badge_field_enabled + label,
+  .calendar_optional_field_enabled + label,
+  .calendar_badge_state_static,
+  .calendar_badge_add_button {
+    text-box: trim-both cap alphabetic;
+  }
+}
+
 .calendar_badge_pills :is(.work_entry_field:hover,.work_entry_field:focus) + label {
   background-color: var(--calendar-badge-pill-item-hover-bg, color-mix(in srgb, var(--btn-selected-back) 55%, transparent));
   border-color: transparent;

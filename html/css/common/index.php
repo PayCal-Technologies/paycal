@@ -1389,6 +1389,13 @@ input, select, textarea {
   transition: var(--depth-interaction-transition);
 }
 
+@supports (text-box: trim-both cap alphabetic) {
+  .btn,
+  button {
+    text-box: trim-both cap alphabetic;
+  }
+}
+
 .btn:hover {
   border-color: var(--button-border-active);
   background-color: var(--button-bg-hover);
@@ -1677,6 +1684,12 @@ label:focus {
   padding: var(--pad-xs);
   text-align: center;
   transition: var(--zero-transition) all linear;
+}
+
+@supports (text-box: trim-both cap alphabetic) {
+  .radio_group .radio + label {
+    text-box: trim-both cap alphabetic;
+  }
 }
 
 .radio_group .radio:active + label,input[type="radio"]:checked + label {
