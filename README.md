@@ -4,7 +4,7 @@ Privacy-first work-hours, pay visibility, and payroll-adjacent reporting for wor
 
 Workers keep control of sensitive work history. Businesses get authorized reporting without broad plaintext access.
 
-Latest documented release: **v1.059.013**
+Latest documented release: **v1.059.014**
 
 [![PHPUnit](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpunit.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpunit.yml)
 [![PHPStan](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpstan.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpstan.yml)
@@ -140,10 +140,10 @@ Set local environment values in `html/.env`, run Redis/PHP/nginx for the target 
 | PHPUnit listed tests | 2454 |
 | Configured PHPUnit files | 290 |
 | Repository PHP test files | 290 |
-| Frontend tests | 14 Playwright specs, 7 JS/MJS tests |
+| Frontend tests | 23 Playwright specs, 25 JS/MJS files |
 | Static analysis | PHPStan Level 9, ESLint, Vigil policy checks |
 
-Suite inventory (as of 2026-07-07):
+Suite inventory (as of 2026-08-22):
 
 - **2,454 listed tests**
 - **290 repository test files**
@@ -151,11 +151,21 @@ Suite inventory (as of 2026-07-07):
 - **2 Indigenous suite files**
 - **2 Manual verification files**
 
-Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-07-07 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes the two manual verification files, which are not configured PHPUnit suites.
+Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-08-22 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count follows the README policy inventory and includes the two manual verification files, which are not configured PHPUnit suites.
 <!-- scribe:quality:end -->
 
 <!-- scribe:recent-releases:begin -->
 ## Recent Releases
+
+## v1.059.014 (2026-08-22)
+
+**Release Focus:** Public GitHub visibility, community files, and current repository metadata.
+
+- Adds root-level contributor, security, and code-of-conduct guidance tailored to PayCal's proprietary public source model.
+- Adds GitHub bug and feature issue templates, contact routing, a social preview asset, public examples, and a GitHub visibility plan.
+- Refreshes the README with current CI badges, official PayCal links, repository links, preview media, and current test inventory.
+- Updates GitHub repository description, homepage, and topics for discoverability.
+- Refreshes PHPStan from 2.2.8 to 2.2.9 while preserving the repository's documented conflict-blocked PHPUnit line.
 
 ## v1.059.013 (2026-08-19)
 
