@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability report
+    url: mailto:security@paycal.app
+    about: Report suspected vulnerabilities privately instead of opening a public issue.
+  - name: PayCal product support
+    url: mailto:support@paycal.app
+    about: Contact PayCal support for account or product support.
+  - name: PayCal policies
+    url: https://paycaltech.com/policies/
+    about: Review PayCal privacy and terms documents.

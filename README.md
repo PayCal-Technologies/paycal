@@ -6,9 +6,24 @@ Workers keep control of sensitive work history. Businesses get authorized report
 
 Latest documented release: **v1.059.013**
 
+[![PHPUnit](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpunit.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpunit.yml)
+[![PHPStan](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpstan.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpstan.yml)
+[![JavaScript](https://github.com/PayCal-Technologies/paycal/actions/workflows/javascript.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/javascript.yml)
+[![Security Gates](https://github.com/PayCal-Technologies/paycal/actions/workflows/security-gates.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/security-gates.yml)
 [![Test Suite](https://img.shields.io/badge/tests-2454%20listed-blue)](html/tests/)
-[![PHPStan](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
+
+![PayCal application preview](html/images/paycal_mockup.jpg)
+
+## Official Links
+
+- Product: https://paycal.app/
+- Company: https://paycaltech.com/
+- GitHub: https://github.com/PayCal-Technologies/paycal
+- Security policy: [SECURITY.md](SECURITY.md)
+- Contributor guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Public examples: [examples/README.md](examples/README.md)
+- Privacy and terms: https://paycaltech.com/policies/
 
 <!-- scribe:begin -->
 

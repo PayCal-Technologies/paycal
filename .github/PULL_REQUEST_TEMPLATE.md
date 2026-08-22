@@ -7,6 +7,7 @@
 - [ ] Not run
 - [ ] Automated tests run
 - [ ] Manual browser verification run
+- [ ] Documentation-only change
 
 ## Accessibility Impact
 
@@ -39,4 +40,11 @@
 
 ## Risks
 
--
+- [ ] No privacy, security, billing, export, or business-access impact
+- [ ] Privacy, security, billing, export, or business-access impact is documented above
+
+## Documentation and Visibility
+
+- [ ] README, examples, help text, or public docs were updated where needed
+- [ ] No public screenshots, logs, fixtures, or examples include secrets, customer data, worker records, payroll data, or production business data
+- [ ] Release notes or changelog updates are included when user-facing behavior changed

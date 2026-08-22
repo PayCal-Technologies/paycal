@@ -1,0 +1,59 @@
+name: Feature request
+description: Suggest a PayCal product, documentation, testing, or developer-experience improvement.
+title: "[Feature]: "
+labels:
+  - feature
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What user, business, maintainer, or compliance problem should this solve?
+      placeholder: Describe the workflow gap and who is affected.
+    validations:
+      required: true
+  - type: dropdown
+    id: persona
+    attributes:
+      label: Primary audience
+      options:
+        - Worker
+        - Business owner or manager
+        - PayCal maintainer
+        - Accessibility reviewer
+        - Security or compliance reviewer
+        - Developer
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the smallest useful version of the change.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional alternatives or existing workflows you tried.
+    validations:
+      required: false
+  - type: textarea
+    id: impact
+    attributes:
+      label: Privacy, security, accessibility, and reporting impact
+      description: Call out protected data, business access, exports, billing, keyboard behavior, screen-reader behavior, or audit implications.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - Given ...
+        - When ...
+        - Then ...
+    validations:
+      required: false
