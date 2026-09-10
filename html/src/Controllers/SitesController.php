@@ -1073,6 +1073,8 @@ final class SitesController
             'regular_hours' => 0.0,
             'overtime_hours' => 0.0,
             'work_days' => 0,
+            'monthly_earnings' => array_fill(1, 12, 0.0),
+            'monthly_hours' => array_fill(1, 12, 0.0),
         ];
       }
 
@@ -1087,6 +1089,12 @@ final class SitesController
       $siteEarnings[$siteId]['regular_hours'] += $regular;
       $siteEarnings[$siteId]['overtime_hours'] += $overtime;
       ++$siteEarnings[$siteId]['work_days'];
+      $date = self::scalarString($workData['date'] ?? '');
+      $entryMonth = (int) substr($date, 5, 2);
+      if ($entryMonth >= 1 && $entryMonth <= 12) {
+        $siteEarnings[$siteId]['monthly_earnings'][$entryMonth] += $gross;
+        $siteEarnings[$siteId]['monthly_hours'][$entryMonth] += $hours;
+      }
 
       $grandTotals['earnings'] += $gross;
       $grandTotals['hours'] += $hours;
@@ -1097,6 +1105,11 @@ final class SitesController
 
     // Convert to indexed array and sort by earnings descending
     $siteList = array_values($siteEarnings);
+    foreach ($siteList as &$siteSummary) {
+      $siteSummary['monthly_earnings'] = array_values($siteSummary['monthly_earnings']);
+      $siteSummary['monthly_hours'] = array_values($siteSummary['monthly_hours']);
+    }
+    unset($siteSummary);
     usort($siteList, fn ($a, $b) => $b['total_earnings'] <=> $a['total_earnings']);
 
     $grandTotals['sites_count'] = count($siteList);

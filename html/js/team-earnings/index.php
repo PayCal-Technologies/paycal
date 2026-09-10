@@ -198,6 +198,40 @@ document.addEventListener('DOMContentLoaded', () => {
     return Number(v).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  function renderSparkline(values, label, className = '') {
+    const numericValues = Array.isArray(values)
+      ? values.map(Number).filter(value => Number.isFinite(value))
+      : [];
+    const safeClass = String(className).replace(/[^a-zA-Z0-9_\-\s]/g, '');
+    const safeLabel = String(label).replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    }[char]));
+
+    if (numericValues.length < 2) {
+      return `<span class="sparkline sparkline_empty ${safeClass}" role="img" aria-label="${safeLabel}"></span>`;
+    }
+
+    const width = 96;
+    const height = 28;
+    const padding = 3;
+    const min = Math.min(...numericValues);
+    const max = Math.max(...numericValues);
+    const range = max - min;
+    const lastIndex = Math.max(1, numericValues.length - 1);
+    const points = numericValues.map((value, index) => {
+      const x = padding + ((index / lastIndex) * (width - (padding * 2)));
+      const normalized = range <= 0 ? 0.5 : ((value - min) / range);
+      const y = height - padding - (normalized * (height - (padding * 2)));
+      return `${x.toFixed(2)},${y.toFixed(2)}`;
+    }).join(' ');
+
+    return `<svg class="sparkline ${safeClass}" viewBox="0 0 96 28" role="img" aria-label="${safeLabel}" focusable="false"><polyline class="sparkline_line" points="${points}"></polyline></svg>`;
+  }
+
   function openMemberDialog(memberData) {
     const body = document.getElementById('earnings_team_member_dialog_body');
     const title = document.getElementById('earnings_team_member_dialog_title');
@@ -212,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let html = '<div class="earnings_breakdown_meta">';
     html += '<span class="earnings_breakdown_role">' + escapeHtml(memberData.role.charAt(0).toUpperCase() + memberData.role.slice(1)) + '</span>';
+    html += '<span class="earnings_breakdown_sparkline">' + renderSparkline(months.map((month) => month.gross), `${memberData.name} monthly gross trend`, 'sparkline_money') + '</span>';
     html += '</div>';
 
     if (months.length === 0) {

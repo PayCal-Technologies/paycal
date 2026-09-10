@@ -177,6 +177,10 @@ ob_start();
               </div>
             </div>
           <?php endforeach; ?>
+          <div class="metric-sparkline-row">
+            <span class="metric-label"><?php echo metrics_index_i18n('ADMIN_METRICS_SESSION_DURATION_DISTRIBUTION'); ?></span>
+            <?= Render::sparkline(array_values($durationData), metrics_index_i18n('ADMIN_METRICS_SESSION_DURATION_DISTRIBUTION'), 'sparkline_admin') ?>
+          </div>
         </div>
       </div>
 
@@ -341,6 +345,15 @@ ob_start();
         <span class="metric-label">Attempts This Year</span>
         <span class="metric-value"><?= formatMetricNumber(getIntValue($scraperDefense, 'attempts_this_year', 0)) ?></span>
       </div>
+      <div class="metric-sparkline-row">
+        <span class="metric-label">Attempts profile</span>
+        <?= Render::sparkline([
+          getIntValue($scraperDefense, 'attempts_today', 0),
+          getIntValue($scraperDefense, 'attempts_this_week', 0),
+          getIntValue($scraperDefense, 'attempts_this_month', 0),
+          getIntValue($scraperDefense, 'attempts_this_year', 0),
+        ], 'Scraper defense attempts profile', 'sparkline_admin') ?>
+      </div>
     </div>
 
     <!-- CONTACT SUPPORT HEALTH -->
@@ -393,6 +406,15 @@ ob_start();
       <div class="metric-row">
         <span class="metric-label">Log Write Failures</span>
         <span class="metric-value <?= getIntValue($contact, 'log_write_failures', 0) > 0 ? 'danger' : 'success' ?>"><?= formatMetricNumber(getIntValue($contact, 'log_write_failures', 0)) ?></span>
+      </div>
+      <div class="metric-sparkline-row">
+        <span class="metric-label">Contact volume profile</span>
+        <?= Render::sparkline([
+          getIntValue($contact, 'today_total', 0),
+          getIntValue($contact, 'week_total', 0),
+          getIntValue($contact, 'month_total', 0),
+          getIntValue($contact, 'total_submissions', 0),
+        ], 'Contact support volume profile', 'sparkline_admin') ?>
       </div>
     </div>
 

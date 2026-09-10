@@ -964,6 +964,40 @@ document.addEventListener("DOMContentLoaded", async () =>
    * @param {Array} sites - Array of site earnings data
    * @param {number} totalEarnings - Total earnings across all sites
    */
+  function renderSparkline(values, label, className = '') {
+    const numericValues = Array.isArray(values)
+      ? values.map(Number).filter(value => Number.isFinite(value))
+      : [];
+    const safeClass = String(className).replace(/[^a-zA-Z0-9_\-\s]/g, '');
+    const safeLabel = String(label).replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    }[char]));
+
+    if (numericValues.length < 2) {
+      return `<span class="sparkline sparkline_empty ${safeClass}" role="img" aria-label="${safeLabel}"></span>`;
+    }
+
+    const width = 96;
+    const height = 28;
+    const padding = 3;
+    const min = Math.min(...numericValues);
+    const max = Math.max(...numericValues);
+    const range = max - min;
+    const lastIndex = Math.max(1, numericValues.length - 1);
+    const points = numericValues.map((value, index) => {
+      const x = padding + ((index / lastIndex) * (width - (padding * 2)));
+      const normalized = range <= 0 ? 0.5 : ((value - min) / range);
+      const y = height - padding - (normalized * (height - (padding * 2)));
+      return `${x.toFixed(2)},${y.toFixed(2)}`;
+    }).join(' ');
+
+    return `<svg class="sparkline ${safeClass}" viewBox="0 0 96 28" role="img" aria-label="${safeLabel}" focusable="false"><polyline class="sparkline_line" points="${points}"></polyline></svg>`;
+  }
+
   function renderEarningsList(sites, totalEarnings) {
     debugLog('renderEarningsList called', {sites, totalEarnings});
     const listEl = PC.getElement('site_earnings_list');
@@ -989,6 +1023,7 @@ document.addEventListener("DOMContentLoaded", async () =>
           </div>
           <div class="site_earnings_amount">
             ${formatCurrencyLocale(site.total_earnings)}
+            <span class="site_earnings_trend">${renderSparkline(site.monthly_earnings, `${site.site_name} monthly earnings trend`, 'sparkline_money')}</span>
           </div>
         </div>
 

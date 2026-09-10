@@ -6,6 +6,7 @@
         <div class="earnings_ytd_basic_row earnings_report_pair item_pair"><dt class="item_label">__OVERTIME__</dt><dd class="item_value">__OVERTIME_HOURS__ __HOURS__</dd></div>
         <div class="earnings_ytd_basic_row earnings_report_pair item_pair"><dt class="item_label">__GROSS_LABEL__</dt><dd class="item_value">$__GROSS__</dd></div>
       </dl>
+      __YTD_HOURS_SPARKLINES__
     </article>
 
     <article class="panel earnings_panel earnings_ytd_card">
@@ -19,6 +20,7 @@
         <div class="earnings_ytd_basic_row earnings_report_pair item_pair earnings_report_pair--strong"><dt class="item_label">__EARNINGS_TOTAL_DEDUCTIONS__</dt><dd class="item_value">$__TOTAL_DEDUCTIONS__</dd></div>
         <div class="earnings_ytd_basic_row earnings_report_pair item_pair earnings_report_pair--strong"><dt class="item_label">__NET_LABEL__</dt><dd class="item_value">$__NET__</dd></div>
       </dl>
+      __YTD_MONEY_SPARKLINES__
     </article>
   </div>
 </div>

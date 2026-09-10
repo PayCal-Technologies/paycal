@@ -410,6 +410,23 @@ body.page-calendar #calendar-v2-root.calendar_full_bleed.panel {
   outline-offset: 2px;
 }
 
+.calendar_month_trend {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 6.5rem;
+}
+
+.calendar_month_trend .sparkline {
+  inline-size: 6.5rem;
+}
+
+@media (max-width: 560px) {
+  .calendar_month_trend {
+    display: none;
+  }
+}
+
 #cal_menu_left {
   display: flex;
   flex-direction: column;

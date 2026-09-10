@@ -743,7 +743,7 @@ final class BusinessMemberReportsService
       {$monthlyExportButtons}
     </div>
     {$browserConvenienceExportsNote}
-    <div id="member_reports_monthly_{$year}" class="earnings_async_slot" data-earnings-slot="monthly" data-earnings-year="{$year}">{$this->buildAsyncSkeletonGrid(11, 6)}</div>
+    <div id="member_reports_monthly_{$year}" class="earnings_async_slot" data-earnings-slot="monthly" data-earnings-year="{$year}">{$this->buildAsyncSkeletonGrid(12, 6)}</div>
   </section>
 
   <section class="panel w100 earnings_panel">
@@ -866,6 +866,14 @@ HTML;
     $tax = new Taxes($this->resolveProvinceName($memberUser), $year);
     $t = $tax->calculateTaxesCents($grossIncomeCents);
     $netCents = $grossIncomeCents - (int) $t['totalDeductions'];
+    $monthGross = [];
+    $monthRegular = [];
+    $monthOvertime = [];
+    foreach ($yearData['months'] as $monthRow) {
+      $monthGross[] = Money::dollarsToCents((string) $monthRow['gross']);
+      $monthRegular[] = $monthRow['reg_hours'];
+      $monthOvertime[] = $monthRow['ot_hours'];
+    }
 
     $render = [
       '__HOURS__' => Strings::i18n('HOURS'),
@@ -895,6 +903,13 @@ HTML;
       '__NET__' => $this->formatNumberLocalized($netCents / 100, 2),
       '__REGULAR_HOURS__' => $this->formatNumberLocalized($regularHours, 2),
       '__OVERTIME_HOURS__' => $this->formatNumberLocalized($overtimeHours, 2),
+      '__YTD_HOURS_SPARKLINES__' => $this->renderMemberSparklineGroup([
+        Strings::i18n('REGULAR') => $monthRegular,
+        Strings::i18n('OVERTIME') => $monthOvertime,
+      ], 'hours'),
+      '__YTD_MONEY_SPARKLINES__' => $this->renderMemberSparklineGroup([
+        Strings::i18n('GROSS') => $monthGross,
+      ], 'money'),
     ];
 
     $hookRendered = EarningsYtdExtensionBridge::renderWithMode($year, $render, 'override');
@@ -903,6 +918,23 @@ HTML;
     }
 
     return Render::template('earnings-year-to-date', $render);
+  }
+
+  /**
+   * @param array<string, array<int, int|float>> $seriesByLabel
+   */
+  private function renderMemberSparklineGroup(array $seriesByLabel, string $variant): string
+  {
+    $items = [];
+    foreach ($seriesByLabel as $label => $series) {
+      $safeLabel = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+      $items[] = '<span class="earnings_ytd_sparkline_item">'
+        . '<span class="earnings_ytd_sparkline_label">' . $safeLabel . '</span>'
+        . Render::sparkline($series, $label . ' trend', 'sparkline_' . $variant)
+        . '</span>';
+    }
+
+    return '<div class="earnings_ytd_sparklines" aria-label="Year-to-date trend summaries">' . implode('', $items) . '</div>';
   }
 
   /**
@@ -961,6 +993,12 @@ HTML;
       $monthNetCents = $monthGrossCents - $monthTotalTaxCents;
 
       $hours = $hoursByMonth[$monthKey] ?? ['reg' => 0.0, 'ot' => 0.0];
+      $dailyGross = [];
+      foreach ($grossByDate as $date => $gross) {
+        if (strncmp((string) $date, $monthKey, 7) === 0) {
+          $dailyGross[] = (float) $gross;
+        }
+      }
 
       $rows[] = [
         'id' => $monthKey,
@@ -975,6 +1013,7 @@ HTML;
         'oas' => '$' . $this->formatNumberLocalized(max(0, $monthOasCents) / 100, 2),
         'total_deductions' => '$' . $this->formatNumberLocalized(max(0, $monthTotalTaxCents) / 100, 2),
         'net' => '$' . $this->formatNumberLocalized($monthNetCents / 100, 2),
+        'trend' => Render::sparkline($dailyGross, Strings::formatLocalizedShortMonth($year, $month) . ' daily gross trend', 'sparkline_money'),
       ];
 
       $prevGrossCents = $ytdGrossCents;
@@ -1015,6 +1054,7 @@ HTML;
       ['key' => 'oas', 'label' => Strings::i18n('EARNINGS_OAS'), 'align' => 'right'],
       ['key' => 'total_deductions', 'label' => Strings::i18n('EARNINGS_TOTAL_DEDUCTIONS'), 'align' => 'right'],
       ['key' => 'net', 'label' => Strings::i18n('NET'), 'align' => 'right'],
+      ['key' => 'trend', 'label' => 'Trend', 'align' => 'right', 'rawHtml' => true],
     ];
   }
 
@@ -1065,7 +1105,7 @@ HTML;
         continue;
       }
 
-      $cards[] = $this->renderMemberPayPeriodCard($period, $totals);
+      $cards[] = $this->renderMemberPayPeriodCard($period, $totals, $workSnapshot);
 
       $nextPeriod = $period->next();
       if ($nextPeriod->start() <= $period->start()) {
@@ -1089,8 +1129,9 @@ HTML;
    *   hours: array{regular: float, overtime: float, travel: float, total: float},
    *   totals: array{grossCents: int, taxCents: int, netCents: int}
    * } $totals
+   * @param MemberWorkSnapshot $workSnapshot
    */
-  private function renderMemberPayPeriodCard(PayPeriods $pp, array $totals): string
+  private function renderMemberPayPeriodCard(PayPeriods $pp, array $totals, array $workSnapshot): string
   {
     $startDate = Strings::formatLocalizedMediumDate($pp->start());
     $endDate = Strings::formatLocalizedMediumDate($pp->endInclusive());
@@ -1101,6 +1142,18 @@ HTML;
     $grossDisplay = $this->formatCurrencyCentsLocalized((int) $totals['totals']['grossCents']);
     $taxDisplay = $this->formatCurrencyCentsLocalized((int) $totals['totals']['taxCents']);
     $netDisplay = $this->formatCurrencyCentsLocalized((int) $totals['totals']['netCents']);
+    $dailyGross = [];
+    $startKey = $pp->start()->format('Y-m-d');
+    $endKey = $pp->endInclusive()->format('Y-m-d');
+    foreach ($workSnapshot['by_year'] as $yearData) {
+      foreach ($yearData['daily_entries'] as $date => $entry) {
+        $dateKey = (string) $date;
+        if ($dateKey >= $startKey && $dateKey <= $endKey) {
+          $dailyGross[] = (float) ($entry['gross'] ?? '0');
+        }
+      }
+    }
+    $grossSparkline = Render::sparkline($dailyGross, "Daily gross trend for {$startDate} to {$endDate}", 'sparkline_money');
     $payPeriodAria = $this->formatI18n('EARNINGS_PAY_PERIOD_ARIA_FMT', ['start' => $startDate, 'end' => $endDate]);
     $regularHoursLabel = htmlspecialchars(Strings::i18n('REGULAR_HOURS'), ENT_QUOTES, 'UTF-8');
     $otHoursLabel = htmlspecialchars(Strings::i18n('EARNINGS_BREAKDOWN_OT_HOURS_LABEL'), ENT_QUOTES, 'UTF-8');
@@ -1123,6 +1176,7 @@ HTML;
     <div class="pay-period-card_row"><span class="pay-period-card_label">{$grossLabel}</span><span class="pay-period-card_value">{$grossDisplay}</span></div>
     <div class="pay-period-card_row"><span class="pay-period-card_label">{$deductionsLabel}</span><span class="pay-period-card_value">{$taxDisplay}</span></div>
     <div class="pay-period-card_row"><span class="pay-period-card_label"><strong>{$netLabel}</strong></span><span class="pay-period-card_value"><strong>{$netDisplay}</strong></span></div>
+    <div class="pay-period-card_sparkline">{$grossSparkline}</div>
   </div>
 </article>
 HTML;

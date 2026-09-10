@@ -3173,6 +3173,42 @@ textarea.is-autosaved,
   border-radius: 1px;
 }
 
+.sparkline {
+  display: inline-block;
+  inline-size: 6rem;
+  block-size: 1.75rem;
+  max-inline-size: 100%;
+  overflow: visible;
+  vertical-align: middle;
+}
+
+.sparkline_line {
+  fill: none;
+  stroke: var(--color-primary, currentColor);
+  stroke-width: 2.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.sparkline_money .sparkline_line {
+  stroke: var(--color-primary, currentColor);
+}
+
+.sparkline_hours .sparkline_line {
+  stroke: var(--color-success, currentColor);
+}
+
+.sparkline_admin .sparkline_line {
+  stroke: var(--color-warning, currentColor);
+}
+
+.sparkline_empty {
+  position: relative;
+  border-block-end: 2px solid color-mix(in srgb, var(--color-text-muted, currentColor) 45%, transparent);
+  opacity: 0.65;
+}
+
 /* Row of sk-chart-bars for a bar-chart skeleton */
 .sk-chart-bars {
   display: flex;

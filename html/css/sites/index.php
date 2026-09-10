@@ -1513,6 +1513,12 @@ foreach (\PayCal\Domain\Config\SiteColorPalette::pickerPalette() as $pc) {
   overflow-wrap: anywhere;
 }
 
+.site_earnings_trend {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.2rem;
+}
+
 .site_earnings_budget {
   display: grid;
   gap: 0.35rem;

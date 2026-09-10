@@ -6,5 +6,6 @@
       <span>__I_GROSS__</span>
       <span>__I_DEDUCTIONS__</span>
       <span>__I_NET__</span>
+      <span>__I_TREND__</span>
     </div>
 __DAILY_ROWS__

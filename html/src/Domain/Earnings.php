@@ -1169,6 +1169,7 @@ class Earnings
     $t = $tax->calculateTaxesCents($grossIncomeCents);
 
     $netCents = $grossIncomeCents - $t['totalDeductions'];
+    $monthlySeries = $this->buildMonthlyTrendSeries($year);
 
     return [
       '__HOURS__'            => self::batchI18n('HOURS'),
@@ -1198,7 +1199,90 @@ class Earnings
       '__NET__'              => self::formatNumberLocalized($netCents / 100, 2),
       '__REGULAR_HOURS__'    => self::formatNumberLocalized($regularHours, 2),
       '__OVERTIME_HOURS__'   => self::formatNumberLocalized($overtimeHours, 2),
+      '__YTD_HOURS_SPARKLINES__' => $this->renderYtdSparklineGroup([
+        self::batchI18n('REGULAR') => $monthlySeries['regularHours'],
+        self::batchI18n('OVERTIME') => $monthlySeries['overtimeHours'],
+      ], 'hours'),
+      '__YTD_MONEY_SPARKLINES__' => $this->renderYtdSparklineGroup([
+        self::batchI18n('GROSS') => $monthlySeries['grossCents'],
+        self::batchI18n('EARNINGS_TOTAL_DEDUCTIONS') => $monthlySeries['taxCents'],
+        self::batchI18n('NET') => $monthlySeries['netCents'],
+      ], 'money'),
     ];
+  }
+
+  /**
+   * @return array{grossCents:list<int>,taxCents:list<int>,netCents:list<int>,regularHours:list<float>,overtimeHours:list<float>}
+   */
+  private function buildMonthlyTrendSeries(int $year): array
+  {
+    $series = [
+      'grossCents' => [],
+      'taxCents' => [],
+      'netCents' => [],
+      'regularHours' => [],
+      'overtimeHours' => [],
+    ];
+
+    for ($month = 1; $month <= 12; ++$month) {
+      $startDate = new \DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month));
+      $endDate = (clone $startDate)->modify('last day of this month');
+      $totals = self::getTotalsForRange($startDate, $endDate, User::currentUUID());
+      $series['grossCents'][] = (int) $totals['totals']['grossCents'];
+      $series['taxCents'][] = (int) $totals['totals']['taxCents'];
+      $series['netCents'][] = (int) $totals['totals']['netCents'];
+      $series['regularHours'][] = (float) $totals['hours']['regular'];
+      $series['overtimeHours'][] = (float) $totals['hours']['overtime'];
+    }
+
+    return $series;
+  }
+
+  /**
+   * @param array<string, array<int, int|float>> $seriesByLabel
+   */
+  private function renderYtdSparklineGroup(array $seriesByLabel, string $variant): string
+  {
+    $items = [];
+    foreach ($seriesByLabel as $label => $series) {
+      $safeLabel = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+      $items[] = '<span class="earnings_ytd_sparkline_item">'
+        . '<span class="earnings_ytd_sparkline_label">' . $safeLabel . '</span>'
+        . Render::sparkline($series, $label . ' trend', 'sparkline_' . $variant)
+        . '</span>';
+    }
+
+    return '<div class="earnings_ytd_sparklines" aria-label="Year-to-date trend summaries">' . implode('', $items) . '</div>';
+  }
+
+  /**
+   * @return list<float>
+   */
+  private function buildDailyGrossSeries(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate): array
+  {
+    $dailyGross = [];
+    foreach (Work::getInstance()->getWorkInRange($startDate, $endDate->modify('+1 day')) as $row) {
+      $resolved = self::resolveWorkRow($row, User::currentUUID());
+      if (is_array($resolved)) {
+        $row = $resolved;
+      } else {
+        CryptoCompatibilityTelemetry::plaintextFallback('sparkline_daily_gross');
+      }
+
+      $date = self::scalarString($row['date'] ?? '');
+      if ($date === '') {
+        continue;
+      }
+
+      if (!isset($dailyGross[$date])) {
+        $dailyGross[$date] = 0.0;
+      }
+      $dailyGross[$date] += self::numericFloat($row['gross'] ?? $row['g'] ?? 0);
+    }
+
+    ksort($dailyGross);
+
+    return array_values($dailyGross);
   }
 
   /**
@@ -1254,6 +1338,7 @@ class Earnings
       $startDate = new \DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month));
       $endDate = (clone $startDate)->modify('last day of this month');
       $totals = self::getTotalsForRange($startDate, $endDate, User::currentUUID());
+      $dailyGross = $this->buildDailyGrossSeries($startDate, $endDate);
 
       $rows[] = [
         'id' => sprintf('%04d-%02d', $year, $month),
@@ -1261,6 +1346,7 @@ class Earnings
         'gross' => self::formatCurrencyCentsLocalized((int) $totals['totals']['grossCents']),
         'deductions' => self::formatCurrencyCentsLocalized((int) $totals['totals']['taxCents']),
         'net' => self::formatCurrencyCentsLocalized((int) $totals['totals']['netCents']),
+        'trend' => Render::sparkline($dailyGross, Strings::formatLocalizedShortMonth($year, $month) . ' daily gross trend', 'sparkline_money'),
       ];
     }
 
@@ -1271,6 +1357,7 @@ class Earnings
         ['key' => 'gross', 'label' => self::batchI18n('GROSS'), 'align' => 'right'],
         ['key' => 'deductions', 'label' => self::batchI18n('EARNINGS_TOTAL_DEDUCTIONS'), 'align' => 'right'],
         ['key' => 'net', 'label' => self::batchI18n('NET'), 'align' => 'right'],
+        ['key' => 'trend', 'label' => 'Trend', 'align' => 'right', 'rawHtml' => true],
       ],
       'rows' => $rows,
       'meta' => [
@@ -1313,6 +1400,7 @@ class Earnings
     }
 
     ksort($data);
+    $grossTrendSeries = [];
     foreach ($data as $key => $earnings) {
       $resolved = self::resolveWorkRow($earnings, User::currentUUID());
       if (is_array($resolved)) {
@@ -1336,6 +1424,7 @@ class Earnings
       $dailyOldAgeSecurity      = $oldAgeSecurity - $previousOldAgeSecurity;
       $dailyDeductions          = $dailyFederalTax + $dailyProvincialTax + $dailyEmploymentInsurance + $dailyCanadaPensionPlan + $dailyOldAgeSecurity;
       $netDay                   = self::numericFloat($earnings['gross'] ?? 0) - $dailyDeductions;
+      $grossTrendSeries[] = self::numericFloat($earnings['gross'] ?? 0);
 
       $dailyRow = [
         '__DATE__'           => $label,
@@ -1345,6 +1434,7 @@ class Earnings
         '__GROSS__'          => self::formatNumberLocalized(self::numericFloat($earnings['gross'] ?? 0), 2),
         '__DEDUCTIONS__'     => self::formatNumberLocalized((float) $dailyDeductions, 2),
         '__NET__'            => self::formatNumberLocalized((float) $netDay, 2),
+        '__TREND__'          => Render::sparkline($grossTrendSeries, $label . ' cumulative gross trend', 'sparkline_money'),
       ];
 
       $dailyRows[] = Render::template('earnings-daily-row', $dailyRow);
@@ -1366,6 +1456,7 @@ class Earnings
       '__I_GROSS__'          => self::batchI18n('GROSS'),
       '__I_DEDUCTIONS__'     => self::batchI18n('DEDUCTIONS'),
       '__I_NET__'            => self::batchI18n('NET'),
+      '__I_TREND__'          => 'Trend',
     ];
 
     return Render::template(
@@ -1590,7 +1681,7 @@ class Earnings
 
       $monthlyHtml = $renderYearInline
         ? '<div id="earnings_monthly_' . $year . '" class="earnings_async_slot" data-earnings-slot="monthly" data-earnings-year="' . $year . '">' . $this->renderMonthlyViewStrip((int) $year) . '</div>'
-        : '<div id="earnings_monthly_' . $year . '" class="earnings_async_slot" data-earnings-slot="monthly" data-earnings-year="' . $year . '">' . self::buildAsyncSkeletonGrid(11, 6) . '</div>';
+        : '<div id="earnings_monthly_' . $year . '" class="earnings_async_slot" data-earnings-slot="monthly" data-earnings-year="' . $year . '">' . self::buildAsyncSkeletonGrid(5, 6) . '</div>';
 
       $historicalIntelligenceHtml = $this->renderHistoricalIntelligence((int) $year);
       $pieGraphsHtml = $this->renderPieGraphs((int) $year);
@@ -2059,6 +2150,11 @@ HTML;
     $grossDisplay = self::formatCurrencyCentsLocalized((int) $totals['totals']['grossCents']);
     $taxDisplay = self::formatCurrencyCentsLocalized((int) $totals['totals']['taxCents']);
     $netDisplay = self::formatCurrencyCentsLocalized((int) $totals['totals']['netCents']);
+    $grossSparkline = Render::sparkline(
+      $this->buildDailyGrossSeries($pp->start(), $pp->endInclusive()),
+      "Daily gross trend for {$startDate} to {$endDate}",
+      'sparkline_money'
+    );
 
     $payRateSummary = '';
     if ($totals['payRate']['deviates'] === true) {
@@ -2099,6 +2195,7 @@ HTML;
     <div class="pay-period-card_row"><span class="pay-period-card_label">Gross</span><span class="pay-period-card_value">{$grossDisplay}</span></div>
     <div class="pay-period-card_row"><span class="pay-period-card_label">Tax</span><span class="pay-period-card_value">{$taxDisplay}</span></div>
     <div class="pay-period-card_row"><span class="pay-period-card_label"><strong>Net</strong></span><span class="pay-period-card_value"><strong>{$netDisplay}</strong></span></div>
+    <div class="pay-period-card_sparkline">{$grossSparkline}</div>
   </div>
   {$sitesSummary}
   {$payRateSummary}

@@ -164,11 +164,59 @@ async function loadCalendar(year, month, pushState = true) {
   }
 }
 
+function renderSparkline(values, label, className = '') {
+  const numericValues = Array.isArray(values)
+    ? values.map(Number).filter(value => Number.isFinite(value))
+    : [];
+  const safeClass = String(className).replace(/[^a-zA-Z0-9_\-\s]/g, '');
+  const safeLabel = String(label).replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  }[char]));
+
+  if (numericValues.length < 2) {
+    return `<span class="sparkline sparkline_empty ${safeClass}" role="img" aria-label="${safeLabel}"></span>`;
+  }
+
+  const width = 96;
+  const height = 28;
+  const padding = 3;
+  const min = Math.min(...numericValues);
+  const max = Math.max(...numericValues);
+  const range = max - min;
+  const lastIndex = Math.max(1, numericValues.length - 1);
+  const points = numericValues.map((value, index) => {
+    const x = padding + ((index / lastIndex) * (width - (padding * 2)));
+    const normalized = range <= 0 ? 0.5 : ((value - min) / range);
+    const y = height - padding - (normalized * (height - (padding * 2)));
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  }).join(' ');
+
+  return `<svg class="sparkline ${safeClass}" viewBox="0 0 96 28" role="img" aria-label="${safeLabel}" focusable="false"><polyline class="sparkline_line" points="${points}"></polyline></svg>`;
+}
+
 // Render calendar HTML from JSON data
 function renderCalendar(data) {
   // Update title
   const titleSection = PC.getElement('cal_date_nav');
   if (titleSection) {
+    const monthTrend = data.monthTrend || {};
+    const safeMonthName = String(data.monthName || '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    }[char]));
+    const monthSparkline = renderSparkline(
+      Array.isArray(monthTrend.gross) && monthTrend.gross.length > 1 ? monthTrend.gross : monthTrend.hours,
+      `${data.monthName} work trend`,
+      'calendar_month_sparkline sparkline_money'
+    );
+
     PC.setHTML(titleSection, `
       <a href="${data.navigation.prev.url}"
          id="month_nav_prev"
@@ -199,6 +247,7 @@ function renderCalendar(data) {
         accesskey="]">
          ${PC.state.nextSVG}
       </a>
+      <span class="calendar_month_trend" aria-label="${safeMonthName} trend">${monthSparkline}</span>
     `);
   }
 

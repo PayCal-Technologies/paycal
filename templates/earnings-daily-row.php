@@ -6,4 +6,5 @@
   <span>__GROSS__</span>
   <span>__DEDUCTIONS__</span>
   <span>__NET__</span>
+  <span class="birdsview_trend">__TREND__</span>
 </div>

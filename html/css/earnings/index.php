@@ -42,6 +42,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   text-wrap: nowrap;
 }
 
+.birdsview_trend {
+  min-inline-size: 6.5rem;
+}
+
 .earnings_panel {
   width: 100%;
 }
@@ -220,6 +224,37 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   margin: 0;
   padding: 0.65rem;
   width: 100%;
+}
+
+.earnings_ytd_sparklines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--panel-border, currentColor) 55%, transparent);
+}
+
+.earnings_ytd_sparkline_item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.earnings_ytd_sparkline_label {
+  min-width: 0;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.earnings_ytd_sparkline_item .sparkline {
+  flex: 0 0 5.5rem;
 }
 
 .earnings_ytd_datagrid {
@@ -753,6 +788,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   margin-top: 0.15rem;
   padding-top: 0.35rem;
   border-top: 1px solid var(--border, rgba(255, 255, 255, 0.2));
+}
+
+.pay-period-card_sparkline {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.25rem;
 }
 
 .pay-period-card_sites {
@@ -2187,7 +2228,14 @@ svg[data-compact-chart="true"] .earnings-crosshair {
 }
 
 .earnings_breakdown_meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   margin-bottom: 0.85rem;
+}
+
+.earnings_breakdown_sparkline {
+  margin-left: auto;
 }
 
 .earnings_breakdown_role {

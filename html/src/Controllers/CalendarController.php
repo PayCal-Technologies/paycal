@@ -1035,13 +1035,27 @@ class CalendarController
     $end = \DateTimeImmutable::createFromMutable($gridEnd);
 
     $workByDay = [];
+    $monthTrend = [
+      'gross' => [],
+      'hours' => [],
+    ];
     foreach (Work::getWorkInRange($start, $end->modify('+1 day'), $user->user_uuid) as $data) {
       $ymd = self::scalarString($data['date'] ?? '');
       if ('' === $ymd) {
         continue;
       }
       $workByDay[$ymd][] = $data;
+      if (strncmp($ymd, sprintf('%04d-%02d', $year, $month), 7) === 0) {
+        if (!isset($monthTrend['gross'][$ymd])) {
+          $monthTrend['gross'][$ymd] = 0.0;
+          $monthTrend['hours'][$ymd] = 0.0;
+        }
+        $monthTrend['gross'][$ymd] += self::numericFloat($data['gross'] ?? $data['g'] ?? 0);
+        $monthTrend['hours'][$ymd] += self::numericFloat($data['hours'] ?? $data['h'] ?? 0);
+      }
     }
+    ksort($monthTrend['gross']);
+    ksort($monthTrend['hours']);
 
     // Generate days array
     $days = [];
@@ -1116,6 +1130,10 @@ class CalendarController
         ],
         'weekHeaders' => $weekHeaders,
         'days' => $days,
+        'monthTrend' => [
+          'gross' => array_values($monthTrend['gross']),
+          'hours' => array_values($monthTrend['hours']),
+        ],
     ];
   }
 
@@ -1248,6 +1266,10 @@ class CalendarController
     $workDict = [];
     $workIdCounter = 1;
     $dateToWorkIds = [];
+    $monthTrend = [
+      'gross' => [],
+      'hours' => [],
+    ];
 
     foreach ($workByDay as $ymd => $entries) {
       $dateToWorkIds[$ymd] = [];
@@ -1296,10 +1318,20 @@ class CalendarController
           'gross' => $gross,
           'g' => $gross,
         ];
+        if (strncmp($ymd, $targetMonth, 7) === 0) {
+          if (!isset($monthTrend['gross'][$ymd])) {
+            $monthTrend['gross'][$ymd] = 0.0;
+            $monthTrend['hours'][$ymd] = 0.0;
+          }
+          $monthTrend['gross'][$ymd] += $gross;
+          $monthTrend['hours'][$ymd] += $hours;
+        }
         
         $dateToWorkIds[$ymd][] = $workId;
       }
     }
+    ksort($monthTrend['gross']);
+    ksort($monthTrend['hours']);
 
     // Generate 42 cells
     $cells = [];
@@ -1320,6 +1352,10 @@ class CalendarController
       'today' => $today,
       'cells' => $cells,
       'work' => $workDict,
+      'monthTrend' => [
+        'gross' => array_values($monthTrend['gross']),
+        'hours' => array_values($monthTrend['hours']),
+      ],
     ];
   }
 

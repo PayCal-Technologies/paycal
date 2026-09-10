@@ -234,6 +234,52 @@ class Render
   }
 
   /**
+   * Render a compact inline SVG trend line for dense metric surfaces.
+   *
+   * @param array<int, int|float|string> $values Numeric values in display order
+   */
+  public static function sparkline(array $values, string $label, string $className = ''): string
+  {
+    $points = [];
+    foreach ($values as $value) {
+      if (is_numeric($value)) {
+        $points[] = (float) $value;
+      }
+    }
+
+    if (count($points) < 2) {
+      return '<span class="sparkline sparkline_empty" role="img" aria-label="' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '"></span>';
+    }
+
+    $width = 96.0;
+    $height = 28.0;
+    $padding = 3.0;
+    $plotWidth = $width - ($padding * 2);
+    $plotHeight = $height - ($padding * 2);
+    $min = min($points);
+    $max = max($points);
+    $range = $max - $min;
+    $lastIndex = max(1, count($points) - 1);
+    $coordinates = [];
+
+    foreach ($points as $index => $value) {
+      $x = $padding + (($index / $lastIndex) * $plotWidth);
+      $normalized = $range <= 0.0 ? 0.5 : (($value - $min) / $range);
+      $y = $height - $padding - ($normalized * $plotHeight);
+      $coordinates[] = number_format($x, 2, '.', '') . ',' . number_format($y, 2, '.', '');
+    }
+
+    $safeLabel = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+    $safeClass = trim(preg_replace('/[^a-zA-Z0-9_\-\s]/', '', $className) ?? '');
+    $classAttr = trim('sparkline ' . $safeClass);
+    $pointsAttr = htmlspecialchars(implode(' ', $coordinates), ENT_QUOTES, 'UTF-8');
+
+    return '<svg class="' . $classAttr . '" viewBox="0 0 96 28" role="img" aria-label="' . $safeLabel . '" focusable="false">'
+      . '<polyline class="sparkline_line" points="' . $pointsAttr . '"></polyline>'
+      . '</svg>';
+  }
+
+  /**
    * Builds an array of navigation link definitions for rendering.
    * @param array<int, Page> $pages list of NavPage enum values to include in the navigation
    * @return array<int, array<string, string>> Structured navigation data ready for rendering.
