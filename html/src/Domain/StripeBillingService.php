@@ -101,7 +101,7 @@ final class StripeBillingService
     }
 
     try {
-      $client = new StripeClient($secretKey);
+      $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
       $subscription = SubscriptionRepository::get($userUUID);
       $storedCustomerId = is_scalar($subscription['customer_id'] ?? null)
         ? trim((string) $subscription['customer_id'])
@@ -182,7 +182,7 @@ final class StripeBillingService
     $customerId = is_scalar($subscription['customer_id'] ?? null) ? trim((string) $subscription['customer_id']) : '';
 
     try {
-      $client = new StripeClient($secretKey);
+      $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
 
       if ($subscriptionId === '' && $customerId === '') {
         $customerId = $this->resolveCanonicalCustomerIdByEmail($secretKey, $userEmail);
@@ -257,7 +257,7 @@ final class StripeBillingService
     }
 
     try {
-      $client = new StripeClient($secretKey);
+      $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
       $session = $client->checkout->sessions->retrieve($normalizedSessionId, []);
 
       $sessionStatus = strtolower((string) ($session->status ?? ''));
@@ -408,7 +408,7 @@ final class StripeBillingService
     }
 
     try {
-      $client = new StripeClient($secretKey);
+      $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
 
       if ($subscriptionId === '') {
         $subscriptionId = $this->resolveActiveSubscriptionId($secretKey, $customerId);
@@ -432,7 +432,7 @@ final class StripeBillingService
       }
 
       $quantity = 1;
-      if (is_object($subscriptionItem) && is_scalar($subscriptionItem->quantity ?? null)) {
+      if (is_scalar($subscriptionItem->quantity ?? null)) {
         $quantity = max(1, (int) $subscriptionItem->quantity);
       }
 
@@ -489,7 +489,7 @@ final class StripeBillingService
     }
 
     try {
-      $client = new StripeClient($secretKey);
+      $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
       $subscription = SubscriptionRepository::get($userUUID);
       $subscriptionId = is_scalar($subscription['id'] ?? null) ? trim((string) $subscription['id']) : '';
       $customerId = is_scalar($subscription['customer_id'] ?? null) ? trim((string) $subscription['customer_id']) : '';
@@ -534,7 +534,7 @@ final class StripeBillingService
       }
 
       $quantity = 1;
-      if (is_object($subscriptionItem) && is_scalar($subscriptionItem->quantity ?? null)) {
+      if (is_scalar($subscriptionItem->quantity ?? null)) {
         $quantity = max(1, (int) $subscriptionItem->quantity);
       }
 
@@ -612,7 +612,7 @@ final class StripeBillingService
     }
 
     try {
-      $client = new StripeClient($secretKey);
+      $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
       $stripeSubscription = null;
 
       if ($subscriptionId !== '') {
@@ -1441,7 +1441,7 @@ final class StripeBillingService
       return trim((string) (($this->portalCustomerResolver)($secretKey, $subscriptionId) ?? ''));
     }
 
-    $client = new StripeClient($secretKey);
+    $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
     $stripeSubscription = $client->subscriptions->retrieve($subscriptionId, []);
 
     return trim((string) ($stripeSubscription->customer ?? ''));
@@ -1456,7 +1456,7 @@ final class StripeBillingService
       return trim((string) (($this->portalSessionCreator)($secretKey, $customerId, $returnURL) ?? ''));
     }
 
-    $client = new StripeClient($secretKey);
+    $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
     $portalSession = $client->billingPortal->sessions->create([
       'customer' => $customerId,
       'return_url' => $returnURL,
@@ -1474,7 +1474,7 @@ final class StripeBillingService
       return ($this->subscriptionCanceler)($secretKey, $subscriptionId);
     }
 
-    $client = new StripeClient($secretKey);
+    $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
     return $client->subscriptions->cancel($subscriptionId, []);
   }
 
@@ -1483,7 +1483,7 @@ final class StripeBillingService
    */
   private function resolveActiveSubscriptionId(string $secretKey, string $customerId): string
   {
-    $client = new StripeClient($secretKey);
+    $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
     $subscriptions = $client->subscriptions->all([
       'customer' => $customerId,
       'status' => 'all',
@@ -1522,7 +1522,7 @@ final class StripeBillingService
       return '';
     }
 
-    $client = new StripeClient($secretKey);
+    $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
     $customers = $client->customers->all([
       'email' => $normalizedEmail,
       'limit' => 20,
@@ -1583,7 +1583,7 @@ final class StripeBillingService
     }
 
     try {
-      $client = new StripeClient($secretKey);
+      $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
       $customers = $client->customers->all([
         'email' => $normalizedEmail,
         'limit' => 30,
@@ -1938,7 +1938,7 @@ final class StripeBillingService
    */
   private function resolvePortalPlanChangeConfigurationId(string $secretKey, string $targetPriceId): string
   {
-    $client = new StripeClient($secretKey);
+    $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
     $metadataName = 'paycal_plan_change_v1';
 
     $configurations = $client->billingPortal->configurations->all([
@@ -1993,7 +1993,7 @@ final class StripeBillingService
       trim($targetPriceId),
     ], static fn (string $priceId): bool => $priceId !== ''));
 
-    $client = new StripeClient($secretKey);
+    $client = new StripeClient(['api_key' => $secretKey, 'stripe_version' => '2026-08-26.dahlia']);
     $pricesByProduct = [];
     foreach (array_unique($priceIds) as $priceId) {
       $price = $client->prices->retrieve($priceId, []);

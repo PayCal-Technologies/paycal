@@ -481,7 +481,7 @@ final class KnockKnockTest extends TestCase
       && str_contains($sampleLower, '/signin');
 
     $publicPagePrefixes = [
-      '/', '/about/', '/auth/', '/blog/', '/contact/', '/faq/', '/help/', '/language-coverage/', '/media/', '/policies/', '/pricing/', '/security/', '/soc2/', '/status/', '/transparency/', '/verify/'
+      '/', '/about/', '/auth/', '/blog/', '/contact/', '/faq/', '/help/', '/language-coverage/', '/media/', '/policies/', '/pricing/', '/security/', '/soc2/', '/status/', '/tools/', '/transparency/', '/verify/'
     ];
 
     $publicPageExact = [

@@ -271,7 +271,7 @@ AUDIO_FEEDBACK Audio Terugkoppeling
 AUDIO_FEEDBACK_USING Audio terugkoppeling via
 AUDIO_INTRO_BTN Audio Introduction
 AUDIO_PREFS Audio Voorkeuren
-AUTH_BETA_NOTICE PayCal bevindt zich in privébeta.
+AUTH_BETA_NOTICE PayCal is in publieke bèta.
 AUTH_DIVIDER_OR of
 AUTH_JS_CONFIRM_DEVICE Bevestig op uw apparaat…
 AUTH_JS_EMAIL_ALREADY_REGISTERED Dit e-mailadres is al geregistreerd. Log in plaats daarvan in.
@@ -1489,11 +1489,11 @@ ERR_TIMEZONE_MISMATCH Timezone mismatch between expected and provided values.
 ERR_UNHANDLED_PAY_FREQUENCY Unhandled pay frequency
 ESCAPE_KEY <kbd>ESCAPE</kbd>
 EXPAND_SIDEBAR Zijbalk uitvouwen
-FAQ_A1 Ja. We zijn momenteel in de privé bètafase met een openbare bèta die in 2024 gelanceerd zal worden. Onze doelen zijn gebaseerd op het eenvoudig houden van dingen, waarde bieden en bovenal een sterke toewijding aan het veilig houden van je privacy en persoonlijke informatie. We volgen beste praktijken naar ons beste vermogen, zoals responsief ontwerp, volledige toegankelijkheid, meertalige en thema-ondersteuning, snelle en veilige serverbeheer en nog veel meer.
+FAQ_A1 Ja. PayCal is in publieke bèta en je kunt nu een account maken. Onze doelen blijven hetzelfde: dingen eenvoudig houden, waarde bieden en je privacy en persoonlijke gegevens beschermen.
 FAQ_A2 Jazeker! We bieden een gratis laag voor iedereen die hun uurloon moet registreren en bijhouden met aanvullende gerelateerde functies die het gemakkelijk maken om verdere inzichten te verkrijgen. We willen dit serviceniveau gratis aanbieden omdat het belangrijk is dat iedereen zoveel mogelijk tools heeft om hun werk, hun inkomsten te beheren en hun leven gemakkelijker te maken.
 FAQ_A3 We zijn van plan onze eerste miljoen te verdienen met een abonnementsmodel betaald door bedrijven en managers die nog meer controle over hun financiën willen. Het plan is eenvoudig. De betaalde laag is een vast maandelijks tarief met details die aangekondigd worden zodra we officieel aan het publiek vrijgeven.
 FAQ_A4 Absoluut! De Kalender toont de geregistreerde uren per baan voor elke dag. Klik op een dag om het Werk Details paneel te openen om naar wens aan te passen. Het Dashboard toont een overzicht van het jaar per maand, loonperiode en baan.
-FAQ_A5 Ook al bieden we momenteel onze diensten in 10 talen aan, we werken aan meer! Kom vaak terug kijken! We streven ernaar om tegen eind 2024 nog 15 talen toe te voegen, met plannen om er meer toe te voegen naarmate de tijd vordert. Als je een suggestie hebt, luisteren we graag! Merci! Salamat Po! Danke! :D
+FAQ_A5 PayCal is beschikbaar in 10 talen. Er kunnen later meer talen bijkomen. Als je een suggestie hebt, horen we die graag.
 FAQ_A6 We streven ernaar om zo open en duidelijk mogelijk te zijn over hoe we deze service beheren. We hebben beleid gecreëerd dat onze servicevoorwaarden, privacycontroles en toegankelijkheidsdoelstellingen schetst.
 FAQ_A7 Gebruik onze Contactpagina om contact met ons op te nemen.
 FAQ_CONTACT_TEXT Als je verdere vragen of zorgen hebt betreffende onze Algemene Voorwaarden, aarzel dan niet om contact op te nemen. Je kunt ons contacteren op
@@ -1563,7 +1563,7 @@ FORECAST_WORKERS Workers
 FORECAST_WORKERS_HINT Number of workers with these parameters
 FRENCH Frans
 FRI Vri
-FRONT_PAGE_BETA_NOTE We are currently in Closed Beta, but keep an eye out for the opportunity to join our Public Beta soon. We are eager to share this fantastic tool with the world.
+FRONT_PAGE_BETA_NOTE PayCal is in publieke bèta. Maak een account om uren, vergoedingen en geschatte betaling bij te houden.
 FRONT_PAGE_CARD_1_BODY Ever wondered what your paycheck would look like before it hits your bank account? With PayCal, workers can now see their expected earnings for each pay period, putting financial planning right at your fingertips.
 FRONT_PAGE_CARD_1_TITLE Earnings Transparency
 FRONT_PAGE_CARD_2_BODY Forget the hassle of manual record-keeping. Simply enter your total hours each day, and watch as it seamlessly saves into our secure database. No more endless spreadsheets or paperwork.
@@ -1638,7 +1638,7 @@ HELP_FAQ_INTRO_SUFFIX .
 HELP_FAQ_PAGE_LINK FAQ page
 HELP_FAQ_Q1_MIDDLE Also, confirm your pay period settings are accurate in
 HELP_FAQ_Q1_PREFIX A: Ensure your work site's wage and any allowances are correctly entered in
-HELP_FAQ_Q1_SUFFIX PayCal.app calculates regular and overtime hours based on defined thresholds (e.g., 8 hours daily, 44 hours weekly for regular pay), as per the calculate_hours function and constants.
+HELP_FAQ_Q1_SUFFIX PayCal calculates regular and overtime hours from the employment-standards rule for your province or territory. Averaging agreements and some jobs use a different threshold. The free tools pages list the general rule and the official source.
 HELP_FAQ_Q1_TITLE Q: Why are my hours not calculating correctly?
 HELP_FAQ_Q2_TEXT A: You can reset your password through the sign in page. An email/password reset feature is a high-priority item that has already been completed in the development roadmap.
 HELP_FAQ_Q2_TITLE Q: I forgot my password, how do I reset it?

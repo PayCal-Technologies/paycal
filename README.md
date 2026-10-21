@@ -4,13 +4,13 @@ Privacy-first work-hours, pay visibility, and payroll-adjacent reporting for wor
 
 Workers keep control of sensitive work history. Businesses get authorized reporting without broad plaintext access.
 
-Latest documented release: **v1.059.014**
+Latest documented release: **v1.059.015**
 
 [![PHPUnit](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpunit.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpunit.yml)
 [![PHPStan](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpstan.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpstan.yml)
 [![JavaScript](https://github.com/PayCal-Technologies/paycal/actions/workflows/javascript.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/javascript.yml)
 [![Security Gates](https://github.com/PayCal-Technologies/paycal/actions/workflows/security-gates.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/security-gates.yml)
-[![Test Suite](https://img.shields.io/badge/tests-2454%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2470%20listed-blue)](html/tests/)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
 ![PayCal application preview](html/images/paycal_mockup.jpg)
@@ -143,19 +143,24 @@ Set local environment values in `html/.env`, run Redis/PHP/nginx for the target 
 | Frontend tests | 23 Playwright specs, 25 JS/MJS files |
 | Static analysis | PHPStan Level 9, ESLint, Vigil policy checks |
 
-Suite inventory (as of 2026-08-22):
+Suite inventory (as of 2026-10-20):
 
-- **2,454 listed tests**
-- **290 repository test files**
-- **Active public suite file split:** **145 Unit**, **60 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
+- **2,470 listed tests**
+- **292 repository test files**
+- **Active public suite file split:** **147 Unit**, **60 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
 - **2 Indigenous suite files**
 - **2 Manual verification files**
 
-Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-08-22 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count follows the README policy inventory and includes the two manual verification files, which are not configured PHPUnit suites.
+Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-10-20 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes the two manual verification files, which are not configured PHPUnit suites.
 <!-- scribe:quality:end -->
 
 <!-- scribe:recent-releases:begin -->
 ## Recent Releases
+
+## v1.059.015 (2026-10-20)
+
+Public pay tools and rotation examples now use reviewed Canadian overtime, vacation and holiday rules. Earnings snapshots and forecasts preserve double time and jurisdiction rates. Release checks and dependency locks were refreshed.
+
 
 ## v1.059.014 (2026-08-22)
 

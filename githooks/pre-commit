@@ -3,8 +3,21 @@ set -euo pipefail
 
 # Purpose: versioned pre-commit entrypoint used by core.hooksPath or copied hooks.
 # Usage: invoked automatically by git before commit creation.
-# Why here: keeps the checked-in hook thin while the real logic lives in scripts/hooks.
+# Why here: keeps the checked-in hook thin while the real logic lives in standalone Vigil.
 
-repo_root="$(git rev-parse --show-toplevel)"
+vigil_path="${VIGIL_BIN:-}"
+if [ -z "${vigil_path}" ]; then
+  if command -v vigil >/dev/null 2>&1; then
+    vigil_path="$(command -v vigil)"
+  else
+    vigil_path="/private/var/www/paycal-technologies/vigil-private/bin/vigil"
+  fi
+fi
 
-exec "${repo_root}/scripts/paycal" hooks:pre-commit "$@"
+if [ ! -x "${vigil_path}" ]; then
+  echo "[fatal] missing vigil binary: ${vigil_path}" >&2
+  echo "[fatal] run: cd /private/var/www/paycal-technologies/vigil-private && go build -o bin/vigil ." >&2
+  exit 1
+fi
+
+exec "${vigil_path}" hooks:pre-commit "$@"

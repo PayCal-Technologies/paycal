@@ -96,6 +96,7 @@ class SettingsController
   ];
 
   #[Route('settings/early-access/immediate-ui/enable', ['POST'])]
+  /** Enable immediate ui early access. */
   public function enableImmediateUiEarlyAccess(): void
   {
     $user = UserRepository::getByUUID(User::currentUUID());
@@ -132,6 +133,7 @@ class SettingsController
   }
 
   #[Route('settings/early-access/immediate-ui/disable', ['POST'])]
+  /** Disable immediate ui early access. */
   public function disableImmediateUiEarlyAccess(): void
   {
     $user = UserRepository::getByUUID(User::currentUUID());

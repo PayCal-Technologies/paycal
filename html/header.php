@@ -43,7 +43,7 @@ if (!$isAuthenticated) {
 }
 
 /** Public pages that don't require authentication */
-$publicPages = ['PAGE_SIGNIN', 'PAGE_REGISTER', 'PAGE_CONTACT', 'PAGE_AUTH', 'PAGE_ABOUT', 'PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA', 'PAGE_PRICING', 'PAGE_STATUS'];
+$publicPages = ['PAGE_SIGNIN', 'PAGE_REGISTER', 'PAGE_CONTACT', 'PAGE_AUTH', 'PAGE_ABOUT', 'PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA', 'PAGE_PRICING', 'PAGE_STATUS', 'PAGE_TOOLS'];
 
 if (!$isAuthenticated && !in_array($currentPage, $publicPages, true)) {
   Security::sendCoreSecurityHeaders();
@@ -302,8 +302,31 @@ if (ContentView::isDocPage($currentPage)) {
   ob_start();
 }
 
+$themeModeForDocument = 'dark';
+try {
+  $themeModeForDocument = strtolower((string) (User::current()->variant ?? 'dark'));
+} catch (\Throwable) {
+  $themeModeForDocument = 'dark';
+}
+if (!in_array($themeModeForDocument, ['light', 'dark'], true)) {
+  $themeModeForDocument = 'dark';
+}
+$themeModeCookie = strtolower(trim((string) ($_COOKIE['PayCal_Theme_Mode'] ?? '')));
+if (!$isAuthenticated && in_array($themeModeCookie, ['light', 'dark'], true)) {
+  $themeModeForDocument = $themeModeCookie;
+}
+$themeFamilyForDocument = 'paycal_blue';
+try {
+  $themeFamilyForDocument = strtolower((string) (User::current()->theme ?? 'paycal_blue'));
+} catch (\Throwable) {
+  $themeFamilyForDocument = 'paycal_blue';
+}
+if ($themeFamilyForDocument === 'paycal') {
+  $themeFamilyForDocument = 'paycal_black';
+}
+
 ?><!DOCTYPE html><!-- Hello there. -->
-<html lang="<?php echo htmlspecialchars((string) $pageLanguage, ENT_QUOTES, 'UTF-8'); ?>" dir="ltr" prefix="og: http://ogp.me/ns#" data-os="<?php echo htmlspecialchars($platformToken, ENT_QUOTES, 'UTF-8'); ?>" data-a11y-animated-images="system" data-a11y-link-underlines="true" data-a11y-dyslexia-typography="<?php echo htmlspecialchars((string) (User::current()->dyslexia_typography ?? UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY), ENT_QUOTES, 'UTF-8'); ?>" data-a11y-high-contrast="<?php echo htmlspecialchars((string) (User::current()->high_contrast_enabled ?? UserPreferenceDefaults::DEFAULT_HIGH_CONTRAST_ENABLED), ENT_QUOTES, 'UTF-8'); ?>" data-a11y-reduced-motion="<?php echo htmlspecialchars((string) (User::current()->reduced_motion_enabled ?? UserPreferenceDefaults::DEFAULT_REDUCED_MOTION_ENABLED), ENT_QUOTES, 'UTF-8'); ?>" data-accent-preset="<?php echo htmlspecialchars((string) (User::current()->accent_preset ?? UserPreferenceDefaults::DEFAULT_ACCENT_PRESET), ENT_QUOTES, 'UTF-8'); ?>" data-depth="<?php echo htmlspecialchars((string) User::current()->depth, ENT_QUOTES, 'UTF-8'); ?>">
+<html lang="<?php echo htmlspecialchars((string) $pageLanguage, ENT_QUOTES, 'UTF-8'); ?>" dir="ltr" prefix="og: http://ogp.me/ns#" data-os="<?php echo htmlspecialchars($platformToken, ENT_QUOTES, 'UTF-8'); ?>" data-authenticated="<?php echo $isAuthenticated ? 'true' : 'false'; ?>" data-theme-family="<?php echo htmlspecialchars($themeFamilyForDocument, ENT_QUOTES, 'UTF-8'); ?>" data-theme-mode="<?php echo htmlspecialchars($themeModeForDocument, ENT_QUOTES, 'UTF-8'); ?>" class="<?php echo $themeModeForDocument === 'dark' ? 'dark-mode' : 'light-mode'; ?>" data-a11y-animated-images="system" data-a11y-link-underlines="true" data-a11y-dyslexia-typography="<?php echo htmlspecialchars((string) (User::current()->dyslexia_typography ?? UserPreferenceDefaults::DEFAULT_DYSLEXIA_TYPOGRAPHY), ENT_QUOTES, 'UTF-8'); ?>" data-a11y-high-contrast="<?php echo htmlspecialchars((string) (User::current()->high_contrast_enabled ?? UserPreferenceDefaults::DEFAULT_HIGH_CONTRAST_ENABLED), ENT_QUOTES, 'UTF-8'); ?>" data-a11y-reduced-motion="<?php echo htmlspecialchars((string) (User::current()->reduced_motion_enabled ?? UserPreferenceDefaults::DEFAULT_REDUCED_MOTION_ENABLED), ENT_QUOTES, 'UTF-8'); ?>" data-accent-preset="<?php echo htmlspecialchars((string) (User::current()->accent_preset ?? UserPreferenceDefaults::DEFAULT_ACCENT_PRESET), ENT_QUOTES, 'UTF-8'); ?>" data-depth="<?php echo htmlspecialchars((string) User::current()->depth, ENT_QUOTES, 'UTF-8'); ?>">
 
 <!--
   _______   ______    ___________          _______   __  ___  __   __       __       ______
@@ -318,6 +341,11 @@ if (ContentView::isDocPage($currentPage)) {
 -->
 
 <head>
+<?php if (!$isAuthenticated && in_array($currentPage, ['PAGE_ABOUT', 'PAGE_HELP', 'PAGE_CONTACT', 'PAGE_TRANSPARENCY', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA', 'PAGE_PRICING', 'PAGE_STATUS'], true) && Environment::appEnv() === 'prod'): ?>
+<link rel="stylesheet" href="/css/site-analytics.css?v=20261016-1">
+<script nonce="<?php echo htmlspecialchars((string) $cspNonce, ENT_QUOTES, 'UTF-8'); ?>" defer src="/js/site-analytics.js?v=20261016-2" data-measurement-id="G-XWS6GR0MLW"></script>
+<?php endif; ?>
+
 
   <!-- Identity -->
 <?php
@@ -765,6 +793,29 @@ echo Render::template('keyboard-shortcuts', $renders);
   }
 } // end $isAuthenticated ?>
 
+<?php
+$themeToggleLightChecked = $themeModeForDocument === 'light' ? ' checked' : '';
+$themeToggleDarkChecked = $themeModeForDocument === 'dark' ? ' checked' : '';
+$themeToggleStatus = $themeModeForDocument === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+$themeToggleSunIcon = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+$themeToggleMoonIcon = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A7.8 7.8 0 0 1 9.5 4 8.2 8.2 0 1 0 20 14.5Z"/></svg>';
+$themeToggleHtml = <<<HTML
+<div class="paycal_theme_toggle pill_group" role="radiogroup" aria-label="Appearance" data-theme-toggle data-theme-current="{$themeModeForDocument}">
+  <input id="paycal_theme_light" class="radio visually_hidden" type="radio" name="paycal_theme_mode" value="light" data-theme-mode-option{$themeToggleLightChecked}>
+  <label for="paycal_theme_light" title="Switch to Light Mode" aria-label="Switch to Light Mode">
+    <span class="paycal_theme_toggle_icon" aria-hidden="true">{$themeToggleSunIcon}</span>
+    <span class="paycal_theme_toggle_text">Light</span>
+  </label>
+  <input id="paycal_theme_dark" class="radio visually_hidden" type="radio" name="paycal_theme_mode" value="dark" data-theme-mode-option{$themeToggleDarkChecked}>
+  <label for="paycal_theme_dark" title="Switch to Dark Mode" aria-label="Switch to Dark Mode">
+    <span class="paycal_theme_toggle_icon" aria-hidden="true">{$themeToggleMoonIcon}</span>
+    <span class="paycal_theme_toggle_text">Dark</span>
+  </label>
+  <span class="visually_hidden" aria-live="polite" data-theme-toggle-status>{$themeToggleStatus}</span>
+</div>
+HTML;
+?>
+
 <svg class="pc_icon_sprite" xmlns="http://www.w3.org/2000/svg" hidden aria-hidden="true" focusable="false">
   <symbol id="pc-icon-business" viewBox="0 0 24 24">
     <path d="M7 21V6.5A1.5 1.5 0 0 1 8.5 5h7A1.5 1.5 0 0 1 17 6.5V21" />
@@ -808,7 +859,7 @@ echo Render::template('keyboard-shortcuts', $renders);
 <?php if (!$isAuthenticated) { ?>
   <li class="pages public_brand"><a href="/" aria-label="PayCal">PayCal</a></li>
   <li class="pages public_language_cluster"><?php echo $publicLanguageBarHtml; ?></li>
-  <li class="pages public_appearance_slot"><button class="public_appearance_button" type="button" aria-label="Appearance" disabled><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="12" cy="16" r="7"></circle><path d="M16 9a7 7 0 0 0 0 14 8 8 0 1 1 0-14Z"></path><circle cx="24" cy="9" r="3"></circle><path d="M24 2v3M24 13v3M17 9h3M28 9h3M19 4l2 2M28 4l-2 2M19 14l2-2M28 14l-2-2"></path></svg></button></li>
+  <li class="pages public_appearance_slot"><?php echo $themeToggleHtml; ?></li>
 <?php } else {
     echo Render::renderSidebarNavigation($sidebarNavigation, (string) $currentPage);
 ?>
@@ -847,6 +898,7 @@ echo Render::template('keyboard-shortcuts', $renders);
           ], (string) $currentPage);
         } ?>
         <?php echo Render::renderNavLinks([Render::settingsUtilityNavLink()], (string) $currentPage); ?>
+          <li class="pages nav_theme_toggle"><?php echo $themeToggleHtml; ?></li>
           <li class="pages"><a href="/help/" data-help-trigger="true" data-nav-shortcut="h" aria-keyshortcuts="h"><span class="nav_icon nav_icon--side"><?php echo $sideNavIcons['shortcuts']; ?></span><span class="nav_label"><?php echo Strings::headerI18n('KEYBOARD'); ?></span></a></li>
 <?php } // end $isAuthenticated nav ?>
 <?php if ($isAuthenticated) { ?>

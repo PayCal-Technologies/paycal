@@ -253,6 +253,10 @@ class Work
         'hours' => $hours,
         'regular_hours' => $regularHours,
         'overtime_hours' => $overtimeHours,
+        'earnings_snapshot_version' => (int) PayRuleData::number($data['earnings_snapshot_version'] ?? 0),
+        'doubletime_hours' => PayRuleData::number($data['doubletime_hours'] ?? 0),
+        'overtime_rate' => PayRuleData::number($data['overtime_rate'] ?? $wage * 1.5),
+        'doubletime_amount' => PayRuleData::number($data['doubletime_amount'] ?? 0),
         'living_out_allowance' => $livingOutAllowance,
         'travel_hours' => $travelHours,
         'wage' => $wage,
@@ -402,6 +406,29 @@ class Work
 
     $siteWages = iterator_to_array(Sites::getSiteWages($userUUID));
 
+    $user = User::getByUUID($userUUID);
+    $overtimeCode = self::overtimeCodeForUser($user);
+    $weekStart = new \DateTimeImmutable($payPeriodStart);
+    $dailyHours = array_fill(0, 7, 0.0);
+    $entriesByDay = array_fill(0, 7, []);
+    $workRowsByKey = [];
+    for ($i = 0; $i < 7; ++$i) {
+      $currentDate = $weekStart->modify('+' . $i . ' days')->format('Y-m-d');
+      $keys = array_merge(Database::scanKeys(Keys::WORK . ":{$userUUID}:{$currentDate}:*"), Database::scanKeys(Keys::WORK . ":archived:{$userUUID}:{$currentDate}:*"));
+      sort($keys);
+      foreach ($keys as $key) {
+        $row = Database::hgetall($key);
+        $workRowsByKey[$key] = $row;
+        $dailyHours[$i] += PayRuleData::number($row['hours'] ?? $row['h'] ?? 0);
+        $entriesByDay[$i][] = $key;
+      }
+    }
+    $allocatedWeek = OvertimeRules::allocateDatedWeek($dailyHours, $overtimeCode, $weekStart);
+    $hourSplits = [];
+    foreach ($allocatedWeek['daily'] as $dayIndex => $dayAllocation) {
+      $hourSplits += self::splitDayHours($entriesByDay[$dayIndex], $workRowsByKey, $dayAllocation);
+    }
+
     // Collect all keys for the week
     for ($i = 0; $i < 7; ++$i) {
       $currentDate = date('Y-m-d', strtotime("{$payPeriodStart} +{$i} days") ?: time());
@@ -431,8 +458,7 @@ class Work
           continue;
         }
 
-        $hoursWorked = (float) $hoursValue;
-        $calculatedHours = self::calculateHours($hoursWorked, $weeklyTotal, $dayRegularTotal);
+        $calculatedHours = $hourSplits[$siteKey] ?? self::calculateHours(PayRuleData::number($hoursValue), $weeklyTotal, $dayRegularTotal);
         $weeklyTotal += $calculatedHours['regular_hours'];
         $dayRegularTotal += $calculatedHours['regular_hours'];
         $dayOvertimeTotal += $calculatedHours['overtime_hours'];
@@ -450,24 +476,32 @@ class Work
           : (is_numeric($workData['wage'] ?? $workData['w'] ?? null) ? (float) ($workData['wage'] ?? $workData['w']) : 0.0);
         $travelHours = is_numeric($workData['travel_hours'] ?? $workData['t'] ?? null) ? (float) ($workData['travel_hours'] ?? $workData['t']) : 0.0;
         $livingOutAllowance = is_numeric($workData['living_out_allowance'] ?? $workData['l'] ?? null) ? (float) ($workData['living_out_allowance'] ?? $workData['l']) : 0.0;
+        $doubletimeHours = (float) ($calculatedHours['doubletime_hours'] ?? 0.0);
+        $overtimeRate = OvertimeRules::hourlyOvertimeRateCents($overtimeCode, (int) round($wage * 100), new \DateTimeImmutable($currentDate)) / 100;
         $snapshot = WorkEntry::calculateEarningsSnapshot(
           $calculatedHours['regular_hours'],
           $calculatedHours['overtime_hours'],
           $travelHours,
           $livingOutAllowance,
-          $wage
+          $wage,
+          0.0,
+          $doubletimeHours,
+          $overtimeRate
         );
 
         Database::hset($siteKey, [
           'regular_hours' => number_format($calculatedHours['regular_hours'], 2, '.', ''),
           'overtime_hours' => number_format($calculatedHours['overtime_hours'], 2, '.', ''),
+          'doubletime_hours' => number_format($doubletimeHours, 2, '.', ''),
+          'doubletime_amount' => number_format($snapshot['doubletime_amount'], 2, '.', ''),
+          'overtime_rate' => number_format($overtimeRate, 2, '.', ''),
           'wage' => number_format($wage, 2, '.', ''),
           'regular_amount' => number_format($snapshot['regular_amount'], 2, '.', ''),
           'overtime_amount' => number_format($snapshot['overtime_amount'], 2, '.', ''),
           'travel_amount' => number_format($snapshot['travel_amount'], 2, '.', ''),
           'living_out_amount' => number_format($snapshot['living_out_amount'], 2, '.', ''),
           'gross' => number_format($snapshot['gross'], 2, '.', ''),
-          'earnings_snapshot_version' => '1',
+          'earnings_snapshot_version' => '3',
         ]);
       }
 
@@ -517,5 +551,71 @@ class Work
   public static function getWorkInPeriod(PayPeriods $pp): \Generator
   {
     return self::getWorkInRange($pp->start(), $pp->endInclusive()->modify('+1 day'));
+  }
+  private static function overtimeCodeForUser(mixed $user): string
+  {
+    $province = $user instanceof User ? (string) $user->province : '';
+    try {
+      return PayRuleData::text(OvertimeRules::resolve($province)['code']);
+    } catch (\InvalidArgumentException) {
+      return OvertimeRules::LEGACY;
+    }
+  }
+
+  /**
+   * Give the day's regular, overtime, and double-time hours to entries in order.
+   *
+   * @param list<string> $siteKeys
+   * @param array<int|string, array<string, mixed>> $workRowsByKey
+   * @param array{regular: float, overtime: float, doubletime: float} $dayAllocation
+   * @return array<string, array{regular_hours: float, overtime_hours: float, doubletime_hours: float}>
+   */
+  private static function splitDayHours(array $siteKeys, array $workRowsByKey, array $dayAllocation): array
+  {
+    $rows = [];
+    $total = 0;
+    foreach ($siteKeys as $siteKey) {
+      $workData = $workRowsByKey[$siteKey] ?? [];
+      $hoursValue = $workData['hours'] ?? $workData['h'] ?? 0;
+      $hundredths = (int) round((PayRuleData::number($hoursValue)) * 100);
+      $rows[] = ['key' => $siteKey, 'hundredths' => $hundredths];
+      $total += $hundredths;
+    }
+
+    $regularLeft = (int) round(((float) $dayAllocation['regular']) * 100);
+    $overtimeLeft = (int) round(((float) $dayAllocation['overtime']) * 100);
+    $doubleLeft = (int) round(((float) $dayAllocation['doubletime']) * 100);
+    $assigned = $regularLeft + $overtimeLeft + $doubleLeft;
+    if ($assigned !== $total && $rows !== []) {
+      $doubleLeft += $total - $assigned;
+      if ($doubleLeft < 0) {
+        $overtimeLeft += $doubleLeft;
+        $doubleLeft = 0;
+      }
+      if ($overtimeLeft < 0) {
+        $regularLeft += $overtimeLeft;
+        $overtimeLeft = 0;
+      }
+    }
+
+    $splits = [];
+    foreach ($rows as $row) {
+      $remaining = $row['hundredths'];
+      $regular = min($remaining, max(0, $regularLeft));
+      $remaining -= $regular;
+      $regularLeft -= $regular;
+      $overtime = min($remaining, max(0, $overtimeLeft));
+      $remaining -= $overtime;
+      $overtimeLeft -= $overtime;
+      $doubletime = min($remaining, max(0, $doubleLeft));
+      $doubleLeft -= $doubletime;
+      $splits[$row['key']] = [
+        'regular_hours' => $regular / 100,
+        'overtime_hours' => ($overtime + $doubletime) / 100,
+        'doubletime_hours' => $doubletime / 100,
+      ];
+    }
+
+    return $splits;
   }
 }

@@ -56,7 +56,7 @@ final class BusinessSearchIndex
       'search_name' => $searchName,
       'owner_uuid' => $ownerUUID,
       'owner_email' => $ownerEmail,
-      'owner_name' => $owner !== null ? trim($owner->full_name) : '',
+      'owner_name' => trim($owner->full_name),
       'updated_at' => date('c'),
     ]);
     Database::sadd(Keys::BUSINESS_SEARCH_INDEX, $businessId);
