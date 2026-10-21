@@ -1,0 +1,689 @@
+{
+  "reviewed_on": "2026-10-20",
+  "note": "A version applies from its year through the next version. Tiers are the minimum percentage of the wages the caller passes in. The notes say which wage items the official page includes or excludes. PayCal does not decide eligibility, leaves, or contracts that pay more than the minimum.",
+  "versions": {
+    "2020": {
+      "through_year": 2025,
+      "jurisdictions": {
+        "CA": {
+          "name": "Federally regulated",
+          "verified": true,
+          "effective_date": "2019-09-01",
+          "source_url": "https://www.canada.ca/en/services/jobs/workplace/federal-labour-standards/vacations-holidays.html",
+          "source_title": "Annual vacations - Federally regulated workplaces",
+          "statute": "Canada Labour Code, RSC 1985, c L-2, s. 184 and following.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. The federal minimum is 4%, increasing to 6% after five consecutive years and 8% after ten consecutive years. Apply the statutory year of employment and wage base.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            },
+            {
+              "min_years": 10,
+              "numerator": 8,
+              "denominator": 100,
+              "label": "8%"
+            }
+          ]
+        },
+        "AB": {
+          "name": "Alberta",
+          "verified": true,
+          "effective_date": "2000-01-01",
+          "source_url": "https://www.alberta.ca/vacation-pay",
+          "source_title": "Employment standards rules – Vacations and vacation pay",
+          "statute": "Employment Standards Code, RSA 2000, c E-9.",
+          "wage_base": "wages excluding overtime, holiday pay, termination pay, unearned bonuses, tips and expenses or allowances",
+          "notes": "Minimum vacation pay is 4% below five completed years and 6% from five completed years. Exclude overtime, general holiday pay, termination pay, unearned bonuses, tips and expense allowances from the wage base. Previous vacation pay treatment depends on the payment arrangement.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "BC": {
+          "name": "British Columbia",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www2.gov.bc.ca/gov/content/employment-business/employment-standards-advice/employment-standards/forms-resources/igm/esa-part-7-section-58",
+          "source_title": "Vacation pay - Employment Standards Act, s. 58",
+          "statute": "Employment Standards Act, RSBC 1996, c 113, s. 58. Interpretive guide reviewed 2026-10-20.",
+          "wage_base": "total wages, including overtime, statutory holiday pay, and previous vacation pay",
+          "notes": "After 5 calendar days of employment, at least 4% of total wages. After 5 consecutive years, at least 6%. The guide says total wages include overtime, statutory holiday pay, and previously paid vacation pay.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "MB": {
+          "name": "Manitoba",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.gov.mb.ca/labour/standards/doc,vacations,factsheet.html",
+          "source_title": "Vacations and vacation pay",
+          "statute": "The Employment Standards Code, CCSM c E110.",
+          "wage_base": "gross wages excluding overtime, wages in lieu of notice, and the previous year's vacation wages",
+          "notes": "Confirmed on the Manitoba fact sheet on 2026-10-20. Two weeks is 4% of gross wages. Three weeks, after the 5th year is completed, is 6%. During the 5th year the rate is still 4% until that year is completed. Overtime wages are not included.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "NB": {
+          "name": "New Brunswick",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.gnb.ca/en/topic/jobs-workplaces/labour-market-workforce/employment-standards/holiday-vacation.html",
+          "source_title": "New Brunswick employment standards",
+          "statute": "Employment Standards Act, SNB.",
+          "wage_base": "gross wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Vacation pay is 4% of gross wages for service below eight years and 6% at eight years. Apply the vacation pay year rules.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 8,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "NL": {
+          "name": "Newfoundland and Labrador",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.gov.nl.ca/gs/files/Your-Rights-At-Work.pdf",
+          "source_title": "Newfoundland and Labrador labour standards",
+          "statute": "Labour Standards Act, RSNL 1990, c L-2.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Vacation pay is 4% of gross wages, including commissions and overtime, and 6% with at least 15 continuous years. Eligibility begins after five work days.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 15,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "NS": {
+          "name": "Nova Scotia",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://novascotia.ca/lwd/employmentrights/docs/labourstandardscodeguide.pdf",
+          "source_title": "Nova Scotia vacation and holidays",
+          "statute": "Labour Standards Code, RSNS 1989, c 246.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Vacation pay is 4% of gross wages excluding vacation pay. Accrual increases to 6% at the start of the eighth year, after seven completed years. Three weeks of vacation time starts in the ninth year.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 7,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "NT": {
+          "name": "Northwest Territories",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.ece.gov.nt.ca/en/services/employment-standards/frequently-asked-questions",
+          "source_title": "Northwest Territories employment standards",
+          "statute": "Employment Standards Act, SNWT.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Vacation pay accrues at 4% of total gross wages for the first five years and at 6% after five completed years, including overtime and statutory holiday pay.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "NU": {
+          "name": "Nunavut",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.gov.nu.ca/sites/default/files/policies-legislations/2025-11/Labour_Standards_Act__2022_.pdf",
+          "source_title": "Nunavut Labour Standards Act consolidation",
+          "statute": "Labour Standards Act, RSNWT (Nu) 1988, c L-1.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Sections 15 and 16 provide 4% for the first five years and 6% for subsequent years. The Act also recognizes years accumulated within the previous ten years; continuous service alone does not determine every entitlement.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "ON": {
+          "name": "Ontario",
+          "verified": true,
+          "effective_date": "2001-09-04",
+          "source_url": "https://www.ontario.ca/document/your-guide-employment-standards-act-0/vacation",
+          "source_title": "Vacation | Your guide to the Employment Standards Act",
+          "statute": "Employment Standards Act, 2000, SO 2000, c 41.",
+          "wage_base": "gross wages excluding vacation pay",
+          "notes": "Confirmed on ontario.ca on 2026-10-20. Less than five years: at least 4% of gross wages earned in the vacation entitlement year, excluding vacation pay. Five or more years at the end of that year: at least 6%. Vacation pay accrues as wages are earned, including for a stub period. Vacation time is 2 weeks, or 3 weeks after five years.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "PE": {
+          "name": "Prince Edward Island",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.princeedwardisland.ca/en/information/workforce-and-advanced-learning/vacation-and-vacation-pay",
+          "source_title": "Prince Edward Island employment standards",
+          "statute": "Employment Standards Act, RSPEI 1988, c E-6.2.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Since June 30, 2026, vacation pay is 4% for five continuous years or less and 6% for more than five years. Before that change the longer service threshold was more than eight years. This yearly estimate cannot resolve a transition period entitlement.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 8,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%",
+              "exclusive_min_years": true
+            }
+          ]
+        },
+        "QC": {
+          "name": "Quebec",
+          "verified": true,
+          "effective_date": "2019-01-01",
+          "source_url": "https://www.cnesst.gouv.qc.ca/fr/conditions-travail/conges/vacances-annuelles",
+          "source_title": "CNESST — Annual vacation",
+          "statute": "Act respecting labour standards, CQLR c N-1.1.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Vacation indemnity is 4% of gross wages below three years of continuous service and 6% from three years. Service is assessed at the end of the reference year; first year vacation time is prorated.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 3,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "SK": {
+          "name": "Saskatchewan",
+          "verified": true,
+          "effective_date": "2014-04-29",
+          "source_url": "https://www.saskatchewan.ca/business/employment-standards/vacations-and-vacation-pay/vacation-pay-calculator",
+          "source_title": "Vacation pay calculator",
+          "statute": "The Saskatchewan Employment Act, SS 2013, c S-15.1.",
+          "wage_base": "total wages, including salary, overtime, public holiday pay, commission, and earned bonuses",
+          "notes": "Confirmed on saskatchewan.ca on 2026-10-20. Three weeks after each year of employment, paid as 3/52 of total wages. Four weeks after 10 years with the same employer, paid as 4/52. The annual vacation page states the week entitlements. The calculator page states the 3/52 and 4/52 fractions and that total wages include overtime.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 3,
+              "denominator": 52,
+              "label": "3/52"
+            },
+            {
+              "min_years": 10,
+              "numerator": 4,
+              "denominator": 52,
+              "label": "4/52"
+            }
+          ]
+        },
+        "YT": {
+          "name": "Yukon",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://yukon.ca/en/employment/employment-standards/learn-about-annual-vacation-pay-and-vacation-time?wbdisable=false",
+          "source_title": "Yukon employment standards",
+          "statute": "Employment Standards Act, RSY 2002, c 72.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. The statutory minimum is 4% of gross wages and two weeks per completed year. Vacation pay entitlement begins after 14 continuous days. The general rule has no statutory 6% tier after five years.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            }
+          ]
+        }
+      }
+    },
+    "2026": {
+      "through_year": 2026,
+      "jurisdictions": {
+        "CA": {
+          "name": "Federally regulated",
+          "verified": true,
+          "effective_date": "2019-09-01",
+          "source_url": "https://www.canada.ca/en/services/jobs/workplace/federal-labour-standards/vacations-holidays.html",
+          "source_title": "Annual vacations - Federally regulated workplaces",
+          "statute": "Canada Labour Code, RSC 1985, c L-2, s. 184 and following.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. The federal minimum is 4%, increasing to 6% after five consecutive years and 8% after ten consecutive years. Apply the statutory year of employment and wage base.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            },
+            {
+              "min_years": 10,
+              "numerator": 8,
+              "denominator": 100,
+              "label": "8%"
+            }
+          ]
+        },
+        "AB": {
+          "name": "Alberta",
+          "verified": true,
+          "effective_date": "2000-01-01",
+          "source_url": "https://www.alberta.ca/vacation-pay",
+          "source_title": "Employment standards rules – Vacations and vacation pay",
+          "statute": "Employment Standards Code, RSA 2000, c E-9.",
+          "wage_base": "wages excluding overtime, holiday pay, termination pay, unearned bonuses, tips and expenses or allowances",
+          "notes": "Minimum vacation pay is 4% below five completed years and 6% from five completed years. Exclude overtime, general holiday pay, termination pay, unearned bonuses, tips and expense allowances from the wage base. Previous vacation pay treatment depends on the payment arrangement.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "BC": {
+          "name": "British Columbia",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www2.gov.bc.ca/gov/content/employment-business/employment-standards-advice/employment-standards/forms-resources/igm/esa-part-7-section-58",
+          "source_title": "Vacation pay - Employment Standards Act, s. 58",
+          "statute": "Employment Standards Act, RSBC 1996, c 113, s. 58. Interpretive guide reviewed 2026-10-20.",
+          "wage_base": "total wages, including overtime, statutory holiday pay, and previous vacation pay",
+          "notes": "After 5 calendar days of employment, at least 4% of total wages. After 5 consecutive years, at least 6%. The guide says total wages include overtime, statutory holiday pay, and previously paid vacation pay.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "MB": {
+          "name": "Manitoba",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.gov.mb.ca/labour/standards/doc,vacations,factsheet.html",
+          "source_title": "Vacations and vacation pay",
+          "statute": "The Employment Standards Code, CCSM c E110.",
+          "wage_base": "gross wages excluding overtime, wages in lieu of notice, and the previous year's vacation wages",
+          "notes": "Confirmed on the Manitoba fact sheet on 2026-10-20. Two weeks is 4% of gross wages. Three weeks, after the 5th year is completed, is 6%. During the 5th year the rate is still 4% until that year is completed. Overtime wages are not included.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "NB": {
+          "name": "New Brunswick",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.gnb.ca/en/topic/jobs-workplaces/labour-market-workforce/employment-standards/holiday-vacation.html",
+          "source_title": "New Brunswick employment standards",
+          "statute": "Employment Standards Act, SNB.",
+          "wage_base": "gross wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Vacation pay is 4% of gross wages for service below eight years and 6% at eight years. Apply the vacation pay year rules.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 8,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "NL": {
+          "name": "Newfoundland and Labrador",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.gov.nl.ca/gs/files/Your-Rights-At-Work.pdf",
+          "source_title": "Newfoundland and Labrador labour standards",
+          "statute": "Labour Standards Act, RSNL 1990, c L-2.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Vacation pay is 4% of gross wages, including commissions and overtime, and 6% with at least 15 continuous years. Eligibility begins after five work days.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 15,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "NS": {
+          "name": "Nova Scotia",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://novascotia.ca/lwd/employmentrights/docs/labourstandardscodeguide.pdf",
+          "source_title": "Nova Scotia vacation and holidays",
+          "statute": "Labour Standards Code, RSNS 1989, c 246.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Vacation pay is 4% of gross wages excluding vacation pay. Accrual increases to 6% at the start of the eighth year, after seven completed years. Three weeks of vacation time starts in the ninth year.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 7,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "NT": {
+          "name": "Northwest Territories",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.ece.gov.nt.ca/en/services/employment-standards/frequently-asked-questions",
+          "source_title": "Northwest Territories employment standards",
+          "statute": "Employment Standards Act, SNWT.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Vacation pay accrues at 4% of total gross wages for the first five years and at 6% after five completed years, including overtime and statutory holiday pay.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "NU": {
+          "name": "Nunavut",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://www.gov.nu.ca/sites/default/files/policies-legislations/2025-11/Labour_Standards_Act__2022_.pdf",
+          "source_title": "Nunavut Labour Standards Act consolidation",
+          "statute": "Labour Standards Act, RSNWT (Nu) 1988, c L-1.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Sections 15 and 16 provide 4% for the first five years and 6% for subsequent years. The Act also recognizes years accumulated within the previous ten years; continuous service alone does not determine every entitlement.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "ON": {
+          "name": "Ontario",
+          "verified": true,
+          "effective_date": "2001-09-04",
+          "source_url": "https://www.ontario.ca/document/your-guide-employment-standards-act-0/vacation",
+          "source_title": "Vacation | Your guide to the Employment Standards Act",
+          "statute": "Employment Standards Act, 2000, SO 2000, c 41.",
+          "wage_base": "gross wages excluding vacation pay",
+          "notes": "Confirmed on ontario.ca on 2026-10-20. Less than five years: at least 4% of gross wages earned in the vacation entitlement year, excluding vacation pay. Five or more years at the end of that year: at least 6%. Vacation pay accrues as wages are earned, including for a stub period. Vacation time is 2 weeks, or 3 weeks after five years.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "PE": {
+          "name": "Prince Edward Island",
+          "verified": true,
+          "effective_date": "2026-06-30",
+          "source_url": "https://www.princeedwardisland.ca/sites/default/files/b281/E-6.3-Employment%20Standards%20Act.pdf",
+          "source_title": "Prince Edward Island employment standards",
+          "statute": "Employment Standards Act, RSPEI 1988, c E-6.2.",
+          "wage_base": "wages",
+          "notes": "Reviewed on 2026-10-20. Section 29, effective June 30, 2026, provides 4% below five completed years and 6% from five completed years. The base includes wages and the statutory cash value of employer provided meals and lodging. Before June 30 the longer service threshold was more than eight years. This yearly estimate cannot resolve a transition period entitlement.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 5,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "QC": {
+          "name": "Quebec",
+          "verified": true,
+          "effective_date": "2019-01-01",
+          "source_url": "https://www.cnesst.gouv.qc.ca/fr/conditions-travail/conges/vacances-annuelles",
+          "source_title": "CNESST — Annual vacation",
+          "statute": "Act respecting labour standards, CQLR c N-1.1.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. Vacation indemnity is 4% of gross wages below three years of continuous service and 6% from three years. Service is assessed at the end of the reference year; first year vacation time is prorated.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            },
+            {
+              "min_years": 3,
+              "numerator": 6,
+              "denominator": 100,
+              "label": "6%"
+            }
+          ]
+        },
+        "SK": {
+          "name": "Saskatchewan",
+          "verified": true,
+          "effective_date": "2014-04-29",
+          "source_url": "https://www.saskatchewan.ca/business/employment-standards/vacations-and-vacation-pay/vacation-pay-calculator",
+          "source_title": "Vacation pay calculator",
+          "statute": "The Saskatchewan Employment Act, SS 2013, c S-15.1.",
+          "wage_base": "total wages, including salary, overtime, public holiday pay, commission, and earned bonuses",
+          "notes": "Confirmed on saskatchewan.ca on 2026-10-20. Three weeks after each year of employment, paid as 3/52 of total wages. Four weeks after 10 years with the same employer, paid as 4/52. The annual vacation page states the week entitlements. The calculator page states the 3/52 and 4/52 fractions and that total wages include overtime.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 3,
+              "denominator": 52,
+              "label": "3/52"
+            },
+            {
+              "min_years": 10,
+              "numerator": 4,
+              "denominator": 52,
+              "label": "4/52"
+            }
+          ]
+        },
+        "YT": {
+          "name": "Yukon",
+          "verified": true,
+          "effective_date": "2020-01-01",
+          "source_url": "https://yukon.ca/en/employment/employment-standards/learn-about-annual-vacation-pay-and-vacation-time?wbdisable=false",
+          "source_title": "Yukon employment standards",
+          "statute": "Employment Standards Act, RSY 2002, c 72.",
+          "wage_base": "wages",
+          "notes": "Reviewed against the official source on 2026-10-20. The statutory minimum is 4% of gross wages and two weeks per completed year. Vacation pay entitlement begins after 14 continuous days. The general rule has no statutory 6% tier after five years.",
+          "tiers": [
+            {
+              "min_years": 0,
+              "numerator": 4,
+              "denominator": 100,
+              "label": "4%"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

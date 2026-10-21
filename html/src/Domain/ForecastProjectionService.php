@@ -338,13 +338,15 @@ final class ForecastProjectionService
       return $this->emptyProjectionResult();
     }
 
+    $provinceCode = self::stringValue($effective['province'] ?? 'AB', 'AB');
+    $overtime = self::overtimeSettings($provinceCode);
     $card = new WorkerRateCard(
       wageRateCents:          $wageCents,
       rateType:               RateType::Hourly,
-      otRule:                 OtRule::Both,
-      otThresholdDailyHours:  8.0,
-      otThresholdWeeklyHours: 44.0,
-      otMultiplierBasisPoints: 15000,
+      otRule:                 $overtime['rule'],
+      otThresholdDailyHours:  $overtime['daily'],
+      otThresholdWeeklyHours: $overtime['weekly'],
+      otMultiplierBasisPoints: $overtime['multiplier'],
       perDiemCents:           self::intValue($effective['loa_per_day_cents'] ?? 0, 0),
       sitePremiumCents:       0,
       taxRegion:              self::stringValue($effective['province'] ?? 'AB', 'AB'),
@@ -394,6 +396,8 @@ final class ForecastProjectionService
         'tax_cents'    => $taxCents,
         'net_cents'    => $netCents,
         'hours'        => round($hours, 1),
+        'vacation_pay_cents' => self::vacationAccrualCents($provinceCode, $result->regularPayCents + (in_array(strtoupper($provinceCode), ['AB', 'MB'], true) ? 0 : $result->otPayCents) + $travelPayCents, $window),
+        'statutory_holidays' => self::holidayDates($provinceCode, $window),
         'window_days'  => $window->days(),
         'window_start' => $window->start->format('Y-m-d'),
         'window_end'   => $window->end->modify('-1 day')->format('Y-m-d'),
@@ -409,6 +413,8 @@ final class ForecastProjectionService
         'net_cents'    => $netCents,
         'gross_cents'  => $grossCents,
         'hours'        => round($hours, 1),
+        'vacation_pay_cents' => self::vacationAccrualCents($provinceCode, $result->regularPayCents + (in_array(strtoupper($provinceCode), ['AB', 'MB'], true) ? 0 : $result->otPayCents) + $travelPayCents, $window),
+        'statutory_holidays' => self::holidayDates($provinceCode, $window),
         'window_start' => $window->start->format('Y-m-d'),
         'window_end'   => $window->end->modify('-1 day')->format('Y-m-d'),
       ];
@@ -478,13 +484,15 @@ final class ForecastProjectionService
       return [];
     }
 
+    $provinceCode = self::stringValue($effective['province'] ?? 'AB', 'AB');
+    $overtime = self::overtimeSettings($provinceCode);
     $card = new WorkerRateCard(
       wageRateCents:          $wageCents,
       rateType:               RateType::Hourly,
-      otRule:                 OtRule::Both,
-      otThresholdDailyHours:  8.0,
-      otThresholdWeeklyHours: 44.0,
-      otMultiplierBasisPoints: 15000,
+      otRule:                 $overtime['rule'],
+      otThresholdDailyHours:  $overtime['daily'],
+      otThresholdWeeklyHours: $overtime['weekly'],
+      otMultiplierBasisPoints: $overtime['multiplier'],
       perDiemCents:           self::intValue($effective['loa_per_day_cents'] ?? 0, 0),
       sitePremiumCents:       0,
       taxRegion:              self::stringValue($effective['province'] ?? 'AB', 'AB'),
@@ -533,6 +541,8 @@ final class ForecastProjectionService
         'tax_cents'   => $taxCents,
         'net_cents'   => $netCents,
         'hours'       => round($hours, 1),
+        'vacation_pay_cents' => self::vacationAccrualCents($provinceCode, $result->regularPayCents + (in_array(strtoupper($provinceCode), ['AB', 'MB'], true) ? 0 : $result->otPayCents) + $travelPayCents, $window),
+        'statutory_holidays' => self::holidayDates($provinceCode, $window),
       ];
     }
 
@@ -555,6 +565,65 @@ final class ForecastProjectionService
     ];
   }
 
+  /**
+   * @return array{rule: OtRule, daily: float, weekly: float, multiplier: int}
+   */
+  private static function overtimeSettings(string $provinceCode): array
+  {
+    // OtRule is declared in WorkerRateCard.php.
+    class_exists(WorkerRateCard::class);
+    try {
+      $rule = OvertimeRules::resolve($provinceCode);
+    } catch (\InvalidArgumentException) {
+      $rule = OvertimeRules::resolve('');
+    }
+
+    $method = PayRuleData::text($rule['method'] ?? 'daily_then_weekly');
+    $daily = $rule['daily_hours'];
+    $weekly = PayRuleData::number($rule['weekly_hours'] ?? 40);
+
+    return [
+      'rule' => OtRule::Jurisdiction,
+      'daily' => $daily === null ? 24.0 : PayRuleData::number($daily),
+      'weekly' => $weekly > 0 ? $weekly : 40.0,
+      'multiplier' => (int) round((PayRuleData::number($rule['multiplier'] ?? 1.5)) * 10000),
+    ];
+  }
+
+  private static function vacationAccrualCents(string $provinceCode, int $workGrossCents, ForecastWindow $window): int
+  {
+    try {
+      return VacationPayEngine::accrualCents(
+        $provinceCode,
+        max(0, $workGrossCents),
+        0.0,
+        (int) $window->start->format('Y')
+      );
+    } catch (\InvalidArgumentException) {
+      return 0;
+    }
+  }
+
+  /**
+   * @return list<array{date: string, name: string}>
+   */
+  private static function holidayDates(string $provinceCode, ForecastWindow $window): array
+  {
+    try {
+      return StatHolidayEngine::between($provinceCode, $window->start, $window->end);
+    } catch (\InvalidArgumentException) {
+      return [];
+    }
+  }
+
+  /**
+   * @return array<string, mixed>
+   */
+
+
+  /**
+   * Estimate tax for a forecast window using YTD gross as annualization context.
+   */
   private function estimateTaxWithYtd(
     string $provinceCode,
     int $grossCents,
@@ -576,6 +645,8 @@ final class ForecastProjectionService
 
     return (int) round($annualTotal * ($windowDays / 365.0));
   }
+
+
 
   /**
    * @param array<string, mixed> $profile

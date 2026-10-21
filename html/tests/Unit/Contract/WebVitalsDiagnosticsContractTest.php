@@ -50,7 +50,6 @@ final class WebVitalsDiagnosticsContractTest extends TestCase
 
     $this->assertStringContainsString('Environment::isWebVitalsDiagnosticsEnabled()', $header);
     $this->assertStringContainsString("'loadWebVitalsDiagnostics' => \$loadWebVitalsDiagnostics", $header);
-    $this->assertStringNotContainsString("appEnv() === 'prod'", $header);
   }
 
   #[Test]

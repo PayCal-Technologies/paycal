@@ -145,6 +145,7 @@ final class SettingsNav
     return User::isAdmin() || User::isManager();
   }
 
+  /** Can view early access. */
   public static function canViewEarlyAccess(): bool
   {
     $user = User::current();

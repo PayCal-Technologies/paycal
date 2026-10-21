@@ -1,0 +1,238 @@
+{
+  "schema_version": "1",
+  "languages": {
+    "php": true,
+    "javascript": true,
+    "go": false,
+    "shell": true,
+    "extensions": [
+      ".php",
+      ".js",
+      ".mjs",
+      ".go",
+      ".sh",
+      ".yml",
+      ".json",
+      ".toml",
+      ".neon"
+    ]
+  },
+  "tools": {
+    "git": "git",
+    "php": "php",
+    "composer": "composer",
+    "phpunit": "vendor/bin/phpunit",
+    "phpstan": "vendor/bin/phpstan",
+    "php_cs_fixer": "vendor/bin/php-cs-fixer",
+    "npm": "npm",
+    "eslint": "eslint",
+    "playwright": "npx playwright",
+    "curl": "curl",
+    "gitleaks": "gitleaks",
+    "pa11y": "npx --yes pa11y",
+    "ibm_accessibility_checker": "npx --yes accessibility-checker@4.0.26",
+    "html_codesniffer": "node tools/a11y/htmlcs-source.mjs",
+    "lighthouse": "lighthouse"
+  },
+  "paths": {
+    "temp_dir": "tmp",
+    "timing_dir": "tmp/ci-timings",
+    "evidence_dir": "tmp/evidence",
+    "cache_dir": "tmp/vigil-cache",
+    "stamp_dir": "tmp/vigil-stamps",
+    "html_root": "html",
+    "html_source": "html/src",
+    "phpstan_config": "phpstan.neon",
+    "phpstan_baseline": "phpstan-baseline.neon",
+    "php_cs_fixer_config": ".php-cs-fixer.dist.php",
+    "phpunit_config": "phpunit.xml",
+    "public_phpunit_config": "phpunit.public.xml",
+    "readme_manifest": "scripts/hooks/readme-version-manifest.txt",
+    "version_file": "VERSION",
+    "junit_report": "junit.xml",
+    "public_promotion_allowlist": "scripts/public-promotion-allowlist.txt",
+    "private_only_allowlist": "scripts/public-excluded-paths.txt",
+    "test_directories": [
+      "html/tests/Unit",
+      "html/tests/Integration",
+      "html/tests/Contract",
+      "html/tests/Soc2",
+      "html/tests/Exploits",
+      "html/tests/Manual"
+    ]
+  },
+  "hooks": {
+    "jobs": 16,
+    "pre_commit_gates": [
+      "checks:staged-sensitive",
+      "checks:composer-state",
+      "checks:readme-version",
+      "phpstan-baseline",
+      "checks:policy-meta",
+      "checks:test-boundaries",
+      "checks:ledger-private",
+      "checks:workspace-hygiene",
+      "checks:no-redis-cli",
+      "checks:semantic-diff",
+      "checks:docblocks",
+      "checks:public-promotion-scope",
+      "policy:check",
+      "javascript:quality",
+      "a11y:htmlcs:staged"
+    ],
+    "pre_push_fast_gates": [
+      "checks:public-promotion-scope",
+      "checks:readme-version",
+      "checks:policy-meta",
+      "phpstan-baseline",
+      "repo:health",
+      "security:gitleaks",
+      "checks:dependency-security",
+      "npm:audit",
+      "checks:strict-types",
+      "checks:test-boundaries",
+      "checks:ledger-private",
+      "checks:workspace-hygiene",
+      "checks:no-redis-cli",
+      "checks:semantic-diff",
+      "checks:docblocks",
+      "checks:staged-sensitive",
+      "checks:composer-state"
+    ]
+  },
+  "environment": {
+    "inherit_process": true,
+    "load_env_files": false,
+    "files": [
+      {
+        "path": ".env",
+        "required": false,
+        "sensitive": true,
+        "load": false,
+        "allow_staged": false
+      },
+      {
+        "path": "html/.env",
+        "required": false,
+        "sensitive": true,
+        "load": false,
+        "allow_staged": false
+      },
+      {
+        "path": ".env.local",
+        "required": false,
+        "sensitive": true,
+        "load": false,
+        "allow_staged": false
+      },
+      {
+        "path": ".env.example",
+        "required": false,
+        "sensitive": false,
+        "load": false,
+        "allow_staged": true
+      }
+    ]
+  },
+  "evidence": {
+    "enabled": true,
+    "jsonl": "tmp/evidence/vigil-evidence.jsonl",
+    "tsv": "tmp/evidence/vigil-evidence.tsv"
+  },
+  "planner": {
+    "enabled": true,
+    "phpstan_paths": [
+      "html"
+    ],
+    "javascript_paths": [
+      "html/js",
+      "tools",
+      "tests"
+    ],
+    "policy_paths": [
+      "scripts",
+      ".github",
+      "githooks",
+      ".githooks",
+      "composer.json",
+      "composer.lock",
+      "package.json",
+      "package-lock.json"
+    ],
+    "documentation_paths": [
+      "README.md",
+      "VERSION",
+      "docs"
+    ],
+    "translation_indicators": [
+      "lang",
+      "i18n",
+      "translation"
+    ]
+  },
+  "policies": {
+    "conflict_blocked_composer_packages": [
+      "phpunit/phpunit"
+    ],
+    "sensitive_path_allowlist": [
+      ".env.example",
+      "soc2/",
+      "vigil.config.json",
+      "docs/CI_CD_SOURCE_COMPENDIUM.md",
+      "docs/CI_CD_SYSTEM_REFERENCE.md",
+      "vendor/"
+    ],
+    "sensitive_path_patterns": [
+      "(^|/)\\.env($|\\.)",
+      "(^|/)\\.envrc$",
+      "(^|/)\\.DS_Store$",
+      "(^|/)dump\\.rdb$",
+      "(^|/)tmp/",
+      "(^|/)logs/",
+      "(^|/)keys/",
+      "\\.(pem|p12|pfx|key|crt|csr)$"
+    ],
+    "secret_assignment_pattern": "(^|[^a-zA-Z$])(SECRET|TOKEN|PASSWORD|PASSWD|API[_-]?KEY|PRIVATE[_-]?KEY|ACCESS[_-]?KEY|CLIENT[_-]?SECRET|WEBHOOK[_-]?SECRET|REDIS_PASSWORD|STRIPE_SECRET|SMTP_PASSWORD)[A-Z0-9_ -]*[:=][[:space:]]*[\"']?[A-Za-z0-9+/_=.-]{8,}",
+    "token_pattern": "(gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|sk_live_[0-9A-Za-z]{16,}|rk_live_[0-9A-Za-z]{16,}|xox[baprs]-[A-Za-z0-9-]{10,}|Bearer[[:space:]][A-Za-z0-9._=-]{20,})",
+    "private_key_pattern": "-----BEGIN (OPENSSH |RSA |DSA |EC |PGP |ENCRYPTED )?PRIVATE KEY-----",
+    "placeholder_pattern": "(REDACTED|redacted|placeholder|example|dummy|fake|changeme|your[_-]?|test[_-]?(key|token|secret|password)|<REDACTED[^>]*>|<[^>]*(SECRET|TOKEN|PASSWORD|KEY)[^>]*>)",
+    "public_promotion_range": "main...HEAD",
+    "block_phpstan_baseline": true
+  },
+  "deploy": {
+    "default_target": "dev",
+    "verify_url": "",
+    "header_urls": []
+  },
+  "ledger": {
+    "root_env_vars": [
+      "VIGIL_LEDGER_ROOT"
+    ],
+    "default_root": "/private/var/www/paycal-technologies/paycal-ledgers"
+  },
+  "redis": {
+    "prefix_env_vars": [
+      "REDIS_PREFIX",
+      "PAYCAL_REDIS_PREFIX",
+      "PAYCAL_TEST_REDIS_PREFIX"
+    ],
+    "db_env_vars": [
+      "REDIS_DATABASE",
+      "PAYCAL_REDIS_DB"
+    ]
+  },
+  "history": {
+    "directory": "tmp/test-history",
+    "slow_test_seconds": 1.0,
+    "known_flakes_file": "",
+    "quarantine_file": ""
+  },
+  "llm": {
+    "enabled": true,
+    "provider": "ollama",
+    "base_url": "http://127.0.0.1:11434",
+    "model": "gemma3:4b",
+    "temperature": "0.2",
+    "max_chars": 12000
+  }
+}

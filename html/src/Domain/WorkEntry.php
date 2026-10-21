@@ -276,6 +276,9 @@ class WorkEntry
       'hours' => ['h'],
       'regular_hours' => ['r'],
       'overtime_hours' => ['o'],
+      'doubletime_hours' => [],
+      'doubletime_amount' => [],
+      'overtime_rate' => [],
       'living_out_allowance' => ['l'],
       'travel_hours' => ['t'],
       'wage' => ['w'],
@@ -370,7 +373,7 @@ class WorkEntry
 
       // Legacy rows can contain a flat split (all hours in regular, overtime zero)
       // even when total hours exceed the configured daily regular cap.
-      if ($hours > $dailyRegularCap && $overtime <= 0.0001 && $splitMatchesHours) {
+      if ((int) ($canonical['earnings_snapshot_version'] ?? 0) < 3 && $hours > $dailyRegularCap && $overtime <= 0.0001 && $splitMatchesHours) {
         $regular = min($hours, $dailyRegularCap);
         $canonical['regular_hours'] = $regular;
         $canonical['overtime_hours'] = max(0.0, $hours - $regular);
@@ -437,32 +440,42 @@ class WorkEntry
    * Taxes and net pay are intentionally excluded because they depend on payroll
    * policy and year-specific rules. These fields are simple facts of the entry.
    *
-   * @return array{regular_amount: float, overtime_amount: float, travel_amount: float, living_out_amount: float, gross: float}
+   * @return array{regular_amount: float, overtime_amount: float, doubletime_amount: float, travel_amount: float, living_out_amount: float, custom_amount: float, gross: float}
    */
   public static function calculateEarningsSnapshot(
     float $regularHours,
     float $overtimeHours,
     float $travelHours,
     float $livingOutAllowance,
-    float $wage
+    float $wage,
+    float $customAmount = 0.0,
+    float $doubletimeHours = 0.0,
+    ?float $overtimeRate = null
   ): array {
     $regularHours = max(0.0, $regularHours);
     $overtimeHours = max(0.0, $overtimeHours);
+    $doubletimeHours = min($overtimeHours, max(0.0, $doubletimeHours));
     $travelHours = max(0.0, $travelHours);
     $livingOutAllowance = max(0.0, $livingOutAllowance);
     $wage = max(0.0, $wage);
+    $customAmount = max(0.0, $customAmount);
 
     $regularAmount = round($regularHours * $wage, 2);
-    $overtimeAmount = round($overtimeHours * $wage * 1.5, 2);
+    // Overtime hours include double time as a subset, preserving existing totals.
+    $overtimeRate ??= $wage * 1.5;
+    $overtimeAmount = round(($overtimeHours - $doubletimeHours) * $overtimeRate + $doubletimeHours * $wage * 2, 2);
+    $doubletimeAmount = round($doubletimeHours * $wage * 2, 2);
     $travelAmount = round($travelHours * $wage, 2);
     $livingOutAmount = round($livingOutAllowance, 2);
 
     return [
       'regular_amount' => $regularAmount,
       'overtime_amount' => $overtimeAmount,
+      'doubletime_amount' => $doubletimeAmount,
       'travel_amount' => $travelAmount,
       'living_out_amount' => $livingOutAmount,
-      'gross' => round($regularAmount + $overtimeAmount + $travelAmount + $livingOutAmount, 2),
+      'custom_amount' => round($customAmount, 2),
+      'gross' => round($regularAmount + $overtimeAmount + $travelAmount + $livingOutAmount + $customAmount, 2),
     ];
   }
 
@@ -663,6 +676,7 @@ class WorkEntry
     $hours = self::validateHours((float) ($workDetails['hours'] ?? 0));
     $regularHours = self::validateHours((float) ($workDetails['regular_hours'] ?? 0));
     $overtimeHours = self::validateHours((float) ($workDetails['overtime_hours'] ?? 0));
+    $doubletimeHours = min($overtimeHours, self::validateHours((float) ($workDetails['doubletime_hours'] ?? 0)));
     $livingOutAllowance = self::validateHours((float) ($workDetails['living_out_allowance'] ?? 0));
     $travelHours = self::validateHours((float) ($workDetails['travel_hours'] ?? 0));
     $wage = (float) ($workDetails['wage'] ?? 0);
@@ -672,7 +686,9 @@ class WorkEntry
       $overtimeHours,
       $travelHours,
       $livingOutAllowance,
-      $wage
+      $wage,
+      0.0,
+      $doubletimeHours
     );
 
     $fieldsToStore = [
@@ -682,6 +698,8 @@ class WorkEntry
       'hours' => number_format($hours, 2, '.', ''),
       'regular_hours' => number_format($regularHours, 2, '.', ''),
       'overtime_hours' => number_format($overtimeHours, 2, '.', ''),
+      'doubletime_hours' => number_format($doubletimeHours, 2, '.', ''),
+      'doubletime_amount' => number_format($earningsSnapshot['doubletime_amount'], 2, '.', ''),
       'living_out_allowance' => number_format($livingOutAllowance, 2, '.', ''),
       'travel_hours' => number_format($travelHours, 2, '.', ''),
       'wage' => number_format($wage, 2, '.', ''),
@@ -855,6 +873,9 @@ class WorkEntry
       'hours' => is_numeric($normalized['hours'] ?? null) ? (float) $normalized['hours'] : 0.0,
       'regular_hours' => is_numeric($normalized['regular_hours'] ?? null) ? (float) $normalized['regular_hours'] : 0.0,
       'overtime_hours' => is_numeric($normalized['overtime_hours'] ?? null) ? (float) $normalized['overtime_hours'] : 0.0,
+      'doubletime_hours' => PayRuleData::number($normalized['doubletime_hours'] ?? 0),
+      'overtime_rate' => PayRuleData::number($normalized['overtime_rate'] ?? 0),
+      'doubletime_amount' => PayRuleData::number($normalized['doubletime_amount'] ?? 0),
       'living_out_allowance' => is_numeric($normalized['living_out_allowance'] ?? null) ? (float) $normalized['living_out_allowance'] : 0.0,
       'travel_hours' => is_numeric($normalized['travel_hours'] ?? null) ? (float) $normalized['travel_hours'] : 0.0,
       'wage' => is_numeric($normalized['wage'] ?? null) ? (float) $normalized['wage'] : 0.0,

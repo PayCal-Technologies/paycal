@@ -51,6 +51,7 @@ final class PageHeadRenderer
     'PAGE_TRANSPARENCY' => 'transparency',
     'PAGE_STATUS' => 'transparency',
     'PAGE_PRICING' => 'pricing',
+    'PAGE_TOOLS' => 'content',
     'PAGE_PAYPERIODS' => 'payperiods',
     'PAGE_AUTH' => 'auth',
     'PAGE_SIGNIN' => 'auth',
@@ -294,7 +295,7 @@ HTML;
 
 HTML;
 
-    if (in_array((string) $context['currentPage'], ['PAGE_HELP', 'PAGE_TRANSPARENCY', 'PAGE_STATUS', 'PAGE_ABOUT', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA'], true)) {
+    if (in_array((string) $context['currentPage'], ['PAGE_HELP', 'PAGE_TOOLS', 'PAGE_TRANSPARENCY', 'PAGE_STATUS', 'PAGE_ABOUT', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA'], true)) {
       $contentViewsCssVersion = htmlspecialchars(self::cssVersion($baseCssVersion, 'content-views'), ENT_QUOTES, 'UTF-8');
       $html .= "  <link rel=\"stylesheet\" href=\"{$cssBase}content-views/?v={$contentViewsCssVersion}\" nonce=\"{$cspNonce}\">\n";
     }
@@ -319,6 +320,7 @@ HTML;
     $cacheVersion = rawurlencode(Environment::appVersion());
     $guardian = htmlspecialchars(Environment::appURL('js/guardian.js') . '?v=' . $cacheVersion, ENT_QUOTES, 'UTF-8');
     $jsBase = htmlspecialchars(Environment::appURL('js/') . '?v=' . $cacheVersion, ENT_QUOTES, 'UTF-8');
+    $themeToggle = htmlspecialchars(Environment::appURL('js/theme-toggle.js') . '?v=' . $cacheVersion, ENT_QUOTES, 'UTF-8');
 
     $html = Render::template('header-application-json-linked-data', [
       '__CSP_NONCE__' => (string) $context['cspNonce'],
@@ -329,6 +331,7 @@ HTML;
 
     $html .= <<<HTML
   <script src="{$guardian}" nonce="{$cspNonce}"></script>
+  <script type="module" src="{$themeToggle}" nonce="{$cspNonce}"></script>
 
 HTML;
 

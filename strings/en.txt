@@ -253,7 +253,7 @@ AUDIO_FEEDBACK Audio Feedback
 AUDIO_FEEDBACK_USING Audio feedback using
 AUDIO_INTRO_BTN Audio Introduction
 AUDIO_PREFS Audio Preferences
-AUTH_BETA_NOTICE PayCal is in private beta.
+AUTH_BETA_NOTICE PayCal is in public beta.
 AUTH_DIVIDER_OR or
 AUTH_JS_CONFIRM_DEVICE Confirm on your device…
 AUTH_JS_EMAIL_ALREADY_REGISTERED This email is already registered. Sign in instead.
@@ -2184,11 +2184,11 @@ ERR_TIMEZONE_MISMATCH Timezone mismatch between expected and provided values.
 ERR_UNHANDLED_PAY_FREQUENCY Unhandled pay frequency
 ESCAPE_KEY ESCAPE
 EXPAND_SIDEBAR Expand Sidebar
-FAQ_A1 Yes. We are currently in the private beta testing phase with a public beta to be launched in 2024. Our goals are grounded in keeping things simple, offering value and above all a solid commitment to keeping your privacy and personal information safe and sound. We follow best practices to the best of our ability, such as responsive design, full accessibility, multi-language and theme support, fast and secure server management and much more.
+FAQ_A1 Yes. PayCal is in public beta, and you can create an account now. Our goals stay the same: keep things simple, offer value, and protect your privacy and personal information. We follow best practices such as responsive design, full accessibility, multi-language and theme support, and fast, secure server management.
 FAQ_A2 You bet! We offer a free tier for anyone needing to record and track their hourly earnings with additional related features that make it easy to gain further insights. We want to offer this level of service for free because it is important that everyone has as many tools as possible to help manage their work, their earnings and make their lives easier.
 FAQ_A3 We plan to make our first million from a subscription model paid by businesses and managers desiring even more control over their finances. The plan is simple. The paid tier is a flat-rate monthly fee with details to be announced once we officially release to the public.
 FAQ_A4 Absolutely! The Calendar displays each day's worth of recorded hours per job. Click on a day to bring up the Work Details panel to adjust as required. The Dashboard shows a breakdown of the year by month, pay period and job.
-FAQ_A5 Even though we presently provide our services in 10 languages, we are working on more! Check back often! We aim to provide an additional 15 more by the end of 2024, with plans to add more as time goes on. If you have a suggestion, we're all ears! Merci! Salamat Po! Danke! D
+FAQ_A5 PayCal is available in 10 languages. More languages may be added over time. If you have a suggestion, we want to hear it.
 FAQ_A6 We strive to be as open and clear as possible about how we operate this service. We have created policies outlining our terms of service, privacy controls, and accessibility goals.
 FAQ_A7 Please use our Contact page to get in touch with us.
 FAQ_CONTACT_TEXT If you have any further questions or concerns regarding our Terms and Conditions of Use, please do not hesitate to reach out. You can contact us at
@@ -2258,7 +2258,7 @@ FORECAST_WORKERS Workers
 FORECAST_WORKERS_HINT Number of workers with these parameters
 FRENCH French
 FRI Fri
-FRONT_PAGE_BETA_NOTE We are currently in Closed Beta, but keep an eye out for the opportunity to join our Public Beta soon. We are eager to share this fantastic tool with the world.
+FRONT_PAGE_BETA_NOTE PayCal is in public beta. Create an account to track your hours, allowances, and estimated pay.
 FRONT_PAGE_CARD_1_BODY Ever wondered what your paycheck would look like before it hits your bank account? With PayCal, workers can now see their expected earnings for each pay period, putting financial planning right at your fingertips.
 FRONT_PAGE_CARD_1_TITLE Earnings Transparency
 FRONT_PAGE_CARD_2_BODY Forget the hassle of manual record-keeping. Simply enter your total hours each day, and watch as it seamlessly saves into our secure database. No more endless spreadsheets or paperwork.
@@ -2333,7 +2333,7 @@ HELP_FAQ_INTRO_SUFFIX .
 HELP_FAQ_PAGE_LINK FAQ page
 HELP_FAQ_Q1_MIDDLE Also, confirm your pay period settings are accurate in
 HELP_FAQ_Q1_PREFIX A: Ensure your work site's wage and any allowances are correctly entered in
-HELP_FAQ_Q1_SUFFIX PayCal.app calculates regular and overtime hours based on defined thresholds (e.g., 8 hours daily, 44 hours weekly for regular pay), as per the calculate_hours function and constants.
+HELP_FAQ_Q1_SUFFIX PayCal calculates regular and overtime hours from the employment-standards rule for your province or territory. Averaging agreements and some jobs use a different threshold. The free tools pages list the general rule and the official source.
 HELP_FAQ_Q1_TITLE Q: Why are my hours not calculating correctly?
 HELP_FAQ_Q2_TEXT A: You can reset your password through the sign in page. An email/password reset feature is a high-priority item that has already been completed in the development roadmap.
 HELP_FAQ_Q2_TITLE Q: I forgot my password, how do I reset it?
@@ -4797,3 +4797,112 @@ BUSINESS_PROTECTED_WORK_NOT_AVAILABLE This member's work data is not available t
 BUSINESS_PROTECTED_WORK_NO_SHARED_WORK No approved work entries are available for this member yet.
 BUSINESSES_API_YOU_DO_NOT_HAVE_A_BUSINESS_CONNECTION You do not have a business connection.
 BUSINESSES_API_YOU_DO_NOT_HAVE_PERMISSION_TO_VIEW_BUSINESS_CONNECTION You do not have permission to view business connections.
+
+TOOLS_INDEX_TITLE Free pay tools
+TOOLS_INDEX_DESCRIPTION Free Canadian pay tools for a next-cheque estimate and provincial employment-standards checks. No account is required.
+TOOLS_INDEX_DECK Check a pay estimate and the general employment-standards rules for your province or territory. No account is required.
+TOOLS_NEXT_CHEQUE_TITLE Next cheque
+TOOLS_NEXT_CHEQUE_DECK Estimate one cheque from hours, travel, and a living-out allowance, using PayCal's tax tables.
+TOOLS_NEXT_CHEQUE_DESCRIPTION Estimate one Canadian paycheque with federal and provincial tax, CPP or QPP, and EI. Vacation pay is shown separately.
+TOOLS_OPEN_CALCULATOR Open the next-cheque calculator
+TOOLS_PAY_RIGHT_HEADING Is my pay right?
+TOOLS_PAY_RIGHT_LINK_PREFIX Is my pay right in
+TOOLS_PAY_RIGHT_TITLE Is my pay right
+TOOLS_PAY_RIGHT_DESCRIPTION General overtime, vacation pay, and statutory holiday rules, with a link to the official employment-standards source.
+TOOLS_FEDERAL_TITLE Federally regulated work
+TOOLS_SIGNUP_TITLE Track this in PayCal
+TOOLS_SIGNUP_NOTE Create a free account to save hours, rotations, allowances, and estimates on your own calendar.
+TOOLS_SIGNUP_CTA Create a free account
+TOOLS_DISCLAIMER These pages are general information and estimates. They are not legal, tax, or payroll advice. A contract, collective agreement, or averaging agreement can set a different rule. Confirm the current rule on the official source linked from the page.
+TOOLS_PROVINCE Province or territory
+TOOLS_TAX_YEAR Tax year
+TOOLS_PAY_PERIODS Cheques in a year
+TOOLS_PERIOD_WEEKLY Weekly (52)
+TOOLS_PERIOD_BIWEEKLY Every two weeks (26)
+TOOLS_PERIOD_SEMIMONTHLY Twice a month (24)
+TOOLS_PERIOD_MONTHLY Monthly (12)
+TOOLS_HOURLY_WAGE Hourly wage in dollars
+TOOLS_REGULAR_HOURS Regular hours on this cheque
+TOOLS_OVERTIME_HOURS Overtime hours on this cheque
+TOOLS_DOUBLETIME_HOURS Double-time hours on this cheque, paid at 2 times
+TOOLS_TRAVEL_HOURS Travel hours on this cheque, paid at the regular rate
+TOOLS_ALLOWANCE Living-out allowance on this cheque, in dollars
+TOOLS_YEARS_OF_SERVICE Years of service for vacation pay
+TOOLS_CALCULATE Calculate
+TOOLS_RESULT_TITLE Estimate for this cheque
+TOOLS_REGULAR_PAY Regular pay
+TOOLS_OVERTIME_PAY Overtime pay
+TOOLS_DOUBLETIME_PAY Double-time pay
+TOOLS_TRAVEL_PAY Travel pay
+TOOLS_GROSS Gross
+TOOLS_ESTIMATED_TAX Estimated tax and payroll deductions
+TOOLS_ESTIMATED_NET Estimated net
+TOOLS_VACATION_ACCRUAL Vacation pay accrual, not included in the net
+TOOLS_VACATION_VERIFIED The vacation percentage was checked against the official page linked from the province guide.
+TOOLS_VACATION_UNVERIFIED The vacation percentage is a working summary. Confirm it on the official page linked from the province guide before you rely on it.
+TOOLS_TAX_NOTE Tax is the PayCal tax-table estimate for a full year of cheques like this one, divided back to one cheque. It is not a CRA payroll deduction.
+TOOLS_OVERTIME_HEADING Overtime
+TOOLS_VACATION_HEADING Vacation pay
+TOOLS_HOLIDAY_HEADING Statutory holidays
+TOOLS_EFFECTIVE Effective
+TOOLS_FROM_YEARS from
+TOOLS_SOURCE_VERIFIED This vacation rule was checked against the linked official page on 20 October 2026.
+TOOLS_SOURCE_UNVERIFIED This vacation rule is a working summary. The linked official page was not fully re-read on 20 October 2026.
+TOOLS_HOLIDAYS_2026 Statutory holidays in 2026
+TOOLS_HOLIDAYS_UNVERIFIED Dated holiday lists for this jurisdiction were not loaded. These names are a working list. Confirm them on the official page.
+TOOLS_PLACE_AB Alberta
+TOOLS_PLACE_BC British Columbia
+TOOLS_PLACE_MB Manitoba
+TOOLS_PLACE_NB New Brunswick
+TOOLS_PLACE_NL Newfoundland and Labrador
+TOOLS_PLACE_NS Nova Scotia
+TOOLS_PLACE_NT Northwest Territories
+TOOLS_PLACE_NU Nunavut
+TOOLS_PLACE_ON Ontario
+TOOLS_PLACE_PE Prince Edward Island
+TOOLS_PLACE_QC Quebec
+TOOLS_PLACE_SK Saskatchewan
+TOOLS_PLACE_YT Yukon
+TOOLS_PAY_DATE Pay date
+TOOLS_OVERTIME_RATE Contracted overtime rate per hour, optional
+TOOLS_OVERTIME_RATE_USED Overtime rate used per hour
+TOOLS_INPUT_ERROR Choose a valid pay date from 2020 through 2026.
+TOOLS_REVIEWED Source review date
+
+TOOLS Tools
+HELP_TOC_ROTATION_PAY Rotation pay
+HELP_ROTATION_PAY_TITLE What a 14/7 or 20/10 rotation pays
+HELP_ROTATION_PAY_DECK An example of a 14/7 rotation and a 20/10 rotation after tax, living-out allowance, and travel.
+HELP_ROTATION_PAY_DESCRIPTION Example pay for a 14/7 rotation and a 20/10 rotation, calculated with PayCal's rotation, Alberta overtime, and tax tools.
+HELP_ROTATION_PAY_EXAMPLE_TITLE This is an example
+HELP_ROTATION_PAY_EXAMPLE_INTRO The figures below are an example. They are calculated by PayCal. They are not a quote for your job.
+HELP_ROTATION_PAY_ASSUMPTION_1 The window is 365 days starting Monday 5 January 2026, the first day of a work block.
+HELP_ROTATION_PAY_ASSUMPTION_2 A 14/7 uses the app rotation of 14 work days, 7 rest days, and 8 hours on each work day.
+HELP_ROTATION_PAY_ASSUMPTION_3 A 20/10 uses the app rotation of 20 work days, 10 rest days, and 10 hours on each work day.
+HELP_ROTATION_PAY_ASSUMPTION_4 The example wage is $40 an hour. Overtime uses the Alberta rule: the greater of hours over 8 in a day or hours over 44 in a week, at 1.5 times.
+HELP_ROTATION_PAY_ASSUMPTION_5 Weeks run Sunday through Saturday, the same week PayCal uses when it recalculates stored hours.
+HELP_ROTATION_PAY_ASSUMPTION_6 Living-out allowance is an example $150 for each on-site day. It is not a statutory amount.
+HELP_ROTATION_PAY_ASSUMPTION_7 Travel is an example 8 hours each way, once per hitch, paid at the regular rate and not put through the overtime rule.
+HELP_ROTATION_PAY_ASSUMPTION_8 Tax is the Alberta 2026 tax-table estimate, annualized from this window the same way the crew forecast estimates tax. It is not a CRA payroll deduction.
+HELP_ROTATION_PAY_ASSUMPTION_9 Vacation pay is the Alberta minimum 4 percent accrual on wage, overtime, and travel pay. It is shown separately and is not inside the net figure. The allowance is not included in that accrual.
+HELP_ROTATION_PAY_RESULTS_TITLE Example results for 365 days
+HELP_ROTATION_PAY_RESULTS_CAPTION Example 14/7 and 20/10 pay over 365 days
+HELP_ROTATION_PAY_COL_ITEM Item
+HELP_ROTATION_PAY_ONSITE_DAYS On-site days
+HELP_ROTATION_PAY_HITCHES Hitches
+HELP_ROTATION_PAY_REGULAR_HOURS Regular hours
+HELP_ROTATION_PAY_OVERTIME_HOURS Overtime hours
+HELP_ROTATION_PAY_TRAVEL_HOURS Travel hours
+HELP_ROTATION_PAY_REGULAR_PAY Regular pay
+HELP_ROTATION_PAY_OVERTIME_PAY Overtime pay
+HELP_ROTATION_PAY_TRAVEL_PAY Travel pay
+HELP_ROTATION_PAY_LOA Living-out allowance
+HELP_ROTATION_PAY_GROSS Gross
+HELP_ROTATION_PAY_TAX Estimated tax and payroll deductions
+HELP_ROTATION_PAY_NET Estimated net
+HELP_ROTATION_PAY_VACATION Vacation pay accrual
+HELP_ROTATION_PAY_VACATION_NOTE Vacation pay is not included in the gross or the net. It is the minimum Alberta accrual on the wage, overtime, and travel amounts.
+HELP_ROTATION_PAY_HOW_TITLE How the example is calculated
+HELP_ROTATION_PAY_HOW_TEXT Work days come from the rotation template. Overtime comes from the Alberta overtime rule. Tax comes from the tax tables. The allowance and the travel hours are example inputs, labeled as an example above.
+HELP_ROTATION_PAY_ALBERTA_LINK Alberta overtime, vacation pay, and statutory holidays
+EARNINGS_FORECAST_CARD_VACATION Vacation accrual

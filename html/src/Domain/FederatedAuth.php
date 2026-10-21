@@ -749,11 +749,13 @@ final class FederatedAuth
     return implode('.', $segments);
   }
 
+  /** Base64 url encode. */
   private static function base64UrlEncode(string $input): string
   {
     return rtrim(strtr(base64_encode($input), '+/', '-_'), '=');
   }
 
+  /** Ecdsa der signature to jose. */
   private static function ecdsaDerSignatureToJose(string $der): string
   {
     if ($der === '' || ord($der[0]) !== 0x30) {

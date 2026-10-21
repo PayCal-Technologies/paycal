@@ -143,6 +143,7 @@ final class FederatedAuthController
     ]);
   }
 
+  /** Complete callback. */
   private function completeCallback(string $provider): void
   {
     $providerId = strtolower(trim($provider));
@@ -376,11 +377,13 @@ final class FederatedAuthController
     return FederatedAuth::validateAppleIdToken($idToken, $jwks, $nonce);
   }
 
+  /** Is supported provider. */
   private function isSupportedProvider(string $providerId): bool
   {
     return in_array($providerId, self::SUPPORTED_PROVIDERS, true);
   }
 
+  /** Federated auth method. */
   private function federatedAuthMethod(string $providerId): string
   {
     return 'federated_' . $providerId;

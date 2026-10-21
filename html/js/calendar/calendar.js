@@ -1594,6 +1594,13 @@
 
     try {
       const decrypted = await callCryptoWorker('decryptEntry', { entry });
+      // The server reconciles complete weeks after a save. Older ciphertext may
+      // still contain the previous derived split; retain the recalculated facts.
+      if (Number(entry.earnings_snapshot_version) >= 3 && decrypted) {
+        for (const field of ['regular_hours', 'overtime_hours', 'doubletime_hours', 'overtime_rate', 'regular_amount', 'overtime_amount', 'doubletime_amount', 'travel_amount', 'living_out_amount', 'gross', 'earnings_snapshot_version']) {
+          if (entry[field] !== undefined) decrypted[field] = entry[field];
+        }
+      }
       cryptoLog('[CRYPTO] decryptEntry succeeded', { blobLength: entry.encrypted_blob.length });
       return decrypted;
     } catch (err) {
@@ -5555,7 +5562,9 @@
     const wage = directWage > 0 ? directWage : siteWage;
     const overtimeScale = resolveOvertimeScale();
     const regularAmount = roundMoneyNumber(regular * wage);
-    const overtimeAmount = roundMoneyNumber(overtime * wage * overtimeScale);
+    const doubletime = Math.min(overtime, Math.max(0, Number(entry?.doubletime_hours) || 0));
+    const overtimeRate = Number(entry?.overtime_rate) > 0 ? Number(entry.overtime_rate) : wage * overtimeScale;
+    const overtimeAmount = roundMoneyNumber((overtime - doubletime) * overtimeRate + doubletime * wage * 2);
     const travelAmount = roundMoneyNumber(travel * wage);
     const livingOutAmount = roundMoneyNumber(livingOut);
 
@@ -5566,7 +5575,7 @@
       travel_amount: travelAmount,
       living_out_amount: livingOutAmount,
       gross: roundMoneyNumber(regularAmount + overtimeAmount + travelAmount + livingOutAmount),
-      earnings_snapshot_version: 1,
+      earnings_snapshot_version: Number(entry?.earnings_snapshot_version) >= 3 ? 3 : 1,
     };
   }
 
@@ -5789,7 +5798,7 @@
       // Re-apply daily cap so old entries with wrong splits display correctly.
       const entryTotal = storedRegular + storedOvertime;
       const dailyRemaining = Math.max(0, 8 - dailyRegularUsed);
-      const regular = Math.min(entryTotal, dailyRemaining);
+      const regular = Number(entry.earnings_snapshot_version) >= 3 ? storedRegular : Math.min(entryTotal, dailyRemaining);
       const overtime = entryTotal - regular;
       dailyRegularUsed += regular;
 
@@ -6150,7 +6159,7 @@
       const storedOvertime = parseFloat(overtimeRaw ?? 0) || 0;
       const entryTotal = storedRegular + storedOvertime;
       const dailyRemaining = Math.max(0, 8 - displayDailyRegularUsed);
-      const regularValue = Math.min(entryTotal, dailyRemaining);
+      const regularValue = Number(entry.earnings_snapshot_version) >= 3 ? storedRegular : Math.min(entryTotal, dailyRemaining);
       const overtimeValue = entryTotal - regularValue;
       displayDailyRegularUsed += regularValue;
 

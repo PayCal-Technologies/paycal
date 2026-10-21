@@ -50,6 +50,7 @@ enum OtRule: string
   case Weekly  = 'weekly';
   case Both    = 'both';
   case None    = 'none';
+  case Jurisdiction = 'jurisdiction';
 }
 
 /**
