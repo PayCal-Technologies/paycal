@@ -62,7 +62,7 @@ class EnvelopeFormat
   }
 
   /**
-   * @param array<string, mixed> $envelope
+   * @param array<array-key, mixed> $envelope
    */
   public static function isValid(array $envelope): bool
   {
@@ -83,7 +83,7 @@ class EnvelopeFormat
   }
 
   /**
-   * @param array<string, mixed> $envelope
+   * @param array<array-key, mixed> $envelope
    */
   public static function validateOrThrow(array $envelope): void
   {
@@ -93,7 +93,7 @@ class EnvelopeFormat
   }
 
   /**
-   * @param array<string, mixed> $envelope
+   * @param array<array-key, mixed> $envelope
    */
   public static function toJson(array $envelope): string
   {

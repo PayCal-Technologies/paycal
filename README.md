@@ -10,7 +10,7 @@ Latest documented release: **v1.059.015**
 [![PHPStan](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpstan.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/phpstan.yml)
 [![JavaScript](https://github.com/PayCal-Technologies/paycal/actions/workflows/javascript.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/javascript.yml)
 [![Security Gates](https://github.com/PayCal-Technologies/paycal/actions/workflows/security-gates.yml/badge.svg)](https://github.com/PayCal-Technologies/paycal/actions/workflows/security-gates.yml)
-[![Test Suite](https://img.shields.io/badge/tests-2470%20listed-blue)](html/tests/)
+[![Test Suite](https://img.shields.io/badge/tests-2487%20listed-blue)](html/tests/)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](LICENSE.txt)
 
 ![PayCal application preview](html/images/paycal_mockup.jpg)
@@ -95,7 +95,7 @@ Accessibility is product quality and compliance evidence. PayCal treats keyboard
 - Redis-backed state with explicit DB separation for local, test, and production expectations.
 - Browser modules under `html/js/` for calendar, reports, crypto, accessibility, and UI behavior.
 - Business workspace pages under `html/business/` and extension manifests under `html/extensions/`.
-- Vigil provides local policy, README, hook, accessibility, test, and release-support gates.
+- vigil provides local policy, README, hook, accessibility, test, and release-support gates.
 <!-- scribe:architecture:end -->
 
 <!-- scribe:platform-agents:begin -->
@@ -106,7 +106,7 @@ Accessibility is product quality and compliance evidence. PayCal treats keyboard
 | Argus | Scoped diagnostic traces with expiry, redaction, and admin-controlled presets. |
 | Lens | Controlled performance and debugging signals without becoming a plaintext data channel. |
 | EmailGarum | Transactional email for verification, recovery, and account-change flows. |
-| Vigil | Local policy, hook, accessibility, test, release, and repository-health gates. |
+| vigil | Local policy, hook, accessibility, test, release, and repository-health gates. |
 | Scribe | Trust-first README shape and generated README components. |
 | Guardian | TrustedHTML and browser DOM sink governance. |
 | ShadowTalon | Global PHP fault capture and structured failure reporting. |
@@ -141,17 +141,17 @@ Set local environment values in `html/.env`, run Redis/PHP/nginx for the target 
 | Configured PHPUnit files | 290 |
 | Repository PHP test files | 290 |
 | Frontend tests | 23 Playwright specs, 25 JS/MJS files |
-| Static analysis | PHPStan Level 9, ESLint, Vigil policy checks |
+| Static analysis | PHPStan Level 9, ESLint, vigil policy checks |
 
-Suite inventory (as of 2026-10-20):
+Suite inventory (as of 2026-10-22):
 
-- **2,470 listed tests**
-- **292 repository test files**
-- **Active public suite file split:** **147 Unit**, **60 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
+- **2,487 listed tests**
+- **295 repository test files**
+- **Active public suite file split:** **150 Unit**, **60 Integration**, **41 Contract**, **1 Timezone**, **24 Accessibility**
 - **2 Indigenous suite files**
 - **2 Manual verification files**
 
-Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-10-20 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes the two manual verification files, which are not configured PHPUnit suites.
+Current inventory reflects `phpunit.public.xml` as re-evaluated on 2026-10-22 via `./vendor/bin/phpunit --configuration phpunit.public.xml --list-tests`. Repository test-file count includes the two manual verification files, which are not configured PHPUnit suites.
 <!-- scribe:quality:end -->
 
 <!-- scribe:recent-releases:begin -->

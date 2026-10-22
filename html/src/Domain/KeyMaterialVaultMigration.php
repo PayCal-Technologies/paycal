@@ -5,19 +5,26 @@ namespace PayCal\Domain;
 /** Idempotent migration using compare and set, without exposing wrapper values. */
 final class KeyMaterialVaultMigration
 {
+  /** @return array{legacy: int, sealed: int, migrated: int, conflicts: int} */
   public static function run(\Redis $redis, bool $apply = false): array
   {
-    $prefix = (string) ($redis->getOption(\Redis::OPT_PREFIX) ?: '');
+    $prefix = $redis->getOption(\Redis::OPT_PREFIX);
+    if (!is_string($prefix)) {
+      throw new \RuntimeException('Invalid Redis key prefix.');
+    }
     $cursor = '0';
     $counts = ['legacy' => 0, 'sealed' => 0, 'migrated' => 0, 'conflicts' => 0];
     do {
       $scan = $redis->rawCommand('SCAN', $cursor, 'MATCH', $prefix . 'user:*', 'COUNT', '500');
-      if (!is_array($scan) || count($scan) !== 2 || !is_array($scan[1])) {
+      if (!is_array($scan) || count($scan) !== 2 || !is_array($scan[1]) || !is_scalar($scan[0])) {
         throw new \RuntimeException('Key material enumeration failed.');
       }
       $cursor = (string) $scan[0];
       foreach ($scan[1] as $physicalKey) {
-        $key = substr((string) $physicalKey, strlen($prefix));
+        if (!is_string($physicalKey)) {
+          throw new \RuntimeException('Invalid key material storage key.');
+        }
+        $key = substr($physicalKey, strlen($prefix));
         if (preg_match('/\Auser:[^:]+(?::passkey_wrapped_deks)?\z/', $key) !== 1 || $redis->type($key) !== \Redis::REDIS_HASH) {
           continue;
         }

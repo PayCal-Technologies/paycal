@@ -7,24 +7,36 @@ use PayCal\Domain\Constants\Keys;
 /** Prepare first, then atomically replace a day and its maintained indexes. */
 final class CalendarReplacementService
 {
+  /** Build the conflict revision key for a calendar day. */
   public static function revisionKey(string $userUUID, string $date): string
   {
     return 'calendar:replacement:revision:' . $userUUID . ':' . $date;
   }
 
+  /** Read the current revision without accepting non string storage values. */
   public static function currentRevision(string $userUUID, string $date): string
   {
     $value = Database::getWriteInstance()->client->get(self::revisionKey($userUUID, $date));
-    return $value === false ? '0' : (string) $value;
+    if ($value === false) {
+      return '0';
+    }
+    if (!is_string($value)) {
+      throw new \RuntimeException('Invalid calendar revision.');
+    }
+    return $value;
   }
 
+  /** Resolve a work key to its calendar revision key. */
   private static function revisionForWorkKey(string $key): ?string
   {
     return preg_match('/\Awork:(?:archived:)?([^:]+):(\d{4}-\d{2}-\d{2}):S[0-9a-fA-F]{9}\z/', $key, $m) === 1
       ? self::revisionKey($m[1], $m[2]) : null;
   }
 
-  /** Make ordinary writes participate in replacement conflict detection. */
+  /**
+   * Make ordinary writes participate in replacement conflict detection.
+   * @param array<string, scalar|null> $fields
+   */
   public static function writeHashIfWork(string $key, array $fields): bool
   {
     $revision = self::revisionForWorkKey($key);
@@ -52,6 +64,7 @@ LUA;
     return true;
   }
 
+  /** Delete a work entry and advance its revision atomically. */
   public static function deleteIfWork(string $key): ?int
   {
     $revision = self::revisionForWorkKey($key);
@@ -103,22 +116,31 @@ LUA;
     return $result === 1;
   }
 
-  /** SCAN MATCH uses physical prefixes; raw commands avoid extension prefix modes. */
+  /**
+   * SCAN MATCH uses physical prefixes; raw commands avoid extension prefix modes.
+   * @return list<string>
+   */
   private static function dayKeys(\Redis $redis, string $userUUID, string $date): array
   {
-    $prefix = (string) ($redis->getOption(\Redis::OPT_PREFIX) ?: '');
+    $prefix = $redis->getOption(\Redis::OPT_PREFIX);
+    if (!is_string($prefix)) {
+      throw new \RuntimeException('Invalid Redis key prefix.');
+    }
     $keys = [];
     foreach ([Keys::WORK . ':' . $userUUID . ':' . $date . ':', Keys::WORK . ':archived:' . $userUUID . ':' . $date . ':'] as $start) {
       $cursor = '0';
       $iterations = 0;
       do {
         $result = $redis->rawCommand('SCAN', $cursor, 'MATCH', $prefix . $start . '*', 'COUNT', '1000');
-        if (!is_array($result) || count($result) !== 2 || !is_array($result[1])) {
+        if (!is_array($result) || count($result) !== 2 || !is_array($result[1]) || !is_scalar($result[0])) {
           throw new \RuntimeException('Calendar key enumeration failed.');
         }
         $cursor = (string) $result[0];
         foreach ($result[1] as $key) {
-          $key = substr((string) $key, strlen($prefix));
+          if (!is_string($key)) {
+            throw new \RuntimeException('Invalid calendar storage key.');
+          }
+          $key = substr($key, strlen($prefix));
           if (!str_starts_with($key, $start)) {
             throw new \RuntimeException('Unexpected calendar storage key.');
           }
@@ -135,7 +157,10 @@ LUA;
     return array_keys($keys);
   }
 
-  /** @param list<array<string, mixed>> $entries */
+  /**
+   * @param list<array<string, mixed>> $entries
+   * @return array{deleted: int, updated: int, refresh_pending: bool}
+   */
   public static function replace(string $userUUID, string $date, array $entries, string $revision, \Closure $authorize): array
   {
     if (preg_match('/\A[A-Za-z0-9_-]+\z/', $userUUID) !== 1 || !WorkEntry::validateDate($date) || count($entries) > 1000) {
@@ -167,7 +192,14 @@ LUA;
       if (($entry['date'] ?? '') !== $date) {
         throw new \InvalidArgumentException('Replacement dates do not match.');
       }
-      $row = WorkEntry::prepareWorkEntry($entry, $userUUID);
+      $fields = [];
+      foreach ($entry as $field => $value) {
+        if (!is_scalar($value) && $value !== null) {
+          throw new \InvalidArgumentException('Calendar entry fields must be scalar values.');
+        }
+        $fields[$field] = $value;
+      }
+      $row = WorkEntry::prepareWorkEntry($fields, $userUUID);
       if ($row === null) {
         throw new \InvalidArgumentException('Calendar entry preparation failed.');
       }

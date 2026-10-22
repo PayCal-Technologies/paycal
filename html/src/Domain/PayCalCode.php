@@ -130,6 +130,7 @@ final class PayCalCode
     }
     throw new \InvalidArgumentException('Invalid recovery code');
   }
+  /** Recognize the recovery code format before decoding. */
   public static function isRecoveryCode(string $input): bool
   {
     return self::validate($input, self::RECOVERY_SECRET_LENGTH)

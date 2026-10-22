@@ -7,6 +7,7 @@ final class KeyMaterialVault
 {
   public const PREFIX = 'pc-km:v1:';
 
+  /** Identify key material that requires vault protection. */
   public static function isSensitiveField(string $key, string $field): bool
   {
     if (preg_match('/\Auser:[^:]+:passkey_wrapped_deks\z/', $key) === 1) {
@@ -16,7 +17,10 @@ final class KeyMaterialVault
       && in_array($field, ['wrapped_dek_passkey', 'wrapped_dek_recovery', 'recovery_proof_key'], true);
   }
 
-  /** @param array<string, string> $fields @return array<string, string> */
+  /**
+   * @param array<string, string> $fields
+   * @return array<string, string>
+   */
   public static function protectHash(string $key, array $fields): array
   {
     foreach ($fields as $field => $value) {
@@ -27,7 +31,10 @@ final class KeyMaterialVault
     return $fields;
   }
 
-  /** @param array<string, string> $fields @return array<string, string> */
+  /**
+   * @param array<string, string> $fields
+   * @return array<string, string>
+   */
   public static function openHash(string $key, array $fields): array
   {
     foreach ($fields as $field => $value) {
@@ -38,6 +45,7 @@ final class KeyMaterialVault
     return $fields;
   }
 
+  /** Encrypt key material with its storage identity as authenticated data. */
   public static function seal(string $key, string $field, string $value): string
   {
     if (str_starts_with($value, 'pc-km:')) {
@@ -57,6 +65,7 @@ final class KeyMaterialVault
     ], JSON_THROW_ON_ERROR));
   }
 
+  /** Authenticate and decrypt a supported key material envelope. */
   public static function open(string $key, string $field, string $value): string
   {
     if (!str_starts_with($value, 'pc-km:')) {
@@ -85,7 +94,10 @@ final class KeyMaterialVault
     return $plaintext;
   }
 
-  /** Keep previous key ids in this file when selecting a new active key. */
+  /**
+   * Keep previous key ids in this file when selecting a new active key.
+   * @return array{active: string, keys: array<string, string>}
+   */
   private static function keyring(): array
   {
     $path = $_ENV['PAYCAL_KEY_MATERIAL_KEYRING_FILE'] ?? getenv('PAYCAL_KEY_MATERIAL_KEYRING_FILE') ?: '/etc/paycal/key-material-keyring.json';
@@ -111,6 +123,7 @@ final class KeyMaterialVault
     return ['active' => $ring['active'], 'keys' => $keys];
   }
 
+  /** Bind the encrypted value to its storage key and field. */
   private static function aad(string $key, string $field): string
   {
     return "paycal-key-material-v1\0" . $key . "\0" . $field;

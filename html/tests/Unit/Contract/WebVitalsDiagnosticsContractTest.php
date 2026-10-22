@@ -48,7 +48,7 @@ final class WebVitalsDiagnosticsContractTest extends TestCase
     $projectRoot = dirname(__DIR__, 3);
     $header = (string) file_get_contents($projectRoot . '/header.php');
 
-    $this->assertStringContainsString('Environment::isWebVitalsDiagnosticsEnabled()', $header);
+    $this->assertStringContainsString('$loadWebVitalsDiagnostics = Environment::isWebVitalsDiagnosticsEnabled();', $header);
     $this->assertStringContainsString("'loadWebVitalsDiagnostics' => \$loadWebVitalsDiagnostics", $header);
   }
 

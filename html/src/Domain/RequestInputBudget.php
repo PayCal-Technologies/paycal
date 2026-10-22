@@ -9,7 +9,10 @@ final class RequestInputBudget
   public const MAX_NODES = 10000;
   public const MAX_DEPTH = 32;
 
-  /** Reject aggregate array growth without serialization or intermediate arrays. */
+  /**
+   * Reject aggregate array growth without serialization or intermediate arrays.
+   * @param array<array-key, mixed> $input
+   */
   public static function assertArray(array $input, int $maxDepth = self::MAX_DEPTH): void
   {
     $nodes = 0;
@@ -17,7 +20,10 @@ final class RequestInputBudget
     self::walk($input, 0, $maxDepth, $nodes, $bytes);
   }
 
-  /** Share counters across siblings so nesting cannot multiply the budget. */
+  /**
+   * Share counters across siblings so nesting cannot multiply the budget.
+   * @param array<array-key, mixed> $input
+   */
   private static function walk(array $input, int $depth, int $maxDepth, int &$nodes, int &$bytes): void
   {
     foreach ($input as $key => $value) {
@@ -67,9 +73,8 @@ final class RequestInputBudget
       if ($char === '"') {
         $quoted = true;
       } elseif ($char === '{' || $char === '[') {
-        if (++$depth > self::MAX_DEPTH) {
-          throw new \RuntimeException('Request JSON exceeds depth limit.');
-        }
+        ++$depth;
+        self::assertJsonDepth($depth);
       } elseif ($char === '}' || $char === ']') {
         --$depth;
       }
@@ -78,6 +83,14 @@ final class RequestInputBudget
           throw new \RuntimeException('Request JSON exceeds structural limit.');
         }
       }
+    }
+  }
+
+  /** Enforce the nesting limit for every opening JSON delimiter. */
+  private static function assertJsonDepth(int $depth): void
+  {
+    if ($depth > self::MAX_DEPTH) {
+      throw new \RuntimeException('Request JSON exceeds depth limit.');
     }
   }
 

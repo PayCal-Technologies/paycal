@@ -601,7 +601,11 @@ class WorkEntry
    *
    * @throws \RuntimeException if no user UUID available
    */
-  /** Prepare validated persistence fields without changing calendar or site state. */
+  /**
+   * Prepare validated persistence fields without changing calendar or site state.
+   * @param array<string, scalar|null> $workDetails
+   * @return array{key: string, date: string, site_id: string, fields: array<string, string>, delete_fields: list<string>}|null
+   */
   public static function prepareWorkEntry(array $workDetails, ?string $userUUID = null): ?array
   {
     $workDetails = self::normalizeWorkEntryPayload($workDetails);
@@ -703,6 +707,7 @@ class WorkEntry
     ];
   }
 
+  /** @param array<string, scalar|null> $workDetails */
   public static function updateWorkEntry(array $workDetails, ?string $userUUID = null): bool
   {
     $userUUID ??= User::currentUUID();

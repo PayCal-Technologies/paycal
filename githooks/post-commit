@@ -20,4 +20,4 @@ if [ ! -x "${vigil_path}" ]; then
   exit 1
 fi
 
-exec "${vigil_path}" hooks:post-commit "$@"
+exec "${vigil_path}" --allow-mutation hooks:post-commit "$@"

@@ -278,10 +278,10 @@ class DEKController
             'wrappedDekPasskeyLen' => strlen($wrappedDekPasskey),
             'wrappedDekPasskeyFp' => $this->safeFingerprint($wrappedDekPasskey),
             'decodedEnvelopeJsonLen' => strlen($decodedEnvelopeJson),
-            'decodeEnvelopeIsArray' => is_array($decodedEnvelope),
-            'envelopeVersion' => is_array($decodedEnvelope) ? ($decodedEnvelope['version'] ?? $decodedEnvelope['v'] ?? null) : null,
-            'hasNonce' => is_array($decodedEnvelope) && (!empty($decodedEnvelope['nonce']) || !empty($decodedEnvelope['iv'])),
-            'hasCiphertext' => is_array($decodedEnvelope) && (!empty($decodedEnvelope['ciphertext']) || !empty($decodedEnvelope['ct'])),
+            'decodeEnvelopeIsArray' => true,
+            'envelopeVersion' => $decodedEnvelope['version'],
+            'hasNonce' => !empty($decodedEnvelope['nonce']),
+            'hasCiphertext' => !empty($decodedEnvelope['ciphertext']),
         ]);
 
         $updateFields = [];

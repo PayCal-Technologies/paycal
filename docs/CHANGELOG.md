@@ -19,7 +19,7 @@ This master changelog provides a high-level overview of major version milestones
 **Public GitHub visibility and repository metadata**
 - Added root-level `CONTRIBUTING.md`, `SECURITY.md`, and `CODE_OF_CONDUCT.md` for public repository participation, private vulnerability reporting, and conduct expectations.
 - Added GitHub bug and feature issue templates, issue contact routing, an expanded pull request checklist, a public examples index, and `.github/social-preview.svg`.
-- Added `docs/github-visibility-plan.md` to keep PayCal's GitHub description, homepage, topics, README links, community files, and public-source positioning aligned with Clyde and Vigil visibility practices.
+- Added `docs/github-visibility-plan.md` to keep PayCal's GitHub description, homepage, topics, README links, community files, and public-source positioning aligned with Clyde and vigil visibility practices.
 - Refreshed the README with current CI badges, official PayCal product/company/GitHub links, security/contributing/examples links, preview media, and current public test inventory.
 - Updated GitHub repository metadata to use the PayCal product homepage, privacy-first description, and focused technology/product topics.
 - Updated PHPStan from 2.2.8 to 2.2.9; PHPUnit remains on the repository's documented conflict-blocked line.
