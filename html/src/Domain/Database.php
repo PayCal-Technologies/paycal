@@ -117,6 +117,7 @@ class Database
       $normalized[(string) $field] = (string) $value;
     }
 
+    $normalized = KeyMaterialVault::protectHash($key, $normalized);
     self::transaction(function (\Redis $r) use ($key, $normalized, $ttlSeconds): void {
       $r->hMSet($key, $normalized);
       $r->expire($key, $ttlSeconds);
@@ -139,7 +140,10 @@ class Database
       $normalized[(string) $field] = (string) $value;
     }
 
-    self::getWriteInstance()->hmset($key, $normalized);
+    $normalized = KeyMaterialVault::protectHash($key, $normalized);
+    if (!CalendarReplacementService::writeHashIfWork($key, $normalized)) {
+      self::getWriteInstance()->hmset($key, $normalized);
+    }
   }
 
   /**
@@ -186,7 +190,7 @@ class Database
       ++$iterations;
 
       foreach ($keys as $key) {
-        $deleted = $redis->client->del($key);
+        $deleted = CalendarReplacementService::deleteIfWork((string) $key) ?? $redis->client->del($key);
         if ($deleted) {
           $deletedCount++;
         }
@@ -349,7 +353,8 @@ class Database
       fn($redis) => $redis->hget($key, $field)
     );
 
-    return is_scalar($result) ? (string) $result : '';
+    $value = is_scalar($result) ? (string) $result : '';
+    return KeyMaterialVault::openHash($key, [$field => $value])[$field];
   }
 
 
@@ -386,7 +391,7 @@ class Database
       $normalized[$field] = is_string($value) ? $value : '';
     }
 
-    return $normalized;
+    return KeyMaterialVault::openHash($key, $normalized);
   }
 
 
@@ -411,7 +416,7 @@ class Database
       $normalized[(string) $field] = is_scalar($value) ? (string) $value : '';
     }
 
-    return $normalized;
+    return KeyMaterialVault::openHash($key, $normalized);
   }
 
 
@@ -465,6 +470,9 @@ class Database
       }
     }
 
+    foreach ($results as $key => $values) {
+      $results[$key] = KeyMaterialVault::openHash((string) $key, $values);
+    }
     return $results;
   }
 
@@ -655,8 +663,9 @@ class Database
 
   /**
    * Execute a block of Redis commands in a single MULTI/EXEC transaction.
-   * All queued commands run atomically; partial failure is not possible
-   * within a connected session.
+   * Queued commands run without interleaving, but Redis does not roll back
+   * runtime command errors. Validate types and use a guarded Lua commit when
+   * an operation requires all or nothing failure behavior.
    *
    * Usage:
    *   Database::transaction(function (\Redis $r) use ($key, $value): void {
@@ -727,7 +736,7 @@ class Database
    */
   public static function unlink(string $key): int
   {
-    $result = self::getWriteInstance()->client->unlink($key);
+    $result = CalendarReplacementService::deleteIfWork($key) ?? self::getWriteInstance()->client->unlink($key);
 
     return is_int($result) ? $result : 0;
   }
@@ -885,6 +894,11 @@ class Database
    */
   public static function rename(string $oldkey, string $newkey): bool
   {
+    $workResult = CalendarReplacementService::renameIfWork($oldkey, $newkey);
+    if ($workResult !== null) {
+      return $workResult;
+    }
+
     return (bool) self::getWriteInstance()->client->rename($oldkey, $newkey);
   }
 

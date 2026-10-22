@@ -521,7 +521,7 @@ final class BillingController
     }
 
     $message = strtolower((string) $result['message']);
-    $status = (str_contains($message, 'missing') || str_contains($message, 'empty') || str_contains($message, 'pre-validation'))
+    $status = (str_contains($message, 'missing') || str_contains($message, 'empty') || str_contains($message, 'pre-validation') || str_contains($message, 'failed verification'))
       ? HttpStatus::HTTP_BAD_REQUEST
       : HttpStatus::HTTP_INTERNAL_SERVER_ERROR;
 

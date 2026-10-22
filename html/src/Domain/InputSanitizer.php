@@ -169,8 +169,9 @@ final class InputSanitizer
     /** @var array<mixed> $value */
     $value = $_POST[$variable];
     $maxLen = SystemConfig::MAX_STRING_LENGTH;
+    RequestInputBudget::assertArray($value, SystemConfig::MAX_ARRAY_DEPTH);
     $valueRaw = json_encode($value);
-    if ($valueRaw !== false && strlen($valueRaw) > $maxLen) {
+    if ($valueRaw === false || strlen($valueRaw) > $maxLen) {
       throw new \RuntimeException('InputSanitizer: POST array input exceeds maximum allowed length of ' . $maxLen . ' bytes');
     }
     return self::sanitizeArray($value);
@@ -186,6 +187,7 @@ final class InputSanitizer
    */
   public static function sanitizeArray(array $array): array
   {
+    RequestInputBudget::assertArray($array, SystemConfig::MAX_ARRAY_DEPTH);
     $maxDepth = SystemConfig::MAX_ARRAY_DEPTH;
     $sanitizeItem = function ($item, $depth = 1) use (&$sanitizeItem, $maxDepth) {
       if ($depth > $maxDepth) {

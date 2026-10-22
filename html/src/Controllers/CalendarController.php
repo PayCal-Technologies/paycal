@@ -435,7 +435,7 @@ class CalendarController
     }
 
     $dayId = (string) InputSanitizer::postString('d');
-    if (!$dayId) {
+    if (!WorkEntry::validateDate($dayId)) {
       \PayCal\Domain\Response::error('[CC] Day ID required.', [], \PayCal\Domain\Enums\HttpStatus::HTTP_BAD_REQUEST);
 
       return;
@@ -511,16 +511,23 @@ class CalendarController
       return;
     }
 
+    $replacementRevision = \PayCal\Domain\CalendarReplacementService::currentRevision($targetUserUUID, $dayId);
     $entriesJson = InputSanitizer::postRaw('entries');
     if ($entriesJson) {
       $entriesJson = html_entity_decode($entriesJson, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-      $entries = json_decode($entriesJson, true);
+      try {
+        \PayCal\Domain\RequestInputBudget::assertBody($entriesJson);
+        $entries = json_decode($entriesJson, true, 32, JSON_THROW_ON_ERROR);
+      } catch (\JsonException|\RuntimeException $e) {
+        Response::error('[CC] Invalid entries payload.', [], HttpStatus::HTTP_BAD_REQUEST);
+        return;
+      }
 
       if (is_array($entries) && (isset($entries['site_id']) || isset($entries['s']))) {
         // Single entry as object, wrap in array
         $entries = [$entries];
       } elseif (!is_array($entries)) {
-        \PayCal\Domain\Response::error("[CC] Invalid entries format: {$entriesJson}", [], HttpStatus::HTTP_BAD_REQUEST);
+        \PayCal\Domain\Response::error('[CC] Invalid entries format.', [], HttpStatus::HTTP_BAD_REQUEST);
 
         return;
       }
@@ -535,24 +542,19 @@ class CalendarController
         'patterns_match' => $pattern === $altPattern
       ], 'pattern_debug');
       
-      $deleted = WorkEntry::deleteWorkEntriesByPattern($pattern);
-      \PayCal\Domain\Log::debug("[CC] Delete pattern: {$pattern}, deleted: {$deleted}");
-      \PayCal\Observability\Lens::add('Calendar Delete Pattern', [
-        'pattern' => $pattern,
-        'deleted_count' => $deleted
-      ], 'delete');
-
       // Group entries by site ID to combine hours for same site
       $grouped = [];
       foreach ($entries as $entry) {
         if (!is_array($entry)) {
-          continue;
+          Response::error('[CC] Invalid calendar entry.', [], HttpStatus::HTTP_BAD_REQUEST);
+          return;
         }
 
         $siteId = InputSanitizer::sanitizeString($entry['site_id'] ?? $entry['s'] ?? '');
 
-        if ('' === $siteId) {
-          continue;
+        if (!WorkEntry::validateSiteId($siteId)) {
+          Response::error('[CC] Calendar entry requires a valid site.', [], HttpStatus::HTTP_BAD_REQUEST);
+          return;
         }
 
         $blob = isset($entry['encrypted_blob']) && is_string($entry['encrypted_blob'])
@@ -644,48 +646,61 @@ class CalendarController
         }
       }
 
-      foreach ($grouped as $workDetails) {
-        $workDetails['cal_work_save_as_default'] = InputSanitizer::postString('cal_work_save_as_default');
+      $saveAsDefault = InputSanitizer::postString('cal_work_save_as_default');
 
-        if (true !== WorkEntryRepository::save($workDetails, $targetUserUUID)) {
-          \PayCal\Domain\Response::error('[CC] Batch update error.', [], \PayCal\Domain\Enums\HttpStatus::HTTP_UNPROCESSABLE);
-
-          return;
-        }
-
-        ++$updated;
+      foreach ($grouped as &$replacementEntry) {
+        $replacementEntry['cal_work_save_as_default'] = $saveAsDefault;
       }
-      \PayCal\Observability\Lens::add('Calendar Batch Update Complete', [
-        'total_grouped' => $total,
-        'successfully_updated' => $updated
-      ], 'batch_end');
-
-      if ($updated !== $total) {
-        \PayCal\Domain\Response::error('[CC] Batch update mismatch.', [], \PayCal\Domain\Enums\HttpStatus::HTTP_UNPROCESSABLE);
-
+      unset($replacementEntry);
+      try {
+        $result = \PayCal\Domain\CalendarReplacementService::replace(
+          $targetUserUUID,
+          $dayId,
+          array_values($grouped),
+          $replacementRevision,
+          static function () use ($actorUUID, $targetUserUUID, $businessId, $mode, $dayId): bool {
+            if (WorkEntryLockService::isLocked($dayId, $targetUserUUID)) {
+              return false;
+            }
+            return !BusinessDiscoveryService::isDelegatedWorkMode($mode)
+              || (new BusinessDiscoveryService())->canMutateWorkForOwner($actorUUID, $targetUserUUID, $businessId);
+          }
+        );
+        $deleted = $result['deleted'];
+        $updated = $result['updated'];
+      } catch (\Throwable $e) {
+        Response::error('[CC] Calendar replacement could not be confirmed. Reload before retrying.', [], HttpStatus::HTTP_UNPROCESSABLE);
         return;
       }
 
       // Always recalculate affected week after batch save/delete/paste so
       // regular/overtime distribution updates in real time.
-      Work::processWorkWeekContainingDate($targetUserUUID, $dayId);
-      \PayCal\Observability\Lens::add('Calendar Week Recalculation', [
-        'mode' => 'batch',
-        'day_id' => $dayId,
-      ], 'recalc');
+      $refreshPending = $result['refresh_pending'];
+      $week = [];
+      try {
+        Work::processWorkWeekContainingDate($targetUserUUID, $dayId);
+        \PayCal\Observability\Lens::add('Calendar Week Recalculation', [
+          'mode' => 'batch',
+          'day_id' => $dayId,
+        ], 'recalc');
 
-      // Refresh CSRF token TTL after successful update
-      $sessionTimeout = (int) ($user->session_timeout);
-      $ttl = max((int) SessionTimeout::ONE_MIN->value, min($sessionTimeout, (int) SessionTimeout::TWO_HOURS->value));
-      Database::expire(Keys::USER . ":" . $user->user_uuid . ":csrf:calendar:{$csrfToken}", $ttl);
+        // Refresh CSRF token TTL after successful update
+        $sessionTimeout = (int) ($user->session_timeout);
+        $ttl = max((int) SessionTimeout::ONE_MIN->value, min($sessionTimeout, (int) SessionTimeout::TWO_HOURS->value));
+        Database::expire(Keys::USER . ":" . $user->user_uuid . ":csrf:calendar:{$csrfToken}", $ttl);
 
-      $week = ('cli' === PHP_SAPI) ? [] : $this->buildWeekPayload($dayId, $targetUserUUID);
+        $week = ('cli' === PHP_SAPI) ? [] : $this->buildWeekPayload($dayId, $targetUserUUID);
       
+      } catch (\Throwable) {
+        $refreshPending = true;
+        Log::warn('[CC] Calendar committed; derived refresh needs retry.');
+      }
       $diagnostic = [
         'dayId' => $dayId,
         'deletePattern' => $pattern,
         'entriesDeleted' => $deleted,
         'entriesUpdated' => $updated,
+        'refresh_pending' => $refreshPending,
         'totalEntriesInRequest' => $total,
         'lens_data' => \PayCal\Observability\Lens::data()
       ];

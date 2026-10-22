@@ -601,7 +601,8 @@ class WorkEntry
    *
    * @throws \RuntimeException if no user UUID available
    */
-  public static function updateWorkEntry(array $workDetails, ?string $userUUID = null): bool
+  /** Prepare validated persistence fields without changing calendar or site state. */
+  public static function prepareWorkEntry(array $workDetails, ?string $userUUID = null): ?array
   {
     $workDetails = self::normalizeWorkEntryPayload($workDetails);
 
@@ -617,19 +618,19 @@ class WorkEntry
     // Validate using centralized validation methods
     if (!self::validateDate($workDate)) {
       Log::warn("WorkEntry::updateWorkEntry - invalid date: {$workDate}");
-      return false;
+      return null;
     }
 
     // Check if date is locked for editing (historical record locking)
     if (WorkEntryLockService::isLocked($workDate, $userUUID)) {
       Log::warn("WorkEntry::updateWorkEntry - date locked: {$workDate} for user {$userUUID}");
       SecurityLog::logEntryLockedAttempt($userUUID, $workDate);
-      return false;
+      return null;
     }
 
     if (!self::validateSiteId($siteID)) {
       Log::warn("WorkEntry::updateWorkEntry - invalid site ID format: {$siteID}");
-      return false;
+      return null;
     }
 
     // Validate and clamp hours using centralized method
@@ -638,37 +639,22 @@ class WorkEntry
       $workDetails['hours'] = number_format(self::validateHours($hours), 2, '.', '');
     }
 
-    // Activate site if currently inactive
-    $siteStatus = (new Sites())->getSiteStatus($siteID, $userUUID);
-    if ($siteStatus === SiteStatus::INACTIVE->value) {
-        (new Sites())->setSiteStatus($siteID, SiteStatus::ACTIVE->value, $userUUID);
-    }
     $workEntryKey = Keys::WORK . ":{$userUUID}:{$workDate}:{$siteID}";
     Log::debug('WorkEntry::updateWorkEntry key');
 
     $blob = self::asString($workDetails['encrypted_blob'] ?? null);
     if ('' === $blob) {
-      try {
-        $v = \PayCal\Domain\Config\SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
-        Database::incr("telemetry:encryption:{$v}:server:required_write_rejected");
-      } catch (\Throwable) {
-      }
+
       Log::warn("WorkEntry::updateWorkEntry - encrypted_blob required for {$workEntryKey}");
 
-      return false;
+      return null;
     }
 
     $validation = self::validateEncryptedBlob($blob);
     if (!$validation['valid']) {
       Log::warn("WorkEntry::updateWorkEntry - encrypted_blob validation failed: {$validation['error']} for {$workEntryKey}");
 
-      try {
-        $v = \PayCal\Domain\Config\SystemConfig::ENCRYPTION_TELEMETRY_SCHEMA;
-        Database::incr("telemetry:encryption:{$v}:server:blob_validation_failed");
-      } catch (\Throwable) {
-      }
-
-      return false;
+      return null;
     }
 
     // Persist ciphertext plus non-sensitive render snapshot for deterministic month paint.
@@ -710,6 +696,29 @@ class WorkEntry
       'gross' => number_format($earningsSnapshot['gross'], 2, '.', ''),
       'earnings_snapshot_version' => '1',
     ];
+
+    return [
+      'key' => $workEntryKey, 'date' => $workDate, 'site_id' => $siteID,
+      'fields' => $fieldsToStore, 'delete_fields' => [],
+    ];
+  }
+
+  public static function updateWorkEntry(array $workDetails, ?string $userUUID = null): bool
+  {
+    $userUUID ??= User::currentUUID();
+    $prepared = self::prepareWorkEntry($workDetails, $userUUID);
+    if ($prepared === null) {
+      return false;
+    }
+    $workDate = $prepared['date'];
+    $siteID = $prepared['site_id'];
+    $workEntryKey = $prepared['key'];
+    $fieldsToStore = $prepared['fields'];
+    // Activate site if currently inactive
+    $siteStatus = (new Sites())->getSiteStatus($siteID, $userUUID);
+    if ($siteStatus === SiteStatus::INACTIVE->value) {
+        (new Sites())->setSiteStatus($siteID, SiteStatus::ACTIVE->value, $userUUID);
+    }
     Log::debug('WorkEntry::updateWorkEntry storing');
     $isNewEntry = !Database::exists($workEntryKey);
     Database::hset($workEntryKey, $fieldsToStore);

@@ -8,8 +8,9 @@ namespace PayCal\Domain;
 final class PayCalCode
 {
   public const ALPHABET = 'ABCDEFGHJKLMNPQRTUWXYZ346789';
-  public const RECOVERY_SECRET_LENGTH = 12;
-  public const RECOVERY_TOTAL_LENGTH = 14;
+  public const RECOVERY_SECRET_LENGTH = 28;
+  public const LEGACY_RECOVERY_SECRET_LENGTH = 12;
+  public const RECOVERY_TOTAL_LENGTH = 30;
   public const EMAIL_SECRET_LENGTH = 4;
   public const EMAIL_TOTAL_LENGTH = 6;
 
@@ -94,15 +95,7 @@ final class PayCalCode
   public static function formatRecoveryCode(string $code): string
   {
     $normalized = self::normalize($code);
-    if (strlen($normalized) <= 6) {
-      return $normalized;
-    }
-
-    if (strlen($normalized) <= 12) {
-      return substr($normalized, 0, 6) . '-' . substr($normalized, 6);
-    }
-
-    return substr($normalized, 0, 6) . '-' . substr($normalized, 6, 6) . '-' . substr($normalized, 12);
+    return implode('-', str_split($normalized, 6));
   }
 
   /**
@@ -130,10 +123,16 @@ final class PayCalCode
   public static function recoverySecretMaterial(string $input): string
   {
     $normalized = self::normalize($input);
-    if (!self::validate($normalized, self::RECOVERY_SECRET_LENGTH)) {
-      throw new \InvalidArgumentException('Invalid recovery code');
+    foreach ([self::RECOVERY_SECRET_LENGTH, self::LEGACY_RECOVERY_SECRET_LENGTH] as $length) {
+      if (self::validate($normalized, $length)) {
+        return substr($normalized, 0, $length);
+      }
     }
-
-    return substr($normalized, 0, self::RECOVERY_SECRET_LENGTH);
+    throw new \InvalidArgumentException('Invalid recovery code');
+  }
+  public static function isRecoveryCode(string $input): bool
+  {
+    return self::validate($input, self::RECOVERY_SECRET_LENGTH)
+      || self::validate($input, self::LEGACY_RECOVERY_SECRET_LENGTH);
   }
 }

@@ -2,7 +2,8 @@
 
 namespace PayCal\Domain\Encryption;
 
-use PayCal\Domain\InvalidArgumentException;
+use InvalidArgumentException;
+use PayCal\Domain\RequestInputBudget;
 
 /**
  * EnvelopeFormat.php
@@ -110,15 +111,17 @@ class EnvelopeFormat
    */
   public static function fromJson(string $json): array
   {
-    $decoded = json_decode($json, true);
+    try {
+      RequestInputBudget::assertBody($json);
+      $decoded = json_decode($json, true, RequestInputBudget::MAX_DEPTH);
+    } catch (\RuntimeException $e) {
+      throw new InvalidArgumentException('Envelope JSON exceeds supported limits.', 0, $e);
+    }
     if (!is_array($decoded)) {
       throw new InvalidArgumentException('Failed to decode envelope JSON');
     }
 
-    $envelope = [];
-    foreach ($decoded as $k => $v) {
-      $envelope[(string) $k] = $v;
-    }
+    $envelope = $decoded;
     self::validateOrThrow($envelope);
 
     /** @var array{version: int, nonce: string, ciphertext: string, aad: string|null} */

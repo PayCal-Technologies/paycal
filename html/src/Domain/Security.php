@@ -85,14 +85,27 @@ final class Security
   private static function firstForwardedAddress(): string
   {
     $xffRaw = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
-    if (is_scalar($xffRaw) && (string) $xffRaw !== '') {
-      $parts = explode(',', (string) $xffRaw);
-      return trim($parts[0]);
+    if (!is_string($xffRaw)) {
+      return '';
+    }
+    if ($xffRaw !== '') {
+      $parts = array_map('trim', explode(',', $xffRaw));
+      foreach ($parts as $part) {
+        if (InputSanitizer::sanitizeIPAddress($part) === 'unknown') {
+          return '';
+        }
+      }
+      // A proxy can append the actual client after attacker supplied prefixes.
+      for ($i = count($parts) - 1; $i >= 0; --$i) {
+        if (!self::isTrustedProxy($parts[$i])) {
+          return $parts[$i];
+        }
+      }
+      return '';
     }
 
     $clientIpRaw = $_SERVER['HTTP_CLIENT_IP'] ?? '';
-
-    return is_scalar($clientIpRaw) ? trim((string) $clientIpRaw) : '';
+    return is_string($clientIpRaw) ? trim($clientIpRaw) : '';
   }
 
   /**

@@ -5,7 +5,7 @@ import {
   formatRecoveryCode,
   payCalChecksum,
   recoverySecretMaterial,
-  validatePayCalCode,
+  validateRecoveryCode,
 } from '/js/core/paycal-code.js';
 
 /**
@@ -24,6 +24,7 @@ import {
  */
 
 self.cryptoState = {
+  generation: 0,
   dek: null,
   dekRaw: null,
   dekVersion: 1,
@@ -63,16 +64,21 @@ const b64ToBytes = fromBase64;
 const bytesToB64 = toBase64;
 
 function generatePayCalRecoveryCode() {
-  const bytes = crypto.getRandomValues(new Uint8Array(PAYCAL_RECOVERY_SECRET_LENGTH));
+  const limit = Math.floor(256 / PAYCAL_A11Y_ALPHABET.length) * PAYCAL_A11Y_ALPHABET.length;
   let secret = '';
-  bytes.forEach((byte) => {
-    secret += PAYCAL_A11Y_ALPHABET[byte % PAYCAL_A11Y_ALPHABET.length];
-  });
-  return formatRecoveryCode(`${secret}${payCalChecksum(secret)}`);
+  while (secret.length < PAYCAL_RECOVERY_SECRET_LENGTH) {
+    const bytes = crypto.getRandomValues(new Uint8Array(PAYCAL_RECOVERY_SECRET_LENGTH * 2));
+    for (const byte of bytes) {
+      if (byte < limit && secret.length < PAYCAL_RECOVERY_SECRET_LENGTH) {
+        secret += PAYCAL_A11Y_ALPHABET[byte % PAYCAL_A11Y_ALPHABET.length];
+      }
+    }
+  }
+  return formatRecoveryCode(secret + payCalChecksum(secret));
 }
 
 function recoveryKeyMaterial(recoveryKey) {
-  if (validatePayCalCode(recoveryKey, PAYCAL_RECOVERY_SECRET_LENGTH)) {
+  if (validateRecoveryCode(recoveryKey)) {
     return encoder.encode(recoverySecretMaterial(recoveryKey));
   }
   return decodeCrockfordBase32(recoveryKey);
@@ -256,7 +262,21 @@ async function deriveRecoveryProof(payload) {
   return { proof: bytesToB64(new Uint8Array(proof)) };
 }
 
+// A clear invalidates pending key imports and responses from older operations.
+function replaceDekState(dek, raw, generation) {
+  if (generation !== self.cryptoState.generation) {
+    raw.fill(0);
+    throw new Error('DEK operation cancelled');
+  }
+  if (self.cryptoState.dekRaw instanceof Uint8Array) {
+    self.cryptoState.dekRaw.fill(0);
+  }
+  self.cryptoState.dek = dek;
+  self.cryptoState.dekRaw = raw;
+}
+
 async function unwrapWithPasskeyCredential(payload) {
+  const generation = self.cryptoState.generation;
   const { wrappedDekPasskey, credentialId, userId, saltBase64, dekVersion, cryptoVersion, derivationMode } = payload;
 
   if (!wrappedDekPasskey || !credentialId || !saltBase64) {
@@ -272,8 +292,8 @@ async function unwrapWithPasskeyCredential(payload) {
     envelope.ct
   );
 
-  self.cryptoState.dek = await crypto.subtle.importKey('raw', dekRaw, 'AES-GCM', false, ['encrypt', 'decrypt']);
-  self.cryptoState.dekRaw = new Uint8Array(dekRaw);
+  const dek = await crypto.subtle.importKey('raw', dekRaw, 'AES-GCM', false, ['encrypt', 'decrypt']);
+  replaceDekState(dek, new Uint8Array(dekRaw), generation);
   self.cryptoState.dekVersion = Number(dekVersion || 1);
   self.cryptoState.cryptoVersion = Number(cryptoVersion || 1);
 
@@ -294,6 +314,7 @@ async function unwrapWithPasskeyCredential(payload) {
  * @returns {Promise<Object>} { ok: true, diagnostics: {...} }
  */
 async function unwrapWithRecoveryKey(payload) {
+  const generation = self.cryptoState.generation;
   const { wrappedDekRecovery, recoveryKey, accountRecoverySalt, dekVersion, cryptoVersion } = payload;
 
   if (!wrappedDekRecovery || !recoveryKey || !accountRecoverySalt) {
@@ -315,8 +336,8 @@ async function unwrapWithRecoveryKey(payload) {
     throw new Error('Recovery Code does not match this account. Check the code and try again.');
   }
 
-  self.cryptoState.dek = await crypto.subtle.importKey('raw', dekRaw, 'AES-GCM', false, ['encrypt', 'decrypt']);
-  self.cryptoState.dekRaw = new Uint8Array(dekRaw);
+  const dek = await crypto.subtle.importKey('raw', dekRaw, 'AES-GCM', false, ['encrypt', 'decrypt']);
+  replaceDekState(dek, new Uint8Array(dekRaw), generation);
   self.cryptoState.dekVersion = Number(dekVersion || 1);
   self.cryptoState.cryptoVersion = Number(cryptoVersion || 1);
 
@@ -337,7 +358,10 @@ async function wrapCurrentDekWithPasskeyCredential(payload) {
 
   const { credentialId, userId, saltBase64, derivationMode } = payload;
   const kekPasskey = await derivePasskeyKEK(credentialId, userId, saltBase64, derivationMode || 'credential-only');
-  const dekRaw = await crypto.subtle.exportKey('raw', self.cryptoState.dek);
+  const dekRaw = self.cryptoState.dekRaw;
+  if (!(dekRaw instanceof Uint8Array) || dekRaw.byteLength !== 32) {
+    throw new Error('Raw DEK unavailable for wrapping');
+  }
   const wrapIv = crypto.getRandomValues(new Uint8Array(12));
   const wrappedCt = new Uint8Array(await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv: wrapIv },
@@ -357,12 +381,13 @@ async function wrapCurrentDekWithPasskeyCredential(payload) {
 }
 
 async function generateAndWrapWithPasskeyCredential(payload) {
+  const generation = self.cryptoState.generation;
   const { credentialId, userId, saltBase64, dekVersion, cryptoVersion, derivationMode } = payload;
   const kekPasskey = await derivePasskeyKEK(credentialId, userId, saltBase64, derivationMode || 'credential-only');
 
   const dekRawBytes = crypto.getRandomValues(new Uint8Array(32));
-  self.cryptoState.dek = await crypto.subtle.importKey('raw', dekRawBytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
-  self.cryptoState.dekRaw = dekRawBytes;
+  const dek = await crypto.subtle.importKey('raw', dekRawBytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
+  replaceDekState(dek, dekRawBytes, generation);
   self.cryptoState.dekVersion = Number(dekVersion || 1);
   self.cryptoState.cryptoVersion = Number(cryptoVersion || 1);
 
@@ -516,6 +541,7 @@ async function encryptProfile(payload) {
 }
 
 function clear() {
+  self.cryptoState.generation += 1;
   if (self.cryptoState.dekRaw instanceof Uint8Array) {
     self.cryptoState.dekRaw.fill(0);
   }
@@ -533,6 +559,7 @@ function hasDek() {
 
 self.onmessage = async (event) => {
   const { id, action, payload } = event.data || {};
+  const generation = self.cryptoState.generation;
 
   try {
     let result;
@@ -577,6 +604,9 @@ self.onmessage = async (event) => {
         throw new Error('Unknown crypto worker action');
     }
 
+    if (action !== 'clear' && generation !== self.cryptoState.generation) {
+      throw new Error('Crypto operation cancelled after clear');
+    }
     self.postMessage({ id, ok: true, result });
   } catch (error) {
     const errorMsg = error?.message || 'Crypto worker failure';

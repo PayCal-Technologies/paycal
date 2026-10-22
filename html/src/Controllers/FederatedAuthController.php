@@ -11,6 +11,7 @@ use PayCal\Domain\Database;
 use PayCal\Domain\Enums\AuthLevel;
 use PayCal\Domain\Enums\HttpStatus;
 use PayCal\Domain\FederatedAuth;
+use PayCal\Domain\FederatedEmailIdentity;
 use PayCal\Domain\InputSanitizer;
 use PayCal\Domain\Response;
 use PayCal\Domain\User;
@@ -230,13 +231,14 @@ final class FederatedAuthController
       return '';
     }
 
-    $email = InputSanitizer::sanitizeEmail((string) ($claims['email'] ?? ''));
-    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $email = strtolower(trim((string) ($claims['email'] ?? '')));
+    if (FederatedEmailIdentity::normalize($email) === '') {
       return '';
     }
 
     $userUUID = UserRepository::getUUIDFromEmail($email);
-    if ($userUUID === '' || UserRepository::getByUUID($userUUID) === null) {
+    $user = $userUUID !== '' ? UserRepository::getByUUID($userUUID) : null;
+    if ($user === null || !FederatedEmailIdentity::matches((string) $user->email, $email)) {
       return '';
     }
 
@@ -260,8 +262,8 @@ final class FederatedAuthController
       return '';
     }
 
-    $email = InputSanitizer::sanitizeEmail((string) ($claims['email'] ?? ''));
-    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $email = strtolower(trim((string) ($claims['email'] ?? '')));
+    if (FederatedEmailIdentity::normalize($email) === '') {
       return '';
     }
 

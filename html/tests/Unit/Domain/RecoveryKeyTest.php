@@ -49,20 +49,20 @@ final class RecoveryKeyTest extends TestCase
     $this->assertSame('Q9', PayCalCode::checksum('R7QT'));
   }
 
-  public function testGenerateCodeUsesShortRecoveryFormat(): void
+  public function testGenerateCodeUsesStrongRecoveryFormat(): void
   {
     $code = RecoveryKey::generateCode();
 
-    $this->assertMatchesRegularExpression('/^[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}-[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}-[ABCDEFGHJKLMNPQRTUWXYZ346789]{2}$/', $code);
+    $this->assertMatchesRegularExpression('/^(?:[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}-){4}[ABCDEFGHJKLMNPQRTUWXYZ346789]{6}$/', $code);
     $this->assertTrue(RecoveryKey::validate($code));
   }
 
   public function testPayCalCodeNormalizationAndChecksumValidation(): void
   {
     $this->assertSame('K3HWR7QTMAPGC9', PayCalCode::normalize(' k3hwr7-qtmapg-c9 '));
-    $this->assertTrue(PayCalCode::validate(' k3hwr7-qtmapg-c9 ', PayCalCode::RECOVERY_SECRET_LENGTH));
+    $this->assertTrue(PayCalCode::isRecoveryCode(' k3hwr7-qtmapg-c9 '));
     $this->assertTrue(PayCalCode::validate('r7qt-q9', PayCalCode::EMAIL_SECRET_LENGTH));
-    $this->assertFalse(PayCalCode::validate('K3HWR7-QTMAPG-C8', PayCalCode::RECOVERY_SECRET_LENGTH));
+    $this->assertFalse(PayCalCode::isRecoveryCode('K3HWR7-QTMAPG-C8'));
     $this->assertFalse(PayCalCode::validate('R7QTQ8', PayCalCode::EMAIL_SECRET_LENGTH));
   }
 
@@ -289,5 +289,13 @@ final class RecoveryKeyTest extends TestCase
     
     // Try to unwrap with wrong KEK
     RecoveryKey::unwrapDEK($wrapped, $kek2);
+  }
+  public function testLegacyRecoveryMaterialAndNewEntropy(): void
+  {
+    $this->assertTrue(RecoveryKey::validate('K3HWR7-QTMAPG-C9'));
+    $this->assertSame('K3HWR7QTMAPG', RecoveryKey::secretMaterial('K3HWR7-QTMAPG-C9'));
+    $code = RecoveryKey::generateCode();
+    $this->assertSame(28, strlen(RecoveryKey::secretMaterial($code)));
+    $this->assertGreaterThanOrEqual(128.0, PayCalCode::RECOVERY_SECRET_LENGTH * log(strlen(PayCalCode::ALPHABET), 2));
   }
 }
