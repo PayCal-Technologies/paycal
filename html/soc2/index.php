@@ -7,17 +7,17 @@ require_once __DIR__ . '/../config.php';
 // soc2/ directory so the dashboard always reflects the most recent run without
 // manual updates.
 
-$soc2Root      = rtrim(\PayCal\Domain\Config\Environment::appHome(), '/') . '/soc2';
-$bundleRoot    = $soc2Root . '/bundles';
-$traceFile     = $soc2Root . '/reports/test-controls/soc2-test-control-trace-latest.json';
+$soc2Root = rtrim(\PayCal\Domain\Config\Environment::appHome(), '/') . '/soc2';
+$bundleRoot = $soc2Root . '/bundles';
+$traceFile = $soc2Root . '/reports/test-controls/soc2-test-control-trace-latest.json';
 
 // Find the latest YYYY-MM bundle directory.
-$latestMonth      = '';
+$latestMonth = '';
 $latestBundleDate = 'Unknown';
-$artifactCount    = 0;
-$controlIds       = [];
-$generatedAt      = '';
-$freshnessLabel   = 'Unknown';
+$artifactCount = 0;
+$controlIds = [];
+$generatedAt = '';
+$freshnessLabel = 'Unknown';
 $bundleMonthCount = 0;
 
 if (is_dir($bundleRoot)) {
@@ -26,7 +26,7 @@ if (is_dir($bundleRoot)) {
         static fn(string $d): bool => (bool) preg_match('/^\d{4}-\d{2}$/', $d)
     );
     $bundleMonthCount = count($months);
-    $latestMonth      = $months !== [] ? array_values($months)[0] : '';
+    $latestMonth = $months !== [] ? array_values($months)[0] : '';
 }
 
 if ($latestMonth !== '') {
@@ -68,9 +68,11 @@ if ($generatedAt !== '') {
 }
 
 $suiteCount = 0;
+$suitesPassed = false;
 if (is_readable($traceFile)) {
     $trace = json_decode((string) file_get_contents($traceFile), true);
     if (is_array($trace)) {
+        $suitesPassed = ($trace['all_passed'] ?? false) === true;
         $raw = $trace['suite_count'] ?? 0;
         $suiteCount = is_int($raw) ? $raw : (int) (is_numeric($raw) ? $raw : 0);
     }
@@ -83,9 +85,11 @@ $controlCount = count($controlIds);
 $currentPage = 'PAGE_TRANSPARENCY';
 $pageTitle = 'SOC 2 Compliance - [PayCal]';
 $pageLabel = 'SOC 2 Compliance';
+$pageMetaDescription = 'PayCal SOC 2 readiness: CC1-CC9 control mapping, evidence bundles, test-control traces, and NDA-gated report access.';
+$pageMetaDescriptionLong = 'PayCal is building toward SOC 2 compliance with CC1-CC9 control mapping, continuous evidence generation, test-control traces, and report access through an NDA request workflow.';
+$pageStylesheets = ['transparency'];
 
 require_once HTML . '/header.php';
-echo PHP_EOL . '<link rel="stylesheet" href="' . \PayCal\Domain\Render::cssURL('transparency') . '">' . PHP_EOL;
 ?>
 <article class="article doc-article">
   <header class="doc-article-header">
@@ -94,6 +98,12 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . \PayCal\Domain\Render::cssURL('
   </header>
 
   <section class="doc-article-body">
+    <section class="doc-section highlight" aria-labelledby="october-evidence-status">
+      <h2 id="october-evidence-status">Evidence review, October 22, 2026</h2>
+      <p>All ten automated test control suites passed in the local verification. Twelve policy and operational records still need review. The evidence freshness gate remains blocked, and SOC 2 readiness is in progress.</p>
+      <p>This dated review does not establish certification, continuous uptime or delivery of alert emails. <a href="https://paycaltech.com/transparency/soc2-readiness-2026-10/">Read the evidence and monitoring update</a>.</p>
+    </section>
+
     <section class="doc-section highlight">
       <h2>Status</h2>
       <ul class="doc-fact-list">
@@ -101,7 +111,7 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . \PayCal\Domain\Render::cssURL('
         <li><strong>Controls:</strong> CC1–CC9 Mapped</li>
         <li><strong>Last Evidence Bundle:</strong> <?php echo htmlspecialchars($latestBundleDate, ENT_QUOTES, 'UTF-8'); ?></li>
         <li><strong>Bundle Generated:</strong> <?php echo htmlspecialchars($freshnessLabel, ENT_QUOTES, 'UTF-8'); ?></li>
-        <li><strong>Daily Schedule:</strong> Active — runs every day at 03:00 UTC</li>
+        <li><strong>Schedule:</strong> Job success must be verified from its latest result</li>
       </ul>
     </section>
 
@@ -110,8 +120,8 @@ echo PHP_EOL . '<link rel="stylesheet" href="' . \PayCal\Domain\Render::cssURL('
       <ul class="doc-fact-list">
         <li><?php echo $artifactCount; ?> evidence artifacts in latest bundle</li>
         <li><?php echo $controlCount; ?> control IDs mapped (<?php echo $bundleMonthCount; ?> monthly bundle<?php echo $bundleMonthCount === 1 ? '' : 's'; ?> on record)</li>
-        <li><?php echo $suiteCount; ?> SOC2-mapped test suite<?php echo $suiteCount === 1 ? '' : 's'; ?> (all passing)</li>
-        <li>Continuous evidence generation — daily automated bundle</li>
+        <li><?php echo $suiteCount; ?> SOC2-mapped test suite<?php echo $suiteCount === 1 ? '' : 's'; ?> (<?php echo $suitesPassed ? 'latest trace reports all passing' : 'passing status not established'; ?>)</li>
+        <li>Automated evidence generation does not replace operational review</li>
       </ul>
     </section>
 
