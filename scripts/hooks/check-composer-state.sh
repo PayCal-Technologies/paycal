@@ -18,13 +18,8 @@ composer validate --strict >/dev/null
 
 paycal_log "pre-commit" "Checking for direct Composer package updates"
 
-# Packages blocked from upgrading due to genuine upstream dependency conflicts.
-# Remove an entry from this list as soon as the conflict is resolved upstream.
-# phpunit/phpunit 13.2.0 requires sebastian/diff ^9 which conflicts with
-# friendsofphp/php-cs-fixer (supports up to sebastian/diff ^8 as of 3.95.x).
-OUTDATED_IGNORE=(
-  "phpunit/phpunit"
-)
+# No direct packages currently require a dependency conflict exception.
+OUTDATED_IGNORE=()
 
 outdated_output="$(composer outdated --direct --strict 2>&1)" || outdated_status=$?
 outdated_status="${outdated_status:-0}"

@@ -95,7 +95,7 @@ Accessibility is product quality and compliance evidence. PayCal treats keyboard
 - Redis-backed state with explicit DB separation for local, test, and production expectations.
 - Browser modules under `html/js/` for calendar, reports, crypto, accessibility, and UI behavior.
 - Business workspace pages under `html/business/` and extension manifests under `html/extensions/`.
-- Vigil provides local policy, README, hook, accessibility, test, and release-support gates.
+- vigil provides local policy, README, hook, accessibility, test, and release-support gates.
 <!-- scribe:architecture:end -->
 
 <!-- scribe:platform-agents:begin -->
@@ -106,7 +106,7 @@ Accessibility is product quality and compliance evidence. PayCal treats keyboard
 | Argus | Scoped diagnostic traces with expiry, redaction, and admin-controlled presets. |
 | Lens | Controlled performance and debugging signals without becoming a plaintext data channel. |
 | EmailGarum | Transactional email for verification, recovery, and account-change flows. |
-| Vigil | Local policy, hook, accessibility, test, release, and repository-health gates. |
+| vigil | Local policy, hook, accessibility, test, release, and repository-health gates. |
 | Scribe | Trust-first README shape and generated README components. |
 | Guardian | TrustedHTML and browser DOM sink governance. |
 | ShadowTalon | Global PHP fault capture and structured failure reporting. |
@@ -141,7 +141,7 @@ Set local environment values in `html/.env`, run Redis/PHP/nginx for the target 
 | Configured PHPUnit files | 290 |
 | Repository PHP test files | 290 |
 | Frontend tests | 23 Playwright specs, 25 JS/MJS files |
-| Static analysis | PHPStan Level 9, ESLint, Vigil policy checks |
+| Static analysis | PHPStan Level 9, ESLint, vigil policy checks |
 
 Suite inventory (as of 2026-08-22):
 

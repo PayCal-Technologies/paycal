@@ -1,6 +1,6 @@
 # GitHub Visibility Plan
 
-This plan adapts the same discoverability work used for Clyde and Vigil to the PayCal public repository while preserving PayCal's proprietary license and privacy-first positioning.
+This plan adapts the same discoverability work used for Clyde and vigil to the PayCal public repository while preserving PayCal's proprietary license and privacy-first positioning.
 
 ## Repository Positioning
 
