@@ -10,11 +10,9 @@
 #   bash scripts/soc2-capture-alert-proof.sh [--force]
 #
 # Why here:
-#   SOC2 GAP-004: "Production alert-delivery proof artifact not yet retained."
-#   CC4 (Monitoring) and CC7 (System Operations) both expect demonstrable
-#   evidence that the alerting pipeline is exercised and that results are
-#   preserved.  This script closes that gap without sending test emails to
-#   real recipients.
+#   Retains endpoint observations for CC4 and CC7 monitoring evidence.
+#   The legacy artifact name is retained for reader compatibility.
+#   This does not test email delivery or close an alert delivery control.
 #
 # Output:
 #   soc2/reports/alert-delivery-proofs/proof-YYYY-MM-DDTHH-MM-SSZ.json

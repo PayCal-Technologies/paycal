@@ -69,10 +69,14 @@ if ($generatedAt !== '') {
 
 $suiteCount = 0;
 $suitesPassed = false;
+$suiteTraceGeneratedAt = '';
 if (is_readable($traceFile)) {
     $trace = json_decode((string) file_get_contents($traceFile), true);
     if (is_array($trace)) {
-        $suitesPassed = ($trace['all_passed'] ?? false) === true;
+        $suiteTraceGeneratedAt = is_string($trace['generated_at_utc'] ?? null) ? $trace['generated_at_utc'] : '';
+        $traceTimestamp = strtotime($suiteTraceGeneratedAt);
+        $traceFresh = $traceTimestamp !== false && $traceTimestamp <= time() && time() - $traceTimestamp <= 35 * 86400;
+        $suitesPassed = ($trace['all_passed'] ?? false) === true && $traceFresh;
         $raw = $trace['suite_count'] ?? 0;
         $suiteCount = is_int($raw) ? $raw : (int) (is_numeric($raw) ? $raw : 0);
     }
@@ -121,6 +125,7 @@ require_once HTML . '/header.php';
         <li><?php echo $artifactCount; ?> evidence artifacts in latest bundle</li>
         <li><?php echo $controlCount; ?> control IDs mapped (<?php echo $bundleMonthCount; ?> monthly bundle<?php echo $bundleMonthCount === 1 ? '' : 's'; ?> on record)</li>
         <li><?php echo $suiteCount; ?> SOC2-mapped test suite<?php echo $suiteCount === 1 ? '' : 's'; ?> (<?php echo $suitesPassed ? 'latest trace reports all passing' : 'passing status not established'; ?>)</li>
+        <li>Trace generated: <?php echo htmlspecialchars($suiteTraceGeneratedAt !== '' ? $suiteTraceGeneratedAt : 'not available', ENT_QUOTES, 'UTF-8'); ?></li>
         <li>Automated evidence generation does not replace operational review</li>
       </ul>
     </section>
