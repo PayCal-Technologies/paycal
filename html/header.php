@@ -398,6 +398,10 @@ echo PageHeadRenderer::renderStylesheets($headContext);
 echo PageHeadRenderer::renderScripts($headContext);
 ?>
 
+<?php if (!$isAuthenticated): ?>
+<link rel="stylesheet" href="/css/public-site.css?v=20261021-2">
+<script nonce="<?php echo htmlspecialchars((string) $cspNonce, ENT_QUOTES, 'UTF-8'); ?>" defer src="/js/public-site.js?v=20261021-2"></script>
+<?php endif; ?>
 </head>
 
 <!-- Go -->

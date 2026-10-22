@@ -1,0 +1,64 @@
+/* Public PayCal website chrome. Uses each site's existing theme tokens. */
+.pc-public-site{--pc-text-scale:1;--pc-surface:var(--color-surface,#161d26);--pc-bg:var(--color-bg,#101820);--pc-ink:var(--color-text,#f2f4f7);--pc-muted:var(--color-text-muted,#c5d2df);--pc-line:var(--color-border-soft,#526273);--pc-accent:var(--color-primary,#83c6ff);font-size:calc(100% * var(--pc-text-scale));scroll-padding-top:100px}
+.pc-public-header,.pc-public-header *,.pc-preferences-panel,.pc-preferences-panel *{box-sizing:border-box}
+.pc-public-header{position:sticky;top:0;z-index:10080;padding:0;width:100%;min-width:0;background:var(--pc-bg);color:var(--pc-ink);border-bottom:1px solid var(--pc-line);transition:transform .18s ease}
+.pc-public-header.is-scroll-hidden{transform:translateY(-100%);pointer-events:none}
+body:has(#page_header.nav_component--public) #page_header.nav_component--header.nav_component--public.pc-public-header{height:auto!important;min-height:76px!important;transform:translateY(0)!important;border-top:0!important;background:var(--pc-bg)!important;color:var(--pc-ink)!important;padding:0!important;z-index:10080!important}
+body:has(#page_header.nav_component--public) #page_header.nav_component--header.nav_component--public.pc-public-header.is-scroll-hidden{transform:translateY(-100%)!important;pointer-events:none}
+.pc-public-header .pc-header-row{position:relative;display:flex;flex-direction:row;align-items:center;gap:12px;width:min(1120px,calc(100% - 48px));min-height:76px;height:auto;margin:0 auto;padding:12px 0;background:transparent;overflow:visible}
+.pc-public-header .pc-brand{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;margin:0 auto 0 0;padding:0;min-height:44px;color:var(--pc-ink);background:transparent;border:0;font:700 1.25rem/1.15 system-ui,sans-serif;text-decoration:none;cursor:pointer}
+.pc-public-header .pc-brand-name{min-width:0;overflow-wrap:anywhere}
+.pc-public-header .pc-brand img{width:32px;height:32px;flex:0 0 32px;object-fit:contain;border-radius:6px}
+.pc-public-header .pc-control,.pc-preferences-panel .pc-control{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:0 0 auto;width:auto;min-width:44px;min-height:44px;margin:0;padding:10px 14px;border:1px solid var(--pc-line);border-radius:10px;background:transparent;color:var(--pc-ink);font:600 14px/1.2 system-ui,sans-serif;cursor:pointer}
+.pc-public-header .pc-preferences{width:44px;padding:10px;border-color:transparent;color:var(--pc-accent)}
+.pc-control svg{width:22px;height:22px;flex:0 0 22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.pc-public-header .pc-control:hover,.pc-public-menu a:hover{background:var(--color-hover,#74859a22)}
+.pc-public-header .pc-public-menu{position:absolute;top:calc(100% + 8px);right:0;width:min(360px,calc(100vw - 32px));max-height:calc(100dvh - 105px);overflow:auto;overscroll-behavior:contain;padding:12px;border:1px solid var(--pc-line);border-radius:14px;background:var(--pc-surface);color:var(--pc-ink);box-shadow:0 16px 40px #0004}
+.pc-public-menu[hidden],.pc-preferences-panel [hidden]{display:none!important}
+.pc-public-menu .pc-menu-links{display:grid;gap:4px;margin:0;padding:0;background:transparent}
+.pc-public-menu .pc-menu-links a,.pc-public-menu .pc-language-links a{display:flex;align-items:center;min-height:44px;margin:0;padding:10px 14px;border:0;border-radius:8px;background:transparent;color:var(--pc-ink);font:500 1rem/1.4 system-ui,sans-serif;text-decoration:none;overflow-wrap:anywhere}
+.pc-public-menu .pc-menu-links a[aria-current=page]{background:var(--color-primary-soft,#74859a22)}
+.pc-public-menu .pc-languages{margin-top:12px;padding-top:12px;border-top:1px solid var(--pc-line)}
+.pc-public-menu .pc-menu-caption{margin:0 12px 8px;color:var(--pc-muted);font:600 .85rem/1.4 system-ui,sans-serif}
+.pc-public-menu .pc-language-links{display:flex;flex-wrap:wrap;gap:4px;margin:0;padding:0}
+.pc-public-menu .pc-language-links a{justify-content:center;min-width:44px;padding:8px;font-size:.85rem}
+.pc-public-menu .pc-language-links a[aria-current],.pc-public-menu .pc-language-links a.is-active{outline:1px solid var(--pc-accent);outline-offset:-1px}
+#pc-preferences-panel{position:fixed;inset:0;width:min(440px,calc(100vw - 32px));min-width:0;max-width:none;height:max-content;max-height:calc(100dvh - 32px);margin:auto;padding:0;overflow:auto;border:1px solid var(--pc-line);border-radius:18px;background:var(--pc-surface);color:var(--pc-ink);box-shadow:0 24px 80px #0008;font:16px/1.6 system-ui,sans-serif}
+#pc-preferences-panel:not([open]){display:none}
+#pc-preferences-panel::backdrop{background:#0009;backdrop-filter:blur(4px)}
+#pc-preferences-panel .pc-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;border-bottom:1px solid var(--pc-line);background:transparent}
+#pc-preferences-panel h2{margin:0;padding:0;color:var(--pc-ink);font:600 24px/1.2 system-ui,sans-serif}
+#pc-preferences-panel .pc-close{width:44px;padding:10px}
+#pc-preferences-panel .pc-dialog-body{display:grid;gap:14px;padding:24px;background:transparent}
+#pc-preferences-panel label{display:block;color:var(--pc-ink);font:600 16px/1.5 system-ui,sans-serif}
+#pc-preferences-panel select{width:100%;min-height:44px;margin:0;padding:8px 12px;border:1px solid var(--pc-line);border-radius:8px;background:var(--pc-bg);color:var(--pc-ink);font:inherit}
+#pc-preferences-panel .pc-size-label{display:flex;justify-content:space-between;gap:16px;margin-top:12px}
+#pc-preferences-panel output{color:var(--pc-muted)}
+#pc-preferences-panel input[type=range]{display:block;position:static;width:100%;height:44px;min-height:44px;margin:0;padding:0;accent-color:var(--pc-accent);cursor:pointer}
+#pc-preferences-panel .pc-reading-preview{padding:16px;border:1px solid var(--pc-line);border-radius:10px;background:var(--pc-bg)}
+#pc-preferences-panel .pc-reading-preview span{font-size:12px;color:var(--pc-muted)}
+#pc-preferences-panel .pc-reading-preview p{margin:8px 0;color:var(--pc-ink);font:calc(20px * var(--pc-text-scale))/1.5 Georgia,serif}
+#pc-preferences-panel .pc-reset{min-height:44px;padding:10px;border:1px solid var(--pc-line);border-radius:9px;background:var(--pc-bg);color:var(--pc-ink);font:inherit;cursor:pointer}
+.pc-reader-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.pc-public-header a:focus-visible,.pc-public-header button:focus-visible,#pc-preferences-panel :is(button,select,input):focus-visible{outline:3px solid var(--pc-accent);outline-offset:3px}
+.pc-built-by{flex-basis:100%;width:100%;margin:20px 0 0;padding:18px 12px;text-align:center;line-height:1.6;font-size:.875rem;overflow-wrap:anywhere}
+.pc-built-by a{color:inherit;font-weight:600;text-underline-offset:.2em}
+.site-footer:has(.pc-built-by){flex-wrap:wrap}
+@media(max-width:600px){.pc-public-header .pc-header-row{width:calc(100% - 32px);gap:8px;min-height:72px;padding:10px 0}.pc-public-header .pc-brand{font-size:1rem;gap:8px}.pc-public-header .pc-brand img{width:28px;height:28px;flex-basis:28px}.pc-public-header .pc-control{padding:10px}.pc-public-header .pc-menu-label{display:none}}
+@media(prefers-reduced-motion:reduce){.pc-public-header{transition:none!important}}
+@media(forced-colors:active){.pc-public-header .pc-control,.pc-public-menu,#pc-preferences-panel{border:1px solid ButtonText}}
+@media print{.pc-public-header,#pc-preferences-panel{display:none!important}}
+.pc-public-site[data-pc-text="100"]{--pc-text-scale:1}
+.pc-public-site[data-pc-text="110"]{--pc-text-scale:1.1}
+.pc-public-site[data-pc-text="120"]{--pc-text-scale:1.2}
+.pc-public-site[data-pc-text="130"]{--pc-text-scale:1.3}
+.pc-public-site[data-pc-text="140"]{--pc-text-scale:1.4}
+.pc-public-site[data-pc-text="150"]{--pc-text-scale:1.5}
+.pc-public-site[data-pc-text="160"]{--pc-text-scale:1.6}
+.pc-public-site[data-pc-text="170"]{--pc-text-scale:1.7}
+.pc-public-site[data-pc-text="180"]{--pc-text-scale:1.8}
+.pc-public-site[data-pc-text="190"]{--pc-text-scale:1.9}
+.pc-public-site[data-pc-text="200"]{--pc-text-scale:2}
+/* Native dialog layout must not inherit the application's modal grid or translation. */
+#pc-preferences-panel[open]{display:block!important;transform:none!important;translate:none!important;animation:none!important}
+#pc-preferences-panel .pc-dialog-head,#pc-preferences-panel .pc-dialog-body{grid-area:auto;position:static;width:100%;height:auto;min-height:0;margin:0;transform:none}

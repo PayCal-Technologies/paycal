@@ -166,6 +166,9 @@ if ($isAuthenticated) {
       </a>
     </div>
     <p class="footer_copyright"><?php echo $i18n['FOOTER_TRADEMARK']; ?></p>
+    <?php if (!$isAuthenticated): ?>
+    <p class="pc-built-by">Built with <span role="img" aria-label="love">❤️</span> by <a href="https://sltd.ca/">Starlit Digital</a></p>
+    <?php endif; ?>
   </footer>
 
   <dialog id="modal_session_timeout" data-dialog-invoker-bridge data-dialog-close-tts="<?php echo htmlspecialchars($i18n['SESSION_TIMEOUT_TITLE'], ENT_QUOTES, 'UTF-8'); ?>" aria-modal="true" aria-labelledby="modal_session_timeout_title" aria-describedby="modal_session_timeout_aria modal_session_timeout_meta">
