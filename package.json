@@ -41,7 +41,7 @@
     "dev:web-vitals": "npm run test:web-vitals"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.11.1",
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.58.2",
     "eslint": "^10.1.0",
     "globals": "^17.4.0",
