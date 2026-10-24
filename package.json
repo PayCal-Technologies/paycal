@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.1",
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "^1.63.0",
     "eslint": "^10.1.0",
     "globals": "^17.4.0",
     "html_codesniffer": "^2.5.1",
