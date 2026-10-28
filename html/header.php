@@ -318,6 +318,11 @@ if (ContentView::isDocPage($currentPage)) {
 -->
 
 <head>
+<?php if (!$isAuthenticated && in_array($currentPage, ['PAGE_ABOUT', 'PAGE_HELP', 'PAGE_CONTACT', 'PAGE_TRANSPARENCY', 'PAGE_POLICIES', 'PAGE_BLOG', 'PAGE_MEDIA', 'PAGE_PRICING', 'PAGE_STATUS'], true) && Environment::appEnv() === 'prod'): ?>
+<link rel="stylesheet" href="/css/site-analytics.css?v=20261016-1">
+<script nonce="<?php echo htmlspecialchars((string) $cspNonce, ENT_QUOTES, 'UTF-8'); ?>" defer src="/js/site-analytics.js?v=20261016-2" data-measurement-id="G-XWS6GR0MLW"></script>
+<?php endif; ?>
+
 
   <!-- Identity -->
 <?php
@@ -370,6 +375,10 @@ echo PageHeadRenderer::renderStylesheets($headContext);
 echo PageHeadRenderer::renderScripts($headContext);
 ?>
 
+<?php if (!$isAuthenticated): ?>
+<link rel="stylesheet" href="/css/public-site.css?v=20261021-2">
+<script nonce="<?php echo htmlspecialchars((string) $cspNonce, ENT_QUOTES, 'UTF-8'); ?>" defer src="/js/public-site.js?v=20261021-2"></script>
+<?php endif; ?>
 </head>
 
 <!-- Go -->

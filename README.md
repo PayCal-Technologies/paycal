@@ -203,3 +203,12 @@ PayCal is proprietary software.
 - Security/contact: security@paycal.app
 <!-- scribe:license-contact:end -->
 <!-- scribe:end -->
+
+
+## Optional public website measurement — 2026-10-16
+
+Public informational pages have consent-gated Google Analytics with standard page
+views only; private/auth/payroll pages remain untagged. Browser privacy signals are
+respected. AI_NOTES_WEBSITE.txt records exact streams, Search Console sitemap/link
+results, source ownership, backups and qualification limits. No product release,
+entitlement or source publication is implied.

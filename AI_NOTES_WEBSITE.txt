@@ -1,0 +1,49 @@
+Google Analytics / Search Console setup — 2026-10-16
+
+Measurement ID: G-XWS6GR0MLW. Existing PayCal Analytics account 306630846 reused.
+- paycal.app property 432408043 / stream 7645688537 reused; existing Search Console domain link dates to 2024-03-26.
+- paycaltech.com property 559327065 / stream 16140342668 created and linked to the existing verified Search Console domain property.
+- Both canonical sitemap.xml URLs submitted through Chrome; Google reports Success, 17 paycal.app pages and 151 paycaltech.com pages.
+
+Source/deployment
+- paycal.app production is paycal-prod:/var/www/paycal/html. paycal-private is development source, not the production webroot. This small additive source change is in both local trees; production private checkout is untouched. No branch changes, commits, pushes or broad promotion performed.
+- paycaltech.com is pct-hostinger:domains/paycaltech.com/public_html. Live header already has unrelated edits, all preserved with digest-guarded patching.
+- header.php includes local js/site-analytics.js and css/site-analytics.css. Nonced script preserves existing CSP; paycaltech connect-src adds exact Google measurement origins. No unsafe-inline/eval or broad https allowance.
+- paycal.app tags only anonymous public informational PAGE_ABOUT/HELP/CONTACT/TRANSPARENCY/POLICIES/BLOG/MEDIA/PRICING/STATUS contexts in prod. Root redirects to auth; auth, register, payroll, signed-in app and admin are deliberately untagged. Some marketing paths redirect to paycaltech.com and are counted there instead.
+- Consent is opt-in per origin; no Google request until allowed, DNT/GPC honored. Query strings/fragments are stripped from page/referrer, no identities/forms/work records sent, ads/signals disabled, host-only six-month cookies. Analytics preferences withdraws consent. Enhanced measurement OFF: standard page views only.
+
+Verification/limits
+- PHP/JS syntax, real public help/pricing responses, no loader on auth, consent state-machine tests and Chrome rendered controls checked. Google receiving live traffic is not yet confirmed; this Chrome profile signals privacy preferences and correctly prevents Google collection. No privacy preference was disabled to manufacture a success.
+- Backups outside webroots in google-metadata-backup-20261016T* on each host. Preserve newer changes during rollback. Voci/validation/google-web-20261016 holds shared receipts.
+- Existing public metadata remains authoritative. Reference comparison applied to Voci, SLTD and Evanswiki with deferred work in their respective AI notes. No app release, price, entitlement or legal-certification claim.
+
+October 21, 2026: Public header, menu, reading preferences and studio credit
+
+Added css/public-site.css and js/public-site.js with version 20261021-2. The
+logo/name and Menu button share a dropdown. Preferences opens a native dialog
+with light, dark or device theme, 100 to 200 percent text size, preview and reset.
+The header hides on downward scrolling and reappears on upward scrolling.
+Existing language destinations and theme controls are retained. The footer says
+Built with a heart emoji by Starlit Digital, linking to https://sltd.ca/.
+
+PayCal loads this presentation only for anonymous visitors. DOM construction is
+compatible with its Trusted Types policy. Existing authentication, payments,
+application settings and CSP remain in place. The corporate site uses the
+existing PayCal calendar icon at apple-touch-icon.png.
+
+The same asset bytes are maintained in paycal/html, paycal-private/html and
+paycaltech. Local header/footer changes are additive because the PayCal source
+checkouts differ from production. Older local appearance placeholders have a
+fallback to existing theme stylesheets and the PayCal_Theme_Mode preference.
+Do not replace production headers with an entire older source file.
+
+Published as a scoped presentation overlay. This is not a ledger qualified
+PayCal application release. Before-images are outside public roots:
+paycal-prod:/var/www/paycal-presentation-backups/header-20261021/before/
+pct-hostinger:domains/paycaltech.com/app_data/deploy-backups/header-20261021/before/
+
+PHP and JS syntax passed. Browser checks covered both menu triggers, Escape,
+preferences, theme persistence, 200% text, desktop and 320px/390px reflow, and
+scroll direction. No authenticated workflow was exercised. Live assets match all
+three source copies. Screenshots and the scoped repository receipt are in
+/Users/cs/Documents/EvansWiki-Starlit-2026-10-21/. No commit or push performed.
