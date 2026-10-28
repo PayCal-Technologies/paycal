@@ -1036,6 +1036,7 @@ final class AccountRecoveryController
     return true;
   }
 
+  /** Has recent passkey step up. */
   private function hasRecentPasskeyStepUp(): bool
   {
     $sessionHash = Authentication::getSessionHashFromCookie();

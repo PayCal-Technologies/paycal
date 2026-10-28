@@ -271,7 +271,7 @@ AUDIO_FEEDBACK Audio-Rückmeldung
 AUDIO_FEEDBACK_USING Audio-Rückmeldung mit
 AUDIO_INTRO_BTN Audio Introduction
 AUDIO_PREFS Audio-Einstellungen
-AUTH_BETA_NOTICE PayCal befindet sich in einer privaten Beta.
+AUTH_BETA_NOTICE PayCal ist in der öffentlichen Beta.
 AUTH_DIVIDER_OR oder
 AUTH_JS_CONFIRM_DEVICE Auf Ihrem Gerät bestätigen…
 AUTH_JS_EMAIL_ALREADY_REGISTERED Diese E-Mail ist bereits registriert. Melden Sie sich stattdessen an.
@@ -1489,11 +1489,11 @@ ERR_TIMEZONE_MISMATCH Timezone mismatch between expected and provided values.
 ERR_UNHANDLED_PAY_FREQUENCY Unhandled pay frequency
 ESCAPE_KEY <kbd>ESC</kbd>
 EXPAND_SIDEBAR Seitenleiste erweitern
-FAQ_A1 Ja. Wir befinden uns derzeit in der privaten Beta-Testphase mit einer öffentlichen Beta, die 2024 gestartet werden soll. Unsere Ziele sind darauf ausgerichtet, die Dinge einfach zu halten, Wert zu bieten und vor allem eine solide Verpflichtung, Ihre Privatsphäre und persönlichen Informationen sicher zu halten. Wir befolgen bewährte Praktiken nach besten Kräften, wie responsives Design, vollständige Barrierefreiheit, Mehrsprachen- und Design-Unterstützung, schnelle und sichere Serververwaltung und vieles mehr.
+FAQ_A1 Ja. PayCal ist in der öffentlichen Beta und Sie können jetzt ein Konto erstellen. Unsere Ziele bleiben gleich: die Dinge einfach halten, Nutzen bieten und Ihre Privatsphäre und persönlichen Daten schützen.
 FAQ_A2 Auf jeden Fall! Wir bieten einen kostenlosen Tarif für alle, die ihre Stundenverdienste aufzeichnen und verfolgen müssen, mit zusätzlichen verwandten Funktionen, die es einfach machen, weitere Einblicke zu gewinnen. Wir möchten diese Serviceebene kostenlos anbieten, weil es wichtig ist, dass jeder so viele Werkzeuge wie möglich hat, um bei der Verwaltung ihrer Arbeit, ihrer Einkommen zu helfen und ihr Leben einfacher zu machen.
 FAQ_A3 Wir planen, unsere erste Million durch ein Abonnement-Modell zu verdienen, das von Unternehmen und Managern bezahlt wird, die noch mehr Kontrolle über ihre Finanzen wünschen. Der Plan ist einfach. Der kostenpflichtige Tarif ist eine monatliche Pauschalgebühr mit Details, die bekannt gegeben werden, sobald wir offiziell für die Öffentlichkeit freigeben.
 FAQ_A4 Absolut! Der Kalender zeigt die aufgezeichneten Stunden pro Tag und Job an. Klicken Sie auf einen Tag, um das Arbeitsdetails-Panel zu öffnen und nach Bedarf anzupassen. Das Dashboard zeigt eine Aufschlüsselung des Jahres nach Monat, Zahlungsperiode und Job.
-FAQ_A5 Obwohl wir derzeit unsere Dienste in 10 Sprachen anbieten, arbeiten wir an mehr! Schauen Sie oft vorbei! Wir wollen bis Ende 2024 weitere 15 hinzufügen, mit Plänen, mit der Zeit mehr hinzuzufügen. Wenn Sie einen Vorschlag haben, sind wir ganz Ohr! Merci! Salamat Po! Danke! :D
+FAQ_A5 PayCal ist in 10 Sprachen verfügbar. Weitere Sprachen können später hinzukommen. Wenn Sie einen Vorschlag haben, möchten wir ihn hören.
 FAQ_A6 Wir bemühen uns, so offen und klar wie möglich über unsere Arbeitsweise zu sein. Wir haben Richtlinien erstellt, die unsere Nutzungsbedingungen, Datenschutzkontrollen und Barrierefreiheitsziele umreißen.
 FAQ_A7 Bitte nutzen Sie unsere Kontaktseite, um sich mit uns in Verbindung zu setzen.
 FAQ_CONTACT_TEXT Wenn Sie weitere Fragen oder Bedenken bezüglich unserer Nutzungsbedingungen haben, zögern Sie bitte nicht, uns zu kontaktieren. Sie können uns kontaktieren unter
@@ -1563,7 +1563,7 @@ FORECAST_WORKERS Workers
 FORECAST_WORKERS_HINT Number of workers with these parameters
 FRENCH Französisch
 FRI Fr
-FRONT_PAGE_BETA_NOTE We are currently in Closed Beta, but keep an eye out for the opportunity to join our Public Beta soon. We are eager to share this fantastic tool with the world.
+FRONT_PAGE_BETA_NOTE PayCal ist in der öffentlichen Beta. Erstellen Sie ein Konto, um Stunden, Zulagen und die geschätzte Bezahlung zu verfolgen.
 FRONT_PAGE_CARD_1_BODY Ever wondered what your paycheck would look like before it hits your bank account? With PayCal, workers can now see their expected earnings for each pay period, putting financial planning right at your fingertips.
 FRONT_PAGE_CARD_1_TITLE Earnings Transparency
 FRONT_PAGE_CARD_2_BODY Forget the hassle of manual record-keeping. Simply enter your total hours each day, and watch as it seamlessly saves into our secure database. No more endless spreadsheets or paperwork.
@@ -1638,7 +1638,7 @@ HELP_FAQ_INTRO_SUFFIX .
 HELP_FAQ_PAGE_LINK FAQ page
 HELP_FAQ_Q1_MIDDLE Also, confirm your pay period settings are accurate in
 HELP_FAQ_Q1_PREFIX A: Ensure your work site's wage and any allowances are correctly entered in
-HELP_FAQ_Q1_SUFFIX PayCal.app calculates regular and overtime hours based on defined thresholds (e.g., 8 hours daily, 44 hours weekly for regular pay), as per the calculate_hours function and constants.
+HELP_FAQ_Q1_SUFFIX PayCal calculates regular and overtime hours from the employment-standards rule for your province or territory. Averaging agreements and some jobs use a different threshold. The free tools pages list the general rule and the official source.
 HELP_FAQ_Q1_TITLE Q: Why are my hours not calculating correctly?
 HELP_FAQ_Q2_TEXT A: You can reset your password through the sign in page. An email/password reset feature is a high-priority item that has already been completed in the development roadmap.
 HELP_FAQ_Q2_TITLE Q: I forgot my password, how do I reset it?

@@ -302,6 +302,15 @@ class Earnings
       $merged['hours'] = (float) $merged['regular_hours'] + (float) $merged['overtime_hours'];
     }
 
+    // Week reconciliation can be newer than the derived values in ciphertext.
+    if (self::numericFloat($row['earnings_snapshot_version'] ?? 0) >= 3) {
+      foreach (['regular_hours', 'overtime_hours', 'doubletime_hours', 'overtime_rate', 'regular_amount', 'overtime_amount', 'doubletime_amount', 'travel_amount', 'living_out_amount', 'gross', 'earnings_snapshot_version'] as $field) {
+        if (array_key_exists($field, $row)) {
+          $merged[$field] = $row[$field];
+        }
+      }
+    }
+
     $hasGrossAfterMerge = isset($merged['gross']) || isset($merged['g']);
     if ($hasGrossAfterMerge) {
       return $merged;
@@ -322,6 +331,12 @@ class Earnings
     $grossCents = Money::dollarsToCents((string) $loa);
     if ($wage !== null) {
       $grossCents += Money::calculateGross($regularHours, $overtimeHours, $wage);
+      $doubleHours = self::numericFloat($merged['doubletime_hours'] ?? 0);
+      $grossCents += (int) round($doubleHours * (float) $wage * 50);
+      $storedOtRate = self::numericFloat($merged['overtime_rate'] ?? 0);
+      if ($storedOtRate > 0) {
+        $grossCents += (int) round(max(0, $overtimeHours - $doubleHours) * ($storedOtRate - (float) $wage * 1.5) * 100);
+      }
       if ($travelHours > 0) {
         $travelPay = $travelHours * (float) $wage;
         $grossCents += Money::dollarsToCents((string) $travelPay);

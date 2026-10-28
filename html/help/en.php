@@ -75,6 +75,12 @@ require_once HTML.'/header.php';
             <p><a class="doc-read-more" href="/help/work-hours/" aria-labelledby="help-card-work-hours help-read-more-work-hours"><span id="help-read-more-work-hours"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></span></a></p>
           </section>
 
+          <section class="doc-section" role="listitem" aria-labelledby="help-card-rotation-pay">
+            <h2 id="help-card-rotation-pay"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_ROTATION_PAY'), ENT_QUOTES, 'UTF-8'); ?></h2>
+            <p><?php echo htmlspecialchars(help_index_i18n('HELP_ROTATION_PAY_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>
+            <p><a class="doc-read-more" href="/help/rotation-pay/"><?php echo htmlspecialchars(help_index_i18n('HELP_READ_MORE'), ENT_QUOTES, 'UTF-8'); ?></a></p>
+          </section>
+
           <section class="doc-section" role="listitem" aria-labelledby="help-card-tax-brackets">
             <h2 id="help-card-tax-brackets"><?php echo htmlspecialchars(help_index_i18n('HELP_TOC_TAX_BRACKETS'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <p><?php echo htmlspecialchars(help_index_i18n('HELP_TAX_BRACKETS_DECK'), ENT_QUOTES, 'UTF-8'); ?></p>

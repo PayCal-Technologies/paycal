@@ -1355,6 +1355,7 @@ class DataGrid
     ];
   }
 
+  /** Resolve toolbar aria label. */
   private function resolveToolbarAriaLabel(): string
   {
     $customLabel = trim(self::toString($this->meta['controlsAriaLabel'] ?? ''));
@@ -1365,6 +1366,7 @@ class DataGrid
     return Strings::i18n('DATAGRID_TOOLBAR_ARIA');
   }
 
+  /** Sanitize class list. */
   private function sanitizeClassList(string $classList): string
   {
     $classes = preg_split('/\s+/', trim($classList));

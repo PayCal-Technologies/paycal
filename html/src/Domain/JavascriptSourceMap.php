@@ -22,6 +22,7 @@ final class JavascriptSourceMap
 
   private static int $generatedLine = 0;
 
+  /** Begin. */
   public static function begin(string $moduleSlug): void
   {
     if (!Environment::isPhpJsSourceMapsEnabled()) {

@@ -289,7 +289,27 @@ final class SecurityTest extends TestCase
 
     $ip = Security::getClientIPAddress();
 
-    $this->assertSame('198.51.100.25', $ip);
+    $this->assertSame('198.51.100.26', $ip);
     putenv('TRUSTED_PROXIES');
+  }
+  #[Test]
+  public function forwardedChainSkipsOnlyExplicitlyTrustedHops(): void
+  {
+    $oldServer = $_SERVER;
+    $oldProxies = getenv('TRUSTED_PROXIES');
+    try {
+      putenv('TRUSTED_PROXIES=192.0.2.1,192.0.2.2');
+      $_SERVER['REMOTE_ADDR'] = '192.0.2.1';
+      $_SERVER['HTTP_X_FORWARDED_FOR'] = '198.51.100.1, 203.0.113.9, 192.0.2.2';
+      self::assertSame('203.0.113.9', Security::getClientIPAddress());
+      $_SERVER['HTTP_X_FORWARDED_FOR'] = 'invalid, 203.0.113.9';
+      $_SERVER['HTTP_CLIENT_IP'] = '198.51.100.1';
+      self::assertSame('192.0.2.1', Security::getClientIPAddress());
+      $_SERVER['HTTP_X_FORWARDED_FOR'] = '192.0.2.2';
+      self::assertSame('192.0.2.1', Security::getClientIPAddress());
+    } finally {
+      $_SERVER = $oldServer;
+      putenv($oldProxies === false ? 'TRUSTED_PROXIES' : 'TRUSTED_PROXIES=' . $oldProxies);
+    }
   }
 }

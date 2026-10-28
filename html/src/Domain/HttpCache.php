@@ -18,6 +18,7 @@ final class HttpCache
 
   private const ONE_YEAR = 31536000;
 
+  /** Send no store. */
   public static function sendNoStore(): void
   {
     if (headers_sent()) {
@@ -104,6 +105,7 @@ final class HttpCache
     }
   }
 
+  /** Has version query. */
   public static function hasVersionQuery(): bool
   {
     $version = $_GET['v'] ?? '';

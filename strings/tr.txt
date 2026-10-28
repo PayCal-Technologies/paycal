@@ -271,7 +271,7 @@ AUDIO_FEEDBACK Ses Geri Bildirimi
 AUDIO_FEEDBACK_USING Ses geri bildirimi kullanılarak
 AUDIO_INTRO_BTN Audio Introduction
 AUDIO_PREFS Ses Tercihleri
-AUTH_BETA_NOTICE PayCal özel beta sürümündedir.
+AUTH_BETA_NOTICE PayCal genel betadadır.
 AUTH_DIVIDER_OR veya
 AUTH_JS_CONFIRM_DEVICE Cihazınızda onaylayın…
 AUTH_JS_EMAIL_ALREADY_REGISTERED Bu e-posta zaten kayıtlı. Bunun yerine giriş yapın.
@@ -1489,11 +1489,11 @@ ERR_TIMEZONE_MISMATCH Timezone mismatch between expected and provided values.
 ERR_UNHANDLED_PAY_FREQUENCY Unhandled pay frequency
 ESCAPE_KEY <kbd>ESCAPE</kbd>
 EXPAND_SIDEBAR Kenar cubugunu genislet
-FAQ_A1 Yes. We are currently in the private beta testing phase with a public beta to be launched in 2024. Our goals are grounded in keeping things simple, offering value and above all a solid commitment to keeping your privacy and personal information safe and sound. We follow best practices to the best of our ability, such as responsive design, full accessibility, multi-language and theme support, fast and secure server management and much more.
+FAQ_A1 Evet. PayCal genel betadadır ve şimdi hesap oluşturabilirsiniz. Hedeflerimiz aynı: işleri basit tutmak, değer sunmak ve gizliliğinizi ile kişisel bilgilerinizi korumak.
 FAQ_A2 Elbette! Saatlik kazançlarını kaydetmek ve takip etmek isteyenler için ek özelliklerle ücretsiz bir katman sunuyoruz. Amacımız herkesin işlerini, kazançlarını yönetmesi ve hayatını kolaylaştırması için mümkün olduğunca çok araç sunmaktır.
 FAQ_A3 İlk milyonumuzu finansları üzerinde daha fazla kontrol isteyen işletmeler ve yöneticiler tarafından ödenen abonelik modeliyle kazanmayı planlıyoruz. Plan basittir. Ücretli katman sabit aylık ücrettir ve detaylar resmi yayınla birlikte duyurulacaktır.
 FAQ_A4 Kesinlikle! Takvim her iş için kaydedilen günlük saatleri gösterir. Gün üzerine tıklayarak çalışma detayları panelini açabilir ve gerektiği gibi ayarlayabilirsiniz. Kontrol paneli yılın ay, ödeme dönemi ve işe göre dağılımını gösterir.
-FAQ_A5 Şu anda hizmetimizi 10 dilde sunuyoruz ancak daha fazla dil üzerinde çalışıyoruz! Sık sık kontrol edin! 2024 sonunda 15 dil daha eklemeyi planlıyoruz ve zamanla daha fazlasını ekleyeceğiz. Öneriniz varsa dinlemeye hazırız! Merci! Salamat Po! Danke! :D
+FAQ_A5 PayCal 10 dilde kullanılabilir. Zamanla başka diller eklenebilir. Bir öneriniz varsa duymak isteriz.
 FAQ_A6 Bu hizmeti nasıl işlettiğimiz konusunda mümkün olduğunca açık ve net olmaya çalışıyoruz. Hizmet şartlarımızı, gizlilik kontrollerimizi ve erişilebilirlik hedeflerimizi içeren politikalar oluşturduk.
 FAQ_A7 Bizimle iletişime geçmek için İletişim sayfamızı kullanın lütfen.
 FAQ_CONTACT_TEXT Kullanım Şartları ve Koşulları ile ilgili başka sorularınız varsa, lütfen çekinmeden bizimle iletişime geçin. Bize ulaşabilirsiniz:
@@ -1563,7 +1563,7 @@ FORECAST_WORKERS Workers
 FORECAST_WORKERS_HINT Number of workers with these parameters
 FRENCH Fransızca
 FRI Cuma
-FRONT_PAGE_BETA_NOTE We are currently in Closed Beta, but keep an eye out for the opportunity to join our Public Beta soon. We are eager to share this fantastic tool with the world.
+FRONT_PAGE_BETA_NOTE PayCal genel betadadır. Saatlerinizi, ödeneklerinizi ve tahmini ücretinizi izlemek için bir hesap oluşturun.
 FRONT_PAGE_CARD_1_BODY Ever wondered what your paycheck would look like before it hits your bank account? With PayCal, workers can now see their expected earnings for each pay period, putting financial planning right at your fingertips.
 FRONT_PAGE_CARD_1_TITLE Earnings Transparency
 FRONT_PAGE_CARD_2_BODY Forget the hassle of manual record-keeping. Simply enter your total hours each day, and watch as it seamlessly saves into our secure database. No more endless spreadsheets or paperwork.
@@ -1638,7 +1638,7 @@ HELP_FAQ_INTRO_SUFFIX .
 HELP_FAQ_PAGE_LINK FAQ page
 HELP_FAQ_Q1_MIDDLE Also, confirm your pay period settings are accurate in
 HELP_FAQ_Q1_PREFIX A: Ensure your work site's wage and any allowances are correctly entered in
-HELP_FAQ_Q1_SUFFIX PayCal.app calculates regular and overtime hours based on defined thresholds (e.g., 8 hours daily, 44 hours weekly for regular pay), as per the calculate_hours function and constants.
+HELP_FAQ_Q1_SUFFIX PayCal calculates regular and overtime hours from the employment-standards rule for your province or territory. Averaging agreements and some jobs use a different threshold. The free tools pages list the general rule and the official source.
 HELP_FAQ_Q1_TITLE Q: Why are my hours not calculating correctly?
 HELP_FAQ_Q2_TEXT A: You can reset your password through the sign in page. An email/password reset feature is a high-priority item that has already been completed in the development roadmap.
 HELP_FAQ_Q2_TITLE Q: I forgot my password, how do I reset it?

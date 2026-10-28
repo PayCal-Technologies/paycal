@@ -96,6 +96,7 @@ class SettingsController
   ];
 
   #[Route('settings/early-access/immediate-ui/enable', ['POST'])]
+  /** Enable immediate ui early access. */
   public function enableImmediateUiEarlyAccess(): void
   {
     $user = UserRepository::getByUUID(User::currentUUID());
@@ -132,6 +133,7 @@ class SettingsController
   }
 
   #[Route('settings/early-access/immediate-ui/disable', ['POST'])]
+  /** Disable immediate ui early access. */
   public function disableImmediateUiEarlyAccess(): void
   {
     $user = UserRepository::getByUUID(User::currentUUID());
@@ -575,8 +577,9 @@ class SettingsController
     }
 
     try {
-      $decoded = json_decode($payloadJson, true, 512, JSON_THROW_ON_ERROR);
-    } catch (\JsonException $e) {
+      \PayCal\Domain\RequestInputBudget::assertBody($payloadJson);
+      $decoded = json_decode($payloadJson, true, 32, JSON_THROW_ON_ERROR);
+    } catch (\JsonException|\RuntimeException $e) {
       Response::error('[SC] Invalid import JSON payload.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }
@@ -645,6 +648,14 @@ class SettingsController
   {
     Authentication::abortIfUnauthenticated();
 
+    $user = UserRepository::getByUUID(User::currentUUID());
+    if ($user && (string) $user->require_reauth_import === '1' && !self::hasRecentPasskeyStepUp()) {
+      Response::error('[SC] Passkey verification required before import.', [
+        'step_up_required' => true,
+      ], HttpStatus::HTTP_FORBIDDEN);
+      return;
+    }
+
     $mutationGate = RedisReliabilityService::allowMutations();
     if ($mutationGate['allowed'] !== true) {
       Response::error(
@@ -689,8 +700,9 @@ class SettingsController
     }
 
     try {
-      $payload = json_decode($payloadJson, true, 512, JSON_THROW_ON_ERROR);
-    } catch (\JsonException $e) {
+      \PayCal\Domain\RequestInputBudget::assertBody($payloadJson);
+      $payload = json_decode($payloadJson, true, \PayCal\Domain\RequestInputBudget::MAX_DEPTH, JSON_THROW_ON_ERROR);
+    } catch (\JsonException|\RuntimeException $e) {
       Response::error('[SC] Import payload decoding failed.', [], HttpStatus::HTTP_BAD_REQUEST);
       return;
     }

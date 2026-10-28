@@ -2,11 +2,11 @@
 
 namespace Tests\Unit;
 
+use PayCal\Domain\Extensions\HookBus;
+use PayCal\Infrastructure\Telemetry\SecurityLog;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PayCal\Domain\Extensions\HookBus;
-use PayCal\Infrastructure\Telemetry\SecurityLog;
 
 /**
  * @internal
@@ -14,12 +14,34 @@ use PayCal\Infrastructure\Telemetry\SecurityLog;
 #[Group('unit')]
 final class SecurityLogTest extends TestCase
 {
+  private string $originalAppEnv;
+
+  protected function setUp(): void
+  {
+    parent::setUp();
+    $property = new \ReflectionProperty(\PayCal\Domain\Config\Environment::class, 'appEnv');
+    $this->originalAppEnv = $property->getValue();
+    $property->setValue(null, 'mac');
+  }
+
+  protected function tearDown(): void
+  {
+    (new \ReflectionProperty(\PayCal\Domain\Config\Environment::class, 'appEnv'))->setValue(null, $this->originalAppEnv);
+    parent::tearDown();
+  }
+
+  /**
+   * Set up before class for the test fixture.
+   */
   public static function setUpBeforeClass(): void
   {
     require_once __DIR__ . '/../../extensions/runtime.php';
   }
 
   #[Test]
+  /**
+   * Log rate limit triggered does not throw.
+   */
   public function logRateLimitTriggeredDoesNotThrow(): void
   {
     $this->expectNotToPerformAssertions();
@@ -28,6 +50,9 @@ final class SecurityLogTest extends TestCase
   }
 
   #[Test]
+  /**
+   * Log dispatches security audit event hook.
+   */
   public function logDispatchesSecurityAuditEventHook(): void
   {
     $ref = new \ReflectionProperty(HookBus::class, 'listeners');

@@ -35,6 +35,23 @@ final class CrawlPolicy
     '/security/',
     '/soc2/',
     '/status/',
+    '/help/rotation-pay/',
+    '/tools/',
+    '/tools/next-cheque/',
+    '/tools/pay-right/alberta/',
+    '/tools/pay-right/british-columbia/',
+    '/tools/pay-right/manitoba/',
+    '/tools/pay-right/new-brunswick/',
+    '/tools/pay-right/newfoundland-and-labrador/',
+    '/tools/pay-right/northwest-territories/',
+    '/tools/pay-right/nova-scotia/',
+    '/tools/pay-right/nunavut/',
+    '/tools/pay-right/ontario/',
+    '/tools/pay-right/prince-edward-island/',
+    '/tools/pay-right/quebec/',
+    '/tools/pay-right/saskatchewan/',
+    '/tools/pay-right/yukon/',
+
     '/transparency/',
     '/verify/',
   ];
@@ -108,6 +125,7 @@ final class CrawlPolicy
     'PAGE_SIGNIN',
     'PAGE_SOC2',
     'PAGE_STATUS',
+    'PAGE_TOOLS',
     'PAGE_TRANSPARENCY',
     'PAGE_VERIFY',
   ];
@@ -145,6 +163,7 @@ final class CrawlPolicy
     return in_array($currentPage, self::PUBLIC_MARKETING_PAGE_IDS, true);
   }
 
+  /** Render robots txt. */
   public static function renderRobotsTxt(): string
   {
     if (!Environment::allowsPublicIndexing()) {
@@ -154,6 +173,7 @@ final class CrawlPolicy
     return self::renderProductionRobotsTxt();
   }
 
+  /** Render sitemap xml. */
   public static function renderSitemapXml(): string
   {
     if (!Environment::allowsPublicIndexing()) {

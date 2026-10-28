@@ -6,6 +6,7 @@ use PayCal\Domain\Constants\Keys;
 use PayCal\Infrastructure\Telemetry\SecurityLog;
 use Stripe\StripeClient;
 use Stripe\Webhook;
+use Stripe\WebhookSignature;
 
 /**
  * StripeBillingService.php
@@ -855,9 +856,8 @@ final class StripeBillingService
   /**
    * Queue a Stripe webhook payload for asynchronous processing.
    *
-   * Signature is pre-validated (timestamp freshness + HMAC format) before the
-   * payload is queued. Full cryptographic verification happens during drain.
-   * This rejects garbage at the door and keeps the queue small.
+   * Signature authenticity is verified before admission. Full event validation
+   * also runs during drain. Capacity refusal preserves already accepted work.
    *
    * @return array{success: bool, message: string, data: array<string, mixed>}
    */
@@ -889,6 +889,18 @@ final class StripeBillingService
       return $this->fail('Stripe-Signature header failed pre-validation.');
     }
 
+    $webhookSecret = $this->requireEnv('STRIPE_WEBHOOK_SECRET');
+    if ($webhookSecret === '') {
+      $this->recordWebhookFailure('webhook_secret_missing', $payloadContext + $signatureContext);
+      return $this->fail('Webhook verification is not configured.');
+    }
+    try {
+      WebhookSignature::verifyHeader($payload, $signatureHeader, $webhookSecret, self::WEBHOOK_TIMESTAMP_TOLERANCE_SECONDS);
+    } catch (\Throwable) {
+      $this->recordWebhookFailure('signature_verification_failed', $payloadContext + $signatureContext);
+      return $this->fail('Stripe-Signature header failed verification.');
+    }
+
     $envelope = [
       'payload' => $payload,
       'signature' => $signatureHeader,
@@ -904,12 +916,25 @@ final class StripeBillingService
     }
 
     try {
-      Database::multi(function ($redis) use ($encoded): void {
-        $redis->lPush(Keys::BILLING_WEBHOOK_QUEUE, $encoded);
-        $redis->lTrim(Keys::BILLING_WEBHOOK_QUEUE, 0, self::WEBHOOK_QUEUE_MAX_ITEMS - 1);
-      });
-
-      $queueDepth = Database::llen(Keys::BILLING_WEBHOOK_QUEUE);
+      // Admission must be atomic: Database::multi uses a pipeline, not MULTI.
+      $script = <<<'LUA'
+if redis.call('LLEN', KEYS[1]) >= tonumber(ARGV[2]) then
+  return 0
+end
+return redis.call('LPUSH', KEYS[1], ARGV[1])
+LUA;
+      $queueDepth = Database::getWriteInstance()->client->eval(
+        $script,
+        [Keys::BILLING_WEBHOOK_QUEUE, $encoded, (string) self::WEBHOOK_QUEUE_MAX_ITEMS],
+        1,
+      );
+      if ($queueDepth === 0) {
+        $this->recordWebhookFailure('queue_capacity', $payloadContext + $signatureContext);
+        return $this->fail('Webhook queue is at capacity; retry delivery.');
+      }
+      if (!is_int($queueDepth) || $queueDepth < 1) {
+        throw new \RuntimeException('Webhook queue admission failed.');
+      }
       $this->recordWebhookOutcome('queued', $payloadContext + $signatureContext + [
         'queue_depth' => (string) $queueDepth,
       ]);

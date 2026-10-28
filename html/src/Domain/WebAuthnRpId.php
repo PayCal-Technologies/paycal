@@ -21,6 +21,7 @@ final class WebAuthnRpId
     '127.0.0.1',
   ];
 
+  /** Resolve. */
   public static function resolve(): string
   {
     $override = Environment::webauthnRpId();
@@ -50,6 +51,7 @@ final class WebAuthnRpId
     return self::LOCAL_DEV_RP_ID_HOSTS;
   }
 
+  /** Effective host. */
   private static function effectiveHost(): string
   {
     $requestHost = FederatedAuth::requestHost();

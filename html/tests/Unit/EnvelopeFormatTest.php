@@ -2,7 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 use PayCal\Domain\Encryption\EnvelopeFormat;
-use PayCal\Domain\InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -31,5 +30,23 @@ final class EnvelopeFormatTest extends TestCase
   {
     $this->expectException(InvalidArgumentException::class);
     EnvelopeFormat::validateOrThrow(['foo' => 'bar']);
+  }
+  public function testNestedAndWideEnvelopeExtensionsAreRejectedBeforeDecode(): void
+  {
+    $base = '{"version":1,"nonce":"nonce","ciphertext":"ciphertext","extra":';
+    foreach ([$base . str_repeat('[', 33) . '0' . str_repeat(']', 33) . '}', $base . '[' . str_repeat('[],', 6000) . '[]]}'] as $json) {
+      try {
+        EnvelopeFormat::fromJson($json);
+        self::fail('Unbounded envelope accepted.');
+      } catch (\InvalidArgumentException) {
+        self::addToAssertionCount(1);
+      }
+    }
+  }
+
+  public function testNormalEnvelopeExtensionsAndNumericKeysRemainCompatible(): void
+  {
+    $json = '{"version":1,"nonce":"nonce","ciphertext":"ciphertext","aad":null,"extra":{"legacy":true},"1":"numeric"}';
+    self::assertSame(json_decode($json, true), EnvelopeFormat::fromJson($json));
   }
 }

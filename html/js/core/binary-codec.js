@@ -39,19 +39,26 @@ export function toBase64(bytes) {
   if (hasNativeBase64) {
     return view.toBase64();
   }
-  return btoa(String.fromCharCode(...view));
+  let binary = '';
+  for (let offset = 0; offset < view.length; offset += 8192) {
+    binary += String.fromCharCode(...view.subarray(offset, offset + 8192));
+  }
+  return btoa(binary);
 }
 
 export function fromHex(hex) {
   const value = String(hex ?? '');
+  if (value.length % 2 !== 0) {
+    throw new RangeError('Hex input must have an even number of characters');
+  }
+  if (/[^0-9a-f]/i.test(value)) {
+    throw new SyntaxError('Hex input contains invalid characters');
+  }
   if (hasNativeHex) {
     return Uint8Array.fromHex(value);
   }
 
-  const normalized = value.trim();
-  if (normalized.length % 2 !== 0) {
-    throw new RangeError('Hex input must have an even number of characters');
-  }
+  const normalized = value;
 
   const output = new Uint8Array(normalized.length / 2);
   for (let index = 0; index < output.length; index += 1) {

@@ -116,6 +116,7 @@ final class BusinessDiscoveryController
     return self::filterBusinessPost(['csrf_token'], [], $droppedKeys) !== false;
   }
 
+  /** Promote business csrf header. */
   private static function promoteBusinessCsrfHeader(): void
   {
     if (isset($_POST['csrf_token']) && is_scalar($_POST['csrf_token']) && trim((string) $_POST['csrf_token']) !== '') {

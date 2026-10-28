@@ -493,6 +493,10 @@ $variant = $defaultVariant;
 if (isset($user->variant) && in_array($user->variant, $allowedVariants, true)) {
   $variant = $user->variant;
 }
+$themeModeCookie = strtolower(trim((string) ($_COOKIE['PayCal_Theme_Mode'] ?? '')));
+if (Authentication::getCookie() === '' && in_array($themeModeCookie, $allowedVariants, true)) {
+  $variant = $themeModeCookie;
+}
 $resolvedTheme = "{$base}_{$variant}";
 
 require_once __DIR__ . "/../tokens/index.php";

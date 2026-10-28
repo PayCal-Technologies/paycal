@@ -27,6 +27,7 @@ import { setActionBusy } from '/js/core/actions.js';
 import {
   PAYCAL_EMAIL_SECRET_LENGTH,
   PAYCAL_RECOVERY_SECRET_LENGTH,
+  PAYCAL_LEGACY_RECOVERY_SECRET_LENGTH,
   formatRecoveryCode,
   formatVerificationCode,
   getPayCalCodeValidationState,
@@ -68,7 +69,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
   const RECOVERY_T = <?php echo json_encode($recoveryI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
   const WEB_AUTHN_UNSUPPORTED_MESSAGE = RECOVERY_T.AUTH_JS_WEBAUTHN_UNSUPPORTED;
   const LEGACY_RECOVERY_LENGTH = 52;
-  const CROCKFORD_ALPHABET = '0123456789ABCDEFGHJKMNPQRTVWXYZ';
+  const CROCKFORD_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
   function recoveryKeyBlockVisible() {
     return Boolean(recoveryKeyBlock && !recoveryKeyBlock.classList.contains('is-hidden'));
@@ -86,7 +87,7 @@ import { formatTemplate as formatRecoveryMessage } from '/js/core/template.js';
   function getRecoveryKeyValidationState(value) {
     const normalized = normalizePayCalCode(value);
     const paycalState = getPayCalCodeValidationState(value, PAYCAL_RECOVERY_SECRET_LENGTH);
-    if (paycalState === 'valid') {
+    if (paycalState === 'valid' || getPayCalCodeValidationState(value, PAYCAL_LEGACY_RECOVERY_SECRET_LENGTH) === 'valid') {
       return 'valid';
     }
     if (normalized.length === 0) {

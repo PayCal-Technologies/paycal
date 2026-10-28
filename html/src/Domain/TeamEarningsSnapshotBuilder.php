@@ -556,6 +556,7 @@ final class TeamEarningsSnapshotBuilder
     return $groupRollups;
   }
 
+  /** Float value. */
   private static function floatValue(mixed $value, float $default = 0.0): float
   {
     if (is_int($value) || is_float($value)) {
@@ -569,6 +570,7 @@ final class TeamEarningsSnapshotBuilder
     return $default;
   }
 
+  /** Int value. */
   private static function intValue(mixed $value, int $default = 0): int
   {
     if (is_int($value)) {
@@ -586,6 +588,7 @@ final class TeamEarningsSnapshotBuilder
     return $default;
   }
 
+  /** String value. */
   private static function stringValue(mixed $value, string $default = ''): string
   {
     if (is_string($value)) {

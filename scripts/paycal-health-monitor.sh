@@ -6,59 +6,36 @@
 
 set -euo pipefail
 
-RECIPIENT="cshaiku@gmail.com"
-FROM_ADDR="alerts@paycal.app"
+RECIPIENT="${PAYCAL_HEALTH_ALERT_RECIPIENT:-cshaiku@gmail.com}"
 STATE_FILE="/tmp/paycal-health-monitor.state"
 HOSTNAME="$(hostname -f 2>/dev/null || hostname)"
 NOW_UTC="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-
-check_url() {
-  local name="$1"
-  local url="$2"
-  local code
-
-  if ! code=$(curl -ksS --connect-timeout 8 --max-time 20 -o /dev/null -w "%{http_code}" "$url" 2>/dev/null); then
-    echo "$name|$url|CURL_ERROR"
-    return
-  fi
-
-  echo "$name|$url|$code"
-}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PHP_BIN="${PHP_BIN:-/usr/bin/php}"
 
 send_email() {
   local subject="$1"
   local body="$2"
 
-  {
-    echo "From: $FROM_ADDR"
-    echo "To: $RECIPIENT"
-    echo "Subject: $subject"
-    echo "Date: $(date -R)"
-    echo
-    printf "%b\n" "$body"
-  } | /usr/bin/msmtp -t
+  printf "%b\n" "$body" | "$PHP_BIN" "$SCRIPT_DIR/send-operational-email.php" \
+    --to "$RECIPIENT" \
+    --subject "$subject"
 }
 
-RESULTS=(
-  "$(check_url "prod-home" "https://paycal.app/")"
-  "$(check_url "prod-css" "https://paycal.app/css/")"
-  "$(check_url "prod-api-root" "https://paycal.app/api/")"
-  "$(check_url "dev-home" "https://dev.paycal.app/")"
-)
-
+PROBE_REPORT="$(python3 "${SCRIPT_DIR}/paycal-http-probes.py")"
+RESULTS=()
 FAILURES=()
-for item in "${RESULTS[@]}"; do
-  IFS='|' read -r name url code <<< "$item"
-
-  if [[ "$code" == "CURL_ERROR" ]]; then
-    FAILURES+=("$name $url -> CURL_ERROR")
-    continue
+while IFS='|' read -r name url code result; do
+  RESULTS+=("$name|$url|$code|$result")
+  if [[ "$result" != "OK" && "$result" != "EXPECTED_MAINTENANCE" ]]; then
+    FAILURES+=("$name $url -> $code $result")
   fi
+done < <(printf '%s' "$PROBE_REPORT" | python3 -c 'import json,sys; [print("|".join(str(p[k]) for k in ("endpoint","url","http_code","result"))) for p in json.load(sys.stdin)["probes"]]')
 
-  if [[ "$code" =~ ^5 ]]; then
-    FAILURES+=("$name $url -> HTTP $code")
-  fi
-done
+if [[ "${1:-}" == "--dry-run" ]]; then
+  printf '%s\n' "$PROBE_REPORT"
+  exit 0
+fi
 
 CURRENT_STATE="ok"
 if [[ ${#FAILURES[@]} -gt 0 ]]; then

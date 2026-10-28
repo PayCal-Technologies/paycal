@@ -1,5 +1,6 @@
 export const PAYCAL_A11Y_ALPHABET = 'ABCDEFGHJKLMNPQRTUWXYZ346789';
-export const PAYCAL_RECOVERY_SECRET_LENGTH = 12;
+export const PAYCAL_RECOVERY_SECRET_LENGTH = 28;
+export const PAYCAL_LEGACY_RECOVERY_SECRET_LENGTH = 12;
 export const PAYCAL_EMAIL_SECRET_LENGTH = 4;
 
 export function normalizePayCalCode(input) {
@@ -96,20 +97,20 @@ export function bindGroupedCodeInput(input, options = {}) {
 }
 
 export function formatRecoveryCode(value) {
-  const normalized = normalizePayCalCode(value).slice(0, PAYCAL_RECOVERY_SECRET_LENGTH + 2);
-  if (normalized.length <= 6) {
-    return normalized;
-  }
-  if (normalized.length <= 12) {
-    return `${normalized.slice(0, 6)}-${normalized.slice(6)}`;
-  }
-  return `${normalized.slice(0, 6)}-${normalized.slice(6, 12)}-${normalized.slice(12)}`;
+  const normalized = normalizePayCalCode(value).slice(0, 52);
+  const groups = normalized.length > PAYCAL_RECOVERY_SECRET_LENGTH + 2 ? /.{1,4}/g : /.{1,6}/g;
+  return normalized.match(groups)?.join('-') || normalized;
 }
 
 export function recoverySecretMaterial(recoveryCode) {
   const normalized = normalizePayCalCode(recoveryCode);
-  if (!validatePayCalCode(normalized, PAYCAL_RECOVERY_SECRET_LENGTH)) {
-    throw new Error('Invalid recovery code');
+  for (const length of [PAYCAL_RECOVERY_SECRET_LENGTH, PAYCAL_LEGACY_RECOVERY_SECRET_LENGTH]) {
+    if (validatePayCalCode(normalized, length)) return normalized.slice(0, length);
   }
-  return normalized.slice(0, PAYCAL_RECOVERY_SECRET_LENGTH);
+  throw new Error('Invalid recovery code');
+}
+
+export function validateRecoveryCode(value) {
+  return validatePayCalCode(value, PAYCAL_RECOVERY_SECRET_LENGTH)
+    || validatePayCalCode(value, PAYCAL_LEGACY_RECOVERY_SECRET_LENGTH);
 }

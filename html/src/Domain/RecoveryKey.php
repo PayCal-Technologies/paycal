@@ -143,7 +143,7 @@ final class RecoveryKey
    */
   public static function format(string $encoded): string
   {
-    if (strlen(self::normalize($encoded)) === PayCalCode::RECOVERY_TOTAL_LENGTH) {
+    if (in_array(strlen(self::normalize($encoded)), [PayCalCode::RECOVERY_TOTAL_LENGTH, PayCalCode::LEGACY_RECOVERY_SECRET_LENGTH + 2], true)) {
       return PayCalCode::formatRecoveryCode($encoded);
     }
 
@@ -164,7 +164,7 @@ final class RecoveryKey
 
   public static function secretMaterial(string $input): string
   {
-    if (PayCalCode::validate($input, PayCalCode::RECOVERY_SECRET_LENGTH)) {
+    if (PayCalCode::isRecoveryCode($input)) {
       return PayCalCode::recoverySecretMaterial($input);
     }
 
@@ -320,7 +320,7 @@ final class RecoveryKey
     try {
       $normalized = self::normalize($input);
 
-      if (PayCalCode::validate($normalized, PayCalCode::RECOVERY_SECRET_LENGTH)) {
+      if (PayCalCode::isRecoveryCode($normalized)) {
         return true;
       }
       

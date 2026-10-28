@@ -249,7 +249,7 @@ AUDIO_FEEDBACK Retour audio
 AUDIO_FEEDBACK_USING Retour audio utilisant
 AUDIO_INTRO_BTN Audio Introduction
 AUDIO_PREFS Préférences audio
-AUTH_BETA_NOTICE PayCal est en bta priv.
+AUTH_BETA_NOTICE PayCal est en bêta publique.
 AUTH_DIVIDER_OR ou
 AUTH_JS_CONFIRM_DEVICE Confirmez sur votre appareil…
 AUTH_JS_CONNECT_FAILED Impossible de se connecter à PayCal.
@@ -2171,11 +2171,11 @@ ERROR_USERNAME_EMPTY Le champ nom d\'utilisateur était vide. Veuillez réessaye
 ERROR_USERNAME_TAKEN Désolé, ce nom d\'utilisateur est déjà pris. Veuillez réessayer.
 ESCAPE_KEY <kbd>ÉCHAP</kbd>
 EXPAND_SIDEBAR Developper la barre laterale
-FAQ_A1 Oui. Nous sommes actuellement en phase de tests bêta privés avec une bêta publique prévue pour 2024. Nos objectifs sont ancrés dans la simplicité, l\'offre de valeur et avant tout un engagement solide à garder votre vie privée et vos informations personnelles en sécurité. Nous suivons les meilleures pratiques au mieux de nos capacités, comme la conception responsive, l\'accessibilité complète, le support multilingue et de thèmes, la gestion de serveur rapide et sécurisée et bien plus encore.
+FAQ_A1 Oui. PayCal est en bêta publique et vous pouvez créer un compte maintenant. Nos objectifs restent les mêmes : garder les choses simples, offrir de la valeur et protéger votre vie privée et vos renseignements personnels. Nous suivons des pratiques solides, comme la conception adaptée, l'accessibilité, le soutien de plusieurs langues et thèmes, et une gestion de serveur rapide et sûre.
 FAQ_A2 Bien sûr ! Nous offrons un niveau gratuit pour quiconque ayant besoin d\'enregistrer et de suivre ses gains horaires avec des fonctionnalités supplémentaires qui facilitent l\'obtention d\'insights supplémentaires. Nous voulons offrir ce niveau de service gratuitement car il est important que tout le monde ait autant d\'outils que possible pour aider à gérer son travail, ses gains et rendre sa vie plus facile.
 FAQ_A3 Nous prévoyons de faire notre premier million grâce à un modèle d\'abonnement payé par les entreprises et les managers désirant encore plus de contrôle sur leurs finances. Le plan est simple. Le niveau payant est un tarif mensuel fixe avec des détails à annoncer une fois que nous sortirons officiellement au public.
 FAQ_A4 Absolument ! Le calendrier affiche chaque jour les heures enregistrées par emploi. Cliquez sur un jour pour faire apparaître le panneau Détails du travail à ajuster selon les besoins. Le tableau de bord montre une ventilation de l\'année par mois, période de paie et emploi.
-FAQ_A5 Même si nous fournissons actuellement nos services en 10 langues, nous en développons plus ! Revenez souvent ! Nous visons à fournir 15 langues supplémentaires d\'ici la fin de 2024, avec des plans pour en ajouter plus au fil du temps. Si vous avez une suggestion, nous sommes tout ouïe ! Merci ! Salamat Po ! Danke ! :D
+FAQ_A5 PayCal est offert en 10 langues. D'autres langues pourront s'ajouter. Si vous avez une suggestion, nous voulons l'entendre.
 FAQ_A6 Nous nous efforçons d\'être aussi ouverts et clairs que possible sur la façon dont nous exploitons ce service. Nous avons créé des politiques décrivant nos conditions d\'utilisation, contrôles de confidentialité et objectifs d\'accessibilité.
 FAQ_A7 Veuillez utiliser notre page Contact pour nous contacter.
 FAQ_CONTACT_TEXT Si vous avez d\'autres questions ou préoccupations concernant nos Conditions d\'utilisation, n\'hésitez pas à nous contacter. Vous pouvez nous contacter à
@@ -2245,7 +2245,7 @@ FORECAST_WORKERS Workers
 FORECAST_WORKERS_HINT Number of workers with these parameters
 FRENCH Français
 FRI Ven
-FRONT_PAGE_BETA_NOTE We are currently in Closed Beta, but keep an eye out for the opportunity to join our Public Beta soon. We are eager to share this fantastic tool with the world.
+FRONT_PAGE_BETA_NOTE PayCal est en bêta publique. Créez un compte pour suivre vos heures, vos indemnités et votre paie estimée.
 FRONT_PAGE_CARD_1_BODY Ever wondered what your paycheck would look like before it hits your bank account? With PayCal, workers can now see their expected earnings for each pay period, putting financial planning right at your fingertips.
 FRONT_PAGE_CARD_1_TITLE Earnings Transparency
 FRONT_PAGE_CARD_2_BODY Forget the hassle of manual record-keeping. Simply enter your total hours each day, and watch as it seamlessly saves into our secure database. No more endless spreadsheets or paperwork.
@@ -2320,7 +2320,7 @@ HELP_FAQ_INTRO_SUFFIX .
 HELP_FAQ_PAGE_LINK FAQ page
 HELP_FAQ_Q1_MIDDLE Also, confirm your pay period settings are accurate in
 HELP_FAQ_Q1_PREFIX A: Ensure your work site's wage and any allowances are correctly entered in
-HELP_FAQ_Q1_SUFFIX PayCal.app calculates regular and overtime hours based on defined thresholds (e.g., 8 hours daily, 44 hours weekly for regular pay), as per the calculate_hours function and constants.
+HELP_FAQ_Q1_SUFFIX PayCal calcule les heures régulières et supplémentaires selon la règle des normes du travail de votre province ou territoire. Les ententes d'étalement et certains emplois utilisent un autre seuil. Les pages d'outils gratuits indiquent la règle générale et la source officielle.
 HELP_FAQ_Q1_TITLE Q: Why are my hours not calculating correctly?
 HELP_FAQ_Q2_TEXT A: You can reset your password through the sign in page. An email/password reset feature is a high-priority item that has already been completed in the development roadmap.
 HELP_FAQ_Q2_TITLE Q: I forgot my password, how do I reset it?
@@ -4767,3 +4767,112 @@ REPORTS_PRINT_MODE_COLOR_DESC Preserves report chart colors while keeping page b
 SETTINGS_ACCENT_PREVIEW_ARIA Accent preview
 SETTINGS_TEXT_SIZE_SLIDER_ARIA Text size adjustment
 SETTINGS_SPACING_SLIDER_ARIA Spacing adjustment
+
+TOOLS_INDEX_TITLE Outils de paie gratuits
+TOOLS_INDEX_DESCRIPTION Outils gratuits pour estimer le prochain chèque et vérifier les normes du travail de votre province ou territoire. Aucun compte n'est requis.
+TOOLS_INDEX_DECK Vérifiez une estimation de paie et les règles générales des normes du travail de votre province ou territoire. Aucun compte n'est requis.
+TOOLS_NEXT_CHEQUE_TITLE Prochain chèque
+TOOLS_NEXT_CHEQUE_DECK Estimez un chèque à partir des heures, du déplacement et d'une indemnité de vie à l'extérieur, avec les tables d'impôt de PayCal.
+TOOLS_NEXT_CHEQUE_DESCRIPTION Estimez un chèque de paie canadien avec l'impôt fédéral et provincial, le RPC ou le RRQ, et l'assurance-emploi. Le salaire de vacances est indiqué à part.
+TOOLS_OPEN_CALCULATOR Ouvrir le calculateur du prochain chèque
+TOOLS_PAY_RIGHT_HEADING Ma paie est-elle juste?
+TOOLS_PAY_RIGHT_LINK_PREFIX Ma paie est-elle juste :
+TOOLS_PAY_RIGHT_TITLE Ma paie est-elle juste
+TOOLS_PAY_RIGHT_DESCRIPTION Règles générales sur le temps supplémentaire, le salaire de vacances et les jours fériés, avec un lien vers la source officielle.
+TOOLS_FEDERAL_TITLE Travail de compétence fédérale
+TOOLS_SIGNUP_TITLE Suivez ceci dans PayCal
+TOOLS_SIGNUP_NOTE Créez un compte gratuit pour enregistrer vos heures, vos rotations, vos indemnités et vos estimations dans votre calendrier.
+TOOLS_SIGNUP_CTA Créer un compte gratuit
+TOOLS_DISCLAIMER Ces pages donnent de l'information générale et des estimations. Elles ne sont pas un avis juridique, fiscal ou de paie. Un contrat, une convention collective ou une entente d'étalement peut prévoir une autre règle. Confirmez la règle actuelle à la source officielle indiquée sur la page.
+TOOLS_PROVINCE Province ou territoire
+TOOLS_TAX_YEAR Année d'imposition
+TOOLS_PAY_PERIODS Chèques dans une année
+TOOLS_PERIOD_WEEKLY Chaque semaine (52)
+TOOLS_PERIOD_BIWEEKLY Toutes les deux semaines (26)
+TOOLS_PERIOD_SEMIMONTHLY Deux fois par mois (24)
+TOOLS_PERIOD_MONTHLY Chaque mois (12)
+TOOLS_HOURLY_WAGE Taux horaire en dollars
+TOOLS_REGULAR_HOURS Heures régulières sur ce chèque
+TOOLS_OVERTIME_HOURS Heures supplémentaires sur ce chèque
+TOOLS_DOUBLETIME_HOURS Heures au taux double sur ce chèque, payées à 2 fois
+TOOLS_TRAVEL_HOURS Heures de déplacement sur ce chèque, payées au taux régulier
+TOOLS_ALLOWANCE Indemnité de vie à l'extérieur sur ce chèque, en dollars
+TOOLS_YEARS_OF_SERVICE Années de service pour le salaire de vacances
+TOOLS_CALCULATE Calculer
+TOOLS_RESULT_TITLE Estimation pour ce chèque
+TOOLS_REGULAR_PAY Paie régulière
+TOOLS_OVERTIME_PAY Paie supplémentaire
+TOOLS_DOUBLETIME_PAY Paie au taux double
+TOOLS_TRAVEL_PAY Paie de déplacement
+TOOLS_GROSS Brut
+TOOLS_ESTIMATED_TAX Impôt et retenues estimés
+TOOLS_ESTIMATED_NET Net estimé
+TOOLS_VACATION_ACCRUAL Salaire de vacances accumulé, non compris dans le net
+TOOLS_VACATION_VERIFIED Le pourcentage de vacances a été vérifié avec la page officielle indiquée dans le guide de la province.
+TOOLS_VACATION_UNVERIFIED Le pourcentage de vacances est un résumé de travail. Confirmez-le sur la page officielle indiquée dans le guide de la province avant de vous y fier.
+TOOLS_TAX_NOTE L'impôt est l'estimation des tables de PayCal pour une année de chèques comme celui-ci, ramenée à un seul chèque. Ce n'est pas une retenue de paie de l'ARC.
+TOOLS_OVERTIME_HEADING Temps supplémentaire
+TOOLS_VACATION_HEADING Salaire de vacances
+TOOLS_HOLIDAY_HEADING Jours fériés
+TOOLS_EFFECTIVE En vigueur
+TOOLS_FROM_YEARS à partir de
+TOOLS_SOURCE_VERIFIED Cette règle de vacances a été vérifiée avec la page officielle liée le 20 octobre 2026.
+TOOLS_SOURCE_UNVERIFIED Cette règle de vacances est un résumé de travail. La page officielle liée n'a pas été relue au complet le 20 octobre 2026.
+TOOLS_HOLIDAYS_2026 Jours fériés en 2026
+TOOLS_HOLIDAYS_UNVERIFIED La liste datée des jours fériés de cet endroit n'est pas chargée. Ces noms sont une liste de travail. Confirmez-les sur la page officielle.
+TOOLS_PLACE_AB Alberta
+TOOLS_PLACE_BC Colombie-Britannique
+TOOLS_PLACE_MB Manitoba
+TOOLS_PLACE_NB Nouveau-Brunswick
+TOOLS_PLACE_NL Terre-Neuve-et-Labrador
+TOOLS_PLACE_NS Nouvelle-Écosse
+TOOLS_PLACE_NT Territoires du Nord-Ouest
+TOOLS_PLACE_NU Nunavut
+TOOLS_PLACE_ON Ontario
+TOOLS_PLACE_PE Île-du-Prince-Édouard
+TOOLS_PLACE_QC Québec
+TOOLS_PLACE_SK Saskatchewan
+TOOLS_PLACE_YT Yukon
+TOOLS_PAY_DATE Date de paie
+TOOLS_OVERTIME_RATE Taux horaire supplémentaire prévu au contrat, facultatif
+TOOLS_OVERTIME_RATE_USED Taux horaire supplémentaire utilisé
+TOOLS_INPUT_ERROR Choisissez une date de paie valide de 2020 à 2026.
+TOOLS_REVIEWED Date de vérification des sources
+
+TOOLS Outils
+HELP_TOC_ROTATION_PAY Paie de rotation
+HELP_ROTATION_PAY_TITLE Ce que paie une rotation 14/7 ou 20/10
+HELP_ROTATION_PAY_DECK Un exemple de rotation 14/7 et de rotation 20/10 après impôt, indemnité de vie à l'extérieur et déplacement.
+HELP_ROTATION_PAY_DESCRIPTION Exemple de paie pour une rotation 14/7 et une rotation 20/10, calculé avec la rotation, le temps supplémentaire de l'Alberta et les tables d'impôt de PayCal.
+HELP_ROTATION_PAY_EXAMPLE_TITLE Ceci est un exemple
+HELP_ROTATION_PAY_EXAMPLE_INTRO Les chiffres ci-dessous sont un exemple. Ils sont calculés par PayCal. Ils ne sont pas un devis pour votre emploi.
+HELP_ROTATION_PAY_ASSUMPTION_1 La fenêtre dure 365 jours à partir du lundi 5 janvier 2026, le premier jour d'un bloc de travail.
+HELP_ROTATION_PAY_ASSUMPTION_2 Une rotation 14/7 utilise 14 jours de travail, 7 jours de repos et 8 heures chaque jour de travail.
+HELP_ROTATION_PAY_ASSUMPTION_3 Une rotation 20/10 utilise 20 jours de travail, 10 jours de repos et 10 heures chaque jour de travail.
+HELP_ROTATION_PAY_ASSUMPTION_4 Le taux de l'exemple est de 40 $ l'heure. Le temps supplémentaire suit la règle de l'Alberta : le plus élevé des heures au-delà de 8 dans une journée ou de 44 dans une semaine, à 1,5 fois.
+HELP_ROTATION_PAY_ASSUMPTION_5 Les semaines vont du dimanche au samedi, la même semaine que PayCal utilise pour recalculer les heures enregistrées.
+HELP_ROTATION_PAY_ASSUMPTION_6 L'indemnité de vie à l'extérieur est un exemple de 150 $ pour chaque jour sur le chantier. Ce n'est pas un montant prévu par la loi.
+HELP_ROTATION_PAY_ASSUMPTION_7 Le déplacement est un exemple de 8 heures dans chaque sens, une fois par rotation, payé au taux régulier et non soumis à la règle de temps supplémentaire.
+HELP_ROTATION_PAY_ASSUMPTION_8 L'impôt est l'estimation des tables de l'Alberta pour 2026, annualisée pour cette fenêtre de la même façon que la prévision d'équipe. Ce n'est pas une retenue de paie de l'ARC.
+HELP_ROTATION_PAY_ASSUMPTION_9 Le salaire de vacances est le minimum de 4 pour cent de l'Alberta sur le salaire, le temps supplémentaire et le déplacement. Il est indiqué à part et n'est pas dans le net. L'indemnité n'entre pas dans ce cumul.
+HELP_ROTATION_PAY_RESULTS_TITLE Résultats de l'exemple pour 365 jours
+HELP_ROTATION_PAY_RESULTS_CAPTION Exemple de paie 14/7 et 20/10 sur 365 jours
+HELP_ROTATION_PAY_COL_ITEM Élément
+HELP_ROTATION_PAY_ONSITE_DAYS Jours sur le chantier
+HELP_ROTATION_PAY_HITCHES Rotations
+HELP_ROTATION_PAY_REGULAR_HOURS Heures régulières
+HELP_ROTATION_PAY_OVERTIME_HOURS Heures supplémentaires
+HELP_ROTATION_PAY_TRAVEL_HOURS Heures de déplacement
+HELP_ROTATION_PAY_REGULAR_PAY Paie régulière
+HELP_ROTATION_PAY_OVERTIME_PAY Paie supplémentaire
+HELP_ROTATION_PAY_TRAVEL_PAY Paie de déplacement
+HELP_ROTATION_PAY_LOA Indemnité de vie à l'extérieur
+HELP_ROTATION_PAY_GROSS Brut
+HELP_ROTATION_PAY_TAX Impôt et retenues estimés
+HELP_ROTATION_PAY_NET Net estimé
+HELP_ROTATION_PAY_VACATION Salaire de vacances accumulé
+HELP_ROTATION_PAY_VACATION_NOTE Le salaire de vacances n'est pas compris dans le brut ni dans le net. C'est le cumul minimum de l'Alberta sur le salaire, le temps supplémentaire et le déplacement.
+HELP_ROTATION_PAY_HOW_TITLE Comment l'exemple est calculé
+HELP_ROTATION_PAY_HOW_TEXT Les jours de travail viennent du modèle de rotation. Le temps supplémentaire vient de la règle de l'Alberta. L'impôt vient des tables d'impôt. L'indemnité et les heures de déplacement sont des données d'exemple, indiquées comme exemple ci-dessus.
+HELP_ROTATION_PAY_ALBERTA_LINK Temps supplémentaire, salaire de vacances et jours fériés de l'Alberta
+EARNINGS_FORECAST_CARD_VACATION Cumul de vacances

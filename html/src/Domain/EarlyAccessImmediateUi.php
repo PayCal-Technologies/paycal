@@ -11,26 +11,31 @@ final class EarlyAccessImmediateUi
   public const FEATURE_KEY = 'auth.immediate_ui';
   public const COOKIE_NAME = 'paycal_ea_immediate_ui';
 
+  /** Page enabled. */
   public static function pageEnabled(): bool
   {
     return (bool) SystemConfig::get('early_access.page_enabled');
   }
 
+  /** Enrollment enabled. */
   public static function enrollmentEnabled(): bool
   {
     return (bool) SystemConfig::get('auth.immediate_ui.enrollment_enabled');
   }
 
+  /** Runtime enabled. */
   public static function runtimeEnabled(): bool
   {
     return (bool) SystemConfig::get('auth.immediate_ui.runtime_enabled');
   }
 
+  /** Activation version. */
   public static function activationVersion(): int
   {
     return max(1, (int) SystemConfig::get('auth.immediate_ui.activation_version'));
   }
 
+  /** User has passkey. */
   public static function userHasPasskey(string $userUUID): bool
   {
     if ($userUUID === '') {
@@ -40,6 +45,7 @@ final class EarlyAccessImmediateUi
     return count(Database::smembers(Keys::webauthnUserCredentials($userUUID))) > 0;
   }
 
+  /** User in rollout. */
   public static function userInRollout(User $user): bool
   {
     $mode = (string) SystemConfig::get('auth.immediate_ui.rollout_mode');
@@ -90,6 +96,7 @@ final class EarlyAccessImmediateUi
     ];
   }
 
+  /** Issue activation cookie. */
   public static function issueActivationCookie(): void
   {
     $expiresAt = time() + (self::ttlDays() * 86400);
@@ -105,6 +112,7 @@ final class EarlyAccessImmediateUi
     ]);
   }
 
+  /** Clear activation cookie. */
   public static function clearActivationCookie(): void
   {
     setcookie(self::COOKIE_NAME, '', [
@@ -116,6 +124,7 @@ final class EarlyAccessImmediateUi
     ]);
   }
 
+  /** Has valid activation cookie. */
   public static function hasValidActivationCookie(): bool
   {
     $cookieValue = $_COOKIE[self::COOKIE_NAME] ?? null;
@@ -150,16 +159,19 @@ final class EarlyAccessImmediateUi
     return true;
   }
 
+  /** Signed out allowed. */
   public static function signedOutAllowed(): bool
   {
     return self::runtimeEnabled() && self::hasValidActivationCookie();
   }
 
+  /** Ttl days. */
   private static function ttlDays(): int
   {
     return max(1, (int) SystemConfig::get('auth.immediate_ui.activation_ttl_days'));
   }
 
+  /** In percentage rollout. */
   private static function inPercentageRollout(string $userUUID): bool
   {
     $percent = max(0, min(100, (int) SystemConfig::get('auth.immediate_ui.rollout_percent')));
@@ -174,11 +186,13 @@ final class EarlyAccessImmediateUi
     return $bucket < $percent;
   }
 
+  /** Signature. */
   private static function signature(string $payload): string
   {
     return hash_hmac('sha256', $payload, self::signingKey());
   }
 
+  /** Signing key. */
   private static function signingKey(): string
   {
     $envValue = $_ENV['PAYCAL_EARLY_ACCESS_SIGNING_KEY'] ?? null;
@@ -190,6 +204,7 @@ final class EarlyAccessImmediateUi
     return hash('sha256', Environment::appHome() . '|' . Environment::appDomain() . '|early-access-immediate-ui');
   }
 
+  /** Secure cookie. */
   private static function secureCookie(): bool
   {
     return Environment::appScheme() === 'https' || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');

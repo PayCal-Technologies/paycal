@@ -2527,6 +2527,83 @@ body:has(#page_header.nav_component--public) #page_header.nav_component--public 
   top: 3px !important;
 }
 
+body:has(#page_header.nav_component--public) #page_header.nav_component--public .public_appearance_slot,
+#page_header.nav_component--header .nav_theme_toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#page_header.nav_component--header .paycal_theme_toggle {
+  --pill-group-gap: 2px;
+  --pill-group-padding: 2px;
+  --pill-item-min-width: 2.25rem;
+  --pill-item-min-height: 1.75rem;
+  --pill-item-padding: 0 0.5rem;
+  --pill-item-font-weight: 800;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  border-color: color-mix(in srgb, var(--panel-border, #4a5260) 76%, transparent);
+  background: color-mix(in srgb, var(--panel-bg, #20242b) 86%, var(--color-bg, #111111));
+}
+
+#page_header.nav_component--header .paycal_theme_toggle label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#page_header.nav_component--header .paycal_theme_toggle_icon,
+#page_header.nav_component--header .paycal_theme_toggle_icon svg {
+  display: block;
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+}
+
+#page_header.nav_component--header .paycal_theme_toggle_icon svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#page_header.nav_component--header .paycal_theme_toggle_text {
+  font-size: 0.72rem;
+  letter-spacing: 0;
+}
+
+#page_header.nav_component--header .nav_theme_toggle .paycal_theme_toggle {
+  max-width: calc(100% - 0.5rem);
+}
+
+body.nav-collapsed #page_header.nav_component--header .nav_theme_toggle .paycal_theme_toggle,
+body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header .nav_theme_toggle .paycal_theme_toggle,
+body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header .nav_theme_toggle .paycal_theme_toggle {
+  --pill-item-min-width: 1.8rem;
+  --pill-item-padding: 0 0.35rem;
+}
+
+body.nav-collapsed #page_header.nav_component--header .nav_theme_toggle .paycal_theme_toggle_text,
+body[data-nav-primary-position='left'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header .nav_theme_toggle .paycal_theme_toggle_text,
+body[data-nav-primary-position='right'][data-nav-initial-state='collapsed']:not(.nav-ready):not(.calendar-screenmode-minimal) #page_header.nav_component--header .nav_theme_toggle .paycal_theme_toggle_text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 body:has(#page_header.nav_component--public) #page_header.nav_component--public .public_appearance_button {
   display: inline-flex !important;
   align-items: center !important;

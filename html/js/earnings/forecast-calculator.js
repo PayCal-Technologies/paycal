@@ -66,6 +66,8 @@ function buildSummaryCardsHtml(state, config, formatHelpers) {
     const gross = formatHelpers.formatCurrency((Number(card.gross_cents) || 0) / 100);
     const hours = formatHelpers.formatHours(Number(card.hours) || 0);
     const grossLabel = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_CARD_GROSS', 'Gross'));
+    const vacationLabel = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_CARD_VACATION', 'Vacation accrual'));
+    const vacation = formatHelpers.formatCurrency((Number(card.vacation_pay_cents) || 0) / 100);
     const hoursLabel = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_CARD_HOURS', 'Hours'));
     const confidenceField = escapeHtml(getI18nLabel(config, 'EARNINGS_FORECAST_CARD_CONFIDENCE', 'Confidence'));
     const grossCents = Math.max(0, Number(card.gross_cents) || 0);
@@ -80,6 +82,7 @@ function buildSummaryCardsHtml(state, config, formatHelpers) {
       <dl class="forecast-summary-card__meta">
         <div><dt>${grossLabel}</dt><dd>${gross}</dd></div>
         <div><dt>${hoursLabel}</dt><dd>${hours}</dd></div>
+        <div><dt>${vacationLabel}</dt><dd>${vacation}</dd></div>
         <div><dt>${confidenceField}</dt><dd>${escapeHtml(confidenceLabel)}</dd></div>
       </dl>
       <div class="forecast-summary-card__progress">

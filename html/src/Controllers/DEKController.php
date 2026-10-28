@@ -266,24 +266,23 @@ class DEKController
             return;
         }
 
-        $decodedEnvelope = json_decode($decodedEnvelopeJson, true);
+        try {
+            $decodedEnvelope = EnvelopeFormat::fromJson($decodedEnvelopeJson);
+        } catch (\Throwable $e) {
+            Response::error('[DEK] Invalid wrappedDekPasskey envelope.', [], HttpStatus::HTTP_BAD_REQUEST);
+            return;
+        }
+
         \PayCal\Observability\Lens::add('[DEK] Wrapped DEK envelope diagnostics', [
             'user_uuid' => $user->user_uuid,
             'wrappedDekPasskeyLen' => strlen($wrappedDekPasskey),
             'wrappedDekPasskeyFp' => $this->safeFingerprint($wrappedDekPasskey),
             'decodedEnvelopeJsonLen' => strlen($decodedEnvelopeJson),
-            'decodeEnvelopeIsArray' => is_array($decodedEnvelope),
-            'envelopeVersion' => is_array($decodedEnvelope) ? ($decodedEnvelope['version'] ?? $decodedEnvelope['v'] ?? null) : null,
-            'hasNonce' => is_array($decodedEnvelope) && (!empty($decodedEnvelope['nonce']) || !empty($decodedEnvelope['iv'])),
-            'hasCiphertext' => is_array($decodedEnvelope) && (!empty($decodedEnvelope['ciphertext']) || !empty($decodedEnvelope['ct'])),
+            'decodeEnvelopeIsArray' => true,
+            'envelopeVersion' => $decodedEnvelope['version'],
+            'hasNonce' => !empty($decodedEnvelope['nonce']),
+            'hasCiphertext' => !empty($decodedEnvelope['ciphertext']),
         ]);
-
-        try {
-            EnvelopeFormat::fromJson($decodedEnvelopeJson);
-        } catch (\Throwable $e) {
-            Response::error('[DEK] Invalid wrappedDekPasskey envelope.', [], HttpStatus::HTTP_BAD_REQUEST);
-            return;
-        }
 
         $updateFields = [];
         $updateFields[UserFields::DEK_VERSION->value] = $dekVersion;

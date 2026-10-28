@@ -92,7 +92,7 @@ foreach ($i18nKeys as $i18nKey) {
           </div>
           <div id="recovery-key-block" class="recovery-field is-hidden">
             <label for="recovery-key">Recovery code</label>
-            <input id="recovery-key" name="recoveryKey" type="text" autocomplete="off" spellcheck="false" maxlength="60" aria-describedby="recovery-key-error">
+            <input id="recovery-key" name="recoveryKey" type="text" autocomplete="off" spellcheck="false" maxlength="80" aria-describedby="recovery-key-error">
             <p class="recovery-hint">Saved when you secured your account.</p>
             <p class="recovery-field-error" id="recovery-key-error" role="alert" aria-live="polite"></p>
           </div>

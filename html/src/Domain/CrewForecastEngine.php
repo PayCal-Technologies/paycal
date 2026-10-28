@@ -184,6 +184,9 @@ final class CrewForecastEngine
     int              $workDays,
     ForecastWindow   $window
   ): ForecastResult {
+    if ($rateCard->otRule === OtRule::Jurisdiction) {
+      return self::forecastJurisdiction($rateCard, $rotation, $workDays, $window);
+    }
     $dailyHours    = $rotation->hoursPerDay;
     $otRule        = $rateCard->otRule;
     $dailyThresh   = $rateCard->otThresholdDailyHours;
@@ -242,6 +245,42 @@ final class CrewForecastEngine
       sitePremiumTotalCents: $sitePremiumTotalCents,
       estimatedTaxCents:     $estimatedTaxCents
     );
+  }
+
+  /** Apply the same complete calendar weeks used by stored earnings. */
+  private static function forecastJurisdiction(WorkerRateCard $card, RotationTemplate $rotation, int $workDays, ForecastWindow $window): ForecastResult
+  {
+    $regular = 0.0;
+    $overtime = 0.0;
+    $doubletime = 0.0;
+    $otPay = 0;
+    $rate = $card->wageRateCents + $card->sitePremiumCents;
+    $cursor = $window->start->setTime(0, 0);
+    $weekStart = $cursor->modify('-' . $cursor->format('w') . ' days');
+    while ($weekStart < $window->end) {
+      $hours = [];
+      for ($i = 0; $i < 7; ++$i) {
+        $date = $weekStart->modify('+' . $i . ' days');
+        $hours[] = $rotation->isWorkDay($date) ? $rotation->hoursPerDay : 0.0;
+      }
+      $split = OvertimeRules::allocateDatedWeek($hours, $card->taxRegion, $weekStart);
+      foreach ($split['daily'] as $i => $day) {
+        $date = $weekStart->modify('+' . $i . ' days');
+        if ($date >= $window->start && $date < $window->end) {
+          $regular += $day['regular'];
+          $overtime += $day['overtime'];
+          $doubletime += $day['doubletime'];
+          $otPay += (int) round($day['overtime'] * OvertimeRules::hourlyOvertimeRateCents($card->taxRegion, $rate, $date) + $day['doubletime'] * $rate * 2);
+        }
+      }
+      $weekStart = $weekStart->modify('+7 days');
+    }
+    $rate = $card->wageRateCents + $card->sitePremiumCents;
+    $regularPay = (int) round($regular * $rate);
+    $diem = $workDays * $card->perDiemCents;
+    $tax = self::estimateTax($card, $regularPay + $otPay + $diem, $window);
+    // Site premium is already included in each hour, never add it a second time.
+    return new ForecastResult($regular, $overtime + $doubletime, $workDays, $regularPay, $otPay, $diem, 0, $tax);
   }
 
   /**

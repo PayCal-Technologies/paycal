@@ -7,6 +7,12 @@ use PayCal\Domain\Extensions\Bridges\ExtensionBootstrapBridge;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Bound application allocations before session, extension and diagnostic work.
+// PHP startup parsing still requires a patched engine and frontend limits.
+if (PHP_SAPI !== 'cli') {
+	\PayCal\Domain\RequestInputBudget::enforce();
+}
+
 $dotenv = \PayCal\Infrastructure\Env\Dotenv::createImmutable(__DIR__);
 $dotenv->safeLoad(['PC_EMAIL_PASSWORD']);
 
