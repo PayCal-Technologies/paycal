@@ -24,7 +24,7 @@ logo/name and Menu button share a dropdown. Preferences opens a native dialog
 with light, dark or device theme, 100 to 200 percent text size, preview and reset.
 The header hides on downward scrolling and reappears on upward scrolling.
 Existing language destinations and theme controls are retained. The footer says
-Built with a heart emoji by Starlit Digital, linking to https://sltd.ca/.
+Built with a heart emoji by Starlight Digital, linking to https://sltd.ca/.
 
 PayCal loads this presentation only for anonymous visitors. DOM construction is
 compatible with its Trusted Types policy. Existing authentication, payments,
