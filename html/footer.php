@@ -167,7 +167,7 @@ if ($isAuthenticated) {
     </div>
     <p class="footer_copyright"><?php echo $i18n['FOOTER_TRADEMARK']; ?></p>
     <?php if (!$isAuthenticated): ?>
-    <p class="pc-built-by">Built with <span role="img" aria-label="love">❤️</span> by <a href="https://sltd.ca/">Starlit Digital</a></p>
+    <p class="pc-built-by">Built with <span role="img" aria-label="love">❤️</span> by <a href="https://sltd.ca/">Starlight Digital</a></p>
     <?php endif; ?>
   </footer>
 
